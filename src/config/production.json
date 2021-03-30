@@ -1,0 +1,13 @@
+{
+  "elrond": {
+    "elastic": "https://uindex.elrond.com",
+    "elrondApi": "https://api.elrond.com",
+    "gateway": "https://backup-gateway.elrond.com",
+    "explorer": "https://beta-explorer.elrond.com",
+    "auctionContract" : "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqplllst77y4l",
+    "stakingContract" : "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqylllslmq6y6",
+    "chainId": "1",
+    "version": 1,
+    "metaChainShardId": 4294967295
+  }
+}

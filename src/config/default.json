@@ -1,0 +1,13 @@
+{
+  "elrond": {
+    "elastic": "https://testnet-index.elrond.com",
+    "elrondApi": "https://testnet-api.elrond.com",
+    "gateway": "https://testnet-gateway.elrond.com",
+    "explorer": "https://testnet-explorer.elrond.com"
+  },
+  "caching": {
+    "getAllContractAddresses": 600,
+    "networkStatus": 60,
+    "networkConfig": 43200
+  }
+}

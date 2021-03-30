@@ -1,0 +1,8 @@
+{
+  "elrond": {
+    "elastic": "https://testnet-uindex.elrond.com",
+    "elrondApi": "https://testnet-api.elrond.com",
+    "gateway": "https://testnet-gateway.elrond.com",
+    "explorer": "https://testnet-explorer.elrond.com"
+  }
+}
