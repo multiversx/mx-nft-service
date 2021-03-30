@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  redis:
+    image: redis
+    container_name: nft-api-cache
+    command: redis-server
+    ports:
+      - '6379:6379'
+    expose:
+      - '6379'

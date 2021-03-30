@@ -1,0 +1,9 @@
+{
+  "elrond": {
+    "elastic": "https://devnet-uindex.elrond.com",
+    "elrondApi": "https://devnet-api.elrond.com",
+    "gateway": "https://devnet-gateway.elrond.com",
+    "explorer": "https://devnet-explorer.elrond.com",
+    "chainID": "D"
+  }
+}
