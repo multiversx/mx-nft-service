@@ -2,8 +2,9 @@
   "elrond": {
     "elastic": "https://testnet-index.elrond.com",
     "elrondApi": "https://testnet-api.elrond.com",
-    "gateway": "https://testnet-gateway.elrond.com",
-    "explorer": "https://testnet-explorer.elrond.com"
+    "gateway": "http://testnet-gateway.elrond.com/vm-values/query",
+    "explorer": "https://testnet-explorer.elrond.com",
+    "nftAddress": ""
   },
   "caching": {
     "getAllContractAddresses": 600,

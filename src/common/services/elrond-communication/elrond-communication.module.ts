@@ -1,18 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ElrondApiService } from './elrond-api.service';
 import { ElrondProxyService } from './elrond-proxy.service';
 import { NonceService } from './nonce.service';
 import { RedisModule } from 'nestjs-redis';
-import { ElrondNodeService } from './elrond-node.service';
 import { CacheManagerModule } from '../cache-manager/cache-manager.module';
 
 @Module({
-  providers: [
-    ElrondApiService,
-    ElrondProxyService,
-    NonceService,
-    ElrondNodeService,
-  ],
+  providers: [ElrondProxyService, NonceService],
   imports: [
     RedisModule.register({
       host: process.env.REDIS_URL,
@@ -23,11 +16,6 @@ import { CacheManagerModule } from '../cache-manager/cache-manager.module';
     }),
     CacheManagerModule,
   ],
-  exports: [
-    ElrondApiService,
-    ElrondProxyService,
-    NonceService,
-    ElrondNodeService,
-  ],
+  exports: [ElrondProxyService, NonceService],
 })
 export class ElrondCommunicationModule {}
