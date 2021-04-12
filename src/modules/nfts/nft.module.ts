@@ -4,10 +4,20 @@ import { ElrondCommunicationModule } from '../../common/services/elrond-communic
 import { NftService } from './nft.service';
 import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
+import { AssetsService } from './assets.service';
+import { AssetsResolver } from './assets.resolver';
+import { OrdersResolver } from './orders.resolver';
+import { AuctionsResolver } from './auctions.resolver';
 
 @Module({
   controllers: [NftController],
-  providers: [NftService],
+  providers: [
+    NftService,
+    AssetsService,
+    AssetsResolver,
+    OrdersResolver,
+    AuctionsResolver,
+  ],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -19,6 +29,6 @@ import * as redisStore from 'cache-manager-redis-store';
       prefix: process.env.REDIS_PREFIX,
     }),
   ],
-  exports: [NftService],
+  exports: [NftService, AssetsService],
 })
 export class NftModule {}

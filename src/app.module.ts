@@ -11,6 +11,7 @@ import * as Transport from 'winston-transport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServicesModule } from './common/services';
 import { NftModule } from './modules/nfts/nft.module';
+import { GraphQLModule } from '@nestjs/graphql';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -41,6 +42,10 @@ if (!!process.env.LOG_FILE) {
     }),
     WinstonModule.forRoot({
       transports: logTransports,
+    }),
+    GraphQLModule.forRoot({
+      autoSchemaFile: 'schema.gql',
+      sortSchema: true,
     }),
     ScheduleModule.forRoot(),
     ConfigModule,

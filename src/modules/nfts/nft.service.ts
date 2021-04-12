@@ -12,11 +12,12 @@ import {
   TypedValue,
   Address,
   ContractFunction,
-  U16Value,
   BytesValue,
 } from '@elrondnetwork/erdjs';
-import BigNumber from 'bignumber.js';
+import { Query } from '@nestjs/graphql';
+
 import { TransactionOnNetwork } from '@elrondnetwork/erdjs/out/transactionOnNetwork';
+import { Asset } from './dto/asset.dto';
 
 @Injectable()
 export class NftService {
@@ -25,6 +26,11 @@ export class NftService {
     private elrondProxyService: ElrondProxyService,
   ) {}
 
+  @Query(() => String)
+  async getAssetsForUser(): Promise<Asset[] | any> {
+    // this.elrondApiService.getService().
+    return new Array<Asset>();
+  }
   //view
   async isUpForAction(): Promise<boolean> {
     const contract = await this.elrondProxyService.getSmartCntract();

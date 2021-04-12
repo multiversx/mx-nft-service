@@ -1,43 +1,37 @@
-import { Account } from '@elrondnetwork/erdjs/out';
 import { Attribute } from './attributes.dto';
-import { Order } from './order.dto';
+import { ID, ObjectType, GraphQLISODateTime, Field } from '@nestjs/graphql';
+import { Price } from './price.dto';
+import { Onwer } from './onwer.dto';
+import { Account } from './account.dto';
 
+@ObjectType()
 export class Asset {
-  tokenId: string;
-  tokenNonce: string;
+  @Field(() => ID)
+  tokenId!: string;
+  @Field()
+  tokenNonce!: string;
+  @Field(() => Price)
   lastSalePrice: Price;
+  @Field({ nullable: false })
   hash: string;
+  @Field(() => Account)
   creator: Account;
+  @Field(() => Onwer)
   currentOwner: Onwer;
+  @Field(() => [Onwer])
   previousOwners: Onwer[];
-  name: string;
+  @Field()
+  name!: string;
+  @Field({ nullable: false })
   royalties: string; //creator percentage
+  @Field(() => [Attribute])
   attributes: Attribute[];
+  @Field(() => GraphQLISODateTime)
   lastSale: Date;
-  creationDate: Date;
+  @Field(() => GraphQLISODateTime)
+  creationDate!: Date;
+  @Field(() => [String])
   uris: string[];
+  @Field(() => [String])
   tags: string[];
-}
-
-export class Auction {
-  owner: Account;
-  asset: Asset;
-  minBid: Price;
-  maxBid: Price;
-  startDate: Date;
-  endDate: Date;
-  topBid?: Price;
-  topBidder?: Account;
-  orders: Order[];
-}
-
-export class Price {
-  tokenIdentifier: string;
-  amount: string;
-  nonce: string;
-}
-export class Onwer {
-  account: Account;
-  startDate: Date;
-  endDate?: Date;
 }
