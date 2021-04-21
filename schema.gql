@@ -1,0 +1,89 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Account {
+  address: ID!
+  assets: [Asset!]!
+  auctions: [Auction!]!
+  followers: [Account!]!
+  following: [Account!]!
+  orders: [Order!]!
+  profileImgUrl: String
+  username: String
+}
+
+type Asset {
+  attributes: [Attribute!]!
+  creationDate: DateTime!
+  creator: Account!
+  currentOwner: Onwer!
+  hash: String!
+  lastSale: DateTime!
+  lastSalePrice: Price!
+  name: String!
+  previousOwners: [Onwer!]!
+  royalties: String!
+  tags: [String!]!
+  tokenId: ID!
+  tokenNonce: String!
+  uris: [String!]!
+}
+
+type Attribute {
+  attributeId: String!
+  description: String!
+  key: String!
+  value: String!
+}
+
+type Auction {
+  asset: Asset!
+  auction: Auction!
+  auctionId: ID!
+  endDate: DateTime!
+  from: Account!
+  maxBid: Price!
+  minBid: Price!
+  orders: [Order!]!
+  owner: Account!
+  startDate: DateTime!
+  topBid: Price!
+  topBidder: Account!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Onwer {
+  account: ID!
+  endDate: DateTime!
+  startDate: DateTime!
+}
+
+type Order {
+  auction: Auction!
+  creationDate: DateTime!
+  from: Account!
+  orderId: ID!
+  price: Price!
+  status: String!
+}
+
+type Price {
+  amount: String!
+  nonce: String!
+  tokenIdentifier: ID!
+}
+
+type Query {
+  assets(id: String!): [Asset!]!
+  auctions(auctionId: String!): [Auction!]!
+  findAllAsset: [Asset!]!
+  findAllAuction: [Auction!]!
+  findAllOrder: [Order!]!
+  getAssetsForUser: String!
+  orders(orderId: String!): [Order!]!
+}

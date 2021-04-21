@@ -12,6 +12,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ServicesModule } from './common/services';
 import { NftModule } from './modules/nfts/nft.module';
 import { GraphQLModule } from '@nestjs/graphql';
+import { AssetsModule } from './assets/assets.module';
+import { AuctionsModule } from './auctions/auctions.module';
+import { OrdersModule } from './orders/orders.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import 'reflect-metadata';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -43,6 +49,7 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
+    TypeOrmModule.forRoot(),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
@@ -51,6 +58,10 @@ if (!!process.env.LOG_FILE) {
     ConfigModule,
     NftModule,
     ServicesModule,
+    AssetsModule,
+    AuctionsModule,
+    OrdersModule,
+    AccountsModule,
   ],
   providers: [
     {
