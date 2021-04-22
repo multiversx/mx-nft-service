@@ -18,6 +18,10 @@ import { OrdersModule } from './orders/orders.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
+import { TokensModuleGraph } from './modules/tokens/tokens.module';
+import { AssetsModuleGraph } from './modules/assets/assets.module';
+import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
+import { OrdersModuleGraph } from './modules/orders/orders.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -57,6 +61,10 @@ if (!!process.env.LOG_FILE) {
     ScheduleModule.forRoot(),
     ConfigModule,
     NftModule,
+    TokensModuleGraph,
+    AssetsModuleGraph,
+    AuctionsModuleGraph,
+    OrdersModuleGraph,
     ServicesModule,
     AssetsModule,
     AuctionsModule,

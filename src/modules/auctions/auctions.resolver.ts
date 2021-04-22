@@ -1,16 +1,14 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
-import { AccountsService } from './accounts.service';
-import { AssetsService } from './assets.service';
-import { BaseResolver } from './base.resolver';
-import { Account } from './dto/account.dto';
-import { Asset } from './dto/asset.dto';
-import { Auction } from './dto/auction.dto';
-import { Order } from './dto/order.dto';
-import { NftService } from './nft.service';
+import { AuctionsService } from './auctions.service';
+import { BaseResolver } from '../nfts/base.resolver';
+import { Account } from '../nfts/dto/account.dto';
+import { Asset } from '../nfts/dto/asset.dto';
+import { Auction } from '../nfts/dto/auction.dto';
+import { Order } from '../nfts/dto/order.dto';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
-  constructor(private nftsService: NftService) {
+  constructor(private auctionsService: AuctionsService) {
     super();
   }
 
@@ -30,7 +28,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { asset } = auction;
-    return this.nftsService.getFullAuctionData();
+    return {};
   }
 
   @ResolveField('topBidder', () => Account)
@@ -39,7 +37,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return {};
   }
 
-  @ResolveField('orders', () => [Order])
+  @ResolveField('order', () => [Order])
   async orders(@Parent() auction: Auction) {
     const { orders } = auction;
     return {};

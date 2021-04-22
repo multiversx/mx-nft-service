@@ -4,7 +4,7 @@
   "port": 3306,
   "username": "user",
   "password": "password",
-  "database": "nfts_db",
+  "database": "db",
   "entities": ["dist/**/*.entity{.ts,.js}"],
   "migrations": ["dist/db/migrations/*.ts"],
   "synchronize": false

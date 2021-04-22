@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { Asset } from './dto/asset.dto';
+import { Asset } from '../nfts/dto/asset.dto';
 import { Address } from '@elrondnetwork/erdjs/out';
 
 @Injectable()

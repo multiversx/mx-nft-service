@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { Asset } from './dto/asset.dto';
 import { Address } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
@@ -20,9 +19,5 @@ export class AuctionsService {
       .getService()
       .getAccount(new Address(address));
     return account;
-  }
-
-  async getNftsForUser(address: string): Promise<Asset[] | any> {
-    return {};
   }
 }

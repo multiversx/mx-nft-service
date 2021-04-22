@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { Asset } from './dto/asset.dto';
-import { Query } from '@nestjs/graphql/dist/decorators/query.decorator';
+import { Asset } from '../nfts/dto/asset.dto';
 
 @Injectable()
 export class AssetsService {
   constructor(private elrondProxyService: ElrondProxyService) {}
 
-  @Query(() => String)
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     // this.elrondApiService.getService().
     return new Array<Asset>();

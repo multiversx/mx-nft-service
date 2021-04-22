@@ -1,17 +1,12 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { BaseResolver } from '../nfts/base.resolver';
+import { Account } from '../nfts/dto/account.dto';
+import { Asset } from '../nfts/dto/asset.dto';
+import { Attribute } from '../nfts/dto/attributes.dto';
 import { AssetsService } from './assets.service';
-import { BaseResolver } from './base.resolver';
-import { Account } from './dto/account.dto';
-import { Asset } from './dto/asset.dto';
-import { Attribute } from './dto/attributes.dto';
-import { NftService } from './nft.service';
-
 @Resolver((of) => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
-  constructor(
-    private assetsService: AssetsService,
-    private nftsService: NftService,
-  ) {
+  constructor(private assetsService: AssetsService) {
     super();
   }
 

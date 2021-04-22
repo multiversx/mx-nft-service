@@ -1,11 +1,12 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { NftService } from './nft.service';
 import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
+import { OrdersService } from './order.service';
+import { OrdersResolver } from './orders.resolver';
 
 @Module({
-  providers: [NftService],
+  providers: [OrdersService, OrdersResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -17,6 +18,6 @@ import * as redisStore from 'cache-manager-redis-store';
       prefix: process.env.REDIS_PREFIX,
     }),
   ],
-  exports: [NftService],
+  exports: [OrdersService],
 })
-export class NftModule {}
+export class OrdersModuleGraph {}

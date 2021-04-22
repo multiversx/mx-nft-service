@@ -1,21 +1,17 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
-import { AssetsService } from './assets.service';
-import { BaseResolver } from './base.resolver';
-import { Account } from './dto/account.dto';
-import { Auction } from './dto/auction.dto';
-import { Order } from './dto/order.dto';
-import { NftService } from './nft.service';
+import { BaseResolver } from '../nfts/base.resolver';
+import { Account } from '../nfts/dto/account.dto';
+import { Auction } from '../nfts/dto/auction.dto';
+import { Order } from '../nfts/dto/order.dto';
+import { OrdersService } from './order.service';
 
-@Resolver(() => Auction)
+@Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(
-    private assetsService: AssetsService,
-    private nftsService: NftService,
-  ) {
+  constructor(private orders: OrdersService) {
     super();
   }
 
-  @Query(() => [Order], { name: 'orders' })
+  @Query(() => [Order], { name: 'order' })
   async getOrders(@Args('orderId', { type: () => String }) orderId: string) {
     return {};
   }

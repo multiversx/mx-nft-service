@@ -26,9 +26,7 @@ export class NftService {
     private elrondProxyService: ElrondProxyService,
   ) {}
 
-  @Query(() => String)
   async getAssetsForUser(): Promise<Asset[] | any> {
-    // this.elrondApiService.getService().
     return new Array<Asset>();
   }
   //view

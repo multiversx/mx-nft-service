@@ -13,7 +13,7 @@ services:
     container_name: nft-db
     restart: always
     environment:
-      MYSQL_DATABASE: 'nfts_db'
+      MYSQL_DATABASE: 'db'
       # So you don't have to use root, but you can if you like
       MYSQL_USER: 'user'
       # You can use whatever password you like
