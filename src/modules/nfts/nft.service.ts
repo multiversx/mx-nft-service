@@ -14,10 +14,10 @@ import {
   ContractFunction,
   BytesValue,
 } from '@elrondnetwork/erdjs';
-import { Query } from '@nestjs/graphql';
 
 import { TransactionOnNetwork } from '@elrondnetwork/erdjs/out/transactionOnNetwork';
 import { Asset } from './dto/asset.dto';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class NftService {
@@ -36,7 +36,7 @@ export class NftService {
       contract.methods
         .isAlreadyUpForAuction([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(8),
+          new U64Value(new BigNumber(8)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -56,7 +56,7 @@ export class NftService {
       contract.methods
         .getPaymentTokenForAuctionedNft([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -78,7 +78,7 @@ export class NftService {
       contract.methods
         .getMinMaxBid([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -98,7 +98,7 @@ export class NftService {
       contract.methods
         .getDeadline([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -118,7 +118,7 @@ export class NftService {
       contract.methods
         .getOriginalOwner([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(5),
+          new U64Value(new BigNumber(5)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -138,7 +138,7 @@ export class NftService {
       contract.methods
         .getCurrentWinningBid([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -158,7 +158,7 @@ export class NftService {
       contract.methods
         .getCurrentWinner([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -178,7 +178,7 @@ export class NftService {
       contract.methods
         .getFullAuctionData([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -195,11 +195,11 @@ export class NftService {
     const contract = await this.elrondProxyService.getSmartCntract();
     let auctionToken = <Interaction>contract.methods
       .auctionToken([
-        new BigUIntValue(0.1),
-        new BigUIntValue(100),
-        new U64Value(1),
+        new BigUIntValue(new BigNumber(0.1)),
+        new BigUIntValue(new BigNumber(100)),
+        new U64Value(new BigNumber(1)),
         new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-        new U64Value(0),
+        new U64Value(new BigNumber(0)),
         // new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
         // new U64Value(0),
         // new U64Value(1),
@@ -212,19 +212,19 @@ export class NftService {
       func: new ContractFunction('ESDTNFTTransfer'),
       args: [
         new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-        new U64Value(0),
-        new U64Value(1),
+        new U64Value(new BigNumber(0)),
+        new U64Value(new BigNumber(1)),
         BytesValue.fromUTF8(
           new Address(
             'erd1qqqqqqqqqqqqqpgqw8faqylfxhsx3nvpngkh9sf97gh877ysd8ssererdq',
           ).hex(),
         ),
         BytesValue.fromUTF8('auctionToken'),
-        new BigUIntValue(0.1),
-        new BigUIntValue(100),
-        new U64Value(1),
+        new BigUIntValue(new BigNumber(0.1)),
+        new BigUIntValue(new BigNumber(100)),
+        new U64Value(new BigNumber(1)),
         new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-        new U64Value(0),
+        new U64Value(new BigNumber(0)),
       ],
       gasLimit: new GasLimit(1400000000),
     });
@@ -238,7 +238,7 @@ export class NftService {
       contract.methods
         .endAuction([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );
@@ -257,7 +257,7 @@ export class NftService {
     const contract = await this.elrondProxyService.getSmartCntract();
     let setCutPercentage = <Interaction>(
       contract.methods
-        .setCutPercentage([new U64Value(10)])
+        .setCutPercentage([new U64Value(new BigNumber(10))])
         .withGasLimit(new GasLimit(5000000))
     );
     let query = setCutPercentage.buildQuery();
@@ -276,7 +276,7 @@ export class NftService {
       contract.methods
         .bid([
           new TokenIdentifierValue(Buffer.from('DANA-17fffc')),
-          new U64Value(1),
+          new U64Value(new BigNumber(1)),
         ])
         .withGasLimit(new GasLimit(5000000))
     );

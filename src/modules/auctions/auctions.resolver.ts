@@ -37,7 +37,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return {};
   }
 
-  @ResolveField('order', () => [Order])
+  @ResolveField('orders', () => [Order])
   async orders(@Parent() auction: Auction) {
     const { orders } = auction;
     return {};

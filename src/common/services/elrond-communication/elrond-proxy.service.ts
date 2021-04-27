@@ -4,6 +4,8 @@ import {
   SmartContract,
   AbiRegistry,
   SmartContractAbi,
+  ContractFunction,
+  BytesValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Inject, Injectable } from '@nestjs/common';
@@ -39,5 +41,42 @@ export class ElrondProxyService {
       abi: abi,
     });
     return contract;
+  }
+
+  async getTokens(tickers: string[]): Promise<any> {
+    let tokens = await this.getService().doGetGeneric(
+      'network/esdts',
+      (response) => {
+        return this.fromHttpResponse(response.tokens);
+      },
+    );
+    let tokenss: any[] = [];
+    tickers.forEach((element) => {
+      let t = tokens.filter((value) => value.includes(element));
+      let d = [];
+      t.forEach((elem) => {
+        const tok = { tokenIdentifier: elem, tokenTicker: element };
+        d.push(tok);
+      });
+      if (d !== undefined) tokenss = [...d];
+    });
+    return tokenss;
+  }
+
+  async getTokenProperties(token_identifier: string): Promise<any> {
+    const contract = new SmartContract({
+      address: new Address(
+        'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u',
+      ),
+    });
+    let response = await contract.runQuery(this.getService(), {
+      func: new ContractFunction('getTokenProperties'),
+      args: [BytesValue.fromUTF8(token_identifier)],
+    });
+    return response.returnData[2].base64ToBech32();
+  }
+
+  fromHttpResponse(payload: any): any {
+    return payload;
   }
 }

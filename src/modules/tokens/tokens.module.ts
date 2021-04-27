@@ -4,11 +4,13 @@ import { CacheManagerModule } from '../../common/services/cache-manager/cache-ma
 import * as redisStore from 'cache-manager-redis-store';
 import { TokensResolver } from './tokens.resolver';
 import { TokensService } from './tokens.service';
+import { TokensDbModule } from 'src/token/tokens.module';
 
 @Module({
   providers: [TokensService, TokensResolver],
   imports: [
     ElrondCommunicationModule,
+    TokensDbModule,
     CacheManagerModule,
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed

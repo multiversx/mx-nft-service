@@ -28,12 +28,8 @@ export class LoggerInterceptor implements NestInterceptor {
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const platformHeader = request.headers['x-platform'];
-    const versionHeader = request.headers['x-version'];
     this.logger.defaultMeta = {
       tag: randomStringGenerator(),
-      platform: platformHeader,
-      appVersion: versionHeader,
     };
 
     return next.handle().pipe(
@@ -62,8 +58,6 @@ export class LoggerInterceptor implements NestInterceptor {
   logException(err: any, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    const platformHeader = request.headers['x-platform'];
-    const versionHeader = request.headers['x-version'];
     this.logger.error('HTTP_REQUEST', {
       method: request.method,
       url: request.url,
@@ -71,8 +65,6 @@ export class LoggerInterceptor implements NestInterceptor {
       user: request.user,
       network: request.networkHeader,
       response: response.statusCode,
-      platform: platformHeader,
-      appVersion: versionHeader,
       exception: err.toString(),
     });
   }

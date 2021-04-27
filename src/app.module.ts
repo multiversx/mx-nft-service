@@ -22,6 +22,7 @@ import { TokensModuleGraph } from './modules/tokens/tokens.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
+import { DbproviderService } from './dbprovider/dbprovider.service';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -57,6 +58,7 @@ if (!!process.env.LOG_FILE) {
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
+      playground: true,
     }),
     ScheduleModule.forRoot(),
     ConfigModule,
@@ -77,6 +79,7 @@ if (!!process.env.LOG_FILE) {
       useClass: LoggerInterceptor,
     },
     LoggerInterceptor,
+    DbproviderService,
   ],
 })
 export class AppModule {}
