@@ -1,4 +1,4 @@
-import { AccountEntity } from 'src/accounts/account.entity';
+import { AccountEntity } from 'src/db/accounts/account.entity';
 import {
   Column,
   Entity,

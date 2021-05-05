@@ -4,7 +4,7 @@ import { CacheManagerModule } from '../../common/services/cache-manager/cache-ma
 import * as redisStore from 'cache-manager-redis-store';
 import { TokensResolver } from './tokens.resolver';
 import { TokensService } from './tokens.service';
-import { TokensDbModule } from 'src/token/tokens.module';
+import { TokensDbModule } from 'src/db/token/tokens.module';
 
 @Module({
   providers: [TokensService, TokensResolver],

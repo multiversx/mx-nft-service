@@ -11,8 +11,8 @@ import {
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../nfts/dto/transaction';
 import { TokenType } from '../nfts/dto/token.dto';
-import { TokenEntity } from 'src/token/token.entity';
-import { TokensServiceDb } from 'src/token/tokens.servicedb';
+import { TokenEntity } from 'src/db/token/token.entity';
+import { TokensServiceDb } from 'src/db/token/tokens.servicedb';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 
 @Injectable()

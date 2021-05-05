@@ -1,5 +1,4 @@
-import { AccountEntity } from 'src/accounts/account.entity';
-import { AuctionEntity } from 'src/auctions/auction.entity';
+import { AccountEntity } from 'src/db/accounts/account.entity';
 import {
   Column,
   Entity,
@@ -7,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { AuctionEntity } from '../auctions/auction.entity';
 
 @Entity('Order')
 export class OrderEntity {

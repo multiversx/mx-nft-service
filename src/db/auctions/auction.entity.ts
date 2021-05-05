@@ -1,5 +1,5 @@
-import { AccountEntity } from 'src/accounts/account.entity';
-import { OrderEntity } from 'src/orders/order.entity';
+import { AccountEntity } from 'src/db/accounts/account.entity';
+import { OrderEntity } from 'src/db/orders/order.entity';
 import {
   Column,
   Entity,

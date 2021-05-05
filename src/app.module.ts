@@ -12,10 +12,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ServicesModule } from './common/services';
 import { NftModule } from './modules/nfts/nft.module';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AssetsModule } from './assets/assets.module';
-import { AuctionsModule } from './auctions/auctions.module';
-import { OrdersModule } from './orders/orders.module';
-import { AccountsModule } from './accounts/accounts.module';
+import { OrdersModule } from './db/orders/orders.module';
+import { AccountsModule } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
 import { TokensModuleGraph } from './modules/tokens/tokens.module';
@@ -23,6 +21,8 @@ import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { DbproviderService } from './dbprovider/dbprovider.service';
+import { AssetsModule } from './db/assets/assets.module';
+import { AuctionsModule } from './db/auctions/auctions.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
