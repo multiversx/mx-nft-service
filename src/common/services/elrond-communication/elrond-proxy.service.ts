@@ -1,12 +1,17 @@
-import { ProxyProvider, ContractFunction, Address } from '@elrondnetwork/erdjs';
+import {
+  ProxyProvider,
+  Address,
+  SmartContract,
+  AbiRegistry,
+  SmartContractAbi,
+  ContractFunction,
+  BytesValue,
+} from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Inject, Injectable } from '@nestjs/common';
-import { Query } from '@elrondnetwork/erdjs/out/smartcontracts/query';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { CacheManagerService } from '../cache-manager/cache-manager.service';
-import { QueryResponse } from '@elrondnetwork/erdjs/out/smartcontracts';
-import { QueryResponseHelper } from 'src/helpers';
 
 @Injectable()
 export class ElrondProxyService {
@@ -22,26 +27,56 @@ export class ElrondProxyService {
     return this.proxy;
   }
 
-  async getAllContractAddresses() {
-    const cachedData = await this.cacheManager.getAllContractAddresses();
-    if (!!cachedData) {
-      return QueryResponse.fromHttpResponse(cachedData);
-    }
-
-    const query = new Query({
-      address: new Address(elrondConfig.stakingContract),
-      func: new ContractFunction('getAllContractAddresses'),
+  async getSmartCntract(): Promise<SmartContract> {
+    console.log('here');
+    let abiRegistry = await AbiRegistry.load({
+      files: ['./src/abis/esdt-nft-marketplace.abi.json'],
     });
-    const result = await this.proxy.queryContract(query);
-    this.logger.info('getContractList', {
-      path: 'elrond-proxy.service.getContractList',
-      returnCode: result.returnCode,
-      returnMessage: result.returnMessage,
-    });
+    let abi = new SmartContractAbi(abiRegistry, ['EsdtNftMarketplace']);
 
-    await this.cacheManager.setAllContractAddresses(
-      QueryResponseHelper.getDataForCache(result),
+    let contract = new SmartContract({
+      address: new Address(
+        'erd1qqqqqqqqqqqqqpgqw8faqylfxhsx3nvpngkh9sf97gh877ysd8ssererdq',
+      ),
+      abi: abi,
+    });
+    return contract;
+  }
+
+  async getTokens(tickers: string[]): Promise<any> {
+    let tokens = await this.getService().doGetGeneric(
+      'network/esdts',
+      (response) => {
+        return this.fromHttpResponse(response.tokens);
+      },
     );
-    return result;
+    let tokenss: any[] = [];
+    tickers.forEach((element) => {
+      let t = tokens.filter((value) => value.includes(element));
+      let d = [];
+      t.forEach((elem) => {
+        const tok = { tokenIdentifier: elem, tokenTicker: element };
+        d.push(tok);
+      });
+      if (d !== undefined) tokenss = [...d];
+    });
+    return tokenss;
+  }
+
+  async getTokenProperties(token_identifier: string): Promise<any> {
+    const contract = new SmartContract({
+      address: new Address(
+        'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u',
+      ),
+    });
+    let response = await contract.runQuery(this.getService(), {
+      func: new ContractFunction('getTokenProperties'),
+      args: [BytesValue.fromUTF8(token_identifier)],
+    });
+    return response.returnData[2].base64ToBech32();
+  }
+
+  fromHttpResponse(payload: any): any {
+    return payload;
   }
 }
