@@ -11,7 +11,7 @@
   "migrations": [
     "dist/db/migrations/*{.ts,.js}"
   ],
-  "synchronize": false,
+  "synchronize": true,
   "cli": {
     "migrationsDir": "src/db/migrations"
   }
