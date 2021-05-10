@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../nfts/base.resolver';
 import { TokenType } from '../nfts/dto/token.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
@@ -14,20 +14,8 @@ export class TokensResolver extends BaseResolver(TokenType) {
   async issueNft(
     @Args('token_name') token_name: string,
     @Args('token_ticker') token_ticker: string,
-    @Args('owner_address') owner_address: string,
   ): Promise<TransactionNode> {
-    return await this.tokensService.issueNft(
-      token_name,
-      token_ticker,
-      owner_address,
-    );
-  }
-
-  @Query(() => [TokenType], { name: 'getTokensForAddress' })
-  async getTokensForAddress(
-    @Args('owner_address') owner_address: string,
-  ): Promise<TokenType[]> {
-    return await this.tokensService.getTokensForAddress(owner_address);
+    return await this.tokensService.issueNft(token_name, token_ticker);
   }
 
   @Mutation(() => TransactionNode, { name: 'setRoles' })
@@ -41,12 +29,5 @@ export class TokensResolver extends BaseResolver(TokenType) {
       address_transfer,
       role,
     );
-  }
-
-  @Query(() => [TokenType])
-  async fetchTokenIdentifiersForUser(
-    @Args('address') address: string,
-  ): Promise<[TokenType]> {
-    return await this.tokensService.fetchTokenIdentifiers(address);
   }
 }

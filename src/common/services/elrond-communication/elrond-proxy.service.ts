@@ -38,26 +38,6 @@ export class ElrondProxyService {
     return contract;
   }
 
-  async getTokens(tickers: string[]): Promise<any> {
-    let tokens = await this.getService().doGetGeneric(
-      'network/esdts',
-      (response) => {
-        return this.fromHttpResponse(response.tokens);
-      },
-    );
-    let tokenss: any[] = [];
-    tickers.forEach((element) => {
-      let t = tokens.filter((value) => value.includes(element));
-      let d = [];
-      t.forEach((elem) => {
-        const tok = { tokenIdentifier: elem, tokenTicker: element };
-        d.push(tok);
-      });
-      if (d !== undefined) tokenss = [...d];
-    });
-    return tokenss;
-  }
-
   async getTokenProperties(token_identifier: string): Promise<any> {
     const contract = new SmartContract({
       address: new Address(

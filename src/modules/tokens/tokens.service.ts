@@ -17,29 +17,18 @@ import { ElrondProxyService } from 'src/common/services/elrond-communication/elr
 
 @Injectable()
 export class TokensService {
-  constructor(
-    private tokensServiceDb: TokensServiceDb,
-    private proxyService: ElrondProxyService,
-  ) {}
+  constructor() {}
   receiverAddress: string =
     'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u';
 
   async issueNft(
     token_name: string,
     token_ticker: string,
-    owner_address: string,
   ): Promise<TransactionNode> {
     const contract = new SmartContract({
       address: new Address(this.receiverAddress),
     });
 
-    await this.tokensServiceDb.updateToken(
-      new TokenEntity({
-        tokenName: token_name,
-        tokenTicker: token_ticker,
-        owner: owner_address,
-      }),
-    );
     const transaction = contract.call({
       func: new ContractFunction('issueNonFungible'),
       value: Balance.egld(5),
@@ -51,86 +40,6 @@ export class TokensService {
     });
     const transactionNode = transaction.toPlainObject();
     return transactionNode;
-  }
-
-  async getTokensForAddress(owner_address: string): Promise<TokenType[]> {
-    let tokenTypes = <TokenType[]>[];
-    let tokenTypesWithoutIdentifier = <TokenType[]>[];
-
-    await this.getTokensWithoutId(
-      owner_address,
-      tokenTypes,
-      tokenTypesWithoutIdentifier,
-    );
-
-    return await this.setTokensIdentifiers(
-      tokenTypesWithoutIdentifier,
-      owner_address,
-      tokenTypes,
-    );
-  }
-
-  private async setTokensIdentifiers(
-    tokenTypesWithoutIdentifier: TokenType[],
-    owner_address: string,
-    tokenTypes: TokenType[],
-  ): Promise<TokenType[]> {
-    return this.getTokensIdentifiers(
-      await this.getNetworkTokens(tokenTypesWithoutIdentifier),
-      owner_address,
-      tokenTypes,
-    );
-  }
-
-  private async getTokensIdentifiers(
-    networkTokens: any,
-    owner_address: string,
-    tokenTypes: TokenType[],
-  ): Promise<TokenType[]> {
-    for (const token of networkTokens) {
-      let tokenProperties = await this.proxyService.getTokenProperties(
-        token.tokenIdentifier,
-      );
-      if (new Address(owner_address).bech32() === tokenProperties) {
-        const index = tokenTypes.findIndex(
-          (x) => x.tokenTicker === token.tokenTicker,
-        );
-        tokenTypes[index].tokenIdentifier = token.tokenIdentifier;
-        this.tokensServiceDb.updateToken(new TokenEntity(tokenTypes[index]));
-      }
-    }
-    return tokenTypes;
-  }
-
-  private async getNetworkTokens(tokenTypesWithoutIdentifier: TokenType[]) {
-    return await this.proxyService.getTokens(
-      tokenTypesWithoutIdentifier.map((tkn) => tkn.tokenTicker),
-    );
-  }
-
-  private async getTokensWithoutId(
-    owner_address: string,
-    tokenTypes: TokenType[],
-    tokenTypesWithoutIdentifier: TokenType[],
-  ) {
-    let tokens = await this.tokensServiceDb.getTokensForAddress(owner_address);
-    tokens.forEach((element) => {
-      tokenTypes.push(
-        new TokenType({
-          id: element.id,
-          address: element.owner,
-          tokenName: element.tokenName,
-          tokenTicker: element.tokenTicker,
-          creationDate: element.creationDate,
-          tokenIdentifier: element.tokenIdentifier,
-        }),
-      );
-    });
-    tokenTypes.forEach((token) => {
-      if (token.tokenIdentifier === null) {
-        tokenTypesWithoutIdentifier.push(token);
-      }
-    });
   }
 
   async setNftRoles(
