@@ -1,14 +1,11 @@
 import { Account } from '../nfts/dto/account.dto';
-import { Mutation, Query, Resolver, Args } from '@nestjs/graphql';
+import { Mutation, Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
-import { AccountsServiceDb } from 'src/db/accounts/accounts.service';
-import { FollowersServiceDb } from 'src/db/followers/followers.service';
+import { add } from 'winston';
 
-@Resolver()
+@Resolver(() => Account)
 export class AccountsResolver {
   constructor(
-    private accountsServiceDb: AccountsServiceDb,
-    private followerServiceDb: FollowersServiceDb,
     private accountsService: AccountsService,
   ) {
   }
@@ -36,23 +33,23 @@ export class AccountsResolver {
   }
 
   @Query(() => Account)
-  async getAccountById(
-    @Args('id') id: number,
+  async getAccount(
+    @Args('id', { nullable: true }) id?: number,
+    @Args('address', { nullable: true }) address?: string
   ): Promise<Account> {
-    return this.accountsService.getAccountById(id);
+    if (id != undefined) {
+      return await this.accountsService.getAccountById(id)
+    }
+    return await this.accountsService.getAccountByAddress(address)
   }
 
-  @Query(() => Account)
-  async getAccountByAddress(
-    @Args('address') address: string,
-  ): Promise<Account> {
-    return this.accountsService.getAccountByAddress(address);
+  @ResolveField('followers', () => [Account])
+  async followers(@Parent() account: Account): Promise<Account[]> {
+    return await this.accountsService.getFollowers(account.id)
   }
 
-  @Query(() => Account)
-  async getAccountWithFollowing(
-    @Args('id') id: number,
-  ): Promise<Account> {
-    return await this.accountsService.getAccountWithFollowers(id);
+  @ResolveField('following', () => [Account])
+  async following(@Parent() account: Account): Promise<Account[]> {
+    return await this.accountsService.getFollowing(account.id)
   }
 }

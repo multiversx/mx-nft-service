@@ -39,35 +39,11 @@ export class AccountsService {
     return await this.accountsServiceDb.getAccountByAddress(address)
   }
 
-  async getAccountWithFollowers(id: number): Promise<Account | any> {
-    const account = await this.accountsServiceDb.getAccountById(id)
-    const followers = await this.followerServiceDb.getFollowers(id)
-    const following = await this.followerServiceDb.getFollowing(id)
+  async getFollowers(id: number): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowers(id)
+  }
 
-    const accountDto = new Account({
-      id: account.id,
-      address: account.address,
-      profileImgUrl: account.profileImgUrl,
-      herotag: account.herotag,
-      followers: [],
-      following: []
-    })
-    followers.forEach((f) => {
-      accountDto.followers.push(new Account({
-        id: f.id,
-        address: f.address,
-        profileImgUrl: f.profileImgUrl,
-        herotag: f.herotag
-      }))
-    })
-    following.forEach((f) => {
-      accountDto.following.push(new Account({
-        id: f.id,
-        address: f.address,
-        profileImgUrl: f.profileImgUrl,
-        herotag: f.herotag
-      }))
-    })
-    return accountDto
+  async getFollowing(id: number): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowing(id)
   }
 }

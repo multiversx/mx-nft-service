@@ -6,7 +6,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Account {
   @Field(() => Number)
-  id: Number;
+  id: number;
 
   @Field(() => ID)
   address: string;

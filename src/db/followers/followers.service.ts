@@ -18,7 +18,7 @@ export class FollowersServiceDb {
     this.followerRepository.update(follower.id, follower)
   }
 
-  async getFollowers(accountId: number): Promise<AccountEntity[]> {
+  async getFollowers(accountId: number): Promise<AccountEntity[] | any[]> {
     const followers = await this.followerRepository
       .createQueryBuilder('follower')
       .leftJoinAndSelect('follower.follower', 'account', 'follower.follower = account.id')
@@ -28,7 +28,7 @@ export class FollowersServiceDb {
     return followers.map(x => x.follower)
   }
 
-  async getFollowing(accountId: number): Promise<AccountEntity[]> {
+  async getFollowing(accountId: number): Promise<AccountEntity[] | any[]> {
     const following = await this.followerRepository
       .createQueryBuilder('follower')
       .leftJoinAndSelect('follower.following', 'account', 'follower.following = account.id')

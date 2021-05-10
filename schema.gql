@@ -92,9 +92,7 @@ type Query {
   findAllAuction: [Auction!]!
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
-  getAccountByAddress(address: String!): Account!
-  getAccountById(id: Float!): Account!
-  getAccountWithFollowing(id: Float!): Account!
+  getAccount(address: String, id: Float): Account!
   getTokensForAddress(owner_address: String!): [TokenType!]!
   order(orderId: String!): [Order!]!
 }
