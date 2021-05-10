@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindConditions, Repository } from 'typeorm';
 import { AssetEntity } from './asset.entity';
 
 @Injectable()
-export class AssetsService {
+export class AssetsServiceDb {
   constructor(
     @InjectRepository(AssetEntity)
     private assetsRepository: Repository<AssetEntity>,
@@ -12,6 +12,22 @@ export class AssetsService {
 
   async getAssets(): Promise<AssetEntity[]> {
     return await this.assetsRepository.find();
+  }
+
+  async getAssetsForUser(
+    conditions: FindConditions<AssetEntity>,
+  ): Promise<AssetEntity[]> {
+    return await this.assetsRepository.find({
+      select: [
+        'id',
+        'tokenId',
+        'name',
+        'royalties',
+        'creationDate',
+        'tokenNonce',
+      ],
+      where: conditions,
+    });
   }
 
   async getAsset(_id: number): Promise<AssetEntity[]> {

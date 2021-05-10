@@ -1,13 +1,7 @@
 import { AccountEntity } from 'src/db/accounts/account.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('Asset')
+@Entity('Assets')
 export class AssetEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,8 +9,14 @@ export class AssetEntity {
   @Column({ length: 25 })
   tokenId: string;
 
+  @Column()
+  tokenNonce: string;
+
   @Column({ length: 25 })
   name: string;
+
+  @Column()
+  hash: string;
 
   @Column({ length: 25 })
   royalties: string;
@@ -24,14 +24,9 @@ export class AssetEntity {
   @Column('date')
   creationDate: Date;
 
-  @Column()
-  tokenNonce: string;
-
-  @OneToOne((type) => AccountEntity)
-  @JoinColumn()
+  @ManyToOne((type) => AccountEntity, (account) => account.ownedAssets)
   currentOwner: AccountEntity;
 
-  @OneToOne((type) => AccountEntity)
-  @JoinColumn()
+  @ManyToOne((type) => AccountEntity, (account) => account.createdAssets)
   creator: AccountEntity;
 }

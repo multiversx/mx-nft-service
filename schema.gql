@@ -18,16 +18,18 @@ type Asset {
   attributes: [Attribute!]!
   creationDate: DateTime!
   creator: Account!
+  creatorAddress: String!
   currentOwner: Onwer!
   hash: String!
   lastSale: DateTime!
   lastSalePrice: Price!
   name: String!
+  ownerAddress: String!
   previousOwners: [Onwer!]!
   royalties: String!
   tags: [String!]!
   tokenId: ID!
-  tokenNonce: String!
+  tokenNonce: Float!
   uris: [String!]!
 }
 
@@ -57,10 +59,38 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
-  issueNft(owner_address: String!, token_name: String!, token_ticker: String!): TransactionNode!
-  setRoles(address_transfer: String!, role: String!, token_identifier: String!): TransactionNode!
+  createAccount(
+    address: String!
+    herotag: String!
+    profileImgUrl: String!
+  ): Account!
   updateAccount(profileImgUrl: String!): Account!
+  createNft(
+    attributes: String!
+    hash: String!
+    name: String!
+    ownerAddress: String!
+    royalties: String!
+    tokenIdentifier: String!
+    tokenNonce: String!
+    uri: String!
+  ): TransactionNode!
+  issueNft(
+    owner_address: String!
+    token_name: String!
+    token_ticker: String!
+  ): TransactionNode!
+  setRoles(
+    address_transfer: String!
+    role: String!
+    token_identifier: String!
+  ): TransactionNode!
+  transferNft(
+    destinationAddress: String!
+    ownerAddress: String!
+    quantity: String!
+    tokenIdentifier: String!
+  ): TransactionNode!
 }
 
 type Onwer {
@@ -85,7 +115,7 @@ type Price {
 }
 
 type Query {
-  assets(id: String!): [Asset!]!
+  assets: [Asset!]!
   auctions(auctionId: String!): [Auction!]!
   fetchTokenIdentifiersForUser(address: String!): [TokenType!]!
   findAllAsset: [Asset!]!
@@ -93,6 +123,7 @@ type Query {
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
   getAccount(address: String, id: Float): Account!
+  getAssetsForUser(address: String!): [Asset!]!
   getTokensForAddress(owner_address: String!): [TokenType!]!
   order(orderId: String!): [Order!]!
 }

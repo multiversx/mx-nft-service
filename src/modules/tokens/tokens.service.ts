@@ -141,7 +141,6 @@ export class TokensService {
     const contract = new SmartContract({
       address: new Address(this.receiverAddress),
     });
-    console.log(token_identifier, address_transfer, role);
     const transaction = contract.call({
       func: new ContractFunction('setSpecialRole'),
       value: Balance.egld(0),

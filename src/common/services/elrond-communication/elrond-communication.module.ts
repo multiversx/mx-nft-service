@@ -3,9 +3,10 @@ import { ElrondProxyService } from './elrond-proxy.service';
 import { NonceService } from './nonce.service';
 import { RedisModule } from 'nestjs-redis';
 import { CacheManagerModule } from '../cache-manager/cache-manager.module';
+import { ElrondApiService } from './elrond-api.service';
 
 @Module({
-  providers: [ElrondProxyService, NonceService],
+  providers: [ElrondProxyService, ElrondApiService, NonceService],
   imports: [
     RedisModule.register({
       host: process.env.REDIS_URL,
@@ -16,6 +17,6 @@ import { CacheManagerModule } from '../cache-manager/cache-manager.module';
     }),
     CacheManagerModule,
   ],
-  exports: [ElrondProxyService, NonceService],
+  exports: [ElrondProxyService, ElrondApiService, NonceService],
 })
 export class ElrondCommunicationModule {}

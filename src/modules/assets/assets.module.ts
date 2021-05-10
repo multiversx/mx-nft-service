@@ -4,12 +4,14 @@ import { CacheManagerModule } from '../../common/services/cache-manager/cache-ma
 import * as redisStore from 'cache-manager-redis-store';
 import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
+import { AssetsModuleDb } from 'src/db/assets/assets.module';
 
 @Module({
   providers: [AssetsService, AssetsResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
+    AssetsModuleDb,
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,

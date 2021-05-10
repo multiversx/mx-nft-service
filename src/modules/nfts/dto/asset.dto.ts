@@ -9,13 +9,17 @@ export class Asset {
   @Field(() => ID)
   tokenId!: string;
   @Field()
-  tokenNonce!: string;
+  tokenNonce!: number;
   @Field(() => Price)
   lastSalePrice: Price;
   @Field({ nullable: false })
   hash: string;
+  @Field(() => String)
+  creatorAddress: string;
   @Field(() => Account)
   creator: Account;
+  @Field(() => String)
+  ownerAddress: string;
   @Field(() => Onwer)
   currentOwner: Onwer;
   @Field(() => [Onwer])
@@ -30,7 +34,7 @@ export class Asset {
   lastSale: Date;
   @Field(() => GraphQLISODateTime)
   creationDate!: Date;
-  @Field(() => [String])
+  @Field(() => [String], { nullable: false })
   uris: string[];
   @Field(() => [String])
   tags: string[];
