@@ -65,17 +65,18 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(createAssetArgs.tokenIdentifier),
-        BytesValue.fromUTF8('0'),
+        BytesValue.fromHex(this.nominateVal(createAssetArgs.tokenNonce || '1')),
         BytesValue.fromUTF8(createAssetArgs.name),
-        BytesValue.fromUTF8(createAssetArgs.royalties),
+        BytesValue.fromHex(
+          this.nominateVal(createAssetArgs.royalties || '0', 100),
+        ),
         BytesValue.fromUTF8(createAssetArgs.hash),
         BytesValue.fromUTF8(createAssetArgs.attributes),
         BytesValue.fromUTF8(createAssetArgs.uri),
       ],
       gasLimit: new GasLimit(60000000),
     });
-    const transactionNode = transaction.toPlainObject();
-    return transactionNode;
+    return transaction.toPlainObject();
   }
 
   async transferNft(
@@ -89,12 +90,19 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(transferNftArgs.tokenIdentifier),
-        BytesValue.fromUTF8(transferNftArgs.quantity || '0'),
+        BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
         BytesValue.fromUTF8(transferNftArgs.destinationAddress),
       ],
       gasLimit: new GasLimit(60000000),
     });
-    const transactionNode = transaction.toPlainObject();
-    return transactionNode;
+    return transaction.toPlainObject();
   }
+
+  nominateVal = (value: string, perc: number = 1) => {
+    let response = (parseFloat(value) * perc).toString(16);
+    if (response.length % 2 !== 0) {
+      response = '0' + response;
+    }
+    return response;
+  };
 }
