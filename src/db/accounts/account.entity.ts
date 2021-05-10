@@ -35,7 +35,7 @@ export class AccountEntity {
   @OneToMany(() => FollowerEntity, f => f.follower)
   followers: FollowerEntity[]
 
-  @ManyToMany(() => FollowerEntity, f => f.following)
+  @OneToMany(() => FollowerEntity, f => f.following)
   following: FollowerEntity[]
 
   constructor(init?: Partial<AccountEntity>) {
