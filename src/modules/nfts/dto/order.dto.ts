@@ -7,14 +7,19 @@ import { Account } from './account.dto';
 export class Order {
   @Field(() => ID)
   orderId: string;
+
   @Field(() => Account)
   from: Account;
+  
   @Field(() => Auction)
   auction: Auction;
+  
   @Field(() => Price)
   price: Price;
+  
   @Field(() => String)
   status: string;
+  
   @Field(() => Date)
   creationDate: Date;
 }

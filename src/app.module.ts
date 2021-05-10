@@ -13,7 +13,7 @@ import { ServicesModule } from './common/services';
 import { NftModule } from './modules/nfts/nft.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { OrdersModule } from './db/orders/orders.module';
-import { AccountsModule } from './db/accounts/accounts.module';
+import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
 import { TokensModuleGraph } from './modules/tokens/tokens.module';
@@ -23,6 +23,7 @@ import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { DbproviderService } from './dbprovider/dbprovider.service';
 import { AssetsModule } from './db/assets/assets.module';
 import { AuctionsModule } from './db/auctions/auctions.module';
+import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -54,7 +55,9 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
-    TypeOrmModule.forRoot(),
+    TypeOrmModule.forRoot({
+      
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
@@ -67,11 +70,12 @@ if (!!process.env.LOG_FILE) {
     AssetsModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,
+    AccountsModuleGraph,
     ServicesModule,
     AssetsModule,
     AuctionsModule,
     OrdersModule,
-    AccountsModule,
+    AccountsModuleDb,
   ],
   providers: [
     {
