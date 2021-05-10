@@ -1,6 +1,13 @@
 import { OrderEntity } from 'src/db/orders/order.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AuctionEntity } from '../auctions/auction.entity';
+import { FollowerEntity } from '../followers/follower.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 
 @Entity('Account')
 export class AccountEntity {
@@ -14,7 +21,7 @@ export class AccountEntity {
   profileImgUrl: string;
 
   @Column({ length: 25 })
-  username: string;
+  herotag: string;
 
   @Column('date')
   creationDate: Date;
@@ -24,4 +31,14 @@ export class AccountEntity {
 
   @OneToMany((type) => AuctionEntity, (auction) => auction.owner)
   auctions: AuctionEntity[];
+
+  @OneToMany(() => FollowerEntity, f => f.follower)
+  followers: FollowerEntity[]
+
+  @ManyToMany(() => FollowerEntity, f => f.following)
+  following: FollowerEntity[]
+
+  constructor(init?: Partial<AccountEntity>) {
+    Object.assign(this, init);
+  }
 }

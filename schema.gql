@@ -8,9 +8,10 @@ type Account {
   auctions: [Auction!]!
   followers: [Account!]!
   following: [Account!]!
+  herotag: String
+  id: Float!
   orders: [Order!]!
   profileImgUrl: String
-  username: String
 }
 
 type Asset {
@@ -56,8 +57,10 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
   issueNft(owner_address: String!, token_name: String!, token_ticker: String!): TransactionNode!
   setRoles(address_transfer: String!, role: String!, token_identifier: String!): TransactionNode!
+  updateAccount(profileImgUrl: String!): Account!
 }
 
 type Onwer {
@@ -82,6 +85,8 @@ type Price {
 }
 
 type Query {
+  addAccs: Account!
+  addFollow: Account!
   assets(id: String!): [Asset!]!
   auctions(auctionId: String!): [Auction!]!
   fetchTokenIdentifiersForUser(address: String!): [TokenType!]!
@@ -89,6 +94,10 @@ type Query {
   findAllAuction: [Auction!]!
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
+  get: Account!
+  getAccountByAddress(address: String!): Account!
+  getAccountById(id: Float!): Account!
+  getAccountWithFollowing(id: Float!): Account!
   getTokensForAddress(owner_address: String!): [TokenType!]!
   order(orderId: String!): [Order!]!
 }
