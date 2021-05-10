@@ -85,8 +85,6 @@ type Price {
 }
 
 type Query {
-  addAccs: Account!
-  addFollow: Account!
   assets(id: String!): [Asset!]!
   auctions(auctionId: String!): [Auction!]!
   fetchTokenIdentifiersForUser(address: String!): [TokenType!]!
@@ -94,7 +92,6 @@ type Query {
   findAllAuction: [Auction!]!
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
-  get: Account!
   getAccountByAddress(address: String!): Account!
   getAccountById(id: Float!): Account!
   getAccountWithFollowing(id: Float!): Account!
