@@ -3,20 +3,23 @@ import { AccountEntity } from "src/db/accounts/account.entity";
 import { AccountsServiceDb } from "../../db/accounts/accounts.service";
 import { FollowersServiceDb } from "../../db/followers/followers.service";
 import { Account } from "../nfts/dto/account.dto";
+import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
+import { Address } from "@elrondnetwork/erdjs";
 
 @Injectable()
 export class AccountsService {
   constructor(
     private accountsServiceDb: AccountsServiceDb,
-    private followerServiceDb: FollowersServiceDb
+    private followerServiceDb: FollowersServiceDb,
+    private elrondProxyService: ElrondProxyService,
   ) { }
 
   async createAccount(
     address: string,
     profileImgUrl: string,
     herotag: string
-  ): Promise<void> {
-    await this.accountsServiceDb.insertAccount(new AccountEntity({
+  ): Promise<Account | any> {
+    return await this.accountsServiceDb.insertAccount(new AccountEntity({
       address: address,
       profileImgUrl: profileImgUrl,
       herotag
@@ -36,7 +39,17 @@ export class AccountsService {
   }
 
   async getAccountByAddress(address: string): Promise<Account | any> {
-    return await this.accountsServiceDb.getAccountByAddress(address)
+    const account = await this.accountsServiceDb.getAccountByAddress(address)
+    if (account !== undefined) {
+      return account
+    }
+    const networkAccount = await this.elrondProxyService.getService()
+      .getAccount(new Address(address))
+
+    return new Account({
+      address: networkAccount.address.bech32(),
+      herotag: networkAccount.userName
+    })
   }
 
   async getFollowers(id: number): Promise<Account[] | any[]> {

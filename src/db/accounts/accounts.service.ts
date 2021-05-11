@@ -9,8 +9,8 @@ export class AccountsServiceDb {
     @InjectRepository(AccountEntity) private accountRepository: Repository<AccountEntity>
   ) { }
 
-  async insertAccount(account: AccountEntity) {
-    await this.accountRepository.save(account)
+  async insertAccount(account: AccountEntity): Promise<AccountEntity> {
+    return await this.accountRepository.save(account)
   }
 
   async getAccountById(id: number): Promise<AccountEntity> {
@@ -19,7 +19,6 @@ export class AccountsServiceDb {
     })
   }
 
-  // TODO: make address unique
   async getAccountByAddress(address: string): Promise<AccountEntity> {
     return await this.accountRepository.findOne({
       where: [{ address: address }]
