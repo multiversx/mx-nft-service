@@ -12,9 +12,13 @@ import { Account } from '../nfts/dto/account.dto';
 import { Onwer } from '../nfts/dto/onwer.dto';
 import { Asset } from '../nfts/dto/asset.dto';
 import { Attribute } from '../nfts/dto/attributes.dto';
-import CreateNftArgs, { TransferNftArgs } from '../nfts/dto/createNftArgs';
+import CreateNftArgs, {
+  AddTagsArgs,
+  TransferNftArgs,
+} from '../nfts/dto/graphqlArgs';
 import { TransactionNode } from '../nfts/dto/transaction';
 import { AssetsService } from './assets.service';
+import { Tag } from '../nfts/dto/tag.dto';
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
@@ -34,6 +38,11 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return await this.assetsService.transferNft(args);
   }
 
+  @Mutation(() => [Tag], { name: 'addTags' })
+  async addTags(@Args() args: AddTagsArgs): Promise<[Tag]> {
+    return await this.assetsService.addTags(args);
+  }
+
   @Query(() => [Asset])
   async getAssetsForUser(@Args('address') address: string) {
     return this.assetsService.getAssetsForUser(address);
@@ -49,17 +58,5 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
     return await this.accountsService.getOwnerByAddress(ownerAddress);
-  }
-
-  @ResolveField('previousOwners', () => [Account])
-  async previousOwners(@Parent() asset: Asset) {
-    const { currentOwner } = asset;
-    return {};
-  }
-
-  @ResolveField('attributes', () => [Attribute])
-  async attributes(@Parent() asset: Asset) {
-    const { currentOwner } = asset;
-    return {};
   }
 }

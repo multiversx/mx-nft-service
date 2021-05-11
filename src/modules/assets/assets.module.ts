@@ -6,6 +6,7 @@ import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
 import { AssetsModuleDb } from 'src/db/assets/assets.module';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
+import { TagsModuleDb } from 'src/db/tags/tags.module';
 
 @Module({
   providers: [AssetsService, AssetsResolver],
@@ -13,6 +14,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
     ElrondCommunicationModule,
     CacheManagerModule,
     AssetsModuleDb,
+    TagsModuleDb,
     forwardRef(() => AccountsModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed

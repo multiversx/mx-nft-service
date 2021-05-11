@@ -1,4 +1,4 @@
-import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { ArgsType, Field } from '@nestjs/graphql';
 
 @ArgsType()
 export default class CreateNftArgs {
@@ -18,6 +18,14 @@ export default class CreateNftArgs {
   uri: string;
   @Field(() => String)
   ownerAddress: string;
+}
+
+@ArgsType()
+export class AddTagsArgs {
+  @Field(() => String)
+  tokenIdentifier: string;
+  @Field(() => [String])
+  tags: [string];
 }
 
 @ArgsType()

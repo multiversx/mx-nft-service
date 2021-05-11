@@ -59,6 +59,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  addTags(tags: [String!]!, tokenIdentifier: String!): [Tag!]!
   createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
   createNft(attributes: String!, hash: String!, name: String!, ownerAddress: String!, royalties: String!, tokenIdentifier: String!, tokenNonce: String!, uri: String!): TransactionNode!
   issueNft(token_name: String!, token_ticker: String!): TransactionNode!
@@ -97,6 +98,12 @@ type Query {
   getAccount(address: String, id: Float): Account!
   getAssetsForUser(address: String!): [Asset!]!
   order(orderId: String!): [Order!]!
+}
+
+type Tag {
+  id: ID!
+  tag: String!
+  tokenId: String!
 }
 
 type TokenType {
