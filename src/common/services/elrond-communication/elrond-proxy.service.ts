@@ -8,9 +8,7 @@ import {
   BytesValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ElrondProxyService {

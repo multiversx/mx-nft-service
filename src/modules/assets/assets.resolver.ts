@@ -6,8 +6,10 @@ import {
   Parent,
   Mutation,
 } from '@nestjs/graphql';
+import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../nfts/base.resolver';
 import { Account } from '../nfts/dto/account.dto';
+import { Onwer } from '../nfts/dto/onwer.dto';
 import { Asset } from '../nfts/dto/asset.dto';
 import { Attribute } from '../nfts/dto/attributes.dto';
 import CreateNftArgs, { TransferNftArgs } from '../nfts/dto/createNftArgs';
@@ -15,7 +17,10 @@ import { TransactionNode } from '../nfts/dto/transaction';
 import { AssetsService } from './assets.service';
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
-  constructor(private assetsService: AssetsService) {
+  constructor(
+    private assetsService: AssetsService,
+    private accountsService: AccountsService,
+  ) {
     super();
   }
 
@@ -34,21 +39,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return this.assetsService.getAssetsForUser(address);
   }
 
-  @Query(() => [Asset], { name: 'assets' })
-  async getAssets() {
-    return this.assetsService.getAssets();
-  }
-
   @ResolveField('creator', () => Account)
   async creator(@Parent() asset: Asset) {
     const { creatorAddress } = asset;
-    return this.authorsService.getAccount(creatorAddress) || {};
+    return await this.accountsService.getAccountByAddress(creatorAddress);
   }
 
-  @ResolveField('currentOwner', () => Account)
+  @ResolveField('currentOwner', () => Onwer)
   async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
-    return this.authorsService.getAccount(ownerAddress) || {};
+    return await this.accountsService.getOwnerByAddress(ownerAddress);
   }
 
   @ResolveField('previousOwners', () => [Account])

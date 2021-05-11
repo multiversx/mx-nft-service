@@ -54,9 +54,7 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
-    TypeOrmModule.forRoot({
-      
-    }),
+    TypeOrmModule.forRoot({}),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       sortSchema: true,

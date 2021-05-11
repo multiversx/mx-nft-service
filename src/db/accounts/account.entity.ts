@@ -4,7 +4,7 @@ import { AuctionEntity } from '../auctions/auction.entity';
 import { FollowerEntity } from '../followers/follower.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('Account')
+@Entity('Accounts')
 export class AccountEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,14 +15,14 @@ export class AccountEntity {
   })
   address: string;
 
-  @Column({ length: 25 })
+  @Column()
   profileImgUrl: string;
 
-  @Column({ length: 25 })
+  @Column()
   herotag: string;
 
   @Column('date')
-  creationDate: Date;
+  creationDate: Date = new Date(new Date().toUTCString());
 
   @OneToMany((type) => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];

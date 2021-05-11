@@ -10,11 +10,8 @@ import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { AssetsServiceDb } from 'src/db/assets/assets.service';
 import '../../utils/extentions';
-import { Account } from '../nfts/dto/account.dto';
 import { Asset } from '../nfts/dto/asset.dto';
 import CreateNftArgs, { TransferNftArgs } from '../nfts/dto/createNftArgs';
-import { Onwer } from '../nfts/dto/onwer.dto';
-import { Price } from '../nfts/dto/price.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
 
 @Injectable()
@@ -30,30 +27,22 @@ export class AssetsService {
     const tokens = await this.apiService.getNftsForUser(address);
     let assets: Asset[] = [];
     tokens.forEach((element) => {
-      assets.push({
-        tokenId: element.identifier,
-        tokenNonce: element.nonce,
-        lastSalePrice: new Price(),
-        creatorAddress: element.creator,
-        creator: new Account(),
-        ownerAddress: element.owner,
-        currentOwner: new Onwer(),
-        previousOwners: [],
-        attributes: [],
-        lastSale: new Date(),
-        creationDate: new Date(),
-        hash: element.hash,
-        name: element.name,
-        royalties: element.royalties,
-        uris: element.uris || [''],
-        tags: [],
-      });
+      assets.push(
+        new Asset({
+          tokenId: element.token,
+          tokenNonce: element.nonce,
+          creatorAddress: element.creator,
+          ownerAddress: element.owner,
+          lastSale: new Date(),
+          creationDate: new Date(),
+          hash: element.hash,
+          name: element.name,
+          royalties: element.royalties,
+          uris: element.uris || [''],
+        }),
+      );
     });
     return assets;
-  }
-
-  async getAssets(): Promise<Asset[] | any> {
-    return this.assetsServiceDb.getAssets();
   }
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
@@ -98,11 +87,11 @@ export class AssetsService {
     return transaction.toPlainObject();
   }
 
-  nominateVal = (value: string, perc: number = 1) => {
+  private nominateVal(value: string, perc: number = 1): string {
     let response = (parseFloat(value) * perc).toString(16);
     if (response.length % 2 !== 0) {
       response = '0' + response;
     }
     return response;
-  };
+  }
 }

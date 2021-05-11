@@ -22,7 +22,7 @@ type Asset {
   currentOwner: Onwer!
   hash: String!
   lastSale: DateTime!
-  lastSalePrice: Price!
+  lastSalePrice: Price
   name: String!
   ownerAddress: String!
   previousOwners: [Onwer!]!
@@ -59,42 +59,16 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  createAccount(
-    address: String!
-    herotag: String!
-    profileImgUrl: String!
-  ): Account!
+  createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
+  createNft(attributes: String!, hash: String!, name: String!, ownerAddress: String!, royalties: String!, tokenIdentifier: String!, tokenNonce: String!, uri: String!): TransactionNode!
+  issueNft(token_name: String!, token_ticker: String!): TransactionNode!
+  setRoles(address_transfer: String!, role: String!, token_identifier: String!): TransactionNode!
+  transferNft(destinationAddress: String!, ownerAddress: String!, quantity: String!, tokenIdentifier: String!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
-  createNft(
-    attributes: String!
-    hash: String!
-    name: String!
-    ownerAddress: String!
-    royalties: String!
-    tokenIdentifier: String!
-    tokenNonce: String!
-    uri: String!
-  ): TransactionNode!
-  issueNft(
-    owner_address: String!
-    token_name: String!
-    token_ticker: String!
-  ): TransactionNode!
-  setRoles(
-    address_transfer: String!
-    role: String!
-    token_identifier: String!
-  ): TransactionNode!
-  transferNft(
-    destinationAddress: String!
-    ownerAddress: String!
-    quantity: String!
-    tokenIdentifier: String!
-  ): TransactionNode!
 }
 
 type Onwer {
-  account: ID!
+  account: Account!
   endDate: DateTime!
   startDate: DateTime!
 }
@@ -115,7 +89,6 @@ type Price {
 }
 
 type Query {
-  assets: [Asset!]!
   auctions(auctionId: String!): [Auction!]!
   findAllAsset: [Asset!]!
   findAllAuction: [Auction!]!
