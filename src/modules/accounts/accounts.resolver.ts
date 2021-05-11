@@ -1,7 +1,6 @@
 import { Account } from '../nfts/dto/account.dto';
 import { Mutation, Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
-import { add } from 'winston';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -15,7 +14,7 @@ export class AccountsResolver {
     @Args('address') address: string,
     @Args('profileImgUrl') profileImgUrl: string,
     @Args('herotag') herotag: string,
-  ): Promise<void> {
+  ): Promise<Account> {
     return this.accountsService.createAccount(
       address,
       profileImgUrl,

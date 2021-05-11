@@ -4,7 +4,6 @@ import { FollowerEntity } from '../followers/follower.entity';
 import {
   Column,
   Entity,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn
 } from 'typeorm';
@@ -14,7 +13,10 @@ export class AccountEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 25 })
+  @Column({
+    length: 62,
+    unique: true
+  })
   address: string;
 
   @Column({ length: 25 })
@@ -24,7 +26,7 @@ export class AccountEntity {
   herotag: string;
 
   @Column('date')
-  creationDate: Date;
+  creationDate: Date = new Date(new Date().toUTCString());
 
   @OneToMany((type) => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];
