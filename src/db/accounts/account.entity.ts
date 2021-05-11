@@ -26,7 +26,7 @@ export class AccountEntity {
   herotag: string;
 
   @Column('date')
-  creationDate: Date = new Date(new Date().toUTCString());
+  creationDate: Date;
 
   @OneToMany((type) => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];

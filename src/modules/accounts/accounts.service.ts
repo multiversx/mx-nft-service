@@ -40,7 +40,6 @@ export class AccountsService {
 
   async getAccountByAddress(address: string): Promise<Account | any> {
     const account = await this.accountsServiceDb.getAccountByAddress(address)
-    console.log(account)
     if (account !== undefined) {
       return account
     }
