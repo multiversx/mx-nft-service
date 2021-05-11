@@ -3,7 +3,7 @@ import { Account } from './account.dto';
 
 @ObjectType()
 export class Onwer {
-  @Field(() => Account)
+  @Field(() => Account, { nullable: true })
   account: Account | any;
   @Field(() => Date)
   startDate: Date;

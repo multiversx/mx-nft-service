@@ -58,7 +58,7 @@ export class AccountsService {
 
   async getOwnerByAddress(address: string): Promise<Onwer | any> {
     let owner = new Onwer();
-    owner.account = await this.accountsServiceDb.getAccountByAddress(address);
+    owner.account = (await this.getAccountByAddress(address)) || null;
     return owner;
   }
 
