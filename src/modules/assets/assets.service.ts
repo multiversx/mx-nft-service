@@ -8,7 +8,6 @@ import {
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { AssetsServiceDb } from 'src/db/assets/assets.service';
 import '../../utils/extentions';
 import { Asset } from '../nfts/dto/asset.dto';
 import CreateNftArgs, { TransferNftArgs } from '../nfts/dto/createNftArgs';

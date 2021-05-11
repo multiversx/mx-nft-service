@@ -1,4 +1,4 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
@@ -13,7 +13,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
     ElrondCommunicationModule,
     CacheManagerModule,
     AssetsModuleDb,
-    AccountsModuleGraph,
+    forwardRef(() => AccountsModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,
