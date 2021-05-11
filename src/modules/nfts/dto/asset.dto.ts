@@ -9,29 +9,37 @@ export class Asset {
   @Field(() => ID)
   tokenId!: string;
   @Field()
-  tokenNonce!: string;
-  @Field(() => Price)
-  lastSalePrice: Price;
+  tokenNonce!: number;
+  @Field(() => Price, { nullable: true })
+  lastSalePrice: Price = null;
   @Field({ nullable: false })
   hash: string;
+  @Field(() => String)
+  creatorAddress: string;
   @Field(() => Account)
-  creator: Account;
+  creator: Account = null;
+  @Field(() => String)
+  ownerAddress: string;
   @Field(() => Onwer)
-  currentOwner: Onwer;
+  currentOwner: Onwer = null;
   @Field(() => [Onwer])
-  previousOwners: Onwer[];
+  previousOwners: Onwer[] = [];
   @Field()
   name!: string;
-  @Field({ nullable: false })
+  @Field()
   royalties: string; //creator percentage
   @Field(() => [Attribute])
-  attributes: Attribute[];
+  attributes: Attribute[] = [];
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
   @Field(() => GraphQLISODateTime)
   creationDate!: Date;
-  @Field(() => [String])
+  @Field(() => [String], { nullable: false })
   uris: string[];
   @Field(() => [String])
-  tags: string[];
+  tags: string[] = [];
+
+  constructor(init?: Partial<Asset>) {
+    Object.assign(this, init);
+  }
 }

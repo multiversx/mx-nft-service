@@ -5,12 +5,8 @@
   "username": "user",
   "password": "password",
   "database": "db",
-  "entities": [
-    "dist/db/**/*.entity{.ts,.js}"
-  ],
-  "migrations": [
-    "dist/db/migrations/*{.ts,.js}"
-  ],
+  "entities": ["dist/db/**/*.entity{.ts,.js}"],
+  "migrations": ["dist/db/migrations/*{.ts,.js}"],
   "synchronize": true,
   "cli": {
     "migrationsDir": "src/db/migrations"

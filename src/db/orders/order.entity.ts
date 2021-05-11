@@ -8,16 +8,22 @@ import {
 } from 'typeorm';
 import { AuctionEntity } from '../auctions/auction.entity';
 
-@Entity('Order')
+@Entity('Orders')
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   orderId: number;
 
   @Column({ length: 25 })
-  price: string;
+  priceTokenIdentifier: string;
 
   @Column({ length: 25 })
-  status: string;
+  priceAmount: string;
+
+  @Column({ length: 25 })
+  priceNonce: string;
+
+  @Column({ length: 25 })
+  status: string; //enum
 
   @Column('date')
   creationDate: Date;

@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetEntity } from './asset.entity';
-import { AssetsService } from './assets.service';
+import { AssetsServiceDb } from './assets.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AssetEntity])],
-  providers: [AssetsService],
+  providers: [AssetsServiceDb],
+  exports: [AssetsServiceDb],
 })
-export class AssetsModule {}
+export class AssetsModuleDb {}

@@ -21,7 +21,6 @@ import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { DbproviderService } from './dbprovider/dbprovider.service';
-import { AssetsModule } from './db/assets/assets.module';
 import { AuctionsModule } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 
@@ -55,9 +54,7 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
-    TypeOrmModule.forRoot({
-      
-    }),
+    TypeOrmModule.forRoot({}),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
@@ -72,7 +69,6 @@ if (!!process.env.LOG_FILE) {
     OrdersModuleGraph,
     AccountsModuleGraph,
     ServicesModule,
-    AssetsModule,
     AuctionsModule,
     OrdersModule,
     AccountsModuleDb,

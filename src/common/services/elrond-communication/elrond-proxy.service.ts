@@ -8,18 +8,12 @@ import {
   BytesValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
-import { CacheManagerService } from '../cache-manager/cache-manager.service';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ElrondProxyService {
   private readonly proxy: ProxyProvider;
-  constructor(
-    private cacheManager: CacheManagerService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {
+  constructor() {
     this.proxy = new ProxyProvider(elrondConfig.gateway, 60000);
   }
 
@@ -28,7 +22,6 @@ export class ElrondProxyService {
   }
 
   async getSmartCntract(): Promise<SmartContract> {
-    console.log('here');
     let abiRegistry = await AbiRegistry.load({
       files: ['./src/abis/esdt-nft-marketplace.abi.json'],
     });
@@ -41,26 +34,6 @@ export class ElrondProxyService {
       abi: abi,
     });
     return contract;
-  }
-
-  async getTokens(tickers: string[]): Promise<any> {
-    let tokens = await this.getService().doGetGeneric(
-      'network/esdts',
-      (response) => {
-        return this.fromHttpResponse(response.tokens);
-      },
-    );
-    let tokenss: any[] = [];
-    tickers.forEach((element) => {
-      let t = tokens.filter((value) => value.includes(element));
-      let d = [];
-      t.forEach((elem) => {
-        const tok = { tokenIdentifier: elem, tokenTicker: element };
-        d.push(tok);
-      });
-      if (d !== undefined) tokenss = [...d];
-    });
-    return tokenss;
   }
 
   async getTokenProperties(token_identifier: string): Promise<any> {

@@ -6,26 +6,27 @@ import { AccountEntity } from './account.entity';
 @Injectable()
 export class AccountsServiceDb {
   constructor(
-    @InjectRepository(AccountEntity) private accountRepository: Repository<AccountEntity>
-  ) { }
+    @InjectRepository(AccountEntity)
+    private accountRepository: Repository<AccountEntity>,
+  ) {}
 
   async insertAccount(account: AccountEntity): Promise<AccountEntity> {
-    return await this.accountRepository.save(account)
+    return await this.accountRepository.save(account);
   }
 
   async getAccountById(id: number): Promise<AccountEntity> {
     return await this.accountRepository.findOne({
-      where: [{ id: id }]
-    })
+      where: [{ id: id }],
+    });
   }
 
   async getAccountByAddress(address: string): Promise<AccountEntity> {
     return await this.accountRepository.findOne({
-      where: [{ address: address }]
-    })
+      where: [{ address: address }],
+    });
   }
 
   async updateAccount(account: AccountEntity) {
-    await this.accountRepository.update(account.id, account)
+    await this.accountRepository.update(account.id, account);
   }
 }
