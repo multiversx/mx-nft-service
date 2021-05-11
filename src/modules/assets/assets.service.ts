@@ -16,12 +16,7 @@ import { TransactionNode } from '../nfts/dto/transaction';
 
 @Injectable()
 export class AssetsService {
-  constructor(
-    private assetsServiceDb: AssetsServiceDb,
-    private apiService: ElrondApiService,
-  ) {}
-  receiverAddress: string =
-    'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u';
+  constructor(private apiService: ElrondApiService) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);

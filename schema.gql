@@ -68,7 +68,7 @@ type Mutation {
 }
 
 type Onwer {
-  account: Account!
+  account: Account
   endDate: DateTime!
   startDate: DateTime!
 }
