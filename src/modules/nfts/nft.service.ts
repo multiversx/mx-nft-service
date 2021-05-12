@@ -24,7 +24,7 @@ export class NftService {
   constructor(
     private cacheManagerService: CacheManagerService,
     private elrondProxyService: ElrondProxyService,
-  ) {}
+  ) { }
 
   async getAssetsForUser(): Promise<Asset[] | any> {
     return new Array<Asset>();
@@ -249,7 +249,7 @@ export class NftService {
       value: query.value,
       gasLimit: new GasLimit(5000000),
     });
-
+    
     return response.toPlainObject();
   }
 
