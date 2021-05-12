@@ -19,7 +19,7 @@ import { TokensModuleGraph } from './modules/tokens/tokens.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
-import { AuctionsModule } from './db/auctions/auctions.module';
+import { AuctionsModuleDb } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 
 const logTransports: Transport[] = [
@@ -67,7 +67,7 @@ if (!!process.env.LOG_FILE) {
     OrdersModuleGraph,
     AccountsModuleGraph,
     ServicesModule,
-    AuctionsModule,
+    AuctionsModuleDb,
     AccountsModuleDb,
   ],
   providers: [

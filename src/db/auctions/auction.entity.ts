@@ -1,27 +1,37 @@
 import { AccountEntity } from 'src/db/accounts/account.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { OrderEntity } from 'src/db/orders/order.entity';
 
-@Entity('Auction')
+@Entity('auctions')
 export class AuctionEntity {
   @PrimaryGeneratedColumn()
-  auctionId: number;
+  Id: number;
 
-  @Column({ length: 25 })
-  assetId: string;
+  @Column({ name: 'token_identifier', length: 20 })
+  tokenIdentifier: string;
 
-  @Column({ length: 25 })
+  @Column({ name: 'owner_address', length: 62 })
+  ownerAddress: string;
+
+  @Column({ name: 'min_bid' })
   minBid: string;
 
-  @Column({ length: 25 })
+  @Column({ name: 'max_bid' })
   maxBid: string;
 
-  @Column('date')
+  @Column({ name: 'creation_date' })
   creationDate: Date;
 
-  @Column('date')
+  @Column({ name: 'start_date' })
   startDate: Date;
 
-  @Column('date')
+  @Column({ name: 'end_date' })
   endDate: Date;
 
   @ManyToOne(() => AccountEntity, (account) => account.orders)

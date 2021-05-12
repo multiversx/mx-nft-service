@@ -23,7 +23,7 @@ export class AccountEntity {
   @Column({ name: 'creation_date', type: 'date' })
   creationDate: Date = new Date(new Date().toUTCString());
 
-  @OneToMany((type) => OrderEntity, (order) => order.creationDate)
+  @OneToMany(() => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];
 
   @OneToMany((type) => AuctionEntity, (auction) => auction.owner)
