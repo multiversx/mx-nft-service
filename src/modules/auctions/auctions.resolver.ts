@@ -1,15 +1,31 @@
-import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent, Mutation } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../nfts/base.resolver';
 import { Account } from '../nfts/dto/account.dto';
 import { Asset } from '../nfts/dto/asset.dto';
-import { Auction } from '../nfts/dto/auction.dto';
+import { Auction, CreateAuctionArgs } from '../nfts/dto/auction.dto';
 import { Order } from '../nfts/dto/order.dto';
+import { TransactionNode } from '../nfts/dto/transaction';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(private auctionsService: AuctionsService) {
     super();
+  }
+
+  @Mutation(() => TransactionNode)
+  async createAuction(
+    @Args('auctionData') auctionData: CreateAuctionArgs
+  ): Promise<TransactionNode> {
+    return await this.auctionsService.createAuction(auctionData)
+  }
+
+  @Mutation(() => Auction)
+  async saveAuction(
+    @Args('tokenIdentifier') tokenId: string,
+    @Args('nonce') nonce: string
+  ): Promise<Auction> {
+    return await this.auctionsService.saveAuction(tokenId, nonce)
   }
 
   @Query(() => [Auction], { name: 'auctions' })

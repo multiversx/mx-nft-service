@@ -4,36 +4,31 @@ import { Repository } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
-export class AuctionsService {
+export class AuctionsServiceDb {
   constructor(
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
-  ) {}
+  ) { }
 
   async getAuctions(): Promise<AuctionEntity[]> {
     return await this.auctionsRepository.find();
   }
 
-  async getAuction(_id: number): Promise<AuctionEntity[]> {
+  async getAuction(id: number): Promise<AuctionEntity[]> {
     return await this.auctionsRepository.find({
-      select: [
-        'auctionId',
-        'assetId',
-        'minBid',
-        'maxBid',
-        'creationDate',
-        'startDate',
-        'endDate',
-      ],
-      where: [{ id: _id }],
+      where: [{ id: id }],
     });
   }
 
-  async updateAuction(asset: AuctionEntity) {
-    this.auctionsRepository.save(asset);
+  async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+    return await this.auctionsRepository.save(auction);
   }
 
-  async deleteAuction(asset: AuctionEntity) {
-    this.auctionsRepository.delete(asset);
+  async updateAuction(auction: AuctionEntity) {
+    await this.auctionsRepository.update(auction.Id, auction);
+  }
+
+  async deleteAuction(auction: AuctionEntity) {
+    await this.auctionsRepository.delete(auction);
   }
 }
