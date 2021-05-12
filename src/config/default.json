@@ -4,7 +4,7 @@
     "elrondApi": "https://testnet-api.elrond.com",
     "gateway": "http://testnet-gateway.elrond.com/vm-values/query",
     "explorer": "https://testnet-explorer.elrond.com",
-    "nftAddress": ""
+    "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u"
   },
   "caching": {
     "getAllContractAddresses": 600,

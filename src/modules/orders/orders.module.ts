@@ -4,12 +4,14 @@ import { CacheManagerModule } from '../../common/services/cache-manager/cache-ma
 import * as redisStore from 'cache-manager-redis-store';
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
+import { OrdersModuleDb } from 'src/db/orders/orders.module';
 
 @Module({
   providers: [OrdersService, OrdersResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
+    OrdersModuleDb,
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,

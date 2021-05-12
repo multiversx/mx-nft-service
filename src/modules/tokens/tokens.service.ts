@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import {
   Address,
@@ -10,20 +10,18 @@ import {
   SmartContract,
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../nfts/dto/transaction';
-import { TokenType } from '../nfts/dto/token.dto';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class TokensService {
   constructor() {}
-  receiverAddress: string =
-    'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u';
 
   async issueNft(
     token_name: string,
     token_ticker: string,
   ): Promise<TransactionNode> {
     const contract = new SmartContract({
-      address: new Address(this.receiverAddress),
+      address: new Address(elrondConfig.esdtNftAddress),
     });
 
     const transaction = contract.call({
@@ -35,8 +33,7 @@ export class TokensService {
       ],
       gasLimit: new GasLimit(60000000),
     });
-    const transactionNode = transaction.toPlainObject();
-    return transactionNode;
+    return transaction.toPlainObject();
   }
 
   async setNftRoles(
@@ -45,7 +42,7 @@ export class TokensService {
     role: string,
   ): Promise<TransactionNode> {
     const contract = new SmartContract({
-      address: new Address(this.receiverAddress),
+      address: new Address(elrondConfig.esdtNftAddress),
     });
     const transaction = contract.call({
       func: new ContractFunction('setSpecialRole'),
@@ -55,20 +52,6 @@ export class TokensService {
         new AddressValue(new Address(address_transfer)),
         BytesValue.fromUTF8(role),
       ],
-      gasLimit: new GasLimit(60000000),
-    });
-    const transactionNode = transaction.toPlainObject();
-    return transactionNode;
-  }
-
-  async fetchTokenIdentifiers(address: string): Promise<[TokenType]> {
-    const contract = new SmartContract({
-      address: new Address(this.receiverAddress),
-    });
-    const transaction = contract.call({
-      func: new ContractFunction('issueNonFungible'),
-      value: Balance.egld(5),
-
       gasLimit: new GasLimit(60000000),
     });
     return transaction.toPlainObject();

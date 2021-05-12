@@ -38,9 +38,7 @@ export class ElrondProxyService {
 
   async getTokenProperties(token_identifier: string): Promise<any> {
     const contract = new SmartContract({
-      address: new Address(
-        'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u',
-      ),
+      address: new Address(elrondConfig.esdtNftAddress),
     });
     let response = await contract.runQuery(this.getService(), {
       func: new ContractFunction('getTokenProperties'),

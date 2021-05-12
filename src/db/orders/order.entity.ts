@@ -1,38 +1,36 @@
-import { AccountEntity } from 'src/db/accounts/account.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { AuctionEntity } from '../auctions/auction.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { OrderStatusType } from './order-status.enum';
 
-@Entity('Orders')
+@Entity('orders')
 export class OrderEntity {
   @PrimaryGeneratedColumn()
-  orderId: number;
+  id: number;
 
-  @Column({ length: 25 })
+  @Column({ name: 'price_token_identifier' })
   priceTokenIdentifier: string;
 
-  @Column({ length: 25 })
+  @Column({ name: 'price_amount' })
   priceAmount: string;
 
-  @Column({ length: 25 })
+  @Column({ name: 'price_nonce' })
   priceNonce: string;
 
-  @Column({ length: 25 })
-  status: string; //enum
+  @Column()
+  status: OrderStatusType;
 
-  @Column('date')
-  creationDate: Date;
+  @Column({ name: 'creation_date', type: 'datetime' })
+  creationDate: Date = new Date(new Date().toUTCString());
 
-  @ManyToOne(() => AccountEntity, (account) => account.orders)
-  @JoinColumn()
-  from: AccountEntity;
+  @Column({ name: 'modified_date', type: 'datetime' })
+  modifieDate: Date = new Date(new Date().toUTCString());
 
-  @ManyToOne(() => AuctionEntity, (account) => account.orders)
-  @JoinColumn()
-  auction: AuctionEntity;
+  @Column({ name: 'owner_address', length: 62 })
+  ownerAddress: string;
+
+  @Column({ name: 'auction_id' })
+  auctionId: number;
+
+  constructor(init?: Partial<OrderEntity>) {
+    Object.assign(this, init);
+  }
 }

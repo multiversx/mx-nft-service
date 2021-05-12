@@ -10,16 +10,20 @@ export class Order {
 
   @Field(() => Account)
   from: Account;
-  
+
   @Field(() => Auction)
   auction: Auction;
-  
+
   @Field(() => Price)
   price: Price;
-  
+
   @Field(() => String)
   status: string;
-  
+
   @Field(() => Date)
   creationDate: Date;
+
+  constructor(init?: Partial<Order>) {
+    Object.assign(this, init);
+  }
 }
