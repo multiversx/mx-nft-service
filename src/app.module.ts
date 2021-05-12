@@ -12,7 +12,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ServicesModule } from './common/services';
 import { NftModule } from './modules/nfts/nft.module';
 import { GraphQLModule } from '@nestjs/graphql';
-import { OrdersModule } from './db/orders/orders.module';
 import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
@@ -70,7 +69,6 @@ if (!!process.env.LOG_FILE) {
     AccountsModuleGraph,
     ServicesModule,
     AuctionsModule,
-    OrdersModule,
     AccountsModuleDb,
   ],
   providers: [

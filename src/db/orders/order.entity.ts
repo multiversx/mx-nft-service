@@ -1,38 +1,35 @@
 import { AccountEntity } from 'src/db/accounts/account.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AuctionEntity } from '../auctions/auction.entity';
+import { OrderStatusType } from './order-status.enum';
 
-@Entity('Orders')
+@Entity('orders')
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   orderId: number;
 
-  @Column({ length: 25 })
+  @Column()
   priceTokenIdentifier: string;
 
-  @Column({ length: 25 })
+  @Column()
   priceAmount: string;
 
-  @Column({ length: 25 })
+  @Column()
   priceNonce: string;
 
-  @Column({ length: 25 })
-  status: string; //enum
+  @Column()
+  status: OrderStatusType;
 
   @Column('date')
-  creationDate: Date;
+  creationDate: Date = new Date(new Date().toUTCString());
 
-  @ManyToOne(() => AccountEntity, (account) => account.orders)
-  @JoinColumn()
-  from: AccountEntity;
+  @Column()
+  accountAddress: string;
 
-  @ManyToOne(() => AuctionEntity, (account) => account.orders)
-  @JoinColumn()
-  auction: AuctionEntity;
+  @Column()
+  auctionId: number;
+
+  constructor(init?: Partial<OrderEntity>) {
+    Object.assign(this, init);
+  }
 }

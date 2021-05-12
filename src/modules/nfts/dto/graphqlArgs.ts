@@ -21,6 +21,20 @@ export default class CreateNftArgs {
 }
 
 @ArgsType()
+export class CreateOrderArgs {
+  @Field(() => String)
+  priceTokenIdentifier: string;
+  @Field(() => String)
+  priceAmount: string;
+  @Field(() => String)
+  priceNonce: string;
+  @Field(() => String)
+  ownerAddress: string;
+  @Field(() => Number)
+  auctionId: number;
+}
+
+@ArgsType()
 export class AddTagsArgs {
   @Field(() => String)
   tokenIdentifier: string;

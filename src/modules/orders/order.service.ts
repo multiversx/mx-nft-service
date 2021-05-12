@@ -1,28 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { Asset } from '../nfts/dto/asset.dto';
-import { Address } from '@elrondnetwork/erdjs/out';
+import { CreateOrderArgs } from '../nfts/dto/graphqlArgs';
+import { Order } from '../nfts/dto/order.dto';
+import { OrdersServiceDb } from 'src/db/orders/orders.service';
+import { OrderEntity } from 'src/db/orders/order.entity';
 
 @Injectable()
 export class OrdersService {
-  constructor(private elrondProxyService: ElrondProxyService) {}
+  constructor(private orderServiceDb: OrdersServiceDb) {}
 
-  async getAuctions(address?: string): Promise<Account | any> {
-    var account = this.elrondProxyService
-      .getService()
-      .getAccount(new Address(address));
-    return account;
-  }
-
-  async getAuction(address: string): Promise<Account | any> {
-    var account = this.elrondProxyService
-      .getService()
-      .getAccount(new Address(address));
-    return account;
-  }
-
-  async getNftsForUser(address: string): Promise<Asset[] | any> {
-    return {};
+  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order | any> {
+    return await this.orderServiceDb.saveOrder(
+      new OrderEntity({
+        auctionId: createOrderArgs.auctionId,
+        accountAddress: createOrderArgs.ownerAddress,
+        priceTokenIdentifier: createOrderArgs.priceTokenIdentifier,
+        priceAmount: createOrderArgs.priceAmount,
+        priceNonce: createOrderArgs.priceNonce,
+      }),
+    );
+    // return new Order();
   }
 }
