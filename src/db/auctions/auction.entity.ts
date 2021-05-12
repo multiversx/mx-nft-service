@@ -1,12 +1,5 @@
 import { AccountEntity } from 'src/db/accounts/account.entity';
-import { OrderEntity } from 'src/db/orders/order.entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('Auction')
 export class AuctionEntity {
@@ -30,9 +23,6 @@ export class AuctionEntity {
 
   @Column('date')
   endDate: Date;
-
-  @OneToMany((type) => OrderEntity, (order) => order.auction) // note: we will create author property in the Photo class below
-  orders: OrderEntity[];
 
   @ManyToOne(() => AccountEntity, (account) => account.orders)
   owner: AccountEntity;

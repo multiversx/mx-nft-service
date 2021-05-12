@@ -63,8 +63,8 @@ type Mutation {
   createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
   createNft(attributes: String!, hash: String!, name: String!, ownerAddress: String!, royalties: String!, tokenIdentifier: String!, tokenNonce: String!, uri: String!): TransactionNode!
   createOrder(auctionId: Float!, ownerAddress: String!, priceAmount: String!, priceNonce: String!, priceTokenIdentifier: String!): Order!
-  issueNft(token_name: String!, token_ticker: String!): TransactionNode!
-  setRoles(address_transfer: String!, role: String!, token_identifier: String!): TransactionNode!
+  issueNft(tokenName: String!, tokenTicker: String!): TransactionNode!
+  setRoles(addressTransfer: String!, role: String!, tokenIdentifier: String!): TransactionNode!
   transferNft(destinationAddress: String!, ownerAddress: String!, quantity: String!, tokenIdentifier: String!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
 }

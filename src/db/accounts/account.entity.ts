@@ -14,13 +14,13 @@ export class AccountEntity {
   })
   address: string;
 
-  @Column()
+  @Column({ name: 'profile_img_url' })
   profileImgUrl: string;
 
   @Column()
   herotag: string;
 
-  @Column('date')
+  @Column({ name: 'creation_date', type: 'date' })
   creationDate: Date = new Date(new Date().toUTCString());
 
   @OneToMany((type) => OrderEntity, (order) => order.creationDate)

@@ -13,12 +13,11 @@ export class OrdersService {
     return await this.orderServiceDb.saveOrder(
       new OrderEntity({
         auctionId: createOrderArgs.auctionId,
-        accountAddress: createOrderArgs.ownerAddress,
+        ownerAddress: createOrderArgs.ownerAddress,
         priceTokenIdentifier: createOrderArgs.priceTokenIdentifier,
         priceAmount: createOrderArgs.priceAmount,
         priceNonce: createOrderArgs.priceNonce,
       }),
     );
-    // return new Order();
   }
 }

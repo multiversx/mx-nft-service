@@ -25,10 +25,7 @@ export class OrdersServiceDb {
 
   async updateOrder(order: OrderEntity) {
     order.status = OrderStatusType.inactive;
-    return await this.ordersRepository.save(order);
-  }
-
-  async deleteOrder(order: OrderEntity) {
-    this.ordersRepository.delete(order);
+    order.modifieDate = new Date(new Date().toUTCString());
+    return await this.ordersRepository.update(order.id, order);
   }
 }

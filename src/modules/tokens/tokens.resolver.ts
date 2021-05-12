@@ -12,21 +12,21 @@ export class TokensResolver extends BaseResolver(TokenType) {
 
   @Mutation(() => TransactionNode, { name: 'issueNft' })
   async issueNft(
-    @Args('token_name') token_name: string,
-    @Args('token_ticker') token_ticker: string,
+    @Args('tokenName') tokenName: string,
+    @Args('tokenTicker') tokenTicker: string,
   ): Promise<TransactionNode> {
-    return await this.tokensService.issueNft(token_name, token_ticker);
+    return await this.tokensService.issueNft(tokenName, tokenTicker);
   }
 
   @Mutation(() => TransactionNode, { name: 'setRoles' })
   async setRoles(
-    @Args('token_identifier') token_identifier: string,
-    @Args('address_transfer') address_transfer: string,
+    @Args('tokenIdentifier') tokenIdentifier: string,
+    @Args('addressTransfer') addressTransfer: string,
     @Args('role') role: string,
   ): Promise<TransactionNode> {
     return await this.tokensService.setNftRoles(
-      token_identifier,
-      address_transfer,
+      tokenIdentifier,
+      addressTransfer,
       role,
     );
   }

@@ -5,7 +5,7 @@ export class TagEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ name: 'token_identifier' })
   tokenIdentifier: string;
 
   @Column()

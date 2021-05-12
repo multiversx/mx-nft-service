@@ -19,7 +19,6 @@ import { TokensModuleGraph } from './modules/tokens/tokens.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
-import { DbproviderService } from './dbprovider/dbprovider.service';
 import { AuctionsModule } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 
@@ -77,7 +76,6 @@ if (!!process.env.LOG_FILE) {
       useClass: LoggerInterceptor,
     },
     LoggerInterceptor,
-    DbproviderService,
   ],
 })
 export class AppModule {}
