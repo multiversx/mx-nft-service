@@ -11,14 +11,10 @@ import { BaseResolver } from '../nfts/base.resolver';
 import { Account } from '../nfts/dto/account.dto';
 import { Onwer } from '../nfts/dto/onwer.dto';
 import { Asset } from '../nfts/dto/asset.dto';
-import { Attribute } from '../nfts/dto/attributes.dto';
-import CreateNftArgs, {
-  AddTagsArgs,
-  TransferNftArgs,
-} from '../nfts/dto/graphqlArgs';
 import { TransactionNode } from '../nfts/dto/transaction';
 import { AssetsService } from './assets.service';
 import { Tag } from '../nfts/dto/tag.dto';
+import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
@@ -29,18 +25,22 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode, { name: 'createNft' })
-  async createNft(@Args() args: CreateNftArgs): Promise<TransactionNode> {
-    return await this.assetsService.createNft(args);
+  async createNft(
+    @Args('input') input: CreateNftArgs,
+  ): Promise<TransactionNode> {
+    return await this.assetsService.createNft(input);
   }
 
   @Mutation(() => TransactionNode, { name: 'transferNft' })
-  async transferNft(@Args() args: TransferNftArgs): Promise<TransactionNode> {
-    return await this.assetsService.transferNft(args);
+  async transferNft(
+    @Args('input') input: TransferNftArgs,
+  ): Promise<TransactionNode> {
+    return await this.assetsService.transferNft(input);
   }
 
   @Mutation(() => [Tag], { name: 'addTags' })
-  async addTags(@Args() args: AddTagsArgs): Promise<[Tag]> {
-    return await this.assetsService.addTags(args);
+  async addTags(@Args('input') input: AddTagsArgs): Promise<[Tag]> {
+    return await this.assetsService.addTags(input);
   }
 
   @Query(() => [Asset])

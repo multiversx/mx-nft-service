@@ -6,6 +6,7 @@ import { Account } from '../nfts/dto/account.dto';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import { Address } from '@elrondnetwork/erdjs';
 import { Onwer } from '../nfts/dto/onwer.dto';
+import { CreateAccountArgs } from './CreateAccountArgs';
 
 @Injectable()
 export class AccountsService {
@@ -15,16 +16,12 @@ export class AccountsService {
     private elrondProxyService: ElrondProxyService,
   ) {}
 
-  async createAccount(
-    address: string,
-    profileImgUrl: string,
-    herotag: string,
-  ): Promise<Account | any> {
+  async createAccount(args: CreateAccountArgs): Promise<Account | any> {
     return await this.accountsServiceDb.insertAccount(
       new AccountEntity({
-        address: address,
-        profileImgUrl: profileImgUrl,
-        herotag,
+        address: args.address,
+        profileImgUrl: args.profileImgUrl,
+        herotag: args.herotag,
       }),
     );
   }

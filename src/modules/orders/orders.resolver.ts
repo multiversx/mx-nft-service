@@ -9,7 +9,7 @@ import {
 import { BaseResolver } from '../nfts/base.resolver';
 import { Account } from '../nfts/dto/account.dto';
 import { Auction } from '../nfts/dto/auction.dto';
-import { CreateOrderArgs } from '../nfts/dto/graphqlArgs';
+import { CreateOrderArgs } from './models/CreateOrderArgs';
 import { Order } from '../nfts/dto/order.dto';
 import { OrdersService } from './order.service';
 
@@ -20,8 +20,8 @@ export class OrdersResolver extends BaseResolver(Order) {
   }
 
   @Mutation(() => Order, { name: 'createOrder' })
-  async createOrder(@Args() args: CreateOrderArgs): Promise<Order> {
-    return await this.orders.createOrder(args);
+  async createOrder(@Args('input') input: CreateOrderArgs): Promise<Order> {
+    return await this.orders.createOrder(input);
   }
 
   @Query(() => [Order], { name: 'order' })

@@ -10,6 +10,7 @@ import {
 import { AccountsService } from './accounts.service';
 import { Asset } from '../nfts/dto/asset.dto';
 import { AssetsService } from '../assets/assets.service';
+import { CreateAccountArgs } from './CreateAccountArgs';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -20,11 +21,9 @@ export class AccountsResolver {
 
   @Mutation(() => Account)
   async createAccount(
-    @Args('address') address: string,
-    @Args('profileImgUrl') profileImgUrl: string,
-    @Args('herotag') herotag: string,
+    @Args('input') input: CreateAccountArgs,
   ): Promise<Account> {
-    return this.accountsService.createAccount(address, profileImgUrl, herotag);
+    return this.accountsService.createAccount(input);
   }
 
   @Mutation(() => Account)

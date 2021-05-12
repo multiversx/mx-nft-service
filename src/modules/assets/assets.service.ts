@@ -12,11 +12,8 @@ import { TagEntity } from 'src/db/tags/tag.entity';
 import { TagsServiceDb } from 'src/db/tags/tags.service';
 import '../../utils/extentions';
 import { Asset } from '../nfts/dto/asset.dto';
-import CreateNftArgs, {
-  AddTagsArgs,
-  TransferNftArgs,
-} from '../nfts/dto/graphqlArgs';
 import { TransactionNode } from '../nfts/dto/transaction';
+import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
 
 @Injectable()
 export class AssetsService {
