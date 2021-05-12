@@ -6,5 +6,6 @@ import { AuctionsServiceDb } from './auctions.service';
 @Module({
   imports: [TypeOrmModule.forFeature([AuctionEntity])],
   providers: [AuctionsServiceDb],
+  exports: [AuctionsServiceDb]
 })
-export class AuctionsModuleDb {}
+export class AuctionsModuleDb { }

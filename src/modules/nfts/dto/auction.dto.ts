@@ -2,7 +2,7 @@ import { Account } from './account.dto';
 import { Order } from './order.dto';
 import { Asset } from './asset.dto';
 import { Price } from './price.dto';
-import { Args, Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Auction {
@@ -37,26 +37,26 @@ export class Auction {
   orders: Order[];
 }
 
-@ObjectType()
+@InputType()
 export class CreateAuctionArgs {
-  @Field(() => String)
+  @Field(() => String!)
   ownerAddress: string
 
-  @Field(() => String)
+  @Field(() => String!)
   tokenIdentifier: string
 
-  @Field(() => String)
+  @Field(() => String!)
   nonce: string
 
-  @Field(() => String)
+  @Field(() => String!)
   minBid: string
 
-  @Field(() => String)
+  @Field(() => String!)
   maxBid: string
 
-  @Field(() => String)
+  @Field(() => String!)
   deadline: string
 
-  @Field(() => String)
+  @Field(() => String!)
   paymentTokenIdentifier: String
 }

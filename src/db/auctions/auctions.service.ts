@@ -20,7 +20,7 @@ export class AuctionsServiceDb {
     });
   }
 
-  async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+  async insertAuction(auction: AuctionEntity | any): Promise<AuctionEntity> {
     return await this.auctionsRepository.save(auction);
   }
 
