@@ -21,7 +21,7 @@ export class ElrondProxyService {
     return this.proxy;
   }
 
-  async getSmartCntract(): Promise<SmartContract> {
+  async getSmartContract(): Promise<SmartContract> {
     let abiRegistry = await AbiRegistry.load({
       files: ['./src/abis/esdt-nft-marketplace.abi.json'],
     });

@@ -46,8 +46,8 @@ type Attribute {
 }
 
 type Auction {
+  Id: ID!
   asset: Asset!
-  auctionId: ID!
   endDate: DateTime!
   maxBid: Price!
   minBid: Price!
@@ -79,6 +79,14 @@ input CreateOrderArgs {
   priceAmount: String!
   priceNonce: String!
   priceTokenIdentifier: String!
+input CreateAuctionArgs {
+  deadline: String!
+  maxBid: String!
+  minBid: String!
+  nonce: String!
+  ownerAddress: String!
+  paymentTokenIdentifier: String!
+  tokenIdentifier: String!
 }
 
 """
@@ -99,6 +107,7 @@ type Mutation {
   issueNft(input: IssueTokenArgs!): TransactionNode!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
+  createAuction(auctionData: CreateAuctionArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
 }
 

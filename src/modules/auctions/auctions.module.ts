@@ -4,12 +4,15 @@ import { CacheManagerModule } from '../../common/services/cache-manager/cache-ma
 import * as redisStore from 'cache-manager-redis-store';
 import { AuctionsService } from './auctions.service';
 import { AuctionsResolver } from './auctions.resolver';
+import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 
 @Module({
   providers: [AuctionsService, AuctionsResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
+    AuctionsModuleDb,
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,
@@ -20,4 +23,4 @@ import { AuctionsResolver } from './auctions.resolver';
   ],
   exports: [AuctionsService],
 })
-export class AuctionsModuleGraph {}
+export class AuctionsModuleGraph { }
