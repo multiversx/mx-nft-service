@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { CreateOrderArgs } from '../nfts/dto/graphqlArgs';
+import { CreateOrderArgs } from './models/CreateOrderArgs';
 import { Order } from '../nfts/dto/order.dto';
 import { OrdersServiceDb } from 'src/db/orders/orders.service';
 import { OrderEntity } from 'src/db/orders/order.entity';

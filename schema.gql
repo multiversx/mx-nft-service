@@ -14,6 +14,11 @@ type Account {
   profileImgUrl: String
 }
 
+input AddTagsArgs {
+  tags: [String!]!
+  tokenIdentifier: String!
+}
+
 type Asset {
   attributes: [Attribute!]!
   creationDate: DateTime!
@@ -53,19 +58,49 @@ type Auction {
   topBidder: Account!
 }
 
+input CreateAccountArgs {
+  address: String!
+  herotag: String!
+  profileImgUrl: String!
+}
+
+input CreateNftArgs {
+  attributes: String!
+  hash: String!
+  name: String!
+  ownerAddress: String!
+  royalties: String!
+  tokenIdentifier: String!
+  tokenNonce: String!
+  uri: String!
+}
+
+input CreateOrderArgs {
+  auctionId: Float!
+  ownerAddress: String!
+  priceAmount: String!
+  priceNonce: String!
+  priceTokenIdentifier: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+input IssueTokenArgs {
+  tokenName: String!
+  tokenTicker: String!
+}
+
 type Mutation {
-  addTags(tags: [String!]!, tokenIdentifier: String!): [Tag!]!
-  createAccount(address: String!, herotag: String!, profileImgUrl: String!): Account!
-  createNft(attributes: String!, hash: String!, name: String!, ownerAddress: String!, royalties: String!, tokenIdentifier: String!, tokenNonce: String!, uri: String!): TransactionNode!
-  createOrder(auctionId: Float!, ownerAddress: String!, priceAmount: String!, priceNonce: String!, priceTokenIdentifier: String!): Order!
-  issueNft(tokenName: String!, tokenTicker: String!): TransactionNode!
-  setRoles(addressTransfer: String!, role: String!, tokenIdentifier: String!): TransactionNode!
-  transferNft(destinationAddress: String!, ownerAddress: String!, quantity: String!, tokenIdentifier: String!): TransactionNode!
+  addTags(input: AddTagsArgs!): [Tag!]!
+  createAccount(input: CreateAccountArgs!): Account!
+  createNft(input: CreateNftArgs!): TransactionNode!
+  createOrder(input: CreateOrderArgs!): Order!
+  issueNft(input: IssueTokenArgs!): TransactionNode!
+  setRoles(input: SetNftRolesArgs!): TransactionNode!
+  transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
 }
 
@@ -101,6 +136,12 @@ type Query {
   order(orderId: String!): [Order!]!
 }
 
+input SetNftRolesArgs {
+  addressToTransfer: String!
+  role: String!
+  tokenIdentifier: String!
+}
+
 type Tag {
   id: ID!
   tag: String!
@@ -128,4 +169,11 @@ type TransactionNode {
   status: String!
   value: String!
   version: Float!
+}
+
+input TransferNftArgs {
+  destinationAddress: String!
+  ownerAddress: String!
+  quantity: String!
+  tokenIdentifier: String!
 }
