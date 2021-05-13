@@ -29,7 +29,7 @@ export class ElrondProxyService {
 
     let contract = new SmartContract({
       address: new Address(
-        'erd1qqqqqqqqqqqqqpgqw8faqylfxhsx3nvpngkh9sf97gh877ysd8ssererdq',
+        'erd1qqqqqqqqqqqqqpgqg6w343j3zvmtc4dxemcw0xty44rgpn3j62vsccfmkj',
       ),
       abi: abi,
     });

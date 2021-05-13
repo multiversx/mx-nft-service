@@ -34,6 +34,7 @@ export class AssetsService {
           tokenNonce: element.nonce,
           creatorAddress: element.creator,
           ownerAddress: element.owner,
+          attributes: element.attributes,
           lastSale: new Date(),
           creationDate: new Date(),
           hash: element.hash,

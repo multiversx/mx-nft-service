@@ -20,7 +20,7 @@ input AddTagsArgs {
 }
 
 type Asset {
-  attributes: [Attribute!]!
+  attributes: String!
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!
@@ -36,13 +36,6 @@ type Asset {
   tokenId: ID!
   tokenNonce: Float!
   uris: [String!]!
-}
-
-type Attribute {
-  attributeId: String!
-  description: String!
-  key: String!
-  value: String!
 }
 
 type Auction {
@@ -64,6 +57,16 @@ input CreateAccountArgs {
   profileImgUrl: String!
 }
 
+input CreateAuctionArgs {
+  deadline: String!
+  maxBid: String!
+  minBid: String!
+  nonce: String!
+  ownerAddress: String!
+  paymentTokenIdentifier: String!
+  tokenIdentifier: String!
+}
+
 input CreateNftArgs {
   attributes: String!
   name: String!
@@ -79,14 +82,6 @@ input CreateOrderArgs {
   priceAmount: String!
   priceNonce: String!
   priceTokenIdentifier: String!
-input CreateAuctionArgs {
-  deadline: String!
-  maxBid: String!
-  minBid: String!
-  nonce: String!
-  ownerAddress: String!
-  paymentTokenIdentifier: String!
-  tokenIdentifier: String!
 }
 
 """
@@ -101,14 +96,22 @@ input IssueTokenArgs {
 
 type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
+  bid(input: TokenActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
+<<<<<<< HEAD
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
+=======
+  createAuction(auctionData: CreateAuctionArgs!): TransactionNode!
+  createNft(input: CreateNftArgs!): TransactionNode!
+>>>>>>> Add bid, withdraw and endAuction actions
   createOrder(input: CreateOrderArgs!): Order!
+  endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
+  saveAuction(nonce: String!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
-  createAuction(auctionData: CreateAuctionArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
+  withdraw(input: TokenActionArgs!): TransactionNode!
 }
 
 type Onwer {
@@ -153,6 +156,12 @@ type Tag {
   id: ID!
   tag: String!
   tokenId: String!
+}
+
+input TokenActionArgs {
+  ownerAddress: String!
+  tokenIdentifier: String!
+  tokenNonce: String!
 }
 
 type TokenType {

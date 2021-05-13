@@ -28,8 +28,8 @@ export class Asset {
   name!: string;
   @Field()
   royalties: string; //creator percentage
-  @Field(() => [Attribute])
-  attributes: Attribute[] = [];
+  @Field(() => String)
+  attributes: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
   @Field(() => GraphQLISODateTime)
