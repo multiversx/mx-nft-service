@@ -8,10 +8,12 @@ export class AuctionsServiceDb {
   constructor(
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
-  ) { }
+  ) {}
 
-  async getAuctions(): Promise<AuctionEntity[]> {
-    return await this.auctionsRepository.find();
+  async getAuctions(ownerAddress: string): Promise<AuctionEntity[]> {
+    return await this.auctionsRepository.find({
+      where: [{ ownerAddress: ownerAddress }],
+    });
   }
 
   async getAuction(id: number): Promise<AuctionEntity[]> {

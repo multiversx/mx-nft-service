@@ -9,9 +9,12 @@ export class Auction {
   @Field(() => ID)
   Id: string;
 
-  @Field(() => String)
+  ownerAddress: string;
+
+  @Field(() => Account)
   owner: Account;
 
+  tokenIdentifier: string;
   @Field(() => Asset)
   asset: Asset;
 
@@ -35,28 +38,32 @@ export class Auction {
 
   @Field(() => [Order])
   orders: Order[];
+
+  constructor(init?: Partial<Auction>) {
+    Object.assign(this, init);
+  }
 }
 
 @InputType()
 export class CreateAuctionArgs {
   @Field(() => String!)
-  ownerAddress: string
+  ownerAddress: string;
 
   @Field(() => String!)
-  tokenIdentifier: string
+  tokenIdentifier: string;
 
   @Field(() => String!)
-  nonce: string
+  nonce: string;
 
   @Field(() => String!)
-  minBid: string
+  minBid: string;
 
   @Field(() => String!)
-  maxBid: string
+  maxBid: string;
 
   @Field(() => String!)
-  deadline: string
+  deadline: string;
 
   @Field(() => String!)
-  paymentTokenIdentifier: String
+  paymentTokenIdentifier: String;
 }

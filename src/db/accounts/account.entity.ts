@@ -1,5 +1,4 @@
 import { OrderEntity } from 'src/db/orders/order.entity';
-import { AuctionEntity } from '../auctions/auction.entity';
 import { FollowerEntity } from '../followers/follower.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -25,9 +24,6 @@ export class AccountEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];
-
-  @OneToMany((type) => AuctionEntity, (auction) => auction.owner)
-  auctions: AuctionEntity[];
 
   @OneToMany(() => FollowerEntity, (f) => f.follower)
   followers: FollowerEntity[];

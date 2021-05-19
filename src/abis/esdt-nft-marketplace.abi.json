@@ -253,6 +253,19 @@
     }
   ],
   "types": {
+    "EsdtToken": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    },
     "Auction": {
       "type": "struct",
       "fields": [
@@ -291,19 +304,6 @@
         {
           "name": "creator_royalties_percentage",
           "type": "BigUint"
-        }
-      ]
-    },
-    "EsdtToken": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nonce",
-          "type": "u64"
         }
       ]
     }

@@ -1,11 +1,11 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { AuctionsService } from './auctions.service';
 import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
+import { AccountsModuleGraph } from '../accounts/accounts.module';
 
 @Module({
   providers: [AuctionsService, AuctionsResolver],
@@ -13,6 +13,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
     ElrondCommunicationModule,
     CacheManagerModule,
     AuctionsModuleDb,
+    forwardRef(() => AccountsModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,
@@ -23,4 +24,4 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
   ],
   exports: [AuctionsService],
 })
-export class AuctionsModuleGraph { }
+export class AuctionsModuleGraph {}

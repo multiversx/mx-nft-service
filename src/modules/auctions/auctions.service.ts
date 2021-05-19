@@ -20,6 +20,8 @@ import {
 } from '@elrondnetwork/erdjs';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { TokenActionArgs } from './tokenActionArgs';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { AuctionAbi } from './AuctionAbi';
 
 @Injectable()
 export class AuctionsService {
@@ -29,7 +31,7 @@ export class AuctionsService {
   ) {}
 
   marketPlaceAddress =
-    'erd1qqqqqqqqqqqqqpgqg6w343j3zvmtc4dxemcw0xty44rgpn3j62vsccfmkj';
+    'erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg';
 
   async createAuction(args: CreateAuctionArgs): Promise<TransactionNode> {
     const contract = this.getSmartContract(args.ownerAddress);
@@ -47,7 +49,7 @@ export class AuctionsService {
         new U64Value(new BigNumber(args.deadline)),
         new TokenIdentifierValue(Buffer.from(args.paymentTokenIdentifier)),
       ],
-      gasLimit: new GasLimit(100000000),
+      gasLimit: new GasLimit(1499999999),
     });
     return createAuctionTx.toPlainObject();
   }
@@ -59,9 +61,9 @@ export class AuctionsService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8('EGLD'),
         new U64Value(new BigNumber(1)),
-        new U64Value(new BigNumber(1)),
+        new U64Value(new BigNumber(2)),
         new AddressValue(new Address(this.marketPlaceAddress)),
         BytesValue.fromUTF8('bid'),
         BytesValue.fromUTF8(args.tokenIdentifier),
@@ -109,11 +111,28 @@ export class AuctionsService {
 
   async saveAuction(tokenId: string, nonce: string): Promise<Auction | any> {
     const auctionData = await this.getAuctionQuery(tokenId, nonce);
-    console.log(1, auctionData);
-    return await this.auctionServiceDb.insertAuction(auctionData);
+    const savedAuction = await this.auctionServiceDb.insertAuction(
+      new AuctionEntity({
+        tokenIdentifier: tokenId,
+        paymentTokenIdentifier: auctionData.payment_token.token_type
+          .valueOf()
+          .toString(),
+        paymentNonce: auctionData.payment_token.nonce.valueOf().toString(),
+        ownerAddress: auctionData.original_owner.valueOf().toString(),
+        minBid: auctionData.min_bid.valueOf().toString(),
+        maxBid: auctionData.max_bid.valueOf().toString(),
+        creationDate: new Date(new Date().toUTCString()),
+        startDate: new Date(new Date().toUTCString()),
+        endDate: new Date(
+          parseInt(auctionData.deadline.valueOf().toString()) * 1000,
+        ),
+      }),
+    );
+    console.log('savedAuction', savedAuction);
+    return savedAuction;
   }
 
-  async getAuctionQuery(tokenId: string, nonce: string): Promise<TypedValue> {
+  async getAuctionQuery(tokenId: string, nonce: string): Promise<AuctionAbi> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getFullAuctionData([
@@ -125,12 +144,61 @@ export class AuctionsService {
       this.elrondProxyService.getService(),
       getDataQuery.buildQuery(),
     );
-    console.log(1, getDataQuery.buildQuery());
-
-    console.log(2, data);
     let result = getDataQuery.interpretQueryResponse(data);
 
-    console.log(3, result);
+    const auction: AuctionAbi = result.firstValue.valueOf();
+    return auction;
+  }
+
+  async getOriginalOwner(tokenId: string, nonce: string): Promise<TypedValue> {
+    const contract = await this.elrondProxyService.getSmartContract();
+    let getDataQuery = <Interaction>(
+      contract.methods.getOriginalOwner([
+        new TokenIdentifierValue(Buffer.from(tokenId)),
+        new U64Value(new BigNumber(1)),
+      ])
+    );
+    let data = await contract.runQuery(
+      this.elrondProxyService.getService(),
+      getDataQuery.buildQuery(),
+    );
+
+    let result = getDataQuery.interpretQueryResponse(data);
+    return result.firstValue.valueOf();
+  }
+
+  async getDeadline(tokenId: string, nonce: string): Promise<TypedValue> {
+    const contract = await this.elrondProxyService.getSmartContract();
+    let getDataQuery = <Interaction>(
+      contract.methods.getDeadline([
+        new TokenIdentifierValue(Buffer.from(tokenId)),
+        new U64Value(new BigNumber(1)),
+      ])
+    );
+    let data = await contract.runQuery(
+      this.elrondProxyService.getService(),
+      getDataQuery.buildQuery(),
+    );
+
+    let result = getDataQuery.interpretQueryResponse(data);
+
+    return result.firstValue.valueOf();
+  }
+
+  async getMin(tokenId: string, nonce: string): Promise<TypedValue> {
+    const contract = await this.elrondProxyService.getSmartContract();
+    let getDataQuery = <Interaction>(
+      contract.methods.getMinMaxBid([
+        new TokenIdentifierValue(Buffer.from(tokenId)),
+        new U64Value(new BigNumber(1)),
+      ])
+    );
+    let data = await contract.runQuery(
+      this.elrondProxyService.getService(),
+      getDataQuery.buildQuery(),
+    );
+
+    let result = getDataQuery.interpretQueryResponse(data);
     return result.firstValue.valueOf();
   }
 
@@ -143,26 +211,18 @@ export class AuctionsService {
       this.elrondProxyService.getService(),
       getDataQuery.buildQuery(),
     );
-    console.log(1, getDataQuery.buildQuery());
-
-    console.log(2, data);
     let result = getDataQuery.interpretQueryResponse(data);
 
-    console.log(3, result);
     return result.firstValue.valueOf();
   }
 
-  async getAuctions(address?: string): Promise<Account | any> {
-    var account = this.elrondProxyService
-      .getService()
-      .getAccount(new Address(address));
+  async getAuctions(address?: string): Promise<Auction | any> {
+    var account = this.auctionServiceDb.getAuctions(address);
     return account;
   }
 
   async getAuction(address: string): Promise<Account | any> {
-    var account = this.elrondProxyService
-      .getService()
-      .getAccount(new Address(address));
+    var account = this.auctionServiceDb.getAuctions(address);
     return account;
   }
 }

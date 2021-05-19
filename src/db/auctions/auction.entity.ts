@@ -9,6 +9,12 @@ export class AuctionEntity {
   @Column({ name: 'token_identifier', length: 20 })
   tokenIdentifier: string;
 
+  @Column({ name: 'payment_token_identifier', length: 20 })
+  paymentTokenIdentifier: string;
+
+  @Column({ name: 'payment_nonce', length: 20 })
+  paymentNonce: string;
+
   @Column({ name: 'owner_address', length: 62 })
   ownerAddress: string;
 
@@ -27,6 +33,7 @@ export class AuctionEntity {
   @Column({ name: 'end_date' })
   endDate: Date;
 
-  @ManyToOne(() => AccountEntity, (account) => account.orders)
-  owner: AccountEntity;
+  constructor(init?: Partial<AuctionEntity>) {
+    Object.assign(this, init);
+  }
 }

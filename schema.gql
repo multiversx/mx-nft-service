@@ -136,13 +136,13 @@ type Price {
 }
 
 type Query {
-  auctions(auctionId: String!): [Auction!]!
   findAllAsset: [Asset!]!
   findAllAuction: [Auction!]!
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
   getAccount(address: String, id: Float): Account!
   getAssetsForUser(address: String!): [Asset!]!
+  getAuctions(ownerAddress: String!): [Auction!]!
   order(orderId: String!): [Order!]!
 }
 

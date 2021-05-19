@@ -14,18 +14,22 @@ import { Auction, CreateAuctionArgs } from '../nfts/dto/auction.dto';
 import { Order } from '../nfts/dto/order.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
 import { TokenActionArgs } from './tokenActionArgs';
+import { AccountsService } from '../accounts/accounts.service';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
-  constructor(private auctionsService: AuctionsService) {
+  constructor(
+    private auctionsService: AuctionsService,
+    private accountsService: AccountsService,
+  ) {
     super();
   }
 
   @Mutation(() => TransactionNode)
   async createAuction(
-    @Args('auctionData') auctionData: CreateAuctionArgs,
+    @Args('auctionData') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
-    return await this.auctionsService.createAuction(auctionData);
+    return await this.auctionsService.createAuction(input);
   }
 
   @Mutation(() => TransactionNode)
@@ -55,22 +59,20 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return await this.auctionsService.saveAuction(tokenId, nonce);
   }
 
-  @Query(() => [Auction], { name: 'auctions' })
-  async getAuctions(
-    @Args('auctionId', { type: () => String }) address: string,
-  ) {
-    return {};
+  @Query(() => [Auction])
+  async getAuctions(@Args('ownerAddress') address: string) {
+    return await this.auctionsService.getAuctions(address);
   }
 
   @ResolveField('owner', () => Account)
-  async creator(@Parent() auction: Auction) {
-    const { owner } = auction;
-    return {};
+  async owner(@Parent() auction: Auction) {
+    const { ownerAddress } = auction;
+    return await this.accountsService.getAccountByAddress(ownerAddress);
   }
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { asset } = auction;
+    const { tokenIdentifier } = auction;
     return {};
   }
 
