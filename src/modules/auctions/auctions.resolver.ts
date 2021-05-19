@@ -15,12 +15,15 @@ import { Order } from '../nfts/dto/order.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
 import { TokenActionArgs } from './tokenActionArgs';
 import { AccountsService } from '../accounts/accounts.service';
+import { AssetsService } from '../assets/assets.service';
+import { elrondConfig } from 'src/config';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
     private accountsService: AccountsService,
+    private assetsService: AssetsService,
   ) {
     super();
   }
@@ -73,7 +76,10 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { tokenIdentifier } = auction;
-    return {};
+    return await this.assetsService.getAssetByTokenIdentifier(
+      tokenIdentifier,
+      elrondConfig.nftMarketplaceAddress,
+    );
   }
 
   @ResolveField('topBidder', () => Account)

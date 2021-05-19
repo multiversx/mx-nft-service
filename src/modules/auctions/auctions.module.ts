@@ -6,6 +6,7 @@ import { AuctionsService } from './auctions.service';
 import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
+import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
   providers: [AuctionsService, AuctionsResolver],
@@ -14,6 +15,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
     CacheManagerModule,
     AuctionsModuleDb,
     forwardRef(() => AccountsModuleGraph),
+    forwardRef(() => AssetsModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,

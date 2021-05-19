@@ -28,9 +28,7 @@ export class ElrondProxyService {
     let abi = new SmartContractAbi(abiRegistry, ['EsdtNftMarketplace']);
 
     let contract = new SmartContract({
-      address: new Address(
-        'erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg',
-      ),
+      address: new Address(elrondConfig.nftMarketplaceAddress),
       abi: abi,
     });
     return contract;

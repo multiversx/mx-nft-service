@@ -22,6 +22,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { TokenActionArgs } from './tokenActionArgs';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AuctionAbi } from './AuctionAbi';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class AuctionsService {
@@ -29,9 +30,6 @@ export class AuctionsService {
     private elrondProxyService: ElrondProxyService,
     private auctionServiceDb: AuctionsServiceDb,
   ) {}
-
-  marketPlaceAddress =
-    'erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg';
 
   async createAuction(args: CreateAuctionArgs): Promise<TransactionNode> {
     const contract = this.getSmartContract(args.ownerAddress);
@@ -42,7 +40,7 @@ export class AuctionsService {
         BytesValue.fromUTF8(args.tokenIdentifier),
         new U64Value(new BigNumber(1)),
         new U64Value(new BigNumber(1)),
-        new AddressValue(new Address(this.marketPlaceAddress)),
+        new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
         BytesValue.fromUTF8('auctionToken'),
         new BigUIntValue(new BigNumber(args.minBid)),
         new BigUIntValue(new BigNumber(args.maxBid)),
@@ -55,17 +53,11 @@ export class AuctionsService {
   }
 
   async bid(args: TokenActionArgs): Promise<TransactionNode> {
-    const contract = this.getSmartContract(args.ownerAddress);
-
+    const contract = this.getSmartContract(elrondConfig.nftMarketplaceAddress);
     let bid = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      value: Balance.egld(0),
+      func: new ContractFunction('bid'),
+      value: Balance.egld(0.000000000000000002),
       args: [
-        BytesValue.fromUTF8('EGLD'),
-        new U64Value(new BigNumber(1)),
-        new U64Value(new BigNumber(2)),
-        new AddressValue(new Address(this.marketPlaceAddress)),
-        BytesValue.fromUTF8('bid'),
         BytesValue.fromUTF8(args.tokenIdentifier),
         new U64Value(new BigNumber(args.tokenNonce)),
       ],

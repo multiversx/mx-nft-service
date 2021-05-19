@@ -47,6 +47,17 @@ export class AssetsService {
     return assets;
   }
 
+  async getAssetByTokenIdentifier(
+    onwerAddress: string,
+    tokenIdentifier: string,
+  ): Promise<Asset | any> {
+    const assets = await this.getAssetsForUser(onwerAddress);
+    const asset = assets.find(
+      (asset: { tokenId: string }) => asset.tokenId === tokenIdentifier,
+    );
+    return asset;
+  }
+
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
     const fileData = await this.fileService.uploadFile(createAssetArgs.file)
 
