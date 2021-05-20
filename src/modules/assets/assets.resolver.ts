@@ -15,7 +15,9 @@ import { TransactionNode } from '../nfts/dto/transaction';
 import { AssetsService } from './assets.service';
 import { Tag } from '../nfts/dto/tag.dto';
 import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
-import { FileUpload, GraphQLUpload } from 'graphql-upload';
+import { FileUpload } from 'graphql-upload';
+import { GraphQLUpload } from 'apollo-server-express'; // notice this is not imported from graphql-upload
+
 import { createWriteStream } from 'fs';
 
 @Resolver(() => Asset)
@@ -47,23 +49,24 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => String)
-  async uploadImage(@Args({ name: 'file', type: () => GraphQLUpload }) file): Promise<String> {
-    console.log(file)
-    return await this.assetsService.getFileData(file)
+  async uploadImage(
+    @Args({ name: 'file', type: () => GraphQLUpload }) file,
+  ): Promise<String> {
+    console.log(file);
+    return await this.assetsService.getFileData(file);
   }
 
   @Mutation(() => Boolean)
-  async uploadFile(@Args({ name: 'file', type: () => GraphQLUpload })
-  {
-    createReadStream,
-    filename
-  }: FileUpload): Promise<boolean> {
-    console.log(filename)
+  async uploadFile(
+    @Args({ name: 'file', type: () => GraphQLUpload })
+    { createReadStream, filename }: FileUpload,
+  ): Promise<boolean> {
+    console.log(filename);
     return new Promise(async (resolve, reject) =>
       createReadStream()
-        .pipe(createWriteStream(`./uploads/${filename}`))
+        .pipe(createWriteStream(`${filename}`))
         .on('finish', () => resolve(true))
-        .on('error', () => reject(false))
+        .on('error', (err) => reject(err)),
     );
   }
 

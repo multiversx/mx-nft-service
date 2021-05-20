@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { GraphQLUpload } from 'graphql-upload';
+import { GraphQLUpload } from 'apollo-server-express';
 
 @InputType()
 export class CreateNftArgs {
