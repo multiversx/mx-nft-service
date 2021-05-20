@@ -25,7 +25,7 @@
     "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
-    "@elrondnetwork/erdjs": "4.1.0",
+    "@elrondnetwork/erdjs": "5.0.0",
     "@nestjs-query/query-graphql": "^0.25.1",
     "@nestjs/common": "^7.6.15",
     "@nestjs/config": "^0.6.3",

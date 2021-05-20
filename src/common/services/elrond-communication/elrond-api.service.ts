@@ -8,7 +8,7 @@ import { ErdTokenType } from './models/enums/erd-token-types';
 export class ElrondApiService {
   private proxy: ApiProvider;
   constructor() {
-    this.proxy = new ApiProvider(elrondConfig.elrondApi, 10000);
+    this.proxy = new ApiProvider(elrondConfig.elrondApi, 20000);
   }
 
   getService(): ApiProvider {

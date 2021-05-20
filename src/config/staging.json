@@ -5,5 +5,14 @@
     "gateway": "https://devnet-gateway.elrond.com",
     "explorer": "https://devnet-explorer.elrond.com",
     "chainID": "D"
+  },
+
+  "gas": {
+    "nftCreate": 60000000,
+    "nftTransfer": 60000000,
+    "startAuction": 60000000,
+    "endAuction": 60000000,
+    "bid": 60000000,
+    "withdraw": 60000000
   }
 }

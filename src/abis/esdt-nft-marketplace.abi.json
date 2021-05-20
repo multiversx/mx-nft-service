@@ -1,5 +1,14 @@
 {
   "name": "EsdtNftMarketplace",
+  "constructor": {
+    "inputs": [
+      {
+        "name": "bid_cut_percentage",
+        "type": "u64"
+      }
+    ],
+    "outputs": []
+  },
   "endpoints": [
     {
       "name": "setCutPercentage",
@@ -69,6 +78,20 @@
       "outputs": []
     },
     {
+      "name": "withdraw",
+      "inputs": [
+        {
+          "name": "nft_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nft_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
       "name": "isAlreadyUpForAuction",
       "inputs": [
         {
@@ -100,7 +123,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<EsdtToken>"
+          "type": "optional<MultiArg<TokenIdentifier,u64>>",
+          "multi_result": true
         }
       ]
     },
@@ -118,7 +142,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<tuple2<BigUint,BigUint>>"
+          "type": "optional<multi<BigUint,BigUint>>",
+          "multi_result": true
         }
       ]
     },
@@ -136,7 +161,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<u64>"
+          "type": "optional<u64>",
+          "multi_result": true
         }
       ]
     },
@@ -154,7 +180,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<Address>"
+          "type": "optional<Address>",
+          "multi_result": true
         }
       ]
     },
@@ -172,7 +199,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<BigUint>"
+          "type": "optional<BigUint>",
+          "multi_result": true
         }
       ]
     },
@@ -190,7 +218,8 @@
       ],
       "outputs": [
         {
-          "type": "Option<Address>"
+          "type": "optional<Address>",
+          "multi_result": true
         }
       ]
     },
@@ -208,12 +237,35 @@
       ],
       "outputs": [
         {
-          "type": "Option<Auction>"
+          "type": "optional<Auction>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getMarketplaceCutPercentage",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
         }
       ]
     }
   ],
   "types": {
+    "EsdtToken": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    },
     "Auction": {
       "type": "struct",
       "fields": [
@@ -244,19 +296,14 @@
         {
           "name": "current_winner",
           "type": "Address"
-        }
-      ]
-    },
-    "EsdtToken": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_type",
-          "type": "TokenIdentifier"
         },
         {
-          "name": "nonce",
-          "type": "u64"
+          "name": "marketplace_cut_percentage",
+          "type": "BigUint"
+        },
+        {
+          "name": "creator_royalties_percentage",
+          "type": "BigUint"
         }
       ]
     }

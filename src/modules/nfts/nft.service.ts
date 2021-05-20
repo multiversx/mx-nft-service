@@ -24,14 +24,14 @@ export class NftService {
   constructor(
     private cacheManagerService: CacheManagerService,
     private elrondProxyService: ElrondProxyService,
-  ) {}
+  ) { }
 
   async getAssetsForUser(): Promise<Asset[] | any> {
     return new Array<Asset>();
   }
   //view
   async isUpForAction(): Promise<boolean> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let isUpForAuction = <Interaction>(
       contract.methods
         .isAlreadyUpForAuction([
@@ -51,7 +51,7 @@ export class NftService {
 
   //view
   async getPaymentTokenForAuctionedNft(): Promise<boolean> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getPaymentTokenForAuctionedNft = <Interaction>(
       contract.methods
         .getPaymentTokenForAuctionedNft([
@@ -73,7 +73,7 @@ export class NftService {
 
   //view
   async getMinMaxBid(): Promise<boolean> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getMinMaxBid = <Interaction>(
       contract.methods
         .getMinMaxBid([
@@ -93,7 +93,7 @@ export class NftService {
 
   //view
   async getDeadline(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getDeadline = <Interaction>(
       contract.methods
         .getDeadline([
@@ -113,7 +113,7 @@ export class NftService {
 
   //view
   async getOriginalOwner(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getOriginalOwner = <Interaction>(
       contract.methods
         .getOriginalOwner([
@@ -133,7 +133,7 @@ export class NftService {
 
   //view
   async getCurrentWinningBid(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getCurrentWinningBid = <Interaction>(
       contract.methods
         .getCurrentWinningBid([
@@ -153,7 +153,7 @@ export class NftService {
 
   //view
   async getCurrentWinner(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getCurrentWinner = <Interaction>(
       contract.methods
         .getCurrentWinner([
@@ -173,7 +173,7 @@ export class NftService {
 
   //view
   async getFullAuctionData(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let getFullAuctionData = <Interaction>(
       contract.methods
         .getFullAuctionData([
@@ -192,7 +192,7 @@ export class NftService {
   }
 
   async actionToken(): Promise<TransactionOnNetwork> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let auctionToken = <Interaction>contract.methods
       .auctionToken([
         new BigUIntValue(new BigNumber(0.1)),
@@ -233,7 +233,7 @@ export class NftService {
   }
 
   async endAuction(): Promise<TransactionOnNetwork> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let endAuction = <Interaction>(
       contract.methods
         .endAuction([
@@ -249,12 +249,12 @@ export class NftService {
       value: query.value,
       gasLimit: new GasLimit(5000000),
     });
-
+    
     return response.toPlainObject();
   }
 
   async setCutPercentage(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let setCutPercentage = <Interaction>(
       contract.methods
         .setCutPercentage([new U64Value(new BigNumber(10))])
@@ -271,7 +271,7 @@ export class NftService {
   }
 
   async bid(): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getSmartCntract();
+    const contract = await this.elrondProxyService.getSmartContract();
     let bid = <Interaction>(
       contract.methods
         .bid([

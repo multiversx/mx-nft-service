@@ -20,7 +20,7 @@ input AddTagsArgs {
 }
 
 type Asset {
-  attributes: [Attribute!]!
+  attributes: String!
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!
@@ -38,16 +38,9 @@ type Asset {
   uris: [String!]!
 }
 
-type Attribute {
-  attributeId: String!
-  description: String!
-  key: String!
-  value: String!
-}
-
 type Auction {
+  Id: ID!
   asset: Asset!
-  auctionId: ID!
   endDate: DateTime!
   maxBid: Price!
   minBid: Price!
@@ -58,10 +51,26 @@ type Auction {
   topBidder: Account!
 }
 
+input BidActionArgs {
+  price: String!
+  tokenIdentifier: String!
+  tokenNonce: String!
+}
+
 input CreateAccountArgs {
   address: String!
   herotag: String!
   profileImgUrl: String!
+}
+
+input CreateAuctionArgs {
+  deadline: String!
+  maxBid: String!
+  minBid: String!
+  nonce: String!
+  ownerAddress: String!
+  paymentTokenIdentifier: String!
+  tokenIdentifier: String!
 }
 
 input CreateNftArgs {
@@ -93,13 +102,18 @@ input IssueTokenArgs {
 
 type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
+  bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
+  createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
+  endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
+  saveAuction(nonce: String!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
+  withdraw(input: TokenActionArgs!): TransactionNode!
 }
 
 type Onwer {
@@ -124,13 +138,13 @@ type Price {
 }
 
 type Query {
-  auctions(auctionId: String!): [Auction!]!
   findAllAsset: [Asset!]!
   findAllAuction: [Auction!]!
   findAllOrder: [Order!]!
   findAllTokenType: [TokenType!]!
   getAccount(address: String, id: Float): Account!
   getAssetsForUser(address: String!): [Asset!]!
+  getAuctions(ownerAddress: String!): [Auction!]!
   order(orderId: String!): [Order!]!
 }
 
@@ -144,6 +158,11 @@ type Tag {
   id: ID!
   tag: String!
   tokenId: String!
+}
+
+input TokenActionArgs {
+  tokenIdentifier: String!
+  tokenNonce: String!
 }
 
 type TokenType {

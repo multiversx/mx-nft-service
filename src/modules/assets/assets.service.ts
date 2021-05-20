@@ -34,6 +34,7 @@ export class AssetsService {
           tokenNonce: element.nonce,
           creatorAddress: element.creator,
           ownerAddress: element.owner,
+          attributes: element.attributes,
           lastSale: new Date(),
           creationDate: new Date(),
           hash: element.hash,
@@ -44,6 +45,17 @@ export class AssetsService {
       );
     });
     return assets;
+  }
+
+  async getAssetByTokenIdentifier(
+    onwerAddress: string,
+    tokenIdentifier: string,
+  ): Promise<Asset | any> {
+    const assets = await this.getAssetsForUser(onwerAddress);
+    const asset = assets.find(
+      (asset: { tokenId: string }) => asset.tokenId === tokenIdentifier,
+    );
+    return asset;
   }
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
