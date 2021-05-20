@@ -33,7 +33,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => TransactionNode)
   async createAuction(
-    @Args('auctionData') input: CreateAuctionArgs,
+    @Args('input') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.createAuction(input);
   }
