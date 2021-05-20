@@ -48,7 +48,7 @@ export class AssetsService {
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
     const fileData = await this.fileService.uploadFile(createAssetArgs.file)
-    console.log(fileData)
+
     const contract = new SmartContract({
       address: new Address(createAssetArgs.ownerAddress),
     });

@@ -21,7 +21,6 @@ export class FileService {
       protocol: fileStorage.protocol
     })
     const payload = await ipfs.add(fileType)
-    console.log(payload)
     const { path } = payload
     const url = `${fileStorage.cdnUrl}${path}`
 
