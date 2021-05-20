@@ -100,7 +100,6 @@ type Mutation {
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
-  uploadImage(file: Upload!): String!
 }
 
 type Onwer {
