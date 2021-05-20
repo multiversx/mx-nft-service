@@ -21,7 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "migrate": "typeorm migration:generate -n",
-    "run-migrations": "typeorm migration:run"
+    "run-migrations": "typeorm migration:run",
+    "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
     "@elrondnetwork/erdjs": "4.1.0",
@@ -48,7 +49,9 @@
     "errorhandler": "^1.5.1",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.4",
+    "graphql-upload": "^12.0.0",
     "helmet": "^4.4.1",
+    "ipfs": "^0.55.1",
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "nest-winston": "^1.4.0",
@@ -98,5 +101,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "resolutions": {
+    "fs-capacitor": "^6.2.0",
+    "graphql-upload": "^11.0.0"
   }
 }

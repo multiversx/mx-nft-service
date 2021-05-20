@@ -4,5 +4,11 @@
     "elrondApi": "https://testnet-api.elrond.com",
     "gateway": "https://testnet-gateway.elrond.com",
     "explorer": "https://testnet-explorer.elrond.com"
+  },
+  "fileStorage": {
+    "host": "ipfs.infura.io",
+    "port": "5001",
+    "protocol": "https",
+    "cdnUrl": "https://ipfs.io/ipfs/"
   }
 }

@@ -10,5 +10,11 @@
     "getAllContractAddresses": 600,
     "networkStatus": 60,
     "networkConfig": 43200
+  },
+  "fileStorage": {
+    "host": "ipfs.infura.io",
+    "port": "5001",
+    "protocol": "https",
+    "cdnUrl": "https://ipfs.io/ipfs/"
   }
 }

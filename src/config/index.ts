@@ -13,3 +13,6 @@ export const elrondConfig = config.get('elrond');
  * The values are in seconds
  */
 export const cacheConfig: CachingConfig = config.get('caching');
+
+
+export const fileStorage = config.get('fileStorage')

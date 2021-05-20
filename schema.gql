@@ -66,13 +66,11 @@ input CreateAccountArgs {
 
 input CreateNftArgs {
   attributes: String!
-  hash: String!
   name: String!
   ownerAddress: String!
   royalties: String!
   tokenIdentifier: String!
   tokenNonce: String!
-  uri: String!
 }
 
 input CreateOrderArgs {
@@ -96,7 +94,7 @@ input IssueTokenArgs {
 type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
   createAccount(input: CreateAccountArgs!): Account!
-  createNft(input: CreateNftArgs!): TransactionNode!
+  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
@@ -177,3 +175,6 @@ input TransferNftArgs {
   quantity: String!
   tokenIdentifier: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

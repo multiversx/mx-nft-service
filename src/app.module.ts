@@ -21,6 +21,7 @@ import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { AuctionsModule } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
+import { FileModule } from './modules/files/file.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -57,6 +58,10 @@ if (!!process.env.LOG_FILE) {
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
       playground: true,
+      uploads: {
+        maxFileSize: 100000000,
+        maxFiles: 5,
+      }
     }),
     ScheduleModule.forRoot(),
     ConfigModule,
@@ -69,6 +74,7 @@ if (!!process.env.LOG_FILE) {
     ServicesModule,
     AuctionsModule,
     AccountsModuleDb,
+    FileModule
   ],
   providers: [
     {
@@ -78,4 +84,4 @@ if (!!process.env.LOG_FILE) {
     LoggerInterceptor,
   ],
 })
-export class AppModule {}
+export class AppModule { }

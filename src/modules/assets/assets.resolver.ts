@@ -15,6 +15,9 @@ import { TransactionNode } from '../nfts/dto/transaction';
 import { AssetsService } from './assets.service';
 import { Tag } from '../nfts/dto/tag.dto';
 import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
+import { GraphQLUpload } from 'apollo-server-express';
+import { FileUpload } from 'graphql-upload';
+
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
@@ -27,7 +30,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode, { name: 'createNft' })
   async createNft(
     @Args('input') input: CreateNftArgs,
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload
   ): Promise<TransactionNode> {
+    input.file = file
     return await this.assetsService.createNft(input);
   }
 
