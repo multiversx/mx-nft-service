@@ -66,14 +66,11 @@ input CreateAccountArgs {
 
 input CreateNftArgs {
   attributes: String!
-  file: Upload!
-  hash: String!
   name: String!
   ownerAddress: String!
   royalties: String!
   tokenIdentifier: String!
   tokenNonce: String!
-  uri: String!
 }
 
 input CreateOrderArgs {
@@ -97,13 +94,12 @@ input IssueTokenArgs {
 type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
   createAccount(input: CreateAccountArgs!): Account!
-  createNft(input: CreateNftArgs!): TransactionNode!
+  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
-  uploadFile(file: Upload!): Boolean!
   uploadImage(file: Upload!): String!
 }
 

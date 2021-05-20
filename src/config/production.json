@@ -8,5 +8,11 @@
     "chainId": "1",
     "version": 1,
     "metaChainShardId": 4294967295
+  },
+  "fileStorage": {
+    "host": "ipfs.infura.io",
+    "port": "5001",
+    "protocol": "https",
+    "cdnUrl": "https://ipfs.io/ipfs/"
   }
 }

@@ -6,7 +6,7 @@ import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { TagsModuleDb } from 'src/db/tags/tags.module';
-import { FileModule } from '../nfts/file.module';
+import { FileModule } from '../files/file.module';
 
 @Module({
   providers: [AssetsService, AssetsResolver],

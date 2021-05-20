@@ -21,7 +21,7 @@ import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { AuctionsModule } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
-import { FileModule } from './modules/nfts/file.module';
+import { FileModule } from './modules/files/file.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
