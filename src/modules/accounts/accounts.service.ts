@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { AccountEntity } from 'src/db/accounts/account.entity';
 import { AccountsServiceDb } from '../../db/accounts/accounts.service';
 import { FollowersServiceDb } from '../../db/followers/followers.service';
-import { Account } from '../nfts/dto/account.dto';
+import { Account } from './models/account.dto';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import { Address } from '@elrondnetwork/erdjs';
-import { Onwer } from '../nfts/dto/onwer.dto';
+import { Onwer } from '../assets/models';
 import { CreateAccountArgs } from './CreateAccountArgs';
 
 @Injectable()

@@ -2,3 +2,8 @@ export * from './AddTagsArgs';
 export * from './CreateNftArgs';
 export * from './TransferNftArgs';
 export * from './CreateAssetArgs';
+export * from './Asset.dto';
+export * from './Attributes.dto';
+export * from './Onwer.dto';
+export * from './Price.dto';
+export * from './Tag.dto';

@@ -11,18 +11,18 @@ import { ElrondApiService } from 'src/common/services/elrond-communication/elron
 import { TagEntity } from 'src/db/tags/tag.entity';
 import { TagsServiceDb } from 'src/db/tags/tags.service';
 import '../../utils/extentions';
-import { Asset } from '../nfts/dto/asset.dto';
-import { TransactionNode } from '../nfts/dto/transaction';
 import { FileService } from '../files/file.service';
+import { TransactionNode } from '../transaction';
 import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
+import { Asset } from './models';
 
 @Injectable()
 export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private tagsServiceDb: TagsServiceDb,
-    private fileService: FileService
-  ) { }
+    private fileService: FileService,
+  ) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
@@ -59,7 +59,7 @@ export class AssetsService {
   }
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
-    const fileData = await this.fileService.uploadFile(createAssetArgs.file)
+    const fileData = await this.fileService.uploadFile(createAssetArgs.file);
 
     const contract = new SmartContract({
       address: new Address(createAssetArgs.ownerAddress),

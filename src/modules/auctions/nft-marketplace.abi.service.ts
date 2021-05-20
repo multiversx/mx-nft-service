@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { TransactionNode } from '../nfts/dto/transaction';
-import { Auction, CreateAuctionArgs } from '../nfts/dto/auction.dto';
+import {
+  CreateAuctionArgs,
+  TokenActionArgs,
+  AuctionAbi,
+  BidActionArgs,
+} from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -18,10 +22,8 @@ import {
   TypedValue,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { TokenActionArgs } from './TokenActionArgs';
-import { AuctionAbi } from './AuctionAbi';
 import { elrondConfig, gas } from 'src/config';
-import { BidActionArgs } from './BidActionArgs';
+import { TransactionNode } from '../transaction';
 
 @Injectable()
 export class NftMarketplaceAbiService {

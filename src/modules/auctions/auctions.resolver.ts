@@ -7,18 +7,21 @@ import {
   Mutation,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
-import { BaseResolver } from '../nfts/base.resolver';
-import { Account } from '../nfts/dto/account.dto';
-import { Asset } from '../nfts/dto/asset.dto';
-import { Auction, CreateAuctionArgs } from '../nfts/dto/auction.dto';
-import { Order } from '../nfts/dto/order.dto';
-import { TransactionNode } from '../nfts/dto/transaction';
-import { TokenActionArgs } from './TokenActionArgs';
+import { BaseResolver } from '../base.resolver';
+import { Account } from '../accounts/models/account.dto';
+import {
+  Auction,
+  CreateAuctionArgs,
+  TokenActionArgs,
+  BidActionArgs,
+} from './models';
 import { AccountsService } from '../accounts/accounts.service';
 import { AssetsService } from '../assets/assets.service';
 import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { BidActionArgs } from './BidActionArgs';
+import { TransactionNode } from '../transaction';
+import { Asset } from '../assets/models/Asset.dto';
+import { Order } from '../orders/models/Order.dto';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {

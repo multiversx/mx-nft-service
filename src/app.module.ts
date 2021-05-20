@@ -10,7 +10,6 @@ import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServicesModule } from './common/services';
-import { NftModule } from './modules/nfts/nft.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -61,11 +60,10 @@ if (!!process.env.LOG_FILE) {
       uploads: {
         maxFileSize: 100000000,
         maxFiles: 5,
-      }
+      },
     }),
     ScheduleModule.forRoot(),
     ConfigModule,
-    NftModule,
     TokensModuleGraph,
     AssetsModuleGraph,
     AuctionsModuleGraph,
@@ -74,7 +72,7 @@ if (!!process.env.LOG_FILE) {
     ServicesModule,
     AuctionsModuleDb,
     AccountsModuleDb,
-    FileModule
+    FileModule,
   ],
   providers: [
     {
@@ -84,4 +82,4 @@ if (!!process.env.LOG_FILE) {
     LoggerInterceptor,
   ],
 })
-export class AppModule { }
+export class AppModule {}
