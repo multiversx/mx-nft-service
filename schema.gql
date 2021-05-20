@@ -51,6 +51,12 @@ type Auction {
   topBidder: Account!
 }
 
+input BidActionArgs {
+  price: String!
+  tokenIdentifier: String!
+  tokenNonce: String!
+}
+
 input CreateAccountArgs {
   address: String!
   herotag: String!
@@ -96,7 +102,7 @@ input IssueTokenArgs {
 
 type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
-  bid(input: TokenActionArgs!): TransactionNode!
+  bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
 <<<<<<< HEAD
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -159,7 +165,6 @@ type Tag {
 }
 
 input TokenActionArgs {
-  ownerAddress: String!
   tokenIdentifier: String!
   tokenNonce: String!
 }
