@@ -9,13 +9,17 @@ import {
 import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/account.dto';
-import { Onwer } from './models/Onwer.dto';
 import { AssetsService } from './assets.service';
-import { Tag } from './models/Tag.dto';
-import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
+import {
+  Asset,
+  AddTagsArgs,
+  CreateNftArgs,
+  TransferNftArgs,
+  Onwer,
+  Tag,
+} from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
-import { Asset } from './models/Asset.dto';
 import { TransactionNode } from '../transaction';
 
 @Resolver(() => Asset)

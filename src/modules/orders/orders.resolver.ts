@@ -10,8 +10,7 @@ import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/account.dto';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
-import { Order } from './models/Order.dto';
-import { CreateOrderArgs } from './models/CreateOrderArgs';
+import { CreateOrderArgs, Order } from './models';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {

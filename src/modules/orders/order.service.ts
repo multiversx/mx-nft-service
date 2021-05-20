@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { CreateOrderArgs } from './models/CreateOrderArgs';
 import { OrdersServiceDb } from 'src/db/orders/orders.service';
 import { OrderEntity } from 'src/db/orders/order.entity';
-import { Order } from './models';
+import { CreateOrderArgs, Order } from './models';
 
 @Injectable()
 export class OrdersService {

@@ -13,8 +13,7 @@ import { TagsServiceDb } from 'src/db/tags/tags.service';
 import '../../utils/extentions';
 import { FileService } from '../files/file.service';
 import { TransactionNode } from '../transaction';
-import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
-import { Asset } from './models';
+import { AddTagsArgs, CreateNftArgs, TransferNftArgs, Asset } from './models';
 
 @Injectable()
 export class AssetsService {
