@@ -6,6 +6,4 @@ export class TokenActionArgs {
   tokenIdentifier: string;
   @Field(() => String)
   tokenNonce: string;
-  @Field(() => String)
-  ownerAddress: string;
 }

@@ -7,9 +7,10 @@ import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
+import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 
 @Module({
-  providers: [AuctionsService, AuctionsResolver],
+  providers: [AuctionsService, AuctionsResolver, NftMarketplaceAbiService],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -24,6 +25,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
       prefix: process.env.REDIS_PREFIX,
     }),
   ],
-  exports: [AuctionsService],
+  exports: [AuctionsService, NftMarketplaceAbiService],
 })
 export class AuctionsModuleGraph {}

@@ -13,15 +13,18 @@ import { Asset } from '../nfts/dto/asset.dto';
 import { Auction, CreateAuctionArgs } from '../nfts/dto/auction.dto';
 import { Order } from '../nfts/dto/order.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
-import { TokenActionArgs } from './tokenActionArgs';
+import { TokenActionArgs } from './TokenActionArgs';
 import { AccountsService } from '../accounts/accounts.service';
 import { AssetsService } from '../assets/assets.service';
 import { elrondConfig } from 'src/config';
+import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
+import { BidActionArgs } from './BidActionArgs';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
+    private nftAbiService: NftMarketplaceAbiService,
     private accountsService: AccountsService,
     private assetsService: AssetsService,
   ) {
@@ -32,26 +35,26 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async createAuction(
     @Args('auctionData') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
-    return await this.auctionsService.createAuction(input);
-  }
-
-  @Mutation(() => TransactionNode)
-  async bid(@Args('input') input: TokenActionArgs): Promise<TransactionNode> {
-    return await this.auctionsService.bid(input);
+    return await this.nftAbiService.createAuction(input);
   }
 
   @Mutation(() => TransactionNode)
   async endAuction(
     @Args('input') input: TokenActionArgs,
   ): Promise<TransactionNode> {
-    return await this.auctionsService.endAuction(input);
+    return await this.nftAbiService.endAuction(input);
+  }
+
+  @Mutation(() => TransactionNode)
+  async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
+    return await this.nftAbiService.bid(input);
   }
 
   @Mutation(() => TransactionNode)
   async withdraw(
     @Args('input') input: TokenActionArgs,
   ): Promise<TransactionNode> {
-    return await this.auctionsService.bid(input);
+    return await this.nftAbiService.withdraw(input);
   }
 
   @Mutation(() => Auction)

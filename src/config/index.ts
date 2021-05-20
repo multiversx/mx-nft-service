@@ -14,5 +14,5 @@ export const elrondConfig = config.get('elrond');
  */
 export const cacheConfig: CachingConfig = config.get('caching');
 
-
-export const fileStorage = config.get('fileStorage')
+export const fileStorage = config.get('fileStorage');
+export const gas = config.get('gas');
