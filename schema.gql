@@ -66,6 +66,7 @@ input CreateAccountArgs {
 
 input CreateNftArgs {
   attributes: String!
+  file: Upload!
   hash: String!
   name: String!
   ownerAddress: String!
@@ -102,6 +103,8 @@ type Mutation {
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
+  uploadFile(file: Upload!): Boolean!
+  uploadImage(file: Upload!): String!
 }
 
 type Onwer {
@@ -177,3 +180,6 @@ input TransferNftArgs {
   quantity: String!
   tokenIdentifier: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

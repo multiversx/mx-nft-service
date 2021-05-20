@@ -13,6 +13,7 @@ import { TagsServiceDb } from 'src/db/tags/tags.service';
 import '../../utils/extentions';
 import { Asset } from '../nfts/dto/asset.dto';
 import { TransactionNode } from '../nfts/dto/transaction';
+import { FileService } from '../nfts/file.service';
 import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
 
 @Injectable()
@@ -20,7 +21,8 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private tagsServiceDb: TagsServiceDb,
-  ) {}
+    private fileService: FileService
+  ) { }
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
@@ -44,7 +46,16 @@ export class AssetsService {
     return assets;
   }
 
+  async getFileData(file: any): Promise<string> {
+    const payload = await this.fileService.uploadFile(file)
+    console.log(payload)
+    // return payload.url
+    return ""
+  }
+
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
+    // const cid = await this.fileService.uploadFile(createAssetArgs.file)
+
     const contract = new SmartContract({
       address: new Address(createAssetArgs.ownerAddress),
     });
