@@ -1,10 +1,10 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { BaseResolver } from '../nfts/base.resolver';
-import { TokenType } from '../nfts/dto/token.dto';
-import { TransactionNode } from '../nfts/dto/transaction';
+import { BaseResolver } from '../base.resolver';
+import { TokenType } from './models';
 import { IssueTokenArgs } from './models';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { TokensService } from './tokens.service';
+import { TransactionNode } from '../transaction';
 
 @Resolver()
 export class TokensResolver extends BaseResolver(TokenType) {

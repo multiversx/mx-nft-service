@@ -1,7 +1,7 @@
-import { Price } from './price.dto';
-import { Auction } from './auction.dto';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Account } from './account.dto';
+import { Account } from 'src/modules/accounts/models/account.dto';
+import { Price } from 'src/modules/assets/models';
+import { Auction } from 'src/modules/auctions/models';
 
 @ObjectType()
 export class Order {

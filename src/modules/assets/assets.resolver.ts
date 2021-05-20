@@ -7,16 +7,20 @@ import {
   Mutation,
 } from '@nestjs/graphql';
 import { AccountsService } from '../accounts/accounts.service';
-import { BaseResolver } from '../nfts/base.resolver';
-import { Account } from '../nfts/dto/account.dto';
-import { Onwer } from '../nfts/dto/onwer.dto';
-import { Asset } from '../nfts/dto/asset.dto';
-import { TransactionNode } from '../nfts/dto/transaction';
+import { BaseResolver } from '../base.resolver';
+import { Account } from '../accounts/models/account.dto';
 import { AssetsService } from './assets.service';
-import { Tag } from '../nfts/dto/tag.dto';
-import { AddTagsArgs, CreateNftArgs, TransferNftArgs } from './models';
+import {
+  Asset,
+  AddTagsArgs,
+  CreateNftArgs,
+  TransferNftArgs,
+  Onwer,
+  Tag,
+} from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
+import { TransactionNode } from '../transaction';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -30,9 +34,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode, { name: 'createNft' })
   async createNft(
     @Args('input') input: CreateNftArgs,
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
   ): Promise<TransactionNode> {
-    input.file = file
+    input.file = file;
     return await this.assetsService.createNft(input);
   }
 

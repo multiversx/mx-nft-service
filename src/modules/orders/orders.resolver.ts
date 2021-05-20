@@ -6,12 +6,11 @@ import {
   Parent,
   Mutation,
 } from '@nestjs/graphql';
-import { BaseResolver } from '../nfts/base.resolver';
-import { Account } from '../nfts/dto/account.dto';
-import { Auction } from '../nfts/dto/auction.dto';
-import { CreateOrderArgs } from './models/CreateOrderArgs';
-import { Order } from '../nfts/dto/order.dto';
+import { BaseResolver } from '../base.resolver';
+import { Account } from '../accounts/models/account.dto';
+import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
+import { CreateOrderArgs, Order } from './models';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {

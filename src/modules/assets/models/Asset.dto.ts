@@ -1,8 +1,8 @@
-import { Attribute } from './attributes.dto';
+import { Attribute } from './Attributes.dto';
 import { ID, ObjectType, GraphQLISODateTime, Field } from '@nestjs/graphql';
-import { Price } from './price.dto';
-import { Onwer } from './onwer.dto';
-import { Account } from './account.dto';
+import { Price } from './Price.dto';
+import { Onwer } from './Onwer.dto';
+import { Account } from '../../accounts/models/account.dto';
 
 @ObjectType()
 export class Asset {

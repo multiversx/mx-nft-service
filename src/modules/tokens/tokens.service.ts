@@ -9,10 +9,10 @@ import {
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
-import { TransactionNode } from '../nfts/dto/transaction';
 import { elrondConfig } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { IssueTokenArgs } from './models';
+import { TransactionNode } from '../transaction';
 
 @Injectable()
 export class TokensService {

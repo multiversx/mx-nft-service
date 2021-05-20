@@ -1,4 +1,4 @@
-import { Account } from '../nfts/dto/account.dto';
+import { Account } from './models/account.dto';
 import {
   Mutation,
   Query,
@@ -8,9 +8,9 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
-import { Asset } from '../nfts/dto/asset.dto';
 import { AssetsService } from '../assets/assets.service';
 import { CreateAccountArgs } from './CreateAccountArgs';
+import { Asset } from '../assets/models';
 
 @Resolver(() => Account)
 export class AccountsResolver {
