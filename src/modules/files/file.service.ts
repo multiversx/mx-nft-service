@@ -14,7 +14,7 @@ export class FileService {
     const fileData = await file
     const readStream = await fileData.createReadStream()
     const fileType = await this.readStreamToBuffer(readStream)
-    
+
     const ipfs = await IPFS.create({
       host: fileStorage.host,
       port: fileStorage.port,

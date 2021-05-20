@@ -59,7 +59,7 @@ if (!!process.env.LOG_FILE) {
       sortSchema: true,
       playground: true,
       uploads: {
-        maxFileSize: 10000000,
+        maxFileSize: 100000000,
         maxFiles: 5,
       }
     }),
