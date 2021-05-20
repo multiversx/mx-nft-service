@@ -104,8 +104,8 @@ type Mutation {
   addTags(input: AddTagsArgs!): [Tag!]!
   bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
-  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
+  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
   endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
@@ -195,7 +195,5 @@ input TransferNftArgs {
   tokenIdentifier: String!
 }
 
-"""
-The `Upload` scalar type represents a file upload.
-"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload
