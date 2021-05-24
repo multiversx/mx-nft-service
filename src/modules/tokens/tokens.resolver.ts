@@ -23,6 +23,13 @@ export class TokensResolver extends BaseResolver(TokenType) {
     return await this.tokensService.issueNft(input);
   }
 
+  @Mutation(() => TransactionNode, { name: 'issueSemiFungible' })
+  async issueSemiFungible(
+    @Args('input') input: IssueTokenArgs,
+  ): Promise<TransactionNode> {
+    return await this.tokensService.issueSemiFungible(input);
+  }
+
   @Mutation(() => TransactionNode, { name: 'setRoles' })
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
