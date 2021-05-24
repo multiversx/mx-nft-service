@@ -82,7 +82,7 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(createAssetArgs.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(createAssetArgs.tokenNonce || '1')),
+        BytesValue.fromHex(this.nominateVal(createAssetArgs.quantity || '1')),
         BytesValue.fromUTF8(createAssetArgs.name),
         BytesValue.fromHex(
           this.nominateVal(createAssetArgs.royalties || '0', 100),

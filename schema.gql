@@ -77,9 +77,9 @@ input CreateNftArgs {
   attributes: String!
   name: String!
   ownerAddress: String!
+  quantity: String!
   royalties: String!
   tokenIdentifier: String!
-  tokenNonce: String!
 }
 
 input CreateOrderArgs {

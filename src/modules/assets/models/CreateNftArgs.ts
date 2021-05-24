@@ -7,7 +7,7 @@ export class CreateNftArgs {
   tokenIdentifier: string;
 
   @Field(() => String)
-  tokenNonce: string;
+  quantity: string;
 
   @Field(() => String)
   name: string;
