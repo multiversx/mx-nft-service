@@ -13,7 +13,10 @@ export class Auction {
   @Field(() => Account)
   owner: Account;
 
+  tokenNonce: number;
+
   tokenIdentifier: string;
+
   @Field(() => Asset)
   asset: Asset;
 

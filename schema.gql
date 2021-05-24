@@ -33,7 +33,7 @@ type Asset {
   previousOwners: [Onwer!]!
   royalties: String!
   tags: [String!]!
-  tokenId: ID!
+  tokenIdentifier: ID!
   tokenNonce: Float!
   uris: [String!]!
 }
@@ -145,6 +145,7 @@ type Query {
   getAccount(address: String, id: Float): Account!
   getAssetsForUser(address: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
+  getRegisteredNfts(ownerAddress: String!): [String!]!
   order(orderId: String!): [Order!]!
 }
 

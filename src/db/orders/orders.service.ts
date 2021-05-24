@@ -25,7 +25,7 @@ export class OrdersServiceDb {
 
   async updateOrder(order: OrderEntity) {
     order.status = OrderStatusType.inactive;
-    order.modifieDate = new Date(new Date().toUTCString());
+    order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.update(order.id, order);
   }
 }

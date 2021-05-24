@@ -7,7 +7,7 @@ import { Account } from '../../accounts/models/account.dto';
 @ObjectType()
 export class Asset {
   @Field(() => ID)
-  tokenId!: string;
+  tokenIdentifier!: string;
   @Field()
   tokenNonce!: number;
   @Field(() => Price, { nullable: true })

@@ -9,12 +9,13 @@ import {
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
+import { Token } from './models/interfaces/elrond/token.dto';
 
 @Injectable()
 export class ElrondProxyService {
   private readonly proxy: ProxyProvider;
   constructor() {
-    this.proxy = new ProxyProvider(elrondConfig.gateway, 60000);
+    this.proxy = new ProxyProvider(elrondConfig.gateway, 100000);
   }
 
   getService(): ProxyProvider {
@@ -45,7 +46,21 @@ export class ElrondProxyService {
     return response.returnData[2].base64ToBech32();
   }
 
-  fromHttpResponse(payload: any): any {
-    return payload;
+  async getNftByTokenIdentifier(
+    address: string,
+    tokenIdentifier: string,
+    tokenNonce: number,
+  ): Promise<Token> {
+    return await this.getService().doGetGeneric(
+      `address/${address}/nft/${tokenIdentifier}/nonce/${tokenNonce}`,
+      (response) => response.tokenData,
+    );
+  }
+
+  async getRegisteredNfts(address: string): Promise<string[]> {
+    return await this.getService().doGetGeneric(
+      `address/${address}/registered-nfts`,
+      (response) => response.tokens,
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { OrderStatusType } from './order-status.enum';
 
 @Entity('orders')
@@ -22,7 +22,7 @@ export class OrderEntity {
   creationDate: Date = new Date(new Date().toUTCString());
 
   @Column({ name: 'modified_date', type: 'datetime' })
-  modifieDate: Date = new Date(new Date().toUTCString());
+  modifiedDate: Date = new Date(new Date().toUTCString());
 
   @Column({ name: 'owner_address', length: 62 })
   ownerAddress: string;
