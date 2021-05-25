@@ -6,6 +6,6 @@ export class SetNftRolesArgs {
   tokenIdentifier: string;
   @Field(() => String)
   addressToTransfer: string;
-  @Field(() => String)
-  role: string;
+  @Field(() => [String])
+  roles: string[];
 }

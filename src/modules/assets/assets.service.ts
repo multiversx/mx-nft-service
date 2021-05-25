@@ -3,11 +3,13 @@ import {
   Balance,
   BytesValue,
   ContractFunction,
+  decodeString,
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
+import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { TagEntity } from 'src/db/tags/tag.entity';
 import { TagsServiceDb } from 'src/db/tags/tags.service';
 import '../../utils/extentions';
@@ -21,6 +23,7 @@ export class AssetsService {
     private apiService: ElrondApiService,
     private tagsServiceDb: TagsServiceDb,
     private fileService: FileService,
+    private elrondGateway: ElrondProxyService,
   ) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
@@ -29,7 +32,7 @@ export class AssetsService {
     tokens.forEach((element) => {
       assets.push(
         new Asset({
-          tokenId: element.token,
+          tokenIdentifier: element.token,
           tokenNonce: element.nonce,
           creatorAddress: element.creator,
           ownerAddress: element.owner,
@@ -49,12 +52,23 @@ export class AssetsService {
   async getAssetByTokenIdentifier(
     onwerAddress: string,
     tokenIdentifier: string,
-  ): Promise<Asset | any> {
-    const assets = await this.getAssetsForUser(onwerAddress);
-    const asset = assets.find(
-      (asset: { tokenId: string }) => asset.tokenId === tokenIdentifier,
+    tokenNonce: number,
+  ): Promise<Asset> {
+    const token = await this.elrondGateway.getNftByTokenIdentifier(
+      onwerAddress,
+      tokenIdentifier,
+      tokenNonce,
     );
-    return asset;
+    return new Asset({
+      tokenIdentifier: tokenIdentifier,
+      tokenNonce: token.nonce,
+      name: token.name,
+      hash: decodeString(Buffer.from(token.hash)),
+      creatorAddress: token.creator,
+      royalties: token.royalties,
+      ownerAddress: token.owner,
+      uris: token.uris,
+    });
   }
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
@@ -68,7 +82,7 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(createAssetArgs.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(createAssetArgs.tokenNonce || '1')),
+        BytesValue.fromHex(this.nominateVal(createAssetArgs.quantity || '1')),
         BytesValue.fromUTF8(createAssetArgs.name),
         BytesValue.fromHex(
           this.nominateVal(createAssetArgs.royalties || '0', 100),

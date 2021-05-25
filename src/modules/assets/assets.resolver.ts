@@ -31,7 +31,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     super();
   }
 
-  @Mutation(() => TransactionNode, { name: 'createNft' })
+  @Mutation(() => TransactionNode)
   async createNft(
     @Args('input') input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
@@ -40,14 +40,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return await this.assetsService.createNft(input);
   }
 
-  @Mutation(() => TransactionNode, { name: 'transferNft' })
+  @Mutation(() => TransactionNode)
   async transferNft(
     @Args('input') input: TransferNftArgs,
   ): Promise<TransactionNode> {
     return await this.assetsService.transferNft(input);
   }
 
-  @Mutation(() => [Tag], { name: 'addTags' })
+  @Mutation(() => [Tag])
   async addTags(@Args('input') input: AddTagsArgs): Promise<[Tag]> {
     return await this.assetsService.addTags(input);
   }

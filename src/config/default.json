@@ -5,7 +5,8 @@
     "gateway": "http://testnet-gateway.elrond.com/vm-values/query",
     "explorer": "https://testnet-explorer.elrond.com",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg"
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg",
+    "issueNftCost": 5
   },
   "caching": {
     "getAllContractAddresses": 600,
@@ -25,6 +26,8 @@
     "startAuction": 60000000,
     "endAuction": 60000000,
     "bid": 60000000,
-    "withdraw": 60000000
+    "withdraw": 60000000,
+    "issueToken": 60000000,
+    "setRoles": 60000000
   }
 }

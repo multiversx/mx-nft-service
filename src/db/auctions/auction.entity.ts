@@ -1,5 +1,4 @@
-import { AccountEntity } from 'src/db/accounts/account.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('auctions')
 export class AuctionEntity {
@@ -8,6 +7,9 @@ export class AuctionEntity {
 
   @Column({ name: 'token_identifier', length: 20 })
   tokenIdentifier: string;
+
+  @Column({ name: 'token_nonce' })
+  tokenNonce: number;
 
   @Column({ name: 'payment_token_identifier', length: 20 })
   paymentTokenIdentifier: string;
