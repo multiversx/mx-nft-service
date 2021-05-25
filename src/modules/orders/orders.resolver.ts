@@ -18,7 +18,7 @@ export class OrdersResolver extends BaseResolver(Order) {
     super();
   }
 
-  @Mutation(() => Order, { name: 'createOrder' })
+  @Mutation(() => Order)
   async createOrder(@Args('input') input: CreateOrderArgs): Promise<Order> {
     return await this.orders.createOrder(input);
   }

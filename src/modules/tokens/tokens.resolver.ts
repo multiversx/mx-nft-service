@@ -16,28 +16,28 @@ export class TokensResolver extends BaseResolver(TokenType) {
     super();
   }
 
-  @Mutation(() => TransactionNode, { name: 'issueNft' })
+  @Mutation(() => TransactionNode)
   async issueNft(
     @Args('input') input: IssueTokenArgs,
   ): Promise<TransactionNode> {
     return await this.tokensService.issueNft(input);
   }
 
-  @Mutation(() => TransactionNode, { name: 'issueSemiFungible' })
+  @Mutation(() => TransactionNode)
   async issueSemiFungible(
     @Args('input') input: IssueTokenArgs,
   ): Promise<TransactionNode> {
     return await this.tokensService.issueSemiFungible(input);
   }
 
-  @Mutation(() => TransactionNode, { name: 'setRoles' })
+  @Mutation(() => TransactionNode)
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
     return await this.tokensService.setNftRoles(input);
   }
 
-  @Query(() => [String], { name: 'getRegisteredNfts' })
+  @Query(() => [String])
   async getRegisteredNfts(
     @Args('ownerAddress') ownerAddress: string,
   ): Promise<string[]> {
