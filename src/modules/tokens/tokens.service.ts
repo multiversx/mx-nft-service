@@ -66,7 +66,7 @@ export class TokensService {
       transactionArgs.push(BytesValue.fromUTF8(args.canWipe.toString()));
     }
     if (args.canPause) {
-      transactionArgs.push(BytesValue.fromUTF8('canWipe'));
+      transactionArgs.push(BytesValue.fromUTF8('canPause'));
       transactionArgs.push(BytesValue.fromUTF8(args.canPause.toString()));
     }
     if (args.canTransferNFTCreateRole) {
