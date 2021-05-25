@@ -1,4 +1,5 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import BigNumber from 'bignumber.js';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -6,7 +7,7 @@ import { Order } from 'src/modules/orders/models';
 @ObjectType()
 export class Auction {
   @Field(() => ID)
-  Id: string;
+  Id: number;
 
   ownerAddress: string;
 

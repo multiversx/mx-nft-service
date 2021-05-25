@@ -8,6 +8,7 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
+import { OrdersModuleGraph } from '../orders/orders.module';
 
 @Module({
   providers: [AuctionsService, AuctionsResolver, NftMarketplaceAbiService],
@@ -17,6 +18,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
     AuctionsModuleDb,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
+    forwardRef(() => OrdersModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,

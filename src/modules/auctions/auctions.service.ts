@@ -12,7 +12,7 @@ export class AuctionsService {
     private auctionServiceDb: AuctionsServiceDb,
   ) {}
 
-  async saveAuction(tokenId: string, nonce: string): Promise<Auction | any> {
+  async saveAuction(tokenId: string, nonce: number): Promise<Auction | any> {
     const auctionData = await this.nftAbiService.getAuctionQuery(
       tokenId,
       nonce,
@@ -20,6 +20,7 @@ export class AuctionsService {
     const savedAuction = await this.auctionServiceDb.insertAuction(
       new AuctionEntity({
         tokenIdentifier: tokenId,
+        tokenNonce: nonce,
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),

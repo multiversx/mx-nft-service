@@ -22,6 +22,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
+import { OrdersService } from '../orders/order.service';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -30,6 +31,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsService: AccountsService,
     private assetsService: AssetsService,
+    private ordersService: OrdersService,
   ) {
     super();
   }
@@ -38,6 +40,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
+    console.log(12, input);
     return await this.nftAbiService.createAuction(input);
   }
 
@@ -63,7 +66,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Mutation(() => Auction)
   async saveAuction(
     @Args('tokenIdentifier') tokenId: string,
-    @Args('nonce') nonce: string,
+    @Args('nonce') nonce: number,
   ): Promise<Auction> {
     return await this.auctionsService.saveAuction(tokenId, nonce);
   }
@@ -97,7 +100,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('orders', () => [Order])
   async orders(@Parent() auction: Auction) {
-    const { orders } = auction;
-    return {};
+    const { Id } = auction;
+    return await this.ordersService.getOrdersForAuction(Id);
   }
 }

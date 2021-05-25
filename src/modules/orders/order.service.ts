@@ -9,7 +9,10 @@ export class OrdersService {
   constructor(private orderServiceDb: OrdersServiceDb) {}
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order | any> {
-    return await this.orderServiceDb.saveOrder(
+    const activeOrders = await this.orderServiceDb.getActiveOrdersForAuction(
+      createOrderArgs.auctionId,
+    );
+    const order = await this.orderServiceDb.saveOrder(
       new OrderEntity({
         auctionId: createOrderArgs.auctionId,
         ownerAddress: createOrderArgs.ownerAddress,
@@ -18,5 +21,12 @@ export class OrdersService {
         priceNonce: createOrderArgs.priceNonce,
       }),
     );
+    if (order && activeOrders) {
+      await this.orderServiceDb.updateOrder(activeOrders[0]);
+    }
+    return order;
+  }
+  async getOrdersForAuction(auctionId: number): Promise<Order[] | any> {
+    return await this.orderServiceDb.getOrdersForAuction(auctionId);
   }
 }

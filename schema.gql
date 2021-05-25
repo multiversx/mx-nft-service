@@ -114,7 +114,7 @@ type Mutation {
   endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
-  saveAuction(nonce: String!, tokenIdentifier: String!): Auction!
+  saveAuction(nonce: Float!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
@@ -131,7 +131,7 @@ type Order {
   auction: Auction!
   creationDate: DateTime!
   from: Account!
-  orderId: ID!
+  id: ID!
   price: Price!
   status: String!
 }

@@ -74,12 +74,6 @@ if (!!process.env.LOG_FILE) {
     AccountsModuleDb,
     FileModule,
   ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggerInterceptor,
-    },
-    LoggerInterceptor,
-  ],
+  providers: [],
 })
 export class AppModule {}
