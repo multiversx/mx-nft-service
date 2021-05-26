@@ -115,7 +115,7 @@ type Mutation {
   endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
-  saveAuction(nonce: Float!, tokenIdentifier: String!): Auction!
+  saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!

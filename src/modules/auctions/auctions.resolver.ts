@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent,
   Mutation,
+  Int,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
@@ -66,7 +67,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Mutation(() => Auction)
   async saveAuction(
     @Args('tokenIdentifier') tokenId: string,
-    @Args('nonce') nonce: number,
+    @Args('nonce', { type: () => Int }) nonce: number,
   ): Promise<Auction> {
     return await this.auctionsService.saveAuction(tokenId, nonce);
   }
