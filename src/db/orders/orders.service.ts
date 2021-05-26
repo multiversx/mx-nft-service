@@ -11,10 +11,21 @@ export class OrdersServiceDb {
     private ordersRepository: Repository<OrderEntity>,
   ) {}
 
-  async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
+  async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity> {
     return await this.ordersRepository
       .createQueryBuilder('order')
-      .where('order.auction = :id and order.status=active', { id: auctionId })
+      .where(`order.auction_id = :id and order.status='active'`, {
+        id: auctionId,
+      })
+      .getOne();
+  }
+
+  async getOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
+    return await this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.auction_id = :id', {
+        id: auctionId,
+      })
       .getMany();
   }
 

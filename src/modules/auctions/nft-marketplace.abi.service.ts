@@ -54,7 +54,7 @@ export class NftMarketplaceAbiService {
     const contract = this.getSmartContract(elrondConfig.nftMarketplaceAddress);
     let bid = contract.call({
       func: new ContractFunction('bid'),
-      value: Balance.egld(args.price),
+      value: Balance.fromString(args.price),
       args: [
         BytesValue.fromUTF8(args.tokenIdentifier),
         new U64Value(new BigNumber(args.tokenNonce)),
@@ -93,7 +93,7 @@ export class NftMarketplaceAbiService {
     return endAuction.toPlainObject();
   }
 
-  async getAuctionQuery(tokenId: string, nonce: string): Promise<AuctionAbi> {
+  async getAuctionQuery(tokenId: string, nonce: number): Promise<AuctionAbi> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getFullAuctionData([

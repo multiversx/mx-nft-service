@@ -6,7 +6,10 @@ import { Auction } from 'src/modules/auctions/models';
 @ObjectType()
 export class Order {
   @Field(() => ID)
-  orderId: string;
+  id: string;
+
+  @Field(() => String)
+  ownerAddress: string;
 
   @Field(() => Account)
   from: Account;

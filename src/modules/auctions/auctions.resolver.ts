@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent,
   Mutation,
+  Int,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
@@ -22,6 +23,8 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
+import { OrdersService } from '../orders/order.service';
+import { Price } from '../assets/models';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -30,6 +33,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsService: AccountsService,
     private assetsService: AssetsService,
+    private ordersService: OrdersService,
   ) {
     super();
   }
@@ -63,7 +67,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Mutation(() => Auction)
   async saveAuction(
     @Args('tokenIdentifier') tokenId: string,
-    @Args('nonce') nonce: string,
+    @Args('nonce', { type: () => Int }) nonce: number,
   ): Promise<Auction> {
     return await this.auctionsService.saveAuction(tokenId, nonce);
   }
@@ -89,15 +93,24 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     );
   }
 
+  @ResolveField('topBid', () => Price)
+  async topBid(@Parent() auction: Auction) {
+    const { Id } = auction;
+    return await this.ordersService.getTopBid(Id);
+  }
+
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
-    const { topBidder } = auction;
-    return {};
+    const { Id } = auction;
+    const lastOrder = await this.ordersService.getActiveOrderForAuction(Id);
+    return lastOrder
+      ? await this.accountsService.getAccountByAddress(lastOrder.ownerAddress)
+      : undefined;
   }
 
   @ResolveField('orders', () => [Order])
   async orders(@Parent() auction: Auction) {
-    const { orders } = auction;
-    return {};
+    const { Id } = auction;
+    return await this.ordersService.getOrdersForAuction(Id);
   }
 }

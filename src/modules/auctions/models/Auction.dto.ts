@@ -1,4 +1,5 @@
 import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
+import BigNumber from 'bignumber.js';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -6,8 +7,9 @@ import { Order } from 'src/modules/orders/models';
 @ObjectType()
 export class Auction {
   @Field(() => ID)
-  Id: string;
+  Id: number;
 
+  @Field(() => String)
   ownerAddress: string;
 
   @Field(() => Account)
@@ -32,11 +34,11 @@ export class Auction {
   @Field(() => Date)
   endDate: Date;
 
-  @Field(() => Price)
-  topBid?: Price;
+  @Field(() => Price, { nullable: true })
+  topBid: Price;
 
-  @Field(() => Account)
-  topBidder?: Account;
+  @Field(() => Account, { nullable: true })
+  topBidder: Account;
 
   @Field(() => [Order])
   orders: Order[];
