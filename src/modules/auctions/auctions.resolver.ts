@@ -41,7 +41,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
-    console.log(12, input);
     return await this.nftAbiService.createAuction(input);
   }
 

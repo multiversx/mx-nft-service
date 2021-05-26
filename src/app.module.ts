@@ -74,6 +74,5 @@ if (!!process.env.LOG_FILE) {
     AccountsModuleDb,
     FileModule,
   ],
-  providers: [],
 })
 export class AppModule {}
