@@ -9,6 +9,7 @@ export class Auction {
   @Field(() => ID)
   Id: number;
 
+  @Field(() => String)
   ownerAddress: string;
 
   @Field(() => Account)
@@ -33,11 +34,11 @@ export class Auction {
   @Field(() => Date)
   endDate: Date;
 
-  @Field(() => Price)
-  topBid?: Price;
+  @Field(() => Price, { nullable: true })
+  topBid: Price;
 
-  @Field(() => Account)
-  topBidder?: Account;
+  @Field(() => Account, { nullable: true })
+  topBidder: Account;
 
   @Field(() => [Order])
   orders: Order[];

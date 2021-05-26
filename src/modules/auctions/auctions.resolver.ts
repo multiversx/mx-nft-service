@@ -23,6 +23,7 @@ import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
 import { OrdersService } from '../orders/order.service';
+import { Price } from '../assets/models';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -92,10 +93,19 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     );
   }
 
+  @ResolveField('topBid', () => Price)
+  async topBid(@Parent() auction: Auction) {
+    const { Id } = auction;
+    return await this.ordersService.getTopBid(Id);
+  }
+
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
-    const { topBidder } = auction;
-    return {};
+    const { Id } = auction;
+    const lastOrder = await this.ordersService.getActiveOrderForAuction(Id);
+    return lastOrder
+      ? await this.accountsService.getAccountByAddress(lastOrder.ownerAddress)
+      : undefined;
   }
 
   @ResolveField('orders', () => [Order])

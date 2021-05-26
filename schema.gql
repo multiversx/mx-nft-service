@@ -46,9 +46,10 @@ type Auction {
   minBid: Price!
   orders: [Order!]!
   owner: Account!
+  ownerAddress: String!
   startDate: DateTime!
-  topBid: Price!
-  topBidder: Account!
+  topBid: Price
+  topBidder: Account
 }
 
 input BidActionArgs {
@@ -132,6 +133,7 @@ type Order {
   creationDate: DateTime!
   from: Account!
   id: ID!
+  ownerAddress: String!
   price: Price!
   status: String!
 }

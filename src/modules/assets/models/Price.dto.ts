@@ -1,12 +1,15 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { FilterableField } from '@nestjs-query/query-graphql';
 
 @ObjectType()
 export class Price {
-  @FilterableField(() => ID)
+  @Field(() => ID)
   tokenIdentifier: string;
-  @FilterableField(() => String)
+  @Field(() => String)
   amount: string;
-  @FilterableField(() => String)
+  @Field(() => String)
   nonce: string;
+
+  constructor(init?: Partial<Price>) {
+    Object.assign(this, init);
+  }
 }

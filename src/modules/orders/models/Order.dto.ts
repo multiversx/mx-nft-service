@@ -8,6 +8,9 @@ export class Order {
   @Field(() => ID)
   id: string;
 
+  @Field(() => String)
+  ownerAddress: string;
+
   @Field(() => Account)
   from: Account;
 
