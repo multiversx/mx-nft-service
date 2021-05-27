@@ -15,6 +15,7 @@ import {
   CreateAuctionArgs,
   TokenActionArgs,
   BidActionArgs,
+  UpdateAuctionArgs,
 } from './models';
 import { AccountsService } from '../accounts/accounts.service';
 import { AssetsService } from '../assets/assets.service';
@@ -50,6 +51,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args('input') input: TokenActionArgs,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.endAuction(input);
+  }
+
+  @Mutation(() => Auction)
+  async updateAuctionStatus(
+    @Args('input') input: UpdateAuctionArgs,
+  ): Promise<TransactionNode> {
+    return await this.auctionsService.updateAuction(input);
   }
 
   @Mutation(() => TransactionNode)

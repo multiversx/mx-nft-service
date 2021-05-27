@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AuctionStatusEnum } from '../../modules/auctions/models/Auction-status.enum';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
@@ -16,9 +17,9 @@ export class AuctionsServiceDb {
     });
   }
 
-  async getAuction(id: number): Promise<AuctionEntity[]> {
-    return await this.auctionsRepository.find({
-      where: [{ id: id }],
+  async getAuction(id: number): Promise<AuctionEntity> {
+    return await this.auctionsRepository.findOne({
+      where: [{ Id: id }],
     });
   }
 
@@ -26,11 +27,9 @@ export class AuctionsServiceDb {
     return await this.auctionsRepository.save(auction);
   }
 
-  async updateAuction(auction: AuctionEntity) {
-    await this.auctionsRepository.update(auction.Id, auction);
-  }
-
-  async deleteAuction(auction: AuctionEntity) {
-    await this.auctionsRepository.delete(auction);
+  async updateAuction(auctionId: number, status: AuctionStatusEnum) {
+    let auction = await this.getAuction(auctionId);
+    auction.status = status;
+    return await this.auctionsRepository.save(auction);
   }
 }

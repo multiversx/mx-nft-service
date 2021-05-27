@@ -2,6 +2,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Price } from 'src/modules/assets/models';
 import { Auction } from 'src/modules/auctions/models';
+import { OrderStatusEnum } from './order-status.enum';
 
 @ObjectType()
 export class Order {
@@ -20,8 +21,8 @@ export class Order {
   @Field(() => Price)
   price: Price;
 
-  @Field(() => String)
-  status: string;
+  @Field(() => OrderStatusEnum)
+  status: OrderStatusEnum;
 
   @Field(() => Date)
   creationDate: Date;

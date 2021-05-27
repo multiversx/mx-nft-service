@@ -17,6 +17,9 @@ export class CreateAuctionArgs {
   @Field(() => String!)
   maxBid: string;
 
+  @Field(() => String)
+  startDate: string = new Date().getTime().toString();
+
   @Field(() => String!)
   deadline: string;
 

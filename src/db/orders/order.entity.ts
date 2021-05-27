@@ -1,11 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { OrderStatusType } from './order-status.enum';
+import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
+import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
-export class OrderEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class OrderEntity extends BaseEntity {
   @Column({ name: 'price_token_identifier' })
   priceTokenIdentifier: string;
 
@@ -16,13 +14,7 @@ export class OrderEntity {
   priceNonce: string;
 
   @Column()
-  status: OrderStatusType;
-
-  @Column({ name: 'creation_date', type: 'datetime' })
-  creationDate: Date = new Date(new Date().toUTCString());
-
-  @Column({ name: 'modified_date', type: 'datetime' })
-  modifiedDate: Date = new Date(new Date().toUTCString());
+  status: OrderStatusEnum;
 
   @Column({ name: 'owner_address', length: 62 })
   ownerAddress: string;
@@ -31,6 +23,7 @@ export class OrderEntity {
   auctionId: number;
 
   constructor(init?: Partial<OrderEntity>) {
+    super();
     Object.assign(this, init);
   }
 }
