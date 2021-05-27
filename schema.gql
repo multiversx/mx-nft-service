@@ -131,6 +131,7 @@ type Onwer {
 type Order {
   auction: Auction!
   creationDate: DateTime!
+  endDate: DateTime!
   from: Account!
   id: ID!
   ownerAddress: String!
@@ -145,15 +146,11 @@ type Price {
 }
 
 type Query {
-  findAllAsset: [Asset!]!
-  findAllAuction: [Auction!]!
-  findAllOrder: [Order!]!
-  findAllTokenType: [TokenType!]!
   getAccount(address: String, id: Float): Account!
   getAssetsForUser(address: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
+  getOrdersForAsset(tokenIdentifier: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
-  order(orderId: String!): [Order!]!
 }
 
 input SetNftRolesArgs {
@@ -171,15 +168,6 @@ type Tag {
 input TokenActionArgs {
   tokenIdentifier: String!
   tokenNonce: String!
-}
-
-type TokenType {
-  address: String!
-  creationDate: DateTime!
-  id: Float!
-  tokenIdentifier: String
-  tokenName: String!
-  tokenTicker: String!
 }
 
 type TransactionNode {

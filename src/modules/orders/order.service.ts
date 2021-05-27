@@ -28,8 +28,15 @@ export class OrdersService {
     return order;
   }
 
-  async getOrdersForAuction(auctionId: number): Promise<Order[] | any> {
-    return await this.orderServiceDb.getOrdersForAuction(auctionId);
+  async getOrdersForAuction(auctionId: number): Promise<Order[]> {
+    const orderEntities = await this.orderServiceDb.getOrdersForAuction(
+      auctionId,
+    );
+    let orders: Order[] = [];
+    orderEntities.forEach((order) => {
+      orders.push(this.mapEntityToDto(order));
+    });
+    return orders;
   }
 
   async getTopBid(auctionId: number): Promise<Price> {
@@ -47,5 +54,20 @@ export class OrdersService {
 
   async getActiveOrderForAuction(auctionId: number): Promise<Order | any> {
     return await this.orderServiceDb.getActiveOrdersForAuction(auctionId);
+  }
+
+  private mapEntityToDto(order: OrderEntity): Order {
+    return new Order({
+      id: order.id,
+      ownerAddress: order.ownerAddress,
+      price: new Price({
+        amount: order.priceAmount,
+        nonce: order.priceNonce,
+        tokenIdentifier: order.priceTokenIdentifier,
+      }),
+      status: order.status,
+      creationDate: order.creationDate,
+      endDate: order.modifiedDate,
+    });
   }
 }
