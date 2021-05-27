@@ -78,7 +78,7 @@ input CreateAuctionArgs {
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
-  startDate: String = "1622120962784"
+  startDate: String = "1622121248065"
   tokenIdentifier: String!
 }
 
