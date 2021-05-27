@@ -1,11 +1,12 @@
 {
   "elrond": {
-    "elastic": "https://testnet-index.elrond.com",
-    "elrondApi": "https://testnet-api.elrond.com",
-    "gateway": "http://testnet-gateway.elrond.com/vm-values/query",
-    "explorer": "https://testnet-explorer.elrond.com",
+    "elastic": "https://devnet-uindex.elrond.com",
+    "elrondApi": "https://devnet-api.elrond.com",
+    "gateway": "https://devnet-gateway.elrond.com",
+    "explorer": "https://devnet-explorer.elrond.com",
+    "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqx2mtqfeel8wn2w98v9k3w6n8e0rwn3zj62vs7s0xlg",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqcc72xa6f0h45gn8xw3774ja45gf3w02062vsjc5c7k",
     "issueNftCost": 5
   },
   "caching": {
