@@ -39,9 +39,9 @@ type Asset {
 }
 
 type Auction {
-  Id: ID!
   asset: Asset!
   endDate: DateTime!
+  id: ID!
   maxBid: Price!
   minBid: Price!
   orders: [Order!]!
@@ -78,7 +78,7 @@ input CreateAuctionArgs {
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
-  startDate: String = "1622121248065"
+  startDate: String = "1622122565944"
   tokenIdentifier: String!
 }
 
@@ -206,7 +206,7 @@ input TransferNftArgs {
 }
 
 input UpdateAuctionArgs {
-  id: Float!
+  id: Int!
   status: AuctionStatusEnum!
 }
 
