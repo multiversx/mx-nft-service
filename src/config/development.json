@@ -1,9 +1,9 @@
 {
   "elrond": {
-    "elastic": "https://testnet-uindex.elrond.com",
-    "elrondApi": "https://testnet-api.elrond.com",
-    "gateway": "https://testnet-gateway.elrond.com",
-    "explorer": "https://testnet-explorer.elrond.com",
+    "elastic": "https://devnet-uindex.elrond.com",
+    "elrondApi": "https://devnet-api.elrond.com",
+    "gateway": "https://devnet-gateway.elrond.com",
+    "explorer": "https://devnet-explorer.elrond.com",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqcc72xa6f0h45gn8xw3774ja45gf3w02062vsjc5c7k",
     "issueNftCost": 5

@@ -7,7 +7,7 @@ import { AuctionStatusEnum } from './Auction-status.enum';
 @ObjectType()
 export class Auction {
   @Field(() => ID)
-  Id: number;
+  id: number;
 
   @Field(() => String)
   ownerAddress: string;

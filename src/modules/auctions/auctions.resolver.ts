@@ -103,14 +103,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
-    const { Id } = auction;
-    return await this.ordersService.getTopBid(Id);
+    const { id } = auction;
+    return await this.ordersService.getTopBid(id);
   }
 
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
-    const { Id } = auction;
-    const lastOrder = await this.ordersService.getActiveOrderForAuction(Id);
+    const { id } = auction;
+    const lastOrder = await this.ordersService.getActiveOrderForAuction(id);
     return lastOrder
       ? await this.accountsService.getAccountByAddress(lastOrder.ownerAddress)
       : undefined;
@@ -118,7 +118,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('orders', () => [Order])
   async orders(@Parent() auction: Auction) {
-    const { Id } = auction;
-    return await this.ordersService.getOrdersForAuction(Id);
+    const { id } = auction;
+    return await this.ordersService.getOrdersForAuction(id);
   }
 }

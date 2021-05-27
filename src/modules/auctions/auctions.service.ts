@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { Auction, UpdateAuctionArgs } from './models';
+import { Auction, AuctionStatusEnum, UpdateAuctionArgs } from './models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -25,7 +25,9 @@ export class AuctionsService {
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),
-        paymentNonce: auctionData.payment_token.nonce.valueOf().toNumber(),
+        paymentNonce: parseInt(
+          auctionData.payment_token.nonce.valueOf().toString(),
+        ),
         ownerAddress: auctionData.original_owner.valueOf().toString(),
         minBid: auctionData.min_bid.valueOf().toString(),
         maxBid: auctionData.max_bid.valueOf().toString(),
@@ -34,6 +36,7 @@ export class AuctionsService {
         endDate: new Date(
           parseInt(auctionData.deadline.valueOf().toString()) * 1000,
         ),
+        status: AuctionStatusEnum.active,
       }),
     );
     return savedAuction;
@@ -55,7 +58,7 @@ export class AuctionsService {
 
   private mapEntityToDto(auction: AuctionEntity): Auction {
     return new Auction({
-      Id: auction.id,
+      id: auction.id,
       ownerAddress: auction.ownerAddress,
       tokenNonce: auction.tokenNonce,
       tokenIdentifier: auction.tokenIdentifier,
