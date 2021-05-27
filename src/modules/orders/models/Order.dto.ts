@@ -6,7 +6,7 @@ import { Auction } from 'src/modules/auctions/models';
 @ObjectType()
 export class Order {
   @Field(() => ID)
-  id: string;
+  id: number;
 
   @Field(() => String)
   ownerAddress: string;
@@ -25,6 +25,9 @@ export class Order {
 
   @Field(() => Date)
   creationDate: Date;
+
+  @Field(() => Date)
+  endDate: Date;
 
   constructor(init?: Partial<Order>) {
     Object.assign(this, init);

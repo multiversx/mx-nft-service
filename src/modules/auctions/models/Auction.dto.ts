@@ -1,5 +1,4 @@
-import { Field, ID, InputType, ObjectType } from '@nestjs/graphql';
-import BigNumber from 'bignumber.js';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -46,28 +45,4 @@ export class Auction {
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
   }
-}
-
-@InputType()
-export class CreateAuctionArgs {
-  @Field(() => String!)
-  ownerAddress: string;
-
-  @Field(() => String!)
-  tokenIdentifier: string;
-
-  @Field(() => String!)
-  nonce: string;
-
-  @Field(() => String!)
-  minBid: string;
-
-  @Field(() => String!)
-  maxBid: string;
-
-  @Field(() => String!)
-  deadline: string;
-
-  @Field(() => String!)
-  paymentTokenIdentifier: String;
 }

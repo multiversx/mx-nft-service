@@ -14,19 +14,17 @@ import { CreateOrderArgs, Order } from './models';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(private orders: OrdersService) {
+  constructor(private ordersService: OrdersService) {
     super();
   }
 
   @Mutation(() => Order)
   async createOrder(@Args('input') input: CreateOrderArgs): Promise<Order> {
-    return await this.orders.createOrder(input);
+    return await this.ordersService.createOrder(input);
   }
 
-  @Query(() => [Order], { name: 'order' })
-  async getOrdersForAsset(
-    @Args('orderId', { type: () => String }) orderId: string,
-  ) {
+  @Query(() => [Order])
+  async getOrdersForAsset(@Args('tokenIdentifier') tokenIdentifier: string) {
     return {};
   }
 
