@@ -39,17 +39,24 @@ type Asset {
 }
 
 type Auction {
-  Id: ID!
   asset: Asset!
   endDate: DateTime!
+  id: ID!
   maxBid: Price!
   minBid: Price!
   orders: [Order!]!
   owner: Account!
   ownerAddress: String!
   startDate: DateTime!
+  status: AuctionStatusEnum!
   topBid: Price
   topBidder: Account
+}
+
+enum AuctionStatusEnum {
+  active
+  closed
+  ended
 }
 
 input BidActionArgs {
@@ -71,6 +78,7 @@ input CreateAuctionArgs {
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
+  startDate: String = "1622122565944"
   tokenIdentifier: String!
 }
 
@@ -119,6 +127,7 @@ type Mutation {
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
+  updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
   withdraw(input: TokenActionArgs!): TransactionNode!
 }
 
@@ -136,7 +145,12 @@ type Order {
   id: ID!
   ownerAddress: String!
   price: Price!
-  status: String!
+  status: OrderStatusEnum!
+}
+
+enum OrderStatusEnum {
+  active
+  inactive
 }
 
 type Price {
@@ -189,6 +203,11 @@ input TransferNftArgs {
   ownerAddress: String!
   quantity: String!
   tokenIdentifier: String!
+}
+
+input UpdateAuctionArgs {
+  id: Int!
+  status: AuctionStatusEnum!
 }
 
 """The `Upload` scalar type represents a file upload."""

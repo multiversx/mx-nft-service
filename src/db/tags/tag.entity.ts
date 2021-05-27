@@ -1,10 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity } from '../base-entity';
 
 @Entity('tags')
-export class TagEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class TagEntity extends BaseEntity {
   @Column({ name: 'token_identifier' })
   tokenIdentifier: string;
 
@@ -12,6 +10,7 @@ export class TagEntity {
   tag: string;
 
   constructor(init?: Partial<TagEntity>) {
+    super();
     Object.assign(this, init);
   }
 }

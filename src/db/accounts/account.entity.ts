@@ -1,16 +1,11 @@
 import { OrderEntity } from 'src/db/orders/order.entity';
 import { FollowerEntity } from '../followers/follower.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity } from '../base-entity';
 
 @Entity('accounts')
-export class AccountEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({
-    length: 62,
-    unique: true,
-  })
+export class AccountEntity extends BaseEntity {
+  @Column({ length: 62, unique: true })
   address: string;
 
   @Column({ name: 'profile_img_url' })
@@ -18,9 +13,6 @@ export class AccountEntity {
 
   @Column()
   herotag: string;
-
-  @Column({ name: 'creation_date', type: 'date' })
-  creationDate: Date = new Date(new Date().toUTCString());
 
   @OneToMany(() => OrderEntity, (order) => order.creationDate)
   orders: OrderEntity[];
@@ -32,6 +24,7 @@ export class AccountEntity {
   following: FollowerEntity[];
 
   constructor(init?: Partial<AccountEntity>) {
+    super();
     Object.assign(this, init);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { OrderStatusType } from './order-status.enum';
+import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { OrderEntity } from './order.entity';
 
 @Injectable()
@@ -30,13 +30,13 @@ export class OrdersServiceDb {
   }
 
   async saveOrder(order: OrderEntity) {
-    order.status = OrderStatusType.active;
+    order.status = OrderStatusEnum.active;
     return await this.ordersRepository.save(order);
   }
 
   async updateOrder(order: OrderEntity) {
-    order.status = OrderStatusType.inactive;
+    order.status = OrderStatusEnum.inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
-    return await this.ordersRepository.update(order.id, order);
+    return await this.ordersRepository.save(order);
   }
 }
