@@ -19,7 +19,7 @@ export class AuctionsServiceDb {
 
   async getAuction(id: number): Promise<AuctionEntity> {
     return await this.auctionsRepository.findOne({
-      where: [{ Id: id }],
+      where: [{ id: id }],
     });
   }
 
