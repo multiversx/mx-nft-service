@@ -24,9 +24,7 @@ export class OrdersResolver extends BaseResolver(Order) {
   }
 
   @Query(() => [Order])
-  async getOrdersForAsset(
-    @Args('tokenIdentifier', { type: () => String }) tokenIdentifier: string,
-  ) {
+  async getOrdersForAsset(@Args('tokenIdentifier') tokenIdentifier: string) {
     return {};
   }
 
