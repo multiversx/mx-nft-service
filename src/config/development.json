@@ -3,7 +3,10 @@
     "elastic": "https://testnet-uindex.elrond.com",
     "elrondApi": "https://testnet-api.elrond.com",
     "gateway": "https://testnet-gateway.elrond.com",
-    "explorer": "https://testnet-explorer.elrond.com"
+    "explorer": "https://testnet-explorer.elrond.com",
+    "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqcc72xa6f0h45gn8xw3774ja45gf3w02062vsjc5c7k",
+    "issueNftCost": 5
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
@@ -17,6 +20,8 @@
     "startAuction": 60000000,
     "endAuction": 60000000,
     "bid": 60000000,
-    "withdraw": 60000000
+    "withdraw": 60000000,
+    "issueToken": 60000000,
+    "setRoles": 60000000
   }
 }
