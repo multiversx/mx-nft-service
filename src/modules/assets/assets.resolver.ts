@@ -21,12 +21,15 @@ import {
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
+import { Auction } from '../auctions/models';
+import { AuctionsService } from '../auctions/auctions.service';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
     private accountsService: AccountsService,
+    private auctionsService: AuctionsService,
   ) {
     super();
   }
@@ -67,5 +70,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
     return await this.accountsService.getOwnerByAddress(ownerAddress);
+  }
+
+  @ResolveField('auction', () => Auction)
+  async auction(@Parent() asset: Asset) {
+    const { tokenIdentifier, tokenNonce } = asset;
+    return await this.auctionsService.getActiveAuction(
+      tokenIdentifier,
+      tokenNonce,
+    );
   }
 }

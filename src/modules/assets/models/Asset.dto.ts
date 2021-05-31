@@ -3,6 +3,7 @@ import { ID, ObjectType, GraphQLISODateTime, Field } from '@nestjs/graphql';
 import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models/account.dto';
+import { Auction } from 'src/modules/auctions/models';
 
 @ObjectType()
 export class Asset {
@@ -36,6 +37,8 @@ export class Asset {
   creationDate!: Date;
   @Field(() => [String], { nullable: false })
   uris: string[];
+  @Field(() => Auction, { nullable: true })
+  auction: Auction;
   @Field(() => [String])
   tags: string[] = [];
 

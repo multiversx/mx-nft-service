@@ -21,6 +21,7 @@ input AddTagsArgs {
 
 type Asset {
   attributes: String!
+  auction: Auction
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!

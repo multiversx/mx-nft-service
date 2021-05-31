@@ -23,6 +23,22 @@ export class AuctionsServiceDb {
     });
   }
 
+  async getActiveAuction(
+    tokenIdentifier: string,
+    tokenNonce: number,
+  ): Promise<AuctionEntity> {
+    return await this.auctionsRepository
+      .createQueryBuilder('auction')
+      .where(
+        `auction.token_identifier = :id and auction.token_nonce = :nonce and auction.status='active'`,
+        {
+          id: tokenIdentifier,
+          nonce: tokenNonce,
+        },
+      )
+      .getOne();
+  }
+
   async insertAuction(auction: AuctionEntity | any): Promise<AuctionEntity> {
     return await this.auctionsRepository.save(auction);
   }

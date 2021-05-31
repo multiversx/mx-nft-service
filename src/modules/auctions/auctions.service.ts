@@ -41,13 +41,24 @@ export class AuctionsService {
   }
 
   async getAuctions(address?: string): Promise<Auction[]> {
-    var auctions = await this.auctionServiceDb.getAuctions(address);
+    const auctions = await this.auctionServiceDb.getAuctions(address);
     let responseAuctions: Auction[] = [];
     auctions.forEach((auction) => {
       responseAuctions.push(this.mapEntityToDto(auction));
     });
 
     return responseAuctions;
+  }
+
+  async getActiveAuction(
+    tokenIdentifier: string,
+    tokenNonce: number,
+  ): Promise<Auction> {
+    const auction = await this.auctionServiceDb.getActiveAuction(
+      tokenIdentifier,
+      tokenNonce,
+    );
+    return auction ? this.mapEntityToDto(auction) : undefined;
   }
 
   async updateAuction(args: UpdateAuctionArgs): Promise<Auction | any> {
