@@ -13,6 +13,7 @@ export interface AuctionAbi {
   min_bid: BigUIntValue;
   max_bid: BigUIntValue;
   deadline: U64Value;
+  start_time: U64Value;
   original_owner: AddressValue;
   current_bid: BigUIntValue;
   current_winner: AddressValue;

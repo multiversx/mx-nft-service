@@ -2,27 +2,30 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateAuctionArgs {
-  @Field(() => String!)
+  @Field(() => String)
   ownerAddress: string;
 
-  @Field(() => String!)
+  @Field(() => String)
   tokenIdentifier: string;
 
-  @Field(() => String!)
+  @Field(() => String)
   nonce: string;
 
-  @Field(() => String!)
+  @Field(() => String)
   minBid: string;
 
-  @Field(() => String!)
+  @Field(() => String)
   maxBid: string;
 
   @Field(() => String)
-  startDate: string = new Date().getTime().toString();
+  startDate: string;
 
-  @Field(() => String!)
+  @Field(() => String)
   deadline: string;
 
-  @Field(() => String!)
-  paymentTokenIdentifier: String;
+  @Field(() => String)
+  paymentTokenIdentifier: string;
+
+  @Field(() => String)
+  paymentTokenNonce: string;
 }

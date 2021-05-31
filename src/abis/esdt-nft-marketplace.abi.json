@@ -44,6 +44,11 @@
           "name": "opt_accepted_payment_token_nonce",
           "type": "optional<u64>",
           "multi_arg": true
+        },
+        {
+          "name": "opt_start_time",
+          "type": "optional<u64>",
+          "multi_arg": true
         }
       ],
       "outputs": []
@@ -123,7 +128,7 @@
       ],
       "outputs": [
         {
-          "type": "optional<MultiArg<TokenIdentifier,u64>>",
+          "type": "optional<multi<TokenIdentifier,u64>>",
           "multi_result": true
         }
       ]
@@ -143,6 +148,25 @@
       "outputs": [
         {
           "type": "optional<multi<BigUint,BigUint>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getStartTime",
+      "inputs": [
+        {
+          "name": "nft_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nft_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<u64>",
           "multi_result": true
         }
       ]
@@ -280,6 +304,10 @@
         {
           "name": "max_bid",
           "type": "BigUint"
+        },
+        {
+          "name": "start_time",
+          "type": "u64"
         },
         {
           "name": "deadline",

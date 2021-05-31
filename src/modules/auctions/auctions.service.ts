@@ -32,10 +32,8 @@ export class AuctionsService {
         minBid: auctionData.min_bid.valueOf().toString(),
         maxBid: auctionData.max_bid.valueOf().toString(),
         creationDate: new Date(new Date().toUTCString()),
-        startDate: new Date(new Date().toUTCString()),
-        endDate: new Date(
-          parseInt(auctionData.deadline.valueOf().toString()) * 1000,
-        ),
+        startDate: auctionData.start_time.valueOf().toString(),
+        endDate: auctionData.deadline.valueOf().toString(),
         status: AuctionStatusEnum.active,
       }),
     );

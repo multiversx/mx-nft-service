@@ -31,11 +31,11 @@ export class Auction {
   @Field(() => Price)
   maxBid: Price;
 
-  @Field(() => Date)
-  startDate: Date;
+  @Field(() => String)
+  startDate: string;
 
-  @Field(() => Date)
-  endDate: Date;
+  @Field(() => String)
+  endDate: string;
 
   @Field(() => Price, { nullable: true })
   topBid: Price;
