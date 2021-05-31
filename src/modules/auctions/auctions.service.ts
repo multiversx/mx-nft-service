@@ -50,9 +50,13 @@ export class AuctionsService {
     return responseAuctions;
   }
 
-  async getActiveAuction(tokenIdentifier: string): Promise<Auction> {
+  async getActiveAuction(
+    tokenIdentifier: string,
+    tokenNonce: number,
+  ): Promise<Auction> {
     const auction = await this.auctionServiceDb.getActiveAuction(
       tokenIdentifier,
+      tokenNonce,
     );
     return auction ? this.mapEntityToDto(auction) : undefined;
   }

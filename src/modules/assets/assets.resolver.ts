@@ -74,7 +74,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('auction', () => Auction)
   async auction(@Parent() asset: Asset) {
-    const { tokenIdentifier } = asset;
-    return await this.auctionsService.getActiveAuction(tokenIdentifier);
+    const { tokenIdentifier, tokenNonce } = asset;
+    return await this.auctionsService.getActiveAuction(
+      tokenIdentifier,
+      tokenNonce,
+    );
   }
 }
