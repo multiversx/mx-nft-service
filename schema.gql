@@ -39,6 +39,11 @@ type Asset {
   uris: [String!]!
 }
 
+input AttributeInput {
+  description: String!
+  tags: [String!]!
+}
+
 type Auction {
   asset: Asset!
   endDate: String!
@@ -85,7 +90,7 @@ input CreateAuctionArgs {
 }
 
 input CreateNftArgs {
-  attributes: String!
+  attributes: AttributeInput!
   name: String!
   ownerAddress: String!
   quantity: String!
