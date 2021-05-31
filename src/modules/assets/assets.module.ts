@@ -7,6 +7,7 @@ import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { TagsModuleDb } from 'src/db/tags/tags.module';
 import { FileModule } from '../files/file.module';
+import { AuctionsModuleGraph } from '../auctions/auctions.module';
 
 @Module({
   providers: [AssetsService, AssetsResolver],
@@ -16,6 +17,7 @@ import { FileModule } from '../files/file.module';
     TagsModuleDb,
     FileModule,
     forwardRef(() => AccountsModuleGraph),
+    forwardRef(() => AuctionsModuleGraph),
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed
       store: redisStore,
