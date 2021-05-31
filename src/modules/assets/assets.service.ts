@@ -11,7 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import '../../utils/extentions';
-import { FileService } from '../files/file.service';
+import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
 import { CreateNftArgs, TransferNftArgs, Asset } from './models';
 
@@ -19,7 +19,7 @@ import { CreateNftArgs, TransferNftArgs, Asset } from './models';
 export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
-    private fileService: FileService,
+    private ipfsService: IpfsService,
     private elrondGateway: ElrondProxyService,
   ) {}
 
@@ -69,8 +69,8 @@ export class AssetsService {
   }
 
   async createNft(args: CreateNftArgs): Promise<TransactionNode> {
-    const fileData = await this.fileService.uploadFile(args.file);
-    const asset = await this.fileService.uploadFile(
+    const fileData = await this.ipfsService.uploadFile(args.file);
+    const asset = await this.ipfsService.uploadText(
       args.attributes.description,
     );
 

@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { fileStorage } from 'src/config';
 import { ReadStream } from 'fs';
-import { UploadFileResult } from './file.model';
+import { UploadToIpfsResult } from './ipfs.model';
 const IPFS = require('ipfs');
 
 @Injectable()
-export class FileService {
+export class IpfsService {
   constructor() {}
 
-  async uploadFile(file: any): Promise<UploadFileResult> {
+  async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const fileData = await file;
     const readStream = await fileData.createReadStream();
     const fileType = await this.readStreamToBuffer(readStream);
@@ -23,7 +23,24 @@ export class FileService {
     const url = `${fileStorage.cdnUrl}${path}`;
 
     ipfs.stop();
-    return new UploadFileResult({
+    return new UploadToIpfsResult({
+      hash: path,
+      url: url,
+    });
+  }
+
+  async uploadText(text: any): Promise<UploadToIpfsResult> {
+    const ipfs = await IPFS.create({
+      host: fileStorage.host,
+      port: fileStorage.port,
+      protocol: fileStorage.protocol,
+    });
+    const payload = await ipfs.add(text);
+    const { path } = payload;
+    const url = `${fileStorage.cdnUrl}${path}`;
+
+    ipfs.stop();
+    return new UploadToIpfsResult({
       hash: path,
       url: url,
     });

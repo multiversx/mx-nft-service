@@ -5,7 +5,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
-import { FileModule } from '../files/file.module';
+import { IpfsModule } from '../ipfs/ipfs.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 
 @Module({
@@ -13,7 +13,7 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
-    FileModule,
+    IpfsModule,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleGraph),
     CacheModule.register({
