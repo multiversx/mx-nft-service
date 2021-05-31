@@ -17,9 +17,11 @@ import {
   ContractFunction,
   GasLimit,
   Interaction,
+  OptionalValue,
   SmartContract,
   TokenIdentifierValue,
   TypedValue,
+  U64Type,
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from 'src/config';
@@ -44,6 +46,14 @@ export class NftMarketplaceAbiService {
         new BigUIntValue(new BigNumber(args.maxBid)),
         new U64Value(new BigNumber(args.deadline)),
         new TokenIdentifierValue(Buffer.from(args.paymentTokenIdentifier)),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce)),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.startDate)),
+        ),
       ],
       gasLimit: new GasLimit(gas.startAuction),
     });

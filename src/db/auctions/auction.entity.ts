@@ -29,10 +29,10 @@ export class AuctionEntity extends BaseEntity {
   maxBid: string;
 
   @Column({ name: 'start_date' })
-  startDate: Date;
+  startDate: string;
 
   @Column({ name: 'end_date' })
-  endDate: Date;
+  endDate: string;
 
   constructor(init?: Partial<AuctionEntity>) {
     super();

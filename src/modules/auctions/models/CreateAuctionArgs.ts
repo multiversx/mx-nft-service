@@ -17,12 +17,15 @@ export class CreateAuctionArgs {
   @Field(() => String!)
   maxBid: string;
 
-  @Field(() => String)
-  startDate: string = new Date().getTime().toString();
+  @Field(() => String!)
+  startDate: string;
 
   @Field(() => String!)
   deadline: string;
 
   @Field(() => String!)
-  paymentTokenIdentifier: String;
+  paymentTokenIdentifier: string;
+
+  @Field(() => String!)
+  paymentTokenNonce: string;
 }

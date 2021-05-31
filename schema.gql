@@ -40,14 +40,14 @@ type Asset {
 
 type Auction {
   asset: Asset!
-  endDate: DateTime!
+  endDate: String!
   id: ID!
   maxBid: Price!
   minBid: Price!
   orders: [Order!]!
   owner: Account!
   ownerAddress: String!
-  startDate: DateTime!
+  startDate: String!
   status: AuctionStatusEnum!
   topBid: Price
   topBidder: Account
@@ -78,7 +78,8 @@ input CreateAuctionArgs {
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
-  startDate: String = "1622122565944"
+  paymentTokenNonce: String!
+  startDate: String!
   tokenIdentifier: String!
 }
 
