@@ -73,6 +73,7 @@ export class AssetsService {
 
   async createNft(createAssetArgs: CreateNftArgs): Promise<TransactionNode> {
     const fileData = await this.fileService.uploadFile(createAssetArgs.file);
+    const attributes = `tags:${createAssetArgs.attributes.tags};description:${createAssetArgs.attributes.description}`;
 
     const contract = new SmartContract({
       address: new Address(createAssetArgs.ownerAddress),
@@ -88,7 +89,7 @@ export class AssetsService {
           this.nominateVal(createAssetArgs.royalties || '0', 100),
         ),
         BytesValue.fromUTF8(fileData.hash),
-        BytesValue.fromUTF8(createAssetArgs.attributes),
+        BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
       ],
       gasLimit: new GasLimit(60000000),
