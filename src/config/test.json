@@ -1,5 +1,34 @@
 {
-  "someconfig": {
+  "elrond": {
+    "elastic": "https://testnet-uindex.elrond.com",
+    "elrondApi": "https://testnet-api.elrond.com",
+    "gateway": "https://testnet-gateway.elrond.com",
+    "explorer": "https://testnet-explorer.elrond.com",
+    "chainID": "T",
+    "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqg6w343j3zvmtc4dxemcw0xty44rgpn3j62vsccfmkj",
+    "issueNftCost": 5
+  },
+  "caching": {
+    "getAllContractAddresses": 600,
+    "networkStatus": 60,
+    "networkConfig": 43200
+  },
+  "fileStorage": {
+    "host": "ipfs.infura.io",
+    "port": "5001",
+    "protocol": "https",
+    "cdnUrl": "https://ipfs.io/ipfs/"
+  },
 
+  "gas": {
+    "nftCreate": 60000000,
+    "nftTransfer": 60000000,
+    "startAuction": 60000000,
+    "endAuction": 60000000,
+    "bid": 60000000,
+    "withdraw": 60000000,
+    "issueToken": 60000000,
+    "setRoles": 60000000
   }
 }
