@@ -46,6 +46,7 @@
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "config": "^3.3.6",
+    "dotenv": "^10.0.0",
     "errorhandler": "^1.5.1",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.4",
