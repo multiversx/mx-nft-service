@@ -29,7 +29,12 @@ import { RedisCacheModule } from 'src/common/services/redis-cache.module';
     TypeOrmModule.forFeature([
       AssetsLikesRepository
     ]),
-    RedisCacheModule
+    RedisCacheModule.register({
+      host: process.env.REDIS_URL,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      db: 2,
+    }),
   ],
   exports: [AssetsService],
 })
