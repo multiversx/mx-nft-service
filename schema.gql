@@ -4,9 +4,9 @@
 
 type Account {
   address: ID!
-  assets(address: String): [Asset!]!
+  assets: [Asset!]!
   auctions: [Auction!]!
-  followers(address: String): [Account!]!
+  followers: [Account!]!
   following: [Account!]!
   herotag: String
   id: Float!
@@ -24,7 +24,7 @@ type Asset {
   hash: String!
   lastSale: DateTime!
   lastSalePrice: Price
-  likesCount(address: Float): Float!
+  likesCount: Float!
   name: String!
   ownerAddress: String!
   previousOwners: [Onwer!]!

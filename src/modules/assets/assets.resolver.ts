@@ -49,9 +49,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('likesCount', () => Number)
-  likesCount(@Parent() asset: Asset,
-    @Args('address', { nullable: true }) address: number) {
-    console.log('HERE3', address);
+  likesCount(@Parent() asset: Asset) {
     const { tokenIdentifier, tokenNonce } = asset;
     return this.assetsService.getAssetsLikesCount(tokenIdentifier, tokenNonce);
   }

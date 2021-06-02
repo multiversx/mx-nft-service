@@ -45,16 +45,12 @@ export class AccountsResolver {
   }
 
   @ResolveField('assets', () => [Asset])
-  async assets(@Parent() account: Account,
-    @Args('address', { nullable: true }) address?: string): Promise<Account[]> {
-    console.log('HERE', address);
+  async assets(@Parent() account: Account): Promise<Account[]> {
     return await this.assetsService.getAssetsForUser(account.address);
   }
 
   @ResolveField('followers', () => [Account])
-  async followers(@Parent() account: Account,
-    @Args('address', { nullable: true }) address?: string): Promise<Account[]> {
-    console.log("ADDRE", address);
+  async followers(@Parent() account: Account): Promise<Account[]> {
     return await this.accountsService.getFollowers(account.id);
   }
 
