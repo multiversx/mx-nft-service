@@ -29,4 +29,18 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
 
     return count > 0;
   }
+
+  addLike(assetLikeEntity: AssetLikeEntity): Promise<AssetLikeEntity> {
+    return this.save(assetLikeEntity);
+  }
+
+  removeLike(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<any> {
+    return this.delete({
+      tokenIdentifier,
+      tokenNonce,
+      address
+    });
+  }
 }

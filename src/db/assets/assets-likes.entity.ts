@@ -14,5 +14,9 @@ export class AssetLikeEntity {
   tokenNonce: number;
 
   @Column({ length: 62 })
-  address: string
+  address: string;
+
+  constructor(init?: Partial<AssetLikeEntity>) {
+    Object.assign(this, init);
+  }
 }

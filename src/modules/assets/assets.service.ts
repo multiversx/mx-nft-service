@@ -7,14 +7,17 @@ import {
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
+import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
 import { CreateNftArgs, TransferNftArgs, Asset } from './models';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class AssetsService {
@@ -22,7 +25,8 @@ export class AssetsService {
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
     private elrondGateway: ElrondProxyService,
-    private assetsLikesRepository: AssetsLikesRepository
+    private assetsLikesRepository: AssetsLikesRepository,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) { }
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
@@ -120,13 +124,78 @@ export class AssetsService {
 
   getAssetLikesCount(tokenIdentifier: string,
     tokenNonce: number): Promise<number> {
-    return this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+    try {
+      return this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+    } catch (err) {
+      this.logger.error('An error occurred while loading asset\'s likes count.', {
+        path: 'AssetsService.getAssetLikesCount',
+        tokenIdentifier,
+        tokenNonce,
+      });
+    }
   }
 
   isAssetLiked(tokenIdentifier: string,
     tokenNonce: number,
     address: string): Promise<boolean> {
-    return this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+    try {
+      return this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+    } catch (err) {
+      this.logger.error('An error occurred while checking if asset is liked.', {
+        path: 'AssetsService.isAssetLiked',
+        tokenIdentifier,
+        tokenNonce,
+        address
+      });
+      return Promise.resolve(false);
+    }
+  }
+
+  async addLike(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<boolean> {
+    try {
+      const assetLikeEntity = this.buildAssetLikeEntity(tokenIdentifier, tokenNonce, address);
+      await this.assetsLikesRepository.addLike(assetLikeEntity);
+      return true;
+    }
+    catch (err) {
+      this.logger.error('An error occurred while adding Asset Like.', {
+        path: 'AssetsService.addLike',
+        tokenIdentifier,
+        tokenNonce,
+        address
+      });
+      return false;
+    }
+  }
+
+  async removeLike(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<any> {
+    try {
+      await this.assetsLikesRepository.removeLike(tokenIdentifier, tokenNonce, address);
+      return true;
+    } catch (err) {
+      this.logger.error('An error occurred while removing Asset Like.', {
+        path: 'AssetsService.removeLike',
+        tokenIdentifier,
+        tokenNonce,
+        address
+      });
+      return false;
+    }
+  }
+
+  private buildAssetLikeEntity(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): AssetLikeEntity {
+    return new AssetLikeEntity(
+      {
+        tokenIdentifier,
+        tokenNonce,
+        address
+      });
   }
 
   private nominateVal(value: string, perc: number = 1): string {

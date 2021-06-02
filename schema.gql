@@ -14,6 +14,12 @@ type Account {
   profileImgUrl: String
 }
 
+input AddLikeArgs {
+  address: String!
+  tokenIdentifier: String!
+  tokenNonce: Float!
+}
+
 type Asset {
   attributes: String!
   auction: Auction
@@ -118,6 +124,7 @@ input IssueTokenArgs {
 }
 
 type Mutation {
+  addLike(input: AddLikeArgs!): Boolean!
   bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
@@ -126,6 +133,7 @@ type Mutation {
   endAuction(input: TokenActionArgs!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
+  removeLike(input: RemoveLikeArgs!): Boolean!
   saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
@@ -168,6 +176,12 @@ type Query {
   getAuctions(ownerAddress: String!): [Auction!]!
   getOrdersForAsset(tokenIdentifier: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
+}
+
+input RemoveLikeArgs {
+  address: String!
+  tokenIdentifier: String!
+  tokenNonce: Float!
 }
 
 input SetNftRolesArgs {

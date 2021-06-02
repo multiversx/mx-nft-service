@@ -16,6 +16,8 @@ import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
 import { Auction } from '../auctions/models';
 import { AuctionsService } from '../auctions/auctions.service';
+import { AddLikeArgs } from './models/add-like.dto';
+import { RemoveLikeArgs } from './models/remove-like.dto';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -41,6 +43,18 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args('input') input: TransferNftArgs,
   ): Promise<TransactionNode> {
     return await this.assetsService.transferNft(input);
+  }
+
+  @Mutation(() => Boolean)
+  addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
+    const { tokenIdentifier, tokenNonce, address } = input;
+    return this.assetsService.addLike(tokenIdentifier, tokenNonce, address);
+  }
+
+  @Mutation(() => Boolean)
+  removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
+    const { tokenIdentifier, tokenNonce, address } = input;
+    return this.assetsService.removeLike(tokenIdentifier, tokenNonce, address);
   }
 
   @Query(() => [Asset])
