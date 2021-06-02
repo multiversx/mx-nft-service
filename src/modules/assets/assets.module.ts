@@ -9,6 +9,7 @@ import { IpfsModule } from '../ipfs/ipfs.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisCacheModule } from 'src/common/services/redis-cache.module';
 
 @Module({
   providers: [AssetsService, AssetsResolver],
@@ -27,7 +28,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     TypeOrmModule.forFeature([
       AssetsLikesRepository
-    ])
+    ]),
+    RedisCacheModule
   ],
   exports: [AssetsService],
 })

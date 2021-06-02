@@ -18,6 +18,8 @@ import { TransactionNode } from '../transaction';
 import { CreateNftArgs, TransferNftArgs, Asset } from './models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class AssetsService {
@@ -27,6 +29,7 @@ export class AssetsService {
     private elrondGateway: ElrondProxyService,
     private assetsLikesRepository: AssetsLikesRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private redisCacheService: RedisCacheService
   ) { }
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
@@ -125,7 +128,9 @@ export class AssetsService {
   getAssetLikesCount(tokenIdentifier: string,
     tokenNonce: number): Promise<number> {
     try {
-      return this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+      const cacheKey = this.getAssetLikesCountCacheKey(tokenIdentifier, tokenNonce);
+      const getAssetLikes = () => this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+      return this.redisCacheService.getOrSet(cacheKey, getAssetLikes, 300);
     } catch (err) {
       this.logger.error('An error occurred while loading asset\'s likes count.', {
         path: 'AssetsService.getAssetLikesCount',
@@ -135,11 +140,18 @@ export class AssetsService {
     }
   }
 
+  private getAssetLikesCountCacheKey(tokenIdentifier: string,
+    tokenNonce: number) {
+    return generateCacheKeyFromParams('assetLikesCount', tokenIdentifier, tokenNonce);
+  }
+
   isAssetLiked(tokenIdentifier: string,
     tokenNonce: number,
     address: string): Promise<boolean> {
     try {
-      return this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+      const cacheKey = this.getAssetLikedCacheKey(tokenIdentifier, tokenNonce, address);
+      const getIsAssetLiked = () => this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+      return this.redisCacheService.getOrSet(cacheKey, getIsAssetLiked, 300);
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
         path: 'AssetsService.isAssetLiked',
@@ -155,8 +167,8 @@ export class AssetsService {
     tokenNonce: number,
     address: string): Promise<boolean> {
     try {
-      const assetLikeEntity = this.buildAssetLikeEntity(tokenIdentifier, tokenNonce, address);
-      await this.assetsLikesRepository.addLike(assetLikeEntity);
+      await this.saveAssetLikeEntity(tokenIdentifier, tokenNonce, address);
+      this.invalidateCache(tokenIdentifier, tokenNonce, address);
       return true;
     }
     catch (err) {
@@ -175,6 +187,7 @@ export class AssetsService {
     address: string): Promise<any> {
     try {
       await this.assetsLikesRepository.removeLike(tokenIdentifier, tokenNonce, address);
+      await this.invalidateCache(tokenIdentifier, tokenNonce, address);
       return true;
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
@@ -185,6 +198,39 @@ export class AssetsService {
       });
       return false;
     }
+  }
+
+  private async invalidateCache(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<void> {
+    await this.invalidateAssetLikeCache(tokenIdentifier, tokenNonce, address);
+    await this.invalidateAssetLikesCount(tokenIdentifier, tokenNonce);
+  }
+
+  private invalidateAssetLikesCount(tokenIdentifier: string,
+    tokenNonce: number): Promise<void> {
+    const cacheKey = this.getAssetLikesCountCacheKey(tokenIdentifier, tokenNonce);
+    return this.redisCacheService.del(cacheKey);
+  }
+
+  private invalidateAssetLikeCache(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<void> {
+    const cacheKey = this.getAssetLikedCacheKey(tokenIdentifier, tokenNonce, address);
+    return this.redisCacheService.del(cacheKey);
+  }
+
+  private getAssetLikedCacheKey(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string) {
+    return generateCacheKeyFromParams('isAssetLiked', tokenIdentifier, tokenNonce, address);
+  }
+
+  private saveAssetLikeEntity(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<any> {
+    const assetLikeEntity = this.buildAssetLikeEntity(tokenIdentifier, tokenNonce, address);
+    return this.assetsLikesRepository.addLike(assetLikeEntity);
   }
 
   private buildAssetLikeEntity(tokenIdentifier: string,
