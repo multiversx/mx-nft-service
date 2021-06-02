@@ -7,7 +7,7 @@
   "database": "db",
   "entities": ["dist/db/**/*.entity{.ts,.js}"],
   "migrations": ["dist/db/migrations/*{.ts,.js}"],
-  "synchronize": true,
+  "synchronize": false,
   "cli": {
     "migrationsDir": "src/db/migrations"
   }
