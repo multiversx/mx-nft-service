@@ -2,10 +2,10 @@ import { CacheModule, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
-import { FileService } from './file.service';
+import { IpfsService as IpfsService } from './ipfs.service';
 
 @Module({
-  providers: [FileService],
+  providers: [IpfsService],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -17,6 +17,6 @@ import { FileService } from './file.service';
       prefix: process.env.REDIS_PREFIX,
     }),
   ],
-  exports: [FileService],
+  exports: [IpfsService],
 })
-export class FileModule { }
+export class IpfsModule {}

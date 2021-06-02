@@ -14,11 +14,6 @@ type Account {
   profileImgUrl: String
 }
 
-input AddTagsArgs {
-  tags: [String!]!
-  tokenIdentifier: String!
-}
-
 type Asset {
   attributes: String!
   auction: Auction
@@ -121,7 +116,6 @@ input IssueTokenArgs {
 }
 
 type Mutation {
-  addTags(input: AddTagsArgs!): [Tag!]!
   bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
@@ -180,12 +174,6 @@ input SetNftRolesArgs {
   tokenIdentifier: String!
 }
 
-type Tag {
-  id: ID!
-  tag: String!
-  tokenId: String!
-}
-
 input TokenActionArgs {
   tokenIdentifier: String!
   tokenNonce: String!
@@ -210,6 +198,7 @@ input TransferNftArgs {
   ownerAddress: String!
   quantity: String!
   tokenIdentifier: String!
+  tokenNonce: String!
 }
 
 input UpdateAuctionArgs {

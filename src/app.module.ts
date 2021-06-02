@@ -20,7 +20,7 @@ import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { AuctionsModuleDb } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
-import { FileModule } from './modules/files/file.module';
+import { IpfsModule } from './modules/ipfs/ipfs.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -72,7 +72,7 @@ if (!!process.env.LOG_FILE) {
     ServicesModule,
     AuctionsModuleDb,
     AccountsModuleDb,
-    FileModule,
+    IpfsModule,
   ],
 })
 export class AppModule {}
