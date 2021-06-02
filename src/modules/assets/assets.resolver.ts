@@ -44,8 +44,18 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Query(() => [Asset])
-  async getAssetsForUser(@Args('address') address: string) {
+  async getAssetsForUser(@Args('address') address: string,
+    @Args('fromAddress') fromAddress?: string) {
+    console.log('HERE2', fromAddress);
     return this.assetsService.getAssetsForUser(address);
+  }
+
+  @ResolveField('likesCount', () => Number)
+  likesCount(@Parent() asset: Asset,
+    @Args('address', { nullable: true }) address: number) {
+    console.log('HERE3', address);
+    const { tokenIdentifier, tokenNonce } = asset;
+    return this.assetsService.getAssetsLikesCount(tokenIdentifier, tokenNonce);
   }
 
   @ResolveField('creator', () => Account)

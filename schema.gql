@@ -4,7 +4,7 @@
 
 type Account {
   address: ID!
-  assets: [Asset!]!
+  assets(address: String): [Asset!]!
   auctions: [Auction!]!
   followers: [Account!]!
   following: [Account!]!
@@ -24,6 +24,7 @@ type Asset {
   hash: String!
   lastSale: DateTime!
   lastSalePrice: Price
+  likesCount(address: Float): Float!
   name: String!
   ownerAddress: String!
   previousOwners: [Onwer!]!
@@ -162,7 +163,7 @@ type Price {
 
 type Query {
   getAccount(address: String, id: Float): Account!
-  getAssetsForUser(address: String!): [Asset!]!
+  getAssetsForUser(address: String!, fromAddress: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
   getOrdersForAsset(tokenIdentifier: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!

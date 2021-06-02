@@ -7,6 +7,8 @@ import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
+import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   providers: [AssetsService, AssetsResolver],
@@ -23,7 +25,10 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
       port: process.env.REDIS_PORT,
       prefix: process.env.REDIS_PREFIX,
     }),
+    TypeOrmModule.forFeature([
+      AssetsLikesRepository
+    ])
   ],
   exports: [AssetsService],
 })
-export class AssetsModuleGraph {}
+export class AssetsModuleGraph { }

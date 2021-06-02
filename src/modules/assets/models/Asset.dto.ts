@@ -41,6 +41,8 @@ export class Asset {
   auction: Auction;
   @Field(() => [String])
   tags: string[] = [];
+  @Field(() => Number)
+  likesCount: number;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);

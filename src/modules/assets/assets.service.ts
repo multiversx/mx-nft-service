@@ -10,6 +10,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
+import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
@@ -21,7 +22,8 @@ export class AssetsService {
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
     private elrondGateway: ElrondProxyService,
-  ) {}
+    private assetsLikesRepository: AssetsLikesRepository
+  ) { }
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
@@ -114,6 +116,11 @@ export class AssetsService {
       gasLimit: new GasLimit(60000000),
     });
     return transaction.toPlainObject();
+  }
+
+  getAssetsLikesCount(tokenIdentifier: string,
+    tokenNonce: number): Promise<number> {
+    return this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
   }
 
   private nominateVal(value: string, perc: number = 1): string {
