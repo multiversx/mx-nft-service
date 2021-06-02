@@ -1,5 +1,4 @@
-import { Attribute } from './Attributes.dto';
-import { ID, ObjectType, GraphQLISODateTime, Field } from '@nestjs/graphql';
+import { ID, ObjectType, GraphQLISODateTime, Field, Int } from '@nestjs/graphql';
 import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models/account.dto';
@@ -41,7 +40,7 @@ export class Asset {
   auction: Auction;
   @Field(() => [String])
   tags: string[] = [];
-  @Field(() => Number)
+  @Field(() => Int)
   likesCount: number;
   @Field(() => Boolean)
   isLiked: boolean;

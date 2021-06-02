@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent,
   Mutation,
+  Int,
 } from '@nestjs/graphql';
 import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../base.resolver';
@@ -62,7 +63,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return this.assetsService.getAssetsForUser(address);
   }
 
-  @ResolveField('likesCount', () => Number)
+  @ResolveField('likesCount', () => Int)
   likesCount(@Parent() asset: Asset) {
     const { tokenIdentifier, tokenNonce } = asset;
     return this.assetsService.getAssetLikesCount(tokenIdentifier, tokenNonce);

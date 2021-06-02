@@ -17,7 +17,7 @@ type Account {
 input AddLikeArgs {
   address: String!
   tokenIdentifier: String!
-  tokenNonce: Float!
+  tokenNonce: Int!
 }
 
 type Asset {
@@ -31,7 +31,7 @@ type Asset {
   isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
   lastSalePrice: Price
-  likesCount: Float!
+  likesCount: Int!
   name: String!
   ownerAddress: String!
   previousOwners: [Onwer!]!
@@ -181,7 +181,7 @@ type Query {
 input RemoveLikeArgs {
   address: String!
   tokenIdentifier: String!
-  tokenNonce: Float!
+  tokenNonce: Int!
 }
 
 input SetNftRolesArgs {
