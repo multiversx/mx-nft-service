@@ -52,7 +52,9 @@ export class AccountsResolver {
   }
 
   @ResolveField('followers', () => [Account])
-  async followers(@Parent() account: Account): Promise<Account[]> {
+  async followers(@Parent() account: Account,
+    @Args('address', { nullable: true }) address?: string): Promise<Account[]> {
+    console.log("ADDRE", address);
     return await this.accountsService.getFollowers(account.id);
   }
 

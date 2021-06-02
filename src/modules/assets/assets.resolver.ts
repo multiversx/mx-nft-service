@@ -44,9 +44,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Query(() => [Asset])
-  async getAssetsForUser(@Args('address') address: string,
-    @Args('fromAddress') fromAddress?: string) {
-    console.log('HERE2', fromAddress);
+  async getAssetsForUser(@Args('address') address: string) {
     return this.assetsService.getAssetsForUser(address);
   }
 
