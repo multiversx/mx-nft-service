@@ -43,6 +43,8 @@ export class Asset {
   tags: string[] = [];
   @Field(() => Number)
   likesCount: number;
+  @Field(() => Boolean)
+  isLiked: boolean;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);

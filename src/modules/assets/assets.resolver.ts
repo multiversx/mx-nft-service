@@ -51,7 +51,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('likesCount', () => Number)
   likesCount(@Parent() asset: Asset) {
     const { tokenIdentifier, tokenNonce } = asset;
-    return this.assetsService.getAssetsLikesCount(tokenIdentifier, tokenNonce);
+    return this.assetsService.getAssetLikesCount(tokenIdentifier, tokenNonce);
+  }
+
+  @ResolveField('isLiked', () => Number)
+  isLiked(@Parent() asset: Asset,
+    @Args('byAddress') byAddress: string) {
+    const { tokenIdentifier, tokenNonce } = asset;
+    return this.assetsService.isAssetLiked(tokenIdentifier, tokenNonce, byAddress);
   }
 
   @ResolveField('creator', () => Account)

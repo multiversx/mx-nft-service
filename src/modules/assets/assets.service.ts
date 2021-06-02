@@ -118,9 +118,15 @@ export class AssetsService {
     return transaction.toPlainObject();
   }
 
-  getAssetsLikesCount(tokenIdentifier: string,
+  getAssetLikesCount(tokenIdentifier: string,
     tokenNonce: number): Promise<number> {
     return this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+  }
+
+  isAssetLiked(tokenIdentifier: string,
+    tokenNonce: number,
+    address: string): Promise<boolean> {
+    return this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
   }
 
   private nominateVal(value: string, perc: number = 1): string {

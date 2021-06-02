@@ -22,6 +22,7 @@ type Asset {
   creatorAddress: String!
   currentOwner: Onwer!
   hash: String!
+  isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Float!
