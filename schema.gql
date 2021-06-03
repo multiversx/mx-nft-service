@@ -131,6 +131,7 @@ input IssueTokenArgs {
 }
 
 type Mutation {
+  addLike(input: AddLikeArgs!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
