@@ -10,9 +10,10 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheModule } from 'src/common/services/redis-cache.module';
+import { AssetsLikesService } from './assets-likes.service';
 
 @Module({
-  providers: [AssetsService, AssetsResolver],
+  providers: [AssetsService, AssetsLikesService, AssetsResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -36,6 +37,6 @@ import { RedisCacheModule } from 'src/common/services/redis-cache.module';
       db: 2,
     }),
   ],
-  exports: [AssetsService],
+  exports: [AssetsService, AssetsLikesService],
 })
 export class AssetsModuleGraph { }
