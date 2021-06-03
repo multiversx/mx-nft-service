@@ -1,5 +1,6 @@
 import {
   Address,
+  AddressValue,
   Balance,
   BytesValue,
   ContractFunction,
@@ -131,7 +132,7 @@ export class AssetsService {
         BytesValue.fromUTF8(transferNftArgs.tokenIdentifier),
         BytesValue.fromHex(this.nominateVal(transferNftArgs.tokenNonce || '1')),
         BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
-        BytesValue.fromUTF8(transferNftArgs.destinationAddress),
+        new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
