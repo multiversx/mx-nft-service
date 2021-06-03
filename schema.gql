@@ -14,6 +14,13 @@ type Account {
   profileImgUrl: String
 }
 
+input AddSftQuantityArgs {
+  nonce: Int!
+  ownerAddress: String!
+  quantity: Int!
+  tokenIdentifier: String!
+}
+
 type Asset {
   attributes: String!
   auction: Auction
@@ -116,6 +123,7 @@ input IssueTokenArgs {
 }
 
 type Mutation {
+  addSftQuantity(input: AddSftQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
