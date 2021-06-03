@@ -13,7 +13,12 @@ import { ElrondProxyService } from 'src/common/services/elrond-communication/elr
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
-import { CreateNftArgs, TransferNftArgs, Asset } from './models';
+import {
+  CreateNftArgs,
+  TransferNftArgs,
+  Asset,
+  AddSftQuantityArgs,
+} from './models';
 
 @Injectable()
 export class AssetsService {
@@ -66,6 +71,23 @@ export class AssetsService {
       ownerAddress: token.owner,
       uris: token.uris,
     });
+  }
+
+  async addQuantity(args: AddSftQuantityArgs): Promise<TransactionNode> {
+    const contract = new SmartContract({
+      address: new Address(args.ownerAddress),
+    });
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTCreate'),
+      value: Balance.egld(0),
+      args: [
+        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
+        BytesValue.fromUTF8(this.nominateVal(args.quantity.toString())),
+      ],
+      gasLimit: new GasLimit(60000000),
+    });
+    return transaction.toPlainObject();
   }
 
   async createNft(args: CreateNftArgs): Promise<TransactionNode> {
