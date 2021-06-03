@@ -14,9 +14,9 @@ type Account {
   profileImgUrl: String
 }
 
-input AddSftQuantityArgs {
+input AddBurnQuantityArgs {
+  addOrBurnRoleAddress: String!
   nonce: Int!
-  ownerAddress: String!
   quantity: Int!
   tokenIdentifier: String!
 }
@@ -123,8 +123,9 @@ input IssueTokenArgs {
 }
 
 type Mutation {
-  addSftQuantity(input: AddSftQuantityArgs!): TransactionNode!
+  addSftQuantity(input: AddBurnQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
+  burnQuantity(input: AddBurnQuantityArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -134,6 +135,8 @@ type Mutation {
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
   saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
+  stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
+  transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
@@ -182,6 +185,11 @@ input SetNftRolesArgs {
   tokenIdentifier: String!
 }
 
+input StopNftCreateArgs {
+  ownerAddress: String!
+  tokenIdentifier: String!
+}
+
 input TokenActionArgs {
   tokenIdentifier: String!
   tokenNonce: String!
@@ -207,6 +215,12 @@ input TransferNftArgs {
   quantity: String!
   tokenIdentifier: String!
   tokenNonce: String!
+}
+
+input TransferNftCreateRoleArgs {
+  addressToTransferList: [String!]!
+  ownerAddress: String!
+  tokenIdentifier: String!
 }
 
 input UpdateAuctionArgs {

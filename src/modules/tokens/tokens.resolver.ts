@@ -1,6 +1,10 @@
 import { Resolver, Args, Mutation, Query } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { TokenType } from './models';
+import {
+  StopNftCreateArgs,
+  TokenType,
+  TransferNftCreateRoleArgs,
+} from './models';
 import { IssueTokenArgs } from './models';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { TokensService } from './tokens.service';
@@ -35,6 +39,20 @@ export class TokensResolver extends BaseResolver(TokenType) {
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
     return await this.tokensService.setNftRoles(input);
+  }
+
+  @Mutation(() => TransactionNode)
+  async transferNFTCreateRole(
+    @Args('input') input: TransferNftCreateRoleArgs,
+  ): Promise<TransactionNode> {
+    return await this.tokensService.transferNFTCreateRole(input);
+  }
+
+  @Mutation(() => TransactionNode)
+  async stopNFTCreate(
+    @Args('input') input: StopNftCreateArgs,
+  ): Promise<TransactionNode> {
+    return await this.tokensService.stopNFTCreate(input);
   }
 
   @Query(() => [String])

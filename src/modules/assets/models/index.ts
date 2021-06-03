@@ -1,5 +1,5 @@
 export * from './CreateNftArgs';
-export * from './AddSftQuantityArgs';
+export * from './BurnAddQuantityArgs';
 export * from './TransferNftArgs';
 export * from './CreateAssetArgs';
 export * from './Asset.dto';

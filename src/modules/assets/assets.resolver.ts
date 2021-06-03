@@ -15,7 +15,7 @@ import {
   CreateNftArgs,
   TransferNftArgs,
   Onwer,
-  AddSftQuantityArgs,
+  AddBurnQuantityArgs,
 } from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
@@ -44,9 +44,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @Mutation(() => TransactionNode)
   async addSftQuantity(
-    @Args('input') input: AddSftQuantityArgs,
+    @Args('input') input: AddBurnQuantityArgs,
   ): Promise<TransactionNode> {
     return await this.assetsService.addQuantity(input);
+  }
+
+  @Mutation(() => TransactionNode)
+  async burnQuantity(
+    @Args('input') input: AddBurnQuantityArgs,
+  ): Promise<TransactionNode> {
+    return await this.assetsService.burnQuantity(input);
   }
 
   @Mutation(() => TransactionNode)
