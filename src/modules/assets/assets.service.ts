@@ -10,6 +10,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
+import { gas } from 'src/config';
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
@@ -78,14 +79,14 @@ export class AssetsService {
       address: new Address(args.ownerAddress),
     });
     const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
+      func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.tokenIdentifier),
         BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
-        BytesValue.fromUTF8(this.nominateVal(args.quantity.toString())),
+        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
-      gasLimit: new GasLimit(60000000),
+      gasLimit: new GasLimit(gas.addQuantity),
     });
     return transaction.toPlainObject();
   }
@@ -95,7 +96,6 @@ export class AssetsService {
     const asset = await this.ipfsService.uploadText(
       args.attributes.description,
     );
-
     const attributes = `tags:${args.attributes.tags};description:${asset.hash}`;
 
     const contract = new SmartContract({
@@ -113,7 +113,7 @@ export class AssetsService {
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
       ],
-      gasLimit: new GasLimit(60000000),
+      gasLimit: new GasLimit(gas.nftCreate),
     });
     return transaction.toPlainObject();
   }
@@ -133,7 +133,7 @@ export class AssetsService {
         BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
         BytesValue.fromUTF8(transferNftArgs.destinationAddress),
       ],
-      gasLimit: new GasLimit(60000000),
+      gasLimit: new GasLimit(gas.nftTransfer),
     });
     return transaction.toPlainObject();
   }

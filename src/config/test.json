@@ -1,7 +1,7 @@
 {
   "elrond": {
     "elastic": "https://testnet-uindex.elrond.com",
-    "elrondApi": "https://testnet-api.elrond.com",
+    "elrondApi": "https://testnet-beta-api.elrond.com",
     "gateway": "https://testnet-gateway.elrond.com",
     "explorer": "https://testnet-explorer.elrond.com",
     "chainID": "T",
@@ -29,6 +29,7 @@
     "bid": 60000000,
     "withdraw": 60000000,
     "issueToken": 60000000,
-    "setRoles": 60000000
+    "setRoles": 60000000,
+    "addQuantity": 10000000
   }
 }
