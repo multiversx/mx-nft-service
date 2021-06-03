@@ -1,9 +1,9 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
-export class AddSftQuantityArgs {
+export class HandleQuantityArgs {
   @Field(() => String)
-  ownerAddress: string;
+  addOrBurnRoleAddress: string;
 
   @Field(() => String)
   tokenIdentifier: string;

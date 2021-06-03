@@ -23,9 +23,9 @@ export class ElrondApiService {
   }
 
   async getNftsForUser(address: string): Promise<Token[]> {
-    const tokens = await this.getTokensForUser(address);
-    return tokens.filter((tkn) => {
-      return tkn.type === ErdTokenType.nonFungibleEsdt;
-    });
+    return await this.getService().doGetGeneric(
+      `accounts/${address}/nfts`,
+      (response) => response,
+    );
   }
 }

@@ -19,7 +19,7 @@ import {
   CreateNftArgs,
   TransferNftArgs,
   Asset,
-  AddSftQuantityArgs,
+  HandleQuantityArgs,
 } from './models';
 
 @Injectable()
@@ -75,9 +75,9 @@ export class AssetsService {
     });
   }
 
-  async addQuantity(args: AddSftQuantityArgs): Promise<TransactionNode> {
+  async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
     const contract = new SmartContract({
-      address: new Address(args.ownerAddress),
+      address: new Address(args.addOrBurnRoleAddress),
     });
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTAddQuantity'),
@@ -88,6 +88,23 @@ export class AssetsService {
         BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
+    });
+    return transaction.toPlainObject();
+  }
+
+  async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+    const contract = new SmartContract({
+      address: new Address(args.addOrBurnRoleAddress),
+    });
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTBurn'),
+      value: Balance.egld(0),
+      args: [
+        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
+        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
+      ],
+      gasLimit: new GasLimit(gas.burnQuantity),
     });
     return transaction.toPlainObject();
   }

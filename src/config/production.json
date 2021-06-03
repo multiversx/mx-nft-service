@@ -22,6 +22,12 @@
     "startAuction": 60000000,
     "endAuction": 60000000,
     "bid": 60000000,
-    "withdraw": 60000000
+    "withdraw": 60000000,
+    "issueToken": 60000000,
+    "setRoles": 60000000,
+    "stopNFTCreate": 60000000,
+    "transferNFTCreateRole": 60000000,
+    "burnQuantity": 10000000,
+    "addQuantity": 10000000
   }
 }
