@@ -114,6 +114,13 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input HandleQuantityArgs {
+  addOrBurnRoleAddress: String!
+  nonce: Int!
+  quantity: Int!
+  tokenIdentifier: String!
+}
+
 input IssueTokenArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -124,8 +131,13 @@ input IssueTokenArgs {
 }
 
 type Mutation {
+<<<<<<< HEAD
   addLike(input: AddLikeArgs!): Boolean!
+=======
+  addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
+>>>>>>> main
   bid(input: BidActionArgs!): TransactionNode!
+  burnQuantity(input: HandleQuantityArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -136,6 +148,8 @@ type Mutation {
   removeLike(input: RemoveLikeArgs!): Boolean!
   saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
+  stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
+  transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
@@ -190,6 +204,11 @@ input SetNftRolesArgs {
   tokenIdentifier: String!
 }
 
+input StopNftCreateArgs {
+  ownerAddress: String!
+  tokenIdentifier: String!
+}
+
 input TokenActionArgs {
   tokenIdentifier: String!
   tokenNonce: String!
@@ -215,6 +234,12 @@ input TransferNftArgs {
   quantity: String!
   tokenIdentifier: String!
   tokenNonce: String!
+}
+
+input TransferNftCreateRoleArgs {
+  addressToTransferList: [String!]!
+  ownerAddress: String!
+  tokenIdentifier: String!
 }
 
 input UpdateAuctionArgs {

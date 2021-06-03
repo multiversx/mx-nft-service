@@ -1,7 +1,7 @@
 {
   "elrond": {
     "elastic": "https://devnet-uindex.elrond.com",
-    "elrondApi": "https://devnet-api.elrond.com",
+    "elrondApi": "https://devnet-beta-api.elrond.com",
     "gateway": "https://devnet-gateway.elrond.com",
     "explorer": "https://devnet-explorer.elrond.com",
     "chainID": "D",
@@ -29,6 +29,10 @@
     "bid": 60000000,
     "withdraw": 60000000,
     "issueToken": 60000000,
-    "setRoles": 60000000
+    "setRoles": 60000000,
+    "stopNFTCreate": 60000000,
+    "transferNFTCreateRole": 60000000,
+    "burnQuantity": 10000000,
+    "addQuantity": 10000000
   }
 }
