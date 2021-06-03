@@ -1,7 +1,7 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
-export class AddBurnQuantityArgs {
+export class HandleQuantityArgs {
   @Field(() => String)
   addOrBurnRoleAddress: string;
 

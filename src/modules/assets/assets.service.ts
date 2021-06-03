@@ -19,7 +19,7 @@ import {
   CreateNftArgs,
   TransferNftArgs,
   Asset,
-  AddBurnQuantityArgs,
+  HandleQuantityArgs,
 } from './models';
 
 @Injectable()
@@ -75,7 +75,7 @@ export class AssetsService {
     });
   }
 
-  async addQuantity(args: AddBurnQuantityArgs): Promise<TransactionNode> {
+  async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
     const contract = new SmartContract({
       address: new Address(args.addOrBurnRoleAddress),
     });
@@ -92,7 +92,7 @@ export class AssetsService {
     return transaction.toPlainObject();
   }
 
-  async burnQuantity(args: AddBurnQuantityArgs): Promise<TransactionNode> {
+  async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
     const contract = new SmartContract({
       address: new Address(args.addOrBurnRoleAddress),
     });

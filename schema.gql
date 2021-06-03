@@ -14,13 +14,6 @@ type Account {
   profileImgUrl: String
 }
 
-input AddBurnQuantityArgs {
-  addOrBurnRoleAddress: String!
-  nonce: Int!
-  quantity: Int!
-  tokenIdentifier: String!
-}
-
 type Asset {
   attributes: String!
   auction: Auction
@@ -113,6 +106,13 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input HandleQuantityArgs {
+  addOrBurnRoleAddress: String!
+  nonce: Int!
+  quantity: Int!
+  tokenIdentifier: String!
+}
+
 input IssueTokenArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -123,9 +123,9 @@ input IssueTokenArgs {
 }
 
 type Mutation {
-  addSftQuantity(input: AddBurnQuantityArgs!): TransactionNode!
+  addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
-  burnQuantity(input: AddBurnQuantityArgs!): TransactionNode!
+  burnQuantity(input: HandleQuantityArgs!): TransactionNode!
   createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
