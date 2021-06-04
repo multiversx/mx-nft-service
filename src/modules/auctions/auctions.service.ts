@@ -68,6 +68,7 @@ export class AuctionsService {
   private mapEntityToDto(auction: AuctionEntity): Auction {
     return new Auction({
       id: auction.id,
+      status: auction.status,
       ownerAddress: auction.ownerAddress,
       tokenNonce: auction.tokenNonce,
       tokenIdentifier: auction.tokenIdentifier,
