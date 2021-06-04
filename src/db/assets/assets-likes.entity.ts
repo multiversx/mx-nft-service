@@ -5,7 +5,7 @@ export class AssetLikeEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'token_identifier', length: 17 })
+  @Column({ name: 'token_identifier', length: 25 })
   @Index()
   tokenIdentifier: string;
 
