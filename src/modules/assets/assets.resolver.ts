@@ -91,7 +91,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return this.assetsLikesService.getAssetLikesCount(tokenIdentifier, tokenNonce);
   }
 
-  @ResolveField('isLiked', () => Number)
+  @ResolveField('isLiked', () => Boolean)
   isLiked(@Parent() asset: Asset,
     @Args('byAddress') byAddress: string) {
     const { tokenIdentifier, tokenNonce } = asset;
