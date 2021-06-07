@@ -5,7 +5,6 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Price } from '../assets/models';
 import { AuctionEntity, AuctionsServiceDb } from '../../db';
 
-
 @Injectable()
 export class AuctionsService {
   constructor(
@@ -13,15 +12,14 @@ export class AuctionsService {
     private auctionServiceDb: AuctionsServiceDb,
   ) {}
 
-  async saveAuction(tokenId: string, nonce: number): Promise<Auction | any> {
-    const auctionData = await this.nftAbiService.getAuctionQuery(
-      tokenId,
-      nonce,
-    );
+  async saveAuction(auctionId: number): Promise<Auction | any> {
+    const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+    console.log('', auctionData);
     const savedAuction = await this.auctionServiceDb.insertAuction(
       new AuctionEntity({
-        token: tokenId,
-        nonce: nonce,
+        token: auctionData.auctioned_token.token_type.valueOf().toString(),
+        nonce: parseInt(auctionData.auctioned_token.nonce.valueOf().toString()),
+
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),
@@ -37,7 +35,7 @@ export class AuctionsService {
         status: AuctionStatusEnum.active,
       }),
     );
-    return savedAuction;
+    return 'savedAuction';
   }
 
   async getAuctions(address?: string): Promise<Auction[]> {
@@ -50,14 +48,8 @@ export class AuctionsService {
     return responseAuctions;
   }
 
-  async getActiveAuction(
-    token: string,
-    nonce: number,
-  ): Promise<Auction> {
-    const auction = await this.auctionServiceDb.getActiveAuction(
-      token,
-      nonce,
-    );
+  async getActiveAuction(token: string, nonce: number): Promise<Auction> {
+    const auction = await this.auctionServiceDb.getActiveAuction(token, nonce);
     return auction ? this.mapEntityToDto(auction) : undefined;
   }
 

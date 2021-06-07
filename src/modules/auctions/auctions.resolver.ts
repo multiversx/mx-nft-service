@@ -48,9 +48,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => TransactionNode)
   async endAuction(
-    @Args('input') input: TokenActionArgs,
+    @Args('auctionId') auctionId: number,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.endAuction(input);
+    return await this.nftAbiService.endAuction(auctionId);
   }
 
   @Mutation(() => Auction)
@@ -67,17 +67,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => TransactionNode)
   async withdraw(
-    @Args('input') input: TokenActionArgs,
+    @Args('auctionId') auctionId: number,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(input);
+    return await this.nftAbiService.withdraw(auctionId);
   }
 
   @Mutation(() => Auction)
-  async saveAuction(
-    @Args('token') tokenId: string,
-    @Args('nonce', { type: () => Int }) nonce: number,
-  ): Promise<Auction> {
-    return await this.auctionsService.saveAuction(tokenId, nonce);
+  async saveAuction(@Args('auctionId') auctionId: number): Promise<Auction> {
+    return await this.auctionsService.saveAuction(auctionId);
   }
 
   @Query(() => [Auction])

@@ -86,11 +86,13 @@ input CreateAccountArgs {
 input CreateAuctionArgs {
   deadline: String!
   maxBid: String!
+  maxOneSftPerPayment: Boolean!
   minBid: String!
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
   paymentTokenNonce: String!
+  quantity: Int!
   startDate: String!
   token: String!
 }
@@ -142,7 +144,7 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
-  endAuction(input: TokenActionArgs!): TransactionNode!
+  endAuction(auctionId: Float!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -153,7 +155,7 @@ type Mutation {
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
-  withdraw(input: TokenActionArgs!): TransactionNode!
+  withdraw(auctionId: Float!): TransactionNode!
 }
 
 type Onwer {
@@ -248,5 +250,7 @@ input UpdateAuctionArgs {
   status: AuctionStatusEnum!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload

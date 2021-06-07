@@ -46,17 +46,30 @@
           "multi_arg": true
         },
         {
+          "name": "opt_sft_max_one_per_payment",
+          "type": "optional<bool>",
+          "multi_arg": true
+        },
+        {
           "name": "opt_start_time",
           "type": "optional<u64>",
           "multi_arg": true
         }
       ],
-      "outputs": []
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "bid",
       "payableInTokens": ["*"],
       "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
         {
           "name": "nft_type",
           "type": "TokenIdentifier"
@@ -72,6 +85,21 @@
       "name": "endAuction",
       "inputs": [
         {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "buySftAfterEndAuction",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
+        {
           "name": "nft_type",
           "type": "TokenIdentifier"
         },
@@ -86,25 +114,35 @@
       "name": "withdraw",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
       "outputs": []
     },
     {
-      "name": "isAlreadyUpForAuction",
+      "name": "getMarketplaceCutPercentage",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidAuctionId",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "doesAuctionExist",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -115,14 +153,53 @@
       ]
     },
     {
-      "name": "getPaymentTokenForAuctionedNft",
+      "name": "getAuctionedToken",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
         {
-          "name": "nft_nonce",
+          "type": "optional<multi<TokenIdentifier,u64,BigUint>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getAuctionType",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "AuctionType"
+        }
+      ]
+    },
+    {
+      "name": "getAuctionStatus",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "AuctionStatus"
+        }
+      ]
+    },
+    {
+      "name": "getPaymentTokenForAuction",
+      "inputs": [
+        {
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -137,11 +214,7 @@
       "name": "getMinMaxBid",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -156,11 +229,7 @@
       "name": "getStartTime",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -175,11 +244,7 @@
       "name": "getDeadline",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -194,11 +259,7 @@
       "name": "getOriginalOwner",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -213,11 +274,7 @@
       "name": "getCurrentWinningBid",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -232,11 +289,7 @@
       "name": "getCurrentWinner",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -251,11 +304,7 @@
       "name": "getFullAuctionData",
       "inputs": [
         {
-          "name": "nft_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nft_nonce",
+          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -265,18 +314,47 @@
           "multi_result": true
         }
       ]
-    },
-    {
-      "name": "getMarketplaceCutPercentage",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
     }
   ],
   "types": {
+    "AuctionStatus": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "None",
+          "discriminant": 0
+        },
+        {
+          "name": "Running",
+          "discriminant": 1
+        },
+        {
+          "name": "SftWaitingForBuyOrOwnerClaim",
+          "discriminant": 2
+        }
+      ]
+    },
+    "AuctionType": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "None",
+          "discriminant": 0
+        },
+        {
+          "name": "Nft",
+          "discriminant": 1
+        },
+        {
+          "name": "SftAll",
+          "discriminant": 2
+        },
+        {
+          "name": "SftOnePerPayment",
+          "discriminant": 3
+        }
+      ]
+    },
     "EsdtToken": {
       "type": "struct",
       "fields": [
@@ -293,6 +371,22 @@
     "Auction": {
       "type": "struct",
       "fields": [
+        {
+          "name": "auctioned_token",
+          "type": "EsdtToken"
+        },
+        {
+          "name": "nr_auctioned_tokens",
+          "type": "BigUint"
+        },
+        {
+          "name": "auction_type",
+          "type": "AuctionType"
+        },
+        {
+          "name": "auction_status",
+          "type": "AuctionStatus"
+        },
         {
           "name": "payment_token",
           "type": "EsdtToken"
