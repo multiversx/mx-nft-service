@@ -20,8 +20,8 @@ export class AuctionsService {
     );
     const savedAuction = await this.auctionServiceDb.insertAuction(
       new AuctionEntity({
-        tokenIdentifier: tokenId,
-        tokenNonce: nonce,
+        token: tokenId,
+        nonce: nonce,
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),
@@ -70,8 +70,8 @@ export class AuctionsService {
       id: auction.id,
       status: auction.status,
       ownerAddress: auction.ownerAddress,
-      tokenNonce: auction.tokenNonce,
-      tokenIdentifier: auction.tokenIdentifier,
+      token: auction.token,
+      nonce: auction.nonce,
       startDate: auction.startDate,
       endDate: auction.endDate,
       minBid: new Price({

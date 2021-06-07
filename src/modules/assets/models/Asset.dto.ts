@@ -7,9 +7,11 @@ import { Auction } from 'src/modules/auctions/models';
 @ObjectType()
 export class Asset {
   @Field(() => ID)
-  tokenIdentifier!: string;
+  token!: string;
   @Field()
-  tokenNonce!: number;
+  nonce!: number;
+  @Field(() => String)
+  identifier!: string;
   @Field(() => Price, { nullable: true })
   lastSalePrice: Price = null;
   @Field({ nullable: false })

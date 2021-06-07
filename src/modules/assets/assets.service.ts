@@ -36,8 +36,9 @@ export class AssetsService {
     tokens.forEach((element) => {
       assets.push(
         new Asset({
-          tokenIdentifier: element.token,
-          tokenNonce: element.nonce,
+          token: element.token,
+          nonce: element.nonce,
+          identifier: element.tokenIdentifier,
           creatorAddress: element.creator,
           ownerAddress: element.owner,
           attributes: element.attributes,
@@ -53,25 +54,25 @@ export class AssetsService {
     return assets;
   }
 
-  async getAssetByTokenIdentifier(
+  async getAssetByToken(
     onwerAddress: string,
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Asset> {
-    const token = await this.elrondGateway.getNftByTokenIdentifier(
+    const nft = await this.elrondGateway.getNftByToken(
       onwerAddress,
-      tokenIdentifier,
-      tokenNonce,
+      token,
+      nonce,
     );
     return new Asset({
-      tokenIdentifier: tokenIdentifier,
-      tokenNonce: token.nonce,
-      name: token.name,
-      hash: decodeString(Buffer.from(token.hash)),
-      creatorAddress: token.creator,
-      royalties: token.royalties,
-      ownerAddress: token.owner,
-      uris: token.uris,
+      token: token,
+      nonce: nft.nonce,
+      name: nft.name,
+      hash: decodeString(Buffer.from(nft.hash)),
+      creatorAddress: nft.creator,
+      royalties: nft.royalties,
+      ownerAddress: nft.owner,
+      uris: nft.uris,
     });
   }
 

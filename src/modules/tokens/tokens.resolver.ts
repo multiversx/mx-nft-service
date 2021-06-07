@@ -6,7 +6,7 @@ import {
   TransferNftCreateRoleArgs,
 } from './models';
 import { IssueTokenArgs } from './models';
-import { SetNftRolesArgs } from './models/SetNftRolesArgs';
+import { SetNftRolesArgs } from './models';
 import { TokensService } from './tokens.service';
 import { TransactionNode } from '../transaction';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';

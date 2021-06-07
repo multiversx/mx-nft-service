@@ -4,11 +4,11 @@ import { BaseEntity } from '../base-entity';
 
 @Entity('auctions')
 export class AuctionEntity extends BaseEntity {
-  @Column({ name: 'token_identifier', length: 20 })
-  tokenIdentifier: string;
+  @Column({ name: 'token', length: 20 })
+  token: string;
 
-  @Column({ name: 'token_nonce' })
-  tokenNonce: number;
+  @Column({ name: 'nonce' })
+  nonce: number;
 
   @Column()
   status: AuctionStatusEnum;

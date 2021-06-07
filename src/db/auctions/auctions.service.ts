@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuctionStatusEnum } from '../../modules/auctions/models/Auction-status.enum';
+import { AuctionStatusEnum } from '../../modules/auctions/models';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
@@ -24,16 +24,16 @@ export class AuctionsServiceDb {
   }
 
   async getActiveAuction(
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<AuctionEntity> {
     return await this.auctionsRepository
       .createQueryBuilder('auction')
       .where(
-        `auction.token_identifier = :id and auction.token_nonce = :nonce and auction.status='active'`,
+        `auction.token = :id and auction.nonce = :nonce and auction.status='active'`,
         {
-          id: tokenIdentifier,
-          nonce: tokenNonce,
+          id: token,
+          nonce: nonce,
         },
       )
       .getOne();

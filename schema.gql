@@ -16,8 +16,8 @@ type Account {
 
 input AddLikeArgs {
   address: String!
-  tokenIdentifier: String!
-  tokenNonce: Int!
+  nonce: Int!
+  token: String!
 }
 
 type Asset {
@@ -28,17 +28,18 @@ type Asset {
   creatorAddress: String!
   currentOwner: Onwer!
   hash: String!
+  identifier: String!
   isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Int!
   name: String!
+  nonce: Float!
   ownerAddress: String!
   previousOwners: [Onwer!]!
   royalties: String!
   tags: [String!]!
-  tokenIdentifier: ID!
-  tokenNonce: Float!
+  token: ID!
   uris: [String!]!
 }
 
@@ -53,11 +54,13 @@ type Auction {
   id: ID!
   maxBid: Price!
   minBid: Price!
+  nonce: Float!
   orders: [Order!]!
   owner: Account!
   ownerAddress: String!
   startDate: String!
   status: AuctionStatusEnum!
+  token: String!
   topBid: Price
   topBidder: Account
 }
@@ -191,8 +194,8 @@ type Query {
 
 input RemoveLikeArgs {
   address: String!
-  tokenIdentifier: String!
-  tokenNonce: Int!
+  nonce: Int!
+  token: String!
 }
 
 input SetNftRolesArgs {
@@ -203,7 +206,7 @@ input SetNftRolesArgs {
 
 input StopNftCreateArgs {
   ownerAddress: String!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input TokenActionArgs {

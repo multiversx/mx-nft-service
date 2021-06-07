@@ -18,11 +18,11 @@ export class Auction {
   @Field(() => AuctionStatusEnum)
   status: AuctionStatusEnum;
 
-  @Field(() => Number)
-  tokenNonce: number;
-
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
+
+  @Field(() => Number)
+  nonce: number;
 
   @Field(() => Asset)
   asset: Asset;
