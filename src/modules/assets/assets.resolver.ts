@@ -17,6 +17,7 @@ import {
   TransferNftArgs,
   Onwer,
   HandleQuantityArgs,
+  PaginatedAsset,
 } from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
@@ -27,13 +28,13 @@ import { AddLikeArgs } from './models/add-like.dto';
 import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
 
-@Resolver(() => Asset)
-export class AssetsResolver extends BaseResolver(Asset) {
+@Resolver(() => PaginatedAsset)
+export class AssetsResolver extends BaseResolver(PaginatedAsset) {
   constructor(
     private assetsService: AssetsService,
     private accountsService: AccountsService,
     private auctionsService: AuctionsService,
-    private assetsLikesService: AssetsLikesService
+    private assetsLikesService: AssetsLikesService,
   ) {
     super();
   }
@@ -92,8 +93,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('isLiked', () => Boolean)
-  isLiked(@Parent() asset: Asset,
-    @Args('byAddress') byAddress: string) {
+  isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     const { token, nonce } = asset;
     return this.assetsLikesService.isAssetLiked(token, nonce, byAddress);
   }

@@ -44,6 +44,11 @@ type Asset {
   uris: [String!]!
 }
 
+type AssetEdge {
+  cursor: String!
+  node: Asset!
+}
+
 input AttributeInput {
   description: String!
   tags: [String!]!
@@ -185,6 +190,16 @@ enum OrderStatusEnum {
   inactive
 }
 
+type PaginatedAsset {
+  auction: Auction!
+  creator: Account!
+  currentOwner: Onwer!
+  edges: [AssetEdge!]
+  hasNextPage: Boolean!
+  nodes: [Asset!]
+  totalCount: Int!
+}
+
 type Price {
   amount: String!
   nonce: Int!
@@ -250,5 +265,7 @@ input UpdateAuctionArgs {
   status: AuctionStatusEnum!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
