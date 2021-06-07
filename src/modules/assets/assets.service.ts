@@ -27,8 +27,8 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
-    private elrondGateway: ElrondProxyService,
-  ) {}
+    private elrondGateway: ElrondProxyService
+  ) { }
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);

@@ -7,9 +7,13 @@ import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
+import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisCacheModule } from 'src/common/services/redis-cache.module';
+import { AssetsLikesService } from './assets-likes.service';
 
 @Module({
-  providers: [AssetsService, AssetsResolver],
+  providers: [AssetsService, AssetsLikesService, AssetsResolver],
   imports: [
     ElrondCommunicationModule,
     CacheManagerModule,
@@ -23,7 +27,16 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
       port: process.env.REDIS_PORT,
       prefix: process.env.REDIS_PREFIX,
     }),
+    TypeOrmModule.forFeature([
+      AssetsLikesRepository
+    ]),
+    RedisCacheModule.register({
+      host: process.env.REDIS_URL,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      db: 2,
+    }),
   ],
-  exports: [AssetsService],
+  exports: [AssetsService, AssetsLikesService],
 })
-export class AssetsModuleGraph {}
+export class AssetsModuleGraph { }

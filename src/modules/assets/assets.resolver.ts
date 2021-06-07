@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent,
   Mutation,
+  Int,
 } from '@nestjs/graphql';
 import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../base.resolver';
@@ -22,6 +23,9 @@ import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
 import { Auction } from '../auctions/models';
 import { AuctionsService } from '../auctions/auctions.service';
+import { AddLikeArgs } from './models/add-like.dto';
+import { RemoveLikeArgs } from './models/remove-like.dto';
+import { AssetsLikesService } from './assets-likes.service';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -29,6 +33,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsService: AssetsService,
     private accountsService: AccountsService,
     private auctionsService: AuctionsService,
+    private assetsLikesService: AssetsLikesService
   ) {
     super();
   }
@@ -63,9 +68,34 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return await this.assetsService.transferNft(input);
   }
 
+  @Mutation(() => Boolean)
+  addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
+    const { tokenIdentifier, tokenNonce, address } = input;
+    return this.assetsLikesService.addLike(tokenIdentifier, tokenNonce, address);
+  }
+
+  @Mutation(() => Boolean)
+  removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
+    const { tokenIdentifier, tokenNonce, address } = input;
+    return this.assetsLikesService.removeLike(tokenIdentifier, tokenNonce, address);
+  }
+
   @Query(() => [Asset])
   async getAssetsForUser(@Args('address') address: string) {
     return this.assetsService.getAssetsForUser(address);
+  }
+
+  @ResolveField('likesCount', () => Int)
+  likesCount(@Parent() asset: Asset) {
+    const { tokenIdentifier, tokenNonce } = asset;
+    return this.assetsLikesService.getAssetLikesCount(tokenIdentifier, tokenNonce);
+  }
+
+  @ResolveField('isLiked', () => Boolean)
+  isLiked(@Parent() asset: Asset,
+    @Args('byAddress') byAddress: string) {
+    const { tokenIdentifier, tokenNonce } = asset;
+    return this.assetsLikesService.isAssetLiked(tokenIdentifier, tokenNonce, byAddress);
   }
 
   @ResolveField('creator', () => Account)

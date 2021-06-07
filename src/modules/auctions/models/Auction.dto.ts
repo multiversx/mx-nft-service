@@ -18,8 +18,10 @@ export class Auction {
   @Field(() => AuctionStatusEnum)
   status: AuctionStatusEnum;
 
+  @Field(() => Number)
   tokenNonce: number;
 
+  @Field(() => String)
   tokenIdentifier: string;
 
   @Field(() => Asset)

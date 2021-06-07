@@ -13,4 +13,4 @@ import { RedisModule } from 'nestjs-redis';
     }),
   ],
 })
-export class ServicesModule {}
+export class ServicesModule { }
