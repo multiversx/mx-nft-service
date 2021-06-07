@@ -58,6 +58,8 @@ type Auction {
   ownerAddress: String!
   startDate: String!
   status: AuctionStatusEnum!
+  tokenIdentifier: String!
+  tokenNonce: Float!
   topBid: Price
   topBidder: Account
 }
@@ -69,6 +71,7 @@ enum AuctionStatusEnum {
 }
 
 input BidActionArgs {
+  auctionId: Int!
   price: String!
   tokenIdentifier: String!
   tokenNonce: String!
@@ -83,11 +86,13 @@ input CreateAccountArgs {
 input CreateAuctionArgs {
   deadline: String!
   maxBid: String!
+  maxOneSftPerPayment: Boolean!
   minBid: String!
   nonce: String!
   ownerAddress: String!
   paymentTokenIdentifier: String!
   paymentTokenNonce: String!
+  quantity: Int!
   startDate: String!
   tokenIdentifier: String!
 }
@@ -139,18 +144,18 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
-  endAuction(input: TokenActionArgs!): TransactionNode!
+  endAuction(auctionId: Float!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
-  saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
+  saveAuction(auctionId: Float!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
-  withdraw(input: TokenActionArgs!): TransactionNode!
+  withdraw(auctionId: Float!): TransactionNode!
 }
 
 type Onwer {
@@ -204,11 +209,6 @@ input SetNftRolesArgs {
 input StopNftCreateArgs {
   ownerAddress: String!
   tokenIdentifier: String!
-}
-
-input TokenActionArgs {
-  tokenIdentifier: String!
-  tokenNonce: String!
 }
 
 type TransactionNode {

@@ -13,15 +13,18 @@ export class AuctionsService {
     private auctionServiceDb: AuctionsServiceDb,
   ) {}
 
-  async saveAuction(tokenId: string, nonce: number): Promise<Auction | any> {
-    const auctionData = await this.nftAbiService.getAuctionQuery(
-      tokenId,
-      nonce,
-    );
+  async saveAuction(auctionId: number): Promise<Auction | any> {
+    const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+    console.log('', auctionData);
     const savedAuction = await this.auctionServiceDb.insertAuction(
       new AuctionEntity({
-        tokenIdentifier: tokenId,
-        tokenNonce: nonce,
+        tokenIdentifier: auctionData.auctioned_token.token_type
+          .valueOf()
+          .toString(),
+        tokenNonce: parseInt(
+          auctionData.auctioned_token.nonce.valueOf().toString(),
+        ),
+
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),
@@ -37,7 +40,7 @@ export class AuctionsService {
         status: AuctionStatusEnum.active,
       }),
     );
-    return savedAuction;
+    return 'savedAuction';
   }
 
   async getAuctions(address?: string): Promise<Auction[]> {
