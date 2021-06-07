@@ -186,6 +186,7 @@ type Price {
 
 type Query {
   getAccount(address: String, id: Float): Account!
+  getAssets: [Asset!]!
   getAssetsForUser(address: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
   getOrdersForAsset(tokenIdentifier: String!): [Order!]!

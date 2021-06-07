@@ -28,4 +28,14 @@ export class ElrondApiService {
       (response) => response,
     );
   }
+
+  async getAllNfts(
+    from: number = 0,
+    size: number = 50
+  ): Promise<Token[]> {
+    return await this.getService().doGetGeneric(
+      `nfts?from=${from}&size=${size}`,
+      (response) => response,
+    );
+  }
 }

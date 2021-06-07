@@ -10,12 +10,15 @@ import { SetNftRolesArgs } from './models';
 import { TokensService } from './tokens.service';
 import { TransactionNode } from '../transaction';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
+import { Asset } from '../assets/models';
+import { AssetsService } from '../assets/assets.service';
 
 @Resolver()
 export class TokensResolver extends BaseResolver(TokenType) {
   constructor(
     private tokensService: TokensService,
     private elrondGateway: ElrondProxyService,
+    private assetsService: AssetsService
   ) {
     super();
   }
@@ -60,5 +63,10 @@ export class TokensResolver extends BaseResolver(TokenType) {
     @Args('ownerAddress') ownerAddress: string,
   ): Promise<string[]> {
     return await this.elrondGateway.getRegisteredNfts(ownerAddress);
+  }
+
+  @Query(() => [Asset])
+  async getAssets(): Promise<Asset[]> {
+    return await this.assetsService.getAllAssets();
   }
 }

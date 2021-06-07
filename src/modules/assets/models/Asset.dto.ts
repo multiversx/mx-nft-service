@@ -3,6 +3,7 @@ import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models/account.dto';
 import { Auction } from 'src/modules/auctions/models';
+import { Token } from '../../../common/services/elrond-communication/models/interfaces/elrond/token.dto';
 
 @ObjectType()
 export class Asset {
@@ -49,5 +50,22 @@ export class Asset {
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
+  }
+
+  static fromToken(token: Token) {
+    return new Asset({
+      token: token.token,
+      nonce: token.nonce,
+      identifier: token.tokenIdentifier,
+      creatorAddress: token.creator,
+      ownerAddress: token.owner,
+      attributes: token.attributes,
+      lastSale: new Date(),
+      creationDate: new Date(),
+      hash: token.hash,
+      name: token.name,
+      royalties: token.royalties,
+      uris: token.uris || [''],
+    })
   }
 }

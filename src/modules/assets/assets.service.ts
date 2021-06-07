@@ -32,26 +32,16 @@ export class AssetsService {
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
-    let assets: Asset[] = [];
-    tokens.forEach((element) => {
-      assets.push(
-        new Asset({
-          token: element.token,
-          nonce: element.nonce,
-          identifier: element.tokenIdentifier,
-          creatorAddress: element.creator,
-          ownerAddress: element.owner,
-          attributes: element.attributes,
-          lastSale: new Date(),
-          creationDate: new Date(),
-          hash: element.hash,
-          name: element.name,
-          royalties: element.royalties,
-          uris: element.uris || [''],
-        }),
-      );
-    });
-    return assets;
+    return tokens.map(element =>
+      Asset.fromToken(element)
+    );
+  }
+
+  async getAllAssets(): Promise<Asset[] | any> {
+    const tokens = await this.apiService.getAllNfts();
+    return tokens.map(element =>
+      Asset.fromToken(element)
+    );
   }
 
   async getAssetByToken(
