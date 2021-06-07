@@ -24,8 +24,8 @@ import {
   U64Type,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { elrondConfig, gas } from 'src/config';
 import { TransactionNode } from '../transaction';
+import { elrondConfig, gas } from '../../config';
 
 @Injectable()
 export class NftMarketplaceAbiService {

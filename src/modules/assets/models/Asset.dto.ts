@@ -2,8 +2,8 @@ import { ID, ObjectType, GraphQLISODateTime, Field, Int } from '@nestjs/graphql'
 import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models/account.dto';
-import { Auction } from 'src/modules/auctions/models';
 import { Token } from '../../../common/services/elrond-communication/models/interfaces/elrond/token.dto';
+import { Auction } from '../../auctions/models';
 
 @ObjectType()
 export class Asset {
