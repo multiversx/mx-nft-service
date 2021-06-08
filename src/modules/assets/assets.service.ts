@@ -11,6 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { gas } from 'src/config';
 import '../../utils/extentions';
+import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
 import {
@@ -81,8 +82,8 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
-        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
+        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
@@ -98,8 +99,8 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
-        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
+        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
@@ -121,9 +122,9 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(args.quantity || '1')),
+        BytesValue.fromHex(nominateVal(args.quantity || 1)),
         BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(this.nominateVal(args.royalties || '0', 100)),
+        BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
@@ -144,20 +145,12 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(transferNftArgs.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.tokenNonce || '1')),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
+        BytesValue.fromHex(nominateVal(transferNftArgs.tokenNonce || 1)),
+        BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
     return transaction.toPlainObject();
-  }
-
-  private nominateVal(value: string, perc: number = 1): string {
-    let response = (parseFloat(value) * perc).toString(16);
-    if (response.length % 2 !== 0) {
-      response = '0' + response;
-    }
-    return response;
   }
 }

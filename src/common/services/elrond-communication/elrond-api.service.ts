@@ -2,6 +2,7 @@ import { ApiProvider } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
 import { Token } from './models/interfaces/elrond/token.dto';
+import { nominateVal } from 'src/modules/formatters';
 
 @Injectable()
 export class ElrondApiService {
@@ -26,7 +27,7 @@ export class ElrondApiService {
     tokenIdentifier: string,
     tokenNonce: number,
   ): Promise<Token> {
-    const identifier = `${tokenIdentifier}-${this.nominateVal(tokenNonce)}`;
+    const identifier = `${tokenIdentifier}-${nominateVal(tokenNonce)}`;
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts/${identifier}`,
       (response) => response,
@@ -38,13 +39,5 @@ export class ElrondApiService {
       `accounts/${address}/nfts`,
       (response) => response,
     );
-  }
-
-  private nominateVal(value: number): string {
-    let response = value.toString(16);
-    if (response.length % 2 !== 0) {
-      response = '0' + response;
-    }
-    return response;
   }
 }
