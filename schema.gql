@@ -27,7 +27,7 @@ type Asset {
   creator: Account!
   creatorAddress: String!
   currentOwner: Onwer!
-  hash: String!
+  hash: String
   isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
   lastSalePrice: Price
@@ -103,7 +103,7 @@ input CreateNftArgs {
   attributes: AttributeInput!
   name: String!
   ownerAddress: String!
-  quantity: String!
+  quantity: Int!
   royalties: String!
   tokenIdentifier: String!
 }
@@ -230,9 +230,9 @@ type TransactionNode {
 input TransferNftArgs {
   destinationAddress: String!
   ownerAddress: String!
-  quantity: String!
+  quantity: Int!
   tokenIdentifier: String!
-  tokenNonce: String!
+  tokenNonce: Int!
 }
 
 input TransferNftCreateRoleArgs {

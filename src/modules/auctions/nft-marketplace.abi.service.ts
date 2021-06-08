@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import {
-  CreateAuctionArgs,
-  TokenActionArgs,
-  AuctionAbi,
-  BidActionArgs,
-} from './models';
+import { CreateAuctionArgs, AuctionAbi, BidActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
