@@ -74,7 +74,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
         BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
@@ -91,7 +91,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTBurn'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
         BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
@@ -114,7 +114,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTCreate'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.quantity || '1')),
         BytesValue.fromUTF8(args.name),
         BytesValue.fromHex(this.nominateVal(args.royalties || '0', 100)),
@@ -137,8 +137,8 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(transferNftArgs.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.tokenNonce || '1')),
+        BytesValue.fromUTF8(transferNftArgs.token),
+        BytesValue.fromHex(this.nominateVal(transferNftArgs.nonce || '1')),
         BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],

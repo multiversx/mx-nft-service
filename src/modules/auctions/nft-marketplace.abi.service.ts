@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
+import { ElrondProxyService } from '../../common';
 import {
   CreateAuctionArgs,
   TokenActionArgs,
@@ -37,7 +37,7 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         new U64Value(new BigNumber(args.nonce)),
         new U64Value(new BigNumber(args.nonce)),
         new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
@@ -66,8 +66,8 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('bid'),
       value: Balance.fromString(args.price),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
-        new U64Value(new BigNumber(args.tokenNonce)),
+        BytesValue.fromUTF8(args.token),
+        new U64Value(new BigNumber(args.nonce)),
       ],
       gasLimit: new GasLimit(gas.bid),
     });
@@ -81,8 +81,8 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('withdraw'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
-        new U64Value(new BigNumber(args.tokenNonce)),
+        BytesValue.fromUTF8(args.token),
+        new U64Value(new BigNumber(args.nonce)),
       ],
       gasLimit: new GasLimit(gas.withdraw),
     });
@@ -95,8 +95,8 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('endAuction'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
-        new U64Value(new BigNumber(args.tokenNonce)),
+        BytesValue.fromUTF8(args.token),
+        new U64Value(new BigNumber(args.nonce)),
       ],
       gasLimit: new GasLimit(gas.endAuction),
     });

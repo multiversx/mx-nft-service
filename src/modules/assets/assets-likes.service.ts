@@ -30,55 +30,55 @@ export class AssetsLikesService {
     }
   }
 
-  isAssetLiked(tokenIdentifier: string,
-    tokenNonce: number,
+  isAssetLiked(token: string,
+    nonce: number,
     address: string): Promise<boolean> {
     try {
-      const cacheKey = this.getAssetLikedCacheKey(tokenIdentifier, tokenNonce, address);
-      const getIsAssetLiked = () => this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+      const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
+      const getIsAssetLiked = () => this.assetsLikesRepository.isAssetLiked(token, nonce, address);
       return this.redisCacheService.getOrSet(cacheKey, getIsAssetLiked, 300);
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
         path: 'AssetsService.isAssetLiked',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return Promise.resolve(false);
     }
   }
 
-  async addLike(tokenIdentifier: string,
-    tokenNonce: number,
+  async addLike(token: string,
+    nonce: number,
     address: string): Promise<boolean> {
     try {
-      await this.saveAssetLikeEntity(tokenIdentifier, tokenNonce, address);
-      this.invalidateCache(tokenIdentifier, tokenNonce, address);
+      await this.saveAssetLikeEntity(token, nonce, address);
+      this.invalidateCache(token, nonce, address);
       return true;
     }
     catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return false;
     }
   }
 
-  async removeLike(tokenIdentifier: string,
-    tokenNonce: number,
+  async removeLike(token: string,
+    nonce: number,
     address: string): Promise<any> {
     try {
-      await this.assetsLikesRepository.removeLike(tokenIdentifier, tokenNonce, address);
-      await this.invalidateCache(tokenIdentifier, tokenNonce, address);
+      await this.assetsLikesRepository.removeLike(token, nonce, address);
+      await this.invalidateCache(token, nonce, address);
       return true;
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
         path: 'AssetsService.removeLike',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return false;

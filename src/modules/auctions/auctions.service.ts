@@ -3,8 +3,8 @@ import '../../utils/extentions';
 import { Auction, AuctionStatusEnum, UpdateAuctionArgs } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Price } from '../assets/models';
-import { AuctionsServiceDb } from '../../db/auctions/auctions.service';
-import { AuctionEntity } from '../../db/auctions/auction.entity';
+import { AuctionEntity, AuctionsServiceDb } from '../../db';
+
 
 @Injectable()
 export class AuctionsService {
@@ -51,12 +51,12 @@ export class AuctionsService {
   }
 
   async getActiveAuction(
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Auction> {
     const auction = await this.auctionServiceDb.getActiveAuction(
-      tokenIdentifier,
-      tokenNonce,
+      token,
+      nonce,
     );
     return auction ? this.mapEntityToDto(auction) : undefined;
   }

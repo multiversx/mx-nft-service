@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { AuctionStatusEnum } from './Auction-status.enum';
-import { Account } from '../../accounts/models/account.dto';
+import { Account } from '../../accounts/models';
 import { Asset, Price } from '../../assets/models';
 import { Order } from '../../orders/models';
 

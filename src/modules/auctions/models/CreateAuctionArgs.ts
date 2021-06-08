@@ -6,7 +6,7 @@ export class CreateAuctionArgs {
   ownerAddress: string;
 
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
 
   @Field(() => String)
   nonce: string;

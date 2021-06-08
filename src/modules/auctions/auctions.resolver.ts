@@ -74,7 +74,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => Auction)
   async saveAuction(
-    @Args('tokenIdentifier') tokenId: string,
+    @Args('token') tokenId: string,
     @Args('nonce', { type: () => Int }) nonce: number,
   ): Promise<Auction> {
     return await this.auctionsService.saveAuction(tokenId, nonce);
