@@ -4,13 +4,11 @@ import {
   Balance,
   BytesValue,
   ContractFunction,
-  decodeString,
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { gas } from 'src/config';
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
@@ -27,21 +25,16 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
-    private elrondGateway: ElrondProxyService
-  ) { }
+  ) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
-    return tokens.map(element =>
-      Asset.fromToken(element)
-    );
+    return tokens.map((element) => Asset.fromToken(element));
   }
 
   async getAllAssets(): Promise<Asset[] | any> {
     const tokens = await this.apiService.getAllNfts();
-    return tokens.map(element =>
-      Asset.fromToken(element)
-    );
+    return tokens.map((element) => Asset.fromToken(element));
   }
 
   async getAssetByToken(
@@ -49,16 +42,16 @@ export class AssetsService {
     token: string,
     nonce: number,
   ): Promise<Asset> {
-    const nft = await this.elrondGateway.getNftByToken(
+    const nft = await this.apiService.getNftByTokenIdentifier(
       onwerAddress,
       token,
       nonce,
     );
     return new Asset({
-      token: token,
+      token: nft.token,
       nonce: nft.nonce,
       name: nft.name,
-      hash: decodeString(Buffer.from(nft.hash)),
+      hash: nft.hash,
       creatorAddress: nft.creator,
       royalties: nft.royalties,
       ownerAddress: nft.owner,
