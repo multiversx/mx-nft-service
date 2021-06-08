@@ -57,10 +57,10 @@ export class NftMarketplaceAbiService {
           new BooleanType(),
           new BooleanValue(args.maxOneSftPerPayment),
         ),
-        // new OptionalValue(
-        //   new U64Type(),
-        //   new U64Value(new BigNumber(args.startDate)),
-        // ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.startDate)),
+        ),
       ],
       gasLimit: new GasLimit(gas.startAuction),
     });
