@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { Repository } from 'typeorm';
-import { AuctionStatusEnum } from '../../modules/auctions/models/Auction-status.enum';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
