@@ -2,10 +2,12 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class CreateAccountArgs {
-  @Field(() => String!)
+  @Field()
   address: string;
-  @Field(() => String!)
+  @Field({ nullable: true })
   profileImgUrl: string;
-  @Field(() => String)
+  @Field({ nullable: true })
   herotag: string;
+  @Field({ nullable: true })
+  description: string;
 }

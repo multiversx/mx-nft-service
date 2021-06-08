@@ -1,5 +1,5 @@
 import { FollowerEntity } from '../followers/follower.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders/order.entity';
 
@@ -8,10 +8,13 @@ export class AccountEntity extends BaseEntity {
   @Column({ length: 62, unique: true })
   address: string;
 
+  @Column()
+  description: string;
+
   @Column({ name: 'profile_img_url' })
   profileImgUrl: string;
 
-  @Column()
+  @Column({ length: 62 })
   herotag: string;
 
   @OneToMany(() => OrderEntity, (order) => order.creationDate)

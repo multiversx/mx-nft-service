@@ -12,6 +12,9 @@ export class Account {
   address: string;
 
   @Field({ nullable: true })
+  description: string;
+
+  @Field({ nullable: true })
   profileImgUrl: string;
 
   @Field({ nullable: true })

@@ -6,6 +6,7 @@ type Account {
   address: ID!
   assets: [Asset!]!
   auctions: [Auction!]!
+  description: String
   followers: [Account!]!
   following: [Account!]!
   herotag: String
@@ -82,8 +83,9 @@ input BidActionArgs {
 
 input CreateAccountArgs {
   address: String!
-  herotag: String!
-  profileImgUrl: String!
+  description: String
+  herotag: String
+  profileImgUrl: String
 }
 
 input CreateAuctionArgs {
@@ -248,5 +250,7 @@ input UpdateAuctionArgs {
   status: AuctionStatusEnum!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
