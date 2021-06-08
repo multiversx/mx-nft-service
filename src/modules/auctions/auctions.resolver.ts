@@ -48,7 +48,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => TransactionNode)
   async endAuction(
-    @Args('auctionId') auctionId: number,
+    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.endAuction(auctionId);
   }
@@ -67,13 +67,15 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => TransactionNode)
   async withdraw(
-    @Args('auctionId') auctionId: number,
+    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.withdraw(auctionId);
   }
 
   @Mutation(() => Auction)
-  async saveAuction(@Args('auctionId') auctionId: number): Promise<Auction> {
+  async saveAuction(
+    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
+  ): Promise<Auction> {
     return await this.auctionsService.saveAuction(auctionId);
   }
 

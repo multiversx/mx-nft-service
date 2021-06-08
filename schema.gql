@@ -65,9 +65,11 @@ type Auction {
 }
 
 enum AuctionStatusEnum {
-  active
-  closed
-  ended
+  Closed
+  Ended
+  None
+  Running
+  SftWaitingForBuyOrOwnerClaim
 }
 
 input BidActionArgs {
@@ -144,18 +146,18 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
-  endAuction(auctionId: Float!): TransactionNode!
+  endAuction(auctionId: Int!): TransactionNode!
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
-  saveAuction(auctionId: Float!): Auction!
+  saveAuction(auctionId: Int!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
-  withdraw(auctionId: Float!): TransactionNode!
+  withdraw(auctionId: Int!): TransactionNode!
 }
 
 type Onwer {
