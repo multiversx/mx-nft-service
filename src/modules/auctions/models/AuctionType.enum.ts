@@ -1,4 +1,4 @@
-export enum AuctionType {
+export enum AuctionTypeEnum {
   None = 'None',
   Nft = 'Nft',
   SftAll = 'SftAll',

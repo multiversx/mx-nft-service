@@ -2,7 +2,6 @@ import { ApiProvider } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
 import { Token } from './models/interfaces/elrond/token.dto';
-import { ErdTokenType } from './models/enums/erd-token-types';
 
 @Injectable()
 export class ElrondApiService {

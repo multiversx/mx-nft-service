@@ -4,4 +4,5 @@ export * from './BidActionArgs';
 export * from './TokenActionArgs';
 export * from './CreateAuctionArgs';
 export * from './UpdateAuctionArgs';
-export * from './Auction-status.enum';
+export * from './AuctionStatus.enum';
+export * from './AuctionType.enum';
