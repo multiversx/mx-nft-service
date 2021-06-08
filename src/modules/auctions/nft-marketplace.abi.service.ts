@@ -226,12 +226,4 @@ export class NftMarketplaceAbiService {
       address: new Address(address),
     });
   }
-
-  private nominateVal(value: string, perc: number = 1): string {
-    let response = (parseFloat(value) * perc).toString(16);
-    if (response.length % 2 !== 0) {
-      response = '0' + response;
-    }
-    return response;
-  }
 }

@@ -4,12 +4,9 @@ import {
   SmartContract,
   AbiRegistry,
   SmartContractAbi,
-  ContractFunction,
-  BytesValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
-import { Token } from './models/interfaces/elrond/token.dto';
 
 @Injectable()
 export class ElrondProxyService {
@@ -33,28 +30,6 @@ export class ElrondProxyService {
       abi: abi,
     });
     return contract;
-  }
-
-  async getTokenProperties(token_identifier: string): Promise<any> {
-    const contract = new SmartContract({
-      address: new Address(elrondConfig.esdtNftAddress),
-    });
-    let response = await contract.runQuery(this.getService(), {
-      func: new ContractFunction('getTokenProperties'),
-      args: [BytesValue.fromUTF8(token_identifier)],
-    });
-    return response.returnData[2].base64ToBech32();
-  }
-
-  async getNftByTokenIdentifier(
-    address: string,
-    tokenIdentifier: string,
-    tokenNonce: number,
-  ): Promise<Token> {
-    return await this.getService().doGetGeneric(
-      `address/${address}/nft/${tokenIdentifier}/nonce/${tokenNonce}`,
-      (response) => response.tokenData,
-    );
   }
 
   async getRegisteredNfts(address: string): Promise<string[]> {

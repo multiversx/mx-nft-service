@@ -4,13 +4,11 @@ import {
   Balance,
   BytesValue,
   ContractFunction,
-  decodeString,
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { gas } from 'src/config';
 import '../../utils/extentions';
 import { IpfsService } from '../ipfs/ipfs.service';
@@ -27,8 +25,7 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
-    private elrondGateway: ElrondProxyService
-  ) { }
+  ) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
@@ -58,16 +55,16 @@ export class AssetsService {
     tokenIdentifier: string,
     tokenNonce: number,
   ): Promise<Asset> {
-    const token = await this.elrondGateway.getNftByTokenIdentifier(
+    const token = await this.apiService.getNftByTokenIdentifier(
       onwerAddress,
       tokenIdentifier,
       tokenNonce,
     );
     return new Asset({
-      tokenIdentifier: tokenIdentifier,
+      tokenIdentifier: token.token,
       tokenNonce: token.nonce,
       name: token.name,
-      hash: decodeString(Buffer.from(token.hash)),
+      hash: token.hash,
       creatorAddress: token.creator,
       royalties: token.royalties,
       ownerAddress: token.owner,

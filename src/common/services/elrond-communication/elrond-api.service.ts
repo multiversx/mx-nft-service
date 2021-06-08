@@ -21,10 +21,30 @@ export class ElrondApiService {
     );
   }
 
+  async getNftByTokenIdentifier(
+    address: string,
+    tokenIdentifier: string,
+    tokenNonce: number,
+  ): Promise<Token> {
+    const identifier = `${tokenIdentifier}-${this.nominateVal(tokenNonce)}`;
+    return await this.getService().doGetGeneric(
+      `accounts/${address}/nfts/${identifier}`,
+      (response) => response,
+    );
+  }
+
   async getNftsForUser(address: string): Promise<Token[]> {
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts`,
       (response) => response,
     );
+  }
+
+  private nominateVal(value: number): string {
+    let response = value.toString(16);
+    if (response.length % 2 !== 0) {
+      response = '0' + response;
+    }
+    return response;
   }
 }
