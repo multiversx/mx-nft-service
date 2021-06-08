@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import { FileUpload } from 'graphql-upload';
 
 @InputType()
@@ -15,8 +15,8 @@ export class CreateNftArgs {
   @Field(() => String)
   token: string;
 
-  @Field(() => String)
-  quantity: string;
+  @Field(() => Int)
+  quantity: number;
 
   @Field(() => String)
   name: string;
