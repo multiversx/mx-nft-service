@@ -103,7 +103,7 @@ input CreateNftArgs {
   attributes: AttributeInput!
   name: String!
   ownerAddress: String!
-  quantity: String!
+  quantity: Int!
   royalties: String!
   token: String!
 }

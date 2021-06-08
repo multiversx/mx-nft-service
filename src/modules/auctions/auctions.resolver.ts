@@ -13,7 +13,6 @@ import { Account } from '../accounts/models/account.dto';
 import {
   Auction,
   CreateAuctionArgs,
-  TokenActionArgs,
   BidActionArgs,
   UpdateAuctionArgs,
 } from './models';
