@@ -15,7 +15,7 @@ import { Token } from '../../../common';
 export class Asset {
   @Field(() => ID)
   token!: string;
-  @Field()
+  @Field(() => Int)
   nonce!: number;
   @Field(() => String)
   identifier!: string;
@@ -72,6 +72,6 @@ export class Asset {
       name: token.name,
       royalties: token.royalties ?? '',
       uris: token.uris || [''],
-    })
+    });
   }
 }

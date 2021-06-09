@@ -1,17 +1,17 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
 export class OrderEntity extends BaseEntity {
-  @Column({ name: 'price_token_identifier' })
-  priceTokenIdentifier: string;
+  @Column({ name: 'price_token' })
+  priceToken: string;
 
   @Column({ name: 'price_amount' })
   priceAmount: string;
 
   @Column({ name: 'price_nonce' })
-  priceNonce: string;
+  priceNonce: number;
 
   @Column()
   status: OrderStatusEnum;

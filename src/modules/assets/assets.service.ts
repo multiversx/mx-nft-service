@@ -43,11 +43,7 @@ export class AssetsService {
     token: string,
     nonce: number,
   ): Promise<Asset> {
-    const nft = await this.apiService.getNftByTokenIdentifier(
-      onwerAddress,
-      token,
-      nonce,
-    );
+    const nft = await this.apiService.getNftByToken(onwerAddress, token, nonce);
     return new Asset({
       token: nft.token,
       nonce: nft.nonce,

@@ -17,7 +17,7 @@ export class OrdersService {
       new OrderEntity({
         auctionId: createOrderArgs.auctionId,
         ownerAddress: createOrderArgs.ownerAddress,
-        priceTokenIdentifier: createOrderArgs.priceTokenIdentifier,
+        priceToken: createOrderArgs.priceToken,
         priceAmount: createOrderArgs.priceAmount,
         priceNonce: createOrderArgs.priceNonce,
       }),
@@ -45,9 +45,9 @@ export class OrdersService {
     );
     return lastOrder
       ? new Price({
-          tokenIdentifier: lastOrder?.priceTokenIdentifier,
+          token: lastOrder?.priceToken,
           amount: lastOrder?.priceAmount,
-          nonce: lastOrder?.priceAmount,
+          nonce: lastOrder?.priceNonce,
         })
       : undefined;
   }
@@ -63,7 +63,7 @@ export class OrdersService {
       price: new Price({
         amount: order.priceAmount,
         nonce: order.priceNonce,
-        tokenIdentifier: order.priceTokenIdentifier,
+        token: order.priceToken,
       }),
       status: order.status,
       creationDate: order.creationDate,

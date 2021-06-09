@@ -9,7 +9,7 @@ type Account {
   followers: [Account!]!
   following: [Account!]!
   herotag: String
-  id: Float!
+  id: Int!
   orders: [Order!]!
   profileImgUrl: String
 }
@@ -34,7 +34,7 @@ type Asset {
   lastSalePrice: Price
   likesCount: Int!
   name: String!
-  nonce: Float!
+  nonce: Int!
   ownerAddress: String!
   previousOwners: [Onwer!]!
   royalties: String!
@@ -54,7 +54,7 @@ type Auction {
   id: ID!
   maxBid: Price!
   minBid: Price!
-  nonce: Float!
+  nonce: Int!
   orders: [Order!]!
   owner: Account!
   ownerAddress: String!
@@ -93,8 +93,8 @@ input CreateAuctionArgs {
   minBid: String!
   nonce: String!
   ownerAddress: String!
-  paymentTokenIdentifier: String!
-  paymentTokenNonce: String!
+  paymentToken: String!
+  paymentTokenNonce: Int!
   quantity: Int!
   startDate: String!
   token: String!
@@ -110,11 +110,11 @@ input CreateNftArgs {
 }
 
 input CreateOrderArgs {
-  auctionId: Float!
+  auctionId: Int!
   ownerAddress: String!
   priceAmount: String!
-  priceNonce: String!
-  priceTokenIdentifier: String!
+  priceNonce: Int!
+  priceToken: String!
 }
 
 """
@@ -185,8 +185,8 @@ enum OrderStatusEnum {
 
 type Price {
   amount: String!
-  nonce: String!
-  tokenIdentifier: ID!
+  nonce: Int!
+  token: ID!
 }
 
 type Query {
@@ -194,7 +194,7 @@ type Query {
   getAssets: [Asset!]!
   getAssetsForUser(address: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
-  getOrdersForAsset(tokenIdentifier: String!): [Order!]!
+  getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
 }
 
@@ -207,7 +207,7 @@ input RemoveLikeArgs {
 input SetNftRolesArgs {
   addressToTransfer: String!
   roles: [String!]!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input StopNftCreateArgs {
@@ -220,7 +220,7 @@ type TransactionNode {
   data: String!
   gasLimit: Float!
   gasPrice: Float!
-  nonce: Float!
+  nonce: Int!
   options: String!
   receiver: String!
   sender: String!
@@ -240,7 +240,7 @@ input TransferNftArgs {
 input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   ownerAddress: String!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input UpdateAuctionArgs {

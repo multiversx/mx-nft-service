@@ -27,10 +27,10 @@ export class CreateAuctionArgs {
   deadline: string;
 
   @Field(() => String)
-  paymentTokenIdentifier: string;
+  paymentToken: string;
 
-  @Field(() => String)
-  paymentTokenNonce: string;
+  @Field(() => Int)
+  paymentTokenNonce: number;
 
   @Field(() => Boolean)
   maxOneSftPerPayment: boolean;

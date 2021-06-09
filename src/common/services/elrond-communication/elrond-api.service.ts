@@ -22,12 +22,12 @@ export class ElrondApiService {
     );
   }
 
-  async getNftByTokenIdentifier(
+  async getNftByToken(
     address: string,
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Token> {
-    const identifier = `${tokenIdentifier}-${nominateVal(tokenNonce)}`;
+    const identifier = `${token}-${nominateVal(nonce)}`;
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts/${identifier}`,
       (response) => response,

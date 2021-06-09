@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -21,7 +21,7 @@ export class Auction {
   @Field(() => String)
   token: string;
 
-  @Field(() => Number)
+  @Field(() => Int)
   nonce: number;
 
   @Field(() => Asset)

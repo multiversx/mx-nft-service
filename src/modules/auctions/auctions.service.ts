@@ -45,16 +45,12 @@ export class AuctionsService {
   private mapDtoToEntity(auctionId: number, auctionData: AuctionAbi): any {
     return new AuctionEntity({
       id: auctionId,
-      tokenIdentifier: auctionData.auctioned_token.token_type
-        .valueOf()
-        .toString(),
+      token: auctionData.auctioned_token.token_type.valueOf().toString(),
       nonce: parseInt(auctionData.auctioned_token.nonce.valueOf().toString()),
       status:
         AuctionStatusEnum[auctionData.auction_status.valueOf().toString()],
       type: AuctionTypeEnum[auctionData.auction_type.valueOf().toString()],
-      paymentTokenIdentifier: auctionData.payment_token.token_type
-        .valueOf()
-        .toString(),
+      paymentToken: auctionData.payment_token.token_type.valueOf().toString(),
       paymentNonce: parseInt(
         auctionData.payment_token.nonce.valueOf().toString(),
       ),
@@ -72,18 +68,18 @@ export class AuctionsService {
       id: auction.id,
       status: auction.status,
       ownerAddress: auction.ownerAddress,
-      token: auction.tokenIdentifier,
+      token: auction.token,
       nonce: auction.nonce,
       startDate: auction.startDate,
       endDate: auction.endDate,
       minBid: new Price({
-        tokenIdentifier: 'EGLD',
-        nonce: '1',
+        token: 'EGLD',
+        nonce: 1,
         amount: auction.minBid,
       }),
       maxBid: new Price({
-        tokenIdentifier: 'EGLD',
-        nonce: '1',
+        token: 'EGLD',
+        nonce: 1,
         amount: auction.maxBid,
       }),
     });

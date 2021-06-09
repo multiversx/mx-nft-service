@@ -43,7 +43,7 @@ export class NftMarketplaceAbiService {
         new BigUIntValue(new BigNumber(args.minBid)),
         new BigUIntValue(new BigNumber(args.maxBid)),
         new U64Value(new BigNumber(args.deadline)),
-        new TokenIdentifierValue(Buffer.from(args.paymentTokenIdentifier)),
+        new TokenIdentifierValue(Buffer.from(args.paymentToken)),
         new OptionalValue(
           new U64Type(),
           new U64Value(new BigNumber(args.paymentTokenNonce)),

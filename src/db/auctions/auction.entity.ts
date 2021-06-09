@@ -15,8 +15,8 @@ export class AuctionEntity {
   @Column({ name: 'modified_date', nullable: true })
   modifiedDate: Date;
 
-  @Column({ name: 'token_identifier', length: 20 })
-  tokenIdentifier: string;
+  @Column({ name: 'token', length: 20 })
+  token: string;
 
   @Column({ name: 'nonce' })
   nonce: number;
@@ -27,8 +27,8 @@ export class AuctionEntity {
   @Column()
   type: AuctionTypeEnum;
 
-  @Column({ name: 'payment_token_identifier', length: 20 })
-  paymentTokenIdentifier: string;
+  @Column({ name: 'payment_token', length: 20 })
+  paymentToken: string;
 
   @Column({ name: 'payment_nonce' })
   paymentNonce: number;

@@ -1,11 +1,11 @@
 import { Auction } from '../../auctions/models';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
 
 @ObjectType()
 export class Account {
-  @Field(() => Number)
+  @Field(() => Int)
   id: number;
 
   @Field(() => ID)

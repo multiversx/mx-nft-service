@@ -1,7 +1,7 @@
-import { ID, ObjectType, Field } from '@nestjs/graphql';
+import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
 @ObjectType()
 export class TransactionNode {
-  @Field()
+  @Field(() => Int)
   nonce: number;
   @Field()
   value: string;
