@@ -22,6 +22,7 @@ export class AccountsService {
         address: args.address,
         profileImgUrl: args.profileImgUrl,
         herotag: args.herotag,
+        description: args.description,
       }),
     );
   }

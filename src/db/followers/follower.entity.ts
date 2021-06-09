@@ -4,9 +4,6 @@ import { BaseEntity } from '../base-entity';
 
 @Entity('followers')
 export class FollowerEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
   @ManyToOne(() => AccountEntity, (account) => account.followers)
   follower: AccountEntity;
 
