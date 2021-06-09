@@ -13,6 +13,7 @@ import { gas } from 'src/config';
 import '../../utils/extentions';
 import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
+import PaginationArgs from '../PaginationArgs.dto';
 import { TransactionNode } from '../transaction';
 import {
   CreateNftArgs,
@@ -28,8 +29,11 @@ export class AssetsService {
     private ipfsService: IpfsService,
   ) {}
 
-  async getAssetsForUser(address: string): Promise<Asset[] | any> {
-    const tokens = await this.apiService.getNftsForUser(address);
+  async getAssetsForUser(
+    address: string,
+    page: PaginationArgs = new PaginationArgs(),
+  ): Promise<Asset[] | any> {
+    const tokens = await this.apiService.getNftsForUser(address, page);
     return tokens.map((element) => Asset.fromToken(element));
   }
 

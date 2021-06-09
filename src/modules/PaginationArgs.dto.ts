@@ -1,16 +1,14 @@
-import { ArgsType, Field, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
-@ArgsType()
+@InputType()
 export default class PaginationArgs {
   @Field(() => Int, { nullable: true })
-  first: number;
-
-  @Field(() => String, { nullable: true })
-  after: string;
+  offset: number;
 
   @Field(() => Int, { nullable: true })
-  last: number;
+  size: number;
 
-  @Field(() => String, { nullable: true })
-  before: string;
+  constructor(init?: Partial<PaginationArgs>) {
+    Object.assign(this, init);
+  }
 }

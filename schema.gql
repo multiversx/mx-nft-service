@@ -191,13 +191,15 @@ enum OrderStatusEnum {
 }
 
 type PaginatedAsset {
-  auction: Auction!
-  creator: Account!
-  currentOwner: Onwer!
   edges: [AssetEdge!]
   hasNextPage: Boolean!
   nodes: [Asset!]
   totalCount: Int!
+}
+
+input PaginationArgs {
+  offset: Int
+  size: Int
 }
 
 type Price {
@@ -209,7 +211,10 @@ type Price {
 type Query {
   getAccount(address: String, id: Float): Account!
   getAssets: [Asset!]!
-  getAssetsForUser(address: String!): [Asset!]!
+  getAssetsForUser(
+    address: String!
+    pagArgs: PaginationArgs!
+  ): [PaginatedAsset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
   getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!

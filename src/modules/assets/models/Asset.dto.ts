@@ -10,10 +10,9 @@ import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { Token } from '../../../common';
-import PaginationArgs from 'src/modules/paginationArgs.dto';
 
 @ObjectType()
-export class Asset extends PaginationArgs {
+export class Asset {
   @Field(() => ID)
   token!: string;
   @Field(() => Int)
@@ -56,7 +55,6 @@ export class Asset extends PaginationArgs {
   isLiked: boolean;
 
   constructor(init?: Partial<Asset>) {
-    super();
     Object.assign(this, init);
   }
 
