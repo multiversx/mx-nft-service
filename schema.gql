@@ -27,7 +27,7 @@ type Asset {
   creator: Account!
   creatorAddress: String!
   currentOwner: Onwer!
-  hash: String!
+  hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
@@ -74,6 +74,7 @@ enum AuctionStatusEnum {
 }
 
 input BidActionArgs {
+  auctionId: Int!
   nonce: String!
   price: String!
   token: String!
@@ -214,11 +215,6 @@ input StopNftCreateArgs {
   token: String!
 }
 
-input TokenActionArgs {
-  nonce: String!
-  token: String!
-}
-
 type TransactionNode {
   chainID: String!
   data: String!
@@ -235,9 +231,9 @@ type TransactionNode {
 
 input TransferNftArgs {
   destinationAddress: String!
-  nonce: String!
+  nonce: Int!
   ownerAddress: String!
-  quantity: String!
+  quantity: Int!
   token: String!
 }
 
@@ -252,7 +248,5 @@ input UpdateAuctionArgs {
   status: AuctionStatusEnum!
 }
 
-"""
-The `Upload` scalar type represents a file upload.
-"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload
