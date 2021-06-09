@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { ElrondProxyService } from '../../common';
-import {
-  CreateAuctionArgs,
-  TokenActionArgs,
-  AuctionAbi,
-  BidActionArgs,
-} from './models';
+import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
+import { CreateAuctionArgs, AuctionAbi, BidActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
   AddressValue,
   Balance,
   BigUIntValue,
+  BooleanType,
+  BooleanValue,
   BytesValue,
   ContractFunction,
   GasLimit,
@@ -33,22 +30,27 @@ export class NftMarketplaceAbiService {
 
   async createAuction(args: CreateAuctionArgs): Promise<TransactionNode> {
     const contract = this.getSmartContract(args.ownerAddress);
+
     let createAuctionTx = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.token),
         new U64Value(new BigNumber(args.nonce)),
-        new U64Value(new BigNumber(args.nonce)),
+        new U64Value(new BigNumber(args.quantity)),
         new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
         BytesValue.fromUTF8('auctionToken'),
         new BigUIntValue(new BigNumber(args.minBid)),
         new BigUIntValue(new BigNumber(args.maxBid)),
         new U64Value(new BigNumber(args.deadline)),
-        new TokenIdentifierValue(Buffer.from(args.paymentTokenIdentifier)),
+        new TokenIdentifierValue(Buffer.from(args.paymentToken)),
         new OptionalValue(
           new U64Type(),
           new U64Value(new BigNumber(args.paymentTokenNonce)),
+        ),
+        new OptionalValue(
+          new BooleanType(),
+          new BooleanValue(args.maxOneSftPerPayment),
         ),
         new OptionalValue(
           new U64Type(),
@@ -66,6 +68,7 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('bid'),
       value: Balance.fromString(args.price),
       args: [
+        new U64Value(new BigNumber(args.auctionId)),
         BytesValue.fromUTF8(args.token),
         new U64Value(new BigNumber(args.nonce)),
       ],
@@ -74,41 +77,49 @@ export class NftMarketplaceAbiService {
     return bid.toPlainObject();
   }
 
-  async withdraw(args: TokenActionArgs): Promise<TransactionNode> {
+  async withdraw(auctionId: number): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getSmartContract();
 
     let withdraw = contract.call({
       func: new ContractFunction('withdraw'),
       value: Balance.egld(0),
-      args: [
-        BytesValue.fromUTF8(args.token),
-        new U64Value(new BigNumber(args.nonce)),
-      ],
+      args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.withdraw),
     });
     return withdraw.toPlainObject();
   }
 
-  async endAuction(args: TokenActionArgs): Promise<TransactionNode> {
+  async endAuction(auctionId: number): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getSmartContract();
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
       value: Balance.egld(0),
-      args: [
-        BytesValue.fromUTF8(args.token),
-        new U64Value(new BigNumber(args.nonce)),
-      ],
+      args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.endAuction),
     });
     return endAuction.toPlainObject();
   }
 
-  async getAuctionQuery(tokenId: string, nonce: number): Promise<AuctionAbi> {
+  async buySftAfterEndAuction(args: BidActionArgs): Promise<TransactionNode> {
+    const contract = await this.elrondProxyService.getSmartContract();
+    let buySftAfterEndAuction = contract.call({
+      func: new ContractFunction('buySftAfterEndAuction'),
+      value: Balance.fromString(args.price),
+      args: [
+        new U64Value(new BigNumber(args.auctionId)),
+        BytesValue.fromUTF8(args.token),
+        new U64Value(new BigNumber(args.nonce)),
+      ],
+      gasLimit: new GasLimit(gas.endAuction),
+    });
+    return buySftAfterEndAuction.toPlainObject();
+  }
+
+  async getAuctionQuery(auctionId: number): Promise<AuctionAbi> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getFullAuctionData([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(nonce)),
+        new U64Value(new BigNumber(auctionId)),
       ])
     );
     let data = await contract.runQuery(
@@ -121,59 +132,64 @@ export class NftMarketplaceAbiService {
     return auction;
   }
 
-  async getOriginalOwner(tokenId: string, nonce: string): Promise<TypedValue> {
+  async getAuctionStatus(auctionId: string): Promise<AuctionAbi> {
+    const contract = await this.elrondProxyService.getSmartContract();
+    let getDataQuery = <Interaction>(
+      contract.methods.getAuctionStatus([
+        new U64Value(new BigNumber(auctionId)),
+      ])
+    );
+    let data = await contract.runQuery(
+      this.elrondProxyService.getService(),
+      getDataQuery.buildQuery(),
+    );
+    let result = getDataQuery.interpretQueryResponse(data);
+
+    const auction: AuctionAbi = result.firstValue.valueOf();
+    return auction;
+  }
+
+  async getOriginalOwner(auctionId: string): Promise<TypedValue> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getOriginalOwner([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(1)),
+        new U64Value(new BigNumber(auctionId)),
       ])
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  async getDeadline(tokenId: string, nonce: string): Promise<TypedValue> {
+  async getDeadline(auctionId: string): Promise<TypedValue> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
-      contract.methods.getDeadline([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(1)),
-      ])
+      contract.methods.getDeadline([new U64Value(new BigNumber(auctionId))])
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  async getMinMaxBid(tokenId: string, nonce: string): Promise<TypedValue> {
+  async getMinMaxBid(auctionId: string): Promise<TypedValue> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
-      contract.methods.getMinMaxBid([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(nonce)),
-      ])
+      contract.methods.getMinMaxBid([new U64Value(new BigNumber(auctionId))])
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  async getCurrentWinningBid(
-    tokenId: string,
-    nonce: string,
-  ): Promise<TypedValue> {
+  async getCurrentWinningBid(auctionId: string): Promise<TypedValue> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getCurrentWinningBid([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(nonce)),
+        new U64Value(new BigNumber(auctionId)),
       ])
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  async getCurrentWinner(tokenId: string, nonce: string): Promise<TypedValue> {
+  async getCurrentWinner(auctionId: string): Promise<TypedValue> {
     const contract = await this.elrondProxyService.getSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getCurrentWinner([
-        new TokenIdentifierValue(Buffer.from(tokenId)),
-        new U64Value(new BigNumber(nonce)),
+        new U64Value(new BigNumber(auctionId)),
       ])
     );
     return await this.getFirstQueryResult(contract, getDataQuery);

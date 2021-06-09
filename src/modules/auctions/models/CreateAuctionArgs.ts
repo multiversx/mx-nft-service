@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateAuctionArgs {
@@ -10,6 +10,9 @@ export class CreateAuctionArgs {
 
   @Field(() => String)
   nonce: string;
+
+  @Field(() => Int)
+  quantity: number;
 
   @Field(() => String)
   minBid: string;
@@ -24,8 +27,11 @@ export class CreateAuctionArgs {
   deadline: string;
 
   @Field(() => String)
-  paymentTokenIdentifier: string;
+  paymentToken: string;
 
-  @Field(() => String)
-  paymentTokenNonce: string;
+  @Field(() => Int)
+  paymentTokenNonce: number;
+
+  @Field(() => Boolean)
+  maxOneSftPerPayment: boolean;
 }

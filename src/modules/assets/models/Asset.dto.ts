@@ -1,4 +1,10 @@
-import { ID, ObjectType, GraphQLISODateTime, Field, Int } from '@nestjs/graphql';
+import {
+  ID,
+  ObjectType,
+  GraphQLISODateTime,
+  Field,
+  Int,
+} from '@nestjs/graphql';
 import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models';
@@ -9,13 +15,13 @@ import { Token } from '../../../common';
 export class Asset {
   @Field(() => ID)
   token!: string;
-  @Field()
+  @Field(() => Int)
   nonce!: number;
   @Field(() => String)
   identifier!: string;
   @Field(() => Price, { nullable: true })
   lastSalePrice: Price = null;
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   hash: string;
   @Field(() => String)
   creatorAddress: string;
@@ -66,6 +72,6 @@ export class Asset {
       name: token.name,
       royalties: token.royalties ?? '',
       uris: token.uris || [''],
-    })
+    });
   }
 }

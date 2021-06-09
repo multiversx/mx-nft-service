@@ -1,15 +1,15 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateOrderArgs {
-  @Field(() => String)
-  priceTokenIdentifier: string;
-  @Field(() => String)
+  @Field()
+  priceToken: string;
+  @Field()
   priceAmount: string;
-  @Field(() => String)
-  priceNonce: string;
+  @Field(() => Int)
+  priceNonce: number;
   @Field(() => String)
   ownerAddress: string;
-  @Field(() => Number)
+  @Field(() => Int)
   auctionId: number;
 }

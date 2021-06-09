@@ -4,15 +4,14 @@ import {
   Balance,
   BytesValue,
   ContractFunction,
-  decodeString,
   GasLimit,
   SmartContract,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { gas } from 'src/config';
 import '../../utils/extentions';
+import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
 import {
@@ -27,21 +26,16 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private ipfsService: IpfsService,
-    private elrondGateway: ElrondProxyService
-  ) { }
+  ) {}
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
-    return tokens.map(element =>
-      Asset.fromToken(element)
-    );
+    return tokens.map((element) => Asset.fromToken(element));
   }
 
   async getAllAssets(): Promise<Asset[] | any> {
     const tokens = await this.apiService.getAllNfts();
-    return tokens.map(element =>
-      Asset.fromToken(element)
-    );
+    return tokens.map((element) => Asset.fromToken(element));
   }
 
   async getAssetByToken(
@@ -49,16 +43,12 @@ export class AssetsService {
     token: string,
     nonce: number,
   ): Promise<Asset> {
-    const nft = await this.elrondGateway.getNftByToken(
-      onwerAddress,
-      token,
-      nonce,
-    );
+    const nft = await this.apiService.getNftByToken(onwerAddress, token, nonce);
     return new Asset({
-      token: token,
+      token: nft.token,
       nonce: nft.nonce,
       name: nft.name,
-      hash: decodeString(Buffer.from(nft.hash)),
+      hash: nft.hash,
       creatorAddress: nft.creator,
       royalties: nft.royalties,
       ownerAddress: nft.owner,
@@ -75,8 +65,8 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.token),
-        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
-        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
+        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
@@ -92,8 +82,8 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.token),
-        BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
-        BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
+        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
@@ -115,9 +105,9 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.token),
-        BytesValue.fromHex(this.nominateVal(args.quantity || '1')),
+        BytesValue.fromHex(nominateVal(args.quantity || 1)),
         BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(this.nominateVal(args.royalties || '0', 100)),
+        BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
@@ -138,20 +128,12 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(transferNftArgs.token),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.nonce || '1')),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
+        BytesValue.fromHex(nominateVal(transferNftArgs.nonce || 1)),
+        BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
     return transaction.toPlainObject();
-  }
-
-  private nominateVal(value: string, perc: number = 1): string {
-    let response = (parseFloat(value) * perc).toString(16);
-    if (response.length % 2 !== 0) {
-      response = '0' + response;
-    }
-    return response;
   }
 }

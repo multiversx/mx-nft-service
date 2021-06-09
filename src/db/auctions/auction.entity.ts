@@ -1,9 +1,20 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { AuctionStatusEnum } from '../../modules/auctions/models/Auction-status.enum';
-import { BaseEntity } from '../base-entity';
+import {
+  AuctionTypeEnum,
+  AuctionStatusEnum,
+} from 'src/modules/auctions/models';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity('auctions')
-export class AuctionEntity extends BaseEntity {
+export class AuctionEntity {
+  @PrimaryColumn({ unique: true })
+  id: number;
+
+  @Column({ name: 'creation_date' })
+  creationDate: Date = new Date(new Date().toUTCString());
+
+  @Column({ name: 'modified_date', nullable: true })
+  modifiedDate: Date;
+
   @Column({ name: 'token', length: 20 })
   token: string;
 
@@ -13,8 +24,11 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   status: AuctionStatusEnum;
 
-  @Column({ name: 'payment_token_identifier', length: 20 })
-  paymentTokenIdentifier: string;
+  @Column()
+  type: AuctionTypeEnum;
+
+  @Column({ name: 'payment_token', length: 20 })
+  paymentToken: string;
 
   @Column({ name: 'payment_nonce' })
   paymentNonce: number;
@@ -35,7 +49,6 @@ export class AuctionEntity extends BaseEntity {
   endDate: string;
 
   constructor(init?: Partial<AuctionEntity>) {
-    super();
     Object.assign(this, init);
   }
 }

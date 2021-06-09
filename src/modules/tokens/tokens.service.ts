@@ -117,7 +117,7 @@ export class TokensService {
 
   private getSetRolesArgs(args: SetNftRolesArgs) {
     let transactionArgs = [
-      BytesValue.fromUTF8(args.tokenIdentifier),
+      BytesValue.fromUTF8(args.token),
       new AddressValue(new Address(args.addressToTransfer)),
     ];
     args.roles.forEach((role) => {
@@ -127,9 +127,7 @@ export class TokensService {
   }
 
   private getTransferCreateRoleArgs(args: TransferNftCreateRoleArgs) {
-    let transactionArgs: TypedValue[] = [
-      BytesValue.fromUTF8(args.tokenIdentifier),
-    ];
+    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.token)];
     args.addressToTransferList.forEach((address) => {
       transactionArgs.push(new AddressValue(new Address(address)));
     });

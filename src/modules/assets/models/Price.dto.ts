@@ -1,13 +1,13 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Price {
   @Field(() => ID)
-  tokenIdentifier: string;
-  @Field(() => String)
+  token: string;
+  @Field()
   amount: string;
-  @Field(() => String)
-  nonce: string;
+  @Field(() => Int)
+  nonce: number;
 
   constructor(init?: Partial<Price>) {
     Object.assign(this, init);

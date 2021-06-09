@@ -1,11 +1,12 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum AuctionStatusEnum {
-  active = 'active',
-  closed = 'closed',
-  ended = 'ended',
+  None = 'None',
+  Running = 'Running',
+  SftWaitingForBuyOrOwnerClaim = 'SftWaitingForBuyOrOwnerClaim',
+  Closed = 'Closed',
+  Ended = 'Ended',
 }
-
 registerEnumType(AuctionStatusEnum, {
   name: 'AuctionStatusEnum',
 });

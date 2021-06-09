@@ -4,12 +4,20 @@ import {
   TokenIdentifierValue,
   U64Value,
 } from '@elrondnetwork/erdjs';
+import { AuctionStatusEnum } from '.';
+import { AuctionTypeEnum } from './AuctionType.enum';
 
 export interface AuctionAbi {
+  auctioned_token: {
+    token_type: TokenIdentifierValue;
+    nonce: U64Value;
+  };
   payment_token: {
     token_type: TokenIdentifierValue;
     nonce: U64Value;
   };
+  auction_type: AuctionTypeEnum;
+  auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
   max_bid: BigUIntValue;
   deadline: U64Value;

@@ -3,7 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class TransferNftCreateRoleArgs {
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
   @Field(() => String)
   ownerAddress: string;
   @Field(() => [String])
