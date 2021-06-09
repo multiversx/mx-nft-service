@@ -13,7 +13,7 @@ export class AttributeInput {
 @InputType()
 export class CreateNftArgs {
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
 
   @Field(() => String)
   quantity: string;

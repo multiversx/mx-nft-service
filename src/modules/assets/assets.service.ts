@@ -32,46 +32,37 @@ export class AssetsService {
 
   async getAssetsForUser(address: string): Promise<Asset[] | any> {
     const tokens = await this.apiService.getNftsForUser(address);
-    let assets: Asset[] = [];
-    tokens.forEach((element) => {
-      assets.push(
-        new Asset({
-          tokenIdentifier: element.token,
-          tokenNonce: element.nonce,
-          creatorAddress: element.creator,
-          ownerAddress: element.owner,
-          attributes: element.attributes,
-          lastSale: new Date(),
-          creationDate: new Date(),
-          hash: element.hash,
-          name: element.name,
-          royalties: element.royalties,
-          uris: element.uris || [''],
-        }),
-      );
-    });
-    return assets;
+    return tokens.map(element =>
+      Asset.fromToken(element)
+    );
   }
 
-  async getAssetByTokenIdentifier(
+  async getAllAssets(): Promise<Asset[] | any> {
+    const tokens = await this.apiService.getAllNfts();
+    return tokens.map(element =>
+      Asset.fromToken(element)
+    );
+  }
+
+  async getAssetByToken(
     onwerAddress: string,
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Asset> {
-    const token = await this.elrondGateway.getNftByTokenIdentifier(
+    const nft = await this.elrondGateway.getNftByToken(
       onwerAddress,
-      tokenIdentifier,
-      tokenNonce,
+      token,
+      nonce,
     );
     return new Asset({
-      tokenIdentifier: tokenIdentifier,
-      tokenNonce: token.nonce,
-      name: token.name,
-      hash: decodeString(Buffer.from(token.hash)),
-      creatorAddress: token.creator,
-      royalties: token.royalties,
-      ownerAddress: token.owner,
-      uris: token.uris,
+      token: token,
+      nonce: nft.nonce,
+      name: nft.name,
+      hash: decodeString(Buffer.from(nft.hash)),
+      creatorAddress: nft.creator,
+      royalties: nft.royalties,
+      ownerAddress: nft.owner,
+      uris: nft.uris,
     });
   }
 
@@ -83,7 +74,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
         BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
@@ -100,7 +91,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTBurn'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.nonce.toString())),
         BytesValue.fromHex(this.nominateVal(args.quantity.toString())),
       ],
@@ -123,7 +114,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTCreate'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.tokenIdentifier),
+        BytesValue.fromUTF8(args.token),
         BytesValue.fromHex(this.nominateVal(args.quantity || '1')),
         BytesValue.fromUTF8(args.name),
         BytesValue.fromHex(this.nominateVal(args.royalties || '0', 100)),
@@ -146,8 +137,8 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(transferNftArgs.tokenIdentifier),
-        BytesValue.fromHex(this.nominateVal(transferNftArgs.tokenNonce || '1')),
+        BytesValue.fromUTF8(transferNftArgs.token),
+        BytesValue.fromHex(this.nominateVal(transferNftArgs.nonce || '1')),
         BytesValue.fromHex(this.nominateVal(transferNftArgs.quantity || '1')),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],

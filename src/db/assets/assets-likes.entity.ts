@@ -5,13 +5,13 @@ export class AssetLikeEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'token_identifier', length: 25 })
+  @Column({ name: 'token', length: 25 })
   @Index()
-  tokenIdentifier: string;
+  token: string;
 
-  @Column({ name: 'token_nonce' })
+  @Column({ name: 'nonce' })
   @Index()
-  tokenNonce: number;
+  nonce: number;
 
   @Column({ length: 62 })
   address: string;

@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Account } from '../../accounts/models/account.dto';
+import { Account } from '../../accounts/models';
 
 @ObjectType()
 export class Onwer {

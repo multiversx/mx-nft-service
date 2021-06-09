@@ -40,7 +40,7 @@ export class TokensService {
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
       value: Balance.egld(0),
-      args: [BytesValue.fromUTF8(args.tokenIdentifier)],
+      args: [BytesValue.fromUTF8(args.token)],
       gasLimit: new GasLimit(gas.stopNFTCreate),
     });
     return transaction.toPlainObject();

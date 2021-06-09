@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { Auction, AuctionStatusEnum, UpdateAuctionArgs } from './models';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Price } from '../assets/models';
+import { AuctionEntity, AuctionsServiceDb } from '../../db';
+
 
 @Injectable()
 export class AuctionsService {
@@ -20,8 +20,8 @@ export class AuctionsService {
     );
     const savedAuction = await this.auctionServiceDb.insertAuction(
       new AuctionEntity({
-        tokenIdentifier: tokenId,
-        tokenNonce: nonce,
+        token: tokenId,
+        nonce: nonce,
         paymentTokenIdentifier: auctionData.payment_token.token_type
           .valueOf()
           .toString(),
@@ -51,12 +51,12 @@ export class AuctionsService {
   }
 
   async getActiveAuction(
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Auction> {
     const auction = await this.auctionServiceDb.getActiveAuction(
-      tokenIdentifier,
-      tokenNonce,
+      token,
+      nonce,
     );
     return auction ? this.mapEntityToDto(auction) : undefined;
   }
@@ -70,8 +70,8 @@ export class AuctionsService {
       id: auction.id,
       status: auction.status,
       ownerAddress: auction.ownerAddress,
-      tokenNonce: auction.tokenNonce,
-      tokenIdentifier: auction.tokenIdentifier,
+      token: auction.token,
+      nonce: auction.nonce,
       startDate: auction.startDate,
       endDate: auction.endDate,
       minBid: new Price({

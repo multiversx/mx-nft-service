@@ -1,8 +1,8 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Account } from 'src/modules/accounts/models/account.dto';
-import { Asset, Price } from 'src/modules/assets/models';
-import { Order } from 'src/modules/orders/models';
 import { AuctionStatusEnum } from './Auction-status.enum';
+import { Account } from '../../accounts/models';
+import { Asset, Price } from '../../assets/models';
+import { Order } from '../../orders/models';
 
 @ObjectType()
 export class Auction {
@@ -18,11 +18,11 @@ export class Auction {
   @Field(() => AuctionStatusEnum)
   status: AuctionStatusEnum;
 
-  @Field(() => Number)
-  tokenNonce: number;
-
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
+
+  @Field(() => Number)
+  nonce: number;
 
   @Field(() => Asset)
   asset: Asset;

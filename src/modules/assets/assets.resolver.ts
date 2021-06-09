@@ -70,14 +70,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @Mutation(() => Boolean)
   addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
-    const { tokenIdentifier, tokenNonce, address } = input;
-    return this.assetsLikesService.addLike(tokenIdentifier, tokenNonce, address);
+    const { token, nonce, address } = input;
+    return this.assetsLikesService.addLike(token, nonce, address);
   }
 
   @Mutation(() => Boolean)
   removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
-    const { tokenIdentifier, tokenNonce, address } = input;
-    return this.assetsLikesService.removeLike(tokenIdentifier, tokenNonce, address);
+    const { token, nonce, address } = input;
+    return this.assetsLikesService.removeLike(token, nonce, address);
   }
 
   @Query(() => [Asset])
@@ -87,15 +87,15 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('likesCount', () => Int)
   likesCount(@Parent() asset: Asset) {
-    const { tokenIdentifier, tokenNonce } = asset;
-    return this.assetsLikesService.getAssetLikesCount(tokenIdentifier, tokenNonce);
+    const { token, nonce } = asset;
+    return this.assetsLikesService.getAssetLikesCount(token, nonce);
   }
 
   @ResolveField('isLiked', () => Boolean)
   isLiked(@Parent() asset: Asset,
     @Args('byAddress') byAddress: string) {
-    const { tokenIdentifier, tokenNonce } = asset;
-    return this.assetsLikesService.isAssetLiked(tokenIdentifier, tokenNonce, byAddress);
+    const { token, nonce } = asset;
+    return this.assetsLikesService.isAssetLiked(token, nonce, byAddress);
   }
 
   @ResolveField('creator', () => Account)
@@ -112,10 +112,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('auction', () => Auction)
   async auction(@Parent() asset: Asset) {
-    const { tokenIdentifier, tokenNonce } = asset;
-    return await this.auctionsService.getActiveAuction(
-      tokenIdentifier,
-      tokenNonce,
-    );
+    const { token, nonce } = asset;
+    return await this.auctionsService.getActiveAuction(token, nonce);
   }
 }

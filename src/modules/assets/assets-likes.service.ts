@@ -15,121 +15,117 @@ export class AssetsLikesService {
     private redisCacheService: RedisCacheService
   ) { }
 
-  getAssetLikesCount(tokenIdentifier: string,
-    tokenNonce: number): Promise<number> {
+  getAssetLikesCount(identifier: string,
+    nonce: number): Promise<number> {
     try {
-      const cacheKey = this.getAssetLikesCountCacheKey(tokenIdentifier, tokenNonce);
-      const getAssetLikes = () => this.assetsLikesRepository.getAssetLikesCount(tokenIdentifier, tokenNonce);
+      const cacheKey = this.getAssetLikesCountCacheKey(identifier, nonce);
+      const getAssetLikes = () => this.assetsLikesRepository.getAssetLikesCount(identifier, nonce);
       return this.redisCacheService.getOrSet(cacheKey, getAssetLikes, 300);
     } catch (err) {
       this.logger.error('An error occurred while loading asset\'s likes count.', {
         path: 'AssetsService.getAssetLikesCount',
-        tokenIdentifier,
-        tokenNonce,
+        identifier,
+        nonce,
       });
     }
   }
 
-  isAssetLiked(tokenIdentifier: string,
-    tokenNonce: number,
+  isAssetLiked(token: string,
+    nonce: number,
     address: string): Promise<boolean> {
     try {
-      const cacheKey = this.getAssetLikedCacheKey(tokenIdentifier, tokenNonce, address);
-      const getIsAssetLiked = () => this.assetsLikesRepository.isAssetLiked(tokenIdentifier, tokenNonce, address);
+      const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
+      const getIsAssetLiked = () => this.assetsLikesRepository.isAssetLiked(token, nonce, address);
       return this.redisCacheService.getOrSet(cacheKey, getIsAssetLiked, 300);
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
         path: 'AssetsService.isAssetLiked',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return Promise.resolve(false);
     }
   }
 
-  async addLike(tokenIdentifier: string,
-    tokenNonce: number,
+  async addLike(token: string,
+    nonce: number,
     address: string): Promise<boolean> {
     try {
-      await this.saveAssetLikeEntity(tokenIdentifier, tokenNonce, address);
-      this.invalidateCache(tokenIdentifier, tokenNonce, address);
+      await this.saveAssetLikeEntity(token, nonce, address);
+      this.invalidateCache(token, nonce, address);
       return true;
     }
     catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return false;
     }
   }
 
-  async removeLike(tokenIdentifier: string,
-    tokenNonce: number,
+  async removeLike(token: string,
+    nonce: number,
     address: string): Promise<any> {
     try {
-      await this.assetsLikesRepository.removeLike(tokenIdentifier, tokenNonce, address);
-      await this.invalidateCache(tokenIdentifier, tokenNonce, address);
+      await this.assetsLikesRepository.removeLike(token, nonce, address);
+      await this.invalidateCache(token, nonce, address);
       return true;
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
         path: 'AssetsService.removeLike',
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
       return false;
     }
   }
 
-  private getAssetLikesCountCacheKey(tokenIdentifier: string,
-    tokenNonce: number) {
-    return generateCacheKeyFromParams('assetLikesCount', tokenIdentifier, tokenNonce);
+  private getAssetLikesCountCacheKey(token: string, nonce: number) {
+    return generateCacheKeyFromParams('assetLikesCount', token, nonce);
   }
 
-  private async invalidateCache(tokenIdentifier: string,
-    tokenNonce: number,
+  private async invalidateCache(token: string, nonce: number,
     address: string): Promise<void> {
-    await this.invalidateAssetLikeCache(tokenIdentifier, tokenNonce, address);
-    await this.invalidateAssetLikesCount(tokenIdentifier, tokenNonce);
+    await this.invalidateAssetLikeCache(token, nonce, address);
+    await this.invalidateAssetLikesCount(token, nonce);
   }
 
-  private invalidateAssetLikesCount(tokenIdentifier: string,
-    tokenNonce: number): Promise<void> {
-    const cacheKey = this.getAssetLikesCountCacheKey(tokenIdentifier, tokenNonce);
+  private invalidateAssetLikesCount(token: string, nonce: number): Promise<void> {
+    const cacheKey = this.getAssetLikesCountCacheKey(token, nonce);
     return this.redisCacheService.del(cacheKey);
   }
 
-  private invalidateAssetLikeCache(tokenIdentifier: string,
-    tokenNonce: number,
+  private invalidateAssetLikeCache(token: string, nonce: number,
     address: string): Promise<void> {
-    const cacheKey = this.getAssetLikedCacheKey(tokenIdentifier, tokenNonce, address);
+    const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
     return this.redisCacheService.del(cacheKey);
   }
 
-  private getAssetLikedCacheKey(tokenIdentifier: string,
-    tokenNonce: number,
-    address: string) {
-    return generateCacheKeyFromParams('isAssetLiked', tokenIdentifier, tokenNonce, address);
+  private getAssetLikedCacheKey(token: string,
+                                nonce: number,
+                                address: string) {
+    return generateCacheKeyFromParams('isAssetLiked', token, nonce, address);
   }
 
-  private saveAssetLikeEntity(tokenIdentifier: string,
-    tokenNonce: number,
-    address: string): Promise<any> {
-    const assetLikeEntity = this.buildAssetLikeEntity(tokenIdentifier, tokenNonce, address);
+  private saveAssetLikeEntity(token: string,
+                              nonce: number,
+                              address: string): Promise<any> {
+    const assetLikeEntity = this.buildAssetLikeEntity(token, nonce, address);
     return this.assetsLikesRepository.addLike(assetLikeEntity);
   }
 
-  private buildAssetLikeEntity(tokenIdentifier: string,
-    tokenNonce: number,
-    address: string): AssetLikeEntity {
+  private buildAssetLikeEntity(token: string,
+                               nonce: number,
+                               address: string): AssetLikeEntity {
     return new AssetLikeEntity(
       {
-        tokenIdentifier,
-        tokenNonce,
+        token,
+        nonce,
         address
       });
   }

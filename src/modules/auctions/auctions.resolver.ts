@@ -74,7 +74,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Mutation(() => Auction)
   async saveAuction(
-    @Args('tokenIdentifier') tokenId: string,
+    @Args('token') tokenId: string,
     @Args('nonce', { type: () => Int }) nonce: number,
   ): Promise<Auction> {
     return await this.auctionsService.saveAuction(tokenId, nonce);
@@ -93,11 +93,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { tokenIdentifier, tokenNonce } = auction;
-    return await this.assetsService.getAssetByTokenIdentifier(
+    const { token, nonce } = auction;
+    return await this.assetsService.getAssetByToken(
       elrondConfig.nftMarketplaceAddress,
-      tokenIdentifier,
-      tokenNonce,
+      token,
+      nonce,
     );
   }
 

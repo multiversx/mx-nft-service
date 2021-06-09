@@ -7,7 +7,7 @@ export class TokenType {
   @Field()
   tokenTicker!: string;
   @Field({ nullable: true })
-  tokenIdentifier?: string;
+  token?: string;
   @Field()
   tokenName!: string;
   @Field()

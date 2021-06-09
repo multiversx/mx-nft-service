@@ -6,7 +6,7 @@ export class HandleQuantityArgs {
   addOrBurnRoleAddress: string;
 
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
 
   @Field(() => Int)
   nonce: number;

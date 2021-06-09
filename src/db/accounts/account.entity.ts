@@ -1,7 +1,7 @@
-import { OrderEntity } from 'src/db/orders/order.entity';
 import { FollowerEntity } from '../followers/follower.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from '../base-entity';
+import { OrderEntity } from '../orders/order.entity';
 
 @Entity('accounts')
 export class AccountEntity extends BaseEntity {

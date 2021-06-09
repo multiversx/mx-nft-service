@@ -3,7 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class TokenActionArgs {
   @Field(() => String)
-  tokenIdentifier: string;
+  token: string;
   @Field(() => String)
-  tokenNonce: string;
+  nonce: string;
 }

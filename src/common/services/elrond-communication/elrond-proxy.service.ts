@@ -46,13 +46,13 @@ export class ElrondProxyService {
     return response.returnData[2].base64ToBech32();
   }
 
-  async getNftByTokenIdentifier(
+  async getNftByToken(
     address: string,
-    tokenIdentifier: string,
-    tokenNonce: number,
+    token: string,
+    nonce: number,
   ): Promise<Token> {
     return await this.getService().doGetGeneric(
-      `address/${address}/nft/${tokenIdentifier}/nonce/${tokenNonce}`,
+      `address/${address}/nft/${token}/nonce/${nonce}`,
       (response) => response.tokenData,
     );
   }

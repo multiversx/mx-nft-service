@@ -16,8 +16,8 @@ type Account {
 
 input AddLikeArgs {
   address: String!
-  tokenIdentifier: String!
-  tokenNonce: Int!
+  nonce: Int!
+  token: String!
 }
 
 type Asset {
@@ -28,17 +28,18 @@ type Asset {
   creatorAddress: String!
   currentOwner: Onwer!
   hash: String!
+  identifier: String!
   isLiked(byAddress: String!): Boolean!
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Int!
   name: String!
+  nonce: Float!
   ownerAddress: String!
   previousOwners: [Onwer!]!
   royalties: String!
   tags: [String!]!
-  tokenIdentifier: ID!
-  tokenNonce: Float!
+  token: ID!
   uris: [String!]!
 }
 
@@ -53,11 +54,13 @@ type Auction {
   id: ID!
   maxBid: Price!
   minBid: Price!
+  nonce: Float!
   orders: [Order!]!
   owner: Account!
   ownerAddress: String!
   startDate: String!
   status: AuctionStatusEnum!
+  token: String!
   topBid: Price
   topBidder: Account
 }
@@ -69,9 +72,9 @@ enum AuctionStatusEnum {
 }
 
 input BidActionArgs {
+  nonce: String!
   price: String!
-  tokenIdentifier: String!
-  tokenNonce: String!
+  token: String!
 }
 
 input CreateAccountArgs {
@@ -89,7 +92,7 @@ input CreateAuctionArgs {
   paymentTokenIdentifier: String!
   paymentTokenNonce: String!
   startDate: String!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input CreateNftArgs {
@@ -98,7 +101,7 @@ input CreateNftArgs {
   ownerAddress: String!
   quantity: String!
   royalties: String!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input CreateOrderArgs {
@@ -118,7 +121,7 @@ input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   nonce: Int!
   quantity: Int!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input IssueTokenArgs {
@@ -143,7 +146,7 @@ type Mutation {
   issueNft(input: IssueTokenArgs!): TransactionNode!
   issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
-  saveAuction(nonce: Int!, tokenIdentifier: String!): Auction!
+  saveAuction(nonce: Int!, token: String!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
@@ -183,6 +186,7 @@ type Price {
 
 type Query {
   getAccount(address: String, id: Float): Account!
+  getAssets: [Asset!]!
   getAssetsForUser(address: String!): [Asset!]!
   getAuctions(ownerAddress: String!): [Auction!]!
   getOrdersForAsset(tokenIdentifier: String!): [Order!]!
@@ -191,8 +195,8 @@ type Query {
 
 input RemoveLikeArgs {
   address: String!
-  tokenIdentifier: String!
-  tokenNonce: Int!
+  nonce: Int!
+  token: String!
 }
 
 input SetNftRolesArgs {
@@ -203,12 +207,12 @@ input SetNftRolesArgs {
 
 input StopNftCreateArgs {
   ownerAddress: String!
-  tokenIdentifier: String!
+  token: String!
 }
 
 input TokenActionArgs {
-  tokenIdentifier: String!
-  tokenNonce: String!
+  nonce: String!
+  token: String!
 }
 
 type TransactionNode {
@@ -227,10 +231,10 @@ type TransactionNode {
 
 input TransferNftArgs {
   destinationAddress: String!
+  nonce: String!
   ownerAddress: String!
   quantity: String!
-  tokenIdentifier: String!
-  tokenNonce: String!
+  token: String!
 }
 
 input TransferNftCreateRoleArgs {
