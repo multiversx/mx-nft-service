@@ -10,6 +10,7 @@ import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { Token } from '../../../common';
+import { TokenTypeEnum } from './TokenTypes.enum';
 
 @ObjectType()
 export class Asset {
@@ -17,6 +18,8 @@ export class Asset {
   token!: string;
   @Field(() => Int)
   nonce!: number;
+  @Field(() => TokenTypeEnum)
+  type: TokenTypeEnum;
   @Field(() => String)
   identifier!: string;
   @Field(() => Price, { nullable: true })
@@ -61,6 +64,7 @@ export class Asset {
   static fromToken(token: Token) {
     return new Asset({
       token: token.token,
+      type: TokenTypeEnum[token.type],
       nonce: token.nonce ?? 0,
       identifier: token.tokenIdentifier ?? token.token,
       creatorAddress: token.creator ?? '',

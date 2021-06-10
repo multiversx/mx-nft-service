@@ -11,9 +11,25 @@ export class AuctionsServiceDb {
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
 
-  async getAuctions(ownerAddress: string): Promise<AuctionEntity[]> {
+  async getAuctionsForOwner(ownerAddress: string): Promise<AuctionEntity[]> {
     return await this.auctionsRepository.find({
       where: [{ ownerAddress: ownerAddress }],
+    });
+  }
+  async getAuctions(
+    limit: number = 50,
+    offset: number,
+  ): Promise<[AuctionEntity[], number]> {
+    return await this.auctionsRepository.findAndCount({
+      skip: offset,
+      take: limit,
+      where: [
+        {
+          status:
+            AuctionStatusEnum.Running ||
+            AuctionStatusEnum.SftWaitingForBuyOrOwnerClaim,
+        },
+      ],
     });
   }
 
@@ -27,7 +43,7 @@ export class AuctionsServiceDb {
     return await this.auctionsRepository
       .createQueryBuilder('auction')
       .where(
-        `auction.token = :id and auction.nonce = :nonce and auction.status='active'`,
+        `auction.token = :id and auction.nonce = :nonce and auction.status='Running'`,
         {
           id: token,
           nonce: nonce,

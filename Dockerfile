@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --unsafe-perm
 
 COPY . .
 EXPOSE 3005

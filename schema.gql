@@ -41,7 +41,30 @@ type Asset {
   royalties: String!
   tags: [String!]!
   token: ID!
+  type: TokenTypeEnum!
   uris: [String!]!
+}
+
+type AssetConnection {
+  edges: [AssetEdge!]
+  pageInfo: AssetPageInfo
+}
+
+type AssetEdge {
+  cursor: String
+  node: Asset
+}
+
+type AssetPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AssetsResponse {
+  page: AssetConnection!
+  pageData: PageData
 }
 
 input AttributeInput {
@@ -64,6 +87,28 @@ type Auction {
   token: String!
   topBid: Price
   topBidder: Account
+}
+
+type AuctionConnection {
+  edges: [AuctionEdge!]
+  pageInfo: AuctionPageInfo
+}
+
+type AuctionEdge {
+  cursor: String
+  node: Auction
+}
+
+type AuctionPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AuctionResponse {
+  page: AuctionConnection!
+  pageData: PageData
 }
 
 enum AuctionStatusEnum {
@@ -185,6 +230,12 @@ enum OrderStatusEnum {
   inactive
 }
 
+type PageData {
+  count: Int!
+  limit: Int!
+  offset: Int!
+}
+
 type Price {
   amount: String!
   nonce: Int!
@@ -193,9 +244,47 @@ type Price {
 
 type Query {
   getAccount(address: String, id: Float): Account!
-  getAssets: [Asset!]!
-  getAssetsForUser(address: String!): [Asset!]!
-  getAuctions(ownerAddress: String!): [Auction!]!
+  getAssets(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AssetsResponse!
+  getAssetsForUser(
+    address: String!
+
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AssetsResponse!
+  getAuctions(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AuctionResponse!
   getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
 }
@@ -215,6 +304,11 @@ input SetNftRolesArgs {
 input StopNftCreateArgs {
   ownerAddress: String!
   token: String!
+}
+
+enum TokenTypeEnum {
+  NonFungibleESDT
+  SemiFungibleESDT
 }
 
 type TransactionNode {

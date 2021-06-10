@@ -28,14 +28,30 @@ export class AssetsService {
     private ipfsService: IpfsService,
   ) {}
 
-  async getAssetsForUser(address: string): Promise<Asset[] | any> {
-    const tokens = await this.apiService.getNftsForUser(address);
-    return tokens.map((element) => Asset.fromToken(element));
+  async getAssetsForUser(
+    address: string,
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[Asset[], number]> {
+    const [tokens, count] = await Promise.all([
+      this.apiService.getNftsForUser(address, offset, limit),
+      this.apiService.getTokensForUserCount(address),
+    ]);
+
+    const assets = tokens.map((element) => Asset.fromToken(element));
+    return [assets, count];
   }
 
-  async getAllAssets(): Promise<Asset[] | any> {
-    const tokens = await this.apiService.getAllNfts();
-    return tokens.map((element) => Asset.fromToken(element));
+  async getAllAssets(
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[Asset[], number]> {
+    const [tokens, count] = await Promise.all([
+      this.apiService.getAllNfts(offset, limit),
+      this.apiService.getNftsCount(),
+    ]);
+    const assets = tokens.map((element) => Asset.fromToken(element));
+    return [assets, count];
   }
 
   async getAssetByToken(

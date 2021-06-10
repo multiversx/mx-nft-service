@@ -13,11 +13,11 @@ services:
     build: .
     container_name: api
     ports:
-      - "3005:3005"
+      - '3005:3005'
     command: bash -c "npm run run-migrations && npm run start:dev"
     volumes:
-    - ./src:/usr/src/app/src
-    - ./test:/usr/src/app/test
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
     env_file:
       - .env.example
     depends_on:

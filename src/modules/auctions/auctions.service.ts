@@ -23,14 +23,20 @@ export class AuctionsService {
     return savedAuction;
   }
 
-  async getAuctions(address?: string): Promise<Auction[]> {
-    const auctions = await this.auctionServiceDb.getAuctions(address);
+  async getAuctions(
+    limit: number,
+    offset: number,
+  ): Promise<[Auction[], number]> {
+    const [auctions, count] = await this.auctionServiceDb.getAuctions(
+      limit,
+      offset,
+    );
     let responseAuctions: Auction[] = [];
     auctions.forEach((auction) => {
       responseAuctions.push(this.mapEntityToDto(auction));
     });
 
-    return responseAuctions;
+    return [responseAuctions, count];
   }
 
   async getActiveAuction(token: string, nonce: number): Promise<Auction> {

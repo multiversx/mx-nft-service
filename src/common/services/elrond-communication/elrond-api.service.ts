@@ -34,9 +34,20 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsForUser(address: string): Promise<Token[]> {
+  async getNftsForUser(
+    address: string,
+    from: number = 0,
+    size: number = 50,
+  ): Promise<Token[]> {
     return await this.getService().doGetGeneric(
-      `accounts/${address}/nfts`,
+      `accounts/${address}/nfts?from=${from}&size=${size}`,
+      (response) => response,
+    );
+  }
+
+  async getTokensForUserCount(address: string): Promise<number> {
+    return await this.getService().doGetGeneric(
+      `accounts/${address}/nfts/count`,
       (response) => response,
     );
   }
@@ -44,6 +55,13 @@ export class ElrondApiService {
   async getAllNfts(from: number = 0, size: number = 50): Promise<Token[]> {
     return await this.getService().doGetGeneric(
       `nfts?from=${from}&size=${size}`,
+      (response) => response,
+    );
+  }
+
+  async getNftsCount(): Promise<number> {
+    return await this.getService().doGetGeneric(
+      'nfts/count',
       (response) => response,
     );
   }
