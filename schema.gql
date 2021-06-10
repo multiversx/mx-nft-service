@@ -41,6 +41,7 @@ type Asset {
   royalties: String!
   tags: [String!]!
   token: ID!
+  type: TokenTypeEnum!
   uris: [String!]!
 }
 
@@ -303,6 +304,11 @@ input SetNftRolesArgs {
 input StopNftCreateArgs {
   ownerAddress: String!
   token: String!
+}
+
+enum TokenTypeEnum {
+  NonFungibleESDT
+  SemiFungibleESDT
 }
 
 type TransactionNode {
