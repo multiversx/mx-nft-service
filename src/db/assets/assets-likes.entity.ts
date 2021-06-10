@@ -1,6 +1,7 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity('assets_likes')
+@Unique('AssetLikeEntity_UQ_LIKE', ['token', 'nonce', 'address'])
 export class AssetLikeEntity {
   @PrimaryGeneratedColumn()
   id: number;

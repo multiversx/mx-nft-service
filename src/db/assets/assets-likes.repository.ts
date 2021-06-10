@@ -6,7 +6,7 @@ import { AssetLikeEntity } from "./assets-likes.entity";
 export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
 
   getAssetLikesCount(token: string,
-                     nonce: number): Promise<number> {
+    nonce: number): Promise<number> {
     return this.count({
       where: {
         token,
@@ -16,8 +16,8 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
   }
 
   async isAssetLiked(token: string,
-                     nonce: number,
-                     address: string): Promise<boolean> {
+    nonce: number,
+    address: string): Promise<boolean> {
 
     const count = await this.count({
       where: {
@@ -30,13 +30,21 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     return count > 0;
   }
 
-  addLike(assetLikeEntity: AssetLikeEntity): Promise<AssetLikeEntity> {
-    return this.save(assetLikeEntity);
+  async addLike(assetLikeEntity: AssetLikeEntity): Promise<AssetLikeEntity> {
+    try {
+      return await this.save(assetLikeEntity);
+    } catch (err) {
+      // If like already exists, we ignore the error.
+      if (err.errno === 1062) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   removeLike(token: string,
-             nonce: number,
-             address: string): Promise<any> {
+    nonce: number,
+    address: string): Promise<any> {
     return this.delete({
       token,
       nonce,
