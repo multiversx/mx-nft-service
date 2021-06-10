@@ -25,7 +25,9 @@ import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
 import { OrdersService } from '../orders/order.service';
 import { Price } from '../assets/models';
-
+import AuctionResponse from './models/AuctionResonse';
+import { connectionFromArraySlice } from 'graphql-relay';
+import ConnectionArgs from '../ConnectionArgs';
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
@@ -78,9 +80,18 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return await this.auctionsService.saveAuction(auctionId);
   }
 
-  @Query(() => [Auction])
-  async getAuctions(@Args('ownerAddress') address: string) {
-    return await this.auctionsService.getAuctions(address);
+  @Query(() => AuctionResponse)
+  async getAuctions(@Args() args: ConnectionArgs) {
+    const { limit, offset } = args.pagingParams();
+    const [auctions, count] = await this.auctionsService.getAuctions(
+      limit,
+      offset,
+    );
+    const page = connectionFromArraySlice(auctions, args, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return { page, pageData: { count, limit, offset } };
   }
 
   @ResolveField('owner', () => Account)

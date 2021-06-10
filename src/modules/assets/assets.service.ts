@@ -37,9 +37,14 @@ export class AssetsService {
     return tokens.map((element) => Asset.fromToken(element));
   }
 
-  async getAllAssets(): Promise<Asset[] | any> {
-    const tokens = await this.apiService.getAllNfts();
-    return tokens.map((element) => Asset.fromToken(element));
+  async getAllAssets(
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[Asset[], number]> {
+    const tokens = await this.apiService.getAllNfts(offset, limit);
+    const assets = tokens.map((element) => Asset.fromToken(element));
+    const count = await this.apiService.getNftsCount();
+    return [assets, count];
   }
 
   async getAssetByToken(

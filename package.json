@@ -5,6 +5,7 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "scripts": {
+    "postinstall": "npx npm-force-resolutions",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -21,8 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "generate-migration": "typeorm migration:generate -n",
-    "run-migrations": "typeorm migration:run",
-    "preinstall": "npx npm-force-resolutions"
+    "run-migrations": "typeorm migration:run"
   },
   "dependencies": {
     "@elrondnetwork/erdjs": "5.0.0",
@@ -48,6 +48,7 @@
     "config": "^3.3.6",
     "errorhandler": "^1.5.1",
     "graphql": "^15.5.0",
+    "graphql-relay": "^0.7.0",
     "graphql-tools": "^7.0.4",
     "graphql-upload": "^12.0.0",
     "helmet": "^4.4.1",
@@ -68,6 +69,7 @@
     "@nestjs/schematics": "^7.3.1",
     "@nestjs/testing": "^7.6.15",
     "@types/express": "^4.17.11",
+    "@types/graphql-relay": "^0.6.0",
     "@types/jest": "^26.0.22",
     "@types/node": "^14.14.36",
     "@types/supertest": "^2.0.10",

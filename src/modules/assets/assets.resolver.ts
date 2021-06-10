@@ -27,6 +27,9 @@ import { AddLikeArgs } from './models/add-like.dto';
 import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
 import PaginationArgs from '../PaginationArgs.dto';
+import AssetsResponse from './AssetsResponse';
+import ConnectionArgs from '../ConnectionArgs';
+import { connectionFromArraySlice } from 'graphql-relay';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -37,6 +40,20 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsLikesService: AssetsLikesService,
   ) {
     super();
+  }
+
+  @Query(() => AssetsResponse)
+  async getAssets(@Args() args: ConnectionArgs): Promise<AssetsResponse> {
+    const { limit, offset } = args.pagingParams();
+    const [assets, count] = await this.assetsService.getAllAssets(
+      offset,
+      limit,
+    );
+    const page = connectionFromArraySlice(assets, args, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return { page, pageData: { count, limit, offset } };
   }
 
   @Mutation(() => TransactionNode)

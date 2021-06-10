@@ -51,4 +51,11 @@ export class ElrondApiService {
       (response) => response,
     );
   }
+
+  async getNftsCount(): Promise<number> {
+    return await this.getService().doGetGeneric(
+      'nfts/count',
+      (response) => response,
+    );
+  }
 }
