@@ -5,7 +5,7 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "scripts": {
-    "postinstall": "npx npm-force-resolutions",
+    "preinstall": "npx npm-force-resolutions",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -105,7 +105,7 @@
     "testEnvironment": "node"
   },
   "resolutions": {
-    "fs-capacitor": "^6.2.0",
-    "graphql-upload": "^11.0.0"
+    "fs-capacitor": "6.2.0",
+    "graphql-upload": "11.0.0"
   }
 }
