@@ -13,7 +13,6 @@ import { gas } from 'src/config';
 import '../../utils/extentions';
 import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
-import PaginationArgs from '../PaginationArgs.dto';
 import { TransactionNode } from '../transaction';
 import {
   CreateNftArgs,
@@ -31,19 +30,27 @@ export class AssetsService {
 
   async getAssetsForUser(
     address: string,
-    page: PaginationArgs = new PaginationArgs(),
-  ): Promise<Asset[] | any> {
-    const tokens = await this.apiService.getNftsForUser(address, page);
-    return tokens.map((element) => Asset.fromToken(element));
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[Asset[], number]> {
+    const [tokens, count] = await Promise.all([
+      this.apiService.getNftsForUser(address, offset, limit),
+      this.apiService.getTokensForUserCount(address),
+    ]);
+
+    const assets = tokens.map((element) => Asset.fromToken(element));
+    return [assets, count];
   }
 
   async getAllAssets(
     offset: number = 0,
     limit: number = 10,
   ): Promise<[Asset[], number]> {
-    const tokens = await this.apiService.getAllNfts(offset, limit);
+    const [tokens, count] = await Promise.all([
+      this.apiService.getAllNfts(offset, limit),
+      this.apiService.getNftsCount(),
+    ]);
     const assets = tokens.map((element) => Asset.fromToken(element));
-    const count = await this.apiService.getNftsCount();
     return [assets, count];
   }
 

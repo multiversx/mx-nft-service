@@ -17,7 +17,7 @@ export class AccountsResolver {
   constructor(
     private accountsService: AccountsService,
     private assetsService: AssetsService,
-  ) { }
+  ) {}
 
   @Mutation(() => Account)
   async createAccount(
@@ -36,7 +36,7 @@ export class AccountsResolver {
   @Query(() => Account)
   async getAccount(
     @Args('id', { nullable: true }) id?: number,
-    @Args('address', { nullable: true }) address?: string
+    @Args('address', { nullable: true }) address?: string,
   ): Promise<Account> {
     if (id != undefined) {
       return await this.accountsService.getAccountById(id);
@@ -45,8 +45,11 @@ export class AccountsResolver {
   }
 
   @ResolveField('assets', () => [Asset])
-  async assets(@Parent() account: Account): Promise<Account[]> {
-    return await this.assetsService.getAssetsForUser(account.address);
+  async assets(@Parent() account: Account): Promise<Asset[]> {
+    const [assets, count] = await this.assetsService.getAssetsForUser(
+      account.address,
+    );
+    return assets;
   }
 
   @ResolveField('followers', () => [Account])

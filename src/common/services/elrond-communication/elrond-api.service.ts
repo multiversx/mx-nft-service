@@ -3,7 +3,6 @@ import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
 import { Token } from './models/interfaces/elrond/token.dto';
 import { nominateVal } from 'src/modules/formatters';
-import PaginationArgs from 'src/modules/PaginationArgs.dto';
 
 @Injectable()
 export class ElrondApiService {
@@ -37,10 +36,18 @@ export class ElrondApiService {
 
   async getNftsForUser(
     address: string,
-    page: PaginationArgs,
+    from: number = 0,
+    size: number = 50,
   ): Promise<Token[]> {
     return await this.getService().doGetGeneric(
-      `accounts/${address}/nfts?from=${page.offset}&size=${page.size}`,
+      `accounts/${address}/nfts?from=${from}&size=${size}`,
+      (response) => response,
+    );
+  }
+
+  async getTokensForUserCount(address: string): Promise<number> {
+    return await this.getService().doGetGeneric(
+      `accounts/${address}/nfts/count`,
       (response) => response,
     );
   }

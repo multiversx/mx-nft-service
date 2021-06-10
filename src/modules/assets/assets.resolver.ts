@@ -26,7 +26,6 @@ import { AuctionsService } from '../auctions/auctions.service';
 import { AddLikeArgs } from './models/add-like.dto';
 import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
-import PaginationArgs from '../PaginationArgs.dto';
 import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
@@ -49,11 +48,21 @@ export class AssetsResolver extends BaseResolver(Asset) {
       offset,
       limit,
     );
-    const page = connectionFromArraySlice(assets, args, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return { page, pageData: { count, limit, offset } };
+    return this.mapResponse<Asset>(assets, args, count, offset, limit);
+  }
+
+  @Query(() => AssetsResponse)
+  async getAssetsForUser(
+    @Args('address') address: string,
+    @Args() args: ConnectionArgs,
+  ) {
+    const { limit, offset } = args.pagingParams();
+    const [assets, count] = await this.assetsService.getAssetsForUser(
+      address,
+      offset,
+      limit,
+    );
+    return this.mapResponse<Asset>(assets, args, count, offset, limit);
   }
 
   @Mutation(() => TransactionNode)
@@ -98,14 +107,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return this.assetsLikesService.removeLike(token, nonce, address);
   }
 
-  @Query(() => [Asset])
-  async getAssetsForUser(
-    @Args('address') address: string,
-    @Args('pagArgs') pageInfo: PaginationArgs,
-  ) {
-    return this.assetsService.getAssetsForUser(address, pageInfo);
-  }
-
   @ResolveField('likesCount', () => Int)
   likesCount(@Parent() asset: Asset) {
     const { token, nonce } = asset;
@@ -134,5 +135,19 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async auction(@Parent() asset: Asset) {
     const { token, nonce } = asset;
     return await this.auctionsService.getActiveAuction(token, nonce);
+  }
+
+  private mapResponse<T>(
+    returnList: T[],
+    args: ConnectionArgs,
+    count: number,
+    offset: number,
+    limit: number,
+  ) {
+    const page = connectionFromArraySlice(returnList, args, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return { page, pageData: { count, limit, offset } };
   }
 }
