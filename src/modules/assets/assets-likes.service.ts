@@ -52,16 +52,17 @@ export class AssetsLikesService {
     nonce: number,
     address: string): Promise<boolean> {
     try {
-      await this.saveAssetLikeEntity(token, nonce, address);
+      const assetLike = await this.saveAssetLikeEntity(token, nonce, address);
       this.invalidateCache(token, nonce, address);
-      return true;
+      return !!assetLike;
     }
     catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
         token,
         nonce,
-        address
+        address,
+        err
       });
       return false;
     }
@@ -79,7 +80,8 @@ export class AssetsLikesService {
         path: 'AssetsService.removeLike',
         token,
         nonce,
-        address
+        address,
+        err
       });
       return false;
     }
@@ -107,21 +109,21 @@ export class AssetsLikesService {
   }
 
   private getAssetLikedCacheKey(token: string,
-                                nonce: number,
-                                address: string) {
+    nonce: number,
+    address: string) {
     return generateCacheKeyFromParams('isAssetLiked', token, nonce, address);
   }
 
   private saveAssetLikeEntity(token: string,
-                              nonce: number,
-                              address: string): Promise<any> {
+    nonce: number,
+    address: string): Promise<any> {
     const assetLikeEntity = this.buildAssetLikeEntity(token, nonce, address);
     return this.assetsLikesRepository.addLike(assetLikeEntity);
   }
 
   private buildAssetLikeEntity(token: string,
-                               nonce: number,
-                               address: string): AssetLikeEntity {
+    nonce: number,
+    address: string): AssetLikeEntity {
     return new AssetLikeEntity(
       {
         token,
