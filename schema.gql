@@ -230,9 +230,9 @@ enum OrderStatusEnum {
 }
 
 type PageData {
-  count: Float!
-  limit: Float!
-  offset: Float!
+  count: Int!
+  limit: Int!
+  offset: Int!
 }
 
 type Price {
@@ -251,10 +251,10 @@ type Query {
     before: String
 
     """Paginate first"""
-    first: Float
+    first: Int
 
     """Paginate last"""
-    last: Float
+    last: Int
   ): AssetsResponse!
   getAssetsForUser(
     address: String!
@@ -266,10 +266,10 @@ type Query {
     before: String
 
     """Paginate first"""
-    first: Float
+    first: Int
 
     """Paginate last"""
-    last: Float
+    last: Int
   ): AssetsResponse!
   getAuctions(
     """Paginate after opaque cursor"""
@@ -279,10 +279,10 @@ type Query {
     before: String
 
     """Paginate first"""
-    first: Float
+    first: Int
 
     """Paginate last"""
-    last: Float
+    last: Int
   ): AuctionResponse!
   getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!

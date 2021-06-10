@@ -1,13 +1,13 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export default class PageData {
-  @Field()
+  @Field(() => Int)
   public count: number;
 
-  @Field()
+  @Field(() => Int)
   public limit: number;
 
-  @Field()
+  @Field(() => Int)
   public offset: number;
 }
