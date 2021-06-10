@@ -44,9 +44,26 @@ type Asset {
   uris: [String!]!
 }
 
+type AssetConnection {
+  edges: [AssetEdge!]
+  pageInfo: AssetPageInfo
+}
+
 type AssetEdge {
-  cursor: String!
-  node: Asset!
+  cursor: String
+  node: Asset
+}
+
+type AssetPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AssetsResponse {
+  page: AssetConnection!
+  pageData: PageData
 }
 
 input AttributeInput {
@@ -69,6 +86,28 @@ type Auction {
   token: String!
   topBid: Price
   topBidder: Account
+}
+
+type AuctionConnection {
+  edges: [AuctionEdge!]
+  pageInfo: AuctionPageInfo
+}
+
+type AuctionEdge {
+  cursor: String
+  node: Auction
+}
+
+type AuctionPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AuctionResponse {
+  page: AuctionConnection!
+  pageData: PageData
 }
 
 enum AuctionStatusEnum {
@@ -190,16 +229,10 @@ enum OrderStatusEnum {
   inactive
 }
 
-type PaginatedAsset {
-  edges: [AssetEdge!]
-  hasNextPage: Boolean!
-  nodes: [Asset!]
-  totalCount: Int!
-}
-
-input PaginationArgs {
-  offset: Int
-  size: Int
+type PageData {
+  count: Float!
+  limit: Float!
+  offset: Float!
 }
 
 type Price {
@@ -210,12 +243,47 @@ type Price {
 
 type Query {
   getAccount(address: String, id: Float): Account!
-  getAssets: [Asset!]!
+  getAssets(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Float
+
+    """Paginate last"""
+    last: Float
+  ): AssetsResponse!
   getAssetsForUser(
     address: String!
-    pagArgs: PaginationArgs!
-  ): [PaginatedAsset!]!
-  getAuctions(ownerAddress: String!): [Auction!]!
+
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Float
+
+    """Paginate last"""
+    last: Float
+  ): AssetsResponse!
+  getAuctions(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Float
+
+    """Paginate last"""
+    last: Float
+  ): AuctionResponse!
   getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
 }
@@ -270,7 +338,5 @@ input UpdateAuctionArgs {
   status: AuctionStatusEnum!
 }
 
-"""
-The `Upload` scalar type represents a file upload.
-"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload
