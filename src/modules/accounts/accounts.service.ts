@@ -7,6 +7,7 @@ import { ElrondProxyService } from '../../common/services/elrond-communication/e
 import { Address } from '@elrondnetwork/erdjs';
 import { Onwer } from '../assets/models';
 import { CreateAccountArgs } from './CreateAccountArgs';
+import { FiltersExpression } from '../filtersTypes';
 
 @Injectable()
 export class AccountsService {
@@ -37,6 +38,14 @@ export class AccountsService {
 
   async getAccountById(id: number): Promise<Account | any> {
     return await this.accountsServiceDb.getAccountById(id);
+  }
+
+  async getAccounts(
+    limit: number = 50,
+    offset: number,
+    filters: FiltersExpression,
+  ): Promise<[any[], number]> {
+    return await this.accountsServiceDb.getAccounts(limit, offset, filters);
   }
 
   async getAccountByAddress(address: string): Promise<Account | any> {

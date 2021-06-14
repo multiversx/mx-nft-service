@@ -11,6 +11,10 @@ import { AccountsService } from './accounts.service';
 import { AssetsService } from '../assets/assets.service';
 import { CreateAccountArgs } from './CreateAccountArgs';
 import { Asset } from '../assets/models';
+import { FiltersExpression } from '../filtersTypes';
+import { connectionFromArraySlice } from 'graphql-relay';
+import ConnectionArgs from '../ConnectionArgs';
+import AccountResponse from './models/AccountResonse';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -34,14 +38,22 @@ export class AccountsResolver {
   }
 
   @Query(() => Account)
-  async getAccount(
-    @Args('id', { nullable: true }) id?: number,
-    @Args('address', { nullable: true }) address?: string,
-  ): Promise<Account> {
-    if (id != undefined) {
-      return await this.accountsService.getAccountById(id);
-    }
-    return await this.accountsService.getAccountByAddress(address);
+  async accounts(
+    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    filters,
+    @Args() args: ConnectionArgs,
+  ): Promise<AccountResponse> {
+    const { limit, offset } = args.pagingParams();
+    const [accounts, count] = await this.accountsService.getAccounts(
+      limit,
+      offset,
+      filters,
+    );
+    const page = connectionFromArraySlice(accounts, args, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return { page, pageData: { count, limit, offset } };
   }
 
   @ResolveField('assets', () => [Asset])

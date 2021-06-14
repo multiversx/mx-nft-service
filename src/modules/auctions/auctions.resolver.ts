@@ -28,7 +28,6 @@ import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import { FilterType } from '@nestjs-query/query-graphql';
 import { FiltersExpression } from '../filtersTypes';
 
 @Resolver(() => Auction)
