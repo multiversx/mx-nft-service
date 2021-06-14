@@ -9,16 +9,16 @@ export class AuctionEntity {
   @PrimaryColumn({ unique: true })
   id: number;
 
-  @Column({ name: 'creation_date' })
-  creationDate: Date = new Date(new Date().toUTCString());
+  @Column({ nullable: true })
+  creationDate: Date;
 
-  @Column({ name: 'modified_date', nullable: true })
+  @Column({ nullable: true })
   modifiedDate: Date;
 
-  @Column({ name: 'token', length: 20 })
+  @Column({ length: 20 })
   token: string;
 
-  @Column({ name: 'nonce' })
+  @Column()
   nonce: number;
 
   @Column()
@@ -27,25 +27,25 @@ export class AuctionEntity {
   @Column()
   type: AuctionTypeEnum;
 
-  @Column({ name: 'payment_token', length: 20 })
+  @Column({ length: 20 })
   paymentToken: string;
 
-  @Column({ name: 'payment_nonce' })
+  @Column()
   paymentNonce: number;
 
-  @Column({ name: 'owner_address', length: 62 })
+  @Column({ length: 62 })
   ownerAddress: string;
 
-  @Column({ name: 'min_bid' })
+  @Column()
   minBid: string;
 
-  @Column({ name: 'max_bid' })
+  @Column()
   maxBid: string;
 
-  @Column({ name: 'start_date' })
+  @Column()
   startDate: string;
 
-  @Column({ name: 'end_date' })
+  @Column()
   endDate: string;
 
   constructor(init?: Partial<AuctionEntity>) {

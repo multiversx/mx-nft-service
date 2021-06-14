@@ -80,10 +80,10 @@ type Auction {
   minBid: Price!
   nonce: Int!
   orders: [Order!]!
-  owner: Account!
-  ownerAddress: String!
+  owner: Account
+  ownerAddress: String
   startDate: String!
-  status: AuctionStatusEnum!
+  status: AuctionStatusEnum
   token: String!
   topBid: Price
   topBidder: Account
@@ -169,6 +169,19 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input Filter {
+  field: String!
+  op: Operation!
+  relationField: String!
+  values: [String!]!
+}
+
+input FiltersExpression {
+  childExpressions: [FiltersExpression!]!
+  filters: [Filter!]!
+  operator: Operator!
+}
+
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   nonce: Int!
@@ -214,6 +227,17 @@ type Onwer {
   startDate: DateTime!
 }
 
+enum Operation {
+  EQ
+  IN
+  LIKE
+}
+
+enum Operator {
+  AND
+  OR
+}
+
 type Order {
   auction: Auction!
   creationDate: DateTime!
@@ -243,6 +267,20 @@ type Price {
 }
 
 type Query {
+  auctions(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+    filters: FiltersExpression
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AuctionResponse!
   getAccount(address: String, id: Float): Account!
   getAssets(
     """Paginate after opaque cursor"""
@@ -272,19 +310,6 @@ type Query {
     """Paginate last"""
     last: Int
   ): AssetsResponse!
-  getAuctions(
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-  ): AuctionResponse!
   getOrdersForAsset(token: String!): [Order!]!
   getRegisteredNfts(ownerAddress: String!): [String!]!
 }

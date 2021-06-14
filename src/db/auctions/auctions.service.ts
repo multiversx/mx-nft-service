@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
-import { Repository } from 'typeorm';
+import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
+import { FiltersExpression } from 'src/modules/filtersTypes';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
@@ -19,18 +21,18 @@ export class AuctionsServiceDb {
   async getAuctions(
     limit: number = 50,
     offset: number,
+    filters: FiltersExpression,
   ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository.findAndCount({
-      skip: offset,
-      take: limit,
-      where: [
-        {
-          status:
-            AuctionStatusEnum.Running ||
-            AuctionStatusEnum.SftWaitingForBuyOrOwnerClaim,
-        },
-      ],
-    });
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      filters,
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder.offset(offset);
+    queryBuilder.limit(limit);
+
+    return await queryBuilder.getManyAndCount();
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
