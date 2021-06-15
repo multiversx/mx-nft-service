@@ -14,7 +14,7 @@ import { Asset } from '../assets/models';
 import { FiltersExpression } from '../filtersTypes';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import AccountResponse from './models/AccountResonse';
+import AccountResponse from './models/AccountResponse';
 
 @Resolver(() => Account)
 export class AccountsResolver {
