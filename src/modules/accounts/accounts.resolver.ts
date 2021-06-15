@@ -37,7 +37,7 @@ export class AccountsResolver {
     return this.accountsService.updateAccount(profileImgUrl);
   }
 
-  @Query(() => Account)
+  @Query(() => AccountResponse)
   async accounts(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,

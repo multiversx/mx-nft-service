@@ -15,6 +15,28 @@ type Account {
   profileImgUrl: String
 }
 
+type AccountConnection {
+  edges: [AccountEdge!]
+  pageInfo: AccountPageInfo
+}
+
+type AccountEdge {
+  cursor: String
+  node: Account
+}
+
+type AccountPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AccountResponse {
+  page: AccountConnection!
+  pageData: PageData
+}
+
 input AddLikeArgs {
   address: String!
   nonce: Int!
@@ -302,7 +324,7 @@ type Query {
 
     """Paginate last"""
     last: Int
-  ): Account!
+  ): AccountResponse!
   assets(
     """Paginate after opaque cursor"""
     after: String
