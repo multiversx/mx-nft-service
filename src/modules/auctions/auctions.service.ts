@@ -7,6 +7,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Price } from '../assets/models';
 import { AuctionStatusEnum } from './models/AuctionStatus.enum';
 import { AuctionTypeEnum } from './models/AuctionType.enum';
+import { FiltersExpression } from '../filtersTypes';
 
 @Injectable()
 export class AuctionsService {
@@ -26,10 +27,12 @@ export class AuctionsService {
   async getAuctions(
     limit: number,
     offset: number,
+    filters: FiltersExpression,
   ): Promise<[Auction[], number]> {
     const [auctions, count] = await this.auctionServiceDb.getAuctions(
       limit,
       offset,
+      filters,
     );
     let responseAuctions: Auction[] = [];
     auctions.forEach((auction) => {

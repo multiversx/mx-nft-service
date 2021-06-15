@@ -28,6 +28,8 @@ import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
+import { FiltersExpression } from '../filtersTypes';
+
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
@@ -81,11 +83,16 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Query(() => AuctionResponse)
-  async getAuctions(@Args() args: ConnectionArgs) {
+  async auctions(
+    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    filters,
+    @Args() args: ConnectionArgs,
+  ) {
     const { limit, offset } = args.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
       limit,
       offset,
+      filters,
     );
     const page = connectionFromArraySlice(auctions, args, {
       arrayLength: count,

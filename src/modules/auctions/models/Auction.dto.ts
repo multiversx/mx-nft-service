@@ -9,13 +9,13 @@ export class Auction {
   @Field(() => ID)
   id: number;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   ownerAddress: string;
 
-  @Field(() => Account)
+  @Field(() => Account, { nullable: true })
   owner: Account;
 
-  @Field(() => AuctionStatusEnum)
+  @Field(() => AuctionStatusEnum, { nullable: true })
   status: AuctionStatusEnum;
 
   @Field(() => String)

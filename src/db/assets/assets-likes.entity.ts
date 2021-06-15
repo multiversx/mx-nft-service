@@ -6,11 +6,11 @@ export class AssetLikeEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'token', length: 25 })
+  @Column({ length: 25 })
   @Index()
   token: string;
 
-  @Column({ name: 'nonce' })
+  @Column()
   @Index()
   nonce: number;
 

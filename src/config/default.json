@@ -6,8 +6,8 @@
     "explorer": "https://devnet-explorer.elrond.com",
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqwsnsxsf7xsj69jqugtxf34w230rt76aw62vs0k6d0t",
-    "issueNftCost": 5
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgq9ac9zvc4ugzrgqaqjqgjdhvxxtx7wu2eu00sxezym3",
+    "issueNftCost": 50000000000000000
   },
   "caching": {
     "getAllContractAddresses": 600,

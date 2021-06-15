@@ -56,7 +56,7 @@ export class TokensResolver extends BaseResolver(TokenType) {
   }
 
   @Query(() => [String])
-  async getRegisteredNfts(
+  async registeredNfts(
     @Args('ownerAddress') ownerAddress: string,
   ): Promise<string[]> {
     return await this.elrondGateway.getRegisteredNfts(ownerAddress);

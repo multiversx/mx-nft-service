@@ -4,22 +4,22 @@ import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
 export class OrderEntity extends BaseEntity {
-  @Column({ name: 'price_token' })
+  @Column()
   priceToken: string;
 
-  @Column({ name: 'price_amount' })
+  @Column()
   priceAmount: string;
 
-  @Column({ name: 'price_nonce' })
+  @Column()
   priceNonce: number;
 
   @Column()
   status: OrderStatusEnum;
 
-  @Column({ name: 'owner_address', length: 62 })
+  @Column({ length: 62 })
   ownerAddress: string;
 
-  @Column({ name: 'auction_id' })
+  @Column()
   auctionId: number;
 
   constructor(init?: Partial<OrderEntity>) {

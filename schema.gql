@@ -15,6 +15,28 @@ type Account {
   profileImgUrl: String
 }
 
+type AccountConnection {
+  edges: [AccountEdge!]
+  pageInfo: AccountPageInfo
+}
+
+type AccountEdge {
+  cursor: String
+  node: Account
+}
+
+type AccountPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AccountResponse {
+  page: AccountConnection!
+  pageData: PageData
+}
+
 input AddLikeArgs {
   address: String!
   nonce: Int!
@@ -80,10 +102,10 @@ type Auction {
   minBid: Price!
   nonce: Int!
   orders: [Order!]!
-  owner: Account!
-  ownerAddress: String!
+  owner: Account
+  ownerAddress: String
   startDate: String!
-  status: AuctionStatusEnum!
+  status: AuctionStatusEnum
   token: String!
   topBid: Price
   topBidder: Account
@@ -138,7 +160,7 @@ input CreateAuctionArgs {
   maxBid: String!
   maxOneSftPerPayment: Boolean!
   minBid: String!
-  nonce: String!
+  nonce: Int!
   ownerAddress: String!
   paymentToken: String!
   paymentTokenNonce: Int!
@@ -168,6 +190,17 @@ input CreateOrderArgs {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input Filter {
+  field: String!
+  op: Operation!
+  values: [String!]!
+}
+
+input FiltersExpression {
+  filters: [Filter!]!
+  operator: Operator!
+}
 
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
@@ -214,6 +247,17 @@ type Onwer {
   startDate: DateTime!
 }
 
+enum Operation {
+  EQ
+  IN
+  LIKE
+}
+
+enum Operator {
+  AND
+  OR
+}
+
 type Order {
   auction: Auction!
   creationDate: DateTime!
@@ -225,9 +269,31 @@ type Order {
   status: OrderStatusEnum!
 }
 
+type OrderConnection {
+  edges: [OrderEdge!]
+  pageInfo: OrderPageInfo
+}
+
+type OrderEdge {
+  cursor: String
+  node: Order
+}
+
+type OrderPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 enum OrderStatusEnum {
   active
   inactive
+}
+
+type OrdersResponse {
+  page: OrderConnection!
+  pageData: PageData
 }
 
 type PageData {
@@ -243,13 +309,27 @@ type Price {
 }
 
 type Query {
-  getAccount(address: String, id: Float): Account!
-  getAssets(
+  accounts(
     """Paginate after opaque cursor"""
     after: String
 
     """Paginate before opaque cursor"""
     before: String
+    filters: FiltersExpression
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AccountResponse!
+  assets(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+    filters: FiltersExpression
 
     """Paginate first"""
     first: Int
@@ -257,6 +337,20 @@ type Query {
     """Paginate last"""
     last: Int
   ): AssetsResponse!
+  auctions(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+    filters: FiltersExpression
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): AuctionResponse!
   getAssetsForUser(
     address: String!
 
@@ -272,21 +366,21 @@ type Query {
     """Paginate last"""
     last: Int
   ): AssetsResponse!
-  getAuctions(
+  orders(
     """Paginate after opaque cursor"""
     after: String
 
     """Paginate before opaque cursor"""
     before: String
+    filters: FiltersExpression
 
     """Paginate first"""
     first: Int
 
     """Paginate last"""
     last: Int
-  ): AuctionResponse!
-  getOrdersForAsset(token: String!): [Order!]!
-  getRegisteredNfts(ownerAddress: String!): [String!]!
+  ): OrdersResponse!
+  registeredNfts(ownerAddress: String!): [String!]!
 }
 
 input RemoveLikeArgs {

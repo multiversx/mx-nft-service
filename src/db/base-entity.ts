@@ -4,9 +4,9 @@ export class BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'creation_date' })
+  @Column()
   creationDate: Date = new Date(new Date().toUTCString());
 
-  @Column({ name: 'modified_date', nullable: true })
+  @Column({ nullable: true })
   modifiedDate: Date;
 }

@@ -11,7 +11,7 @@ export class AccountEntity extends BaseEntity {
   @Column()
   description: string;
 
-  @Column({ name: 'profile_img_url' })
+  @Column()
   profileImgUrl: string;
 
   @Column({ length: 62 })
