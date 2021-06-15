@@ -8,8 +8,8 @@ export class CreateAuctionArgs {
   @Field(() => String)
   token: string;
 
-  @Field(() => String)
-  nonce: string;
+  @Field(() => Int)
+  nonce: number;
 
   @Field(() => Int)
   quantity: number;

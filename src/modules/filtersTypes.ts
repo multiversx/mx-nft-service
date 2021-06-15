@@ -26,8 +26,6 @@ export class Filter {
   values: string;
   @Field(() => String)
   field: string;
-  @Field(() => String)
-  relationField: String;
 }
 
 @InputType()
@@ -36,6 +34,4 @@ export class FiltersExpression {
   operator: Operator;
   @Field(() => [Filter])
   filters: [Filter];
-  @Field(() => [FiltersExpression])
-  childExpressions: [FiltersExpression];
 }

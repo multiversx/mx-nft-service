@@ -22,11 +22,8 @@ export default class WhereBuilder<Entity> {
 
   private buildExpressionRec(fe: FiltersExpression): string {
     const filters = map(fe.filters, (f) => this.buildFilter(f));
-    const children = map(fe.childExpressions, (child) =>
-      this.buildExpressionRec(child),
-    );
 
-    const allSqlBlocks = [...filters, ...children];
+    const allSqlBlocks = [...filters];
     console.log('test ', Operator[fe.operator]);
     const sqLExpr = allSqlBlocks.join(` ${Operator[fe.operator]} `);
     return isEmpty(sqLExpr) ? '' : `(${sqLExpr})`;

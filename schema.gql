@@ -160,7 +160,7 @@ input CreateAuctionArgs {
   maxBid: String!
   maxOneSftPerPayment: Boolean!
   minBid: String!
-  nonce: String!
+  nonce: Int!
   ownerAddress: String!
   paymentToken: String!
   paymentTokenNonce: Int!
@@ -194,12 +194,10 @@ scalar DateTime
 input Filter {
   field: String!
   op: Operation!
-  relationField: String!
   values: [String!]!
 }
 
 input FiltersExpression {
-  childExpressions: [FiltersExpression!]!
   filters: [Filter!]!
   operator: Operator!
 }

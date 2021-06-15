@@ -7,7 +7,7 @@
     "chainID": "T",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqg6w343j3zvmtc4dxemcw0xty44rgpn3j62vsccfmkj",
-    "issueNftCost": 5
+    "issueNftCost": 50000000000000000
   },
   "caching": {
     "getAllContractAddresses": 600,

@@ -16,10 +16,9 @@ export default class JoinBuilder<Entity> {
   }
 
   private buildJoinEntitiesRec(fe: FiltersExpression) {
-    forEach(fe.filters, (filter: { field: string; relationField: string }) =>
-      this.addJoinEntity(filter.field, filter.relationField),
+    forEach(fe.filters, (filter: { field: string }) =>
+      this.addJoinEntity(filter.field),
     );
-    forEach(fe.childExpressions, (child) => this.buildJoinEntitiesRec(child));
   }
 
   private addJoinEntity(field: string, relationField?: string) {

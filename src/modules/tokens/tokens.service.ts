@@ -82,7 +82,7 @@ export class TokensService {
 
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction(functionName),
-      value: Balance.egld(elrondConfig.issueNftCost),
+      value: Balance.fromString(elrondConfig.issueNftCost),
       args: transactionArgs,
       gasLimit: new GasLimit(gas.issueToken),
     });
