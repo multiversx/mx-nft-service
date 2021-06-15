@@ -4,6 +4,7 @@ import { OrdersServiceDb } from 'src/db/orders/orders.service';
 import { OrderEntity } from 'src/db/orders/order.entity';
 import { CreateOrderArgs, Order } from './models';
 import { Price } from '../assets/models';
+import { FiltersExpression } from '../filtersTypes';
 
 @Injectable()
 export class OrdersService {
@@ -37,6 +38,24 @@ export class OrdersService {
       orders.push(this.mapEntityToDto(order));
     });
     return orders;
+  }
+
+  async getOrders(
+    limit: number,
+    offset: number,
+    filters: FiltersExpression,
+  ): Promise<[Order[], number]> {
+    const [ordersEntities, count] = await this.orderServiceDb.getOrders(
+      limit,
+      offset,
+      filters,
+    );
+
+    let responseOrders: Order[] = [];
+    ordersEntities.forEach((order) => {
+      responseOrders.push(this.mapEntityToDto(order));
+    });
+    return [responseOrders, count];
   }
 
   async getTopBid(auctionId: number): Promise<Price> {

@@ -249,9 +249,31 @@ type Order {
   status: OrderStatusEnum!
 }
 
+type OrderConnection {
+  edges: [OrderEdge!]
+  pageInfo: OrderPageInfo
+}
+
+type OrderEdge {
+  cursor: String
+  node: Order
+}
+
+type OrderPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 enum OrderStatusEnum {
   active
   inactive
+}
+
+type OrdersResponse {
+  page: OrderConnection!
+  pageData: PageData
 }
 
 type PageData {
@@ -324,7 +346,20 @@ type Query {
     """Paginate last"""
     last: Int
   ): AssetsResponse!
-  getOrdersForAsset(token: String!): [Order!]!
+  orders(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+    filters: FiltersExpression
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): OrdersResponse!
   registeredNfts(ownerAddress: String!): [String!]!
 }
 

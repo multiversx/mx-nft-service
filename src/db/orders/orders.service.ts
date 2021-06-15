@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
+import { FiltersExpression } from 'src/modules/filtersTypes';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { OrderEntity } from './order.entity';
 
@@ -14,7 +16,7 @@ export class OrdersServiceDb {
   async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity> {
     return await this.ordersRepository
       .createQueryBuilder('order')
-      .where(`order.auction_id = :id and order.status='active'`, {
+      .where(`order.auctionId = :id and order.status='active'`, {
         id: auctionId,
       })
       .getOne();
@@ -23,10 +25,27 @@ export class OrdersServiceDb {
   async getOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
     return await this.ordersRepository
       .createQueryBuilder('order')
-      .where('order.auction_id = :id', {
+      .where('order.auctionId = :id', {
         id: auctionId,
       })
       .getMany();
+  }
+
+  async getOrders(
+    limit: number = 50,
+    offset: number,
+    filters: FiltersExpression,
+  ): Promise<[OrderEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<OrderEntity>(
+      this.ordersRepository,
+      filters,
+    );
+    const queryBuilder: SelectQueryBuilder<OrderEntity> =
+      filterQueryBuilder.build();
+    queryBuilder.offset(offset);
+    queryBuilder.limit(limit);
+
+    return await queryBuilder.getManyAndCount();
   }
 
   async saveOrder(order: OrderEntity) {
