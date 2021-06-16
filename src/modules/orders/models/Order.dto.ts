@@ -4,7 +4,6 @@ import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
 import { Price } from '../../assets/models';
 
-
 @ObjectType()
 export class Order {
   @Field(() => ID)

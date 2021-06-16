@@ -20,19 +20,19 @@ export class Account {
   @Field({ nullable: true })
   herotag: string;
 
-  @Field(() => [Asset])
+  @Field(() => [Asset], { nullable: true })
   assets: Asset[];
 
-  @Field(() => [Order])
+  @Field(() => [Order], { nullable: true })
   orders: Order[];
 
-  @Field(() => [Auction])
+  @Field(() => [Auction], { nullable: true })
   auctions: Auction[];
 
-  @Field(() => [Account])
+  @Field(() => [Account], { nullable: true })
   followers: Account[];
 
-  @Field(() => [Account])
+  @Field(() => [Account], { nullable: true })
   following: Account[];
 
   constructor(init?: Partial<Account>) {

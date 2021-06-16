@@ -24,7 +24,6 @@ export default class WhereBuilder<Entity> {
     const filters = map(fe.filters, (f) => this.buildFilter(f));
 
     const allSqlBlocks = [...filters];
-    console.log('test ', Operator[fe.operator]);
     const sqLExpr = allSqlBlocks.join(` ${Operator[fe.operator]} `);
     return isEmpty(sqLExpr) ? '' : `(${sqLExpr})`;
   }

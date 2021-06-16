@@ -1,8 +1,8 @@
 import { ApiProvider } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
-import { Token } from './models/interfaces/elrond/token.dto';
 import { nominateVal } from 'src/modules/formatters';
+import { Token } from './models/token.dto';
 
 @Injectable()
 export class ElrondApiService {
@@ -22,7 +22,7 @@ export class ElrondApiService {
     );
   }
 
-  async getNftByToken(
+  async getNftByTokenAndAddress(
     address: string,
     token: string,
     nonce: number,
@@ -30,6 +30,14 @@ export class ElrondApiService {
     const identifier = `${token}-${nominateVal(nonce)}`;
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts/${identifier}`,
+      (response) => response,
+    );
+  }
+
+  async getNftByToken(token: string, nonce: number): Promise<Token> {
+    const identifier = `${token}-${nominateVal(nonce)}`;
+    return await this.getService().doGetGeneric(
+      `nfts/${identifier}`,
       (response) => response,
     );
   }

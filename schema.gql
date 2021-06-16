@@ -4,14 +4,14 @@
 
 type Account {
   address: ID!
-  assets: [Asset!]!
-  auctions: [Auction!]!
+  assets: [Asset!]
+  auctions: [Auction!]
   description: String
-  followers: [Account!]!
-  following: [Account!]!
+  followers: [Account!]
+  following: [Account!]
   herotag: String
   id: Int!
-  orders: [Order!]!
+  orders: [Order!]
   profileImgUrl: String
 }
 
@@ -45,7 +45,7 @@ type Asset {
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!
-  currentOwner: Onwer!
+  currentOwner: Onwer
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean!
@@ -55,9 +55,9 @@ type Asset {
   name: String!
   nonce: Int!
   ownerAddress: String!
-  previousOwners: [Onwer!]!
+  previousOwners: [Onwer!]
   royalties: String!
-  tags: [String!]!
+  tags: [String!]
   token: ID!
   type: TokenTypeEnum!
   uris: [String!]!
@@ -100,7 +100,7 @@ type Auction {
   maxBid: Price!
   minBid: Price!
   nonce: Int!
-  orders: [Order!]!
+  orders: [Order!]
   owner: Account
   ownerAddress: String
   startDate: String!

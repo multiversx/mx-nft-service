@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggerInterceptor } from './interceptors/logger-interceptor';
 import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
@@ -21,6 +19,7 @@ import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { AuctionsModuleDb } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
+import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -57,6 +56,13 @@ if (!!process.env.LOG_FILE) {
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
       playground: true,
+      formatError: (error: GraphQLError) => {
+        const graphQLFormattedError: GraphQLFormattedError = {
+          message:
+            error.extensions?.exception?.response?.message || error.message,
+        };
+        return graphQLFormattedError;
+      },
       uploads: {
         maxFileSize: 100000000,
         maxFiles: 5,

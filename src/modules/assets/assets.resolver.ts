@@ -49,9 +49,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args() args: ConnectionArgs,
   ): Promise<AssetsResponse> {
     const { limit, offset } = args.pagingParams();
-    const [assets, count] = await this.assetsService.getAllAssets(
+    const [assets, count] = await this.assetsService.getAssets(
       offset,
       limit,
+      filters,
     );
     return this.mapResponse<Asset>(assets, args, count, offset, limit);
   }

@@ -11,6 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { gas } from 'src/config';
 import '../../utils/extentions';
+import { AssetsFilter } from '../filtersTypes';
 import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
 import { TransactionNode } from '../transaction';
@@ -42,6 +43,45 @@ export class AssetsService {
     return [assets, count];
   }
 
+  async getAssets(
+    offset: number = 0,
+    limit: number = 10,
+    filters: AssetsFilter,
+  ): Promise<[Asset[], number]> {
+    let [assets, count] = [[], 0];
+    if (filters?.ownerAddress) {
+      if (filters?.nonce && filters?.token) {
+        [assets, count] = [
+          [
+            await this.getAssetByTokenAndAddress(
+              filters.ownerAddress,
+              filters.token,
+              filters.nonce,
+            ),
+          ],
+          1,
+        ];
+      } else {
+        [assets, count] = await this.getAssetsForUser(
+          filters.ownerAddress,
+          offset,
+          limit,
+        );
+      }
+    } else {
+      if (filters?.nonce && filters?.token) {
+        [assets, count] = [
+          [await this.getAssetByToken(filters.token, filters.nonce)],
+          1,
+        ];
+      } else {
+        [assets, count] = await this.getAllAssets(offset, limit);
+      }
+    }
+
+    return [assets, count];
+  }
+
   async getAllAssets(
     offset: number = 0,
     limit: number = 10,
@@ -54,22 +94,22 @@ export class AssetsService {
     return [assets, count];
   }
 
-  async getAssetByToken(
+  async getAssetByTokenAndAddress(
     onwerAddress: string,
     token: string,
     nonce: number,
   ): Promise<Asset> {
-    const nft = await this.apiService.getNftByToken(onwerAddress, token, nonce);
-    return new Asset({
-      token: nft.token,
-      nonce: nft.nonce,
-      name: nft.name,
-      hash: nft.hash,
-      creatorAddress: nft.creator,
-      royalties: nft.royalties,
-      ownerAddress: nft.owner,
-      uris: nft.uris,
-    });
+    const nft = await this.apiService.getNftByTokenAndAddress(
+      onwerAddress,
+      token,
+      nonce,
+    );
+    return Asset.fromToken(nft);
+  }
+
+  async getAssetByToken(token: string, nonce: number): Promise<Asset> {
+    const nft = await this.apiService.getNftByToken(token, nonce);
+    return Asset.fromToken(nft);
   }
 
   async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
