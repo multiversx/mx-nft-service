@@ -1,6 +1,5 @@
-import { CacheModule, forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import * as redisStore from 'cache-manager-redis-store';
 import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
@@ -18,13 +17,6 @@ import { AssetsLikesService } from './assets-likes.service';
     IpfsModule,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleGraph),
-    CacheModule.register({
-      ttl: 30, // default cache to 30 seconds. it will be overridden when needed
-      store: redisStore,
-      host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
-      prefix: process.env.REDIS_PREFIX,
-    }),
     TypeOrmModule.forFeature([AssetsLikesRepository]),
     RedisCacheModule.register({
       host: process.env.REDIS_URL,

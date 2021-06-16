@@ -1,20 +1,10 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import * as redisStore from 'cache-manager-redis-store';
 import { IpfsService as IpfsService } from './ipfs.service';
 
 @Module({
   providers: [IpfsService],
-  imports: [
-    ElrondCommunicationModule,
-    CacheModule.register({
-      ttl: 30,
-      store: redisStore,
-      host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
-      prefix: process.env.REDIS_PREFIX,
-    }),
-  ],
+  imports: [ElrondCommunicationModule],
   exports: [IpfsService],
 })
 export class IpfsModule {}
