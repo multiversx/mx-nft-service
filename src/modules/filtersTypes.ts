@@ -1,4 +1,4 @@
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
 
 export enum Operator {
   AND,
@@ -34,4 +34,17 @@ export class FiltersExpression {
   operator: Operator;
   @Field(() => [Filter])
   filters: [Filter];
+}
+
+@InputType()
+export class AssetsFilter {
+  @Field(() => String, { nullable: true })
+  ownerAddress: string;
+
+  @Field(() => String, { nullable: true })
+  token: string;
+  @Field(() => Int, { nullable: true })
+  nonce: number;
+  @Field(() => [String], { nullable: true })
+  tags: [string];
 }

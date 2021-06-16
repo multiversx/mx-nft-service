@@ -15,11 +15,6 @@ type Account {
   profileImgUrl: String
 }
 
-type AccountConnection {
-  edges: [AccountEdge!]
-  pageInfo: AccountPageInfo
-}
-
 type AccountEdge {
   cursor: String
   node: Account
@@ -33,8 +28,9 @@ type AccountPageInfo {
 }
 
 type AccountResponse {
-  page: AccountConnection!
+  edges: [AccountEdge!]
   pageData: PageData
+  pageInfo: AccountPageInfo
 }
 
 input AddLikeArgs {
@@ -67,11 +63,6 @@ type Asset {
   uris: [String!]!
 }
 
-type AssetConnection {
-  edges: [AssetEdge!]
-  pageInfo: AssetPageInfo
-}
-
 type AssetEdge {
   cursor: String
   node: Asset
@@ -84,9 +75,17 @@ type AssetPageInfo {
   startCursor: String
 }
 
+input AssetsFilter {
+  nonce: Int
+  ownerAddress: String
+  tags: [String!]
+  token: String
+}
+
 type AssetsResponse {
-  page: AssetConnection!
+  edges: [AssetEdge!]
   pageData: PageData
+  pageInfo: AssetPageInfo
 }
 
 input AttributeInput {
@@ -111,11 +110,6 @@ type Auction {
   topBidder: Account
 }
 
-type AuctionConnection {
-  edges: [AuctionEdge!]
-  pageInfo: AuctionPageInfo
-}
-
 type AuctionEdge {
   cursor: String
   node: Auction
@@ -129,8 +123,9 @@ type AuctionPageInfo {
 }
 
 type AuctionResponse {
-  page: AuctionConnection!
+  edges: [AuctionEdge!]
   pageData: PageData
+  pageInfo: AuctionPageInfo
 }
 
 enum AuctionStatusEnum {
@@ -269,11 +264,6 @@ type Order {
   status: OrderStatusEnum!
 }
 
-type OrderConnection {
-  edges: [OrderEdge!]
-  pageInfo: OrderPageInfo
-}
-
 type OrderEdge {
   cursor: String
   node: Order
@@ -292,8 +282,9 @@ enum OrderStatusEnum {
 }
 
 type OrdersResponse {
-  page: OrderConnection!
+  edges: [OrderEdge!]
   pageData: PageData
+  pageInfo: OrderPageInfo
 }
 
 type PageData {
@@ -329,7 +320,7 @@ type Query {
 
     """Paginate before opaque cursor"""
     before: String
-    filters: FiltersExpression
+    filters: AssetsFilter
 
     """Paginate first"""
     first: Int

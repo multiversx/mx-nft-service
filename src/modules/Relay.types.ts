@@ -47,10 +47,11 @@ export default function relayTypes<T>(type: Type<T>): any {
 
   @ObjectType(`${name}Page`, { isAbstract: true })
   abstract class Page {
-    public name = `${name}Page`;
+    @Field(() => [Edge], { nullable: true })
+    public edges!: Relay.Edge<T>[];
 
-    @Field(() => Connection)
-    public page!: Connection;
+    @Field(() => PageInfo, { nullable: true })
+    public pageInfo!: Relay.PageInfo;
 
     @Field(() => PageData, { nullable: true })
     public pageData!: PageData;

@@ -29,7 +29,7 @@ import { AssetsLikesService } from './assets-likes.service';
 import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
-import { FiltersExpression } from '../filtersTypes';
+import { AssetsFilter } from '../filtersTypes';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -44,7 +44,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @Query(() => AssetsResponse)
   async assets(
-    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    @Args({ name: 'filters', type: () => AssetsFilter, nullable: true })
     filters,
     @Args() args: ConnectionArgs,
   ): Promise<AssetsResponse> {
@@ -153,6 +153,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
       arrayLength: count,
       sliceStart: offset || 0,
     });
-    return { page, pageData: { count, limit, offset } };
+    return {
+      edges: page.edges,
+      pageInfo: page.pageInfo,
+      pageData: { count, limit, offset },
+    };
   }
 }
