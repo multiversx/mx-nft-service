@@ -98,7 +98,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
       arrayLength: count,
       sliceStart: offset || 0,
     });
-    return { page, pageData: { count, limit, offset } };
+    return {
+      edges: page.edges,
+      pageInfo: page.pageInfo,
+      pageData: { count, limit, offset },
+    };
   }
 
   @ResolveField('owner', () => Account)
