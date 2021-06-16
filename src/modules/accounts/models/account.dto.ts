@@ -29,10 +29,10 @@ export class Account {
   @Field(() => [Auction], { nullable: true })
   auctions: Auction[];
 
-  @Field(() => [Account])
+  @Field(() => [Account], { nullable: true })
   followers: Account[];
 
-  @Field(() => [Account])
+  @Field(() => [Account], { nullable: true })
   following: Account[];
 
   constructor(init?: Partial<Account>) {

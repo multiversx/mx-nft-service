@@ -32,10 +32,10 @@ export class Asset {
   creator: Account = null;
   @Field(() => String)
   ownerAddress: string;
-  @Field(() => Onwer)
-  currentOwner: Onwer = null;
-  @Field(() => [Onwer])
-  previousOwners: Onwer[] = [];
+  @Field(() => Onwer, { nullable: true })
+  currentOwner: Onwer;
+  @Field(() => [Onwer], { nullable: true })
+  previousOwners: Onwer[];
   @Field()
   name!: string;
   @Field()
@@ -50,8 +50,8 @@ export class Asset {
   uris: string[];
   @Field(() => Auction, { nullable: true })
   auction: Auction;
-  @Field(() => [String])
-  tags: string[] = [];
+  @Field(() => [String], { nullable: true })
+  tags: string[];
   @Field(() => Int)
   likesCount: number;
   @Field(() => Boolean)

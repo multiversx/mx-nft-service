@@ -45,7 +45,7 @@ export class Auction {
   @Field(() => Account, { nullable: true })
   topBidder: Account;
 
-  @Field(() => [Order])
+  @Field(() => [Order], { nullable: true })
   orders: Order[];
 
   constructor(init?: Partial<Auction>) {
