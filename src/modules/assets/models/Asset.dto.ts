@@ -9,8 +9,8 @@ import { Price } from './Price.dto';
 import { Onwer } from './Onwer.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
-import { Token } from '../../../common';
 import { TokenTypeEnum } from './TokenTypes.enum';
+import { Token } from 'src/common/services/elrond-communication/models/token.dto';
 
 @ObjectType()
 export class Asset {

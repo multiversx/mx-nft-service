@@ -114,7 +114,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { token, nonce } = auction;
-    return await this.assetsService.getAssetByToken(
+    return await this.assetsService.getAssetByTokenAndAddress(
       elrondConfig.nftMarketplaceAddress,
       token,
       nonce,

@@ -1,6 +1,5 @@
 import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { AccountsResolver } from './accounts.resolver';
 import { AccountsService } from './accounts.service';
@@ -15,7 +14,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     AccountsModuleDb,
     forwardRef(() => AssetsModuleGraph),
     FollowersModuleDb,
-    CacheManagerModule,
     CacheModule.register({
       ttl: 30,
       store: redisStore,

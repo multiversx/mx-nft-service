@@ -1,6 +1,5 @@
 import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
@@ -16,7 +15,6 @@ import { AssetsLikesService } from './assets-likes.service';
   providers: [AssetsService, AssetsLikesService, AssetsResolver],
   imports: [
     ElrondCommunicationModule,
-    CacheManagerModule,
     IpfsModule,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleGraph),
@@ -27,9 +25,7 @@ import { AssetsLikesService } from './assets-likes.service';
       port: process.env.REDIS_PORT,
       prefix: process.env.REDIS_PREFIX,
     }),
-    TypeOrmModule.forFeature([
-      AssetsLikesRepository
-    ]),
+    TypeOrmModule.forFeature([AssetsLikesRepository]),
     RedisCacheModule.register({
       host: process.env.REDIS_URL,
       port: process.env.REDIS_PORT,
@@ -39,4 +35,4 @@ import { AssetsLikesService } from './assets-likes.service';
   ],
   exports: [AssetsService, AssetsLikesService],
 })
-export class AssetsModuleGraph { }
+export class AssetsModuleGraph {}

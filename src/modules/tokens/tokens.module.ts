@@ -1,6 +1,5 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { TokensResolver } from './tokens.resolver';
 import { TokensService } from './tokens.service';
@@ -10,7 +9,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
   providers: [TokensService, TokensResolver],
   imports: [
     ElrondCommunicationModule,
-    CacheManagerModule,
     AssetsModuleGraph,
     CacheModule.register({
       ttl: 30, // default cache to 30 seconds. it will be overridden when needed

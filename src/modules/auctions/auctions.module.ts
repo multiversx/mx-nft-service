@@ -1,6 +1,5 @@
 import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { CacheManagerModule } from '../../common/services/cache-manager/cache-manager.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { AuctionsService } from './auctions.service';
 import { AuctionsResolver } from './auctions.resolver';
@@ -14,7 +13,6 @@ import { OrdersModuleGraph } from '../orders/orders.module';
   providers: [AuctionsService, AuctionsResolver, NftMarketplaceAbiService],
   imports: [
     ElrondCommunicationModule,
-    CacheManagerModule,
     AuctionsModuleDb,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),

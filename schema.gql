@@ -4,14 +4,14 @@
 
 type Account {
   address: ID!
-  assets: [Asset!]!
-  auctions: [Auction!]!
+  assets: [Asset!]
+  auctions: [Auction!]
   description: String
   followers: [Account!]!
   following: [Account!]!
   herotag: String
   id: Int!
-  orders: [Order!]!
+  orders: [Order!]
   profileImgUrl: String
 }
 
