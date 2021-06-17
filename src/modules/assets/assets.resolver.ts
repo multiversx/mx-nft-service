@@ -6,6 +6,7 @@ import {
   Parent,
   Mutation,
   Int,
+  Context,
 } from '@nestjs/graphql';
 import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../base.resolver';
@@ -15,7 +16,7 @@ import {
   Asset,
   CreateNftArgs,
   TransferNftArgs,
-  Onwer,
+  Owner,
   HandleQuantityArgs,
 } from './models';
 import { GraphQLUpload } from 'apollo-server-express';
@@ -30,13 +31,13 @@ import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { AssetsFilter } from '../filtersTypes';
+import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
     private accountsService: AccountsService,
-    private auctionsService: AuctionsService,
     private assetsLikesService: AssetsLikesService,
   ) {
     super();
@@ -53,20 +54,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
       offset,
       limit,
       filters,
-    );
-    return this.mapResponse<Asset>(assets, args, count, offset, limit);
-  }
-
-  @Query(() => AssetsResponse)
-  async getAssetsForUser(
-    @Args('address') address: string,
-    @Args() args: ConnectionArgs,
-  ) {
-    const { limit, offset } = args.pagingParams();
-    const [assets, count] = await this.assetsService.getAssetsForUser(
-      address,
-      offset,
-      limit,
     );
     return this.mapResponse<Asset>(assets, args, count, offset, limit);
   }
@@ -131,16 +118,20 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return await this.accountsService.getAccountByAddress(creatorAddress);
   }
 
-  @ResolveField('currentOwner', () => Onwer)
+  @ResolveField('currentOwner', () => Owner)
   async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
     return await this.accountsService.getOwnerByAddress(ownerAddress);
   }
 
   @ResolveField('auction', () => Auction)
-  async auction(@Parent() asset: Asset) {
-    const { token, nonce } = asset;
-    return await this.auctionsService.getActiveAuction(token, nonce);
+  async auction(
+    @Parent() asset: Asset,
+    @Context()
+    { auctionsByIdentifierLoader: auctionsByIdentifierLoader }: IGraphQLContext,
+  ) {
+    const { identifier } = asset;
+    return auctionsByIdentifierLoader.load(identifier);
   }
 
   private mapResponse<T>(

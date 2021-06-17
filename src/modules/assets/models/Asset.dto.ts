@@ -6,7 +6,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { Price } from './Price.dto';
-import { Onwer } from './Onwer.dto';
+import { Owner } from './Owner.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { TokenTypeEnum } from './TokenTypes.enum';
@@ -32,10 +32,10 @@ export class Asset {
   creator: Account = null;
   @Field(() => String)
   ownerAddress: string;
-  @Field(() => Onwer, { nullable: true })
-  currentOwner: Onwer;
-  @Field(() => [Onwer], { nullable: true })
-  previousOwners: Onwer[];
+  @Field(() => Owner, { nullable: true })
+  currentOwner: Owner;
+  @Field(() => [Owner], { nullable: true })
+  previousOwners: Owner[];
   @Field()
   name!: string;
   @Field()
@@ -48,8 +48,8 @@ export class Asset {
   creationDate!: Date;
   @Field(() => [String], { nullable: false })
   uris: string[];
-  @Field(() => Auction, { nullable: true })
-  auction: Auction;
+  @Field(() => [Auction], { nullable: true })
+  auction: Auction[];
   @Field(() => [String], { nullable: true })
   tags: string[];
   @Field(() => Int)
@@ -62,11 +62,12 @@ export class Asset {
   }
 
   static fromToken(token: Token) {
+    console.log(token);
     return new Asset({
       token: token.token,
       type: TokenTypeEnum[token.type],
       nonce: token.nonce ?? 0,
-      identifier: token.tokenIdentifier ?? token.token,
+      identifier: token.identifier,
       creatorAddress: token.creator ?? '',
       ownerAddress: token.owner,
       attributes: token.attributes ?? '',

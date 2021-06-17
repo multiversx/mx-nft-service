@@ -6,6 +6,7 @@ import {
   Args,
   ResolveField,
   Parent,
+  Context,
 } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
 import { AssetsService } from '../assets/assets.service';
@@ -15,6 +16,8 @@ import { FiltersExpression } from '../filtersTypes';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import AccountResponse from './models/AccountResponse';
+import { Auction } from '../auctions/models';
+import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -66,6 +69,17 @@ export class AccountsResolver {
       account.address,
     );
     return assets;
+  }
+
+  @ResolveField('auctions', () => [Auction])
+  async auction(
+    @Parent() asset: Asset,
+    @Context()
+    { auctionsByIdentifierLoader: genreBooksLoader }: IGraphQLContext,
+  ) {
+    console.log(asset);
+    const { identifier } = asset;
+    return genreBooksLoader.load(identifier);
   }
 
   @ResolveField('followers', () => [Account])

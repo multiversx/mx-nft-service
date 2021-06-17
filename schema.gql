@@ -5,7 +5,7 @@
 type Account {
   address: ID!
   assets: [Asset!]
-  auctions: [Auction!]
+  auctions: [Auction!]!
   description: String
   followers: [Account!]
   following: [Account!]
@@ -41,11 +41,11 @@ input AddLikeArgs {
 
 type Asset {
   attributes: String!
-  auction: Auction
+  auction: [Auction!]
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!
-  currentOwner: Onwer
+  currentOwner: Owner
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean!
@@ -55,7 +55,7 @@ type Asset {
   name: String!
   nonce: Int!
   ownerAddress: String!
-  previousOwners: [Onwer!]
+  previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
   token: ID!
@@ -236,12 +236,6 @@ type Mutation {
   withdraw(auctionId: Int!): TransactionNode!
 }
 
-type Onwer {
-  account: Account
-  endDate: DateTime!
-  startDate: DateTime!
-}
-
 enum Operation {
   EQ
   IN
@@ -285,6 +279,12 @@ type OrdersResponse {
   edges: [OrderEdge!]
   pageData: PageData
   pageInfo: OrderPageInfo
+}
+
+type Owner {
+  account: Account
+  endDate: DateTime!
+  startDate: DateTime!
 }
 
 type PageData {
@@ -342,21 +342,6 @@ type Query {
     """Paginate last"""
     last: Int
   ): AuctionResponse!
-  getAssetsForUser(
-    address: String!
-
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-  ): AssetsResponse!
   orders(
     """Paginate after opaque cursor"""
     after: String

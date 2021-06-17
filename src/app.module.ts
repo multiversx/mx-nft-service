@@ -20,6 +20,9 @@ import { AuctionsModuleDb } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
+import { auctionsByIdentifierLoader } from './db/auctions/auctions.loader';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -44,6 +47,12 @@ if (!!process.env.LOG_FILE) {
 }
 
 @Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DataLoaderInterceptor,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -66,6 +75,9 @@ if (!!process.env.LOG_FILE) {
       uploads: {
         maxFileSize: 100000000,
         maxFiles: 5,
+      },
+      context: {
+        auctionsByIdentifierLoader: auctionsByIdentifierLoader(),
       },
     }),
     ScheduleModule.forRoot(),
