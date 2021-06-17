@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { fileStorage } from 'src/config';
 import { ReadStream } from 'fs';
 import { UploadToIpfsResult } from './ipfs.model';
+import { FileContent } from './file.content';
 const IPFS = require('ipfs');
 
 @Injectable()
@@ -21,11 +22,10 @@ export class IpfsService {
     return this.mapReturnType(path);
   }
 
-  async uploadText(text: any): Promise<UploadToIpfsResult> {
+  async uploadText(file: FileContent): Promise<UploadToIpfsResult> {
     const ipfs = await this.getIpfs();
-    const payload = await ipfs.add(text);
+    const payload = await ipfs.add(JSON.stringify(file));
     const { path } = payload;
-
     ipfs.stop();
     return this.mapReturnType(path);
   }
