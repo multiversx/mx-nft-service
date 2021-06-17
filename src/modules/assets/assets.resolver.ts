@@ -8,7 +8,6 @@ import {
   Int,
   Context,
 } from '@nestjs/graphql';
-import { AccountsService } from '../accounts/accounts.service';
 import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/account.dto';
 import { AssetsService } from './assets.service';
@@ -36,7 +35,6 @@ import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
-    private accountsService: AccountsService,
     private assetsLikesService: AssetsLikesService,
   ) {
     super();
@@ -112,15 +110,27 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('creator', () => Account)
-  async creator(@Parent() asset: Asset) {
+  async creator(
+    @Parent() asset: Asset,
+    @Context()
+    { accountsLoader: accountsLoader }: IGraphQLContext,
+  ) {
     const { creatorAddress } = asset;
-    return await this.accountsService.getAccountByAddress(creatorAddress);
+    const artist = await accountsLoader.load(creatorAddress);
+    return artist !== undefined ? artist[0] : null;
   }
 
-  @ResolveField('currentOwner', () => Owner)
-  async currentOwner(@Parent() asset: Asset) {
+  @ResolveField('currentOwner', () => Account)
+  async currentOwner(
+    @Parent() asset: Asset,
+    @Context()
+    { accountsLoader: accountsLoader }: IGraphQLContext,
+  ) {
     const { ownerAddress } = asset;
-    return await this.accountsService.getOwnerByAddress(ownerAddress);
+    const ownerAccount = await accountsLoader.load(ownerAddress);
+    let owner = new Owner();
+    owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
+    return owner;
   }
 
   @ResolveField('auction', () => Auction)
@@ -130,7 +140,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
     { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
   ) {
     const { identifier } = asset;
-    return assetAuctionLoader.load(identifier);
+    const auctions = await assetAuctionLoader.load(identifier);
+    return auctions !== undefined ? auctions[0] : null;
   }
 
   private mapResponse<T>(

@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
@@ -10,10 +10,13 @@ export class Order {
   @Field(() => ID)
   id: number;
 
+  @Field(() => Int)
+  auctionId: number;
+
   @Field(() => String)
   ownerAddress: string;
 
-  @Field(() => Account)
+  @Field(() => Account, { nullable: true })
   from: Account;
 
   @Field(() => Auction)

@@ -41,7 +41,7 @@ input AddLikeArgs {
 
 type Asset {
   attributes: String!
-  auction: [Auction!]
+  auction: Auction
   creationDate: DateTime!
   creator: Account!
   creatorAddress: String!
@@ -250,9 +250,10 @@ enum Operator {
 
 type Order {
   auction: Auction!
+  auctionId: Int!
   creationDate: DateTime!
   endDate: DateTime!
-  from: Account!
+  from: Account
   id: ID!
   ownerAddress: String!
   price: Price!

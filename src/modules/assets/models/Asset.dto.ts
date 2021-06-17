@@ -48,8 +48,8 @@ export class Asset {
   creationDate!: Date;
   @Field(() => [String], { nullable: false })
   uris: string[];
-  @Field(() => [Auction], { nullable: true })
-  auction: Auction[];
+  @Field(() => Auction, { nullable: true })
+  auction: Auction;
   @Field(() => [String], { nullable: true })
   tags: string[];
   @Field(() => Int)

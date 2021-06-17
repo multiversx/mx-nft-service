@@ -108,9 +108,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Auction) {
-    const { ownerAddress } = auction;
-    return await this.accountsService.getAccountByAddress(ownerAddress);
+  async owner(
+    @Parent() asset: Asset,
+    @Context()
+    { accountsLoader: accountsLoader }: IGraphQLContext,
+  ) {
+    const { ownerAddress } = asset;
+    const owner = await accountsLoader.load(ownerAddress);
+    return owner !== undefined ? owner[0] : null;
   }
 
   @ResolveField('asset', () => Asset)

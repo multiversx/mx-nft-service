@@ -25,6 +25,8 @@ import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
 import { acountAuctionLoader } from './db/auctions/account-auction.loader';
 import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
+import { accountsLoader } from './db/accounts/accounts.loader';
+import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -80,8 +82,10 @@ if (!!process.env.LOG_FILE) {
       },
       context: {
         assetAuctionLoader: assetAuctionLoader(),
+        auctionLoaderById: auctionLoaderById(),
         acountAuctionLoader: acountAuctionLoader(),
         auctionOrdersLoader: auctionOrdersLoader(),
+        accountsLoader: accountsLoader(),
       },
     }),
     ScheduleModule.forRoot(),
