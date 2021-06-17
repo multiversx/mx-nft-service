@@ -73,13 +73,12 @@ export class AccountsResolver {
 
   @ResolveField('auctions', () => [Auction])
   async auction(
-    @Parent() asset: Asset,
+    @Parent() account: Account,
     @Context()
-    { auctionsByIdentifierLoader: genreBooksLoader }: IGraphQLContext,
+    { acountAuctionLoader: acountAuctionLoader }: IGraphQLContext,
   ) {
-    console.log(asset);
-    const { identifier } = asset;
-    return genreBooksLoader.load(identifier);
+    const { address } = account;
+    return acountAuctionLoader.load(address);
   }
 
   @ResolveField('followers', () => [Account])

@@ -3,6 +3,7 @@ import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
 import { Price } from '../../assets/models';
+import { OrderEntity } from 'src/db/orders/order.entity';
 
 @ObjectType()
 export class Order {
@@ -32,5 +33,20 @@ export class Order {
 
   constructor(init?: Partial<Order>) {
     Object.assign(this, init);
+  }
+
+  static fromEntity(order: OrderEntity) {
+    return new Order({
+      id: order.id,
+      ownerAddress: order.ownerAddress,
+      price: new Price({
+        amount: order.priceAmount,
+        nonce: order.priceNonce,
+        token: order.priceToken,
+      }),
+      status: order.status,
+      creationDate: order.creationDate,
+      endDate: order.modifiedDate,
+    });
   }
 }

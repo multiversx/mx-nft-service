@@ -1,5 +1,9 @@
-import { auctionsByIdentifierLoader } from './auctions.loader';
+import { auctionOrdersLoader } from '../orders/auction-orders.loader';
+import { acountAuctionLoader } from './account-auction.loader';
+import { assetAuctionLoader } from './asset-auction.loader';
 
 export interface IGraphQLContext {
-  auctionsByIdentifierLoader: ReturnType<typeof auctionsByIdentifierLoader>;
+  assetAuctionLoader: ReturnType<typeof assetAuctionLoader>;
+  acountAuctionLoader: ReturnType<typeof acountAuctionLoader>;
+  auctionOrdersLoader: ReturnType<typeof auctionOrdersLoader>;
 }

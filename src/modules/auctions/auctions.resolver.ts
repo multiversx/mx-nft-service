@@ -6,6 +6,7 @@ import {
   Parent,
   Mutation,
   Int,
+  Context,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
@@ -29,6 +30,7 @@ import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression } from '../filtersTypes';
+import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -137,8 +139,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('orders', () => [Order])
-  async orders(@Parent() auction: Auction) {
+  async orders(
+    @Parent() auction: Auction,
+    @Context()
+    { auctionOrdersLoader: auctionOrdersLoader }: IGraphQLContext,
+  ) {
     const { id } = auction;
-    return await this.ordersService.getOrdersForAuction(id);
+    const orderEntities = await auctionOrdersLoader.load(id);
+    return orderEntities.map((element) => Order.fromEntity(element));
   }
 }

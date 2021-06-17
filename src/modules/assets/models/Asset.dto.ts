@@ -62,7 +62,6 @@ export class Asset {
   }
 
   static fromToken(token: Token) {
-    console.log(token);
     return new Asset({
       token: token.token,
       type: TokenTypeEnum[token.type],

@@ -23,7 +23,6 @@ import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
 import { Auction } from '../auctions/models';
-import { AuctionsService } from '../auctions/auctions.service';
 import { AddLikeArgs } from './models/add-like.dto';
 import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
@@ -128,10 +127,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async auction(
     @Parent() asset: Asset,
     @Context()
-    { auctionsByIdentifierLoader: auctionsByIdentifierLoader }: IGraphQLContext,
+    { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
   ) {
     const { identifier } = asset;
-    return auctionsByIdentifierLoader.load(identifier);
+    return assetAuctionLoader.load(identifier);
   }
 
   private mapResponse<T>(

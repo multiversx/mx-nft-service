@@ -22,7 +22,9 @@ import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
-import { auctionsByIdentifierLoader } from './db/auctions/auctions.loader';
+import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
+import { acountAuctionLoader } from './db/auctions/account-auction.loader';
+import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -77,7 +79,9 @@ if (!!process.env.LOG_FILE) {
         maxFiles: 5,
       },
       context: {
-        auctionsByIdentifierLoader: auctionsByIdentifierLoader(),
+        assetAuctionLoader: assetAuctionLoader(),
+        acountAuctionLoader: acountAuctionLoader(),
+        auctionOrdersLoader: auctionOrdersLoader(),
       },
     }),
     ScheduleModule.forRoot(),
