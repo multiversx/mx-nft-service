@@ -97,6 +97,7 @@ type Auction {
   asset: Asset!
   endDate: String!
   id: ID!
+  identifier: String!
   maxBid: Price!
   minBid: Price!
   nonce: Int!

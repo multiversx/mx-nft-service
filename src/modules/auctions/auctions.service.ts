@@ -8,6 +8,7 @@ import { Price } from '../assets/models';
 import { AuctionStatusEnum } from './models/AuctionStatus.enum';
 import { AuctionTypeEnum } from './models/AuctionType.enum';
 import { FiltersExpression } from '../filtersTypes';
+import { nominateVal } from '../formatters';
 
 @Injectable()
 export class AuctionsService {
@@ -69,6 +70,11 @@ export class AuctionsService {
       creationDate: new Date(new Date().toUTCString()),
       startDate: auctionData.start_time.valueOf().toString(),
       endDate: auctionData.deadline.valueOf().toString(),
+      identifier: `${auctionData.auctioned_token.token_type
+        .valueOf()
+        .toString()}-${nominateVal(
+        parseInt(auctionData.auctioned_token.nonce.valueOf().toString()),
+      )}`,
     });
   }
 

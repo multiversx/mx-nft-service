@@ -21,6 +21,9 @@ export class Auction {
   @Field(() => String)
   token: string;
 
+  @Field(() => String)
+  identifier: string;
+
   @Field(() => Int)
   nonce: number;
 
