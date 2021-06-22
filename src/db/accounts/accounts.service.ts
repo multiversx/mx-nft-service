@@ -46,6 +46,6 @@ export class AccountsServiceDb {
   }
 
   async updateAccount(account: AccountEntity) {
-    await this.accountRepository.update(account.id, account);
+    return await this.accountRepository.update(account.id, account);
   }
 }

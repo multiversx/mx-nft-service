@@ -1,4 +1,4 @@
-import { Account } from './models/account.dto';
+import { Account, SocialLink } from './models';
 import {
   Mutation,
   Query,
@@ -15,14 +15,16 @@ import { Asset } from '../assets/models';
 import { FiltersExpression } from '../filtersTypes';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import AccountResponse from './models/AccountResponse';
 import { Auction } from '../auctions/models';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
+import AccountResponse from './models/AccountResponse';
+import { SocialLinksToAccountServiceDb } from 'src/db/socialLinksToAccount/social-link.service';
 
 @Resolver(() => Account)
 export class AccountsResolver {
   constructor(
     private accountsService: AccountsService,
+    private socialLinksService: SocialLinksToAccountServiceDb,
     private assetsService: AssetsService,
   ) {}
 
@@ -34,10 +36,8 @@ export class AccountsResolver {
   }
 
   @Mutation(() => Account)
-  async updateAccount(
-    @Args('profileImgUrl') profileImgUrl: string,
-  ): Promise<void> {
-    return this.accountsService.updateAccount(profileImgUrl);
+  async updateAccount(@Args('input') input: CreateAccountArgs): Promise<void> {
+    return this.accountsService.updateAccount(input);
   }
 
   @Query(() => AccountResponse)
@@ -89,5 +89,14 @@ export class AccountsResolver {
   @ResolveField('following', () => [Account])
   async following(@Parent() account: Account): Promise<Account[]> {
     return await this.accountsService.getFollowing(account.id);
+  }
+
+  @ResolveField('socialLinks', () => [SocialLink])
+  async socialLinks(@Parent() account: Account): Promise<SocialLink[]> {
+    const socialLinks = await this.socialLinksService.getSocialLinksForAccount(
+      account.id,
+    );
+
+    return socialLinks.map((element) => SocialLink.fromEntity(element));
   }
 }

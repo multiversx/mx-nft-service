@@ -2,6 +2,7 @@ import { Auction } from '../../auctions/models';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
+import { SocialLink } from './social-links.dto';
 
 @ObjectType()
 export class Account {
@@ -34,6 +35,9 @@ export class Account {
 
   @Field(() => [Account], { nullable: true })
   following: Account[];
+
+  @Field(() => [SocialLink], { nullable: true })
+  socialLinks: SocialLink[];
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);

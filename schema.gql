@@ -13,6 +13,7 @@ type Account {
   id: Int!
   orders: [Order!]
   profileImgUrl: String
+  socialLinks: [SocialLink!]
 }
 
 type AccountEdge {
@@ -148,7 +149,7 @@ input CreateAccountArgs {
   address: String!
   description: String
   herotag: String
-  profileImgUrl: String
+  socialLinkIds: [Int!]
 }
 
 input CreateAuctionArgs {
@@ -232,7 +233,7 @@ type Mutation {
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
-  updateAccount(profileImgUrl: String!): Account!
+  updateAccount(input: CreateAccountArgs!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
   withdraw(auctionId: Int!): TransactionNode!
 }
@@ -371,6 +372,12 @@ input SetNftRolesArgs {
   addressToTransfer: String!
   roles: [String!]!
   token: String!
+}
+
+type SocialLink {
+  iconName: String!
+  id: Int!
+  name: String!
 }
 
 input StopNftCreateArgs {

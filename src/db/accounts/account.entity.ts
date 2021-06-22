@@ -2,6 +2,7 @@ import { FollowerEntity } from '../followers/follower.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders/order.entity';
+import { SocialLinkEntity } from '../socialLinks/social-link.entity';
 
 @Entity('accounts')
 export class AccountEntity extends BaseEntity {
@@ -14,6 +15,9 @@ export class AccountEntity extends BaseEntity {
   @Column()
   profileImgUrl: string;
 
+  @Column()
+  coverImgUrl: string;
+
   @Column({ length: 62 })
   herotag: string;
 
@@ -25,6 +29,9 @@ export class AccountEntity extends BaseEntity {
 
   @OneToMany(() => FollowerEntity, (f) => f.following)
   following: FollowerEntity[];
+
+  @OneToMany(() => SocialLinkEntity, (link) => link.id)
+  socialLinks: SocialLinkEntity[];
 
   constructor(init?: Partial<AccountEntity>) {
     super();

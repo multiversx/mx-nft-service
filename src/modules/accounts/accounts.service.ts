@@ -21,19 +21,27 @@ export class AccountsService {
     return await this.accountsServiceDb.insertAccount(
       new AccountEntity({
         address: args.address,
-        profileImgUrl: args.profileImgUrl,
         herotag: args.herotag,
         description: args.description,
       }),
     );
   }
 
-  async updateAccount(profileImgUrl: string): Promise<void> {
-    await this.accountsServiceDb.updateAccount(
-      new AccountEntity({
-        profileImgUrl: profileImgUrl,
-      }),
+  async updateAccount(args: CreateAccountArgs): Promise<Account | any> {
+    const existingAccount = await this.accountsServiceDb.getAccountByAddress(
+      args.address,
     );
+    const newAccount = new AccountEntity({
+      herotag: args.herotag ? args.herotag : existingAccount.herotag,
+      description: args.description
+        ? args.description
+        : existingAccount.description,
+    });
+    if (existingAccount) {
+      newAccount.id = existingAccount.id;
+      return this.accountsServiceDb.updateAccount(newAccount);
+    }
+    return this.accountsServiceDb.insertAccount(newAccount);
   }
 
   async getAccountById(id: number): Promise<Account | any> {
