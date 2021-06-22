@@ -7,8 +7,8 @@ TEMPLATE=template.yaml
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-if [[ "$BRANCH" != "master" ]]; then
-  echo 'Not on [master] branch - Aborting';
+if [[ "$BRANCH" != "main" ]]; then
+  echo 'Not on [main] branch - Aborting';
   exit 1;
 fi
 

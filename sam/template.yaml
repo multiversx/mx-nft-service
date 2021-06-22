@@ -56,7 +56,7 @@ Resources:
   BucketMediaTestnet:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: nfts-testnet-media.elrond.com
+      BucketName: testnet-nfts-media.elrond.com
       AccessControl: PublicRead
       WebsiteConfiguration:
         ErrorDocument: error.html
@@ -74,7 +74,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::nfts-testnet-media.elrond.com/*"
+            Resource: "arn:aws:s3:::testnet-nfts-media.elrond.com/*"
 
   CloudFrontMediaTestnet:
     Type: AWS::CloudFront::Distribution
@@ -83,10 +83,10 @@ Resources:
         Enabled: true
         PriceClass: PriceClass_100
         Aliases:
-          - nfts-testnet-media.elrond.com
+          - testnet-nfts-media.elrond.com
         Origins:
           - Id: s3-static-site
-            DomainName: nfts-testnet-media.elrond.com.s3-website.us-east-1.amazonaws.com
+            DomainName: testnet-nfts-media.elrond.com.s3-website.us-east-1.amazonaws.com
             CustomOriginConfig:
               HTTPPort: "80"
               HTTPSPort: "443"
@@ -106,7 +106,7 @@ Resources:
   BucketMediaDevnet:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: nfts-devnet-media.elrond.com
+      BucketName: devnet-nfts-media.elrond.com
       AccessControl: PublicRead
       WebsiteConfiguration:
         ErrorDocument: error.html
@@ -124,7 +124,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::nfts-devnet-media.elrond.com/*"
+            Resource: "arn:aws:s3:::devnet-nfts-media.elrond.com/*"
 
   CloudFrontMediaDevnet:
     Type: AWS::CloudFront::Distribution
@@ -133,10 +133,10 @@ Resources:
         Enabled: true
         PriceClass: PriceClass_100
         Aliases:
-          - nfts-devnet-media.elrond.com
+          - devnet-nfts-media.elrond.com
         Origins:
           - Id: s3-static-site
-            DomainName: nfts-devnet-media.elrond.com.s3-website.us-east-1.amazonaws.com
+            DomainName: devnet-nfts-media.elrond.com.s3-website.us-east-1.amazonaws.com
             CustomOriginConfig:
               HTTPPort: "80"
               HTTPSPort: "443"
