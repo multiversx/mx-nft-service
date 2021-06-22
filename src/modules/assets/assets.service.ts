@@ -148,9 +148,11 @@ export class AssetsService {
 
   async createNft(args: CreateNftArgs): Promise<TransactionNode> {
     const fileData = await this.ipfsService.uploadFile(args.file);
-    const asset = await this.ipfsService.uploadText(
-      args.attributes.description,
-    );
+    const asset = await this.ipfsService.uploadText({
+      description: args.attributes.description,
+      fileType: args.file.mimeType,
+      fileUri: fileData.url,
+    });
     const attributes = `tags:${args.attributes.tags};description:${asset.hash}`;
 
     const contract = new SmartContract({
