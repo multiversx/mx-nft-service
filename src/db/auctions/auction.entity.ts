@@ -18,6 +18,9 @@ export class AuctionEntity {
   @Column({ length: 20 })
   token: string;
 
+  @Column({ length: 30 })
+  identifier: string;
+
   @Column()
   nonce: number;
 

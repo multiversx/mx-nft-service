@@ -5,6 +5,7 @@ import {
   ResolveField,
   Parent,
   Mutation,
+  Context,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/account.dto';
@@ -15,6 +16,7 @@ import OrdersResponse from './models/OrdersResponse';
 import { FiltersExpression } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
+import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
@@ -51,14 +53,24 @@ export class OrdersResolver extends BaseResolver(Order) {
   }
 
   @ResolveField('from', () => Account)
-  async from(@Parent() order: Order) {
-    const { from } = order;
-    return {};
+  async from(
+    @Parent() order: Order,
+    @Context()
+    { accountsLoader: accountsLoader }: IGraphQLContext,
+  ) {
+    const { ownerAddress } = order;
+    const owner = await accountsLoader.load(ownerAddress);
+    return owner !== undefined ? owner[0] : null;
   }
 
   @ResolveField('auction', () => Auction)
-  async auction(@Parent() order: Order) {
-    const { auction } = order;
-    return {};
+  async auction(
+    @Parent() order: Order,
+    @Context()
+    { auctionLoaderById: auctionLoaderById }: IGraphQLContext,
+  ) {
+    const { auctionId } = order;
+    const auctions = await auctionLoaderById.load(auctionId);
+    return auctions !== undefined ? auctions[0] : null;
   }
 }

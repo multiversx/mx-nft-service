@@ -87,6 +87,7 @@ export class OrdersService {
       status: order.status,
       creationDate: order.creationDate,
       endDate: order.modifiedDate,
+      auctionId: order.auctionId,
     });
   }
 }

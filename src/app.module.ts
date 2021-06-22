@@ -20,6 +20,13 @@ import { AuctionsModuleDb } from './db/auctions/auctions.module';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
+import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
+import { acountAuctionLoader } from './db/auctions/account-auction.loader';
+import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
+import { accountsLoader } from './db/accounts/accounts.loader';
+import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -44,6 +51,12 @@ if (!!process.env.LOG_FILE) {
 }
 
 @Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DataLoaderInterceptor,
+    },
+  ],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -66,6 +79,13 @@ if (!!process.env.LOG_FILE) {
       uploads: {
         maxFileSize: 100000000,
         maxFiles: 5,
+      },
+      context: {
+        assetAuctionLoader: assetAuctionLoader(),
+        auctionLoaderById: auctionLoaderById(),
+        acountAuctionLoader: acountAuctionLoader(),
+        auctionOrdersLoader: auctionOrdersLoader(),
+        accountsLoader: accountsLoader(),
       },
     }),
     ScheduleModule.forRoot(),

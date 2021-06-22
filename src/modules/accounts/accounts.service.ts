@@ -5,7 +5,7 @@ import { FollowersServiceDb } from '../../db/followers/followers.service';
 import { Account } from './models/account.dto';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import { Address } from '@elrondnetwork/erdjs';
-import { Onwer } from '../assets/models';
+import { Owner } from '../assets/models';
 import { CreateAccountArgs } from './CreateAccountArgs';
 import { FiltersExpression } from '../filtersTypes';
 
@@ -73,8 +73,8 @@ export class AccountsService {
     });
   }
 
-  async getOwnerByAddress(address: string): Promise<Onwer | any> {
-    let owner = new Onwer();
+  async getOwnerByAddress(address: string): Promise<Owner | any> {
+    let owner = new Owner();
     owner.account = (await this.getAccountByAddress(address)) || null;
     return owner;
   }

@@ -15,7 +15,6 @@ import { AssetsLikesService } from './assets-likes.service';
   imports: [
     ElrondCommunicationModule,
     IpfsModule,
-    forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleGraph),
     TypeOrmModule.forFeature([AssetsLikesRepository]),
     RedisCacheModule.register({

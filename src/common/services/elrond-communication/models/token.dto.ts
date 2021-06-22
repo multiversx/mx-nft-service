@@ -1,5 +1,6 @@
 export interface Token {
   token: string;
+  identifier: string;
   name: string;
   type: string;
   owner: string;
