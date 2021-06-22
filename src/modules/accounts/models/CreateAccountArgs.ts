@@ -1,4 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
+import { FileUpload } from 'graphql-upload';
 
 @InputType()
 export class CreateAccountArgs {
@@ -10,4 +11,7 @@ export class CreateAccountArgs {
   description: string;
   @Field(() => [Int], { nullable: true })
   socialLinkIds: number[];
+
+  avatarFile: FileUpload;
+  coverFile: FileUpload;
 }

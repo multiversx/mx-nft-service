@@ -1,3 +1,3 @@
 export * from './account.dto';
-export * from './AccountResponse';
+export * from './CreateAccountArgs';
 export * from './social-links.dto';

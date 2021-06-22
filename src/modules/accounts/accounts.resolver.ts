@@ -10,15 +10,17 @@ import {
 } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
 import { AssetsService } from '../assets/assets.service';
-import { CreateAccountArgs } from './CreateAccountArgs';
+import { CreateAccountArgs } from './models/CreateAccountArgs';
 import { Asset } from '../assets/models';
 import { FiltersExpression } from '../filtersTypes';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import { Auction } from '../auctions/models';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
-import AccountResponse from './models/AccountResponse';
 import { SocialLinksToAccountServiceDb } from 'src/db/socialLinksToAccount/social-link.service';
+import { GraphQLUpload } from 'apollo-server-express';
+import { FileUpload } from 'graphql-upload';
+import AccountResponse from './AccountResponse';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -31,12 +33,26 @@ export class AccountsResolver {
   @Mutation(() => Account)
   async createAccount(
     @Args('input') input: CreateAccountArgs,
+    @Args({ name: 'coverImage', type: () => GraphQLUpload, nullable: true })
+    coverImage: FileUpload,
+    @Args({ name: 'avatarFile', type: () => GraphQLUpload, nullable: true })
+    avatarFile: FileUpload,
   ): Promise<Account> {
+    input.coverFile = coverImage;
+    input.avatarFile = avatarFile;
     return this.accountsService.createAccount(input);
   }
 
   @Mutation(() => Account)
-  async updateAccount(@Args('input') input: CreateAccountArgs): Promise<void> {
+  async updateAccount(
+    @Args('input') input: CreateAccountArgs,
+    @Args({ name: 'coverImage', type: () => GraphQLUpload, nullable: true })
+    coverImage: FileUpload,
+    @Args({ name: 'avatarFile', type: () => GraphQLUpload, nullable: true })
+    avatarFile: FileUpload,
+  ): Promise<void> {
+    input.coverFile = coverImage;
+    input.avatarFile = avatarFile;
     return this.accountsService.updateAccount(input);
   }
 

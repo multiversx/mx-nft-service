@@ -6,9 +6,10 @@ import { AccountsModuleDb } from '../../db/accounts/accounts.module';
 import { FollowersModuleDb } from 'src/db/followers/followers.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { SocialLinksToAccountModuleDb } from 'src/db/socialLinksToAccount/social-link-account.module';
+import { S3Service } from '../s3/s3-manager.service';
 
 @Module({
-  providers: [AccountsService, AccountsResolver],
+  providers: [AccountsService, S3Service, AccountsResolver],
   imports: [
     ElrondCommunicationModule,
     AccountsModuleDb,

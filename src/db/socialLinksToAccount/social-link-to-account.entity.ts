@@ -3,7 +3,7 @@ import { AccountEntity } from '../accounts/account.entity';
 import { BaseEntity } from '../base-entity';
 import { SocialLinkEntity } from '../socialLinks/social-link.entity';
 
-@Entity('social_links')
+@Entity('social_links_accounts')
 export class SocialLinkToAccountEntity extends BaseEntity {
   @ManyToOne(() => SocialLinkEntity, (link) => link.accounts)
   socialLink: SocialLinkEntity;

@@ -9,13 +9,13 @@ export class AccountEntity extends BaseEntity {
   @Column({ length: 62, unique: true })
   address: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   profileImgUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   coverImgUrl: string;
 
   @Column({ length: 62 })
