@@ -227,7 +227,7 @@ type Mutation {
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
-  upsertAccount(avatarFile: Upload, coverImage: Upload, input: UpsertAccountArgs!): Account!
+  upsertAccount(avatarImage: Upload, coverImage: Upload, input: UpsertAccountArgs!): Account!
   withdraw(auctionId: Int!): TransactionNode!
 }
 

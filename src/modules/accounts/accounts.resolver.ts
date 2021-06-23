@@ -34,11 +34,11 @@ export class AccountsResolver {
     @Args('input') input: UpsertAccountArgs,
     @Args({ name: 'coverImage', type: () => GraphQLUpload, nullable: true })
     coverImage: FileUpload,
-    @Args({ name: 'avatarFile', type: () => GraphQLUpload, nullable: true })
-    avatarFile: FileUpload,
+    @Args({ name: 'avatarImage', type: () => GraphQLUpload, nullable: true })
+    avatarImage: FileUpload,
   ): Promise<void> {
-    input.coverFile = coverImage;
-    input.avatarFile = avatarFile;
+    input.coverImage = coverImage;
+    input.avatarImage = avatarImage;
     return this.accountsService.upsertAccount(input);
   }
 

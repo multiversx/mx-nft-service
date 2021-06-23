@@ -10,6 +10,6 @@ export class UpsertAccountArgs {
   @Field(() => [Int], { nullable: true })
   socialLinkIds: number[];
 
-  avatarFile: FileUpload;
-  coverFile: FileUpload;
+  avatarImage: FileUpload;
+  coverImage: FileUpload;
 }
