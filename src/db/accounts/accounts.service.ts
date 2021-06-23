@@ -12,10 +12,6 @@ export class AccountsServiceDb {
     private accountRepository: Repository<AccountEntity>,
   ) {}
 
-  async insertAccount(account: AccountEntity): Promise<AccountEntity> {
-    return await this.accountRepository.save(account);
-  }
-
   async getAccountById(id: number): Promise<AccountEntity> {
     return await this.accountRepository.findOne({
       where: [{ id: id }],
@@ -45,7 +41,7 @@ export class AccountsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
-  async updateAccount(account: AccountEntity) {
-    return await this.accountRepository.update(account.id, account);
+  async saveAccount(account: AccountEntity) {
+    return await this.accountRepository.save(account);
   }
 }

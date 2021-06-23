@@ -19,6 +19,9 @@ export class Account {
   profileImgUrl: string;
 
   @Field({ nullable: true })
+  coverImgUrl: string;
+
+  @Field({ nullable: true })
   herotag: string;
 
   @Field(() => [Asset], { nullable: true })

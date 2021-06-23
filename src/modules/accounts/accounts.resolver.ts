@@ -10,7 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
 import { AssetsService } from '../assets/assets.service';
-import { CreateAccountArgs } from './models/CreateAccountArgs';
+import { UpsertAccountArgs } from './models/UpsertAccountArgs';
 import { Asset } from '../assets/models';
 import { FiltersExpression } from '../filtersTypes';
 import { connectionFromArraySlice } from 'graphql-relay';
@@ -31,21 +31,8 @@ export class AccountsResolver {
   ) {}
 
   @Mutation(() => Account)
-  async createAccount(
-    @Args('input') input: CreateAccountArgs,
-    @Args({ name: 'coverImage', type: () => GraphQLUpload, nullable: true })
-    coverImage: FileUpload,
-    @Args({ name: 'avatarFile', type: () => GraphQLUpload, nullable: true })
-    avatarFile: FileUpload,
-  ): Promise<Account> {
-    input.coverFile = coverImage;
-    input.avatarFile = avatarFile;
-    return this.accountsService.createAccount(input);
-  }
-
-  @Mutation(() => Account)
-  async updateAccount(
-    @Args('input') input: CreateAccountArgs,
+  async upsertAccount(
+    @Args('input') input: UpsertAccountArgs,
     @Args({ name: 'coverImage', type: () => GraphQLUpload, nullable: true })
     coverImage: FileUpload,
     @Args({ name: 'avatarFile', type: () => GraphQLUpload, nullable: true })
@@ -53,7 +40,7 @@ export class AccountsResolver {
   ): Promise<void> {
     input.coverFile = coverImage;
     input.avatarFile = avatarFile;
-    return this.accountsService.updateAccount(input);
+    return this.accountsService.upsertAccount(input);
   }
 
   @Query(() => AccountResponse)

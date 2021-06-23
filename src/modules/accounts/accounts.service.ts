@@ -6,7 +6,7 @@ import { Account } from './models/account.dto';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import { Address } from '@elrondnetwork/erdjs';
 import { Owner } from '../assets/models';
-import { CreateAccountArgs } from './models/CreateAccountArgs';
+import { UpsertAccountArgs } from './models/UpsertAccountArgs';
 import { FiltersExpression } from '../filtersTypes';
 import { S3Service } from '../s3/s3-manager.service';
 
@@ -19,45 +19,24 @@ export class AccountsService {
     private s3Service: S3Service,
   ) {}
 
-  async createAccount(args: CreateAccountArgs): Promise<Account | any> {
-    let account = new AccountEntity({
-      address: args.address,
-      herotag: args.herotag,
-      description: args.description,
-    });
-    await this.uploadFiles(args, account);
-    return await this.accountsServiceDb.insertAccount(account);
-  }
-
-  private async uploadFiles(args: CreateAccountArgs, account: AccountEntity) {
-    if (args.avatarFile) {
-      console.log('avatarFile');
-      account.profileImgUrl = await this.s3Service.upload(args.avatarFile);
-    }
-    if (args.coverFile) {
-      account.coverImgUrl = await this.s3Service.upload(args.coverFile);
-    }
-  }
-
-  async updateAccount(args: CreateAccountArgs): Promise<Account | any> {
-    const existingAccount = await this.accountsServiceDb.getAccountByAddress(
+  async upsertAccount(args: UpsertAccountArgs): Promise<Account | any> {
+    let existingAccount = await this.accountsServiceDb.getAccountByAddress(
       args.address,
     );
-    const newAccount = new AccountEntity({
-      herotag: args.herotag ? args.herotag : existingAccount.herotag,
+    if (!existingAccount) {
+      existingAccount = await this.getAccountFromBlockchain(args.address);
+      existingAccount.creationDate = new Date(new Date().toUTCString());
+    }
+    const newAccount = {
+      ...existingAccount,
+      description: args.description ?? existingAccount?.description,
+      address: args.address ?? existingAccount?.address,
+      modifiedDate: new Date(new Date().toUTCString()),
+    };
 
-      address: args.address ? args.address : existingAccount.address,
-      description: args.description
-        ? args.description
-        : existingAccount.description,
-    });
     await this.uploadFiles(args, newAccount);
 
-    if (existingAccount) {
-      newAccount.id = existingAccount.id;
-      return this.accountsServiceDb.updateAccount(newAccount);
-    }
-    return this.accountsServiceDb.insertAccount(newAccount);
+    return this.accountsServiceDb.saveAccount(newAccount);
   }
 
   async getAccountById(id: number): Promise<Account | any> {
@@ -90,7 +69,16 @@ export class AccountsService {
     const networkAccount = await this.elrondProxyService
       .getService()
       .getAccount(new Address(address));
+    return new Account({
+      address: networkAccount.address.bech32(),
+      herotag: networkAccount.userName,
+    });
+  }
 
+  async getAccountFromBlockchain(address: string): Promise<Account | any> {
+    const networkAccount = await this.elrondProxyService
+      .getService()
+      .getAccount(new Address(address));
     return new Account({
       address: networkAccount.address.bech32(),
       herotag: networkAccount.userName,
@@ -111,12 +99,22 @@ export class AccountsService {
     return await this.followerServiceDb.getFollowing(id);
   }
 
+  private async uploadFiles(args: UpsertAccountArgs, account: AccountEntity) {
+    if (args.avatarFile) {
+      account.profileImgUrl = await this.s3Service.upload(args.avatarFile);
+    }
+    if (args.coverFile) {
+      account.coverImgUrl = await this.s3Service.upload(args.coverFile);
+    }
+  }
+
   private mapEntityToDto(account: AccountEntity): Account {
     return new Account({
       id: account.id,
       address: account.address,
       description: account.description,
       profileImgUrl: account.profileImgUrl,
+      coverImgUrl: account.coverImgUrl,
       herotag: account.herotag,
     });
   }

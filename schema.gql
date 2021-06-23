@@ -6,6 +6,7 @@ type Account {
   address: ID!
   assets: [Asset!]
   auctions: [Auction!]!
+  coverImgUrl: String
   description: String
   followers: [Account!]
   following: [Account!]
@@ -145,13 +146,6 @@ input BidActionArgs {
   token: String!
 }
 
-input CreateAccountArgs {
-  address: String!
-  description: String
-  herotag: String
-  socialLinkIds: [Int!]
-}
-
 input CreateAuctionArgs {
   deadline: String!
   maxBid: String!
@@ -220,7 +214,6 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
-  createAccount(avatarFile: Upload, coverImage: Upload, input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
@@ -233,8 +226,8 @@ type Mutation {
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
-  updateAccount(avatarFile: Upload, coverImage: Upload, input: CreateAccountArgs!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
+  upsertAccount(avatarFile: Upload, coverImage: Upload, input: UpsertAccountArgs!): Account!
   withdraw(auctionId: Int!): TransactionNode!
 }
 
@@ -425,3 +418,9 @@ input UpdateAuctionArgs {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input UpsertAccountArgs {
+  address: String!
+  description: String
+  socialLinkIds: [Int!]
+}
