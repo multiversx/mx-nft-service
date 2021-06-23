@@ -353,6 +353,19 @@ type Query {
     last: Int
   ): OrdersResponse!
   registeredNfts(ownerAddress: String!): [String!]!
+  socialLinks(
+    """Paginate after opaque cursor"""
+    after: String
+
+    """Paginate before opaque cursor"""
+    before: String
+
+    """Paginate first"""
+    first: Int
+
+    """Paginate last"""
+    last: Int
+  ): SocialLinksResponse!
 }
 
 input RemoveLikeArgs {
@@ -371,6 +384,24 @@ type SocialLink {
   iconName: String!
   id: Int!
   name: String!
+}
+
+type SocialLinkEdge {
+  cursor: String
+  node: SocialLink
+}
+
+type SocialLinkPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type SocialLinksResponse {
+  edges: [SocialLinkEdge!]
+  pageData: PageData
+  pageInfo: SocialLinkPageInfo
 }
 
 input StopNftCreateArgs {

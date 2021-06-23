@@ -2,7 +2,7 @@ import { Auction } from '../../auctions/models';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
-import { SocialLink } from './social-links.dto';
+import { SocialLink } from 'src/modules/socialLinks/models';
 
 @ObjectType()
 export class Account {

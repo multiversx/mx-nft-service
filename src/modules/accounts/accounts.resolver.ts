@@ -1,4 +1,4 @@
-import { Account, SocialLink } from './models';
+import { Account } from './models';
 import {
   Mutation,
   Query,
@@ -21,6 +21,7 @@ import { SocialLinksToAccountServiceDb } from 'src/db/socialLinksToAccount/socia
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import AccountResponse from './AccountResponse';
+import { SocialLink } from '../socialLinks/models';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -99,7 +100,6 @@ export class AccountsResolver {
     const socialLinks = await this.socialLinksService.getSocialLinksForAccount(
       account.id,
     );
-
     return socialLinks.map((element) => SocialLink.fromEntity(element));
   }
 }

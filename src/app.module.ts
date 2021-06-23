@@ -27,6 +27,7 @@ import { acountAuctionLoader } from './db/auctions/account-auction.loader';
 import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { accountsLoader } from './db/accounts/accounts.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
+import { SocialLinksModuleGraph } from './modules/socialLinks/social-links.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -98,6 +99,7 @@ if (!!process.env.LOG_FILE) {
     ServicesModule,
     AuctionsModuleDb,
     AccountsModuleDb,
+    SocialLinksModuleGraph,
     IpfsModule,
   ],
 })

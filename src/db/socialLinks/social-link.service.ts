@@ -10,11 +10,13 @@ export class SocialLinksServiceDb {
     private socialLinkRepository: Repository<SocialLinkEntity>,
   ) {}
 
-  async getSocialLinks(): Promise<SocialLinkEntity[] | any[]> {
-    const socialLink = await this.socialLinkRepository
-      .createQueryBuilder('socialLinks')
-      .select()
-      .getMany();
-    return socialLink;
+  async getSocialLinks(
+    limit: number = 50,
+    offset: number = 0,
+  ): Promise<[SocialLinkEntity[], number]> {
+    return this.socialLinkRepository.findAndCount({
+      skip: offset,
+      take: limit,
+    });
   }
 }
