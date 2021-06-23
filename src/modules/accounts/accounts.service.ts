@@ -107,10 +107,12 @@ export class AccountsService {
 
   private async uploadFiles(args: UpsertAccountArgs, account: AccountEntity) {
     if (args.avatarFile) {
-      account.profileImgUrl = await this.s3Service.upload(args.avatarFile);
+      const avatarUrl = await this.s3Service.upload(args.avatarFile);
+      account.profileImgUrl = new URL(avatarUrl).pathname;
     }
     if (args.coverFile) {
-      account.coverImgUrl = await this.s3Service.upload(args.coverFile);
+      const coverUrl = await this.s3Service.upload(args.coverFile);
+      account.coverImgUrl = new URL(coverUrl).pathname;
     }
   }
 
