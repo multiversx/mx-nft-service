@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AccountEntity } from '../accounts/account.entity';
 
 @Entity('social_links')
@@ -12,7 +12,7 @@ export class SocialLinkEntity {
   @Column()
   iconName: string;
 
-  @ManyToOne(() => AccountEntity, (account) => account.socialLinks)
+  @ManyToMany(() => AccountEntity, (account) => account.socialLinks)
   accounts: AccountEntity;
 
   constructor(init?: Partial<SocialLinkEntity>) {

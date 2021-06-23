@@ -9,6 +9,7 @@ import { Owner } from '../assets/models';
 import { UpsertAccountArgs } from './models/UpsertAccountArgs';
 import { FiltersExpression } from '../filtersTypes';
 import { S3Service } from '../s3/s3-manager.service';
+import { SocialLinkEntity } from 'src/db/socialLinks/social-link.entity';
 
 @Injectable()
 export class AccountsService {
@@ -33,9 +34,10 @@ export class AccountsService {
       address: args.address ?? existingAccount?.address,
       modifiedDate: new Date(new Date().toUTCString()),
     };
-
+    newAccount.socialLinks = args.socialLinkIds.map(
+      (i) => new SocialLinkEntity({ id: i }),
+    );
     await this.uploadFiles(args, newAccount);
-
     return this.accountsServiceDb.saveAccount(newAccount);
   }
 
@@ -89,6 +91,10 @@ export class AccountsService {
     let owner = new Owner();
     owner.account = (await this.getAccountByAddress(address)) || null;
     return owner;
+  }
+
+  async getSocialLinks(id: number): Promise<Account[] | any[]> {
+    return await this.accountsServiceDb.getSocialLinks(id);
   }
 
   async getFollowers(id: number): Promise<Account[] | any[]> {

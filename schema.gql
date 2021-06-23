@@ -5,7 +5,7 @@
 type Account {
   address: ID!
   assets: [Asset!]
-  auctions: [Auction!]!
+  auctions: [Auction!]
   coverImgUrl: String
   description: String
   followers: [Account!]

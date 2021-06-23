@@ -17,7 +17,6 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import { Auction } from '../auctions/models';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
-import { SocialLinksToAccountServiceDb } from 'src/db/socialLinksToAccount/social-link.service';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import AccountResponse from './AccountResponse';
@@ -27,7 +26,6 @@ import { SocialLink } from '../socialLinks/models';
 export class AccountsResolver {
   constructor(
     private accountsService: AccountsService,
-    private socialLinksService: SocialLinksToAccountServiceDb,
     private assetsService: AssetsService,
   ) {}
 
@@ -76,7 +74,7 @@ export class AccountsResolver {
   }
 
   @ResolveField('auctions', () => [Auction])
-  async auction(
+  async auctions(
     @Parent() account: Account,
     @Context()
     { acountAuctionLoader: acountAuctionLoader }: IGraphQLContext,
@@ -97,9 +95,7 @@ export class AccountsResolver {
 
   @ResolveField('socialLinks', () => [SocialLink])
   async socialLinks(@Parent() account: Account): Promise<SocialLink[]> {
-    const socialLinks = await this.socialLinksService.getSocialLinksForAccount(
-      account.id,
-    );
+    const socialLinks = await this.accountsService.getSocialLinks(account.id);
     return socialLinks.map((element) => SocialLink.fromEntity(element));
   }
 }

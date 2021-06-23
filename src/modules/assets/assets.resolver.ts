@@ -140,8 +140,11 @@ export class AssetsResolver extends BaseResolver(Asset) {
     { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
   ) {
     const { identifier } = asset;
-    const auctions = await assetAuctionLoader.load(identifier);
-    return auctions !== undefined ? auctions[0] : null;
+    if (identifier) {
+      const auctions = await assetAuctionLoader.load(identifier);
+      return auctions !== undefined ? auctions[0] : null;
+    }
+    return null;
   }
 
   private mapResponse<T>(

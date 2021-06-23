@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { FiltersExpression } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { SocialLinkEntity } from '../socialLinks/social-link.entity';
 import { AccountEntity } from './account.entity';
 
 @Injectable()
@@ -39,6 +40,15 @@ export class AccountsServiceDb {
     queryBuilder.limit(limit);
 
     return await queryBuilder.getManyAndCount();
+  }
+
+  async getSocialLinks(accountId: number): Promise<SocialLinkEntity[]> {
+    const account = await this.accountRepository
+      .createQueryBuilder('account')
+      .leftJoinAndSelect('account.socialLinks', 'socialLink')
+      .where('account.id = :id', { id: accountId })
+      .getMany();
+    return account.map((x) => x.socialLinks)[0];
   }
 
   async saveAccount(account: AccountEntity) {

@@ -1,5 +1,5 @@
 import { FollowerEntity } from '../followers/follower.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders/order.entity';
 import { SocialLinkEntity } from '../socialLinks/social-link.entity';
@@ -30,7 +30,8 @@ export class AccountEntity extends BaseEntity {
   @OneToMany(() => FollowerEntity, (f) => f.following)
   following: FollowerEntity[];
 
-  @OneToMany(() => SocialLinkEntity, (link) => link.id)
+  @ManyToMany(() => SocialLinkEntity, (link) => link.accounts)
+  @JoinTable()
   socialLinks: SocialLinkEntity[];
 
   constructor(init?: Partial<AccountEntity>) {
