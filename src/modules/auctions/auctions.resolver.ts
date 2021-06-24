@@ -29,8 +29,9 @@ import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import { FiltersExpression } from '../filtersTypes';
+import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
+import { QueryRequest } from '../QueryRequest';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -88,13 +89,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async auctions(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
+    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
+    sorting,
     @Args() args: ConnectionArgs,
   ) {
     const { limit, offset } = args.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
-      limit,
-      offset,
-      filters,
+      new QueryRequest({ limit, offset, filters, sorting }),
     );
     const page = connectionFromArraySlice(auctions, args, {
       arrayLength: count,
@@ -121,6 +122,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { token, nonce } = auction;
+
     return await this.assetsService.getAssetByTokenAndAddress(
       elrondConfig.nftMarketplaceAddress,
       token,
@@ -151,6 +153,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   ) {
     const { id } = auction;
     const orderEntities = await auctionOrdersLoader.load(id);
-    return orderEntities.map((element) => Order.fromEntity(element));
+    return orderEntities?.map((element) => Order.fromEntity(element));
   }
 }

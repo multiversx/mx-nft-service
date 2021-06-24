@@ -239,6 +239,7 @@ type Mutation {
 
 enum Operation {
   EQ
+  GE
   IN
   LIKE
 }
@@ -343,6 +344,7 @@ type Query {
 
     """Paginate last"""
     last: Int
+    sorting: [Sorting!]
   ): AuctionResponse!
   orders(
     """Paginate after opaque cursor"""
@@ -357,6 +359,7 @@ type Query {
 
     """Paginate last"""
     last: Int
+    sorting: [Sorting!]
   ): OrdersResponse!
   registeredNfts(ownerAddress: String!): [String!]!
 }
@@ -371,6 +374,16 @@ input SetNftRolesArgs {
   addressToTransfer: String!
   roles: [String!]!
   token: String!
+}
+
+enum Sort {
+  ASC
+  DESC
+}
+
+input Sorting {
+  direction: Sort!
+  field: String!
 }
 
 input StopNftCreateArgs {

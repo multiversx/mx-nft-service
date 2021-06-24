@@ -9,6 +9,12 @@ export enum Operation {
   EQ,
   IN,
   LIKE,
+  GE,
+}
+
+export enum Sort {
+  ASC,
+  DESC,
 }
 
 registerEnumType(Operator, {
@@ -16,6 +22,9 @@ registerEnumType(Operator, {
 });
 registerEnumType(Operation, {
   name: 'Operation',
+});
+registerEnumType(Sort, {
+  name: 'Sort',
 });
 
 @InputType()
@@ -26,6 +35,14 @@ export class Filter {
   values: string;
   @Field(() => String)
   field: string;
+}
+
+@InputType()
+export class Sorting {
+  @Field(() => String)
+  field: string;
+  @Field(() => Sort)
+  direction: Sort;
 }
 
 @InputType()

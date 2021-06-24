@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { FiltersExpression } from 'src/modules/filtersTypes';
+import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { QueryRequest } from '../../modules/QueryRequest';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
@@ -19,18 +20,17 @@ export class AuctionsServiceDb {
     });
   }
   async getAuctions(
-    limit: number = 50,
-    offset: number,
-    filters: FiltersExpression,
+    queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
-      filters,
+      queryRequest.filters,
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    queryBuilder.offset(offset);
-    queryBuilder.limit(limit);
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    this.addOrderBy(queryRequest.sorting, queryBuilder);
 
     return await queryBuilder.getManyAndCount();
   }
@@ -41,19 +41,6 @@ export class AuctionsServiceDb {
     });
   }
 
-  async getActiveAuction(token: string, nonce: number): Promise<AuctionEntity> {
-    return await this.auctionsRepository
-      .createQueryBuilder('auction')
-      .where(
-        `auction.token = :id and auction.nonce = :nonce and auction.status='Running'`,
-        {
-          id: token,
-          nonce: nonce,
-        },
-      )
-      .getOne();
-  }
-
   async insertAuction(auction: AuctionEntity | any): Promise<AuctionEntity> {
     return await this.auctionsRepository.save(auction);
   }
@@ -62,5 +49,17 @@ export class AuctionsServiceDb {
     let auction = await this.getAuction(auctionId);
     auction.status = status;
     return await this.auctionsRepository.save(auction);
+  }
+
+  private addOrderBy(
+    sorting: Sorting[],
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+  ) {
+    sorting?.forEach((sort) =>
+      queryBuilder.addOrderBy(
+        sort.field,
+        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+      ),
+    );
   }
 }

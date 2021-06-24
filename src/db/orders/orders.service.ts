@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { FiltersExpression } from 'src/modules/filtersTypes';
+import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
+import { QueryRequest } from '../../modules/QueryRequest';
 import { OrderEntity } from './order.entity';
 
 @Injectable()
@@ -22,28 +23,18 @@ export class OrdersServiceDb {
       .getOne();
   }
 
-  async getOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
-    return await this.ordersRepository
-      .createQueryBuilder('order')
-      .where('order.auctionId = :id', {
-        id: auctionId,
-      })
-      .getMany();
-  }
-
   async getOrders(
-    limit: number = 50,
-    offset: number,
-    filters: FiltersExpression,
+    queryRequest: QueryRequest,
   ): Promise<[OrderEntity[], number]> {
     const filterQueryBuilder = new FilterQueryBuilder<OrderEntity>(
       this.ordersRepository,
-      filters,
+      queryRequest.filters,
     );
     const queryBuilder: SelectQueryBuilder<OrderEntity> =
       filterQueryBuilder.build();
-    queryBuilder.offset(offset);
-    queryBuilder.limit(limit);
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    this.addOrderBy(queryRequest.sorting, queryBuilder);
 
     return await queryBuilder.getManyAndCount();
   }
@@ -57,5 +48,17 @@ export class OrdersServiceDb {
     order.status = OrderStatusEnum.inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
+  }
+
+  private addOrderBy(
+    sorting: Sorting[],
+    queryBuilder: SelectQueryBuilder<OrderEntity>,
+  ) {
+    sorting?.forEach((sort) =>
+      queryBuilder.addOrderBy(
+        sort.field,
+        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+      ),
+    );
   }
 }

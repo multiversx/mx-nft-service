@@ -13,10 +13,11 @@ import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { CreateOrderArgs, Order } from './models';
 import OrdersResponse from './models/OrdersResponse';
-import { FiltersExpression } from '../filtersTypes';
+import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
+import { QueryRequest } from '../QueryRequest';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
@@ -33,13 +34,13 @@ export class OrdersResolver extends BaseResolver(Order) {
   async orders(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
+    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
+    sorting,
     @Args() args: ConnectionArgs,
   ) {
     const { limit, offset } = args.pagingParams();
     const [orders, count] = await this.ordersService.getOrders(
-      limit,
-      offset,
-      filters,
+      new QueryRequest({ limit, offset, filters, sorting }),
     );
     const page = connectionFromArraySlice(orders, args, {
       arrayLength: count,
