@@ -79,6 +79,8 @@ export class AccountsResolver {
     { acountAuctionLoader: acountAuctionLoader }: IGraphQLContext,
   ) {
     const { address } = account;
+
+    if (!address) return null;
     return acountAuctionLoader.load(address);
   }
 

@@ -36,10 +36,6 @@ export class AccountsService {
     );
   }
 
-  async getAccountById(id: number): Promise<Account | any> {
-    return await this.accountsServiceDb.getAccountById(id);
-  }
-
   async getAccounts(
     limit: number = 50,
     offset: number,
@@ -50,12 +46,7 @@ export class AccountsService {
       offset,
       filters,
     );
-    let responseAccounts: Account[] = [];
-    accounts.forEach((account) => {
-      responseAccounts.push(this.mapEntityToDto(account));
-    });
-
-    return [responseAccounts, count];
+    return [accounts.map((elem) => Account.fromEntity(elem)), count];
   }
 
   async getAccountByAddress(address: string): Promise<Account | any> {
@@ -85,15 +76,5 @@ export class AccountsService {
 
   async getFollowing(id: number): Promise<Account[] | any[]> {
     return await this.followerServiceDb.getFollowing(id);
-  }
-
-  private mapEntityToDto(account: AccountEntity): Account {
-    return new Account({
-      id: account.id,
-      address: account.address,
-      description: account.description,
-      profileImgUrl: account.profileImgUrl,
-      herotag: account.herotag,
-    });
   }
 }

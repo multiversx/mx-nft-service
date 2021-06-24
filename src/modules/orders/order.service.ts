@@ -10,11 +10,11 @@ import { QueryRequest } from '../QueryRequest';
 export class OrdersService {
   constructor(private orderServiceDb: OrdersServiceDb) {}
 
-  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order | any> {
+  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
     const activeOrder = await this.orderServiceDb.getActiveOrdersForAuction(
       createOrderArgs.auctionId,
     );
-    const order = await this.orderServiceDb.saveOrder(
+    const orderEntity = await this.orderServiceDb.saveOrder(
       new OrderEntity({
         auctionId: createOrderArgs.auctionId,
         ownerAddress: createOrderArgs.ownerAddress,
@@ -23,10 +23,10 @@ export class OrdersService {
         priceNonce: createOrderArgs.priceNonce,
       }),
     );
-    if (order && activeOrder) {
+    if (orderEntity && activeOrder) {
       await this.orderServiceDb.updateOrder(activeOrder);
     }
-    return order;
+    return Order.fromEntity(orderEntity);
   }
 
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
@@ -34,11 +34,7 @@ export class OrdersService {
       queryRequest,
     );
 
-    let responseOrders: Order[] = [];
-    ordersEntities.forEach((order) => {
-      responseOrders.push(this.mapEntityToDto(order));
-    });
-    return [responseOrders, count];
+    return [ordersEntities.map((order) => Order.fromEntity(order)), count];
   }
 
   async getTopBid(auctionId: number): Promise<Price> {
@@ -54,23 +50,10 @@ export class OrdersService {
       : undefined;
   }
 
-  async getActiveOrderForAuction(auctionId: number): Promise<Order | any> {
-    return await this.orderServiceDb.getActiveOrdersForAuction(auctionId);
-  }
-
-  private mapEntityToDto(order: OrderEntity): Order {
-    return new Order({
-      id: order.id,
-      ownerAddress: order.ownerAddress,
-      price: new Price({
-        amount: order.priceAmount,
-        nonce: order.priceNonce,
-        token: order.priceToken,
-      }),
-      status: order.status,
-      creationDate: order.creationDate,
-      endDate: order.modifiedDate,
-      auctionId: order.auctionId,
-    });
+  async getActiveOrderForAuction(auctionId: number): Promise<Order> {
+    const orderEntity = await this.orderServiceDb.getActiveOrdersForAuction(
+      auctionId,
+    );
+    return Order.fromEntity(orderEntity);
   }
 }

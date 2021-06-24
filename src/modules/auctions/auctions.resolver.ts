@@ -153,6 +153,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     { auctionOrdersLoader: auctionOrdersLoader }: IGraphQLContext,
   ) {
     const { id } = auction;
+
+    if (!id) return null;
     const orderEntities = await auctionOrdersLoader.load(id);
     return orderEntities?.map((element) => Order.fromEntity(element));
   }

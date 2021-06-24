@@ -61,6 +61,8 @@ export class OrdersResolver extends BaseResolver(Order) {
     { accountsLoader: accountsLoader }: IGraphQLContext,
   ) {
     const { ownerAddress } = order;
+
+    if (!ownerAddress) return null;
     const owner = await accountsLoader.load(ownerAddress);
     return owner !== undefined ? owner[0] : null;
   }
