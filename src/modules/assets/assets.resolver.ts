@@ -44,15 +44,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async assets(
     @Args({ name: 'filters', type: () => AssetsFilter, nullable: true })
     filters,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [assets, count] = await this.assetsService.getAssets(
       offset,
       limit,
       filters,
     );
-    return this.mapResponse<Asset>(assets, args, count, offset, limit);
+    return this.mapResponse<Asset>(assets, pagination, count, offset, limit);
   }
 
   @Mutation(() => TransactionNode)

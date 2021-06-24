@@ -36,13 +36,14 @@ export class OrdersResolver extends BaseResolver(Order) {
     filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
     sorting,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [orders, count] = await this.ordersService.getOrders(
       new QueryRequest({ limit, offset, filters, sorting }),
     );
-    const page = connectionFromArraySlice(orders, args, {
+    const page = connectionFromArraySlice(orders, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
     });

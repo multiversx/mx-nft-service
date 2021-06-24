@@ -144,6 +144,20 @@ input BidActionArgs {
   token: String!
 }
 
+input ConnectionArgs {
+  """Paginate after opaque cursor"""
+  after: String
+
+  """Paginate before opaque cursor"""
+  before: String
+
+  """Paginate first"""
+  first: Int
+
+  """Paginate last"""
+  last: Int
+}
+
 input CreateAccountArgs {
   address: String!
   description: String
@@ -303,64 +317,10 @@ type Price {
 }
 
 type Query {
-  accounts(
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-    filters: FiltersExpression
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-  ): AccountResponse!
-  assets(
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-    filters: AssetsFilter
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-  ): AssetsResponse!
-  auctions(
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-    filters: FiltersExpression
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-    sorting: [Sorting!]
-  ): AuctionResponse!
-  orders(
-    """Paginate after opaque cursor"""
-    after: String
-
-    """Paginate before opaque cursor"""
-    before: String
-    filters: FiltersExpression
-
-    """Paginate first"""
-    first: Int
-
-    """Paginate last"""
-    last: Int
-    sorting: [Sorting!]
-  ): OrdersResponse!
+  accounts(filters: FiltersExpression, pagination: ConnectionArgs): AccountResponse!
+  assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
+  auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   registeredNfts(ownerAddress: String!): [String!]!
 }
 

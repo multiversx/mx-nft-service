@@ -3,7 +3,7 @@ import {
   ConnectionCursor,
   fromGlobalId,
 } from 'graphql-relay';
-import { Field, ArgsType, Int } from '@nestjs/graphql';
+import { Field, Int, InputType } from '@nestjs/graphql';
 
 type PagingMeta =
   | { pagingType: 'forward'; after?: string; first: number }
@@ -67,7 +67,7 @@ function getPagingParameters(args: ConnectionArgs) {
   }
 }
 
-@ArgsType()
+@InputType()
 export default class ConnectionArgs implements ConnectionArguments {
   @Field({ nullable: true, description: 'Paginate before opaque cursor' })
   public before?: ConnectionCursor;

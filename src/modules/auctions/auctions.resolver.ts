@@ -91,13 +91,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
     sorting,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
       new QueryRequest({ limit, offset, filters, sorting }),
     );
-    const page = connectionFromArraySlice(auctions, args, {
+    const page = connectionFromArraySlice(auctions, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
     });
