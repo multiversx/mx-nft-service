@@ -39,17 +39,19 @@ export class Order {
   }
 
   static fromEntity(order: OrderEntity) {
-    return new Order({
-      id: order.id,
-      ownerAddress: order.ownerAddress,
-      price: new Price({
-        amount: order.priceAmount,
-        nonce: order.priceNonce,
-        token: order.priceToken,
-      }),
-      status: order.status,
-      creationDate: order.creationDate,
-      endDate: order.modifiedDate,
-    });
+    return order
+      ? new Order({
+          id: order.id,
+          ownerAddress: order.ownerAddress,
+          price: new Price({
+            amount: order.priceAmount,
+            nonce: order.priceNonce,
+            token: order.priceToken,
+          }),
+          status: order.status,
+          creationDate: order.creationDate,
+          endDate: order.modifiedDate,
+        })
+      : null;
   }
 }

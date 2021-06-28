@@ -62,20 +62,22 @@ export class Asset {
   }
 
   static fromToken(token: Token) {
-    return new Asset({
-      token: token.token,
-      type: TokenTypeEnum[token.type],
-      nonce: token.nonce ?? 0,
-      identifier: token.identifier,
-      creatorAddress: token.creator ?? '',
-      ownerAddress: token.owner,
-      attributes: token.attributes ?? '',
-      lastSale: new Date(),
-      creationDate: new Date(),
-      hash: token.hash ?? '',
-      name: token.name,
-      royalties: token.royalties ?? '',
-      uris: token.uris || [''],
-    });
+    return token
+      ? new Asset({
+          token: token.token,
+          type: TokenTypeEnum[token.type],
+          nonce: token.nonce ?? 0,
+          identifier: token.identifier,
+          creatorAddress: token.creator ?? '',
+          ownerAddress: token.owner,
+          attributes: token.attributes ?? '',
+          lastSale: new Date(),
+          creationDate: new Date(),
+          hash: token.hash ?? '',
+          name: token.name,
+          royalties: token.royalties ?? '',
+          uris: token.uris || [''],
+        })
+      : null;
   }
 }
