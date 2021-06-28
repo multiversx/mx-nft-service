@@ -16,12 +16,6 @@ export class AccountsServiceDb {
     return await this.accountRepository.save(account);
   }
 
-  async getAccountById(id: number): Promise<AccountEntity> {
-    return await this.accountRepository.findOne({
-      where: [{ id: id }],
-    });
-  }
-
   async getAccountByAddress(address: string): Promise<AccountEntity> {
     return await this.accountRepository.findOne({
       where: [{ address: address }],

@@ -44,15 +44,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async assets(
     @Args({ name: 'filters', type: () => AssetsFilter, nullable: true })
     filters,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [assets, count] = await this.assetsService.getAssets(
       offset,
       limit,
       filters,
     );
-    return this.mapResponse<Asset>(assets, args, count, offset, limit);
+    return this.mapResponse<Asset>(assets, pagination, count, offset, limit);
   }
 
   @Mutation(() => TransactionNode)
@@ -127,6 +128,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
     { accountsLoader: accountsLoader }: IGraphQLContext,
   ) {
     const { ownerAddress } = asset;
+
+    if (!ownerAddress) {
+      return null;
+    }
     const ownerAccount = await accountsLoader.load(ownerAddress);
     let owner = new Owner();
     owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
@@ -140,6 +145,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
   ) {
     const { identifier } = asset;
+    if (!identifier) {
+      return null;
+    }
     const auctions = await assetAuctionLoader.load(identifier);
     return auctions !== undefined ? auctions[0] : null;
   }

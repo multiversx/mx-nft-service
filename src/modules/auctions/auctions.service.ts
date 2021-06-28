@@ -7,8 +7,8 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Price } from '../assets/models';
 import { AuctionStatusEnum } from './models/AuctionStatus.enum';
 import { AuctionTypeEnum } from './models/AuctionType.enum';
-import { FiltersExpression } from '../filtersTypes';
 import { nominateVal } from '../formatters';
+import { QueryRequest } from '../QueryRequest';
 
 @Injectable()
 export class AuctionsService {
@@ -25,15 +25,9 @@ export class AuctionsService {
     return savedAuction;
   }
 
-  async getAuctions(
-    limit: number,
-    offset: number,
-    filters: FiltersExpression,
-  ): Promise<[Auction[], number]> {
+  async getAuctions(queryRequest: QueryRequest): Promise<[Auction[], number]> {
     const [auctions, count] = await this.auctionServiceDb.getAuctions(
-      limit,
-      offset,
-      filters,
+      queryRequest,
     );
     let responseAuctions: Auction[] = [];
     auctions.forEach((auction) => {
@@ -41,11 +35,6 @@ export class AuctionsService {
     });
 
     return [responseAuctions, count];
-  }
-
-  async getActiveAuction(token: string, nonce: number): Promise<Auction> {
-    const auction = await this.auctionServiceDb.getActiveAuction(token, nonce);
-    return auction ? this.mapEntityToDto(auction) : undefined;
   }
 
   async updateAuction(args: UpdateAuctionArgs): Promise<Auction | any> {

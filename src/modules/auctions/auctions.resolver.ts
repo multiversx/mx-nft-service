@@ -29,8 +29,9 @@ import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import { FiltersExpression } from '../filtersTypes';
+import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
+import { QueryRequest } from '../QueryRequest';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -88,15 +89,16 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async auctions(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
+    sorting,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
-      limit,
-      offset,
-      filters,
+      new QueryRequest({ limit, offset, filters, sorting }),
     );
-    const page = connectionFromArraySlice(auctions, args, {
+    const page = connectionFromArraySlice(auctions, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
     });
@@ -121,6 +123,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { token, nonce } = auction;
+
     return await this.assetsService.getAssetByTokenAndAddress(
       elrondConfig.nftMarketplaceAddress,
       token,
@@ -150,7 +153,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     { auctionOrdersLoader: auctionOrdersLoader }: IGraphQLContext,
   ) {
     const { id } = auction;
+
+    if (!id) return null;
     const orderEntities = await auctionOrdersLoader.load(id);
-    return orderEntities.map((element) => Order.fromEntity(element));
+    return orderEntities?.map((element) => Order.fromEntity(element));
   }
 }

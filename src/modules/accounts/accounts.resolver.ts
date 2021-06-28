@@ -44,15 +44,16 @@ export class AccountsResolver {
   async accounts(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
-    @Args() args: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<AccountResponse> {
-    const { limit, offset } = args.pagingParams();
+    const { limit, offset } = pagination.pagingParams();
     const [accounts, count] = await this.accountsService.getAccounts(
       limit,
       offset,
       filters,
     );
-    const page = connectionFromArraySlice(accounts, args, {
+    const page = connectionFromArraySlice(accounts, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
     });
@@ -78,6 +79,10 @@ export class AccountsResolver {
     { acountAuctionLoader: acountAuctionLoader }: IGraphQLContext,
   ) {
     const { address } = account;
+
+    if (!address) {
+      return null;
+    }
     return acountAuctionLoader.load(address);
   }
 
