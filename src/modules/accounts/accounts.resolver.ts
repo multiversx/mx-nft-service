@@ -80,7 +80,9 @@ export class AccountsResolver {
   ) {
     const { address } = account;
 
-    if (!address) return null;
+    if (!address) {
+      return null;
+    }
     return acountAuctionLoader.load(address);
   }
 

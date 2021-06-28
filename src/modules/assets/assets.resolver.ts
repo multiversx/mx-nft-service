@@ -129,7 +129,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
   ) {
     const { ownerAddress } = asset;
 
-    if (!ownerAddress) return null;
+    if (!ownerAddress) {
+      return null;
+    }
     const ownerAccount = await accountsLoader.load(ownerAddress);
     let owner = new Owner();
     owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
@@ -143,7 +145,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
   ) {
     const { identifier } = asset;
-    if (!identifier) return null;
+    if (!identifier) {
+      return null;
+    }
     const auctions = await assetAuctionLoader.load(identifier);
     return auctions !== undefined ? auctions[0] : null;
   }
