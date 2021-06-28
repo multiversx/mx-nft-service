@@ -74,6 +74,7 @@ export class AuctionsService {
       ownerAddress: auction.ownerAddress,
       token: auction.token,
       nonce: auction.nonce,
+      identifier: auction.identifier,
       startDate: auction.startDate,
       endDate: auction.endDate,
       minBid: new Price({
