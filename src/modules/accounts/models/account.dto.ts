@@ -41,12 +41,14 @@ export class Account {
   }
 
   static fromEntity(account: AccountEntity) {
-    return new Account({
-      id: account.id,
-      address: account.address,
-      description: account.description,
-      profileImgUrl: account.profileImgUrl,
-      herotag: account.herotag,
-    });
+    return account
+      ? new Account({
+          id: account.id,
+          address: account.address,
+          description: account.description,
+          profileImgUrl: account.profileImgUrl,
+          herotag: account.herotag,
+        })
+      : null;
   }
 }
