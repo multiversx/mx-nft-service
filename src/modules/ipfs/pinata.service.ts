@@ -19,13 +19,11 @@ export class PinataService {
 
     try {
       const response = await axios.post(url, data, {
-        withCredentials: true,
         maxContentLength: 'Infinity',
         maxBodyLength: 'Infinity',
         headers: {
           'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
-          pinata_api_key: process.env.PINATA_API_KEY,
-          pinata_secret_api_key: process.env.PINATA_SECRET_API_KEY,
+          Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
       return this.mapReturnType(response.data.IpfsHash);
@@ -40,8 +38,7 @@ export class PinataService {
     try {
       const response = await axios.post(url, fileMetadata, {
         headers: {
-          pinata_api_key: process.env.PINATA_API_KEY,
-          pinata_secret_api_key: process.env.PINATA_SECRET_API_KEY,
+          Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
 
