@@ -14,6 +14,7 @@ import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
 import { nominateVal } from '../formatters';
 import { IpfsService } from '../ipfs/ipfs.service';
+import { PinataService } from '../ipfs/pinata.service';
 import { TransactionNode } from '../transaction';
 import {
   CreateNftArgs,
@@ -26,7 +27,7 @@ import {
 export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
-    private ipfsService: IpfsService,
+    private pinataService: PinataService,
   ) {}
 
   async getAssetsForUser(
@@ -147,11 +148,13 @@ export class AssetsService {
   }
 
   async createNft(args: CreateNftArgs): Promise<TransactionNode> {
-    const fileData = await this.ipfsService.uploadFile(args.file);
-    const asset = await this.ipfsService.uploadText({
+    const file = await args.file;
+    const fileData = await this.pinataService.uploadFile(file);
+    const asset = await this.pinataService.uploadText({
       description: args.attributes.description,
-      fileType: args.file.mimeType,
+      fileType: file.mimetype,
       fileUri: fileData.url,
+      fileName: file.filename,
     });
     const attributes = `tags:${args.attributes.tags};description:${asset.hash}`;
 
