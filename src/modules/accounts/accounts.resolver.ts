@@ -73,7 +73,7 @@ export class AccountsResolver {
   }
 
   @ResolveField('auctions', () => [Auction])
-  async auction(
+  async auctions(
     @Parent() account: Account,
     @Context()
     { acountAuctionLoader: acountAuctionLoader }: IGraphQLContext,

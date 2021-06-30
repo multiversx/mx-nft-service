@@ -1,30 +1,43 @@
-import { EntityRepository, Repository } from "typeorm";
-import { AssetLikeEntity } from "./assets-likes.entity";
-
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)
 export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
-
-  getAssetLikesCount(token: string,
-    nonce: number): Promise<number> {
+  getAssetLikesCount(token: string, nonce: number): Promise<number> {
     return this.count({
       where: {
         token,
-        nonce
-      }
+        nonce,
+      },
     });
   }
 
-  async isAssetLiked(token: string,
-    nonce: number,
-    address: string): Promise<boolean> {
+  async getAssetsLiked(
+    limit: number = 50,
+    offset: number,
+    address: string,
+  ): Promise<[AssetLikeEntity[], number]> {
+    const assetsLiked = await this.createQueryBuilder('assetsLiked')
+      .where({
+        address: address,
+      })
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
+    return assetsLiked;
+  }
 
+  async isAssetLiked(
+    token: string,
+    nonce: number,
+    address: string,
+  ): Promise<boolean> {
     const count = await this.count({
       where: {
         token,
         nonce,
-        address
-      }
+        address,
+      },
     });
 
     return count > 0;
@@ -42,13 +55,11 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     }
   }
 
-  removeLike(token: string,
-    nonce: number,
-    address: string): Promise<any> {
+  removeLike(token: string, nonce: number, address: string): Promise<any> {
     return this.delete({
       token,
       nonce,
-      address
+      address,
     });
   }
 }

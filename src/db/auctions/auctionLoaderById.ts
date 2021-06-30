@@ -5,7 +5,7 @@ import { AuctionEntity } from './auction.entity';
 const batchAuctions = async (auctionsIds: number[]) => {
   const auctions = await getRepository(AuctionEntity)
     .createQueryBuilder('auctions')
-    .where('id IN(:...auctionsIds) AND Status not in ("Closed", "Ended")', {
+    .where('id IN(:...auctionsIds)', {
       auctionsIds: auctionsIds,
     })
     .getMany();

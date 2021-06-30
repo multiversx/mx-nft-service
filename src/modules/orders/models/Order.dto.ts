@@ -51,6 +51,7 @@ export class Order {
           status: order.status,
           creationDate: order.creationDate,
           endDate: order.modifiedDate,
+          auctionId: order.auctionId,
         })
       : null;
   }
