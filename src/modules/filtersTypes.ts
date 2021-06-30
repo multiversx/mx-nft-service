@@ -57,11 +57,12 @@ export class FiltersExpression {
 export class AssetsFilter {
   @Field(() => String, { nullable: true })
   ownerAddress: string;
-
   @Field(() => String, { nullable: true })
   token: string;
   @Field(() => Int, { nullable: true })
   nonce: number;
   @Field(() => [String], { nullable: true })
   tags: [string];
+  @Field(() => String, { nullable: true })
+  likedByAddress: string;
 }

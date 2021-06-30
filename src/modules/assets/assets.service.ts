@@ -13,9 +13,9 @@ import { gas } from 'src/config';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
 import { nominateVal } from '../formatters';
-import { IpfsService } from '../ipfs/ipfs.service';
 import { PinataService } from '../ipfs/pinata.service';
 import { TransactionNode } from '../transaction';
+import { AssetsLikesService } from './assets-likes.service';
 import {
   CreateNftArgs,
   TransferNftArgs,
@@ -28,6 +28,7 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private pinataService: PinataService,
+    private assetsLikedService: AssetsLikesService,
   ) {}
 
   async getAssetsForUser(
@@ -50,34 +51,19 @@ export class AssetsService {
     filters: AssetsFilter,
   ): Promise<[Asset[], number]> {
     let [assets, count] = [[], 0];
+    [assets, count] = await this.getlikedByAssets(filters, limit, offset);
     if (filters?.ownerAddress) {
-      if (filters?.nonce && filters?.token) {
-        [assets, count] = [
-          [
-            await this.getAssetByTokenAndAddress(
-              filters.ownerAddress,
-              filters.token,
-              filters.nonce,
-            ),
-          ],
-          1,
-        ];
-      } else {
-        [assets, count] = await this.getAssetsForUser(
-          filters.ownerAddress,
-          offset,
-          limit,
-        );
-      }
+      [assets, count] = await this.getAssetsByOwnerAddress(
+        filters,
+        offset,
+        limit,
+      );
     } else {
-      if (filters?.nonce && filters?.token) {
-        [assets, count] = [
-          [await this.getAssetByToken(filters.token, filters.nonce)],
-          1,
-        ];
-      } else {
-        [assets, count] = await this.getAllAssets(offset, limit);
-      }
+      [assets, count] = await this.getAssetsWithoutOwner(
+        filters,
+        offset,
+        limit,
+      );
     }
 
     return [assets, count];
@@ -196,5 +182,60 @@ export class AssetsService {
       gasLimit: new GasLimit(gas.nftTransfer),
     });
     return transaction.toPlainObject();
+  }
+
+  private async getAssetsWithoutOwner(
+    filters: AssetsFilter,
+    offset: number,
+    limit: number,
+  ): Promise<[Asset[], number]> {
+    if (filters?.nonce && filters?.token) {
+      return [[await this.getAssetByToken(filters.token, filters.nonce)], 1];
+    } else {
+      return await this.getAllAssets(offset, limit);
+    }
+  }
+
+  private async getAssetsByOwnerAddress(
+    filters: AssetsFilter,
+    offset: number,
+    limit: number,
+  ): Promise<[Asset[], number]> {
+    if (filters?.nonce && filters?.token) {
+      return [
+        [
+          await this.getAssetByTokenAndAddress(
+            filters.ownerAddress,
+            filters.token,
+            filters.nonce,
+          ),
+        ],
+        1,
+      ];
+    } else {
+      return await this.getAssetsForUser(filters.ownerAddress, offset, limit);
+    }
+  }
+
+  private async getlikedByAssets(
+    filters: AssetsFilter,
+    limit: number,
+    offset: number,
+  ): Promise<[Asset[], number]> {
+    if (filters?.likedByAddress) {
+      const [assetsLiked, assetsCount] =
+        await this.assetsLikedService.getAssetLiked(
+          limit,
+          offset,
+          filters?.likedByAddress,
+        );
+      let assets = [];
+      for await (const element of assetsLiked) {
+        assets.push(await this.getAssetByToken(element.token, element.nonce));
+      }
+
+      return [assets, assetsCount];
+    }
+    return [[], 0];
   }
 }
