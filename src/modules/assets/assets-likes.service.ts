@@ -128,7 +128,7 @@ export class AssetsLikesService {
     address: string,
   ): Promise<void> {
     await this.invalidateAssetLikeCache(token, nonce, address);
-    await this.invalidateAssetLikedByCount(token);
+    await this.invalidateAssetLikedByCount(address);
     await this.invalidateAssetLikesCount(token, nonce);
   }
 

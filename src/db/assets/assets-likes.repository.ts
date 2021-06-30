@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)
@@ -13,8 +13,8 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
   }
 
   async getAssetsLiked(
-    limit: number = 50,
-    offset: number,
+    limit: number = 20,
+    offset: number = 0,
     address: string,
   ): Promise<[AssetLikeEntity[], number]> {
     const assetsLiked = await this.createQueryBuilder('assetsLiked')
