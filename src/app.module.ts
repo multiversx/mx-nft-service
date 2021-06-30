@@ -26,6 +26,7 @@ import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { RedisModule } from 'nestjs-redis';
 import { cacheConfig } from './config';
+import { AuthModule } from './modules/auth/auth.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -57,6 +58,7 @@ if (!!process.env.LOG_FILE) {
     },
   ],
   imports: [
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

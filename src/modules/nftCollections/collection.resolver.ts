@@ -10,6 +10,8 @@ import { SetNftRolesArgs } from './models';
 import { TransactionNode } from '../transaction';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { CollectionsService } from './collection.service';
+import { GqlAuthGuard } from '../auth/gql.auth-guard';
+import { UseGuards } from '@nestjs/common';
 
 @Resolver()
 export class CollectionsResolver extends BaseResolver(Collection) {
@@ -21,6 +23,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async issueNft(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
@@ -28,6 +31,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async issueSemiFungible(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
@@ -35,6 +39,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
@@ -42,6 +47,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async transferNFTCreateRole(
     @Args('input') input: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
@@ -49,6 +55,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async stopNFTCreate(
     @Args('input') input: StopNftCreateArgs,
   ): Promise<TransactionNode> {

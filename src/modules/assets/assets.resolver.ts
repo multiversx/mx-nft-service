@@ -30,6 +30,8 @@ import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { AssetsFilter } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../auth/gql.auth-guard';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -57,6 +59,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async createNft(
     @Args('input') input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
@@ -66,6 +69,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async addSftQuantity(
     @Args('input') input: HandleQuantityArgs,
   ): Promise<TransactionNode> {
@@ -73,6 +77,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async burnQuantity(
     @Args('input') input: HandleQuantityArgs,
   ): Promise<TransactionNode> {
@@ -80,6 +85,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async transferNft(
     @Args('input') input: TransferNftArgs,
   ): Promise<TransactionNode> {
@@ -87,12 +93,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
   addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
     const { identifier, address } = input;
     return this.assetsLikesService.addLike(identifier, address);
   }
 
   @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
   removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
     const { identifier, address } = input;
     return this.assetsLikesService.removeLike(identifier, address);
