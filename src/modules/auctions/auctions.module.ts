@@ -7,6 +7,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { OrdersModuleGraph } from '../orders/orders.module';
+import { RedisCacheModule } from 'src/common/services/redis-cache.module';
 
 @Module({
   providers: [AuctionsService, AuctionsResolver, NftMarketplaceAbiService],
@@ -16,6 +17,12 @@ import { OrdersModuleGraph } from '../orders/orders.module';
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
+    RedisCacheModule.register({
+      host: process.env.REDIS_URL,
+      port: process.env.REDIS_PORT,
+      password: process.env.REDIS_PASSWORD,
+      db: 2,
+    }),
   ],
   exports: [AuctionsService, NftMarketplaceAbiService],
 })

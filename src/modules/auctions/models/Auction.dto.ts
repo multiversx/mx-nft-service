@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { AuctionEntity } from 'src/db';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -53,5 +54,30 @@ export class Auction {
 
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
+  }
+
+  static fromEntity(auction: AuctionEntity) {
+    return auction
+      ? new Auction({
+          id: auction.id,
+          status: auction.status,
+          ownerAddress: auction.ownerAddress,
+          token: auction.token,
+          nonce: auction.nonce,
+          identifier: auction.identifier,
+          startDate: auction.startDate,
+          endDate: auction.endDate,
+          minBid: new Price({
+            token: 'EGLD',
+            nonce: 1,
+            amount: auction.minBid,
+          }),
+          maxBid: new Price({
+            token: 'EGLD',
+            nonce: 1,
+            amount: auction.maxBid,
+          }),
+        })
+      : null;
   }
 }
