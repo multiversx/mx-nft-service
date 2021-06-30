@@ -236,5 +236,6 @@ export class AssetsService {
 
       return [assets, assetsCount];
     }
+    return [[], 0];
   }
 }
