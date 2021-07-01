@@ -1,4 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
+import { OrderEntity } from 'src/db/orders/order.entity';
 
 @InputType()
 export class CreateOrderArgs {
@@ -12,4 +13,14 @@ export class CreateOrderArgs {
   ownerAddress: string;
   @Field(() => Int)
   auctionId: number;
+
+  static toEntity(args: CreateOrderArgs): OrderEntity {
+    return new OrderEntity({
+      auctionId: args.auctionId,
+      ownerAddress: args.ownerAddress,
+      priceToken: args.priceToken,
+      priceAmount: args.priceAmount,
+      priceNonce: args.priceNonce,
+    });
+  }
 }

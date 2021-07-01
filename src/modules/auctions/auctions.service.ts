@@ -21,7 +21,7 @@ export class AuctionsService {
   ) {}
 
   async saveAuction(auctionId: number): Promise<Auction | any> {
-    this.invalidateCache();
+    await this.invalidateCache();
     const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
     const savedAuction = await this.auctionServiceDb.insertAuction(
       AuctionEntity.fromAuctionAbi(auctionId, auctionData),
@@ -44,7 +44,7 @@ export class AuctionsService {
   }
 
   async updateAuction(args: UpdateAuctionArgs): Promise<Auction | any> {
-    this.invalidateCache();
+    await this.invalidateCache();
     return await this.auctionServiceDb.updateAuction(args.id, args.status);
   }
 
@@ -53,6 +53,6 @@ export class AuctionsService {
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.delKeysContaining('auction');
+    return this.redisCacheService.delKeysContaining('auctions');
   }
 }
