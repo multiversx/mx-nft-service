@@ -53,6 +53,6 @@ export class AuctionsService {
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.delKeysContaining('auctions');
+    return this.redisCacheService.flushDb();
   }
 }

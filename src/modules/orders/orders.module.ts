@@ -12,9 +12,9 @@ import { RedisCacheModule } from 'src/common/services/redis-cache.module';
     OrdersModuleDb,
     RedisCacheModule.register({
       host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
+      port: parseInt(process.env.REDIS_PORT),
       password: process.env.REDIS_PASSWORD,
-      db: 2,
+      db: 5,
     }),
   ],
   exports: [OrdersService],

@@ -15,13 +15,12 @@ import { AssetsLikesService } from './assets-likes.service';
   imports: [
     ElrondCommunicationModule,
     IpfsModule,
-    forwardRef(() => AuctionsModuleGraph),
     TypeOrmModule.forFeature([AssetsLikesRepository]),
     RedisCacheModule.register({
       host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
+      port: parseInt(process.env.REDIS_PORT),
       password: process.env.REDIS_PASSWORD,
-      db: 2,
+      db: 3,
     }),
   ],
   exports: [AssetsService, AssetsLikesService],

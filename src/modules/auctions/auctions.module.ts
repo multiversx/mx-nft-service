@@ -8,22 +8,29 @@ import { AssetsModuleGraph } from '../assets/assets.module';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { RedisCacheModule } from 'src/common/services/redis-cache.module';
+import { OrdersService } from '../orders/order.service';
+import { OrdersModuleDb } from 'src/db/orders/orders.module';
 
 @Module({
-  providers: [AuctionsService, AuctionsResolver, NftMarketplaceAbiService],
+  providers: [
+    AuctionsService,
+    AuctionsResolver,
+    NftMarketplaceAbiService,
+    OrdersService,
+  ],
   imports: [
     ElrondCommunicationModule,
     AuctionsModuleDb,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
-    forwardRef(() => OrdersModuleGraph),
+    OrdersModuleDb,
     RedisCacheModule.register({
       host: process.env.REDIS_URL,
-      port: process.env.REDIS_PORT,
+      port: parseInt(process.env.REDIS_PORT),
       password: process.env.REDIS_PASSWORD,
-      db: 2,
+      db: 4,
     }),
   ],
-  exports: [AuctionsService, NftMarketplaceAbiService],
+  exports: [AuctionsService, NftMarketplaceAbiService, OrdersService],
 })
 export class AuctionsModuleGraph {}

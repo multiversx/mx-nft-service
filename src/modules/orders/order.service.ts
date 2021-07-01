@@ -19,18 +19,25 @@ export class OrdersService {
   ) {}
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
-    const activeOrder = await this.orderServiceDb.getActiveOrdersForAuction(
-      createOrderArgs.auctionId,
-    );
+    try {
+      const activeOrder = await this.orderServiceDb.getActiveOrdersForAuction(
+        createOrderArgs.auctionId,
+      );
 
-    await this.invalidateCache();
-    const orderEntity = await this.orderServiceDb.saveOrder(
-      CreateOrderArgs.toEntity(createOrderArgs),
-    );
-    if (orderEntity && activeOrder) {
-      await this.orderServiceDb.updateOrder(activeOrder);
+      await this.invalidateCache();
+      const orderEntity = await this.orderServiceDb.saveOrder(
+        CreateOrderArgs.toEntity(createOrderArgs),
+      );
+      if (orderEntity && activeOrder) {
+        await this.orderServiceDb.updateOrder(activeOrder);
+      }
+      return Order.fromEntity(orderEntity);
+    } catch (error) {
+      this.logger.error('An error occurred while creating an order', error, {
+        path: 'OrdersService.createOrder',
+        createOrderArgs,
+      });
     }
-    return Order.fromEntity(orderEntity);
   }
 
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
@@ -74,14 +81,14 @@ export class OrdersService {
   }
 
   private getAuctionsCacheKey(request: QueryRequest) {
-    return generateCacheKeyFromParams('auctions', hash(request));
+    return generateCacheKeyFromParams('orders', hash(request));
   }
 
   private getAuctionCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('auctions' + auctionId);
+    return generateCacheKeyFromParams('orders' + auctionId);
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.delKeysContaining('auctions');
+    return this.redisCacheService.flushDb();
   }
 }
