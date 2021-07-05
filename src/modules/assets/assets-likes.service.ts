@@ -7,6 +7,7 @@ import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { cacheConfig } from 'src/config';
 
 @Injectable()
 export class AssetsLikesService {
@@ -16,7 +17,9 @@ export class AssetsLikesService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient('assets');
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.assetsRedisClientName,
+    );
   }
 
   getAssetLikesCount(identifier: string, nonce: number): Promise<number> {
@@ -28,7 +31,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getAssetLikes,
-        300,
+        cacheConfig.assetsttl,
       );
     } catch (err) {
       this.logger.error(
@@ -55,7 +58,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        300,
+        cacheConfig.assetsttl,
       );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
@@ -78,7 +81,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getIsAssetLiked,
-        300,
+        cacheConfig.assetsttl,
       );
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {

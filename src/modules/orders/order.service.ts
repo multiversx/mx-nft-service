@@ -9,6 +9,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
+import { cacheConfig } from 'src/config';
 const hash = require('object-hash');
 
 @Injectable()
@@ -19,7 +20,9 @@ export class OrdersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient('orders');
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.ordersRedisClientName,
+    );
   }
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
@@ -51,7 +54,7 @@ export class OrdersService {
       this.redisClient,
       cacheKey,
       getOrders,
-      300,
+      cacheConfig.ordersttl,
     );
   }
 
@@ -62,7 +65,7 @@ export class OrdersService {
       this.redisClient,
       cacheKey,
       getTopBid,
-      300,
+      cacheConfig.ordersttl,
     );
   }
 
@@ -73,7 +76,7 @@ export class OrdersService {
       this.redisClient,
       cacheKey,
       getActiveOrder,
-      300,
+      cacheConfig.ordersttl,
     );
   }
 

@@ -27,6 +27,7 @@ import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { accountsLoader } from './db/accounts/accounts.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { RedisModule } from 'nestjs-redis';
+import { cacheConfig } from './config';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -96,25 +97,25 @@ if (!!process.env.LOG_FILE) {
         db: 0,
       },
       {
-        name: 'auctions',
+        name: cacheConfig.auctionsRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
-        db: 2,
+        db: cacheConfig.auctionsDbName,
       },
       {
-        name: 'orders',
+        name: cacheConfig.ordersRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
-        db: 3,
+        db: cacheConfig.ordersDbName,
       },
       {
-        name: 'assets',
+        name: cacheConfig.assetsRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
-        db: 4,
+        db: cacheConfig.assetsDbName,
       },
     ]),
     ScheduleModule.forRoot(),

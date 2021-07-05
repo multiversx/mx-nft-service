@@ -10,6 +10,7 @@ import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { cacheConfig } from 'src/config';
 const hash = require('object-hash');
 
 @Injectable()
@@ -21,27 +22,43 @@ export class AuctionsService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient('auctions');
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.auctionsRedisClientName,
+    );
   }
 
   async saveAuction(auctionId: number): Promise<Auction | any> {
-    await this.invalidateCache();
-    const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-    const savedAuction = await this.auctionServiceDb.insertAuction(
-      AuctionEntity.fromAuctionAbi(auctionId, auctionData),
-    );
-    return savedAuction;
+    try {
+      await this.invalidateCache();
+      const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+      const savedAuction = await this.auctionServiceDb.insertAuction(
+        AuctionEntity.fromAuctionAbi(auctionId, auctionData),
+      );
+      return savedAuction;
+    } catch (error) {
+      this.logger.error('An error occurred while savind an auction', error, {
+        path: 'AuctionsService.saveAuction',
+        auctionId,
+      });
+    }
   }
 
   async getAuctions(queryRequest: QueryRequest): Promise<[Auction[], number]> {
-    const cacheKey = this.getAuctionsCacheKey(queryRequest);
-    const getAssetLiked = () => this.getMappedAuctions(queryRequest);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getAssetLiked,
-      300,
-    );
+    try {
+      const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      const getAssetLiked = () => this.getMappedAuctions(queryRequest);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAssetLiked,
+        cacheConfig.auctionsttl,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', error, {
+        path: 'AuctionsService.getAuctions',
+        queryRequest,
+      });
+    }
   }
 
   private async getMappedAuctions(queryRequest: QueryRequest) {
