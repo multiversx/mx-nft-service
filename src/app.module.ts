@@ -7,7 +7,6 @@ import {
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServicesModule } from './common/services';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -125,7 +124,6 @@ if (!!process.env.LOG_FILE) {
     AuctionsModuleGraph,
     OrdersModuleGraph,
     AccountsModuleGraph,
-    ServicesModule,
     AuctionsModuleDb,
     AccountsModuleDb,
     IpfsModule,
