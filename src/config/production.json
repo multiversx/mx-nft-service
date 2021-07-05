@@ -11,35 +11,10 @@
     "version": 1,
     "metaChainShardId": 4294967295
   },
-  "caching": {
-    "ordersRedisClientName": "orders",
-    "ordersDbName": 2,
-    "ordersttl": 43200,
-    "assetsRedisClientName": "assets",
-    "assetsDbName": 3,
-    "assetsttl": 43200,
-    "auctionsRedisClientName": "auctions",
-    "auctionsDbName": 4,
-    "auctionsttl": 43200
-  },
   "fileStorage": {
     "host": "ipfs.infura.io",
     "port": "5001",
     "protocol": "https",
     "cdnUrl": "https://ipfs.io/ipfs/"
-  },
-  "gas": {
-    "nftCreate": 60000000,
-    "nftTransfer": 60000000,
-    "startAuction": 60000000,
-    "endAuction": 60000000,
-    "bid": 60000000,
-    "withdraw": 60000000,
-    "issueToken": 60000000,
-    "setRoles": 60000000,
-    "stopNFTCreate": 60000000,
-    "transferNFTCreateRole": 60000000,
-    "burnQuantity": 10000000,
-    "addQuantity": 10000000
   }
 }
