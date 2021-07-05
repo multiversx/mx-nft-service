@@ -7,16 +7,20 @@ import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 const hash = require('object-hash');
 
 @Injectable()
 export class OrdersService {
+  private redisClient: Redis.Redis;
   constructor(
     private orderServiceDb: OrdersServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {}
+  ) {
+    this.redisClient = this.redisCacheService.getClient('orders');
+  }
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
@@ -43,19 +47,34 @@ export class OrdersService {
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
     const cacheKey = this.getAuctionsCacheKey(queryRequest);
     const getOrders = () => this.getMappedOrders(queryRequest);
-    return this.redisCacheService.getOrSet(cacheKey, getOrders, 300);
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      cacheKey,
+      getOrders,
+      300,
+    );
   }
 
   async getTopBid(auctionId: number): Promise<Price> {
     const cacheKey = this.getAuctionCacheKey(auctionId);
     const getTopBid = () => this.getPrice(auctionId);
-    return this.redisCacheService.getOrSet(cacheKey, getTopBid, 300);
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      cacheKey,
+      getTopBid,
+      300,
+    );
   }
 
   async getActiveOrderForAuction(auctionId: number): Promise<Order> {
     const cacheKey = this.getAuctionCacheKey(auctionId);
     const getActiveOrder = () => this.getActiveOrder(auctionId);
-    return this.redisCacheService.getOrSet(cacheKey, getActiveOrder, 300);
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      cacheKey,
+      getActiveOrder,
+      300,
+    );
   }
 
   private async getMappedOrders(queryRequest: QueryRequest) {
@@ -89,6 +108,6 @@ export class OrdersService {
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.flushDb();
+    return this.redisCacheService.flushDb(this.redisClient);
   }
 }

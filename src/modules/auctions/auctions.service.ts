@@ -8,17 +8,21 @@ import { QueryRequest } from '../QueryRequest';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 const hash = require('object-hash');
 
 @Injectable()
 export class AuctionsService {
+  private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
     private auctionServiceDb: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {}
+  ) {
+    this.redisClient = this.redisCacheService.getClient('auctions');
+  }
 
   async saveAuction(auctionId: number): Promise<Auction | any> {
     await this.invalidateCache();
@@ -32,7 +36,12 @@ export class AuctionsService {
   async getAuctions(queryRequest: QueryRequest): Promise<[Auction[], number]> {
     const cacheKey = this.getAuctionsCacheKey(queryRequest);
     const getAssetLiked = () => this.getMappedAuctions(queryRequest);
-    return this.redisCacheService.getOrSet(cacheKey, getAssetLiked, 300);
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      cacheKey,
+      getAssetLiked,
+      300,
+    );
   }
 
   private async getMappedAuctions(queryRequest: QueryRequest) {
@@ -53,6 +62,6 @@ export class AuctionsService {
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.flushDb();
+    return this.redisCacheService.flushDb(this.redisClient);
   }
 }

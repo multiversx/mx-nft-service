@@ -3,20 +3,11 @@ import { ElrondCommunicationModule } from '../../common/services/elrond-communic
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
-import { RedisCacheModule } from 'src/common/services/redis-cache.module';
+import { RedisCacheService } from 'src/common/services/redis-cache.service';
 
 @Module({
-  providers: [OrdersService, OrdersResolver],
-  imports: [
-    ElrondCommunicationModule,
-    OrdersModuleDb,
-    RedisCacheModule.register({
-      host: process.env.REDIS_URL,
-      port: parseInt(process.env.REDIS_PORT),
-      password: process.env.REDIS_PASSWORD,
-      db: 5,
-    }),
-  ],
-  exports: [OrdersService],
+  providers: [OrdersService, OrdersResolver, RedisCacheService],
+  imports: [ElrondCommunicationModule, OrdersModuleDb],
+  exports: [OrdersService, RedisCacheService],
 })
 export class OrdersModuleGraph {}
