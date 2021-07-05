@@ -1,88 +1,142 @@
-import { Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import { Cache } from 'cache-manager';
+import * as Redis from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { RedisService } from 'nestjs-redis';
+import { generateCacheKey } from 'src/utils/generate-cache-key';
 import { Logger } from 'winston';
 
 @Injectable()
 export class RedisCacheService {
-  DEFAULT_TTL = 300;
+  private DEFAULT_TTL = 300;
   constructor(
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
-  ) { }
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly redisService: RedisService,
+  ) {}
 
-  async get(key: string): Promise<any> {
+  getClient(clientName: string): Redis.Redis {
+    return this.redisService.getClient(clientName);
+  }
+  async get(
+    client: Redis.Redis,
+    key: string,
+    region: string = null,
+  ): Promise<any> {
+    const cacheKey = generateCacheKey(key, region);
     try {
-      return await this.cache.get(key);
+      return JSON.parse(await client.get(cacheKey));
     } catch (err) {
-      this.logger.error('An error occurred while trying to get from redis cache.', {
-        path: 'redis-cache.service.get',
-        exception: err.toString(),
-        cacheKey: key
-      });
+      this.logger.error(
+        'An error occurred while trying to get from redis cache.',
+        {
+          path: 'redis-cache.service.get',
+          exception: err.toString(),
+          cacheKey: cacheKey,
+        },
+      );
       return null;
     }
   }
-
-  async set(key: string,
+  async set(
+    client: Redis.Redis,
+    key: string,
     value: any,
-    ttl: number = this.DEFAULT_TTL
+    ttl: number = this.DEFAULT_TTL,
+    region: string = null,
   ): Promise<void> {
     if (isNil(value)) {
       return;
     }
+    const cacheKey = generateCacheKey(key, region);
     try {
-      await this.cache.set(key, value, { ttl });
+      await client.set(cacheKey, JSON.stringify(value), 'EX', ttl);
     } catch (err) {
-      this.logger.error('An error occurred while trying to set in redis cache.', {
-        path: 'redis-cache.service.set',
-        exception: err.toString(),
-        cacheKey: key
-      });
+      this.logger.error(
+        'An error occurred while trying to set in redis cache.',
+        {
+          path: 'redis-cache.service.set',
+          exception: err.toString(),
+          cacheKey: cacheKey,
+        },
+      );
       return;
     }
   }
 
-  async del(key: string): Promise<void> {
+  async del(
+    client: Redis.Redis,
+    key: string,
+    region: string = null,
+  ): Promise<void> {
+    const cacheKey = generateCacheKey(key, region);
     try {
-      await this.cache.del(key);
+      await client.del(cacheKey);
     } catch (err) {
-      this.logger.error('An error occurred while trying to delete from redis cache.', {
-        path: 'redis-cache.service.del',
+      this.logger.error(
+        'An error occurred while trying to delete from redis cache.',
+        {
+          path: 'redis-cache.service.del',
+          exception: err.toString(),
+          cacheKey: cacheKey,
+        },
+      );
+    }
+  }
+
+  async flushDb(client: Redis.Redis): Promise<void> {
+    try {
+      await client.flushdb();
+    } catch (err) {
+      this.logger.error('An error occurred while trying to flush the db', {
+        path: 'redis-cache.service.flushDb',
         exception: err.toString(),
-        cacheKey: key
       });
     }
   }
 
   async getOrSet(
+    client: Redis.Redis,
     key: string,
     createValueFunc: () => any,
-    ttl: number = this.DEFAULT_TTL
+    ttl: number = this.DEFAULT_TTL,
+    region: string = null,
   ): Promise<any> {
-    const cachedData = await this.get(key);
+    const cachedData = await this.get(client, key, region);
     if (!isNil(cachedData)) {
       return cachedData;
     }
-
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc(key, createValueFunc);
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+      key,
+      region,
+      createValueFunc,
+    );
     const value = await internalCreateValueFunc();
-    await this.set(key, value, ttl);
+    await this.set(client, key, value, ttl, region);
     return value;
   }
 
-  async setOrUpdate(key: string,
+  async setOrUpdate(
+    client: Redis.Redis,
+    key: string,
     createValueFunc: () => any,
-    ttl: number = this.DEFAULT_TTL): Promise<any> {
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc(key, createValueFunc);
+    ttl: number = this.DEFAULT_TTL,
+    region: string = null,
+  ): Promise<any> {
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+      key,
+      region,
+      createValueFunc,
+    );
     const value = await internalCreateValueFunc();
-    await this.set(key, value, ttl);
+    await this.set(client, key, value, ttl, region);
     return value;
   }
 
-  private buildInternalCreateValueFunc(key: string,
-    createValueFunc: () => any): () => Promise<any> {
+  private buildInternalCreateValueFunc(
+    key: string,
+    region: string,
+    createValueFunc: () => any,
+  ): () => Promise<any> {
     return async () => {
       try {
         let data = createValueFunc();
@@ -94,7 +148,8 @@ export class RedisCacheService {
         this.logger.error(`An error occurred while trying to load value.`, {
           path: 'redis-cache.service.createValueFunc',
           exception: err.toString(),
-          key
+          key,
+          region,
         });
         return null;
       }

@@ -69,7 +69,7 @@ export class AssetsService {
     return [assets, count];
   }
 
-  async getAllAssets(
+  private async getAllAssets(
     offset: number = 0,
     limit: number = 10,
   ): Promise<[Asset[], number]> {

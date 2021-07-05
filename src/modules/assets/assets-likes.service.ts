@@ -5,22 +5,34 @@ import '../../utils/extentions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { cacheConfig } from 'src/config';
 
 @Injectable()
 export class AssetsLikesService {
+  private redisClient: Redis.Redis;
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {}
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.assetsRedisClientName,
+    );
+  }
 
   getAssetLikesCount(identifier: string, nonce: number): Promise<number> {
     try {
       const cacheKey = this.getAssetLikesCountCacheKey(identifier, nonce);
       const getAssetLikes = () =>
         this.assetsLikesRepository.getAssetLikesCount(identifier, nonce);
-      return this.redisCacheService.getOrSet(cacheKey, getAssetLikes, 300);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAssetLikes,
+        cacheConfig.assetsttl,
+      );
     } catch (err) {
       this.logger.error(
         "An error occurred while loading asset's likes count.",
@@ -42,7 +54,12 @@ export class AssetsLikesService {
       const cacheKey = this.getAssetLikedByCacheKey(address);
       const getAssetLiked = () =>
         this.assetsLikesRepository.getAssetsLiked(limit, offset, address);
-      return this.redisCacheService.getOrSet(cacheKey, getAssetLiked, 300);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAssetLiked,
+        cacheConfig.assetsttl,
+      );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
         path: 'AssetsService.getAssetLiked',
@@ -60,7 +77,12 @@ export class AssetsLikesService {
       const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
       const getIsAssetLiked = () =>
         this.assetsLikesRepository.isAssetLiked(token, nonce, address);
-      return this.redisCacheService.getOrSet(cacheKey, getIsAssetLiked, 300);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getIsAssetLiked,
+        cacheConfig.assetsttl,
+      );
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
         path: 'AssetsService.isAssetLiked',
@@ -134,7 +156,7 @@ export class AssetsLikesService {
 
   private invalidateAssetLikedByCount(address: string): Promise<void> {
     const cacheKey = this.getAssetLikedByCacheKey(address);
-    return this.redisCacheService.del(cacheKey);
+    return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
   private invalidateAssetLikesCount(
@@ -142,7 +164,7 @@ export class AssetsLikesService {
     nonce: number,
   ): Promise<void> {
     const cacheKey = this.getAssetLikesCountCacheKey(token, nonce);
-    return this.redisCacheService.del(cacheKey);
+    return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
   private invalidateAssetLikeCache(
@@ -151,7 +173,7 @@ export class AssetsLikesService {
     address: string,
   ): Promise<void> {
     const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
-    return this.redisCacheService.del(cacheKey);
+    return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
   private getAssetLikedCacheKey(token: string, nonce: number, address: string) {

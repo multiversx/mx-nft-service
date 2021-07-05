@@ -7,7 +7,6 @@ import {
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ServicesModule } from './common/services';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -27,6 +26,8 @@ import { acountAuctionLoader } from './db/auctions/account-auction.loader';
 import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { accountsLoader } from './db/accounts/accounts.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
+import { RedisModule } from 'nestjs-redis';
+import { cacheConfig } from './config';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -88,6 +89,35 @@ if (!!process.env.LOG_FILE) {
         accountsLoader: accountsLoader(),
       },
     }),
+    RedisModule.register([
+      {
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: 0,
+      },
+      {
+        name: cacheConfig.auctionsRedisClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.auctionsDbName,
+      },
+      {
+        name: cacheConfig.ordersRedisClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.ordersDbName,
+      },
+      {
+        name: cacheConfig.assetsRedisClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.assetsDbName,
+      },
+    ]),
     ScheduleModule.forRoot(),
     ConfigModule,
     TokensModuleGraph,
@@ -95,7 +125,6 @@ if (!!process.env.LOG_FILE) {
     AuctionsModuleGraph,
     OrdersModuleGraph,
     AccountsModuleGraph,
-    ServicesModule,
     AuctionsModuleDb,
     AccountsModuleDb,
     IpfsModule,

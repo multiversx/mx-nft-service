@@ -3,10 +3,11 @@ import { ElrondCommunicationModule } from '../../common/services/elrond-communic
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
+import { RedisCacheService } from 'src/common/services/redis-cache.service';
 
 @Module({
-  providers: [OrdersService, OrdersResolver],
+  providers: [OrdersService, OrdersResolver, RedisCacheService],
   imports: [ElrondCommunicationModule, OrdersModuleDb],
-  exports: [OrdersService],
+  exports: [OrdersService, RedisCacheService],
 })
 export class OrdersModuleGraph {}

@@ -10,9 +10,15 @@
     "issueNftCost": 50000000000000000
   },
   "caching": {
-    "getAllContractAddresses": 600,
-    "networkStatus": 60,
-    "networkConfig": 43200
+    "ordersRedisClientName": "orders",
+    "ordersDbName": 2,
+    "ordersttl": 43200,
+    "assetsRedisClientName": "assets",
+    "assetsDbName": 3,
+    "assetsttl": 43200,
+    "auctionsRedisClientName": "auctions",
+    "auctionsDbName": 4,
+    "auctionsttl": 43200
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
