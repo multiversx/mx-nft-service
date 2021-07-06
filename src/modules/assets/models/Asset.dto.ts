@@ -44,8 +44,8 @@ export class Asset {
   attributes: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
-  @Field(() => GraphQLISODateTime)
-  creationDate!: Date;
+  @Field(() => String)
+  creationDate!: string;
   @Field(() => [String], { nullable: false })
   uris: string[];
   @Field(() => Auction, { nullable: true })
@@ -64,7 +64,7 @@ export class Asset {
   static fromToken(token: Token) {
     return token
       ? new Asset({
-          token: token.token,
+          token: token.collection,
           type: TokenTypeEnum[token.type],
           nonce: token.nonce ?? 0,
           identifier: token.identifier,
@@ -72,11 +72,12 @@ export class Asset {
           ownerAddress: token.owner,
           attributes: token.attributes ?? '',
           lastSale: new Date(),
-          creationDate: new Date(),
+          creationDate: token.timestamp,
           hash: token.hash ?? '',
           name: token.name,
           royalties: token.royalties ?? '',
           uris: token.uris || [''],
+          tags: token.tags || [''],
         })
       : null;
   }

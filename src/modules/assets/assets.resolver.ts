@@ -118,7 +118,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   ) {
     const { creatorAddress } = asset;
     const artist = await accountsLoader.load(creatorAddress);
-    return artist !== undefined ? artist[0] : null;
+    return artist !== undefined ? artist[0] : undefined;
   }
 
   @ResolveField('currentOwner', () => Account)

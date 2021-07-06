@@ -16,6 +16,7 @@ import { nominateVal } from '../formatters';
 import { PinataService } from '../ipfs/pinata.service';
 import { TransactionNode } from '../transaction';
 import { AssetsLikesService } from './assets-likes.service';
+import { AssetsQuery } from './assets-query';
 import {
   CreateNftArgs,
   TransferNftArgs,
@@ -33,11 +34,10 @@ export class AssetsService {
 
   async getAssetsForUser(
     address: string,
-    offset: number = 0,
-    limit: number = 10,
+    query: string = '',
   ): Promise<[Asset[], number]> {
     const [tokens, count] = await Promise.all([
-      this.apiService.getNftsForUser(address, offset, limit),
+      this.apiService.getNftsForUser(address, query),
       this.apiService.getTokensForUserCount(address),
     ]);
 
@@ -50,35 +50,21 @@ export class AssetsService {
     limit: number = 10,
     filters: AssetsFilter,
   ): Promise<[Asset[], number]> {
-    let [assets, count] = [[], 0];
-    [assets, count] = await this.getlikedByAssets(filters, limit, offset);
+    const apiQuery = new AssetsQuery()
+      .addCreator(filters.creatorAddress)
+      .addTags(filters.tags)
+      .addCollection(filters.collection)
+      .addPageSize(offset, limit)
+      .build();
+
+    if (filters?.likedByAddress) {
+      return await this.getlikedByAssets(filters.likedByAddress, limit, offset);
+    }
     if (filters?.ownerAddress) {
-      [assets, count] = await this.getAssetsByOwnerAddress(
-        filters,
-        offset,
-        limit,
-      );
-    } else {
-      [assets, count] = await this.getAssetsWithoutOwner(
-        filters,
-        offset,
-        limit,
-      );
+      return await this.getAssetsByOwnerAddress(filters, apiQuery);
     }
 
-    return [assets, count];
-  }
-
-  private async getAllAssets(
-    offset: number = 0,
-    limit: number = 10,
-  ): Promise<[Asset[], number]> {
-    const [tokens, count] = await Promise.all([
-      this.apiService.getAllNfts(offset, limit),
-      this.apiService.getNftsCount(),
-    ]);
-    const assets = tokens.map((element) => Asset.fromToken(element));
-    return [assets, count];
+    return await this.getAssetsWithoutOwner(filters, apiQuery);
   }
 
   async getAssetByTokenAndAddress(
@@ -184,22 +170,29 @@ export class AssetsService {
     return transaction.toPlainObject();
   }
 
+  private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {
+    const [tokens, count] = await Promise.all([
+      this.apiService.getAllNfts(query),
+      this.apiService.getNftsCount(),
+    ]);
+    const assets = tokens.map((element) => Asset.fromToken(element));
+    return [assets, count];
+  }
+
   private async getAssetsWithoutOwner(
     filters: AssetsFilter,
-    offset: number,
-    limit: number,
+    query: string = '',
   ): Promise<[Asset[], number]> {
     if (filters?.nonce && filters?.token) {
       return [[await this.getAssetByToken(filters.token, filters.nonce)], 1];
     } else {
-      return await this.getAllAssets(offset, limit);
+      return await this.getAllAssets(query);
     }
   }
 
   private async getAssetsByOwnerAddress(
     filters: AssetsFilter,
-    offset: number,
-    limit: number,
+    query: string = '',
   ): Promise<[Asset[], number]> {
     if (filters?.nonce && filters?.token) {
       return [
@@ -213,29 +206,26 @@ export class AssetsService {
         1,
       ];
     } else {
-      return await this.getAssetsForUser(filters.ownerAddress, offset, limit);
+      return await this.getAssetsForUser(filters.ownerAddress, query);
     }
   }
 
   private async getlikedByAssets(
-    filters: AssetsFilter,
+    likedByAddress: string,
     limit: number,
     offset: number,
   ): Promise<[Asset[], number]> {
-    if (filters?.likedByAddress) {
-      const [assetsLiked, assetsCount] =
-        await this.assetsLikedService.getAssetLiked(
-          limit,
-          offset,
-          filters?.likedByAddress,
-        );
-      let assets = [];
-      for await (const element of assetsLiked) {
-        assets.push(await this.getAssetByToken(element.token, element.nonce));
-      }
-
-      return [assets, assetsCount];
+    const [assetsLiked, assetsCount] =
+      await this.assetsLikedService.getAssetLiked(
+        limit,
+        offset,
+        likedByAddress,
+      );
+    let assets = [];
+    for await (const element of assetsLiked) {
+      assets.push(await this.getAssetByToken(element.token, element.nonce));
     }
-    return [[], 0];
+
+    return [assets, assetsCount];
   }
 }

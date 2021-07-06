@@ -58,6 +58,8 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   ownerAddress: string;
   @Field(() => String, { nullable: true })
+  creatorAddress: string;
+  @Field(() => String, { nullable: true })
   token: string;
   @Field(() => Int, { nullable: true })
   nonce: number;
@@ -65,4 +67,6 @@ export class AssetsFilter {
   tags: [string];
   @Field(() => String, { nullable: true })
   likedByAddress: string;
+  @Field(() => String, { nullable: true })
+  collection: string;
 }

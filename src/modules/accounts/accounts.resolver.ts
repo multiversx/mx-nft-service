@@ -66,9 +66,7 @@ export class AccountsResolver {
 
   @ResolveField('assets', () => [Asset])
   async assets(@Parent() account: Account): Promise<Asset[]> {
-    const [assets, count] = await this.assetsService.getAssetsForUser(
-      account.address,
-    );
+    const [assets] = await this.assetsService.getAssetsForUser(account.address);
     return assets;
   }
 
