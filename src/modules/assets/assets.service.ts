@@ -51,9 +51,9 @@ export class AssetsService {
     filters: AssetsFilter,
   ): Promise<[Asset[], number]> {
     const apiQuery = new AssetsQuery()
-      .addCreator(filters.creatorAddress)
-      .addTags(filters.tags)
-      .addCollection(filters.collection)
+      .addCreator(filters?.creatorAddress)
+      .addTags(filters?.tags)
+      .addCollection(filters?.collection)
       .addPageSize(offset, limit)
       .build();
 
