@@ -1,5 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { AuctionEntity } from 'src/db';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
@@ -20,7 +20,7 @@ export class Auction {
   status: AuctionStatusEnum;
 
   @Field(() => String)
-  token: string;
+  collection: string;
 
   @Field(() => String)
   identifier: string;
@@ -62,19 +62,19 @@ export class Auction {
           id: auction.id,
           status: auction.status,
           ownerAddress: auction.ownerAddress,
-          token: auction.token,
+          collection: auction.collection,
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,
           endDate: auction.endDate,
           minBid: new Price({
             token: 'EGLD',
-            nonce: 1,
+            nonce: 0,
             amount: auction.minBid,
           }),
           maxBid: new Price({
             token: 'EGLD',
-            nonce: 1,
+            nonce: 0,
             amount: auction.maxBid,
           }),
         })

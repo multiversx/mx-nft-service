@@ -36,12 +36,12 @@ export class AssetsService {
     address: string,
     query: string = '',
   ): Promise<[Asset[], number]> {
-    const [tokens, count] = await Promise.all([
+    const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
-      this.apiService.getTokensForUserCount(address),
+      this.apiService.getNftsForUserCount(address),
     ]);
 
-    const assets = tokens.map((element) => Asset.fromToken(element));
+    const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -67,22 +67,20 @@ export class AssetsService {
     return await this.getAssetsWithoutOwner(filters, apiQuery);
   }
 
-  async getAssetByTokenAndAddress(
+  async getAssetByIdentifierAndAddress(
     onwerAddress: string,
-    token: string,
-    nonce: number,
+    identifier: string,
   ): Promise<Asset> {
-    const nft = await this.apiService.getNftByTokenAndAddress(
+    const nft = await this.apiService.getNftByIdentifierAndAddress(
       onwerAddress,
-      token,
-      nonce,
+      identifier,
     );
-    return Asset.fromToken(nft);
+    return Asset.fromNft(nft);
   }
 
-  async getAssetByToken(token: string, nonce: number): Promise<Asset> {
-    const nft = await this.apiService.getNftByToken(token, nonce);
-    return Asset.fromToken(nft);
+  async getAssetByIdentifier(identifier: string): Promise<Asset> {
+    const nft = await this.apiService.getNftByIdentifier(identifier);
+    return Asset.fromNft(nft);
   }
 
   async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
@@ -93,7 +91,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         BytesValue.fromHex(nominateVal(args.nonce)),
         BytesValue.fromHex(nominateVal(args.quantity)),
       ],
@@ -110,7 +108,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTBurn'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         BytesValue.fromHex(nominateVal(args.nonce)),
         BytesValue.fromHex(nominateVal(args.quantity)),
       ],
@@ -137,7 +135,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTCreate'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         BytesValue.fromHex(nominateVal(args.quantity || 1)),
         BytesValue.fromUTF8(args.name),
         BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
@@ -160,7 +158,7 @@ export class AssetsService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(transferNftArgs.token),
+        BytesValue.fromUTF8(transferNftArgs.collection),
         BytesValue.fromHex(nominateVal(transferNftArgs.nonce || 1)),
         BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
@@ -171,11 +169,11 @@ export class AssetsService {
   }
 
   private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {
-    const [tokens, count] = await Promise.all([
+    const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(),
     ]);
-    const assets = tokens.map((element) => Asset.fromToken(element));
+    const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -183,8 +181,8 @@ export class AssetsService {
     filters: AssetsFilter,
     query: string = '',
   ): Promise<[Asset[], number]> {
-    if (filters?.nonce && filters?.token) {
-      return [[await this.getAssetByToken(filters.token, filters.nonce)], 1];
+    if (filters?.identifier) {
+      return [[await this.getAssetByIdentifier(filters.identifier)], 1];
     } else {
       return await this.getAllAssets(query);
     }
@@ -194,13 +192,12 @@ export class AssetsService {
     filters: AssetsFilter,
     query: string = '',
   ): Promise<[Asset[], number]> {
-    if (filters?.nonce && filters?.token) {
+    if (filters?.identifier) {
       return [
         [
-          await this.getAssetByTokenAndAddress(
+          await this.getAssetByIdentifierAndAddress(
             filters.ownerAddress,
-            filters.token,
-            filters.nonce,
+            filters.identifier,
           ),
         ],
         1,
@@ -222,7 +219,7 @@ export class AssetsService {
         likedByAddress,
       );
     const assetsPromises = assetsLiked.map((element) =>
-      this.getAssetByToken(element.token, element.nonce),
+      this.getAssetByIdentifier(element.identifier),
     );
     const assets = await Promise.all(assetsPromises);
 

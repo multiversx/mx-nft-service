@@ -60,13 +60,11 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   creatorAddress: string;
   @Field(() => String, { nullable: true })
-  token: string;
-  @Field(() => Int, { nullable: true })
-  nonce: number;
+  identifier: string;
+  @Field(() => String, { nullable: true })
+  collection: string;
   @Field(() => [String], { nullable: true })
   tags: [string];
   @Field(() => String, { nullable: true })
   likedByAddress: string;
-  @Field(() => String, { nullable: true })
-  collection: string;
 }

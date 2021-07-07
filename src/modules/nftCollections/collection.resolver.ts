@@ -2,19 +2,19 @@ import { Resolver, Args, Mutation, Query } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import {
   StopNftCreateArgs,
-  TokenType,
+  Collection,
   TransferNftCreateRoleArgs,
 } from './models';
-import { IssueTokenArgs } from './models';
+import { IssueCollectionArgs } from './models';
 import { SetNftRolesArgs } from './models';
-import { TokensService } from './tokens.service';
 import { TransactionNode } from '../transaction';
 import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
+import { CollectionsService } from './collection.service';
 
 @Resolver()
-export class TokensResolver extends BaseResolver(TokenType) {
+export class CollectionsResolver extends BaseResolver(Collection) {
   constructor(
-    private tokensService: TokensService,
+    private collectionsService: CollectionsService,
     private elrondGateway: ElrondProxyService,
   ) {
     super();
@@ -22,37 +22,37 @@ export class TokensResolver extends BaseResolver(TokenType) {
 
   @Mutation(() => TransactionNode)
   async issueNft(
-    @Args('input') input: IssueTokenArgs,
+    @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
-    return await this.tokensService.issueNft(input);
+    return await this.collectionsService.issueNft(input);
   }
 
   @Mutation(() => TransactionNode)
   async issueSemiFungible(
-    @Args('input') input: IssueTokenArgs,
+    @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
-    return await this.tokensService.issueSemiFungible(input);
+    return await this.collectionsService.issueSemiFungible(input);
   }
 
   @Mutation(() => TransactionNode)
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
-    return await this.tokensService.setNftRoles(input);
+    return await this.collectionsService.setNftRoles(input);
   }
 
   @Mutation(() => TransactionNode)
   async transferNFTCreateRole(
     @Args('input') input: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
-    return await this.tokensService.transferNFTCreateRole(input);
+    return await this.collectionsService.transferNFTCreateRole(input);
   }
 
   @Mutation(() => TransactionNode)
   async stopNFTCreate(
     @Args('input') input: StopNftCreateArgs,
   ): Promise<TransactionNode> {
-    return await this.tokensService.stopNFTCreate(input);
+    return await this.collectionsService.stopNFTCreate(input);
   }
 
   @Query(() => [String])

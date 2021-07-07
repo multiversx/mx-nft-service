@@ -88,51 +88,47 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @Mutation(() => Boolean)
   addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
-    const { token, nonce, address } = input;
-    return this.assetsLikesService.addLike(token, nonce, address);
+    const { identifier, address } = input;
+    return this.assetsLikesService.addLike(identifier, address);
   }
 
   @Mutation(() => Boolean)
   removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
-    const { token, nonce, address } = input;
-    return this.assetsLikesService.removeLike(token, nonce, address);
+    const { identifier, address } = input;
+    return this.assetsLikesService.removeLike(identifier, address);
   }
 
   @ResolveField('likesCount', () => Int)
   likesCount(@Parent() asset: Asset) {
-    const { token, nonce } = asset;
-    return this.assetsLikesService.getAssetLikesCount(token, nonce);
+    const { identifier } = asset;
+    return this.assetsLikesService.getAssetLikesCount(identifier);
   }
 
   @ResolveField('isLiked', () => Boolean)
   isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
-    const { token, nonce } = asset;
-    return this.assetsLikesService.isAssetLiked(token, nonce, byAddress);
+    const { identifier } = asset;
+    return this.assetsLikesService.isAssetLiked(identifier, byAddress);
   }
 
   @ResolveField('creator', () => Account)
-  async creator(
-    @Parent() asset: Asset,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async creator(@Parent() asset: Asset) {
     const { creatorAddress } = asset;
-    const artist = await accountsLoader.load(creatorAddress);
+    const artist = await this.accountsService.getAccountByAddress(
+      creatorAddress,
+    );
     return artist !== undefined ? artist[0] : undefined;
   }
 
   @ResolveField('currentOwner', () => Account)
-  async currentOwner(
-    @Parent() asset: Asset,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
 
     if (!ownerAddress) {
       return null;
     }
-    const ownerAccount = await accountsLoader.load(ownerAddress);
+    const ownerAccount = await this.accountsService.getAccountByAddress(
+      ownerAddress,
+    );
     let owner = new Owner();
     owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
     return owner;

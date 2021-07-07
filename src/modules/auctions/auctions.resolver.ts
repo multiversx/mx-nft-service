@@ -110,24 +110,19 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(
-    @Parent() asset: Asset,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async owner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
-    const owner = await accountsLoader.load(ownerAddress);
+    const owner = await this.accountsService.getAccountByAddress(ownerAddress);
     return owner !== undefined ? owner[0] : null;
   }
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { token, nonce } = auction;
+    const { identifier } = auction;
 
-    return await this.assetsService.getAssetByTokenAndAddress(
+    return await this.assetsService.getAssetByIdentifierAndAddress(
       elrondConfig.nftMarketplaceAddress,
-      token,
-      nonce,
+      identifier,
     );
   }
 

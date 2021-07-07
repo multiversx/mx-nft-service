@@ -1,4 +1,4 @@
-export interface Token {
+export interface Nft {
   collection: string;
   identifier: string;
   name: string;
@@ -18,7 +18,6 @@ export interface Token {
   canAddSpecialRoles: boolean;
   canTransferNFTCreateRole: boolean;
   wiped: string;
-  tokenIdentifier: string;
   attributes: string;
   balance: string;
   creator: string;

@@ -1,5 +1,5 @@
-export * from './IssueTokenArgs';
+export * from './IssueCollectionArgs';
 export * from './SetNftRolesArgs';
 export * from './StopNftCreateArgs';
 export * from './TransferNftCreateRoleArgs';
-export * from './Token.dto';
+export * from './Collection.dto';

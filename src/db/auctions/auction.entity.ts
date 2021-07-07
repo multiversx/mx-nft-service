@@ -4,21 +4,13 @@ import {
   AuctionAbi,
 } from 'src/modules/auctions/models';
 import { nominateVal } from 'src/modules/formatters';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { BaseEntity } from '../base-entity';
 
 @Entity('auctions')
-export class AuctionEntity {
-  @PrimaryColumn({ unique: true })
-  id: number;
-
-  @Column({ nullable: true })
-  creationDate: Date;
-
-  @Column({ nullable: true })
-  modifiedDate: Date;
-
+export class AuctionEntity extends BaseEntity {
   @Column({ length: 20 })
-  token: string;
+  collection: string;
 
   @Column({ length: 30 })
   identifier: string;
@@ -54,6 +46,7 @@ export class AuctionEntity {
   endDate: string;
 
   constructor(init?: Partial<AuctionEntity>) {
+    super();
     Object.assign(this, init);
   }
 
@@ -61,7 +54,7 @@ export class AuctionEntity {
     return auction
       ? new AuctionEntity({
           id: auctionId,
-          token: auction.auctioned_token.token_type.valueOf().toString(),
+          collection: auction.auctioned_token.token_type.valueOf().toString(),
           nonce: parseInt(auction.auctioned_token.nonce.valueOf().toString()),
           status:
             AuctionStatusEnum[auction.auction_status.valueOf().toString()],
@@ -73,7 +66,6 @@ export class AuctionEntity {
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
           maxBid: auction.max_bid.valueOf().toString(),
-          creationDate: new Date(new Date().toUTCString()),
           startDate: auction.start_time.valueOf().toString(),
           endDate: auction.deadline.valueOf().toString(),
           identifier: `${auction.auctioned_token.token_type

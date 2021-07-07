@@ -1,12 +1,17 @@
-import { Entity, ManyToOne } from 'typeorm';
-import { AccountEntity } from '../accounts/account.entity';
+import { Column, Entity, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 
 @Entity('followers')
+@Unique('FollowEntity_UQ_Follow', ['followerAddress', 'followingAddress'])
 export class FollowerEntity extends BaseEntity {
-  @ManyToOne(() => AccountEntity, (account) => account.followers)
-  follower: AccountEntity;
+  @Column({ length: 62 })
+  followerAddress: string;
 
-  @ManyToOne(() => AccountEntity, (account) => account.following)
-  following: AccountEntity;
+  @Column({ length: 62 })
+  followingAddress: string;
+
+  constructor(init?: Partial<FollowerEntity>) {
+    super();
+    Object.assign(this, init);
+  }
 }

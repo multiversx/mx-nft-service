@@ -8,10 +8,9 @@ import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
-import { TokensModuleGraph } from './modules/tokens/tokens.module';
+import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
@@ -24,7 +23,6 @@ import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
 import { acountAuctionLoader } from './db/auctions/account-auction.loader';
 import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
-import { accountsLoader } from './db/accounts/accounts.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { RedisModule } from 'nestjs-redis';
 import { cacheConfig } from './config';
@@ -86,7 +84,6 @@ if (!!process.env.LOG_FILE) {
         auctionLoaderById: auctionLoaderById(),
         acountAuctionLoader: acountAuctionLoader(),
         auctionOrdersLoader: auctionOrdersLoader(),
-        accountsLoader: accountsLoader(),
       },
     }),
     RedisModule.register([
@@ -120,13 +117,12 @@ if (!!process.env.LOG_FILE) {
     ]),
     ScheduleModule.forRoot(),
     ConfigModule,
-    TokensModuleGraph,
+    CollectionModuleGraph,
     AssetsModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,
     AccountsModuleGraph,
     AuctionsModuleDb,
-    AccountsModuleDb,
     IpfsModule,
   ],
 })

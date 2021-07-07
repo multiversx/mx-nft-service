@@ -18,10 +18,14 @@ import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
+import { AccountsService } from '../accounts/accounts.service';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(private ordersService: OrdersService) {
+  constructor(
+    private ordersService: OrdersService,
+    private accountsService: AccountsService,
+  ) {
     super();
   }
 
@@ -55,15 +59,11 @@ export class OrdersResolver extends BaseResolver(Order) {
   }
 
   @ResolveField('from', () => Account)
-  async from(
-    @Parent() order: Order,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async from(@Parent() order: Order) {
     const { ownerAddress } = order;
 
     if (!ownerAddress) return null;
-    const owner = await accountsLoader.load(ownerAddress);
+    const owner = await this.accountsService.getAccountByAddress(ownerAddress);
     return owner !== undefined ? owner[0] : null;
   }
 

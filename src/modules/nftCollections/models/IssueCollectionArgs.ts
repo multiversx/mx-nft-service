@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class IssueTokenArgs {
+export class IssueCollectionArgs {
   @Field(() => String)
   tokenName: string;
   @Field(() => String)

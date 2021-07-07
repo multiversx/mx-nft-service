@@ -13,25 +13,25 @@ import {
 import { elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import {
-  IssueTokenArgs,
+  IssueCollectionArgs,
   StopNftCreateArgs,
   TransferNftCreateRoleArgs,
 } from './models';
 import { TransactionNode } from '../transaction';
 
 @Injectable()
-export class TokensService {
+export class CollectionsService {
   constructor() {}
 
   private readonly esdtSmartContract = new SmartContract({
     address: new Address(elrondConfig.esdtNftAddress),
   });
 
-  async issueNft(args: IssueTokenArgs): Promise<TransactionNode> {
+  async issueNft(args: IssueCollectionArgs): Promise<TransactionNode> {
     return this.issueToken(args, 'issueNonFungible');
   }
 
-  async issueSemiFungible(args: IssueTokenArgs): Promise<TransactionNode> {
+  async issueSemiFungible(args: IssueCollectionArgs): Promise<TransactionNode> {
     return this.issueToken(args, 'issueSemiFungible');
   }
 
@@ -40,7 +40,7 @@ export class TokensService {
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
       value: Balance.egld(0),
-      args: [BytesValue.fromUTF8(args.token)],
+      args: [BytesValue.fromUTF8(args.collection)],
       gasLimit: new GasLimit(gas.stopNFTCreate),
     });
     return transaction.toPlainObject();
@@ -77,7 +77,7 @@ export class TokensService {
     });
   }
 
-  private issueToken(args: IssueTokenArgs, functionName: string) {
+  private issueToken(args: IssueCollectionArgs, functionName: string) {
     let transactionArgs = this.getIssueTokenArguments(args);
 
     const transaction = this.esdtSmartContract.call({
@@ -89,7 +89,7 @@ export class TokensService {
     return transaction.toPlainObject();
   }
 
-  private getIssueTokenArguments(args: IssueTokenArgs) {
+  private getIssueTokenArguments(args: IssueCollectionArgs) {
     let transactionArgs = [
       BytesValue.fromUTF8(args.tokenName),
       BytesValue.fromUTF8(args.tokenTicker),
@@ -117,7 +117,7 @@ export class TokensService {
 
   private getSetRolesArgs(args: SetNftRolesArgs) {
     let transactionArgs = [
-      BytesValue.fromUTF8(args.token),
+      BytesValue.fromUTF8(args.collection),
       new AddressValue(new Address(args.addressToTransfer)),
     ];
     args.roles.forEach((role) => {
@@ -127,7 +127,7 @@ export class TokensService {
   }
 
   private getTransferCreateRoleArgs(args: TransferNftCreateRoleArgs) {
-    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.token)];
+    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.collection)];
     args.addressToTransferList.forEach((address) => {
       transactionArgs.push(new AddressValue(new Address(address)));
     });
