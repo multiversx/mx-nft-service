@@ -1,5 +1,5 @@
 export interface Token {
-  token: string;
+  collection: string;
   identifier: string;
   name: string;
   type: string;
@@ -25,5 +25,7 @@ export interface Token {
   hash: string;
   nonce: number;
   royalties: string;
+  timestamp: string;
   uris: string[];
+  tags: string[];
 }

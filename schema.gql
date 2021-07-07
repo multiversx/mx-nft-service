@@ -42,7 +42,7 @@ input AddLikeArgs {
 type Asset {
   attributes: String!
   auction: Auction
-  creationDate: DateTime!
+  creationDate: String!
   creator: Account!
   creatorAddress: String!
   currentOwner: Owner
@@ -76,6 +76,8 @@ type AssetPageInfo {
 }
 
 input AssetsFilter {
+  collection: String
+  creatorAddress: String
   likedByAddress: String
   nonce: Int
   ownerAddress: String
