@@ -221,10 +221,10 @@ export class AssetsService {
         offset,
         likedByAddress,
       );
-    let assets = [];
-    for await (const element of assetsLiked) {
-      assets.push(await this.getAssetByToken(element.token, element.nonce));
-    }
+    const assetsPromises = assetsLiked.map((element) =>
+      this.getAssetByToken(element.token, element.nonce),
+    );
+    const assets = await Promise.all(assetsPromises);
 
     return [assets, assetsCount];
   }
