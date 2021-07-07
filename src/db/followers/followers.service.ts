@@ -11,11 +11,30 @@ export class FollowersServiceDb {
   ) {}
 
   async insertFollower(follower: FollowerEntity) {
-    this.followerRepository.save(follower);
+    try {
+      return await this.followerRepository.save(follower);
+    } catch (err) {
+      // If like already exists, we ignore the error.
+      if (err.errno === 1062) {
+        return null;
+      }
+      throw err;
+    }
   }
 
-  async deleteFollower(follower: FollowerEntity) {
-    this.followerRepository.delete(follower);
+  async deleteFollower(unfollowAddress: string, address: string) {
+    try {
+      return await this.followerRepository.delete({
+        followingAddress: unfollowAddress,
+        followerAddress: address,
+      });
+    } catch (err) {
+      // If like already exists, we ignore the error.
+      if (err.errno === 1062) {
+        return null;
+      }
+      throw err;
+    }
   }
 
   async getFollowers(followerAddress: string): Promise<any[]> {

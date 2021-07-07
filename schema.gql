@@ -159,13 +159,6 @@ input ConnectionArgs {
   last: Int
 }
 
-input CreateAccountArgs {
-  address: String!
-  description: String
-  herotag: String
-  profileImgUrl: String
-}
-
 input CreateAuctionArgs {
   collection: String!
   deadline: String!
@@ -213,6 +206,11 @@ input FiltersExpression {
   operator: Operator!
 }
 
+input FollowEntityArgs {
+  address: String!
+  addressToFollow: String!
+}
+
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   collection: String!
@@ -234,11 +232,11 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
-  createAccount(input: CreateAccountArgs!): Account!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
   endAuction(auctionId: Int!): TransactionNode!
+  follow(input: FollowEntityArgs!): Boolean!
   issueNft(input: IssueCollectionArgs!): TransactionNode!
   issueSemiFungible(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -247,7 +245,7 @@ type Mutation {
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
-  updateAccount(profileImgUrl: String!): Account!
+  unfollow(input: UnfollowEntityArgs!): Boolean!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
   withdraw(auctionId: Int!): TransactionNode!
 }
@@ -323,9 +321,10 @@ type Price {
 }
 
 type Query {
-  accounts(filters: FiltersExpression, pagination: ConnectionArgs): AccountResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  followers(address: String, pagination: ConnectionArgs): AccountResponse!
+  following(address: String, pagination: ConnectionArgs): AccountResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   registeredNfts(ownerAddress: String!): [String!]!
 }
@@ -382,6 +381,11 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   ownerAddress: String!
   token: String!
+}
+
+input UnfollowEntityArgs {
+  address: String!
+  addressToUnfollow: String!
 }
 
 input UpdateAuctionArgs {

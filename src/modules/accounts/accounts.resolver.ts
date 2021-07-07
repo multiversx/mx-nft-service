@@ -10,13 +10,13 @@ import AccountResponse from './models/AccountResponse';
 export class AccountsResolver {
   constructor(private accountsService: AccountsService) {}
 
-  @Mutation(() => Account)
-  async follow(@Args('input') input: FollowEntityArgs): Promise<Account> {
+  @Mutation(() => Boolean)
+  async follow(@Args('input') input: FollowEntityArgs): Promise<boolean> {
     return this.accountsService.follow(input.address, input.addressToFollow);
   }
 
-  @Mutation(() => Account)
-  async unfollow(@Args('input') input: UnfollowEntityArgs): Promise<Account> {
+  @Mutation(() => Boolean)
+  async unfollow(@Args('input') input: UnfollowEntityArgs): Promise<boolean> {
     return this.accountsService.unfollow(
       input.address,
       input.addressToUnfollow,
