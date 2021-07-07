@@ -9,17 +9,17 @@ import { Price } from './Price.dto';
 import { Owner } from './Owner.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
-import { TokenTypeEnum } from './TokenTypes.enum';
+import { NftTypeEnum } from './NftTypes.enum';
 import { Token } from 'src/common/services/elrond-communication/models/token.dto';
 
 @ObjectType()
 export class Asset {
   @Field(() => ID)
-  token!: string;
+  collection!: string;
   @Field(() => Int)
   nonce!: number;
-  @Field(() => TokenTypeEnum)
-  type: TokenTypeEnum;
+  @Field(() => NftTypeEnum)
+  type: NftTypeEnum;
   @Field(() => String)
   identifier!: string;
   @Field(() => Price, { nullable: true })
@@ -61,23 +61,23 @@ export class Asset {
     Object.assign(this, init);
   }
 
-  static fromToken(token: Token) {
-    return token
+  static fromNft(nft: Token) {
+    return nft
       ? new Asset({
-          token: token.collection,
-          type: TokenTypeEnum[token.type],
-          nonce: token.nonce ?? 0,
-          identifier: token.identifier,
-          creatorAddress: token.creator ?? '',
-          ownerAddress: token.owner,
-          attributes: token.attributes ?? '',
+          collection: nft.collection,
+          type: NftTypeEnum[nft.type],
+          nonce: nft.nonce ?? 0,
+          identifier: nft.identifier,
+          creatorAddress: nft.creator ?? '',
+          ownerAddress: nft.owner,
+          attributes: nft.attributes ?? '',
           lastSale: new Date(),
-          creationDate: token.timestamp,
-          hash: token.hash ?? '',
-          name: token.name,
-          royalties: token.royalties ?? '',
-          uris: token.uris || [''],
-          tags: token.tags || [''],
+          creationDate: nft.timestamp,
+          hash: nft.hash ?? '',
+          name: nft.name,
+          royalties: nft.royalties ?? '',
+          uris: nft.uris || [''],
+          tags: nft.tags || [''],
         })
       : null;
   }

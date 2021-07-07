@@ -18,7 +18,7 @@ export class AuctionEntity {
   modifiedDate: Date;
 
   @Column({ length: 20 })
-  token: string;
+  collection: string;
 
   @Column({ length: 30 })
   identifier: string;
@@ -61,7 +61,7 @@ export class AuctionEntity {
     return auction
       ? new AuctionEntity({
           id: auctionId,
-          token: auction.auctioned_token.token_type.valueOf().toString(),
+          collection: auction.auctioned_token.token_type.valueOf().toString(),
           nonce: parseInt(auction.auctioned_token.nonce.valueOf().toString()),
           status:
             AuctionStatusEnum[auction.auction_status.valueOf().toString()],

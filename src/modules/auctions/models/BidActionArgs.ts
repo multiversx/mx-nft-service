@@ -5,7 +5,7 @@ export class BidActionArgs {
   @Field(() => Int)
   auctionId: number;
   @Field(() => String)
-  token: string;
+  collection: string;
   @Field(() => String)
   price: string;
   @Field(() => String)

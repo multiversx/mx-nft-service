@@ -3,11 +3,10 @@ import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)
 export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
-  getAssetLikesCount(token: string, nonce: number): Promise<number> {
+  getAssetLikesCount(identifier: string): Promise<number> {
     return this.count({
       where: {
-        token,
-        nonce,
+        identifier,
       },
     });
   }
@@ -27,15 +26,10 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     return assetsLiked;
   }
 
-  async isAssetLiked(
-    token: string,
-    nonce: number,
-    address: string,
-  ): Promise<boolean> {
+  async isAssetLiked(identifier: string, address: string): Promise<boolean> {
     const count = await this.count({
       where: {
-        token,
-        nonce,
+        identifier,
         address,
       },
     });
@@ -55,10 +49,9 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     }
   }
 
-  removeLike(token: string, nonce: number, address: string): Promise<any> {
+  removeLike(identifier: string, address: string): Promise<any> {
     return this.delete({
-      token,
-      nonce,
+      identifier,
       address,
     });
   }

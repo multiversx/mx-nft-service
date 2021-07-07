@@ -3,7 +3,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 @InputType()
 export class TransferNftArgs {
   @Field(() => String)
-  token: string;
+  collection: string;
   @Field(() => Int)
   nonce: number;
   @Field(() => String)

@@ -11,7 +11,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { AccountsModuleDb } from './db/accounts/accounts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
-import { TokensModuleGraph } from './modules/tokens/tokens.module';
+import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
@@ -120,7 +120,7 @@ if (!!process.env.LOG_FILE) {
     ]),
     ScheduleModule.forRoot(),
     ConfigModule,
-    TokensModuleGraph,
+    CollectionModuleGraph,
     AssetsModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,

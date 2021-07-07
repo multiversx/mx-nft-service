@@ -1,10 +1,10 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum TokenTypeEnum {
+export enum NftTypeEnum {
   NonFungibleESDT = 'NonFungibleESDT',
   SemiFungibleESDT = 'SemiFungibleESDT',
 }
 
-registerEnumType(TokenTypeEnum, {
-  name: 'TokenTypeEnum',
+registerEnumType(NftTypeEnum, {
+  name: 'NftTypeEnum',
 });

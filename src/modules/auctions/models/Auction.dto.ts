@@ -20,7 +20,7 @@ export class Auction {
   status: AuctionStatusEnum;
 
   @Field(() => String)
-  token: string;
+  collection: string;
 
   @Field(() => String)
   identifier: string;
@@ -62,7 +62,7 @@ export class Auction {
           id: auction.id,
           status: auction.status,
           ownerAddress: auction.ownerAddress,
-          token: auction.token,
+          collection: auction.collection,
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,

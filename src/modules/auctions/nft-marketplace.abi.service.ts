@@ -35,7 +35,7 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         new U64Value(new BigNumber(args.nonce)),
         new U64Value(new BigNumber(args.quantity)),
         new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
@@ -69,7 +69,7 @@ export class NftMarketplaceAbiService {
       value: Balance.fromString(args.price),
       args: [
         new U64Value(new BigNumber(args.auctionId)),
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         new U64Value(new BigNumber(args.nonce)),
       ],
       gasLimit: new GasLimit(gas.bid),
@@ -107,7 +107,7 @@ export class NftMarketplaceAbiService {
       value: Balance.fromString(args.price),
       args: [
         new U64Value(new BigNumber(args.auctionId)),
-        BytesValue.fromUTF8(args.token),
+        BytesValue.fromUTF8(args.collection),
         new U64Value(new BigNumber(args.nonce)),
       ],
       gasLimit: new GasLimit(gas.endAuction),

@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { TokensResolver } from './tokens.resolver';
-import { TokensService } from './tokens.service';
+import { CollectionsResolver } from './collection.resolver';
+import { CollectionsService } from './collection.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
-  providers: [TokensService, TokensResolver],
+  providers: [CollectionsService, CollectionsResolver],
   imports: [ElrondCommunicationModule, AssetsModuleGraph],
-  exports: [TokensService],
+  exports: [CollectionsService],
 })
-export class TokensModuleGraph {}
+export class CollectionModuleGraph {}

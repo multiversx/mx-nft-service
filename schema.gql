@@ -35,13 +35,13 @@ type AccountResponse {
 
 input AddLikeArgs {
   address: String!
-  nonce: Int!
-  token: String!
+  identifier: String!
 }
 
 type Asset {
   attributes: String!
   auction: Auction
+  collection: ID!
   creationDate: String!
   creator: Account!
   creatorAddress: String!
@@ -58,8 +58,7 @@ type Asset {
   previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
-  token: ID!
-  type: TokenTypeEnum!
+  type: NftTypeEnum!
   uris: [String!]!
 }
 
@@ -78,11 +77,10 @@ type AssetPageInfo {
 input AssetsFilter {
   collection: String
   creatorAddress: String
+  identifier: String
   likedByAddress: String
-  nonce: Int
   ownerAddress: String
   tags: [String!]
-  token: String
 }
 
 type AssetsResponse {
@@ -98,6 +96,7 @@ input AttributeInput {
 
 type Auction {
   asset: Asset!
+  collection: String!
   endDate: String!
   id: ID!
   identifier: String!
@@ -109,7 +108,6 @@ type Auction {
   ownerAddress: String
   startDate: String!
   status: AuctionStatusEnum
-  token: String!
   topBid: Price
   topBidder: Account
 }
@@ -142,9 +140,9 @@ enum AuctionStatusEnum {
 
 input BidActionArgs {
   auctionId: Int!
+  collection: String!
   nonce: String!
   price: String!
-  token: String!
 }
 
 input ConnectionArgs {
@@ -169,6 +167,7 @@ input CreateAccountArgs {
 }
 
 input CreateAuctionArgs {
+  collection: String!
   deadline: String!
   maxBid: String!
   maxOneSftPerPayment: Boolean!
@@ -179,16 +178,15 @@ input CreateAuctionArgs {
   paymentTokenNonce: Int!
   quantity: Int!
   startDate: String!
-  token: String!
 }
 
 input CreateNftArgs {
   attributes: AttributeInput!
+  collection: String!
   name: String!
   ownerAddress: String!
   quantity: Int!
   royalties: String!
-  token: String!
 }
 
 input CreateOrderArgs {
@@ -217,12 +215,12 @@ input FiltersExpression {
 
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
+  collection: String!
   nonce: Int!
   quantity: Int!
-  token: String!
 }
 
-input IssueTokenArgs {
+input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
   canTransferNFTCreateRole: Boolean = false
@@ -241,8 +239,8 @@ type Mutation {
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
   endAuction(auctionId: Int!): TransactionNode!
-  issueNft(input: IssueTokenArgs!): TransactionNode!
-  issueSemiFungible(input: IssueTokenArgs!): TransactionNode!
+  issueNft(input: IssueCollectionArgs!): TransactionNode!
+  issueSemiFungible(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   saveAuction(auctionId: Int!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
@@ -252,6 +250,11 @@ type Mutation {
   updateAccount(profileImgUrl: String!): Account!
   updateAuctionStatus(input: UpdateAuctionArgs!): Auction!
   withdraw(auctionId: Int!): TransactionNode!
+}
+
+enum NftTypeEnum {
+  NonFungibleESDT
+  SemiFungibleESDT
 }
 
 enum Operation {
@@ -329,8 +332,7 @@ type Query {
 
 input RemoveLikeArgs {
   address: String!
-  nonce: Int!
-  token: String!
+  identifier: String!
 }
 
 input SetNftRolesArgs {
@@ -354,11 +356,6 @@ input StopNftCreateArgs {
   token: String!
 }
 
-enum TokenTypeEnum {
-  NonFungibleESDT
-  SemiFungibleESDT
-}
-
 type TransactionNode {
   chainID: String!
   data: String!
@@ -374,11 +371,11 @@ type TransactionNode {
 }
 
 input TransferNftArgs {
+  collection: String!
   destinationAddress: String!
   nonce: Int!
   ownerAddress: String!
   quantity: Int!
-  token: String!
 }
 
 input TransferNftCreateRoleArgs {

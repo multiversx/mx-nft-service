@@ -22,11 +22,11 @@ export class AssetsLikesService {
     );
   }
 
-  getAssetLikesCount(identifier: string, nonce: number): Promise<number> {
+  getAssetLikesCount(identifier: string): Promise<number> {
     try {
-      const cacheKey = this.getAssetLikesCountCacheKey(identifier, nonce);
+      const cacheKey = this.getAssetLikesCountCacheKey(identifier);
       const getAssetLikes = () =>
-        this.assetsLikesRepository.getAssetLikesCount(identifier, nonce);
+        this.assetsLikesRepository.getAssetLikesCount(identifier);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -39,7 +39,6 @@ export class AssetsLikesService {
         {
           path: 'AssetsService.getAssetLikesCount',
           identifier,
-          nonce,
         },
       );
     }
@@ -68,15 +67,11 @@ export class AssetsLikesService {
     }
   }
 
-  isAssetLiked(
-    token: string,
-    nonce: number,
-    address: string,
-  ): Promise<boolean> {
+  isAssetLiked(identifier: string, address: string): Promise<boolean> {
     try {
-      const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
+      const cacheKey = this.getAssetLikedCacheKey(identifier, address);
       const getIsAssetLiked = () =>
-        this.assetsLikesRepository.isAssetLiked(token, nonce, address);
+        this.assetsLikesRepository.isAssetLiked(identifier, address);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -86,28 +81,22 @@ export class AssetsLikesService {
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
         path: 'AssetsService.isAssetLiked',
-        token,
-        nonce,
+        identifier,
         address,
       });
       return Promise.resolve(false);
     }
   }
 
-  async addLike(
-    token: string,
-    nonce: number,
-    address: string,
-  ): Promise<boolean> {
+  async addLike(identifier: string, address: string): Promise<boolean> {
     try {
-      const assetLike = await this.saveAssetLikeEntity(token, nonce, address);
-      this.invalidateCache(token, nonce, address);
+      const assetLike = await this.saveAssetLikeEntity(identifier, address);
+      this.invalidateCache(identifier, address);
       return !!assetLike;
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
-        token,
-        nonce,
+        identifier,
         address,
         err,
       });
@@ -115,20 +104,15 @@ export class AssetsLikesService {
     }
   }
 
-  async removeLike(
-    token: string,
-    nonce: number,
-    address: string,
-  ): Promise<any> {
+  async removeLike(identifier: string, address: string): Promise<any> {
     try {
-      await this.assetsLikesRepository.removeLike(token, nonce, address);
-      await this.invalidateCache(token, nonce, address);
+      await this.assetsLikesRepository.removeLike(identifier, address);
+      await this.invalidateCache(identifier, address);
       return true;
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
         path: 'AssetsService.removeLike',
-        token,
-        nonce,
+        identifier,
         address,
         err,
       });
@@ -136,8 +120,8 @@ export class AssetsLikesService {
     }
   }
 
-  private getAssetLikesCountCacheKey(token: string, nonce: number) {
-    return generateCacheKeyFromParams('assetLikesCount', token, nonce);
+  private getAssetLikesCountCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('assetLikesCount', identifier);
   }
 
   private getAssetLikedByCacheKey(filters) {
@@ -145,13 +129,12 @@ export class AssetsLikesService {
   }
 
   private async invalidateCache(
-    token: string,
-    nonce: number,
+    identifier: string,
     address: string,
   ): Promise<void> {
-    await this.invalidateAssetLikeCache(token, nonce, address);
+    await this.invalidateAssetLikeCache(identifier, address);
     await this.invalidateAssetLikedByCount(address);
-    await this.invalidateAssetLikesCount(token, nonce);
+    await this.invalidateAssetLikesCount(identifier);
   }
 
   private invalidateAssetLikedByCount(address: string): Promise<void> {
@@ -159,44 +142,37 @@ export class AssetsLikesService {
     return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
-  private invalidateAssetLikesCount(
-    token: string,
-    nonce: number,
-  ): Promise<void> {
-    const cacheKey = this.getAssetLikesCountCacheKey(token, nonce);
+  private invalidateAssetLikesCount(identifier: string): Promise<void> {
+    const cacheKey = this.getAssetLikesCountCacheKey(identifier);
     return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
   private invalidateAssetLikeCache(
-    token: string,
-    nonce: number,
+    identifier: string,
     address: string,
   ): Promise<void> {
-    const cacheKey = this.getAssetLikedCacheKey(token, nonce, address);
+    const cacheKey = this.getAssetLikedCacheKey(identifier, address);
     return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 
-  private getAssetLikedCacheKey(token: string, nonce: number, address: string) {
-    return generateCacheKeyFromParams('isAssetLiked', token, nonce, address);
+  private getAssetLikedCacheKey(identifier: string, address: string) {
+    return generateCacheKeyFromParams('isAssetLiked', identifier, address);
   }
 
   private saveAssetLikeEntity(
-    token: string,
-    nonce: number,
+    identifier: string,
     address: string,
   ): Promise<any> {
-    const assetLikeEntity = this.buildAssetLikeEntity(token, nonce, address);
+    const assetLikeEntity = this.buildAssetLikeEntity(identifier, address);
     return this.assetsLikesRepository.addLike(assetLikeEntity);
   }
 
   private buildAssetLikeEntity(
-    token: string,
-    nonce: number,
+    identifier: string,
     address: string,
   ): AssetLikeEntity {
     return new AssetLikeEntity({
-      token,
-      nonce,
+      identifier,
       address,
     });
   }
