@@ -2,7 +2,6 @@ import { Auction } from '../../auctions/models';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
-import { AccountEntity } from 'src/db/accounts/account.entity';
 
 @ObjectType()
 export class Account {
@@ -38,17 +37,5 @@ export class Account {
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);
-  }
-
-  static fromEntity(account: AccountEntity) {
-    return account
-      ? new Account({
-          id: account.id,
-          address: account.address,
-          description: account.description,
-          profileImgUrl: account.profileImgUrl,
-          herotag: account.herotag,
-        })
-      : null;
   }
 }

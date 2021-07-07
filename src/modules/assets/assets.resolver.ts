@@ -111,28 +111,24 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('creator', () => Account)
-  async creator(
-    @Parent() asset: Asset,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async creator(@Parent() asset: Asset) {
     const { creatorAddress } = asset;
-    const artist = await accountsLoader.load(creatorAddress);
+    const artist = await this.accountsService.getAccountByAddress(
+      creatorAddress,
+    );
     return artist !== undefined ? artist[0] : undefined;
   }
 
   @ResolveField('currentOwner', () => Account)
-  async currentOwner(
-    @Parent() asset: Asset,
-    @Context()
-    { accountsLoader: accountsLoader }: IGraphQLContext,
-  ) {
+  async currentOwner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
 
     if (!ownerAddress) {
       return null;
     }
-    const ownerAccount = await accountsLoader.load(ownerAddress);
+    const ownerAccount = await this.accountsService.getAccountByAddress(
+      ownerAddress,
+    );
     let owner = new Owner();
     owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
     return owner;

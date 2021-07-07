@@ -1,59 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { AccountEntity } from 'src/db/accounts/account.entity';
-import { AccountsServiceDb } from '../../db/accounts/accounts.service';
 import { FollowersServiceDb } from '../../db/followers/followers.service';
 import { Account } from './models/account.dto';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import { Address } from '@elrondnetwork/erdjs';
 import { Owner } from '../assets/models';
-import { CreateAccountArgs } from './CreateAccountArgs';
-import { FiltersExpression } from '../filtersTypes';
+import { FollowerEntity } from 'src/db/followers/follower.entity';
 
 @Injectable()
 export class AccountsService {
   constructor(
-    private accountsServiceDb: AccountsServiceDb,
     private followerServiceDb: FollowersServiceDb,
     private elrondProxyService: ElrondProxyService,
   ) {}
 
-  async createAccount(args: CreateAccountArgs): Promise<Account | any> {
-    return await this.accountsServiceDb.insertAccount(
-      new AccountEntity({
-        address: args.address,
-        profileImgUrl: args.profileImgUrl,
-        herotag: args.herotag,
-        description: args.description,
-      }),
-    );
-  }
-
-  async updateAccount(profileImgUrl: string): Promise<void> {
-    await this.accountsServiceDb.updateAccount(
-      new AccountEntity({
-        profileImgUrl: profileImgUrl,
-      }),
-    );
-  }
-
-  async getAccounts(
-    limit: number = 50,
-    offset: number,
-    filters: FiltersExpression,
-  ): Promise<[any[], number]> {
-    const [accounts, count] = await this.accountsServiceDb.getAccounts(
-      limit,
-      offset,
-      filters,
-    );
-    return [accounts.map((elem) => Account.fromEntity(elem)), count];
-  }
-
   async getAccountByAddress(address: string): Promise<Account | any> {
-    const account = await this.accountsServiceDb.getAccountByAddress(address);
-    if (account !== undefined) {
-      return account;
-    }
     const networkAccount = await this.elrondProxyService
       .getService()
       .getAccount(new Address(address));
@@ -70,11 +30,29 @@ export class AccountsService {
     return owner;
   }
 
-  async getFollowers(id: number): Promise<Account[] | any[]> {
-    return await this.followerServiceDb.getFollowers(id);
+  async follow(address: string, followAddress: string): Promise<any> {
+    return await this.followerServiceDb.insertFollower(
+      new FollowerEntity({
+        followingAddress: followAddress,
+        followerAddress: address,
+      }),
+    );
   }
 
-  async getFollowing(id: number): Promise<Account[] | any[]> {
-    return await this.followerServiceDb.getFollowing(id);
+  async unfollow(address: string, followAddress: string): Promise<any> {
+    return await this.followerServiceDb.deleteFollower(
+      new FollowerEntity({
+        followingAddress: followAddress,
+        followerAddress: address,
+      }),
+    );
+  }
+
+  async getFollowers(address: string): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowers(address);
+  }
+
+  async getFollowing(address: string): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowing(address);
   }
 }

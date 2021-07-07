@@ -1,11 +1,9 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { BaseEntity } from '../base-entity';
 
 @Entity('assets_likes')
 @Unique('AssetLikeEntity_UQ_LIKE', ['identifier', 'address'])
-export class AssetLikeEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class AssetLikeEntity extends BaseEntity {
   @Column({ length: 25 })
   @Index()
   identifier: string;
@@ -14,6 +12,7 @@ export class AssetLikeEntity {
   address: string;
 
   constructor(init?: Partial<AssetLikeEntity>) {
+    super();
     Object.assign(this, init);
   }
 }
