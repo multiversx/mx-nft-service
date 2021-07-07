@@ -128,7 +128,7 @@ export class AssetsService {
       fileUri: fileData.url,
       fileName: file.filename,
     });
-    const attributes = `tags:${args.attributes.tags};description:${asset.hash}`;
+    const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
 
     const contract = new SmartContract({
       address: new Address(args.ownerAddress),
