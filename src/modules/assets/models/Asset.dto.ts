@@ -10,7 +10,7 @@ import { Owner } from './Owner.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
-import { Token } from 'src/common/services/elrond-communication/models/token.dto';
+import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
 
 @ObjectType()
 export class Asset {
@@ -61,7 +61,7 @@ export class Asset {
     Object.assign(this, init);
   }
 
-  static fromNft(nft: Token) {
+  static fromNft(nft: Nft) {
     return nft
       ? new Asset({
           collection: nft.collection,

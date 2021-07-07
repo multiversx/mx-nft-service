@@ -336,8 +336,8 @@ input RemoveLikeArgs {
 
 input SetNftRolesArgs {
   addressToTransfer: String!
+  collection: String!
   roles: [String!]!
-  token: String!
 }
 
 enum Sort {
@@ -351,8 +351,8 @@ input Sorting {
 }
 
 input StopNftCreateArgs {
+  collection: String!
   ownerAddress: String!
-  token: String!
 }
 
 type TransactionNode {
@@ -379,8 +379,8 @@ input TransferNftArgs {
 
 input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
+  collection: String!
   ownerAddress: String!
-  token: String!
 }
 
 input UnfollowEntityArgs {

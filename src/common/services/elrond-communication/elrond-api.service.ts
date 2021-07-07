@@ -1,8 +1,7 @@
 import { ApiProvider } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
 import { Injectable } from '@nestjs/common';
-import { nominateVal } from 'src/modules/formatters';
-import { Token } from './models/token.dto';
+import { Nft } from './models/nft.dto';
 
 @Injectable()
 export class ElrondApiService {
@@ -15,7 +14,7 @@ export class ElrondApiService {
     return this.proxy;
   }
 
-  async getTokensForUser(address: string): Promise<Token[]> {
+  async getTokensForUser(address: string): Promise<Nft[]> {
     return await this.getService().doGetGeneric(
       `accounts/${address}/tokens`,
       (response) => response,
@@ -25,21 +24,21 @@ export class ElrondApiService {
   async getNftByIdentifierAndAddress(
     address: string,
     identifier: string,
-  ): Promise<Token> {
+  ): Promise<Nft> {
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts/${identifier}`,
       (response) => response,
     );
   }
 
-  async getNftByIdentifier(identifier: string): Promise<Token> {
+  async getNftByIdentifier(identifier: string): Promise<Nft> {
     return await this.getService().doGetGeneric(
       `nfts/${identifier}`,
       (response) => response,
     );
   }
 
-  async getNftsForUser(address: string, query: string = ''): Promise<Token[]> {
+  async getNftsForUser(address: string, query: string = ''): Promise<Nft[]> {
     return await this.getService().doGetGeneric(
       `accounts/${address}/nfts${query}`,
       (response) => response,
@@ -53,7 +52,7 @@ export class ElrondApiService {
     );
   }
 
-  async getAllNfts(query: string = ''): Promise<Token[]> {
+  async getAllNfts(query: string = ''): Promise<Nft[]> {
     return await this.getService().doGetGeneric(
       `nfts${query}`,
       (response) => response,

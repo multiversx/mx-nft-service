@@ -1,4 +1,4 @@
-export interface Token {
+export interface Nft {
   collection: string;
   identifier: string;
   name: string;

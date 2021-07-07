@@ -40,7 +40,7 @@ export class CollectionsService {
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
       value: Balance.egld(0),
-      args: [BytesValue.fromUTF8(args.token)],
+      args: [BytesValue.fromUTF8(args.collection)],
       gasLimit: new GasLimit(gas.stopNFTCreate),
     });
     return transaction.toPlainObject();
@@ -117,7 +117,7 @@ export class CollectionsService {
 
   private getSetRolesArgs(args: SetNftRolesArgs) {
     let transactionArgs = [
-      BytesValue.fromUTF8(args.token),
+      BytesValue.fromUTF8(args.collection),
       new AddressValue(new Address(args.addressToTransfer)),
     ];
     args.roles.forEach((role) => {
@@ -127,7 +127,7 @@ export class CollectionsService {
   }
 
   private getTransferCreateRoleArgs(args: TransferNftCreateRoleArgs) {
-    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.token)];
+    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.collection)];
     args.addressToTransferList.forEach((address) => {
       transactionArgs.push(new AddressValue(new Address(address)));
     });
