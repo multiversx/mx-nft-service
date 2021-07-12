@@ -32,6 +32,8 @@ import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../auth/gql.auth-guard';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -46,6 +48,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
   ): Promise<TransactionNode> {
@@ -53,6 +56,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async endAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
@@ -60,6 +64,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => Auction)
+  @UseGuards(GqlAuthGuard)
   async updateAuctionStatus(
     @Args('input') input: UpdateAuctionArgs,
   ): Promise<TransactionNode> {
@@ -67,11 +72,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
     return await this.nftAbiService.bid(input);
   }
 
   @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
   async withdraw(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
@@ -79,6 +86,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => Auction)
+  @UseGuards(GqlAuthGuard)
   async saveAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<Auction> {
