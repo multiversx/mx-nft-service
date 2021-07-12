@@ -34,13 +34,13 @@ type AccountResponse {
 }
 
 input AddLikeArgs {
-  address: String!
   identifier: String!
 }
 
 type Asset {
   attributes: String!
   auction: Auction
+  balance: String!
   collection: ID!
   creationDate: String!
   creator: Account!
@@ -52,6 +52,7 @@ type Asset {
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Int!
+  metadata: Metadata
   name: String!
   nonce: Int!
   ownerAddress: String!
@@ -166,7 +167,6 @@ input CreateAuctionArgs {
   maxOneSftPerPayment: Boolean!
   minBid: String!
   nonce: Int!
-  ownerAddress: String!
   paymentToken: String!
   paymentTokenNonce: Int!
   quantity: Int!
@@ -177,14 +177,12 @@ input CreateNftArgs {
   attributes: AttributeInput!
   collection: String!
   name: String!
-  ownerAddress: String!
   quantity: Int!
   royalties: String!
 }
 
 input CreateOrderArgs {
   auctionId: Int!
-  ownerAddress: String!
   priceAmount: String!
   priceNonce: Int!
   priceToken: String!
@@ -207,7 +205,6 @@ input FiltersExpression {
 }
 
 input FollowEntityArgs {
-  address: String!
   addressToFollow: String!
 }
 
@@ -225,6 +222,13 @@ input IssueCollectionArgs {
   canWipe: Boolean = false
   tokenName: String!
   tokenTicker: String!
+}
+
+type Metadata {
+  description: String!
+  fileName: String!
+  fileType: String!
+  fileUri: String!
 }
 
 type Mutation {
@@ -330,7 +334,6 @@ type Query {
 }
 
 input RemoveLikeArgs {
-  address: String!
   identifier: String!
 }
 
@@ -373,7 +376,6 @@ input TransferNftArgs {
   collection: String!
   destinationAddress: String!
   nonce: Int!
-  ownerAddress: String!
   quantity: Int!
 }
 
@@ -384,7 +386,6 @@ input TransferNftCreateRoleArgs {
 }
 
 input UnfollowEntityArgs {
-  address: String!
   addressToUnfollow: String!
 }
 

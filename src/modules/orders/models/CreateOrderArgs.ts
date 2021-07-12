@@ -9,15 +9,13 @@ export class CreateOrderArgs {
   priceAmount: string;
   @Field(() => Int)
   priceNonce: number;
-  @Field(() => String)
-  ownerAddress: string;
   @Field(() => Int)
   auctionId: number;
 
-  static toEntity(args: CreateOrderArgs): OrderEntity {
+  static toEntity(ownerAddress: string, args: CreateOrderArgs): OrderEntity {
     return new OrderEntity({
       auctionId: args.auctionId,
-      ownerAddress: args.ownerAddress,
+      ownerAddress: ownerAddress,
       priceToken: args.priceToken,
       priceAmount: args.priceAmount,
       priceNonce: args.priceNonce,

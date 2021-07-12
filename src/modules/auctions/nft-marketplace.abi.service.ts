@@ -28,8 +28,11 @@ import { elrondConfig, gas } from '../../config';
 export class NftMarketplaceAbiService {
   constructor(private elrondProxyService: ElrondProxyService) {}
 
-  async createAuction(args: CreateAuctionArgs): Promise<TransactionNode> {
-    const contract = this.getSmartContract(args.ownerAddress);
+  async createAuction(
+    ownerAddress: string,
+    args: CreateAuctionArgs,
+  ): Promise<TransactionNode> {
+    const contract = this.getSmartContract(ownerAddress);
 
     let createAuctionTx = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),

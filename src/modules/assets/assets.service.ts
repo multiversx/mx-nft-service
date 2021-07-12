@@ -117,7 +117,10 @@ export class AssetsService {
     return transaction.toPlainObject();
   }
 
-  async createNft(args: CreateNftArgs): Promise<TransactionNode> {
+  async createNft(
+    ownerAddress: string,
+    args: CreateNftArgs,
+  ): Promise<TransactionNode> {
     const file = await args.file;
     const fileData = await this.pinataService.uploadFile(file);
     const asset = await this.pinataService.uploadText({
@@ -129,7 +132,7 @@ export class AssetsService {
     const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
 
     const contract = new SmartContract({
-      address: new Address(args.ownerAddress),
+      address: new Address(ownerAddress),
     });
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
@@ -149,10 +152,11 @@ export class AssetsService {
   }
 
   async transferNft(
+    ownerAddress: string,
     transferNftArgs: TransferNftArgs,
   ): Promise<TransactionNode> {
     const contract = new SmartContract({
-      address: new Address(transferNftArgs.ownerAddress),
+      address: new Address(ownerAddress),
     });
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
