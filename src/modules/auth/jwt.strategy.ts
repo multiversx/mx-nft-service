@@ -13,17 +13,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async authenticate(req: any, options?: any) {
-    super.authenticate(req, {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET_KEY,
-      signOptions: {
-        expiresIn: `${process.env.JWT_TOKEN_EXPIRE_SECONDS}s`,
-      },
-    });
-  }
-
   async validate(payload: any): Promise<any> {
     const { user } = payload;
 
