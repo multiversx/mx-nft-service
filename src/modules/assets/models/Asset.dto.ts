@@ -31,7 +31,6 @@ export class Asset {
   creatorAddress: string;
   @Field(() => Account)
   creator: Account = null;
-  @Field(() => [String])
   @Field(() => [Account], { nullable: true })
   owners: Account[];
   @Field(() => [Owner], { nullable: true })
