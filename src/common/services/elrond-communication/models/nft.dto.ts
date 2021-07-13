@@ -5,7 +5,7 @@ export interface Nft {
   identifier: string;
   name: string;
   type: string;
-  owner: string;
+  owners: ApiAccount[];
   minted: string;
   burnt: string;
   decimals: number;
@@ -30,4 +30,10 @@ export interface Nft {
   uris: string[];
   tags: string[];
   metadata: NftMetadata;
+}
+
+export interface ApiAccount {
+  address: string;
+  balance: string;
+  herotag: string;
 }

@@ -38,7 +38,7 @@ export class AssetsService {
   ): Promise<[Asset[], number]> {
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
-      this.apiService.getNftsForUserCount(address),
+      this.apiService.getNftsForUserCount(address, query),
     ]);
 
     const assets = nfts.map((element) => Asset.fromNft(element));
@@ -175,7 +175,7 @@ export class AssetsService {
   private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {
     const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),
-      this.apiService.getNftsCount(),
+      this.apiService.getNftsCount(query),
     ]);
     const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];

@@ -41,7 +41,6 @@ export class AccountsService {
           followerAddress: address,
         }),
       );
-      console.log(follower);
       return !!follower;
     } catch (err) {
       this.logger.error('An error occurred while adding Follower.', {

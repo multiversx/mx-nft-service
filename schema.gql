@@ -40,22 +40,21 @@ input AddLikeArgs {
 type Asset {
   attributes: String!
   auction: Auction
-  balance: String!
+  balance: String
   collection: ID!
   creationDate: String!
   creator: Account!
   creatorAddress: String!
-  currentOwner: Owner
   hash: String
   identifier: String!
-  isLiked(byAddress: String!): Boolean!
+  isLiked(byAddress: String!): Boolean
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Int!
   metadata: Metadata
   name: String!
   nonce: Int!
-  ownerAddress: String!
+  owners: [Account!]
   previousOwners: [Owner!]
   royalties: String!
   tags: [String!]

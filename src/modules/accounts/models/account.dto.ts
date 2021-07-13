@@ -2,6 +2,7 @@ import { Auction } from '../../auctions/models';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
+import { ApiAccount } from 'src/common/services/elrond-communication/models/nft.dto';
 
 @ObjectType()
 export class Account {
@@ -37,5 +38,14 @@ export class Account {
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);
+  }
+
+  static fromApiAccount(account: ApiAccount) {
+    return account
+      ? new Account({
+          address: account.address,
+          herotag: account.herotag,
+        })
+      : null;
   }
 }

@@ -134,21 +134,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return artist !== undefined ? artist[0] : undefined;
   }
 
-  @ResolveField('currentOwner', () => Account)
-  async currentOwner(@Parent() asset: Asset) {
-    const { ownerAddress } = asset;
-
-    if (!ownerAddress) {
-      return null;
-    }
-    const ownerAccount = await this.accountsService.getAccountByAddress(
-      ownerAddress,
-    );
-    let owner = new Owner();
-    owner.account = ownerAccount !== undefined ? ownerAccount[0] : null;
-    return owner;
-  }
-
   @ResolveField('auction', () => Auction)
   async auction(
     @Parent() asset: Asset,
@@ -160,7 +145,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
       return null;
     }
     const auctions = await assetAuctionLoader.load(identifier);
-    return auctions !== undefined ? auctions[0] : null;
+    return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
   }
 
   private mapResponse<T>(
