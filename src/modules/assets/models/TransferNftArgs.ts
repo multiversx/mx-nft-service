@@ -6,8 +6,6 @@ export class TransferNftArgs {
   collection: string;
   @Field(() => Int)
   nonce: number;
-  @Field(() => String)
-  ownerAddress: string;
   @Field(() => Int)
   quantity: number;
   @Field(() => String)

@@ -25,7 +25,10 @@ export class OrdersService {
     );
   }
 
-  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
+  async createOrder(
+    ownerAddress: string,
+    createOrderArgs: CreateOrderArgs,
+  ): Promise<Order> {
     try {
       const activeOrder = await this.orderServiceDb.getActiveOrdersForAuction(
         createOrderArgs.auctionId,
@@ -33,7 +36,7 @@ export class OrdersService {
 
       await this.invalidateCache();
       const orderEntity = await this.orderServiceDb.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs),
+        CreateOrderArgs.toEntity(ownerAddress, createOrderArgs),
       );
       if (orderEntity && activeOrder) {
         await this.orderServiceDb.updateOrder(activeOrder);

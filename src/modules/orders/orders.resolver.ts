@@ -21,6 +21,7 @@ import { QueryRequest } from '../QueryRequest';
 import { AccountsService } from '../accounts/accounts.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
+import { User } from '../user';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
@@ -33,8 +34,11 @@ export class OrdersResolver extends BaseResolver(Order) {
 
   @Mutation(() => Order)
   @UseGuards(GqlAuthGuard)
-  async createOrder(@Args('input') input: CreateOrderArgs): Promise<Order> {
-    return await this.ordersService.createOrder(input);
+  async createOrder(
+    @Args('input') input: CreateOrderArgs,
+    @User() user: any,
+  ): Promise<Order> {
+    return await this.ordersService.createOrder(user.publicKey, input);
   }
 
   @Query(() => OrdersResponse)

@@ -34,6 +34,7 @@ import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
+import { User } from '../user';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -51,8 +52,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.createAuction(input);
+    return await this.nftAbiService.createAuction(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)

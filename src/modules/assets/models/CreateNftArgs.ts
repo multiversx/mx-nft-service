@@ -27,8 +27,5 @@ export class CreateNftArgs {
   @Field(() => AttributeInput)
   attributes: AttributeInput;
 
-  @Field(() => String)
-  ownerAddress: string;
-
   file: FileUpload;
 }

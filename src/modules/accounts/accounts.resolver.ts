@@ -5,20 +5,27 @@ import { FollowEntityArgs, UnfollowEntityArgs } from './CreateAccountArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import AccountResponse from './models/AccountResponse';
+import { User } from '../user';
 
 @Resolver(() => Account)
 export class AccountsResolver {
   constructor(private accountsService: AccountsService) {}
 
   @Mutation(() => Boolean)
-  async follow(@Args('input') input: FollowEntityArgs): Promise<boolean> {
-    return this.accountsService.follow(input.address, input.addressToFollow);
+  async follow(
+    @Args('input') input: FollowEntityArgs,
+    @User() user: any,
+  ): Promise<boolean> {
+    return this.accountsService.follow(user.publicKey, input.addressToFollow);
   }
 
   @Mutation(() => Boolean)
-  async unfollow(@Args('input') input: UnfollowEntityArgs): Promise<boolean> {
+  async unfollow(
+    @Args('input') input: UnfollowEntityArgs,
+    @User() user: any,
+  ): Promise<boolean> {
     return this.accountsService.unfollow(
-      input.address,
+      user.publicKey,
       input.addressToUnfollow,
     );
   }

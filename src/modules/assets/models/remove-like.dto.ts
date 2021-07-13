@@ -4,6 +4,4 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 export class RemoveLikeArgs {
   @Field(() => String)
   identifier: string;
-  @Field(() => String)
-  address: string;
 }

@@ -3,6 +3,4 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 export class AddLikeArgs {
   @Field(() => String)
   identifier: string;
-  @Field(() => String)
-  address: string;
 }

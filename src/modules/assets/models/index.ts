@@ -6,3 +6,4 @@ export * from './Asset.dto';
 export * from './Attributes.dto';
 export * from './Owner.dto';
 export * from './Price.dto';
+export * from './Metadata.dto';

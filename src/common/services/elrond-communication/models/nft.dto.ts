@@ -1,3 +1,5 @@
+import { NftMetadata } from './nftMetadata';
+
 export interface Nft {
   collection: string;
   identifier: string;
@@ -27,4 +29,5 @@ export interface Nft {
   timestamp: string;
   uris: string[];
   tags: string[];
+  metadata: NftMetadata;
 }

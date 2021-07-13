@@ -32,6 +32,7 @@ import { AssetsFilter } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
+import { User } from '../user';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -63,9 +64,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async createNft(
     @Args('input') input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
+    @User() user: any,
   ): Promise<TransactionNode> {
     input.file = file;
-    return await this.assetsService.createNft(input);
+    return await this.assetsService.createNft(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
@@ -88,22 +90,27 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @UseGuards(GqlAuthGuard)
   async transferNft(
     @Args('input') input: TransferNftArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.assetsService.transferNft(input);
+    return await this.assetsService.transferNft(user.publicKey, input);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  addLike(@Args('input') input: AddLikeArgs): Promise<boolean> {
-    const { identifier, address } = input;
-    return this.assetsLikesService.addLike(identifier, address);
+  addLike(
+    @Args('input') input: AddLikeArgs,
+    @User() user: any,
+  ): Promise<boolean> {
+    return this.assetsLikesService.addLike(input.identifier, user.publicKey);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  removeLike(@Args('input') input: RemoveLikeArgs): Promise<boolean> {
-    const { identifier, address } = input;
-    return this.assetsLikesService.removeLike(identifier, address);
+  removeLike(
+    @Args('input') input: RemoveLikeArgs,
+    @User() user: any,
+  ): Promise<boolean> {
+    return this.assetsLikesService.removeLike(input.identifier, user.publicKey);
   }
 
   @ResolveField('likesCount', () => Int)

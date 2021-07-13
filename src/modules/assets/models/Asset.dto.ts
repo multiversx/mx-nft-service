@@ -11,6 +11,7 @@ import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
+import { Metadata } from './Metadata.dto';
 
 @ObjectType()
 export class Asset {
@@ -39,9 +40,11 @@ export class Asset {
   @Field()
   name!: string;
   @Field()
-  royalties: string; //creator percentage
+  royalties: string;
   @Field(() => String)
   attributes: string;
+  @Field(() => String)
+  balance: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
   @Field(() => String)
@@ -56,6 +59,8 @@ export class Asset {
   likesCount: number;
   @Field(() => Boolean)
   isLiked: boolean;
+  @Field(() => Metadata, { nullable: true })
+  metadata: Metadata;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -74,10 +79,11 @@ export class Asset {
           lastSale: new Date(),
           creationDate: nft.timestamp,
           hash: nft.hash ?? '',
+          balance: nft.balance,
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
-          tags: nft.tags || [''],
+          metadata: Metadata.fromNftMetadata(nft.metadata),
         })
       : null;
   }

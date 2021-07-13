@@ -3,9 +3,6 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 @InputType()
 export class CreateAuctionArgs {
   @Field(() => String)
-  ownerAddress: string;
-
-  @Field(() => String)
   collection: string;
 
   @Field(() => Int)
