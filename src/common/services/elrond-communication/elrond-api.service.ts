@@ -45,9 +45,12 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsForUserCount(address: string): Promise<number> {
+  async getNftsForUserCount(
+    address: string,
+    query: string = '',
+  ): Promise<number> {
     return await this.getService().doGetGeneric(
-      `accounts/${address}/nfts/count`,
+      `accounts/${address}/nfts/count${query}`,
       (response) => response,
     );
   }
@@ -59,9 +62,9 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsCount(): Promise<number> {
+  async getNftsCount(query: string = ''): Promise<number> {
     return await this.getService().doGetGeneric(
-      'nfts/count',
+      `nfts/count${query}`,
       (response) => response,
     );
   }

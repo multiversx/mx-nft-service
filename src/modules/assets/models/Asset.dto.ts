@@ -10,8 +10,8 @@ import { Owner } from './Owner.dto';
 import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
-import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
 import { Metadata } from './Metadata.dto';
+import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
 
 @ObjectType()
 export class Asset {
@@ -31,10 +31,9 @@ export class Asset {
   creatorAddress: string;
   @Field(() => Account)
   creator: Account = null;
-  @Field(() => String)
-  ownerAddress: string;
-  @Field(() => Owner, { nullable: true })
-  currentOwner: Owner;
+  @Field(() => [String])
+  @Field(() => [Account], { nullable: true })
+  owners: Account[];
   @Field(() => [Owner], { nullable: true })
   previousOwners: Owner[];
   @Field()
@@ -43,7 +42,7 @@ export class Asset {
   royalties: string;
   @Field(() => String)
   attributes: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   balance: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
@@ -57,7 +56,7 @@ export class Asset {
   tags: string[];
   @Field(() => Int)
   likesCount: number;
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
   @Field(() => Metadata, { nullable: true })
   metadata: Metadata;
@@ -74,7 +73,7 @@ export class Asset {
           nonce: nft.nonce ?? 0,
           identifier: nft.identifier,
           creatorAddress: nft.creator ?? '',
-          ownerAddress: nft.owner,
+          owners: nft.owners?.map((account) => Account.fromApiAccount(account)),
           attributes: nft.attributes ?? '',
           lastSale: new Date(),
           creationDate: nft.timestamp,

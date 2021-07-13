@@ -120,8 +120,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() asset: Asset) {
-    const { ownerAddress } = asset;
+  async owner(@Parent() auction: Auction) {
+    const { ownerAddress } = auction;
     const owner = await this.accountsService.getAccountByAddress(ownerAddress);
     return owner !== undefined ? owner[0] : null;
   }
