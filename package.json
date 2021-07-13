@@ -25,7 +25,7 @@
     "run-migrations": "typeorm migration:run"
   },
   "dependencies": {
-    "@elrondnetwork/erdjs": "5.0.0",
+    "@elrondnetwork/erdjs": "6.1.1",
     "@nestjs-query/query-graphql": "^0.25.1",
     "@nestjs/common": "^7.6.15",
     "@nestjs/config": "^0.6.3",

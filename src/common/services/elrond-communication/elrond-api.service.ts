@@ -7,7 +7,7 @@ import { Nft } from './models/nft.dto';
 export class ElrondApiService {
   private proxy: ApiProvider;
   constructor() {
-    this.proxy = new ApiProvider(elrondConfig.elrondApi, 20000);
+    this.proxy = new ApiProvider(elrondConfig.elrondApi);
   }
 
   getService(): ApiProvider {
