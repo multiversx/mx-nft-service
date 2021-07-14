@@ -85,7 +85,6 @@ if (!!process.env.LOG_FILE) {
         maxFiles: 5,
       },
       context: () => ({
-        randomValue: Math.random(),
         assetAuctionLoader: assetAuctionLoader(),
         auctionLoaderById: auctionLoaderById(),
         acountAuctionLoader: acountAuctionLoader(),
