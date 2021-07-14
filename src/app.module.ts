@@ -84,12 +84,13 @@ if (!!process.env.LOG_FILE) {
         maxFileSize: 100000000,
         maxFiles: 5,
       },
-      context: {
+      context: () => ({
+        randomValue: Math.random(),
         assetAuctionLoader: assetAuctionLoader(),
         auctionLoaderById: auctionLoaderById(),
         acountAuctionLoader: acountAuctionLoader(),
         auctionOrdersLoader: auctionOrdersLoader(),
-      },
+      }),
     }),
     RedisModule.register([
       {
