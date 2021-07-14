@@ -76,6 +76,8 @@ if (!!process.env.LOG_FILE) {
           message:
             error.extensions?.exception?.response?.message || error.message,
         };
+        console.error(graphQLFormattedError);
+
         return graphQLFormattedError;
       },
       uploads: {
