@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FollowersServiceDb } from '../../db/followers/followers.service';
 import { Account } from './models/account.dto';
-import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { Address } from '@elrondnetwork/erdjs';
-import { Owner } from '../assets/models';
 import { FollowerEntity } from 'src/db/followers/follower.entity';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
