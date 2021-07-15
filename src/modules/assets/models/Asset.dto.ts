@@ -29,10 +29,8 @@ export class Asset {
   hash: string;
   @Field(() => String)
   creatorAddress: string;
-  @Field(() => Account)
-  creator: Account = null;
-  @Field(() => [Account], { nullable: true })
-  owners: Account[];
+  @Field(() => [String], { nullable: true })
+  owners: string[];
   @Field(() => [Owner], { nullable: true })
   previousOwners: Owner[];
   @Field()
@@ -74,7 +72,7 @@ export class Asset {
           nonce: nft.nonce ?? 0,
           identifier: nft.identifier,
           creatorAddress: nft.creator ?? '',
-          owners: nft.owners?.map((account) => Account.fromApiAccount(account)),
+          owners: nft.owners?.map((account) => account.address),
           attributes: nft.attributes ?? '',
           lastSale: new Date(),
           creationDate: nft.timestamp,

@@ -73,7 +73,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => Boolean)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async addNftPreviewImg(
     @Args({ name: 'identifier', type: () => String }) identifier: string,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
@@ -151,15 +151,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
   async hasPreview(@Parent() asset: Asset) {
     const { identifier } = asset;
     return this.previewUrlService.checkHasPreviewUrl(identifier);
-  }
-
-  @ResolveField('creator', () => Account)
-  async creator(@Parent() asset: Asset) {
-    const { creatorAddress } = asset;
-    const artist = await this.accountsService.getAccountByAddress(
-      creatorAddress,
-    );
-    return artist !== undefined ? artist[0] : undefined;
   }
 
   @ResolveField('auction', () => Auction)

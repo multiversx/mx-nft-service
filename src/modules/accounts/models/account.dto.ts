@@ -6,20 +6,8 @@ import { ApiAccount } from 'src/common/services/elrond-communication/models/nft.
 
 @ObjectType()
 export class Account {
-  @Field(() => Int)
-  id: number;
-
   @Field(() => ID)
   address: string;
-
-  @Field({ nullable: true })
-  description: string;
-
-  @Field({ nullable: true })
-  profileImgUrl: string;
-
-  @Field({ nullable: true })
-  herotag: string;
 
   @Field(() => [Asset], { nullable: true })
   assets: Asset[];
@@ -38,14 +26,5 @@ export class Account {
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);
-  }
-
-  static fromApiAccount(account: ApiAccount) {
-    return account
-      ? new Account({
-          address: account.address,
-          herotag: account.herotag,
-        })
-      : null;
   }
 }
