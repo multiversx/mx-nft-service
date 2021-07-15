@@ -73,7 +73,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async addNftPreviewImg(
     @Args({ name: 'identifier', type: () => String }) identifier: string,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,

@@ -17,7 +17,6 @@ export class S3Service {
   }
 
   async checkFileExists(filename) {
-    console.log(filename);
     const s3 = this.getS3();
     return s3
       .headObject({
@@ -45,8 +44,7 @@ export class S3Service {
 
     const s3 = this.getS3();
     try {
-      let s3Response = await s3.upload(params).promise();
-      console.log(s3Response);
+      await s3.upload(params).promise();
       return true;
     } catch (e) {
       this.logger.error('An error occurred while trying to upload file to s3', {
