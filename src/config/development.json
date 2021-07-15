@@ -1,9 +1,5 @@
 {
   "elrond": {
-    "elastic": "https://devnet-uindex.elrond.com",
-    "elrondApi": "https://devnet-beta-api.elrond.com",
-    "gateway": "https://devnet-gateway.elrond.com",
-    "explorer": "https://devnet-explorer.elrond.com",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqvfpluw9whepv7ge0e60khnx70yys6p3lu00sat8pff",
     "issueNftCost": 50000000000000000

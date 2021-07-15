@@ -47,8 +47,10 @@ export class Asset {
   lastSale: Date;
   @Field(() => String)
   creationDate!: string;
-  @Field(() => [String], { nullable: false })
+  @Field(() => [String])
   uris: string[];
+  @Field(() => Boolean, { nullable: true })
+  hasPreview: boolean;
   @Field(() => Auction, { nullable: true })
   auction: Auction;
   @Field(() => [String], { nullable: true })

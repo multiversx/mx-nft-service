@@ -12,7 +12,9 @@ import { Injectable } from '@nestjs/common';
 export class ElrondProxyService {
   private readonly proxy: ProxyProvider;
   constructor() {
-    this.proxy = new ProxyProvider(elrondConfig.gateway, { timeout: 5000 });
+    this.proxy = new ProxyProvider(process.env.ELROND_GATEWAY, {
+      timeout: 10000,
+    });
   }
 
   getService(): ProxyProvider {
