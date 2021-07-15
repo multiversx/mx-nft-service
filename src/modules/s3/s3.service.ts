@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
-import { ReadStream } from 'fs';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 
@@ -11,16 +10,33 @@ export class S3Service {
   ) {}
   AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 
-  async upload(file) {
-    const { filename } = file;
-
-    const fileData = await file;
+  async upload(fileData, filename) {
     const readStream = await fileData.createReadStream();
     const bucketS3 = process.env.AWS_S3_BUCKET_NAME;
     return await this.uploadS3(readStream, bucketS3, filename);
   }
 
-  async uploadS3(file, bucket, name) {
+  async checkFileExists(filename) {
+    console.log(filename);
+    const s3 = this.getS3();
+    return s3
+      .headObject({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: filename,
+      })
+      .promise()
+      .then(
+        () => true,
+        (err) => {
+          if (err.code === 'NotFound') {
+            return false;
+          }
+          throw err;
+        },
+      );
+  }
+
+  private async uploadS3(file, bucket, name) {
     const params = {
       Bucket: bucket,
       Key: String(name),
@@ -30,15 +46,14 @@ export class S3Service {
     const s3 = this.getS3();
     try {
       let s3Response = await s3.upload(params).promise();
-
-      return s3Response.Location;
+      console.log(s3Response);
+      return true;
     } catch (e) {
-      console.log(e);
       this.logger.error('An error occurred while trying to upload file to s3', {
         path: 'S3Service.upload',
         exception: e.toString(),
       });
-      return;
+      return false;
     }
   }
 
@@ -47,16 +62,5 @@ export class S3Service {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
-  }
-  async readStreamToBuffer(readStream: ReadStream): Promise<Buffer> {
-    let chunks = [];
-    try {
-      for await (const chunk of readStream) {
-        chunks.push(chunk);
-      }
-      return Buffer.concat(chunks);
-    } catch (error) {
-      throw error;
-    }
   }
 }

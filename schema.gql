@@ -45,6 +45,7 @@ type Asset {
   creationDate: String!
   creator: Account!
   creatorAddress: String!
+  hasPreview: Boolean
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
@@ -232,6 +233,7 @@ type Metadata {
 
 type Mutation {
   addLike(input: AddLikeArgs!): Boolean!
+  addNftPreviewImg(file: Upload!, identifier: String!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
