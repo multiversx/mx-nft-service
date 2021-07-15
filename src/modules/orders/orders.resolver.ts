@@ -70,8 +70,10 @@ export class OrdersResolver extends BaseResolver(Order) {
     const { ownerAddress } = order;
 
     if (!ownerAddress) return null;
-    const owner = await this.accountsService.getAccountByAddress(ownerAddress);
-    return owner !== undefined ? owner[0] : null;
+    const owner = new Account({
+      address: ownerAddress,
+    });
+    return owner;
   }
 
   @ResolveField('auction', () => Auction)

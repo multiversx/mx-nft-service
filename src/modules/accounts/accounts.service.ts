@@ -13,25 +13,7 @@ export class AccountsService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private followerServiceDb: FollowersServiceDb,
-    private elrondProxyService: ElrondProxyService,
   ) {}
-
-  async getAccountByAddress(address: string): Promise<Account | any> {
-    const networkAccount = await this.elrondProxyService
-      .getService()
-      .getAccount(new Address(address));
-
-    return new Account({
-      address: networkAccount.address.bech32(),
-      herotag: networkAccount.userName,
-    });
-  }
-
-  async getOwnerByAddress(address: string): Promise<Owner | any> {
-    let owner = new Owner();
-    owner.account = (await this.getAccountByAddress(address)) || null;
-    return owner;
-  }
 
   async follow(address: string, followAddress: string): Promise<any> {
     try {

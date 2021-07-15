@@ -13,9 +13,6 @@ export class Auction {
   @Field(() => String, { nullable: true })
   ownerAddress: string;
 
-  @Field(() => Account, { nullable: true })
-  owner: Account;
-
   @Field(() => AuctionStatusEnum, { nullable: true })
   status: AuctionStatusEnum;
 

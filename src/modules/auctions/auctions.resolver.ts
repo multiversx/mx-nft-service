@@ -119,13 +119,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     };
   }
 
-  @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Auction) {
-    const { ownerAddress } = auction;
-    const owner = await this.accountsService.getAccountByAddress(ownerAddress);
-    return owner;
-  }
-
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { identifier } = auction;
@@ -147,7 +140,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const { id } = auction;
     const lastOrder = await this.ordersService.getActiveOrderForAuction(id);
     return lastOrder
-      ? await this.accountsService.getAccountByAddress(lastOrder.ownerAddress)
+      ? new Account({
+          address: lastOrder.ownerAddress,
+        })
       : undefined;
   }
 

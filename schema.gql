@@ -6,13 +6,9 @@ type Account {
   address: ID!
   assets: [Asset!]
   auctions: [Auction!]
-  description: String
   followers: [Account!]
   following: [Account!]
-  herotag: String
-  id: Int!
   orders: [Order!]
-  profileImgUrl: String
 }
 
 type AccountEdge {
@@ -43,7 +39,6 @@ type Asset {
   balance: String
   collection: ID!
   creationDate: String!
-  creator: Account!
   creatorAddress: String!
   hasPreview: Boolean
   hash: String
@@ -55,7 +50,7 @@ type Asset {
   metadata: Metadata
   name: String!
   nonce: Int!
-  owners: [Account!]
+  owners: [String!]
   previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
@@ -105,7 +100,6 @@ type Auction {
   minBid: Price!
   nonce: Int!
   orders: [Order!]
-  owner: Account
   ownerAddress: String
   startDate: String!
   status: AuctionStatusEnum
