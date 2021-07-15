@@ -40,7 +40,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
-    private artistAssetService: PreviewNftUrlService,
+    private previewUrlService: PreviewNftUrlService,
   ) {
     super();
   }
@@ -86,7 +86,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     )
       throw new Error('unsuported_media_type');
 
-    return await this.artistAssetService.addPreviewImageToS3(
+    return await this.previewUrlService.addPreviewImageToS3(
       identifier,
       fileData,
     );
@@ -150,7 +150,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('hasPreview', () => Boolean)
   async hasPreview(@Parent() asset: Asset) {
     const { identifier } = asset;
-    return this.artistAssetService.checkHasPreviewUrl(identifier);
+    return this.previewUrlService.checkHasPreviewUrl(identifier);
   }
 
   @ResolveField('creator', () => Account)
