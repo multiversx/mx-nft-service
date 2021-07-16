@@ -62,7 +62,7 @@ export class OrdersService {
   }
 
   async getTopBid(auctionId: number): Promise<Price> {
-    const cacheKey = this.getAuctionCacheKey(auctionId);
+    const cacheKey = this.getTopBidCacheKey(auctionId);
     const getTopBid = () => this.getPrice(auctionId);
     return this.redisCacheService.getOrSet(
       this.redisClient,
@@ -111,6 +111,10 @@ export class OrdersService {
 
   private getAuctionCacheKey(auctionId: number) {
     return generateCacheKeyFromParams('orders' + auctionId);
+  }
+
+  private getTopBidCacheKey(auctionId: number) {
+    return generateCacheKeyFromParams('topBid' + auctionId);
   }
 
   private async invalidateCache(): Promise<void> {
