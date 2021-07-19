@@ -23,10 +23,14 @@ import {
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
+import { ChainID, NetworkConfig } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class NftMarketplaceAbiService {
-  constructor(private elrondProxyService: ElrondProxyService) {}
+  constructor(private elrondProxyService: ElrondProxyService) {
+    let defaultNetworkConfig = NetworkConfig.getDefault();
+    defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
+  }
 
   async createAuction(
     ownerAddress: string,
