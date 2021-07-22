@@ -82,6 +82,7 @@ export class Asset {
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
           metadata: Metadata.fromNftMetadata(nft.metadata),
+          tags: nft.tags
         })
       : null;
   }
