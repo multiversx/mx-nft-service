@@ -82,17 +82,8 @@ export class Asset {
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
           metadata: Metadata.fromNftMetadata(nft.metadata),
-          tags: Asset.parseTags(nft.attributes)
+          tags: nft.tags
         })
       : null;
-  }
-
-  static parseTags(attributes: string): string[] {
-    const decoded = Buffer.from(attributes, 'base64').toString('utf-8');
-    const match = decoded.match(/tags:(.*);/);
-    if (!match || match.length != 2 ) {
-      return [];
-    }
-    return match[1].split(",");
   }
 }
