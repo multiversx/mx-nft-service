@@ -66,7 +66,7 @@ export class NftMarketplaceAbiService {
       ],
       gasLimit: new GasLimit(gas.startAuction),
     });
-    return createAuctionTx.toPlainObject();
+    return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
 
   async bid(args: BidActionArgs): Promise<TransactionNode> {
