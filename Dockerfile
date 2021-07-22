@@ -11,8 +11,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN chown -R elrond /usr/src/app 
-USER elrond
+RUN chown -R elrond /usr/src/app
 
 RUN npm install
 COPY . .
