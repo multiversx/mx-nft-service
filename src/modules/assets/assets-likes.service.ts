@@ -90,9 +90,9 @@ export class AssetsLikesService {
 
   async addLike(identifier: string, address: string): Promise<boolean> {
     try {
-      const assetLike = await this.saveAssetLikeEntity(identifier, address);
+      await this.saveAssetLikeEntity(identifier, address);
       this.invalidateCache(identifier, address);
-      return !!assetLike;
+      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
@@ -100,7 +100,7 @@ export class AssetsLikesService {
         address,
         err,
       });
-      return false;
+      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }
   }
 
@@ -108,7 +108,7 @@ export class AssetsLikesService {
     try {
       await this.assetsLikesRepository.removeLike(identifier, address);
       await this.invalidateCache(identifier, address);
-      return true;
+      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
         path: 'AssetsService.removeLike',
@@ -116,7 +116,7 @@ export class AssetsLikesService {
         address,
         err,
       });
-      return false;
+      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }
   }
 
