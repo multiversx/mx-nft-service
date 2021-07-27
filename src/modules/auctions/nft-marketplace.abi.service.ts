@@ -42,7 +42,7 @@ export class NftMarketplaceAbiService {
     let createAuctionTx = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
-      args: this.getArgs(args),
+      args: this.getCreateAuctionArgs(args),
       gasLimit: new GasLimit(gas.startAuction),
     });
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
@@ -189,7 +189,7 @@ export class NftMarketplaceAbiService {
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  private getArgs(args: CreateAuctionArgs): TypedValue[] {
+  private getCreateAuctionArgs(args: CreateAuctionArgs): TypedValue[] {
     console.log(12, args, new BigNumber(args.maxBid || 0));
     const maxBid = new BigNumber(args.maxBid || 0);
     let returnArgs: TypedValue[] = [
