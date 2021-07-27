@@ -190,8 +190,6 @@ export class NftMarketplaceAbiService {
   }
 
   private getCreateAuctionArgs(args: CreateAuctionArgs): TypedValue[] {
-    console.log(12, args, new BigNumber(args.maxBid || 0));
-    const maxBid = new BigNumber(args.maxBid || 0);
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(args.collection),
       new U64Value(new BigNumber(args.nonce)),
