@@ -157,14 +157,14 @@ input ConnectionArgs {
 input CreateAuctionArgs {
   collection: String!
   deadline: String!
-  maxBid: String!
-  maxOneSftPerPayment: Boolean!
+  maxBid: String
+  maxOneSftPerPayment: Boolean
   minBid: String!
   nonce: Int!
   paymentToken: String!
-  paymentTokenNonce: Int!
+  paymentTokenNonce: Int
   quantity: Int!
-  startDate: String!
+  startDate: String
 }
 
 input CreateNftArgs {

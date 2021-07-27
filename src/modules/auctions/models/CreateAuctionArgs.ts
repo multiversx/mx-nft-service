@@ -2,7 +2,7 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateAuctionArgs {
-  @Field(() => String)
+  @Field()
   collection: string;
 
   @Field(() => Int)
@@ -11,24 +11,24 @@ export class CreateAuctionArgs {
   @Field(() => Int)
   quantity: number;
 
-  @Field(() => String)
+  @Field()
   minBid: string;
 
-  @Field(() => String)
+  @Field({ nullable: true })
   maxBid: string;
 
-  @Field(() => String)
+  @Field({ nullable: true })
   startDate: string;
 
-  @Field(() => String)
+  @Field()
   deadline: string;
 
-  @Field(() => String)
+  @Field()
   paymentToken: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   paymentTokenNonce: number;
 
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   maxOneSftPerPayment: boolean;
 }

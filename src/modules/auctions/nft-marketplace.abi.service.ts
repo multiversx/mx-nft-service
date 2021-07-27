@@ -20,10 +20,11 @@ import {
   TypedValue,
   U64Type,
   U64Value,
+  ChainID,
+  NetworkConfig,
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
-import { ChainID, NetworkConfig } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -41,29 +42,7 @@ export class NftMarketplaceAbiService {
     let createAuctionTx = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
-      args: [
-        BytesValue.fromUTF8(args.collection),
-        new U64Value(new BigNumber(args.nonce)),
-        new U64Value(new BigNumber(args.quantity)),
-        new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
-        BytesValue.fromUTF8('auctionToken'),
-        new BigUIntValue(new BigNumber(args.minBid)),
-        new BigUIntValue(new BigNumber(args.maxBid)),
-        new U64Value(new BigNumber(args.deadline)),
-        new TokenIdentifierValue(Buffer.from(args.paymentToken)),
-        new OptionalValue(
-          new U64Type(),
-          new U64Value(new BigNumber(args.paymentTokenNonce)),
-        ),
-        new OptionalValue(
-          new BooleanType(),
-          new BooleanValue(args.maxOneSftPerPayment),
-        ),
-        new OptionalValue(
-          new U64Type(),
-          new U64Value(new BigNumber(args.startDate)),
-        ),
-      ],
+      args: this.getArgs(args),
       gasLimit: new GasLimit(gas.startAuction),
     });
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
@@ -208,6 +187,55 @@ export class NftMarketplaceAbiService {
       contract.methods.getMarketplaceCutPercentage()
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
+  }
+
+  private getArgs(args: CreateAuctionArgs): TypedValue[] {
+    console.log(12, args, new BigNumber(args.maxBid || 0));
+    const maxBid = new BigNumber(args.maxBid || 0);
+    let returnArgs: TypedValue[] = [
+      BytesValue.fromUTF8(args.collection),
+      new U64Value(new BigNumber(args.nonce)),
+      new U64Value(new BigNumber(args.quantity)),
+      new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
+      BytesValue.fromUTF8('auctionToken'),
+      new BigUIntValue(new BigNumber(args.minBid)),
+      new BigUIntValue(new BigNumber(args.maxBid || 0)),
+      new U64Value(new BigNumber(args.deadline)),
+      new TokenIdentifierValue(Buffer.from(args.paymentToken)),
+    ];
+
+    if (args.startDate) {
+      return [
+        ...returnArgs,
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce)),
+        ),
+        new OptionalValue(
+          new BooleanType(),
+          new BooleanValue(args.maxOneSftPerPayment),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.startDate)),
+        ),
+      ];
+    }
+
+    if (args.maxOneSftPerPayment) {
+      return [
+        ...returnArgs,
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce)),
+        ),
+        new OptionalValue(
+          new BooleanType(),
+          new BooleanValue(args.maxOneSftPerPayment),
+        ),
+      ];
+    }
+    return returnArgs;
   }
 
   private async getFirstQueryResult(

@@ -1,6 +1,7 @@
 import {
   AddressValue,
   BigUIntValue,
+  OptionValue,
   TokenIdentifierValue,
   U64Value,
 } from '@elrondnetwork/erdjs';
@@ -19,7 +20,7 @@ export interface AuctionAbi {
   auction_type: AuctionTypeEnum;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
-  max_bid: BigUIntValue;
+  max_bid: OptionValue;
   deadline: U64Value;
   start_time: U64Value;
   original_owner: AddressValue;
