@@ -25,6 +25,9 @@ export class Auction {
   @Field(() => Int)
   nonce: number;
 
+  @Field(() => Int)
+  nrAuctionedTokens: number;
+
   @Field(() => Asset)
   asset: Asset;
 

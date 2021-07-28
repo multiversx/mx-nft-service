@@ -13,6 +13,7 @@ export interface AuctionAbi {
     token_type: TokenIdentifierValue;
     nonce: U64Value;
   };
+  nr_auctioned_tokens: BigUIntValue;
   payment_token: {
     token_type: TokenIdentifierValue;
     nonce: U64Value;
