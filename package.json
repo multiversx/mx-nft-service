@@ -26,7 +26,7 @@
     "revert-migrations": "typeorm migration:revert"
   },
   "dependencies": {
-    "@elrondnetwork/erdjs": "6.1.1",
+    "@elrondnetwork/erdjs": "6.5.0",
     "@nestjs-query/query-graphql": "^0.25.1",
     "@nestjs/common": "^7.6.15",
     "@nestjs/config": "^0.6.3",

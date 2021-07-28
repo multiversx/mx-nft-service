@@ -65,7 +65,7 @@ export class AuctionEntity extends BaseEntity {
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
-          maxBid: auction.max_bid.valueOf().toString(),
+          maxBid: auction.max_bid?.valueOf()?.toString() || '0',
           startDate: auction.start_time.valueOf().toString(),
           endDate: auction.deadline.valueOf().toString(),
           identifier: `${auction.auctioned_token.token_type
