@@ -12,6 +12,9 @@ export class AuctionEntity extends BaseEntity {
   @Column({ length: 20 })
   collection: string;
 
+  @Column()
+  nrAuctionedTokens: number;
+
   @Column({ length: 30 })
   identifier: string;
 
@@ -56,6 +59,9 @@ export class AuctionEntity extends BaseEntity {
           id: auctionId,
           collection: auction.auctioned_token.token_type.valueOf().toString(),
           nonce: parseInt(auction.auctioned_token.nonce.valueOf().toString()),
+          nrAuctionedTokens: parseInt(
+            auction.nr_auctioned_tokens.valueOf().toString(),
+          ),
           status:
             AuctionStatusEnum[auction.auction_status.valueOf().toString()],
           type: AuctionTypeEnum[auction.auction_type.valueOf().toString()],

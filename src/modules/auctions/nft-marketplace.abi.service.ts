@@ -225,7 +225,7 @@ export class NftMarketplaceAbiService {
         ...returnArgs,
         new OptionalValue(
           new U64Type(),
-          new U64Value(new BigNumber(args.paymentTokenNonce)),
+          new U64Value(new BigNumber(args.paymentTokenNonce || 0)),
         ),
         new OptionalValue(
           new BooleanType(),
