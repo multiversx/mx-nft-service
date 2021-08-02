@@ -18,10 +18,10 @@ export class Metadata {
   static fromNftMetadata(metadata: NftMetadata) {
     return metadata
       ? new Metadata({
-          description: metadata.description,
-          fileName: metadata.fileName,
-          fileType: metadata.fileType,
-          fileUri: metadata.fileUri,
+          description: metadata.description ?? '',
+          fileName: metadata.fileName ?? '',
+          fileType: metadata.fileType ?? '',
+          fileUri: metadata.fileUri ?? '',
         })
       : null;
   }
