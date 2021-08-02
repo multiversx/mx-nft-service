@@ -236,8 +236,8 @@ type Mutation {
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   follow(input: FollowEntityArgs!): Boolean!
-  issueNft(input: IssueCollectionArgs!): TransactionNode!
-  issueSemiFungible(input: IssueCollectionArgs!): TransactionNode!
+  issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
+  issueSFTCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
@@ -320,10 +320,10 @@ type Price {
 type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  collections(ownerAddress: String!): [String!]!
   followers(address: String, pagination: ConnectionArgs): AccountResponse!
   following(address: String, pagination: ConnectionArgs): AccountResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
-  registeredNfts(ownerAddress: String!): [String!]!
 }
 
 input RemoveLikeArgs {

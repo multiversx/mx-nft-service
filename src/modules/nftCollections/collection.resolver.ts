@@ -23,23 +23,23 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async issueNft(
+  // @UseGuards(GqlAuthGuard)
+  async issueNftCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
     return await this.collectionsService.issueNft(input);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async issueSemiFungible(
+  // @UseGuards(GqlAuthGuard)
+  async issueSFTCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
     return await this.collectionsService.issueSemiFungible(input);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
@@ -63,9 +63,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Query(() => [String])
-  async registeredNfts(
+  async collections(
     @Args('ownerAddress') ownerAddress: string,
   ): Promise<string[]> {
-    return await this.elrondGateway.getRegisteredNfts(ownerAddress);
+    return await this.elrondGateway.getCollections(ownerAddress);
   }
 }

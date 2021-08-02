@@ -34,7 +34,7 @@ export class ElrondProxyService {
     return contract;
   }
 
-  async getRegisteredNfts(address: string): Promise<string[]> {
+  async getCollections(address: string): Promise<string[]> {
     return await this.getService().doGetGeneric(
       `address/${address}/registered-nfts`,
       (response) => response.tokens,
