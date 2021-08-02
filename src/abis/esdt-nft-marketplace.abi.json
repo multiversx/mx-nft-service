@@ -92,7 +92,7 @@
       "outputs": []
     },
     {
-      "name": "buySftAfterEndAuction",
+      "name": "buySft",
       "payableInTokens": ["*"],
       "inputs": [
         {
@@ -178,20 +178,6 @@
       "outputs": [
         {
           "type": "AuctionType"
-        }
-      ]
-    },
-    {
-      "name": "getAuctionStatus",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "AuctionStatus"
         }
       ]
     },
@@ -317,23 +303,6 @@
     }
   ],
   "types": {
-    "AuctionStatus": {
-      "type": "enum",
-      "variants": [
-        {
-          "name": "None",
-          "discriminant": 0
-        },
-        {
-          "name": "Running",
-          "discriminant": 1
-        },
-        {
-          "name": "SftWaitingForBuyOrOwnerClaim",
-          "discriminant": 2
-        }
-      ]
-    },
     "AuctionType": {
       "type": "enum",
       "variants": [
@@ -382,10 +351,6 @@
         {
           "name": "auction_type",
           "type": "AuctionType"
-        },
-        {
-          "name": "auction_status",
-          "type": "AuctionStatus"
         },
         {
           "name": "payment_token",

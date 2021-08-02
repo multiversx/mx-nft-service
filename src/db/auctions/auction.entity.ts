@@ -62,8 +62,7 @@ export class AuctionEntity extends BaseEntity {
           nrAuctionedTokens: parseInt(
             auction.nr_auctioned_tokens.valueOf().toString(),
           ),
-          status:
-            AuctionStatusEnum[auction.auction_status.valueOf().toString()],
+          status: AuctionStatusEnum.Running,
           type: AuctionTypeEnum[auction.auction_type.valueOf().toString()],
           paymentToken: auction.payment_token.token_type.valueOf().toString(),
           paymentNonce: parseInt(
