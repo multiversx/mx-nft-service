@@ -16,6 +16,7 @@ import {
   CreateAuctionArgs,
   BidActionArgs,
   UpdateAuctionArgs,
+  BuySftActionArgs,
 } from './models';
 import { AccountsService } from '../accounts/accounts.service';
 import { AssetsService } from '../assets/assets.service';
@@ -41,7 +42,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
-    private accountsService: AccountsService,
     private assetsService: AssetsService,
     private ordersService: OrdersService,
   ) {
@@ -77,6 +77,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @UseGuards(GqlAuthGuard)
   async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
     return await this.nftAbiService.bid(input);
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
+  async buySft(
+    @Args('input') input: BuySftActionArgs,
+  ): Promise<TransactionNode> {
+    return await this.nftAbiService.buySft(input);
   }
 
   @Mutation(() => TransactionNode)

@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
-import { CreateAuctionArgs, AuctionAbi, BidActionArgs } from './models';
+import {
+  CreateAuctionArgs,
+  AuctionAbi,
+  BidActionArgs,
+  BuySftActionArgs,
+} from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -86,10 +91,10 @@ export class NftMarketplaceAbiService {
     return endAuction.toPlainObject();
   }
 
-  async buySftAfterEndAuction(args: BidActionArgs): Promise<TransactionNode> {
+  async buySft(args: BuySftActionArgs): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getSmartContract();
     let buySftAfterEndAuction = contract.call({
-      func: new ContractFunction('buySftAfterEndAuction'),
+      func: new ContractFunction('buySft'),
       value: Balance.fromString(args.price),
       args: [
         new U64Value(new BigNumber(args.auctionId)),

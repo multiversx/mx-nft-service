@@ -141,6 +141,13 @@ input BidActionArgs {
   price: String!
 }
 
+input BuySftActionArgs {
+  auctionId: Int!
+  collection: String!
+  nonce: String!
+  price: String!
+}
+
 input ConnectionArgs {
   """Paginate after opaque cursor"""
   after: String
@@ -232,6 +239,7 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buySft(input: BuySftActionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createOrder(input: CreateOrderArgs!): Order!
