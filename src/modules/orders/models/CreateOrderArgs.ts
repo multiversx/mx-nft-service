@@ -12,6 +12,10 @@ export class CreateOrderArgs {
   @Field(() => Int)
   auctionId: number;
 
+  constructor(init?: Partial<CreateOrderArgs>) {
+    Object.assign(this, init);
+  }
+
   static toEntity(ownerAddress: string, args: CreateOrderArgs): OrderEntity {
     return new OrderEntity({
       auctionId: args.auctionId,

@@ -15,7 +15,6 @@ import {
   Auction,
   CreateAuctionArgs,
   BidActionArgs,
-  UpdateAuctionArgs,
   BuySftActionArgs,
 } from './models';
 import { AccountsService } from '../accounts/accounts.service';
@@ -49,32 +48,27 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
-    @User() user: any,
+    // @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.createAuction(user.publicKey, input);
+    return await this.nftAbiService.createAuction(
+      'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th',
+      input,
+    );
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async endAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.endAuction(auctionId);
   }
 
-  @Mutation(() => Auction)
-  @UseGuards(GqlAuthGuard)
-  async updateAuctionStatus(
-    @Args('input') input: UpdateAuctionArgs,
-  ): Promise<TransactionNode> {
-    return await this.auctionsService.updateAuction(input);
-  }
-
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
     return await this.nftAbiService.bid(input);
   }
@@ -96,7 +90,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => Auction)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async saveAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<Auction> {

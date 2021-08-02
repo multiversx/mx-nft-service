@@ -11,34 +11,18 @@ import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/account.dto';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
-import { CreateOrderArgs, Order } from './models';
+import { Order } from './models';
 import OrdersResponse from './models/OrdersResponse';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
-import { AccountsService } from '../accounts/accounts.service';
-import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { User } from '../user';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(
-    private ordersService: OrdersService,
-    private accountsService: AccountsService,
-  ) {
+  constructor(private ordersService: OrdersService) {
     super();
-  }
-
-  @Mutation(() => Order)
-  @UseGuards(GqlAuthGuard)
-  async createOrder(
-    @Args('input') input: CreateOrderArgs,
-    @User() user: any,
-  ): Promise<Order> {
-    return await this.ordersService.createOrder(user.publicKey, input);
   }
 
   @Query(() => OrdersResponse)
