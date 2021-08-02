@@ -80,26 +80,27 @@ export class TransactionService {
       const functionName = getDataFunctionName(transaction.data);
       const dataArgs = getDataArgs(transaction.data);
 
-      if (this.isAuctionToken(dataArgs)) {
-        if (await this.isTransactionSuccessfull(transaction)) {
-          const trans = await this.gatewayService
-            .getService()
-            .getTransaction(transaction.hash, undefined, true);
-          const scResults = trans.getSmartContractResults().getResultingCalls();
-          if (scResults.length > 0) {
-            const decodedData = this.splitDataArgs(
-              scResults[scResults.length - 1]?.data,
-            );
+      if (
+        this.isAuctionToken(dataArgs) &&
+        (await this.isTransactionSuccessful(transaction))
+      ) {
+        const trans = await this.gatewayService
+          .getService()
+          .getTransaction(transaction.hash, undefined, true);
+        const scResults = trans.getSmartContractResults().getResultingCalls();
+        if (scResults.length > 0) {
+          const decodedData = this.splitDataArgs(
+            scResults[scResults.length - 1]?.data,
+          );
 
-            if (Buffer.from(decodedData[0], 'hex').toString() === 'ok') {
-              this.auctionsService.saveAuction(parseInt(decodedData[1], 16));
-            }
+          if (Buffer.from(decodedData[0], 'hex').toString() === 'ok') {
+            this.auctionsService.saveAuction(parseInt(decodedData[1], 16));
           }
         }
       }
       switch (functionName) {
         case 'bid': {
-          if (await this.isTransactionSuccessfull(transaction))
+          if (await this.isTransactionSuccessful(transaction))
             this.ordersService.createOrder(
               transaction.sender,
               new CreateOrderArgs({
@@ -112,7 +113,7 @@ export class TransactionService {
           return;
         }
         case 'withdraw': {
-          if (await this.isTransactionSuccessfull(transaction)) {
+          if (await this.isTransactionSuccessful(transaction)) {
             this.auctionsService.updateAuction(
               parseInt(dataArgs[0], 16),
               AuctionStatusEnum.Closed,
@@ -121,7 +122,7 @@ export class TransactionService {
           }
         }
         case 'endAuction': {
-          if (await this.isTransactionSuccessfull(transaction)) {
+          if (await this.isTransactionSuccessful(transaction)) {
             this.auctionsService.updateAuction(
               parseInt(dataArgs[0], 16),
               AuctionStatusEnum.Ended,
@@ -135,7 +136,7 @@ export class TransactionService {
     });
   }
 
-  private async isTransactionSuccessfull(transaction: any) {
+  private async isTransactionSuccessful(transaction: any) {
     return (
       (
         await this.apiService.getService().getTransaction(transaction.hash)
