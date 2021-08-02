@@ -239,7 +239,6 @@ type Mutation {
   issueNft(input: IssueCollectionArgs!): TransactionNode!
   issueSemiFungible(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
-  saveAuction(auctionId: Int!): Auction!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!

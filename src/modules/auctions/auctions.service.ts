@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { Auction, AuctionStatusEnum, UpdateAuctionArgs } from './models';
+import { Auction, AuctionStatusEnum } from './models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
