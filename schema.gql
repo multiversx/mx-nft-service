@@ -131,7 +131,6 @@ enum AuctionStatusEnum {
   Ended
   None
   Running
-  SftWaitingForBuyOrOwnerClaim
 }
 
 input BidActionArgs {
