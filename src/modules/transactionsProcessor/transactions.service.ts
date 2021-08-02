@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { TransactionProcessor } from '@elrondnetwork/transaction-processor';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { oneWeek } from './helpers';
-import { TransactionStatus } from './entities/transaction.status';
 import { AuctionsService } from '../auctions/auctions.service';
 import { AuctionStatusEnum } from '../auctions/models';
 import { OrdersService } from '../orders/order.service';
 import { CreateOrderArgs } from '../orders/models';
+import { ElrondProxyService } from 'src/common';
+import { getDataArgs, getDataFunctionName } from './decoders';
+import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
+import { TransactionStatus } from '@elrondnetwork/erdjs';
 
 @Injectable()
 export class TransactionService {
@@ -19,6 +21,8 @@ export class TransactionService {
 
   constructor(
     private auctionsService: AuctionsService,
+    private gatewayService: ElrondProxyService,
+    private apiService: ElrondApiService,
     private ordersService: OrdersService,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -39,9 +43,11 @@ export class TransactionService {
       await transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
-          this.processTransactions(transactions);
+          setTimeout(async () => {
+            this.processTransactions(transactions);
+          }, 6000);
           console.log(
-            `Received ${transactions.length} transnonceactions on shard ${shardId} and nonce ${nonce}`,
+            `Received ${transactions.length} transactions on shard ${shardId} and nonce ${nonce}`,
           );
         },
         getLastProcessedNonce: async (shardId) => {
@@ -70,16 +76,30 @@ export class TransactionService {
   }
 
   private processTransactions(transactions) {
-    transactions.forEach((transaction) => {
-      const functionName = this.getDataFunctionName(transaction.data);
-      const dataArgs = this.getDataArgs(transaction.data);
-      if (transaction.status === TransactionStatus.success) {
-        if (this.isAuctionToken(dataArgs)) {
-          console.log('auctiontoken');
-          // return;
+    transactions.forEach(async (transaction) => {
+      const functionName = getDataFunctionName(transaction.data);
+      const dataArgs = getDataArgs(transaction.data);
+
+      if (this.isAuctionToken(dataArgs)) {
+        if (await this.isTransactionSuccessfull(transaction)) {
+          const trans = await this.gatewayService
+            .getService()
+            .getTransaction(transaction.hash, undefined, true);
+          const scResults = trans.getSmartContractResults().getResultingCalls();
+          if (scResults.length > 0) {
+            const decodedData = this.splitDataArgs(
+              scResults[scResults.length - 1]?.data,
+            );
+
+            if (Buffer.from(decodedData[0], 'hex').toString() === 'ok') {
+              this.auctionsService.saveAuction(parseInt(decodedData[1], 16));
+            }
+          }
         }
-        switch (functionName) {
-          case 'bid': {
+      }
+      switch (functionName) {
+        case 'bid': {
+          if (await this.isTransactionSuccessfull(transaction))
             this.ordersService.createOrder(
               transaction.sender,
               new CreateOrderArgs({
@@ -89,76 +109,51 @@ export class TransactionService {
                 priceNonce: 0,
               }),
             );
-            return;
-          }
-          case 'withdraw': {
+          return;
+        }
+        case 'withdraw': {
+          if (await this.isTransactionSuccessfull(transaction)) {
             this.auctionsService.updateAuction(
               parseInt(dataArgs[0], 16),
               AuctionStatusEnum.Closed,
             );
-            // return;
+            return;
           }
-          case 'endAuction': {
+        }
+        case 'endAuction': {
+          if (await this.isTransactionSuccessfull(transaction)) {
             this.auctionsService.updateAuction(
               parseInt(dataArgs[0], 16),
               AuctionStatusEnum.Ended,
             );
-            // return;
+            return;
           }
-          // default:
-          //   return {};
         }
+        default:
+          return {};
       }
     });
   }
 
-  public getDataFunctionName(data): string | undefined {
-    const decoded = this.getDataDecoded(data);
-    if (decoded) {
-      return decoded.split('@')[0];
-    }
+  private async isTransactionSuccessfull(transaction: any) {
+    return (
+      (
+        await this.apiService.getService().getTransaction(transaction.hash)
+      ).status.status
+        .valueOf()
+        .toLowerCase() === 'success'
+    );
+  }
 
-    return undefined;
+  public splitDataArgs(data): string[] | undefined {
+    return data.split('@').splice(1);
   }
 
   public isAuctionToken(decoded): boolean | undefined {
-    console.log('isAuctionToken', decoded);
     if (decoded && decoded.length > 4) {
       const dataEndpointName = Buffer.from(decoded[4], 'hex').toString();
       if (dataEndpointName === 'auctionToken') return true;
     }
     return false;
   }
-
-  public getDataEndpointName(data): string | undefined {
-    const decoded = this.getDataArgs(data);
-    if (decoded && decoded.length > 2) {
-      console.log(121, decoded);
-      return Buffer.from(decoded[4], 'hex').toString();
-    }
-    return undefined;
-  }
-  public getDataArgs(data): string[] | undefined {
-    const decoded = this.getDataDecoded(data);
-    if (decoded) {
-      return decoded.split('@').splice(1);
-    }
-
-    return undefined;
-  }
-  private getDataDecoded(data): string | undefined {
-    if (data) {
-      return base64Decode(data);
-    }
-    return undefined;
-  }
-}
-
-export function base64DecodeBinary(str: string): Buffer {
-  return Buffer.from(str, 'base64');
-}
-
-export function base64Decode(str: string): string {
-  console.log('decodetr', str);
-  return base64DecodeBinary(str).toString('binary');
 }

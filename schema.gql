@@ -99,7 +99,7 @@ type Auction {
   maxBid: Price!
   minBid: Price!
   nonce: Int!
-  nrAuctionedTokens: Int!
+  nrAuctionedTokens: Int
   orders: [Order!]
   ownerAddress: String
   startDate: String!

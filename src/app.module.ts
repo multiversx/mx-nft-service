@@ -27,7 +27,7 @@ import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { RedisModule } from 'nestjs-redis';
 import { cacheConfig } from './config';
 import { AuthModule } from './modules/auth/auth.module';
-import { TransactionModule } from './modules/transactions/transaction.module';
+import { TransactionModule } from './modules/transactionsProcessor/transaction.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({

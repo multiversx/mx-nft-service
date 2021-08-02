@@ -25,7 +25,7 @@ export class Auction {
   @Field(() => Int)
   nonce: number;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   nrAuctionedTokens: number;
 
   @Field(() => Asset)
@@ -67,6 +67,7 @@ export class Auction {
           identifier: auction.identifier,
           startDate: auction.startDate,
           endDate: auction.endDate,
+          nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: 'EGLD',
             nonce: 0,
