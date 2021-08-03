@@ -41,6 +41,7 @@ export class TransactionService {
       let transactionProcessor = new TransactionProcessor();
       await transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
+        waitForFinalizedCrossShardSmartContractResults: true,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
           setTimeout(async () => {
             this.processTransactions(transactions);
@@ -50,15 +51,10 @@ export class TransactionService {
           );
         },
         getLastProcessedNonce: async (shardId) => {
-          let result = await this.redisCacheService.get(
+          return await this.redisCacheService.get(
             this.redisClient,
             `lastprocessednonce:${shardId}`,
           );
-          if (result === null) {
-            return undefined;
-          }
-
-          return result;
         },
         setLastProcessedNonce: async (shardId, nonce) => {
           await this.redisCacheService.set(

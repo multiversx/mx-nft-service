@@ -27,7 +27,6 @@ import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { RedisModule } from 'nestjs-redis';
 import { cacheConfig } from './config';
 import { AuthModule } from './modules/auth/auth.module';
-import { TransactionModule } from './modules/transactionsProcessor/transaction.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 
 const logTransports: Transport[] = [
@@ -143,7 +142,6 @@ if (!!process.env.LOG_FILE) {
     AccountsModuleGraph,
     AuctionsModuleDb,
     IpfsModule,
-    TransactionModule,
   ],
 })
 export class AppModule {}
