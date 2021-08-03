@@ -53,8 +53,10 @@ type Asset {
   previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
+  thumbnailUrl: String!
   type: NftTypeEnum!
   uris: [String!]!
+  url: String!
 }
 
 type AssetEdge {

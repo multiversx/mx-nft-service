@@ -7,7 +7,6 @@ import {
 } from '@nestjs/graphql';
 import { Price } from './Price.dto';
 import { Owner } from './Owner.dto';
-import { Account } from '../../accounts/models';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
@@ -47,6 +46,10 @@ export class Asset {
   creationDate!: string;
   @Field(() => [String])
   uris: string[];
+  @Field(() => String)
+  url: string;
+  @Field(() => String)
+  thumbnailUrl: string;
   @Field(() => Auction, { nullable: true })
   auction: Auction;
   @Field(() => [String], { nullable: true })
@@ -79,6 +82,8 @@ export class Asset {
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
+          url: nft.url || '',
+          thumbnailUrl: nft.thumbnailUrl || '',
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
         })
