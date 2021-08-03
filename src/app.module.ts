@@ -28,6 +28,7 @@ import { RedisModule } from 'nestjs-redis';
 import { cacheConfig } from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { TransactionModule } from './modules/transactionsProcessor/transaction.module';
+import { loggerMiddleware } from './modules/metrics/logger-middleware';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -66,9 +67,14 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
-    TypeOrmModule.forRoot({}),
+    TypeOrmModule.forRoot({
+      keepConnectionAlive: true,
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
+      buildSchemaOptions: {
+        fieldMiddleware: [loggerMiddleware],
+      },
       sortSchema: true,
       playground: true,
       formatError: (error: GraphQLError) => {

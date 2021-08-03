@@ -6,14 +6,27 @@ import {
   SmartContractAbi,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig } from '../../../config';
+import * as Agent from 'agentkeepalive';
 import { Injectable } from '@nestjs/common';
+import { SmartContractProfiler } from 'src/modules/metrics/smartcontract-profiler';
 
 @Injectable()
 export class ElrondProxyService {
   private readonly proxy: ProxyProvider;
   constructor() {
+    const keepAliveOptions = {
+      maxSockets: elrondConfig.keepAliveMaxSockets,
+      maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
+      timeout: elrondConfig.keepAliveTimeout,
+      freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
+    };
+    const httpAgent = new Agent(keepAliveOptions);
+    const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
+
     this.proxy = new ProxyProvider(process.env.ELROND_GATEWAY, {
-      timeout: 10000,
+      timeout: elrondConfig.proxyTimeout,
+      httpAgent: elrondConfig.keepAlive ? httpAgent : null,
+      httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
     });
   }
 
@@ -27,7 +40,7 @@ export class ElrondProxyService {
     });
     let abi = new SmartContractAbi(abiRegistry, ['EsdtNftMarketplace']);
 
-    let contract = new SmartContract({
+    let contract = new SmartContractProfiler({
       address: new Address(elrondConfig.nftMarketplaceAddress),
       abi: abi,
     });
