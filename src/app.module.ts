@@ -67,7 +67,9 @@ if (!!process.env.LOG_FILE) {
     WinstonModule.forRoot({
       transports: logTransports,
     }),
-    TypeOrmModule.forRoot({}),
+    TypeOrmModule.forRoot({
+      keepConnectionAlive: true,
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       buildSchemaOptions: {
