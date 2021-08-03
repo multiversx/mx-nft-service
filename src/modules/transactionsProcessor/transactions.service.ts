@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { TransactionProcessor } from '@elrondnetwork/transaction-processor';
 import * as Redis from 'ioredis';
@@ -12,7 +12,6 @@ import { CreateOrderArgs } from '../orders/models';
 import { ElrondProxyService } from 'src/common';
 import { getDataArgs, getDataFunctionName } from './decoders';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { TransactionStatus } from '@elrondnetwork/erdjs';
 
 @Injectable()
 export class TransactionService {
@@ -31,7 +30,7 @@ export class TransactionService {
     );
   }
 
-  @Cron('*/1 * * * * *')
+  @Cron(CronExpression.EVERY_SECOND)
   async handleNewTransactions() {
     if (this.isRunnningHandleNewTransactions) {
       return;
