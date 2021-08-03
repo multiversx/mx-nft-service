@@ -32,15 +32,12 @@ import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
-import { PreviewNftUrlService } from './preview-image.service';
-import { ImageMimeTypeEnum } from './models/ImageMimeType.enum';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
-    private previewUrlService: PreviewNftUrlService,
   ) {
     super();
   }
@@ -70,26 +67,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
   ): Promise<TransactionNode> {
     input.file = file;
     return await this.assetsService.createNft(user.publicKey, input);
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
-  async addNftPreviewImg(
-    @Args({ name: 'identifier', type: () => String }) identifier: string,
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-  ): Promise<Boolean> {
-    const fileData = await file;
-    if (
-      !Object.values(ImageMimeTypeEnum).includes(
-        fileData.mimetype as ImageMimeTypeEnum,
-      )
-    )
-      throw new Error('unsuported_media_type');
-
-    return await this.previewUrlService.addPreviewImageToS3(
-      identifier,
-      fileData,
-    );
   }
 
   @Mutation(() => TransactionNode)
@@ -145,12 +122,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
   isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     const { identifier } = asset;
     return this.assetsLikesService.isAssetLiked(identifier, byAddress);
-  }
-
-  @ResolveField('hasPreview', () => Boolean)
-  async hasPreview(@Parent() asset: Asset) {
-    const { identifier } = asset;
-    return this.previewUrlService.checkHasPreviewUrl(identifier);
   }
 
   @ResolveField('auction', () => Auction)

@@ -47,8 +47,6 @@ export class Asset {
   creationDate!: string;
   @Field(() => [String])
   uris: string[];
-  @Field(() => Boolean, { nullable: true })
-  hasPreview: boolean;
   @Field(() => Auction, { nullable: true })
   auction: Auction;
   @Field(() => [String], { nullable: true })
@@ -82,7 +80,7 @@ export class Asset {
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
           metadata: Metadata.fromNftMetadata(nft.metadata),
-          tags: nft.tags
+          tags: nft.tags,
         })
       : null;
   }
