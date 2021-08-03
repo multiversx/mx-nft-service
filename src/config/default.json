@@ -6,6 +6,8 @@
     "issueNftCost": 50000000000000000
   },
   "caching": {
+    "transactionsProcessorRedisClientName": "transactionsProcessor",
+    "transactionsProcessorDbName": 1,
     "ordersRedisClientName": "orders",
     "ordersDbName": 2,
     "ordersttl": 43200,

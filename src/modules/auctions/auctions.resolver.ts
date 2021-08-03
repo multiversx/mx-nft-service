@@ -15,10 +15,8 @@ import {
   Auction,
   CreateAuctionArgs,
   BidActionArgs,
-  UpdateAuctionArgs,
   BuySftActionArgs,
 } from './models';
-import { AccountsService } from '../accounts/accounts.service';
 import { AssetsService } from '../assets/assets.service';
 import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -65,14 +63,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return await this.nftAbiService.endAuction(auctionId);
   }
 
-  @Mutation(() => Auction)
-  @UseGuards(GqlAuthGuard)
-  async updateAuctionStatus(
-    @Args('input') input: UpdateAuctionArgs,
-  ): Promise<TransactionNode> {
-    return await this.auctionsService.updateAuction(input);
-  }
-
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
@@ -93,14 +83,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
   ): Promise<TransactionNode> {
     return await this.nftAbiService.withdraw(auctionId);
-  }
-
-  @Mutation(() => Auction)
-  @UseGuards(GqlAuthGuard)
-  async saveAuction(
-    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-  ): Promise<Auction> {
-    return await this.auctionsService.saveAuction(auctionId);
   }
 
   @Query(() => AuctionResponse)

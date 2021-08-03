@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { Auction, UpdateAuctionArgs } from './models';
+import { Auction, AuctionStatusEnum } from './models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -69,9 +69,12 @@ export class AuctionsService {
     return [auctions.map((element) => Auction.fromEntity(element)), count];
   }
 
-  async updateAuction(args: UpdateAuctionArgs): Promise<Auction | any> {
+  async updateAuction(
+    id: number,
+    status: AuctionStatusEnum,
+  ): Promise<Auction | any> {
     await this.invalidateCache();
-    return await this.auctionServiceDb.updateAuction(args.id, args.status);
+    return await this.auctionServiceDb.updateAuction(id, status);
   }
 
   private getAuctionsCacheKey(request: QueryRequest) {

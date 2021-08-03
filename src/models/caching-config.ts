@@ -4,6 +4,8 @@
 export class CachingConfig {
   auctionsRedisClientName: string;
   auctionsDbName: number;
+  transactionsProcessorRedisClientName: string;
+  transactionsProcessorDbName: number;
   auctionsttl: number;
   assetsDbName: number;
   assetsRedisClientName: string;
