@@ -23,7 +23,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async issueNftCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
@@ -31,7 +31,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async issueSFTCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
@@ -39,7 +39,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
