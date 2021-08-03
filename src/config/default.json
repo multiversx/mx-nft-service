@@ -3,7 +3,15 @@
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqcg22wnug7s285fuuwyartwatf5amcps3u00std0ar7",
-    "issueNftCost": 50000000000000000
+    "issueNftCost": 50000000000000000,
+    "version": 1,
+    "proxyTimeout": 60000,
+    "timeoutLimit": 10000,
+    "keepAlive": false,
+    "keepAliveTimeout": 50000,
+    "keepAliveFreeSocketTimeout": 30000,
+    "keepAliveMaxSockets": 100,
+    "keepAliveMaxFreeSockets": 10
   },
   "caching": {
     "transactionsProcessorRedisClientName": "transactionsProcessor",
