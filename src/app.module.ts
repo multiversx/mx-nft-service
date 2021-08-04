@@ -1,14 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
+import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
-import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import 'reflect-metadata';
 import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
@@ -24,32 +19,9 @@ import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
 import { acountAuctionLoader } from './db/auctions/account-auction.loader';
 import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
-import { RedisModule } from 'nestjs-redis';
-import { cacheConfig } from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
-
-const logTransports: Transport[] = [
-  new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      nestWinstonModuleUtilities.format.nestLike(),
-    ),
-  }),
-];
-
-const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
-
-if (!!process.env.LOG_FILE) {
-  logTransports.push(
-    new winston.transports.File({
-      filename: process.env.LOG_FILE,
-      dirname: 'logs',
-      maxsize: 100000,
-      level: logLevel,
-    }),
-  );
-}
+import { CommonModule } from './common.module';
 
 @Module({
   providers: [
@@ -62,12 +34,6 @@ if (!!process.env.LOG_FILE) {
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    WinstonModule.forRoot({
-      transports: logTransports,
-    }),
-    TypeOrmModule.forRoot({
-      keepConnectionAlive: true,
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
@@ -97,44 +63,7 @@ if (!!process.env.LOG_FILE) {
         auctionOrdersLoader: auctionOrdersLoader(),
       }),
     }),
-    RedisModule.register([
-      {
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: 0,
-      },
-      {
-        name: cacheConfig.transactionsProcessorRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.transactionsProcessorDbName,
-      },
-      {
-        name: cacheConfig.auctionsRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.auctionsDbName,
-      },
-      {
-        name: cacheConfig.ordersRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.ordersDbName,
-      },
-      {
-        name: cacheConfig.assetsRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.assetsDbName,
-      },
-    ]),
-    ScheduleModule.forRoot(),
-    ConfigModule,
+    CommonModule,
     CollectionModuleGraph,
     AssetsModuleGraph,
     AuctionsModuleGraph,

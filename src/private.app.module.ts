@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppModule } from './app.module';
+import { CommonModule } from './common.module';
 import { MetricsController } from './modules/metrics/metrics.controller';
 
 @Module({
-  imports: [AppModule],
+  imports: [CommonModule],
   controllers: [MetricsController],
   providers: [],
 })
