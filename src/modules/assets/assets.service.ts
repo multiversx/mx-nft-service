@@ -5,10 +5,10 @@ import {
   BytesValue,
   ContractFunction,
   GasLimit,
-  SmartContract,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
+import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 import { gas } from 'src/config';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
@@ -84,9 +84,7 @@ export class AssetsService {
   }
 
   async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
-    const contract = new SmartContract({
-      address: new Address(args.addOrBurnRoleAddress),
-    });
+    const contract = getSmartContract(args.addOrBurnRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
@@ -101,9 +99,7 @@ export class AssetsService {
   }
 
   async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
-    const contract = new SmartContract({
-      address: new Address(args.addOrBurnRoleAddress),
-    });
+    const contract = getSmartContract(args.addOrBurnRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTBurn'),
       value: Balance.egld(0),
@@ -131,9 +127,7 @@ export class AssetsService {
     });
     const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
 
-    const contract = new SmartContract({
-      address: new Address(ownerAddress),
-    });
+    const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
       value: Balance.egld(0),
@@ -155,9 +149,7 @@ export class AssetsService {
     ownerAddress: string,
     transferNftArgs: TransferNftArgs,
   ): Promise<TransactionNode> {
-    const contract = new SmartContract({
-      address: new Address(ownerAddress),
-    });
+    const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
@@ -177,7 +169,7 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    const assets = nfts.map((element) => Asset.fromNft(element));
+    const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 

@@ -17,6 +17,7 @@ import { ElrondApiService } from 'src/common/services/elrond-communication/elron
 export class TransactionService {
   private isRunnningHandleNewTransactions = false;
   private redisClient: Redis.Redis;
+  private transactionProcessor = new TransactionProcessor();
 
   constructor(
     private auctionsService: AuctionsService,
@@ -38,27 +39,20 @@ export class TransactionService {
 
     this.isRunnningHandleNewTransactions = true;
     try {
-      let transactionProcessor = new TransactionProcessor();
-      await transactionProcessor.start({
+      await this.transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
+        waitForFinalizedCrossShardSmartContractResults: true,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
-          setTimeout(async () => {
-            this.processTransactions(transactions);
-          }, 6000);
+          this.processTransactions(transactions);
           console.log(
             `Received ${transactions.length} transactions on shard ${shardId} and nonce ${nonce}`,
           );
         },
         getLastProcessedNonce: async (shardId) => {
-          let result = await this.redisCacheService.get(
+          return await this.redisCacheService.get(
             this.redisClient,
             `lastprocessednonce:${shardId}`,
           );
-          if (result === null) {
-            return undefined;
-          }
-
-          return result;
         },
         setLastProcessedNonce: async (shardId, nonce) => {
           await this.redisCacheService.set(

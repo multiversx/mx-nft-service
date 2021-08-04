@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrivateAppModule } from './private.app.module';
+import { TransactionsProcessorModule } from './transaction.processor.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +21,16 @@ async function bootstrap() {
     await privateApp.listen(
       parseInt(process.env.PRIVATE_PORT),
       process.env.PRIVATE_LISTEN_ADDRESS,
+    );
+  }
+
+  if (process.env.ENABLE_TRANSACTION_PROCESSOR === 'true') {
+    const privateTransactionsApp = await NestFactory.create(
+      TransactionsProcessorModule,
+    );
+    await privateTransactionsApp.listen(
+      parseInt(process.env.TRANSACTION_PROCESSOR_PORT),
+      process.env.TRANSACTION_PROCESSOR_LISTEN_ADDRESS,
     );
   }
 }
