@@ -108,6 +108,7 @@ type Auction {
   status: AuctionStatusEnum
   topBid: Price
   topBidder: Account
+  type: AuctionTypeEnum
 }
 
 type AuctionEdge {
@@ -133,6 +134,13 @@ enum AuctionStatusEnum {
   Ended
   None
   Running
+}
+
+enum AuctionTypeEnum {
+  Nft
+  None
+  SftAll
+  SftOnePerPayment
 }
 
 input BidActionArgs {

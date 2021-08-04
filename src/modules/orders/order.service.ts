@@ -84,17 +84,6 @@ export class OrdersService {
     );
   }
 
-  async getActiveOrderForAuction(auctionId: number): Promise<Order> {
-    const cacheKey = this.getAuctionCacheKey(auctionId);
-    const getActiveOrder = () => this.getActiveOrder(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getActiveOrder,
-      cacheConfig.ordersttl,
-    );
-  }
-
   async getActiveOrdersForAuction(auctionId: number): Promise<Order[]> {
     const cacheKey = this.getAuctionOrdersCacheKey(auctionId);
     const getActiveOrder = () => this.getActiveOrders(auctionId);
@@ -115,17 +104,10 @@ export class OrdersService {
   }
 
   private async getPrice(auctionId: number) {
-    const lastOrder = await this.orderServiceDb.getActiveOrderForAuction(
+    const activeOrders = await this.orderServiceDb.getActiveOrdersForAuction(
       auctionId,
     );
-    return Price.fromEntity(lastOrder);
-  }
-
-  private async getActiveOrder(auctionId: number) {
-    const orderEntity = await this.orderServiceDb.getActiveOrderForAuction(
-      auctionId,
-    );
-    return Order.fromEntity(orderEntity);
+    return Price.fromEntity(activeOrders[activeOrders.length - 1]);
   }
 
   private async getActiveOrders(auctionId: number) {
@@ -137,10 +119,6 @@ export class OrdersService {
 
   private getAuctionsCacheKey(request: QueryRequest) {
     return generateCacheKeyFromParams('orders', hash(request));
-  }
-
-  private getAuctionCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('order' + auctionId);
   }
 
   private getAuctionOrdersCacheKey(auctionId: number) {
