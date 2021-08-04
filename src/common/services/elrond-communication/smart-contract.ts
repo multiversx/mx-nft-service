@@ -1,5 +1,5 @@
+import { Address, SmartContract } from '@elrondnetwork/erdjs';
 import { SmartContractProfiler } from 'src/modules/metrics/smartcontract-profiler';
-import { Address, SmartContract } from '../../../../../elrond-sdk-erdjs';
 
 export function getSmartContract(address: string): SmartContract {
   return new SmartContractProfiler({
