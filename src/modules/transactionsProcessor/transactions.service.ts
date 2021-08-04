@@ -12,11 +12,13 @@ import { CreateOrderArgs } from '../orders/models';
 import { ElrondProxyService } from 'src/common';
 import { getDataArgs, getDataFunctionName } from './decoders';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
+import { TransactionWatcher } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class TransactionService {
   private isRunnningHandleNewTransactions = false;
   private redisClient: Redis.Redis;
+  private transactionProcessor = new TransactionProcessor();
 
   constructor(
     private auctionsService: AuctionsService,
@@ -38,14 +40,11 @@ export class TransactionService {
 
     this.isRunnningHandleNewTransactions = true;
     try {
-      let transactionProcessor = new TransactionProcessor();
-      await transactionProcessor.start({
+      await this.transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
         waitForFinalizedCrossShardSmartContractResults: true,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
-          setTimeout(async () => {
-            this.processTransactions(transactions);
-          }, 6000);
+          this.processTransactions(transactions);
           console.log(
             `Received ${transactions.length} transactions on shard ${shardId} and nonce ${nonce}`,
           );
