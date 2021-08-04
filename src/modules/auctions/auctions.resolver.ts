@@ -16,6 +16,7 @@ import {
   CreateAuctionArgs,
   BidActionArgs,
   BuySftActionArgs,
+  AuctionTypeEnum,
 } from './models';
 import { AssetsService } from '../assets/assets.service';
 import { elrondConfig } from 'src/config';
@@ -128,12 +129,23 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
     const { id } = auction;
-    const lastOrder = await this.ordersService.getActiveOrderForAuction(id);
-    return lastOrder
+    const activeOrders = await this.ordersService.getActiveOrdersForAuction(id);
+    return activeOrders?.length > 0
       ? new Account({
-          address: lastOrder.ownerAddress,
+          address: activeOrders[activeOrders.length - 1].ownerAddress,
         })
       : undefined;
+  }
+
+  @ResolveField('availableTokens', () => Int)
+  async availableTokens(@Parent() auction: Auction) {
+    const { id, nrAuctionedTokens, type } = auction;
+    if (type === AuctionTypeEnum.SftOnePerPayment) {
+      const orders = await this.ordersService.getActiveOrdersForAuction(id);
+      const availableTokens = nrAuctionedTokens - orders?.length;
+      return availableTokens;
+    }
+    return nrAuctionedTokens;
   }
 
   @ResolveField('orders', () => [Order])

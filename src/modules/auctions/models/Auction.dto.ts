@@ -4,6 +4,7 @@ import { Account } from 'src/modules/accounts/models/account.dto';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
 import { AuctionStatusEnum } from '.';
+import { AuctionTypeEnum } from './AuctionType.enum';
 
 @ObjectType()
 export class Auction {
@@ -16,6 +17,9 @@ export class Auction {
   @Field(() => AuctionStatusEnum, { nullable: true })
   status: AuctionStatusEnum;
 
+  @Field(() => AuctionTypeEnum, { nullable: true })
+  type: AuctionTypeEnum;
+
   @Field(() => String)
   collection: string;
 
@@ -27,6 +31,9 @@ export class Auction {
 
   @Field(() => Int, { nullable: true })
   nrAuctionedTokens: number;
+
+  @Field(() => Int, { nullable: true })
+  availableTokens: number;
 
   @Field(() => Asset)
   asset: Asset;
@@ -61,6 +68,7 @@ export class Auction {
       ? new Auction({
           id: auction.id,
           status: auction.status,
+          type: auction.type,
           ownerAddress: auction.ownerAddress,
           collection: auction.collection,
           nonce: auction.nonce,
