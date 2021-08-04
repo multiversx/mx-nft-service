@@ -85,51 +85,6 @@ if (!!process.env.LOG_FILE) {
     ElrondCommunicationModule,
   ],
   providers: [RedisCacheService],
-  exports: [
-    WinstonModule.forRoot({
-      transports: logTransports,
-    }),
-    RedisModule.register([
-      {
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: 0,
-      },
-      {
-        name: cacheConfig.transactionsProcessorRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.transactionsProcessorDbName,
-      },
-      {
-        name: cacheConfig.auctionsRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.auctionsDbName,
-      },
-      {
-        name: cacheConfig.ordersRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.ordersDbName,
-      },
-      {
-        name: cacheConfig.assetsRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.assetsDbName,
-      },
-    ]),
-
-    TypeOrmModule.forRoot({
-      keepConnectionAlive: true,
-    }),
-    ElrondCommunicationModule,
-  ],
+  exports: [ElrondCommunicationModule],
 })
 export class CommonModule {}
