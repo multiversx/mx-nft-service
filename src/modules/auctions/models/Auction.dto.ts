@@ -28,6 +28,9 @@ export class Auction {
   @Field(() => Int, { nullable: true })
   nrAuctionedTokens: number;
 
+  @Field(() => Int, { nullable: true })
+  availableTokens: number;
+
   @Field(() => Asset)
   asset: Asset;
 

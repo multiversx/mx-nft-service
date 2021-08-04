@@ -136,6 +136,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
       : undefined;
   }
 
+  @ResolveField('availableTokens', () => Int)
+  async availableTokens(@Parent() auction: Auction) {
+    const { id, nrAuctionedTokens } = auction;
+    const orders = await this.ordersService.getActiveOrdersForAuction(id);
+    const availableTokens = nrAuctionedTokens - orders?.length;
+    return availableTokens;
+  }
+
   @ResolveField('orders', () => [Order])
   async orders(
     @Parent() auction: Auction,

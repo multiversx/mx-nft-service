@@ -95,8 +95,8 @@ export class TransactionService {
         case 'bid': {
           if (await this.isTransactionSuccessful(transaction))
             this.ordersService.createOrder(
-              transaction.sender,
               new CreateOrderArgs({
+                ownerAddress: transaction.sender,
                 auctionId: parseInt(dataArgs[0], 16),
                 priceToken: 'EGLD',
                 priceAmount: transaction.value,
@@ -105,6 +105,20 @@ export class TransactionService {
             );
           return;
         }
+        case 'buySft': {
+          if (await this.isTransactionSuccessful(transaction))
+            this.ordersService.createOrderForSft(
+              new CreateOrderArgs({
+                ownerAddress: transaction.sender,
+                auctionId: parseInt(dataArgs[0], 16),
+                priceToken: 'EGLD',
+                priceAmount: transaction.value,
+                priceNonce: 0,
+              }),
+            );
+          return;
+        }
+
         case 'withdraw': {
           if (await this.isTransactionSuccessful(transaction)) {
             this.auctionsService.updateAuction(

@@ -25,22 +25,34 @@ export class OrdersService {
     );
   }
 
-  async createOrder(
-    ownerAddress: string,
-    createOrderArgs: CreateOrderArgs,
-  ): Promise<Order> {
+  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      const activeOrder = await this.orderServiceDb.getActiveOrdersForAuction(
+      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
         createOrderArgs.auctionId,
       );
 
       await this.invalidateCache();
       const orderEntity = await this.orderServiceDb.saveOrder(
-        CreateOrderArgs.toEntity(ownerAddress, createOrderArgs),
+        CreateOrderArgs.toEntity(createOrderArgs),
       );
       if (orderEntity && activeOrder) {
         await this.orderServiceDb.updateOrder(activeOrder);
       }
+      return Order.fromEntity(orderEntity);
+    } catch (error) {
+      this.logger.error('An error occurred while creating an order', error, {
+        path: 'OrdersService.createOrder',
+        createOrderArgs,
+      });
+    }
+  }
+
+  async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
+    try {
+      await this.invalidateCache();
+      const orderEntity = await this.orderServiceDb.saveOrder(
+        CreateOrderArgs.toEntity(createOrderArgs),
+      );
       return Order.fromEntity(orderEntity);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', error, {
@@ -83,6 +95,17 @@ export class OrdersService {
     );
   }
 
+  async getActiveOrdersForAuction(auctionId: number): Promise<Order[]> {
+    const cacheKey = this.getAuctionOrdersCacheKey(auctionId);
+    const getActiveOrder = () => this.getActiveOrders(auctionId);
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      cacheKey,
+      getActiveOrder,
+      cacheConfig.ordersttl,
+    );
+  }
+
   private async getMappedOrders(queryRequest: QueryRequest) {
     const [ordersEntities, count] = await this.orderServiceDb.getOrders(
       queryRequest,
@@ -92,17 +115,24 @@ export class OrdersService {
   }
 
   private async getPrice(auctionId: number) {
-    const lastOrder = await this.orderServiceDb.getActiveOrdersForAuction(
+    const lastOrder = await this.orderServiceDb.getActiveOrderForAuction(
       auctionId,
     );
     return Price.fromEntity(lastOrder);
   }
 
   private async getActiveOrder(auctionId: number) {
-    const orderEntity = await this.orderServiceDb.getActiveOrdersForAuction(
+    const orderEntity = await this.orderServiceDb.getActiveOrderForAuction(
       auctionId,
     );
     return Order.fromEntity(orderEntity);
+  }
+
+  private async getActiveOrders(auctionId: number) {
+    const orderEntities = await this.orderServiceDb.getActiveOrdersForAuction(
+      auctionId,
+    );
+    return orderEntities.map((order) => Order.fromEntity(order));
   }
 
   private getAuctionsCacheKey(request: QueryRequest) {
@@ -110,6 +140,10 @@ export class OrdersService {
   }
 
   private getAuctionCacheKey(auctionId: number) {
+    return generateCacheKeyFromParams('order' + auctionId);
+  }
+
+  private getAuctionOrdersCacheKey(auctionId: number) {
     return generateCacheKeyFromParams('orders' + auctionId);
   }
 

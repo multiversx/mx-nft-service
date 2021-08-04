@@ -93,6 +93,7 @@ input AttributeInput {
 
 type Auction {
   asset: Asset!
+  availableTokens: Int
   collection: String!
   endDate: String!
   id: ID!
