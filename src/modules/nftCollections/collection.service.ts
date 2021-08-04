@@ -18,14 +18,15 @@ import {
   TransferNftCreateRoleArgs,
 } from './models';
 import { TransactionNode } from '../transaction';
+import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 
 @Injectable()
 export class CollectionsService {
   constructor() {}
 
-  private readonly esdtSmartContract = new SmartContract({
-    address: new Address(elrondConfig.esdtNftAddress),
-  });
+  private readonly esdtSmartContract = getSmartContract(
+    elrondConfig.esdtNftAddress,
+  );
 
   async issueNft(args: IssueCollectionArgs): Promise<TransactionNode> {
     return this.issueToken(args, 'issueNonFungible');
@@ -36,7 +37,7 @@ export class CollectionsService {
   }
 
   async stopNFTCreate(args: StopNftCreateArgs): Promise<TransactionNode> {
-    const smartContract = this.getSmartContract(args.ownerAddress);
+    const smartContract = getSmartContract(args.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
       value: Balance.egld(0),
@@ -49,7 +50,7 @@ export class CollectionsService {
   async transferNFTCreateRole(
     args: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
-    const smartContract = this.getSmartContract(args.ownerAddress);
+    const smartContract = getSmartContract(args.ownerAddress);
     let transactionArgs = this.getTransferCreateRoleArgs(args);
     const transaction = smartContract.call({
       func: new ContractFunction('transferNFTCreateRole'),
@@ -69,12 +70,6 @@ export class CollectionsService {
       gasLimit: new GasLimit(gas.setRoles),
     });
     return transaction.toPlainObject();
-  }
-
-  private getSmartContract(address: string) {
-    return new SmartContract({
-      address: new Address(address),
-    });
   }
 
   private issueToken(args: IssueCollectionArgs, functionName: string) {
