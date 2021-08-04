@@ -12,7 +12,6 @@ import { CreateOrderArgs } from '../orders/models';
 import { ElrondProxyService } from 'src/common';
 import { getDataArgs, getDataFunctionName } from './decoders';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { TransactionWatcher } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class TransactionService {
