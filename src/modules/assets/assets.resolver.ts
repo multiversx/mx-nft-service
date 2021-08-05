@@ -124,8 +124,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return this.assetsLikesService.isAssetLiked(identifier, byAddress);
   }
 
-  @ResolveField('auction', () => Auction)
-  async auction(
+  @ResolveField('auctions', () => [Auction])
+  async auctions(
     @Parent() asset: Asset,
     @Context()
     { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
@@ -135,7 +135,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
       return null;
     }
     const auctions = await assetAuctionLoader.load(identifier);
-    return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
+    return auctions !== undefined
+      ? auctions.map((auction) => Auction.fromEntity(auction))
+      : null;
   }
 
   private mapResponse<T>(
