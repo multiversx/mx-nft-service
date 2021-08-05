@@ -50,8 +50,8 @@ export class Asset {
   url: string;
   @Field(() => String)
   thumbnailUrl: string;
-  @Field(() => Auction, { nullable: true })
-  auction: Auction;
+  @Field(() => [Auction], { nullable: true })
+  auctions: Auction[];
   @Field(() => [String], { nullable: true })
   tags: string[];
   @Field(() => Int)
