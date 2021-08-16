@@ -47,7 +47,7 @@ type Asset {
   lastSalePrice: Price
   likesCount: Int!
   metadata: Metadata
-  name: String!
+  name: String
   nonce: Int!
   owners: [String!]
   previousOwners: [Owner!]

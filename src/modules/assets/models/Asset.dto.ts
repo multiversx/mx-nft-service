@@ -32,8 +32,8 @@ export class Asset {
   owners: string[];
   @Field(() => [Owner], { nullable: true })
   previousOwners: Owner[];
-  @Field()
-  name!: string;
+  @Field({ nullable: true })
+  name: string;
   @Field()
   royalties: string;
   @Field(() => String)
