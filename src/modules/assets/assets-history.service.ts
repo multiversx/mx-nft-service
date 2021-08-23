@@ -38,7 +38,7 @@ export class AssetsHistoryService {
             index,
             AssetActionEnum.StartedAuction,
             res[index]._source.address,
-            res[index]._source.events[0].topics[2],
+            res[index]._source.events[0].topics[3],
           ),
         );
         break;
@@ -55,7 +55,7 @@ export class AssetsHistoryService {
               this.addHistoryLog(
                 res,
                 index,
-                AssetActionEnum.Bought,
+                AssetActionEnum.Received,
                 res[index]._source.events[0].topics[3].base64ToBech32(),
                 res[index]._source.events[0].topics[2],
               ),
@@ -94,8 +94,8 @@ export class AssetsHistoryService {
             res,
             index,
             AssetActionEnum.ClosedAuction,
-            res[index]._source.events[0].topics[4]?.base64ToBech32() || '',
-            res[index]._source.events[0].topics[3],
+            res[index]._source.events[1].topics[4]?.base64ToBech32() || '',
+            res[index]._source.events[1].topics[3],
           ),
         );
         break;
@@ -125,14 +125,18 @@ export class AssetsHistoryService {
         break;
       }
       case AuctionEventEnum.BuySftEvent: {
+        const count = Buffer.from(
+          nominateVal(parseInt('1')).toString(),
+          'hex',
+        ).toString('base64');
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.address,
-            1,
-            res[index]._source.events[1].topics[5],
+            res[index]._source.events[1].topics[3].base64ToBech32(),
+            count,
+            res[index]._source.events[1].topics[4],
           ),
         );
         break;
@@ -154,7 +158,7 @@ export class AssetsHistoryService {
       address: address,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount
-        ? parseInt(Buffer.from(itemsCount, 'base64').toString('hex'))
+        ? parseInt(Buffer.from(itemsCount, 'base64').toString('hex'), 16)
         : undefined,
       price: price
         ? new Price({

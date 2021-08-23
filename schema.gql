@@ -78,7 +78,7 @@ type AssetHistoryLog {
   action: AssetActionEnum!
   actionDate: String!
   address: String!
-  itemCount: Int!
+  itemCount: Int
   price: Price
 }
 
