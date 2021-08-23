@@ -43,6 +43,18 @@ export class AssetsHistoryService {
         );
         break;
       }
+      case 'ESDTNFTAddQuantity': {
+        historyLog.push(
+          this.addHistoryLog(
+            res,
+            index,
+            AssetActionEnum.Added,
+            res[index]._source.address,
+            res[index]._source.events[0].topics[2],
+          ),
+        );
+        break;
+      }
       case 'ESDTNFTTransfer': {
         if (res[index]._source.events.length < 2) {
           if (
