@@ -59,9 +59,27 @@ type Asset {
   url: String!
 }
 
+enum AssetActionEnum {
+  Added
+  Bought
+  ClosedAuction
+  Created
+  EndedAuction
+  Received
+  StartedAuction
+}
+
 type AssetEdge {
   cursor: String
   node: Asset
+}
+
+type AssetHistoryLog {
+  action: AssetActionEnum!
+  actionDate: String!
+  address: String!
+  itemCount: Int!
+  price: Price
 }
 
 type AssetPageInfo {
@@ -327,6 +345,7 @@ type Price {
 }
 
 type Query {
+  assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   collections(ownerAddress: String!): [String!]!

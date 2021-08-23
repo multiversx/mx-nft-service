@@ -36,9 +36,12 @@ export class AuctionsServiceDb {
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
-    return await this.auctionsRepository.findOne({
-      where: [{ id: id }],
-    });
+    if (id) {
+      return await this.auctionsRepository.findOne({
+        where: [{ id: id }],
+      });
+    }
+    return null;
   }
 
   async insertAuction(auction: AuctionEntity | any): Promise<AuctionEntity> {
@@ -47,8 +50,10 @@ export class AuctionsServiceDb {
 
   async updateAuction(auctionId: number, status: AuctionStatusEnum) {
     let auction = await this.getAuction(auctionId);
-    auction.status = status;
-    return await this.auctionsRepository.save(auction);
+    if (auction) {
+      auction.status = status;
+      return await this.auctionsRepository.save(auction);
+    }
   }
 
   private addOrderBy(

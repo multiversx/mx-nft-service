@@ -2,25 +2,16 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { SearchResponse } from './models/elastic-search';
-import { ElrondTransactionDTO } from './models/elrond-transaction.dto';
+import { HitResponse, SearchResponse } from './models/elastic-search';
 
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
 }
-/**
- * Service used for Elrond Elastic endpoint requests;
- */
+
 @Injectable()
 export class ElrondElasticService {
-  /**
-   * Elastic search client
-   */
   private client: Client;
-  /**
-   * Set the correct host to be used
-   */
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
@@ -29,130 +20,62 @@ export class ElrondElasticService {
     });
   }
 
-  async getDelegationTransactionsCount(
-    contractAddress: string,
-    fromAddress: string,
-  ): Promise<number> {
-    const targetSeconds = Math.floor(Date.now() / 1000) - 10;
+  async getNftHistory(collection: string, nonce: string): Promise<any> {
+    console.log(collection, nonce);
     const body = {
-      size: 0,
+      size: 10,
       query: {
-        bool: {
-          must: [
-            {
-              match: {
-                sender: fromAddress,
-              },
-            },
-            {
-              match: {
-                receiver: contractAddress,
-              },
-            },
-            {
-              match: {
-                status: 'success',
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  lte: targetSeconds,
+        nested: {
+          path: 'events',
+          query: {
+            bool: {
+              must: [
+                {
+                  match: {
+                    'events.topics': collection,
+                  },
                 },
-              },
+                {
+                  match: {
+                    'events.topics': nonce,
+                  },
+                },
+              ],
             },
-          ],
+          },
         },
       },
+      sort: [
+        {
+          timestamp: {
+            order: 'desc',
+          },
+        },
+      ],
     };
     try {
-      const response = await this.client.search({
+      const response: ApiResponse<SearchResponse> = await this.client.search({
         body,
       });
-      return response.body.hits.total.value;
+
+      let responseMap: HitResponse[] = [];
+      response.body.hits.hits.forEach((hit) => {
+        hit._source.events.forEach((event) => {
+          if (event.topics[0] === collection && event.topics[1] === nonce) {
+            responseMap.push(hit);
+          }
+          return;
+        });
+      });
+
+      return response.body.hits.hits;
     } catch (e) {
       this.logger.error('Fail to count transactions', {
         path: 'elrond-elastic.service.getDelegationTransactionsCount',
-        address: fromAddress,
-        contract: contractAddress,
+        address: nonce,
         exception: e.toString(),
       });
       return 0;
-    }
-  }
-
-  /**
-   * Check if an address had transactions with any of the contracts from the list
-   * @param address
-   * @param providerAddresses
-   * @param offset
-   */
-  async getDelegationTransactionsCountWithProviders(
-    address: string,
-    providerAddresses: string[],
-    offset = 0,
-  ): Promise<string[]> {
-    const targetSeconds = Math.floor(Date.now() / 1000) - 10;
-    const size = 200;
-    const body = {
-      from: offset,
-      size,
-      _source: ['receiver'],
-      query: {
-        bool: {
-          must: [
-            {
-              match: {
-                sender: address,
-              },
-            },
-            {
-              match: {
-                status: 'success',
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  lte: targetSeconds,
-                },
-              },
-            },
-          ],
-          should: providerAddresses.map((receiver) => {
-            return {
-              match: {
-                receiver,
-              },
-            };
-          }),
-        },
-      },
-    };
-    try {
-      const response: ApiResponse<SearchResponse<ElrondTransactionDTO>> =
-        await this.client.search({
-          body,
-        });
-      const responseScAddresses = response.body.hits.hits
-        .map((o) => o?._source?.receiver)
-        .filter((el) => !!el);
-      let newAddresses = [];
-      if (response.body.hits.total['value'] > offset + size) {
-        newAddresses = await this.getDelegationTransactionsCountWithProviders(
-          address,
-          providerAddresses,
-          offset + size,
-        );
-      }
-      return [...responseScAddresses, ...newAddresses];
-    } catch (e) {
-      this.logger.error('Fail to count transactions for all providers', {
-        path: 'elrond-elastic.service.getDelegationTransactionsCount',
-        address,
-        exception: e.toString(),
-      });
-      return [];
     }
   }
 }

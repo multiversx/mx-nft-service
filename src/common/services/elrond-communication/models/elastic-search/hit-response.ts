@@ -1,9 +1,9 @@
+import { SourceResponse } from './source-response';
 
-export interface HitResponse<T> {
+export interface HitResponse {
   _index: string;
   _type: string;
   _id: string;
   _score: string;
-  _source: T;
-
+  _source: SourceResponse;
 }
