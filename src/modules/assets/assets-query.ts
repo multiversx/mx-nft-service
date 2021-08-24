@@ -1,3 +1,5 @@
+import { NftTypeEnum } from './models/NftTypes.enum';
+
 export class AssetsQuery {
   private query: string = '';
 
@@ -19,6 +21,13 @@ export class AssetsQuery {
     if (!collection) return this;
     if (this.query === '') this.query = `?collection=${collection}`;
     else this.query = `${this.query}&collection=${collection}`;
+    return this;
+  }
+
+  addType(type: NftTypeEnum): this {
+    if (!type) return this;
+    if (this.query === '') this.query = `?type=${type}`;
+    else this.query = `${this.query}&type=${type}`;
     return this;
   }
 

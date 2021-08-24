@@ -1,4 +1,5 @@
 import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
+import { NftTypeEnum } from './assets/models/NftTypes.enum';
 
 export enum Operator {
   AND,
@@ -67,4 +68,6 @@ export class AssetsFilter {
   tags: [string];
   @Field(() => String, { nullable: true })
   likedByAddress: string;
+  @Field(() => NftTypeEnum, { nullable: true })
+  type: NftTypeEnum;
 }
