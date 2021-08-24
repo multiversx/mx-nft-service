@@ -3,7 +3,7 @@ import { ElrondElasticService } from 'src/common/services/elrond-communication/e
 import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
-import { AuctionEventEnum } from './models/AuctionEvent.enum';
+import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class AssetsHistoryService {
 
   private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
     switch (res[index]._source.events[0].identifier) {
-      case 'auction_token_event': {
+      case AuctionEventEnum.AuctionTokenEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
@@ -43,7 +43,7 @@ export class AssetsHistoryService {
         );
         break;
       }
-      case 'ESDTNFTAddQuantity': {
+      case NftEventEnum.ESDTNFTAddQuantity: {
         historyLog.push(
           this.addHistoryLog(
             res,
@@ -55,7 +55,7 @@ export class AssetsHistoryService {
         );
         break;
       }
-      case 'ESDTNFTTransfer': {
+      case NftEventEnum.ESDTNFTTransfer: {
         if (res[index]._source.events.length < 2) {
           if (
             !Object.values(AuctionEventEnum).includes(
@@ -78,7 +78,7 @@ export class AssetsHistoryService {
         }
         break;
       }
-      case 'ESDTNFTCreate': {
+      case NftEventEnum.ESDTNFTCreate: {
         historyLog.push(
           this.addHistoryLog(
             res,
