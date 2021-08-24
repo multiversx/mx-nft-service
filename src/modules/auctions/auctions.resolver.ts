@@ -17,6 +17,7 @@ import {
   BidActionArgs,
   BuySftActionArgs,
   AuctionTypeEnum,
+  AuctionStatusEnum,
 } from './models';
 import { AssetsService } from '../assets/assets.service';
 import { elrondConfig } from 'src/config';
@@ -32,6 +33,8 @@ import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
+import { ElrondElasticService } from 'src/common/services/elrond-communication/elrond-elastic.service';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
@@ -60,30 +63,36 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @UseGuards(GqlAuthGuard)
   async endAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.endAuction(auctionId);
+    return await this.nftAbiService.endAuction(user.publicKey, auctionId);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async bid(@Args('input') input: BidActionArgs): Promise<TransactionNode> {
-    return await this.nftAbiService.bid(input);
+  async bid(
+    @Args('input') input: BidActionArgs,
+    @User() user: any,
+  ): Promise<TransactionNode> {
+    return await this.nftAbiService.bid(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async buySft(
     @Args('input') input: BuySftActionArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.buySft(input);
+    return await this.nftAbiService.buySft(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async withdraw(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(auctionId);
+    return await this.nftAbiService.withdraw(user.publicKey, auctionId);
   }
 
   @Query(() => AuctionResponse)
@@ -112,12 +121,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { identifier } = auction;
-
-    return await this.assetsService.getAssetByIdentifierAndAddress(
-      elrondConfig.nftMarketplaceAddress,
-      identifier,
-    );
+    const { identifier, status } = auction;
+    return status !== AuctionStatusEnum.Closed &&
+      status !== AuctionStatusEnum.Ended
+      ? await this.assetsService.getAssetByIdentifierAndAddress(
+          elrondConfig.nftMarketplaceAddress,
+          identifier,
+        )
+      : undefined;
   }
 
   @ResolveField('topBid', () => Price)
