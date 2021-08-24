@@ -9,7 +9,6 @@ import {
   Context,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/account.dto';
 import { AssetsService } from './assets.service';
 import {
   Asset,
