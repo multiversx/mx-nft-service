@@ -121,15 +121,24 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { identifier, status } = auction;
-    if (
-      status !== AuctionStatusEnum.Closed &&
+    const { identifier, status, topBidder, ownerAddress } = auction;
+    return await this.assetsService.getAssetByIdentifierAndAddress(
+      this.getAssetAddress(status, ownerAddress, topBidder),
+      identifier,
+    );
+  }
+
+  private getAssetAddress(
+    status: AuctionStatusEnum,
+    ownerAddress: string,
+    topBidder: Account,
+  ): string {
+    return status !== AuctionStatusEnum.Closed &&
       status !== AuctionStatusEnum.Ended
-    )
-      return await this.assetsService.getAssetByIdentifierAndAddress(
-        elrondConfig.nftMarketplaceAddress,
-        identifier,
-      );
+      ? elrondConfig.nftMarketplaceAddress
+      : status === AuctionStatusEnum.Closed
+      ? ownerAddress
+      : topBidder.address;
   }
 
   @ResolveField('topBid', () => Price)
