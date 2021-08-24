@@ -113,14 +113,16 @@ export class AssetsHistoryService {
         break;
       }
       case AuctionEventEnum.EndAuctionEvent: {
+        const [, , , itemsCount, address, price] =
+          res[index]._source.events[1].topics;
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.events[1].topics[4].base64ToBech32(),
+            address.base64ToBech32(),
             res[index]._source.events[0].topics[2],
-            res[index]._source.events[1].topics[5],
+            price,
           ),
         );
         historyLog.push(
@@ -128,9 +130,9 @@ export class AssetsHistoryService {
             res,
             index,
             AssetActionEnum.EndedAuction,
-            res[index]._source.events[1].topics[4].base64ToBech32(),
-            res[index]._source.events[1].topics[3],
-            res[index]._source.events[1].topics[5],
+            address.base64ToBech32(),
+            itemsCount,
+            price,
           ),
         );
 

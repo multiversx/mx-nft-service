@@ -21,7 +21,6 @@ export class ElrondElasticService {
   }
 
   async getNftHistory(collection: string, nonce: string): Promise<any> {
-    console.log(collection, nonce);
     const body = {
       size: 10,
       query: {
@@ -60,15 +59,14 @@ export class ElrondElasticService {
 
       let responseMap: HitResponse[] = [];
       response.body.hits.hits.forEach((hit) => {
-        hit._source.events.forEach((event) => {
+        for (const event of hit._source.events) {
           if (event.topics[0] === collection && event.topics[1] === nonce) {
             responseMap.push(hit);
+            break;
           }
-          return;
-        });
+        }
       });
-
-      return response.body.hits.hits;
+      return responseMap;
     } catch (e) {
       this.logger.error('Fail to count transactions', {
         path: 'elrond-elastic.service.getDelegationTransactionsCount',
