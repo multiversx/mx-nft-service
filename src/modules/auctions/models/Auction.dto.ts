@@ -35,7 +35,7 @@ export class Auction {
   @Field(() => Int, { nullable: true })
   availableTokens: number;
 
-  @Field(() => Asset)
+  @Field(() => Asset, { nullable: true })
   asset: Asset;
 
   @Field(() => Price)
