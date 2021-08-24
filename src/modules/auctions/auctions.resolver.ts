@@ -128,7 +128,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
           elrondConfig.nftMarketplaceAddress,
           identifier,
         )
-      : undefined;
+      : await this.assetsService.getAssetByIdentifier(identifier);
   }
 
   @ResolveField('topBid', () => Price)
