@@ -54,7 +54,10 @@ export class NftMarketplaceAbiService {
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
 
-  async bid(args: BidActionArgs): Promise<TransactionNode> {
+  async bid(
+    ownerAddress: string,
+    args: BidActionArgs,
+  ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let bid = contract.call({
       func: new ContractFunction('bid'),
@@ -66,10 +69,13 @@ export class NftMarketplaceAbiService {
       ],
       gasLimit: new GasLimit(gas.bid),
     });
-    return bid.toPlainObject();
+    return bid.toPlainObject(new Address(ownerAddress));
   }
 
-  async withdraw(auctionId: number): Promise<TransactionNode> {
+  async withdraw(
+    ownerAddress: string,
+    auctionId: number,
+  ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
 
     let withdraw = contract.call({
@@ -78,10 +84,13 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.withdraw),
     });
-    return withdraw.toPlainObject();
+    return withdraw.toPlainObject(new Address(ownerAddress));
   }
 
-  async endAuction(auctionId: number): Promise<TransactionNode> {
+  async endAuction(
+    ownerAddress: string,
+    auctionId: number,
+  ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
@@ -89,10 +98,13 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.endAuction),
     });
-    return endAuction.toPlainObject();
+    return endAuction.toPlainObject(new Address(ownerAddress));
   }
 
-  async buySft(args: BuySftActionArgs): Promise<TransactionNode> {
+  async buySft(
+    ownerAddress: string,
+    args: BuySftActionArgs,
+  ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
@@ -104,7 +116,7 @@ export class NftMarketplaceAbiService {
       ],
       gasLimit: new GasLimit(gas.endAuction),
     });
-    return buySftAfterEndAuction.toPlainObject();
+    return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
   }
 
   async getAuctionQuery(auctionId: number): Promise<AuctionAbi> {
