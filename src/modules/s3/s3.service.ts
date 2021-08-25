@@ -10,8 +10,7 @@ export class S3Service {
   ) {}
   AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 
-  async upload(fileData, filename) {
-    const readStream = await fileData.createReadStream();
+  async upload(readStream, filename) {
     const bucketS3 = process.env.AWS_S3_BUCKET_NAME;
     return await this.uploadS3(readStream, bucketS3, filename);
   }
