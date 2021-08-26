@@ -122,11 +122,7 @@ export class AssetsService {
     args: CreateNftArgs,
   ): Promise<TransactionNode> {
     const file = await args.file;
-    const readStream = await file.createReadStream();
-    const fileData = await this.pinataService.uploadFile(
-      readStream,
-      file.filename,
-    );
+    const fileData = await this.pinataService.uploadFile(file);
     const fileMetadata = new FileContent({
       description: args.attributes.description,
       fileType: file.mimetype,
@@ -135,8 +131,9 @@ export class AssetsService {
     });
     const asset = await this.pinataService.uploadText(fileMetadata);
 
-    await this.s3Service.upload(readStream, fileData.hash);
-    await this.s3Service.upload(fileMetadata, asset.hash);
+    await this.s3Service.upload(file, fileData.hash);
+    await this.s3Service.uploadText(fileMetadata, asset.hash);
+
     const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
 
     const contract = getSmartContract(ownerAddress);

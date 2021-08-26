@@ -10,11 +10,12 @@ const FormData = require('form-data');
 export class PinataService {
   constructor() {}
 
-  async uploadFile(readStream: any, filename): Promise<UploadToIpfsResult> {
+  async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/pinning/pinFileToIPFS`;
+    const readStream = await file.createReadStream();
 
     const data = new FormData();
-    data.append('file', readStream, filename);
+    data.append('file', readStream, file.filename);
 
     try {
       const response = await axios.post(url, data, {
