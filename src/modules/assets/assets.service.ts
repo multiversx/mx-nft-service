@@ -13,7 +13,9 @@ import { gas } from 'src/config';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
 import { nominateVal } from '../formatters';
+import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
+import { S3Service } from '../s3/s3.service';
 import { TransactionNode } from '../transaction';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from './assets-query';
@@ -29,6 +31,7 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private pinataService: PinataService,
+    private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
   ) {}
 
@@ -120,12 +123,17 @@ export class AssetsService {
   ): Promise<TransactionNode> {
     const file = await args.file;
     const fileData = await this.pinataService.uploadFile(file);
-    const asset = await this.pinataService.uploadText({
+    const fileMetadata = new FileContent({
       description: args.attributes.description,
       fileType: file.mimetype,
       fileUri: fileData.url,
       fileName: file.filename,
     });
+    const asset = await this.pinataService.uploadText(fileMetadata);
+
+    await this.s3Service.upload(file, fileData.hash);
+    await this.s3Service.uploadText(fileMetadata, asset.hash);
+
     const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
 
     const contract = getSmartContract(ownerAddress);

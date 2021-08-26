@@ -9,6 +9,7 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import { AssetsHistoryResolver } from './assets-history.resolver';
 import { AssetsHistoryService } from './assets-history.service';
+import { S3Service } from '../s3/s3.service';
 
 @Module({
   providers: [
@@ -18,12 +19,13 @@ import { AssetsHistoryService } from './assets-history.service';
     AssetsResolver,
     AssetsHistoryResolver,
     RedisCacheService,
+    S3Service,
   ],
   imports: [
     ElrondCommunicationModule,
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
-  exports: [AssetsService, AssetsLikesService, RedisCacheService],
+  exports: [AssetsService, AssetsLikesService, RedisCacheService, S3Service],
 })
 export class AssetsModuleGraph {}

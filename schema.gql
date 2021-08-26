@@ -96,6 +96,7 @@ input AssetsFilter {
   likedByAddress: String
   ownerAddress: String
   tags: [String!]
+  type: NftTypeEnum
 }
 
 type AssetsResponse {
