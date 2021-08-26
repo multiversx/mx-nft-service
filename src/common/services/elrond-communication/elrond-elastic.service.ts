@@ -68,8 +68,8 @@ export class ElrondElasticService {
       });
       return responseMap;
     } catch (e) {
-      this.logger.error('Fail to count transactions', {
-        path: 'elrond-elastic.service.getDelegationTransactionsCount',
+      this.logger.error('Fail to get logs', {
+        path: 'elrond-elastic.service.getNftHistory',
         address: nonce,
         exception: e.toString(),
       });

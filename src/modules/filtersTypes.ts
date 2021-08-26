@@ -11,6 +11,7 @@ export enum Operation {
   IN,
   LIKE,
   GE,
+  LE,
 }
 
 export enum Sort {

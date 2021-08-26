@@ -284,6 +284,7 @@ enum Operation {
   EQ
   GE
   IN
+  LE
   LIKE
 }
 
