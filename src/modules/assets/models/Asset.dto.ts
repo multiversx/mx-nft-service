@@ -18,7 +18,7 @@ export class Asset {
   collection!: string;
   @Field(() => Int)
   nonce!: number;
-  @Field(() => NftTypeEnum)
+  @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
   @Field(() => String)
   identifier!: string;

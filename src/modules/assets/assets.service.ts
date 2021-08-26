@@ -57,7 +57,7 @@ export class AssetsService {
       .addCreator(filters?.creatorAddress)
       .addTags(filters?.tags)
       .addCollection(filters?.collection)
-      .addType(filters.type)
+      .addType(filters?.type)
       .addPageSize(offset, limit)
       .build();
 

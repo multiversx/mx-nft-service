@@ -54,7 +54,7 @@ type Asset {
   royalties: String!
   tags: [String!]
   thumbnailUrl: String!
-  type: NftTypeEnum!
+  type: NftTypeEnum
   uris: [String!]!
   url: String!
 }
@@ -284,6 +284,7 @@ enum Operation {
   EQ
   GE
   IN
+  LE
   LIKE
 }
 

@@ -68,6 +68,6 @@ export class OrdersResolver extends BaseResolver(Order) {
   ) {
     const { auctionId } = order;
     const auctions = await auctionLoaderById.load(auctionId);
-    return auctions !== undefined ? auctions[0] : null;
+    return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
   }
 }

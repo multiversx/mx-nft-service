@@ -44,6 +44,9 @@ export default class WhereBuilder<Entity> {
       case Operation.GE:
         this.params[paramName] = `%${filter.values[0]}%`;
         return `${filter.field} >= :${paramName}`;
+      case Operation.LE:
+        this.params[paramName] = `%${filter.values[0]}%`;
+        return `${filter.field} <= :${paramName}`;
       default:
         throw new Error(`Unknown filter operation: ${filter.op}`);
     }
