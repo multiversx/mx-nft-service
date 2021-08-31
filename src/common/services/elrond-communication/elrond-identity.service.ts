@@ -29,9 +29,6 @@ export class ElrondIdentityService {
         profiler.duration,
       );
       const accounts = response.data.info;
-      Object.keys(accounts).map(function (key, index) {
-        return accounts[key];
-      });
       return Object.keys(accounts).map(function (key, index) {
         return accounts[key];
       });
