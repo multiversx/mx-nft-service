@@ -37,6 +37,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
+import { OrdersProvider } from 'src/db/orders/orders.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -46,6 +47,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private assetsService: AssetsService,
     private ordersService: OrdersService,
     private accountsProvider: AccountsProvider,
+    private ordersProvider: OrdersProvider,
   ) {
     super();
   }
@@ -134,22 +136,26 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
     const { id } = auction;
-    return await this.ordersService.getTopBid(id);
+    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+
+    return activeOrders?.length > 0
+      ? Price.fromEntity(activeOrders[activeOrders.length - 1])
+      : null;
   }
 
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
     const { id } = auction;
-    const activeOrders = await this.ordersService.getActiveOrdersForAuction(id);
 
-    if (activeOrders?.length <= 0) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      activeOrders[activeOrders.length - 1].ownerAddress,
-    );
-    return Account.fromEntity(
-      account,
-      activeOrders[activeOrders.length - 1].ownerAddress,
-    );
+    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+    return activeOrders?.length > 0
+      ? Account.fromEntity(
+          await this.accountsProvider.getAccountByAddress(
+            activeOrders[activeOrders.length - 1].ownerAddress,
+          ),
+          activeOrders[activeOrders.length - 1].ownerAddress,
+        )
+      : null;
   }
 
   @ResolveField('availableTokens', () => Int)
