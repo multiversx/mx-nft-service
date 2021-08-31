@@ -41,17 +41,15 @@ export class Account {
   }
 
   static fromEntity(account: AccountIdentity, address: string) {
-    return account
-      ? new Account({
-          address: address,
-          description: account?.description,
-          profile: account?.profile,
-          cover: account?.cover,
-          herotag: account?.herotag,
-          socialLinks: account?.socialLinks?.map(
-            (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
-          ),
-        })
-      : null;
+    return new Account({
+      address: address,
+      description: account?.description,
+      profile: account?.profile,
+      cover: account?.cover,
+      herotag: account?.herotag,
+      socialLinks: account?.socialLinks?.map(
+        (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
+      ),
+    });
   }
 }

@@ -6,7 +6,6 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { Price } from './Price.dto';
-import { Owner } from './Owner.dto';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
@@ -35,8 +34,6 @@ export class Asset {
   ownersAddresses: string[];
   @Field(() => [Account], { nullable: true })
   owners: Account[];
-  @Field(() => [Owner], { nullable: true })
-  previousOwners: Owner[];
   @Field({ nullable: true })
   name: string;
   @Field()

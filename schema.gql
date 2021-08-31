@@ -57,7 +57,6 @@ type Asset {
   nonce: Int!
   owners: [Account!]
   ownersAddresses: [String!]
-  previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
   thumbnailUrl: String!
@@ -334,12 +333,6 @@ type OrdersResponse {
   edges: [OrderEdge!]
   pageData: PageData
   pageInfo: OrderPageInfo
-}
-
-type Owner {
-  account: Account
-  endDate: DateTime!
-  startDate: DateTime!
 }
 
 type PageData {

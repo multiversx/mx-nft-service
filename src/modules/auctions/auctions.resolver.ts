@@ -141,11 +141,15 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBidder(@Parent() auction: Auction) {
     const { id } = auction;
     const activeOrders = await this.ordersService.getActiveOrdersForAuction(id);
-    return activeOrders?.length > 0
-      ? new Account({
-          address: activeOrders[activeOrders.length - 1].ownerAddress,
-        })
-      : undefined;
+
+    if (activeOrders?.length <= 0) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      activeOrders[activeOrders.length - 1].ownerAddress,
+    );
+    return Account.fromEntity(
+      account,
+      activeOrders[activeOrders.length - 1].ownerAddress,
+    );
   }
 
   @ResolveField('availableTokens', () => Int)
