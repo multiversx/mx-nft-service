@@ -15,7 +15,7 @@ export class OrdersProvider {
     return await this.dataLoader.load(auctionId);
   }
 
-  batchOrders = async (auctionIds: number[]) => {
+  private batchOrders = async (auctionIds: number[]) => {
     const orders = await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')
