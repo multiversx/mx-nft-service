@@ -348,7 +348,6 @@ type Price {
 }
 
 type Query {
-  accounts(address: String, pagination: ConnectionArgs): AccountResponse!
   assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!

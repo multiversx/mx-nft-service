@@ -31,26 +31,6 @@ export class AccountsResolver {
   }
 
   @Query(() => AccountResponse)
-  async accounts(
-    @Args({ name: 'address', type: () => String, nullable: true })
-    address,
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
-  ): Promise<AccountResponse> {
-    const { limit, offset } = pagination.pagingParams();
-    const [followers, count] = await this.accountsService.getFollowers(address);
-    const page = connectionFromArraySlice(followers, pagination, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
-  }
-
-  @Query(() => AccountResponse)
   async followers(
     @Args({ name: 'address', type: () => String, nullable: true })
     address,
