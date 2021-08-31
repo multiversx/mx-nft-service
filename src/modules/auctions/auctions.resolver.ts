@@ -25,7 +25,6 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
-import { OrdersService } from '../orders/order.service';
 import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
@@ -45,7 +44,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
     private assetsService: AssetsService,
-    private ordersService: OrdersService,
     private accountsProvider: AccountsProvider,
     private ordersProvider: OrdersProvider,
   ) {
@@ -162,8 +160,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const orders = await this.ordersService.getActiveOrdersForAuction(id);
-      const availableTokens = nrAuctionedTokens - orders?.length;
+      const orders = await this.ordersProvider.getOrderByAuctionId(id);
+      const availableTokens =
+        nrAuctionedTokens - orders?.length || nrAuctionedTokens;
       return availableTokens;
     }
     return nrAuctionedTokens;
