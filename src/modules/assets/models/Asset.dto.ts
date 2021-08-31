@@ -6,11 +6,11 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { Price } from './Price.dto';
-import { Owner } from './Owner.dto';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
+import { Account } from 'src/modules/accounts/models';
 
 @ObjectType()
 export class Asset {
@@ -28,10 +28,12 @@ export class Asset {
   hash: string;
   @Field(() => String)
   creatorAddress: string;
+  @Field({ nullable: true })
+  creator: Account;
   @Field(() => [String], { nullable: true })
-  owners: string[];
-  @Field(() => [Owner], { nullable: true })
-  previousOwners: Owner[];
+  ownersAddresses: string[];
+  @Field(() => [Account], { nullable: true })
+  owners: Account[];
   @Field({ nullable: true })
   name: string;
   @Field()
@@ -73,7 +75,7 @@ export class Asset {
           nonce: nft.nonce ?? 0,
           identifier: nft.identifier,
           creatorAddress: nft.creator ?? '',
-          owners: nft.owners?.map((account) => account.address),
+          ownersAddresses: nft.owners?.map((account) => account.address),
           attributes: nft.attributes ?? '',
           lastSale: new Date(),
           creationDate: nft.timestamp,

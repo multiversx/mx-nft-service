@@ -1,1 +1,2 @@
-export * from './account.dto'
+export * from './Account.dto';
+export * from './SocialLink.dto';

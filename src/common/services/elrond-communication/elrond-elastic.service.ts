@@ -3,6 +3,8 @@ import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { HitResponse, SearchResponse } from './models/elastic-search';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
+import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 
 export interface AddressTransactionCount {
   contractAddress: string;
@@ -21,6 +23,9 @@ export class ElrondElasticService {
   }
 
   async getNftHistory(collection: string, nonce: string): Promise<any> {
+    const profiler = new PerformanceProfiler(
+      `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
+    );
     const body = {
       size: 10,
       query: {
@@ -57,6 +62,12 @@ export class ElrondElasticService {
         body,
       });
 
+      profiler.stop();
+      MetricsCollector.setExternalCall(
+        ElrondElasticService.name,
+        'getNftHistory',
+        profiler.duration,
+      );
       let responseMap: HitResponse[] = [];
       response.body.hits.hits.forEach((hit) => {
         for (const event of hit._source.events) {

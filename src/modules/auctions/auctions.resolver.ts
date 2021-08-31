@@ -10,7 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/account.dto';
+import { Account } from '../accounts/models/Account.dto';
 import {
   Auction,
   CreateAuctionArgs,
@@ -25,7 +25,6 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
-import { OrdersService } from '../orders/order.service';
 import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
@@ -33,11 +32,11 @@ import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
-import { ElrondElasticService } from 'src/common/services/elrond-communication/elrond-elastic.service';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
+import { AccountsProvider } from '../accounts/accounts.loader';
+import { OrdersProvider } from 'src/db/orders/orders.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -45,7 +44,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
     private assetsService: AssetsService,
-    private ordersService: OrdersService,
+    private accountsProvider: AccountsProvider,
+    private ordersProvider: OrdersProvider,
   ) {
     super();
   }
@@ -134,26 +134,35 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
     const { id } = auction;
-    return await this.ordersService.getTopBid(id);
+    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+
+    return activeOrders?.length > 0
+      ? Price.fromEntity(activeOrders[activeOrders.length - 1])
+      : null;
   }
 
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
     const { id } = auction;
-    const activeOrders = await this.ordersService.getActiveOrdersForAuction(id);
+
+    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
     return activeOrders?.length > 0
-      ? new Account({
-          address: activeOrders[activeOrders.length - 1].ownerAddress,
-        })
-      : undefined;
+      ? Account.fromEntity(
+          await this.accountsProvider.getAccountByAddress(
+            activeOrders[activeOrders.length - 1].ownerAddress,
+          ),
+          activeOrders[activeOrders.length - 1].ownerAddress,
+        )
+      : null;
   }
 
   @ResolveField('availableTokens', () => Int)
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const orders = await this.ordersService.getActiveOrdersForAuction(id);
-      const availableTokens = nrAuctionedTokens - orders?.length;
+      const orders = await this.ordersProvider.getOrderByAuctionId(id);
+      const availableTokens =
+        nrAuctionedTokens - orders?.length || nrAuctionedTokens;
       return availableTokens;
     }
     return nrAuctionedTokens;
@@ -170,5 +179,16 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     if (!id) return null;
     const orderEntities = await auctionOrdersLoader.load(id);
     return orderEntities?.map((element) => Order.fromEntity(element));
+  }
+
+  @ResolveField('owner', () => Account)
+  async owner(@Parent() auction: Auction) {
+    const { ownerAddress } = auction;
+
+    if (!ownerAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      ownerAddress,
+    );
+    return Account.fromEntity(account, ownerAddress);
   }
 }

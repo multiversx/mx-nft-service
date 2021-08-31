@@ -1,10 +1,23 @@
 import { Module } from '@nestjs/common';
-import { ElrondProxyService } from './elrond-proxy.service';
-import { ElrondApiService } from './elrond-api.service';
-import { ElrondElasticService } from './elrond-elastic.service';
+import {
+  ElrondApiService,
+  ElrondElasticService,
+  ElrondIdentityService,
+  ElrondProxyService,
+} from 'src/common';
 
 @Module({
-  providers: [ElrondProxyService, ElrondApiService, ElrondElasticService],
-  exports: [ElrondProxyService, ElrondApiService, ElrondElasticService],
+  providers: [
+    ElrondProxyService,
+    ElrondApiService,
+    ElrondElasticService,
+    ElrondIdentityService,
+  ],
+  exports: [
+    ElrondProxyService,
+    ElrondApiService,
+    ElrondElasticService,
+    ElrondIdentityService,
+  ],
 })
 export class ElrondCommunicationModule {}

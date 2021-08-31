@@ -31,12 +31,15 @@ import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
+import { Account } from '../accounts/models/Account.dto';
+import { AccountsProvider } from '../accounts/accounts.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
+    private accountsProvider: AccountsProvider,
   ) {
     super();
   }
@@ -137,6 +140,17 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return auctions !== undefined
       ? auctions.map((auction) => Auction.fromEntity(auction))
       : null;
+  }
+
+  @ResolveField('creator', () => Account)
+  async creator(@Parent() asset: Asset) {
+    const { creatorAddress } = asset;
+
+    if (!creatorAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      creatorAddress,
+    );
+    return Account.fromEntity(account, creatorAddress);
   }
 
   private mapResponse<T>(

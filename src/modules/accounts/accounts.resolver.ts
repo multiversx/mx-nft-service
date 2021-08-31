@@ -1,4 +1,4 @@
-import { Account } from './models/account.dto';
+import { Account } from './models/Account.dto';
 import { Mutation, Query, Resolver, Args } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
 import { FollowEntityArgs, UnfollowEntityArgs } from './CreateAccountArgs';

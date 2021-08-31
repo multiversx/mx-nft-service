@@ -73,48 +73,12 @@ export class OrdersService {
     );
   }
 
-  async getTopBid(auctionId: number): Promise<Price> {
-    const cacheKey = this.getTopBidCacheKey(auctionId);
-    const getTopBid = () => this.getPrice(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getTopBid,
-      cacheConfig.ordersttl,
-    );
-  }
-
-  async getActiveOrdersForAuction(auctionId: number): Promise<Order[]> {
-    const cacheKey = this.getAuctionOrdersCacheKey(auctionId);
-    const getActiveOrder = () => this.getActiveOrders(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getActiveOrder,
-      cacheConfig.ordersttl,
-    );
-  }
-
   private async getMappedOrders(queryRequest: QueryRequest) {
     const [ordersEntities, count] = await this.orderServiceDb.getOrders(
       queryRequest,
     );
 
     return [ordersEntities.map((order) => Order.fromEntity(order)), count];
-  }
-
-  private async getPrice(auctionId: number) {
-    const activeOrders = await this.orderServiceDb.getActiveOrdersForAuction(
-      auctionId,
-    );
-    return Price.fromEntity(activeOrders[activeOrders.length - 1]);
-  }
-
-  private async getActiveOrders(auctionId: number) {
-    const orderEntities = await this.orderServiceDb.getActiveOrdersForAuction(
-      auctionId,
-    );
-    return orderEntities.map((order) => Order.fromEntity(order));
   }
 
   private getAuctionsCacheKey(request: QueryRequest) {

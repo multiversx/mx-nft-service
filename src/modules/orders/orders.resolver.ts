@@ -8,7 +8,7 @@ import {
   Context,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/account.dto';
+import { Account } from '../accounts/models/Account.dto';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { Order } from './models';
@@ -18,10 +18,14 @@ import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
+import { AccountsProvider } from '../accounts/accounts.loader';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(private ordersService: OrdersService) {
+  constructor(
+    private ordersService: OrdersService,
+    private accountsProvider: AccountsProvider,
+  ) {
     super();
   }
 
@@ -54,10 +58,10 @@ export class OrdersResolver extends BaseResolver(Order) {
     const { ownerAddress } = order;
 
     if (!ownerAddress) return null;
-    const owner = new Account({
-      address: ownerAddress,
-    });
-    return owner;
+    const account = await this.accountsProvider.getAccountByAddress(
+      ownerAddress,
+    );
+    return Account.fromEntity(account, ownerAddress);
   }
 
   @ResolveField('auction', () => Auction)
