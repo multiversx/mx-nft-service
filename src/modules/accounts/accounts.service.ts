@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FollowersServiceDb } from '../../db/followers/followers.service';
-import { Account } from './models/account.dto';
+import { Account } from './models/Account.dto';
 import { FollowerEntity } from 'src/db/followers/follower.entity';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';

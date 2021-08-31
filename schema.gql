@@ -3,12 +3,17 @@
 # ------------------------------------------------------
 
 type Account {
-  address: ID!
+  address: ID
   assets: [Asset!]
   auctions: [Auction!]
+  cover: String
+  description: String
   followers: [Account!]
   following: [Account!]
+  herotag: String
   orders: [Order!]
+  profile: String
+  socialLinks: [SocialLink!]
 }
 
 type AccountEdge {
@@ -39,6 +44,7 @@ type Asset {
   balance: String
   collection: ID!
   creationDate: String!
+  creator: Account
   creatorAddress: String!
   hash: String
   identifier: String!
@@ -49,7 +55,8 @@ type Asset {
   metadata: Metadata
   name: String
   nonce: Int!
-  owners: [String!]
+  owners: [Account!]
+  ownersAddresses: [String!]
   previousOwners: [Owner!]
   royalties: String!
   tags: [String!]
@@ -122,6 +129,7 @@ type Auction {
   nonce: Int!
   nrAuctionedTokens: Int
   orders: [Order!]
+  owner: Account
   ownerAddress: String
   startDate: String!
   status: AuctionStatusEnum
@@ -347,6 +355,7 @@ type Price {
 }
 
 type Query {
+  accounts(address: String, pagination: ConnectionArgs): AccountResponse!
   assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
@@ -364,6 +373,11 @@ input SetNftRolesArgs {
   addressToTransfer: String!
   collection: String!
   roles: [String!]!
+}
+
+type SocialLink {
+  type: ID
+  url: String
 }
 
 enum Sort {

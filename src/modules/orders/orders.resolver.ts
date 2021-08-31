@@ -8,7 +8,7 @@ import {
   Context,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/account.dto';
+import { Account } from '../accounts/models/Account.dto';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { Order } from './models';

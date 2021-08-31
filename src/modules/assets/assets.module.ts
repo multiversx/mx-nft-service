@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { AssetsService } from './assets.service';
 import { AssetsResolver } from './assets.resolver';
@@ -10,6 +10,7 @@ import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import { AssetsHistoryResolver } from './assets-history.resolver';
 import { AssetsHistoryService } from './assets-history.service';
 import { S3Service } from '../s3/s3.service';
+import { AccountsModuleGraph } from '../accounts/accounts.module';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { S3Service } from '../s3/s3.service';
   ],
   imports: [
     ElrondCommunicationModule,
+    forwardRef(() => AccountsModuleGraph),
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],

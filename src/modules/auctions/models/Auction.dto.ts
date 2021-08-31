@@ -1,6 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import { Account } from 'src/modules/accounts/models/account.dto';
+import { Account } from 'src/modules/accounts/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
 import { AuctionStatusEnum } from '.';
@@ -13,6 +13,9 @@ export class Auction {
 
   @Field(() => String, { nullable: true })
   ownerAddress: string;
+
+  @Field(() => Account, { nullable: true })
+  owner: Account;
 
   @Field(() => AuctionStatusEnum, { nullable: true })
   status: AuctionStatusEnum;

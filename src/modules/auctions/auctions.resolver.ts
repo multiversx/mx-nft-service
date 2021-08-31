@@ -10,7 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/account.dto';
+import { Account } from '../accounts/models/Account.dto';
 import {
   Auction,
   CreateAuctionArgs,
@@ -33,11 +33,10 @@ import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
-import { ElrondElasticService } from 'src/common/services/elrond-communication/elrond-elastic.service';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
+import { AccountsProvider } from '../accounts/accounts.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -46,6 +45,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private assetsService: AssetsService,
     private ordersService: OrdersService,
+    private accountsProvider: AccountsProvider,
   ) {
     super();
   }
@@ -170,5 +170,16 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     if (!id) return null;
     const orderEntities = await auctionOrdersLoader.load(id);
     return orderEntities?.map((element) => Order.fromEntity(element));
+  }
+
+  @ResolveField('owner', () => Account)
+  async owner(@Parent() auction: Auction) {
+    const { ownerAddress } = auction;
+
+    if (!ownerAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      ownerAddress,
+    );
+    return Account.fromEntity(account, ownerAddress);
   }
 }
