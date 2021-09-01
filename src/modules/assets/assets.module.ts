@@ -11,6 +11,7 @@ import { AssetsHistoryResolver } from './assets-history.resolver';
 import { AssetsHistoryService } from './assets-history.service';
 import { S3Service } from '../s3/s3.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
+import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 
 @Module({
   providers: [
@@ -25,6 +26,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
   imports: [
     ElrondCommunicationModule,
     forwardRef(() => AccountsModuleGraph),
+    forwardRef(() => AuctionsModuleDb),
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
