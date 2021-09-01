@@ -11,6 +11,7 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
+import { ElrondApiService } from 'src/common';
 const hash = require('object-hash');
 
 @Injectable()
@@ -18,6 +19,7 @@ export class AuctionsService {
   private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
+    private apiService: ElrondApiService,
     private auctionServiceDb: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -27,12 +29,23 @@ export class AuctionsService {
     );
   }
 
-  async saveAuction(auctionId: number): Promise<Auction | any> {
+  async saveAuction(
+    auctionId: number,
+    collection: string,
+    nonce: string,
+  ): Promise<Auction | any> {
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+      const asset = await this.apiService.getNftByIdentifier(
+        `${collection}-${nonce}`,
+      );
       const savedAuction = await this.auctionServiceDb.insertAuction(
-        AuctionEntity.fromAuctionAbi(auctionId, auctionData),
+        AuctionEntity.fromAuctionAbi(
+          auctionId,
+          auctionData,
+          asset.tags.toString(),
+        ),
       );
       return savedAuction;
     } catch (error) {

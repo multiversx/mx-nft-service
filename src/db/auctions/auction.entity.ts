@@ -48,12 +48,15 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   endDate: string;
 
+  @Column()
+  tags: string;
+
   constructor(init?: Partial<AuctionEntity>) {
     super();
     Object.assign(this, init);
   }
 
-  static fromAuctionAbi(auctionId: number, auction: AuctionAbi) {
+  static fromAuctionAbi(auctionId: number, auction: AuctionAbi, tags: string) {
     return auction
       ? new AuctionEntity({
           id: auctionId,
@@ -78,6 +81,7 @@ export class AuctionEntity extends BaseEntity {
             .toString()}-${nominateVal(
             parseInt(auction.auctioned_token.nonce.valueOf().toString()),
           )}`,
+          tags: `,${tags},`,
         })
       : null;
   }
