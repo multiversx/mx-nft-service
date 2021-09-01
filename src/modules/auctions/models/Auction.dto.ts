@@ -70,7 +70,6 @@ export class Auction {
   }
 
   static fromEntity(auction: AuctionEntity) {
-    console.log(auction);
     return auction
       ? new Auction({
           id: auction.id,
