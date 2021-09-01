@@ -132,6 +132,7 @@ type Auction {
   ownerAddress: String
   startDate: String!
   status: AuctionStatusEnum
+  tags: String
   topBid: Price
   topBidder: Account
   type: AuctionTypeEnum

@@ -87,7 +87,11 @@ export class TransactionService {
           );
 
           if (Buffer.from(decodedData[0], 'hex').toString() === 'ok') {
-            this.auctionsService.saveAuction(parseInt(decodedData[1], 16));
+            this.auctionsService.saveAuction(
+              parseInt(decodedData[1], 16),
+              Buffer.from(dataArgs[0], 'hex').toString(),
+              dataArgs[1],
+            );
           }
         }
       }

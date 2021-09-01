@@ -53,6 +53,9 @@ export class Auction {
   @Field(() => String)
   endDate: string;
 
+  @Field({ nullable: true })
+  tags: string;
+
   @Field(() => Price, { nullable: true })
   topBid: Price;
 
@@ -89,6 +92,7 @@ export class Auction {
             nonce: 0,
             amount: auction.maxBid,
           }),
+          tags: auction.tags,
         })
       : null;
   }
