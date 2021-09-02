@@ -12,6 +12,7 @@ export enum Operation {
   LIKE,
   GE,
   LE,
+  BETWEEN,
 }
 
 export enum Sort {
@@ -34,7 +35,7 @@ export class Filter {
   @Field(() => Operation)
   op: Operation;
   @Field(() => [String])
-  values: string;
+  values: string[];
   @Field(() => String)
   field: string;
 }

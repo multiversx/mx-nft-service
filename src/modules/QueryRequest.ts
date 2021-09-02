@@ -10,3 +10,14 @@ export class QueryRequest {
     Object.assign(this, init);
   }
 }
+
+export class TrendingQueryRequest {
+  limit: number = 20;
+  offset: number = 0;
+  startDate: Date;
+  endDate: Date;
+
+  constructor(init?: Partial<TrendingQueryRequest>) {
+    Object.assign(this, init);
+  }
+}
