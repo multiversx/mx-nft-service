@@ -37,6 +37,9 @@ export default class WhereBuilder<Entity> {
         return `${filter.field} = :${paramName}`;
       case Operation.IN:
         this.params[paramName] = filter.values;
+        if (filter.field === 'tags') {
+          return this.getTagsFilter(filter);
+        }
         return `${filter.field} IN (:${paramName})`;
       case Operation.LIKE:
         this.params[paramName] = `%${filter.values[0]}%`;
@@ -53,5 +56,16 @@ export default class WhereBuilder<Entity> {
       default:
         throw new Error(`Unknown filter operation: ${filter.op}`);
     }
+  }
+
+  private getTagsFilter(filter: Filter) {
+    let filterQuery = '';
+    filter.values.forEach((element) => {
+      filterQuery =
+        filterQuery === ''
+          ? `FIND_IN_SET('${element}', tags) `
+          : `${filterQuery} AND FIND_IN_SET('${element}', tags) `;
+    });
+    return filterQuery;
   }
 }

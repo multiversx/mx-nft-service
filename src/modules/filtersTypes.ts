@@ -35,7 +35,7 @@ export class Filter {
   @Field(() => Operation)
   op: Operation;
   @Field(() => [String])
-  values: string;
+  values: string[];
   @Field(() => String)
   field: string;
 }
