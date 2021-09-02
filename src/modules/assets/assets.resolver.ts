@@ -32,7 +32,7 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionsProvider } from 'src/db/auctions/asset-auctions.loader';
+import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -136,8 +136,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
       identifier,
     );
-    return auctions !== undefined
-      ? auctions.map((auction) => Auction.fromEntity(auction))
+    return auctions
+      ? auctions?.map((auction) => Auction.fromEntity(auction))
       : null;
   }
 

@@ -9,6 +9,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { OrdersService } from '../orders/order.service';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { AuctionsProvider } from './asset-auctions.loader';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
+    AuctionsProvider,
   ],
   imports: [
     ElrondCommunicationModule,
@@ -30,6 +32,7 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
+    AuctionsProvider,
   ],
 })
 export class AuctionsModuleGraph {}
