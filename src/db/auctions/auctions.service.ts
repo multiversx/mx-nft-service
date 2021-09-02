@@ -42,13 +42,9 @@ export class AuctionsServiceDb {
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status <> 'Ended' AND a.status <> 'Closed' AND o.creationDate  BETWEEN '${queryRequest.startDate
-          .toISOString()
-          .slice(0, 19)
-          .replace('T', ' ')}' AND '${queryRequest.endDate
-          .toISOString()
-          .slice(0, 19)
-          .replace('T', ' ')}'`,
+        `a.status <> 'Ended' AND a.status <> 'Closed' AND o.creationDate  
+        BETWEEN '${this.getSqlDate(queryRequest.startDate)}' 
+        AND '${this.getSqlDate(queryRequest.endDate)}'`,
       )
       .groupBy('a.id')
       .orderBy('COUNT(a.Id)', 'DESC')
@@ -99,6 +95,10 @@ export class AuctionsServiceDb {
       return await this.auctionsRepository.save(auction);
     }
     return null;
+  }
+
+  private getSqlDate(date: Date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
   }
 
   private addOrderBy(
