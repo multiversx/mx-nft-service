@@ -52,15 +52,12 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.createAuction(
-      'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th',
-      input,
-    );
+    return await this.nftAbiService.createAuction(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
