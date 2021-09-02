@@ -12,6 +12,7 @@ export enum Operation {
   LIKE,
   GE,
   LE,
+  BETWEEN,
 }
 
 export enum Sort {

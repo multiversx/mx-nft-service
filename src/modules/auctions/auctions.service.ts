@@ -4,7 +4,7 @@ import { Auction, AuctionStatusEnum } from './models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { QueryRequest } from '../QueryRequest';
+import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
@@ -59,12 +59,11 @@ export class AuctionsService {
   async getAuctions(queryRequest: QueryRequest): Promise<[Auction[], number]> {
     try {
       const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      const getAssetLiked = () => this.getMappedAuctions(queryRequest);
+      const getAuctions = () => this.getMappedAuctions(queryRequest);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAssetLiked,
-        cacheConfig.auctionsttl,
+        getAuctions,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', error, {
@@ -74,10 +73,65 @@ export class AuctionsService {
     }
   }
 
+  async getAuctionsOrderByNoBids(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
+    try {
+      const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      const getAuctions = () => this.getMappedAuctionsOrderBids(queryRequest);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAuctions,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', error, {
+        path: 'AuctionsService.getAuctions',
+        queryRequest,
+      });
+    }
+  }
+
+  async getTrendingAuctions(
+    queryRequest: TrendingQueryRequest,
+  ): Promise<[Auction[], number]> {
+    try {
+      const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      const getTrendingAuctions = () =>
+        this.getMappedTrendingAuctions(queryRequest);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getTrendingAuctions,
+        cacheConfig.auctionsttl,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', error, {
+        path: 'AuctionsService.getTrendingAuctions',
+        queryRequest,
+      });
+    }
+  }
+
+  private async getMappedTrendingAuctions(queryRequest: TrendingQueryRequest) {
+    const [auctions, count] = await this.auctionServiceDb.getTrendingAuctions(
+      queryRequest,
+    );
+
+    return [auctions.map((element) => Auction.fromEntity(element)), count];
+  }
+
   private async getMappedAuctions(queryRequest: QueryRequest) {
     const [auctions, count] = await this.auctionServiceDb.getAuctions(
       queryRequest,
     );
+
+    return [auctions.map((element) => Auction.fromEntity(element)), count];
+  }
+
+  private async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
+    const [auctions, count] =
+      await this.auctionServiceDb.getAuctionsOrderByOrdersCount(queryRequest);
 
     return [auctions.map((element) => Auction.fromEntity(element)), count];
   }
@@ -90,7 +144,7 @@ export class AuctionsService {
     return await this.auctionServiceDb.updateAuction(id, status);
   }
 
-  private getAuctionsCacheKey(request: QueryRequest) {
+  private getAuctionsCacheKey(request: any) {
     return generateCacheKeyFromParams('auctions', hash(request));
   }
 

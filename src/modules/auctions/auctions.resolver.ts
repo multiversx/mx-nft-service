@@ -7,6 +7,7 @@ import {
   Mutation,
   Int,
   Context,
+  GraphQLISODateTime,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
@@ -31,7 +32,7 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
-import { QueryRequest } from '../QueryRequest';
+import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
@@ -51,12 +52,15 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
-    @User() user: any,
+    // @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.createAuction(user.publicKey, input);
+    return await this.nftAbiService.createAuction(
+      'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th',
+      input,
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -107,6 +111,53 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
       new QueryRequest({ limit, offset, filters, sorting }),
+    );
+    const page = connectionFromArraySlice(auctions, pagination, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return {
+      edges: page.edges,
+      pageInfo: page.pageInfo,
+      pageData: { count, limit, offset },
+    };
+  }
+
+  @Query(() => AuctionResponse)
+  async auctionsSortByBids(
+    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    filters,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ) {
+    const { limit, offset } = pagination.pagingParams();
+    const [auctions, count] = await this.auctionsService.getAuctions(
+      new QueryRequest({ limit, offset, filters }),
+    );
+    const page = connectionFromArraySlice(auctions, pagination, {
+      arrayLength: count,
+      sliceStart: offset || 0,
+    });
+    return {
+      edges: page.edges,
+      pageInfo: page.pageInfo,
+      pageData: { count, limit, offset },
+    };
+  }
+
+  @Query(() => AuctionResponse)
+  async trendingAuctions(
+    @Args({ name: 'startDate', type: () => GraphQLISODateTime })
+    startDate,
+    @Args({ name: 'endDate', type: () => GraphQLISODateTime })
+    endDate,
+
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ) {
+    const { limit, offset } = pagination.pagingParams();
+    const [auctions, count] = await this.auctionsService.getTrendingAuctions(
+      new TrendingQueryRequest({ limit, offset, startDate, endDate }),
     );
     const page = connectionFromArraySlice(auctions, pagination, {
       arrayLength: count,

@@ -47,6 +47,9 @@ export default class WhereBuilder<Entity> {
       case Operation.LE:
         this.params[paramName] = `%${filter.values[0]}%`;
         return `${filter.field} <= :${paramName}`;
+      case Operation.BETWEEN:
+        this.params[paramName] = `%${filter.values[0]}%`;
+        return `${filter.field} BETWEEN '${filter.values[0]}' AND '${filter.values[1]}'`;
       default:
         throw new Error(`Unknown filter operation: ${filter.op}`);
     }

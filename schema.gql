@@ -289,6 +289,7 @@ enum NftTypeEnum {
 }
 
 enum Operation {
+  BETWEEN
   EQ
   GE
   IN
@@ -352,10 +353,12 @@ type Query {
   assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
   collections(ownerAddress: String!): [String!]!
   followers(address: String, pagination: ConnectionArgs): AccountResponse!
   following(address: String, pagination: ConnectionArgs): AccountResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
+  trendingAuctions(endDate: DateTime!, pagination: ConnectionArgs, startDate: DateTime!): AuctionResponse!
 }
 
 input RemoveLikeArgs {
