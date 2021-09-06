@@ -150,7 +150,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const account = await this.accountsProvider.getAccountByAddress(
       creatorAddress,
     );
-    return Account.fromEntity(account, creatorAddress);
+    return Account.fromEntity(account);
   }
 
   private mapResponse<T>(

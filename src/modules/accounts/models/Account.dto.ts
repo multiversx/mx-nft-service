@@ -40,9 +40,9 @@ export class Account {
     Object.assign(this, init);
   }
 
-  static fromEntity(account: AccountIdentity, address: string) {
+  static fromEntity(account: AccountIdentity) {
     return new Account({
-      address: address,
+      address: account.address,
       description: account?.description,
       profile: account?.profile,
       cover: account?.cover,

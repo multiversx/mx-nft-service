@@ -61,7 +61,7 @@ export class OrdersResolver extends BaseResolver(Order) {
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
-    return Account.fromEntity(account, ownerAddress);
+    return Account.fromEntity(account);
   }
 
   @ResolveField('auction', () => Auction)

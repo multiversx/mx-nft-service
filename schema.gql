@@ -34,6 +34,10 @@ type AccountResponse {
   pageInfo: AccountPageInfo
 }
 
+input AccountsFilter {
+  addresses: [String!]!
+}
+
 input AddLikeArgs {
   identifier: String!
 }
@@ -350,6 +354,7 @@ type Price {
 }
 
 type Query {
+  accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
   assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!

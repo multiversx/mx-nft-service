@@ -6,10 +6,33 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import AccountResponse from './models/AccountResponse';
 import { User } from '../user';
+import { AccountsFilter } from './models/AccountsFilter';
+import { ElrondIdentityService } from 'src/common';
 
 @Resolver(() => Account)
 export class AccountsResolver {
-  constructor(private accountsService: AccountsService) {}
+  constructor(
+    private accountsService: AccountsService,
+    private identityService: ElrondIdentityService,
+  ) {}
+
+  @Query(() => AccountResponse)
+  async accounts(
+    @Args({ name: 'filters', type: () => AccountsFilter })
+    filters,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ): Promise<AccountResponse> {
+    const { limit, offset } = pagination.pagingParams();
+    const accounts = await this.identityService.getProfiles(filters?.addresses);
+    return this.mapResponse<Account>(
+      accounts?.map((acc) => Account.fromEntity(acc)),
+      pagination,
+      accounts?.length,
+      offset,
+      limit,
+    );
+  }
 
   @Mutation(() => Boolean)
   async follow(
@@ -39,15 +62,13 @@ export class AccountsResolver {
   ): Promise<AccountResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [followers, count] = await this.accountsService.getFollowers(address);
-    const page = connectionFromArraySlice(followers, pagination, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
+    return this.mapResponse<Account>(
+      followers,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
   }
 
   @Query(() => AccountResponse)
@@ -59,7 +80,23 @@ export class AccountsResolver {
   ): Promise<AccountResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [accounts, count] = await this.accountsService.getFollowing(address);
-    const page = connectionFromArraySlice(accounts, pagination, {
+    return this.mapResponse<Account>(
+      accounts,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
+  }
+
+  private mapResponse<T>(
+    returnList: T[],
+    args: ConnectionArgs,
+    count: number,
+    offset: number,
+    limit: number,
+  ) {
+    const page = connectionFromArraySlice(returnList, args, {
       arrayLength: count,
       sliceStart: offset || 0,
     });
