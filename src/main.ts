@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import axios from 'axios';
 import { AppModule } from './app.module';
 import { PrivateAppModule } from './private.app.module';
 import { TransactionsProcessorModule } from './transaction.processor.module';
@@ -36,3 +37,29 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+axios.interceptors.response.use(
+  function (response) {
+    let path = response?.request?.path;
+    if (path && path.includes('by-nonce')) {
+      console.log({ gatewayResponse: response.data });
+
+      let matches = path.match(
+        /block\/(?<shard>[0-9]*)\/by-nonce\/(?<nonce>[0-9]*)/,
+      );
+      let shard = matches.groups['shard'];
+      let nonce = matches.groups['nonce'];
+
+      console.log({
+        shard,
+        nonce,
+        response: JSON.stringify(response.data),
+      });
+    }
+
+    return response;
+  },
+  function (error) {
+    return Promise.reject(error);
+  },
+);
