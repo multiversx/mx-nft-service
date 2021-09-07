@@ -34,6 +34,8 @@ async function bootstrap() {
       process.env.TRANSACTION_PROCESSOR_LISTEN_ADDRESS,
     );
   }
+
+  console.log({ gatewayUrl: process.env.ELROND_GATEWAY });
 }
 
 bootstrap();
