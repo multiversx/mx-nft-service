@@ -48,7 +48,11 @@ export class TransactionService {
         onTransactionsReceived: async (shardId, nonce, transactions) => {
           this.processTransactions(transactions);
           console.log(
-            `Received ${transactions.length} transactions on shard ${shardId} and nonce ${nonce}`,
+            `Received ${
+              transactions.length
+            } transactions on shard ${shardId} and nonce ${nonce} with hashes: ${transactions.map(
+              (x) => x.hash,
+            )}`,
           );
         },
         getLastProcessedNonce: async (shardId) => {
