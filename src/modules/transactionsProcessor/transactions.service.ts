@@ -45,14 +45,11 @@ export class TransactionService {
       await this.transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
         waitForFinalizedCrossShardSmartContractResults: true,
+        maxLookBehind: 10000,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
           this.processTransactions(transactions);
           console.log(
-            `Received ${
-              transactions.length
-            } transactions on shard ${shardId} and nonce ${nonce} with hashes: ${transactions.map(
-              (x) => x.hash,
-            )}`,
+            `Received ${transactions.length} transactions on shard ${shardId} and nonce ${nonce} `,
           );
         },
         getLastProcessedNonce: async (shardId) => {
