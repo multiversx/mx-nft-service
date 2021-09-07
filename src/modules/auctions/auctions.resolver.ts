@@ -199,7 +199,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
           await this.accountsProvider.getAccountByAddress(
             activeOrders[activeOrders.length - 1].ownerAddress,
           ),
-          activeOrders[activeOrders.length - 1].ownerAddress,
         )
       : null;
   }
@@ -237,6 +236,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
-    return Account.fromEntity(account, ownerAddress);
+    return Account.fromEntity(account);
   }
 }

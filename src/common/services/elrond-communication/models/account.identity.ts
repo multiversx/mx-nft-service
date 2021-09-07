@@ -5,6 +5,7 @@ export interface AccountIdentity {
   herotag: string;
   id: string;
   socialLinks: SocialLink[];
+  address: string;
 }
 
 export interface SocialLink {

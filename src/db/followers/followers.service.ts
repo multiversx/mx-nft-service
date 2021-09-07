@@ -37,17 +37,29 @@ export class FollowersServiceDb {
     }
   }
 
-  async getFollowers(followerAddress: string): Promise<any[]> {
+  async getFollowers(
+    followerAddress: string,
+    offset: number,
+    limit: number,
+  ): Promise<[FollowerEntity[], number]> {
     const followers = await this.followerRepository.findAndCount({
       where: [{ followingAddress: followerAddress }],
+      take: limit,
+      skip: offset,
     });
 
     return followers;
   }
 
-  async getFollowing(followingAddress: string): Promise<any[]> {
+  async getFollowing(
+    followingAddress: string,
+    offset: number,
+    limit: number,
+  ): Promise<[FollowerEntity[], number]> {
     const following = await this.followerRepository.findAndCount({
       where: [{ followerAddress: followingAddress }],
+      take: limit,
+      skip: offset,
     });
 
     return following;

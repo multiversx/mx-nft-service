@@ -4,6 +4,7 @@ import { Asset } from '../../assets/models';
 import { Order } from '../../orders/models';
 import { SocialLink } from './SocialLink.dto';
 import { AccountIdentity } from 'src/common/services/elrond-communication/models/account.identity';
+import { FollowerResponse } from './FollowerResponse';
 
 @ObjectType()
 export class Account {
@@ -30,19 +31,19 @@ export class Account {
   @Field(() => [Auction], { nullable: true })
   auctions: Auction[];
 
-  @Field(() => [Account], { nullable: true })
-  followers: Account[];
+  @Field(() => FollowerResponse, { nullable: true })
+  followers: FollowerResponse;
 
-  @Field(() => [Account], { nullable: true })
-  following: Account[];
+  @Field(() => FollowerResponse, { nullable: true })
+  following: FollowerResponse;
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);
   }
 
-  static fromEntity(account: AccountIdentity, address: string) {
+  static fromEntity(account: AccountIdentity) {
     return new Account({
-      address: address,
+      address: account.address,
       description: account?.description,
       profile: account?.profile,
       cover: account?.cover,
