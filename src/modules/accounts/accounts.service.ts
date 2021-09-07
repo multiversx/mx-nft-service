@@ -47,11 +47,19 @@ export class AccountsService {
     }
   }
 
-  async getFollowers(address: string): Promise<Account[] | any[]> {
-    return await this.followerServiceDb.getFollowers(address);
+  async getFollowers(
+    address: string,
+    offset: number,
+    limit: number,
+  ): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowers(address, offset, limit);
   }
 
-  async getFollowing(address: string): Promise<Account[] | any[]> {
-    return await this.followerServiceDb.getFollowing(address);
+  async getFollowing(
+    address: string,
+    offset: number,
+    limit: number,
+  ): Promise<Account[] | any[]> {
+    return await this.followerServiceDb.getFollowing(address, offset, limit);
   }
 }

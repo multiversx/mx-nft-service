@@ -8,8 +8,8 @@ type Account {
   auctions: [Auction!]
   cover: String
   description: String
-  followers: [Account!]
-  following: [Account!]
+  followers(pagination: ConnectionArgs): FollowerResponse
+  following(pagination: ConnectionArgs): FollowerResponse
   herotag: String
   orders: [Order!]
   profile: String
@@ -243,6 +243,17 @@ input FollowEntityArgs {
   addressToFollow: String!
 }
 
+type FollowerResponse {
+  edges: [FollowerResponseEdge!]
+  pageData: PageData
+  pageInfo: PageInfo
+}
+
+type FollowerResponseEdge {
+  cursor: String!
+  node: Account
+}
+
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   collection: String!
@@ -347,6 +358,13 @@ type PageData {
   offset: Int!
 }
 
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 type Price {
   amount: String!
   nonce: Int!
@@ -360,8 +378,6 @@ type Query {
   auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
   collections(ownerAddress: String!): [String!]!
-  followers(address: String, pagination: ConnectionArgs): AccountResponse!
-  following(address: String, pagination: ConnectionArgs): AccountResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   trendingAuctions(endDate: DateTime!, pagination: ConnectionArgs, startDate: DateTime!): AuctionResponse!
 }

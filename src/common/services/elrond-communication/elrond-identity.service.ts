@@ -10,7 +10,6 @@ export class ElrondIdentityService {
 
   async getProfiles(addresses: string[]): Promise<AccountIdentity[]> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/multiple`;
-
     const profiler = new PerformanceProfiler(`getProfiles ${url}`);
 
     let request: any = { addresses: addresses };
