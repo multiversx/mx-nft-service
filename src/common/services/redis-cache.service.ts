@@ -83,6 +83,35 @@ export class RedisCacheService {
     }
   }
 
+  async delByPattern(
+    client: Redis.Redis,
+    key: string,
+    region: string = null,
+  ): Promise<void> {
+    const cacheKey = generateCacheKey(key, region);
+    try {
+      const stream = client.scanStream({ match: cacheKey, count: 100 });
+      let keys = [];
+      stream.on('data', function (resultKeys) {
+        for (var i = 0; i < resultKeys.length; i++) {
+          keys.push(resultKeys[i]);
+        }
+      });
+      stream.on('end', function () {
+        client.unlink(keys);
+      });
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while trying to delete from redis cache by pattern.',
+        {
+          path: 'redis-cache.service.delByPattern',
+          exception: err.toString(),
+          cacheKey: cacheKey,
+        },
+      );
+    }
+  }
+
   async flushDb(client: Redis.Redis): Promise<void> {
     try {
       await client.flushdb();

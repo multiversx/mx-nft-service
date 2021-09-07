@@ -77,6 +77,13 @@ if (!!process.env.LOG_FILE) {
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.assetsDbName,
       },
+      {
+        name: cacheConfig.followersRedisClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.followersDbName,
+      },
     ]),
 
     TypeOrmModule.forRoot({
