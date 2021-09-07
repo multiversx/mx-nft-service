@@ -41,7 +41,7 @@ export class FollowersServiceDb {
     followerAddress: string,
     offset: number,
     limit: number,
-  ): Promise<any[]> {
+  ): Promise<[FollowerEntity[], number]> {
     const followers = await this.followerRepository.findAndCount({
       where: [{ followingAddress: followerAddress }],
       take: limit,
@@ -55,7 +55,7 @@ export class FollowersServiceDb {
     followingAddress: string,
     offset: number,
     limit: number,
-  ): Promise<[any[], number]> {
+  ): Promise<[FollowerEntity[], number]> {
     const following = await this.followerRepository.findAndCount({
       where: [{ followerAddress: followingAddress }],
       take: limit,

@@ -51,7 +51,7 @@ export class AccountsService {
     address: string,
     offset: number,
     limit: number,
-  ): Promise<Account[] | any[]> {
+  ): Promise<[FollowerEntity[], number]> {
     return await this.followerServiceDb.getFollowers(address, offset, limit);
   }
 
@@ -59,7 +59,7 @@ export class AccountsService {
     address: string,
     offset: number,
     limit: number,
-  ): Promise<Account[] | any[]> {
+  ): Promise<[FollowerEntity[], number]> {
     return await this.followerServiceDb.getFollowing(address, offset, limit);
   }
 }
