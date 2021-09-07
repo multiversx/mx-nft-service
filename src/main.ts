@@ -50,7 +50,7 @@ axios.interceptors.response.use(
       let shard = matches.groups['shard'];
       let nonce = matches.groups['nonce'];
 
-      const result = response.data;
+      const result = response.data.data;
 
       let transactions = [];
 
