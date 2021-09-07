@@ -42,18 +42,26 @@ axios.interceptors.response.use(
   function (response) {
     let path = response?.request?.path;
     if (path && path.includes('by-nonce')) {
-      console.log({ gatewayResponse: response.data });
-
       let matches = path.match(
         /block\/(?<shard>[0-9]*)\/by-nonce\/(?<nonce>[0-9]*)/,
       );
       let shard = matches.groups['shard'];
       let nonce = matches.groups['nonce'];
 
+      const result = response.data;
+
+      let transactions = [];
+
+      if (result && result.block && result.block.miniBlocks !== undefined) {
+        for (let miniBlock of result.block.miniBlocks) {
+          transactions.push(...miniBlock.transactions);
+        }
+      }
+
       console.log({
         shard,
         nonce,
-        response: JSON.stringify(response.data),
+        transactions: transactions.map((x) => x.hash),
       });
     }
 
