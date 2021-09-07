@@ -13,6 +13,9 @@ export class CachingConfig {
   ordersRedisClientName: string;
   ordersDbName: number;
   ordersttl: number;
+  followersDbName: number;
+  followersRedisClientName: string;
+  followersttl: number;
 
   // network config and network status
   networkConfig: number;
