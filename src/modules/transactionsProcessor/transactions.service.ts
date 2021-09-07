@@ -56,10 +56,14 @@ export class TransactionService {
           );
         },
         getLastProcessedNonce: async (shardId) => {
-          return await this.redisCacheService.get(
+          let result = await this.redisCacheService.get(
             this.redisClient,
             `lastprocessednonce:${shardId}`,
           );
+
+          console.log(`LastProcessedNonce for shard ${shardId}: ${result}`);
+
+          return result;
         },
         setLastProcessedNonce: async (shardId, nonce) => {
           await this.redisCacheService.set(
