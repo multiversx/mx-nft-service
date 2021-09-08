@@ -59,13 +59,14 @@ export class AuctionsServiceDb {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
+      'auctions',
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     queryBuilder
-      .innerJoin('orders', 'o', 'o.auctionId=AuctionEntity.id')
-      .groupBy('AuctionEntity.id')
-      .orderBy('COUNT(AuctionEntity.Id)', 'DESC')
+      .leftJoin('orders', 'o', 'o.auctionId=auctions.id')
+      .groupBy('auctions.id')
+      .orderBy('COUNT(auctions.Id)', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
 

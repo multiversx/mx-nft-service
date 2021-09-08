@@ -10,8 +10,9 @@ export default class FilterQueryBuilder<Entity> {
   constructor(
     entityRepository: Repository<Entity>,
     private filtersExpression?: FiltersExpression,
+    private queryBuilderName?: string,
   ) {
-    this.queryBuilder = entityRepository.createQueryBuilder();
+    this.queryBuilder = entityRepository.createQueryBuilder(queryBuilderName);
   }
 
   build() {
@@ -24,6 +25,7 @@ export default class FilterQueryBuilder<Entity> {
     const whereBuilder = new WhereBuilder<Entity>(
       this.queryBuilder,
       this.filtersExpression,
+      this.queryBuilderName,
     );
     whereBuilder.build();
 

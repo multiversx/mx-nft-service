@@ -128,9 +128,10 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] = await this.auctionsService.getAuctions(
-      new QueryRequest({ limit, offset, filters }),
-    );
+    const [auctions, count] =
+      await this.auctionsService.getAuctionsOrderByNoBids(
+        new QueryRequest({ limit, offset, filters }),
+      );
     const page = connectionFromArraySlice(auctions, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
