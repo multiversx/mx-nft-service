@@ -11,6 +11,7 @@ export default class WhereBuilder<Entity> {
   constructor(
     private readonly queryBuilder: SelectQueryBuilder<Entity>,
     private filtersExpression?: FiltersExpression,
+    private queryBuilderName?: string,
   ) {}
 
   build() {
@@ -31,40 +32,44 @@ export default class WhereBuilder<Entity> {
   private buildFilter(filter: Filter): string {
     const paramName = `${filter.field}_${++this.paramsCount}`;
 
+    const sqlParamName = this.queryBuilderName
+      ? `${this.queryBuilderName}.${filter.field}`
+      : filter.field;
+
     switch (filter.op) {
       case Operation.EQ:
         this.params[paramName] = filter.values[0];
-        return `${filter.field} = :${paramName}`;
+        return `${sqlParamName} = :${paramName}`;
       case Operation.IN:
         this.params[paramName] = filter.values;
         if (filter.field === 'tags') {
-          return this.getTagsFilter(filter);
+          return this.getTagsFilter(filter, sqlParamName);
         }
-        return `${filter.field} IN (:${paramName})`;
+        return `${sqlParamName} IN (:${paramName})`;
       case Operation.LIKE:
         this.params[paramName] = `%${filter.values[0]}%`;
-        return `${filter.field} LIKE :${paramName}`;
+        return `${sqlParamName} LIKE :${paramName}`;
       case Operation.GE:
         this.params[paramName] = `%${filter.values[0]}%`;
-        return `${filter.field} >= :${paramName}`;
+        return `${sqlParamName} >= :${paramName}`;
       case Operation.LE:
         this.params[paramName] = `%${filter.values[0]}%`;
-        return `${filter.field} <= :${paramName}`;
+        return `${sqlParamName} <= :${paramName}`;
       case Operation.BETWEEN:
         this.params[paramName] = `%${filter.values[0]}%`;
-        return `${filter.field} BETWEEN '${filter.values[0]}' AND '${filter.values[1]}'`;
+        return `${sqlParamName} BETWEEN '${filter.values[0]}' AND '${filter.values[1]}'`;
       default:
         throw new Error(`Unknown filter operation: ${filter.op}`);
     }
   }
 
-  private getTagsFilter(filter: Filter) {
+  private getTagsFilter(filter: Filter, paramName: string) {
     let filterQuery = '';
     filter.values.forEach((element) => {
       filterQuery =
         filterQuery === ''
-          ? `FIND_IN_SET('${element}', tags) `
-          : `${filterQuery} AND FIND_IN_SET('${element}', tags) `;
+          ? `FIND_IN_SET('${element}', ${paramName}) `
+          : `${filterQuery} AND FIND_IN_SET('${element}', ${paramName}) `;
     });
     return filterQuery;
   }
