@@ -33,6 +33,7 @@ import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AssetLikesProvider } from './asset-likes.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -40,6 +41,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
+    private assetsLikeProvider: AssetLikesProvider,
     private auctionsProvider: AuctionsProvider,
   ) {
     super();
@@ -118,7 +120,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('likesCount', () => Int)
   likesCount(@Parent() asset: Asset) {
     const { identifier } = asset;
-    return this.assetsLikesService.getAssetLikesCount(identifier);
+    return this.assetsLikeProvider.getAssetLikesCount(identifier);
   }
 
   @ResolveField('isLiked', () => Boolean)

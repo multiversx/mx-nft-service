@@ -4,6 +4,7 @@ import * as Redis from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisService } from 'nestjs-redis';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
+import { promisify } from 'util';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -61,6 +62,82 @@ export class RedisCacheService {
       );
       return;
     }
+  }
+
+  private getChunks<T>(array: T[], size = 25): T[][] {
+    return array.reduce((result: T[][], item, current) => {
+      const index = Math.floor(current / size);
+
+      if (!result[index]) {
+        result[index] = [];
+      }
+
+      result[index].push(item);
+
+      return result;
+    }, []);
+  }
+
+  async batchGetCache<T>(
+    client,
+    keys: string[],
+    region: string = null,
+  ): Promise<T[]> {
+    const chunks = this.getChunks(
+      keys.map((key) => generateCacheKey(key, region)),
+      100,
+    );
+    console.log({ chunks });
+    const asyncMGet = promisify(client.mget).bind(client);
+    const result = [];
+    try {
+      for (const chunkKeys of chunks) {
+        let chunkValues = await asyncMGet(chunkKeys);
+        console.log({ chunkValues });
+        chunkValues = chunkValues.map((value: any) =>
+          value ? JSON.parse(value) : null,
+        );
+
+        result.push(...chunkValues);
+      }
+
+      return result;
+    } catch (err) {
+      console.log('############ ', err);
+      return;
+    }
+  }
+
+  async batchSetCache(
+    client: Redis.Redis,
+    keys: string[],
+    values: any[],
+    ttl: number,
+  ) {
+    const chunks = this.getChunks(
+      keys.map((key, index) => {
+        const element: any = {};
+        element[key] = index;
+        return element;
+      }, 25),
+    );
+
+    const sets = [];
+
+    for (const chunk of chunks) {
+      const chunkKeys = chunk.map((element: any) => Object.keys(element)[0]);
+      const chunkValues = chunk.map(
+        (element: any) => values[Object.values(element)[0] as number],
+      );
+
+      sets.push(
+        ...chunkKeys.map((key: string, index: number) => {
+          return ['set', key, JSON.stringify(chunkValues[index]), 'ex', ttl];
+        }),
+      );
+    }
+    const multi = client.multi(sets);
+    return promisify(multi.exec).call(multi);
   }
 
   async del(

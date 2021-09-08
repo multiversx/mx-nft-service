@@ -13,11 +13,13 @@ import { S3Service } from '../s3/s3.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
+import { AssetLikesProvider } from './asset-likes.loader';
 
 @Module({
   providers: [
     AssetsService,
     AssetsLikesService,
+    AssetLikesProvider,
     AssetsHistoryService,
     AssetsResolver,
     AssetsHistoryResolver,
@@ -32,6 +34,12 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
-  exports: [AssetsService, AssetsLikesService, RedisCacheService, S3Service],
+  exports: [
+    AssetsService,
+    AssetsLikesService,
+    RedisCacheService,
+    S3Service,
+    AssetLikesProvider,
+  ],
 })
 export class AssetsModuleGraph {}

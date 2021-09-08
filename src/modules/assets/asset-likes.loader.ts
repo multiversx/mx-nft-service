@@ -18,26 +18,50 @@ export class AssetLikesProvider {
 
   constructor(private redisCacheService: RedisCacheService) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
+      cacheConfig.followersRedisClientName,
     );
   }
 
   async getAssetLikesCount(identifier: string): Promise<any> {
-    return await this.dataLoader.load(identifier);
-  }
-
-  private getAuctions = async (identifiers: string[]) => {
-    const cacheKey = this.getAuctionsCacheKey(identifiers);
-    const getAuctions = () => this.batchAssetLikes(identifiers);
+    const cacheKey = this.getAuctionCacheKey(identifier);
+    const getAuctions = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
       cacheKey,
       getAuctions,
-      cacheConfig.auctionsttl,
+      cacheConfig.followersttl,
     );
+  }
+
+  private getAuctions = async (identifiers: string[]) => {
+    const cacheKey = this.getAuctionsCacheKey(identifiers)[0];
+    const getAuctions = () => this.batchAssetLikes(identifiers);
+    return this.batchAssetLikes(identifiers);
   };
 
   private batchAssetLikes = async (identifiers: string[]) => {
+    const cacheKeys = this.getAuctionsCacheKey(identifiers);
+    const getLikes = await this.redisCacheService.batchGetCache(
+      this.redisClient,
+      cacheKeys,
+    );
+    if (getLikes.includes(null)) {
+      const assetLikes = await getRepository(AssetLikeEntity)
+        .createQueryBuilder('assetLikes')
+        .where('identifier IN(:...identifiers)', {
+          identifiers: identifiers,
+        })
+        .getMany();
+      const assetsIdentifiers: { [key: string]: AssetLikeEntity[] } = {};
+
+      assetLikes.forEach((asset) => {
+        if (!assetsIdentifiers[asset.identifier]) {
+          assetsIdentifiers[asset.identifier] = [asset];
+        } else {
+          assetsIdentifiers[asset.identifier].push(asset);
+        }
+      });
+    }
     const assetLikes = await getRepository(AssetLikeEntity)
       .createQueryBuilder('assetLikes')
       .where('identifier IN(:...identifiers)', {
@@ -58,6 +82,9 @@ export class AssetLikesProvider {
   };
 
   private getAuctionsCacheKey(identifiers: string[]) {
-    return generateCacheKeyFromParams('assetLikesCount', identifiers);
+    return identifiers.map((id) => this.getAuctionCacheKey(id));
+  }
+  private getAuctionCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('assetLikesCount', identifier);
   }
 }
