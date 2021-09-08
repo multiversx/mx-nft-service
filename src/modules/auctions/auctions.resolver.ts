@@ -181,9 +181,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('topBid', () => Price)
-  async topBid(@Parent() auction: Auction) {
+  async topBid(
+    @Parent() auction: Auction,
+    @Context()
+    { auctionActiveOrdersLoader: auctionActiveOrdersLoader }: IGraphQLContext,
+  ) {
     const { id } = auction;
-    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+    if (!id) return null;
+    const activeOrders = await auctionActiveOrdersLoader.load(id);
 
     return activeOrders?.length > 0
       ? Price.fromEntity(activeOrders[activeOrders.length - 1])
@@ -191,10 +196,16 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('topBidder', () => Account)
-  async topBidder(@Parent() auction: Auction) {
+  async topBidder(
+    @Parent() auction: Auction,
+    @Context()
+    { auctionActiveOrdersLoader: auctionActiveOrdersLoader }: IGraphQLContext,
+  ) {
     const { id } = auction;
 
-    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+    if (!id) return null;
+    const activeOrders = await auctionActiveOrdersLoader.load(id);
+
     return activeOrders?.length > 0
       ? Account.fromEntity(
           await this.accountsProvider.getAccountByAddress(

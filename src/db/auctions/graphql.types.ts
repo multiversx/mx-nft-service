@@ -1,3 +1,4 @@
+import { auctionActiveOrdersLoader } from '../orders/auction-activeOrders.loader';
 import { auctionOrdersLoader } from '../orders/auction-orders.loader';
 import { acountAuctionLoader } from './account-auction.loader';
 import { assetAuctionLoader } from './asset-auction.loader';
@@ -8,4 +9,5 @@ export interface IGraphQLContext {
   auctionLoaderById: ReturnType<typeof auctionLoaderById>;
   acountAuctionLoader: ReturnType<typeof acountAuctionLoader>;
   auctionOrdersLoader: ReturnType<typeof auctionOrdersLoader>;
+  auctionActiveOrdersLoader: ReturnType<typeof auctionActiveOrdersLoader>;
 }

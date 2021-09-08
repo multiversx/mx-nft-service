@@ -22,6 +22,7 @@ import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
+import { auctionActiveOrdersLoader } from './db/orders/auction-activeOrders.loader';
 
 @Module({
   providers: [
@@ -61,6 +62,7 @@ import { CommonModule } from './common.module';
         auctionLoaderById: auctionLoaderById(),
         acountAuctionLoader: acountAuctionLoader(),
         auctionOrdersLoader: auctionOrdersLoader(),
+        auctionActiveOrdersLoader: auctionActiveOrdersLoader(),
       }),
     }),
     CommonModule,
