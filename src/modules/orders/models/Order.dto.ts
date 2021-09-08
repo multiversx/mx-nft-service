@@ -31,7 +31,7 @@ export class Order {
   @Field(() => Date)
   creationDate: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   endDate: Date;
 
   constructor(init?: Partial<Order>) {
