@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
-import { TransactionProcessor } from '@elrondnetwork/transaction-processor';
+import {
+  LogTopic,
+  TransactionProcessor,
+} from '@elrondnetwork/transaction-processor';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { oneWeek } from './helpers';
@@ -42,6 +45,7 @@ export class TransactionService {
       await this.transactionProcessor.start({
         gatewayUrl: process.env.ELROND_GATEWAY,
         waitForFinalizedCrossShardSmartContractResults: true,
+        maxLookBehind: 10000,
         onTransactionsReceived: async (shardId, nonce, transactions) => {
           this.processTransactions(transactions);
           console.log(
@@ -61,6 +65,9 @@ export class TransactionService {
             nonce,
             oneWeek(),
           );
+        },
+        onMessageLogged: (topic: LogTopic, message: string) => {
+          console.log(`TxProcessor: ${message}`);
         },
       });
     } finally {
