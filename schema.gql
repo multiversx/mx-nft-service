@@ -321,7 +321,7 @@ type Order {
   auction: Auction!
   auctionId: Int!
   creationDate: DateTime!
-  endDate: DateTime!
+  endDate: DateTime
   from: Account
   id: ID!
   ownerAddress: String!
