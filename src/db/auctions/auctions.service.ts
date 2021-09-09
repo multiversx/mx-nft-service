@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
@@ -10,6 +11,7 @@ import { AuctionEntity } from './auction.entity';
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
+    private auctionsLoader: AuctionsProvider,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -91,6 +93,8 @@ export class AuctionsServiceDb {
     status: AuctionStatusEnum,
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
+
+    await this.auctionsLoader.clearKey(auction.identifier);
     if (auction) {
       auction.status = status;
       return await this.auctionsRepository.save(auction);

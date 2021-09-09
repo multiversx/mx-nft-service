@@ -20,30 +20,8 @@ export class AssetsLikesService {
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.assetsRedisClientName,
     );
-  }
-
-  getAssetLikesCount(identifier: string): Promise<number> {
-    try {
-      const cacheKey = this.getAssetLikesCountCacheKey(identifier);
-      const getAssetLikes = () =>
-        this.assetsLikesRepository.getAssetLikesCount(identifier);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAssetLikes,
-        cacheConfig.assetsttl,
-      );
-    } catch (err) {
-      this.logger.error(
-        "An error occurred while loading asset's likes count.",
-        {
-          path: 'AssetsService.getAssetLikesCount',
-          identifier,
-        },
-      );
-    }
   }
 
   getAssetLiked(
@@ -59,7 +37,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        cacheConfig.followersttl,
+        cacheConfig.assetsttl,
       );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
@@ -122,10 +100,6 @@ export class AssetsLikesService {
     }
   }
 
-  private getAssetLikesCountCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assetLikesCount', identifier);
-  }
-
   private getAssetLikedByCacheKey(filters) {
     return generateCacheKeyFromParams('assetLiked', filters);
   }
@@ -137,16 +111,10 @@ export class AssetsLikesService {
     await this.assetsLikeProvider.clearKey(identifier);
     await this.invalidateAssetLikeCache(identifier, address);
     await this.invalidateAssetLikedByCount(address);
-    await this.invalidateAssetLikesCount(identifier);
   }
 
   private invalidateAssetLikedByCount(address: string): Promise<void> {
     const cacheKey = this.getAssetLikedByCacheKey(address);
-    return this.redisCacheService.del(this.redisClient, cacheKey);
-  }
-
-  private invalidateAssetLikesCount(identifier: string): Promise<void> {
-    const cacheKey = this.getAssetLikesCountCacheKey(identifier);
     return this.redisCacheService.del(this.redisClient, cacheKey);
   }
 

@@ -12,7 +12,7 @@ import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
 })
 export class AssetLikesProvider {
   private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssetLikes(keys),
+    async (keys: string[]) => await this.batchAssetLikesCount(keys),
   );
   private redisClient: Redis.Redis;
 
@@ -23,7 +23,7 @@ export class AssetLikesProvider {
   }
 
   async getAssetLikesCount(identifier: string): Promise<any> {
-    const cacheKey = this.getAuctionCacheKey(identifier);
+    const cacheKey = this.getAssetLikeCountCacheKey(identifier);
     const getAuctions = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
@@ -34,6 +34,10 @@ export class AssetLikesProvider {
   }
 
   async clearKey(identifier: string): Promise<any> {
+    await this.redisCacheService.del(
+      this.redisClient,
+      this.getAssetLikeCountCacheKey(identifier),
+    );
     return this.dataLoader.clear(identifier);
   }
 
@@ -41,8 +45,8 @@ export class AssetLikesProvider {
     return this.dataLoader.clearAll();
   }
 
-  private batchAssetLikes = async (identifiers: string[]) => {
-    const cacheKeys = this.getAuctionsCacheKey(identifiers);
+  private batchAssetLikesCount = async (identifiers: string[]) => {
+    const cacheKeys = this.getAssetsLikesCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
     const getLikes = await this.redisCacheService.batchGetCache(
       this.redisClient,
@@ -74,7 +78,7 @@ export class AssetLikesProvider {
           } else {
             assetsIdentifiers[asset.identifier].push(asset);
           }
-          keys = [...keys, this.getAuctionCacheKey(asset.identifier)];
+          keys = [...keys, this.getAssetLikeCountCacheKey(asset.identifier)];
           values = [
             ...values,
             {
@@ -84,7 +88,7 @@ export class AssetLikesProvider {
           ];
         },
       );
-      const likes = await this.redisCacheService.batchSetCache(
+      await this.redisCacheService.batchSetCache(
         this.redisClient,
         keys,
         values,
@@ -94,10 +98,11 @@ export class AssetLikesProvider {
     }
   };
 
-  private getAuctionsCacheKey(identifiers: string[]) {
-    return identifiers.map((id) => this.getAuctionCacheKey(id));
+  private getAssetsLikesCountCacheKeys(identifiers: string[]) {
+    return identifiers.map((id) => this.getAssetLikeCountCacheKey(id));
   }
-  private getAuctionCacheKey(identifier: string) {
+
+  private getAssetLikeCountCacheKey(identifier: string) {
     return generateCacheKeyFromParams('assetLikesCount', identifier);
   }
 }

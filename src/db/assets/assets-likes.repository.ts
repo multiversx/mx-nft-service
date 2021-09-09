@@ -3,14 +3,6 @@ import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)
 export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
-  getAssetLikesCount(identifier: string): Promise<number> {
-    return this.count({
-      where: {
-        identifier,
-      },
-    });
-  }
-
   async getAssetsLiked(
     limit: number = 20,
     offset: number = 0,
