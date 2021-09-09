@@ -64,20 +64,6 @@ export class RedisCacheService {
     }
   }
 
-  private getChunks<T>(array: T[], size = 25): T[][] {
-    return array.reduce((result: T[][], item, current) => {
-      const index = Math.floor(current / size);
-
-      if (!result[index]) {
-        result[index] = [];
-      }
-
-      result[index].push(item);
-
-      return result;
-    }, []);
-  }
-
   async batchGetCache<T>(
     client,
     keys: string[],
@@ -255,6 +241,20 @@ export class RedisCacheService {
     const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
     return value;
+  }
+
+  private getChunks<T>(array: T[], size = 25): T[][] {
+    return array.reduce((result: T[][], item, current) => {
+      const index = Math.floor(current / size);
+
+      if (!result[index]) {
+        result[index] = [];
+      }
+
+      result[index].push(item);
+
+      return result;
+    }, []);
   }
 
   private buildInternalCreateValueFunc(
