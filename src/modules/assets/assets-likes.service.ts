@@ -8,17 +8,19 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
+import { AssetLikesProvider } from './asset-likes.loader';
 
 @Injectable()
 export class AssetsLikesService {
   private redisClient: Redis.Redis;
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
+    private assetsLikeProvider: AssetLikesProvider,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
+      cacheConfig.followersRedisClientName,
     );
   }
 
@@ -57,7 +59,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        cacheConfig.assetsttl,
+        cacheConfig.followersttl,
       );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
@@ -76,7 +78,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getIsAssetLiked,
-        cacheConfig.assetsttl,
+        cacheConfig.followersttl,
       );
     } catch (err) {
       this.logger.error('An error occurred while checking if asset is liked.', {
@@ -91,7 +93,7 @@ export class AssetsLikesService {
   async addLike(identifier: string, address: string): Promise<boolean> {
     try {
       await this.saveAssetLikeEntity(identifier, address);
-      this.invalidateCache(identifier, address);
+      await this.invalidateCache(identifier, address);
       return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
@@ -132,6 +134,7 @@ export class AssetsLikesService {
     identifier: string,
     address: string,
   ): Promise<void> {
+    await this.assetsLikeProvider.clearKey(identifier);
     await this.invalidateAssetLikeCache(identifier, address);
     await this.invalidateAssetLikedByCount(address);
     await this.invalidateAssetLikesCount(identifier);

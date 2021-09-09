@@ -47,7 +47,7 @@ type Asset {
   auctions: [Auction!]
   balance: String
   collection: ID!
-  creationDate: String!
+  creationDate: String
   creator: Account
   creatorAddress: String!
   hash: String
@@ -55,7 +55,7 @@ type Asset {
   isLiked(byAddress: String!): Boolean
   lastSale: DateTime!
   lastSalePrice: Price
-  likesCount: Int!
+  likesCount: Int
   metadata: Metadata
   name: String
   nonce: Int!
@@ -63,10 +63,10 @@ type Asset {
   ownersAddresses: [String!]
   royalties: String!
   tags: [String!]
-  thumbnailUrl: String!
+  thumbnailUrl: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String!
+  url: String
 }
 
 enum AssetActionEnum {

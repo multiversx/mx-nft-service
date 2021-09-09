@@ -125,7 +125,6 @@ export class AccountsService {
 
   private async invalidateFollowersKey(address: string): Promise<void> {
     const cacheKey = generateCacheKeyFromParams('followers', address);
-    console.log(cacheKey);
     return await this.redisCacheService.delByPattern(
       this.redisClient,
       `${cacheKey}_*`,

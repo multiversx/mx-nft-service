@@ -12,7 +12,7 @@ import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
 })
 export class AssetLikesProvider {
   private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.getAuctions(keys),
+    async (keys: string[]) => await this.batchAssetLikes(keys),
   );
   private redisClient: Redis.Redis;
 
@@ -33,52 +33,65 @@ export class AssetLikesProvider {
     );
   }
 
-  private getAuctions = async (identifiers: string[]) => {
-    const cacheKey = this.getAuctionsCacheKey(identifiers)[0];
-    const getAuctions = () => this.batchAssetLikes(identifiers);
-    return this.batchAssetLikes(identifiers);
-  };
+  async clearKey(identifier: string): Promise<any> {
+    return this.dataLoader.clear(identifier);
+  }
+
+  async clearAll(): Promise<any> {
+    return this.dataLoader.clearAll();
+  }
 
   private batchAssetLikes = async (identifiers: string[]) => {
     const cacheKeys = this.getAuctionsCacheKey(identifiers);
+    let [keys, values] = [[], []];
     const getLikes = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
     );
     if (getLikes.includes(null)) {
       const assetLikes = await getRepository(AssetLikeEntity)
-        .createQueryBuilder('assetLikes')
-        .where('identifier IN(:...identifiers)', {
-          identifiers: identifiers,
-        })
-        .getMany();
-      const assetsIdentifiers: { [key: string]: AssetLikeEntity[] } = {};
-
-      assetLikes.forEach((asset) => {
-        if (!assetsIdentifiers[asset.identifier]) {
-          assetsIdentifiers[asset.identifier] = [asset];
-        } else {
-          assetsIdentifiers[asset.identifier].push(asset);
-        }
-      });
+        .createQueryBuilder('al')
+        .select('al.identifier as identifier')
+        .addSelect('COUNT(al.identifier) as likesCount')
+        .where(
+          `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
+          {
+            identifiers: identifiers,
+          },
+        )
+        .groupBy('al.identifier')
+        .execute();
+      const assetsIdentifiers: { [key: string]: any[] } = {};
+      assetLikes.forEach(
+        (asset: { identifier: string; likesCount: string }) => {
+          if (!assetsIdentifiers[asset.identifier]) {
+            assetsIdentifiers[asset.identifier] = [
+              {
+                identifier: asset.identifier,
+                likesCount: parseInt(asset.likesCount),
+              },
+            ];
+          } else {
+            assetsIdentifiers[asset.identifier].push(asset);
+          }
+          keys = [...keys, this.getAuctionCacheKey(asset.identifier)];
+          values = [
+            ...values,
+            {
+              identifier: asset.identifier,
+              likesCount: parseInt(asset.likesCount),
+            },
+          ];
+        },
+      );
+      const likes = await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        keys,
+        values,
+        cacheConfig.followersttl,
+      );
+      return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
     }
-    const assetLikes = await getRepository(AssetLikeEntity)
-      .createQueryBuilder('assetLikes')
-      .where('identifier IN(:...identifiers)', {
-        identifiers: identifiers,
-      })
-      .getMany();
-    const assetsIdentifiers: { [key: string]: AssetLikeEntity[] } = {};
-
-    assetLikes.forEach((asset) => {
-      if (!assetsIdentifiers[asset.identifier]) {
-        assetsIdentifiers[asset.identifier] = [asset];
-      } else {
-        assetsIdentifiers[asset.identifier].push(asset);
-      }
-    });
-
-    return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
   };
 
   private getAuctionsCacheKey(identifiers: string[]) {

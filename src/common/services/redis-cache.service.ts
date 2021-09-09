@@ -87,13 +87,11 @@ export class RedisCacheService {
       keys.map((key) => generateCacheKey(key, region)),
       100,
     );
-    console.log({ chunks });
     const asyncMGet = promisify(client.mget).bind(client);
     const result = [];
     try {
       for (const chunkKeys of chunks) {
         let chunkValues = await asyncMGet(chunkKeys);
-        console.log({ chunkValues });
         chunkValues = chunkValues.map((value: any) =>
           value ? JSON.parse(value) : null,
         );
@@ -102,8 +100,15 @@ export class RedisCacheService {
       }
 
       return result;
-    } catch (err) {
-      console.log('############ ', err);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to get batch of keys from redis cache.',
+        {
+          path: 'redis-cache.service.batchGetCache',
+          exception: error.toString(),
+          cacheKeys: keys,
+        },
+      );
       return;
     }
   }
@@ -113,31 +118,45 @@ export class RedisCacheService {
     keys: string[],
     values: any[],
     ttl: number,
+    region: string = null,
   ) {
-    const chunks = this.getChunks(
-      keys.map((key, index) => {
-        const element: any = {};
-        element[key] = index;
-        return element;
-      }, 25),
-    );
-
-    const sets = [];
-
-    for (const chunk of chunks) {
-      const chunkKeys = chunk.map((element: any) => Object.keys(element)[0]);
-      const chunkValues = chunk.map(
-        (element: any) => values[Object.values(element)[0] as number],
+    try {
+      const mapKeys = keys.map((key) => generateCacheKey(key, region));
+      const chunks = this.getChunks(
+        mapKeys.map((key, index) => {
+          const element: any = {};
+          element[key] = index;
+          return element;
+        }, 25),
       );
 
-      sets.push(
-        ...chunkKeys.map((key: string, index: number) => {
-          return ['set', key, JSON.stringify(chunkValues[index]), 'ex', ttl];
-        }),
+      const sets = [];
+
+      for (const chunk of chunks) {
+        const chunkKeys = chunk.map((element: any) => Object.keys(element)[0]);
+        const chunkValues = chunk.map(
+          (element: any) => values[Object.values(element)[0] as number],
+        );
+
+        sets.push(
+          ...chunkKeys.map((key: string, index: number) => {
+            return ['set', key, JSON.stringify(chunkValues[index]), 'ex', ttl];
+          }),
+        );
+      }
+      const multi = client.multi(sets);
+      return promisify(multi.exec).call(multi);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to set batch of keys from redis cache.',
+        {
+          path: 'redis-cache.service.batchSetCache',
+          exception: error.toString(),
+          cacheKeys: keys,
+        },
       );
+      return;
     }
-    const multi = client.multi(sets);
-    return promisify(multi.exec).call(multi);
   }
 
   async del(
