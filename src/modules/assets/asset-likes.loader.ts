@@ -13,6 +13,7 @@ import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
 export class AssetLikesProvider {
   private dataLoader = new DataLoader(
     async (keys: string[]) => await this.batchAssetLikesCount(keys),
+    { cache: false },
   );
   private redisClient: Redis.Redis;
 
