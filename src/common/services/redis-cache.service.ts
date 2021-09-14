@@ -4,6 +4,7 @@ import * as Redis from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisService } from 'nestjs-redis';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
+import { promisify } from 'util';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -57,6 +58,87 @@ export class RedisCacheService {
           path: 'redis-cache.service.set',
           exception: err.toString(),
           cacheKey: cacheKey,
+        },
+      );
+      return;
+    }
+  }
+
+  async batchGetCache<T>(
+    client,
+    keys: string[],
+    region: string = null,
+  ): Promise<T[]> {
+    const chunks = this.getChunks(
+      keys.map((key) => generateCacheKey(key, region)),
+      100,
+    );
+    const asyncMGet = promisify(client.mget).bind(client);
+    const result = [];
+    try {
+      for (const chunkKeys of chunks) {
+        let chunkValues = await asyncMGet(chunkKeys);
+        chunkValues = chunkValues.map((value: any) =>
+          value ? JSON.parse(value) : null,
+        );
+
+        result.push(...chunkValues);
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to get batch of keys from redis cache.',
+        {
+          path: 'redis-cache.service.batchGetCache',
+          exception: error.toString(),
+          cacheKeys: keys,
+        },
+      );
+      return;
+    }
+  }
+
+  async batchSetCache(
+    client: Redis.Redis,
+    keys: string[],
+    values: any[],
+    ttl: number,
+    region: string = null,
+  ) {
+    try {
+      const mapKeys = keys.map((key) => generateCacheKey(key, region));
+      const chunks = this.getChunks(
+        mapKeys.map((key, index) => {
+          const element: any = {};
+          element[key] = index;
+          return element;
+        }, 25),
+      );
+
+      const sets = [];
+
+      for (const chunk of chunks) {
+        const chunkKeys = chunk.map((element: any) => Object.keys(element)[0]);
+        const chunkValues = chunk.map(
+          (element: any) => values[Object.values(element)[0] as number],
+        );
+
+        sets.push(
+          ...chunkKeys.map((key: string, index: number) => {
+            return ['set', key, JSON.stringify(chunkValues[index]), 'ex', ttl];
+          }),
+        );
+      }
+      const multi = client.multi(sets);
+      return promisify(multi.exec).call(multi);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to set batch of keys from redis cache.',
+        {
+          path: 'redis-cache.service.batchSetCache',
+          exception: error.toString(),
+          cacheKeys: keys,
         },
       );
       return;
@@ -159,6 +241,20 @@ export class RedisCacheService {
     const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
     return value;
+  }
+
+  private getChunks<T>(array: T[], size = 25): T[][] {
+    return array.reduce((result: T[][], item, current) => {
+      const index = Math.floor(current / size);
+
+      if (!result[index]) {
+        result[index] = [];
+      }
+
+      result[index].push(item);
+
+      return result;
+    }, []);
   }
 
   private buildInternalCreateValueFunc(

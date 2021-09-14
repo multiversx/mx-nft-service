@@ -27,12 +27,13 @@ import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { AssetsFilter } from '../filtersTypes';
-import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
+import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AssetLikesProvider } from './asset-likes.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -40,6 +41,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
+    private assetsLikeProvider: AssetLikesProvider,
+    private auctionsProvider: AuctionsProvider,
   ) {
     super();
   }
@@ -115,9 +118,12 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('likesCount', () => Int)
-  likesCount(@Parent() asset: Asset) {
+  async likesCount(@Parent() asset: Asset) {
     const { identifier } = asset;
-    return this.assetsLikesService.getAssetLikesCount(identifier);
+    const assetLikes = await this.assetsLikeProvider.getAssetLikesCount(
+      identifier,
+    );
+    return assetLikes ? assetLikes[0]?.likesCount : null;
   }
 
   @ResolveField('isLiked', () => Boolean)
@@ -127,18 +133,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('auctions', () => [Auction])
-  async auctions(
-    @Parent() asset: Asset,
-    @Context()
-    { assetAuctionLoader: assetAuctionLoader }: IGraphQLContext,
-  ) {
+  async auctions(@Parent() asset: Asset) {
     const { identifier } = asset;
     if (!identifier) {
       return null;
     }
-    const auctions = await assetAuctionLoader.load(identifier);
-    return auctions !== undefined
-      ? auctions.map((auction) => Auction.fromEntity(auction))
+    const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
+      identifier,
+    );
+    return auctions
+      ? auctions?.map((auction) => Auction.fromEntity(auction))
       : null;
   }
 

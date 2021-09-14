@@ -6,10 +6,12 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { QueryRequest } from '../../modules/QueryRequest';
 import { OrderEntity } from './order.entity';
+import { OrdersProvider } from './orders.loader';
 
 @Injectable()
 export class OrdersServiceDb {
   constructor(
+    private ordersLoader: OrdersProvider,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}
@@ -54,6 +56,7 @@ export class OrdersServiceDb {
   }
 
   async updateOrder(order: OrderEntity) {
+    this.ordersLoader.clearKey(order.auctionId);
     order.status = OrderStatusEnum.inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);

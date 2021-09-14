@@ -44,19 +44,19 @@ export class Asset {
   balance: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   creationDate!: string;
   @Field(() => [String])
   uris: string[];
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   url: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   thumbnailUrl: string;
   @Field(() => [Auction], { nullable: true })
   auctions: Auction[];
   @Field(() => [String], { nullable: true })
   tags: string[];
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   likesCount: number;
   @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
