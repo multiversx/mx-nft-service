@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import {
   LogTopic,
+  ShardTransaction,
   TransactionProcessor,
 } from '@elrondnetwork/transaction-processor';
 import * as Redis from 'ioredis';
@@ -15,6 +16,7 @@ import { CreateOrderArgs } from '../orders/models';
 import { ElrondProxyService } from 'src/common';
 import { getDataArgs, getDataFunctionName } from './decoders';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
+import { TransactionHash } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class TransactionService {
@@ -75,18 +77,26 @@ export class TransactionService {
     }
   }
 
-  private processTransactions(transactions) {
-    transactions.forEach(async (transaction) => {
+  private async processTransactions(transactions: ShardTransaction[]) {
+    for (let transaction of transactions) {
+      if (!this.isTransactionSuccessful(transaction)) {
+        console.log(
+          `Transaction with tx hash ${transaction.hash} is not successful, has status '${transaction.status}'`,
+        );
+        continue;
+      }
+
       const functionName = getDataFunctionName(transaction.data);
       const dataArgs = getDataArgs(transaction.data);
 
-      if (
-        this.isAuctionToken(dataArgs) &&
-        (await this.isTransactionSuccessful(transaction))
-      ) {
+      if (this.isAuctionToken(dataArgs)) {
         const trans = await this.gatewayService
           .getService()
-          .getTransaction(transaction.hash, undefined, true);
+          .getTransaction(
+            new TransactionHash(transaction.hash),
+            undefined,
+            true,
+          );
         const scResults = trans.getSmartContractResults().getResultingCalls();
         if (scResults.length > 0) {
           const decodedData = this.splitDataArgs(
@@ -102,66 +112,54 @@ export class TransactionService {
           }
         }
       }
+
       switch (functionName) {
         case 'bid': {
-          if (await this.isTransactionSuccessful(transaction))
-            this.ordersService.createOrder(
-              new CreateOrderArgs({
-                ownerAddress: transaction.sender,
-                auctionId: parseInt(dataArgs[0], 16),
-                priceToken: 'EGLD',
-                priceAmount: transaction.value,
-                priceNonce: 0,
-              }),
-            );
-          return;
+          this.ordersService.createOrder(
+            new CreateOrderArgs({
+              ownerAddress: transaction.sender,
+              auctionId: parseInt(dataArgs[0], 16),
+              priceToken: 'EGLD',
+              priceAmount: transaction.value,
+              priceNonce: 0,
+            }),
+          );
+          break;
         }
         case 'buySft': {
-          if (await this.isTransactionSuccessful(transaction))
-            this.ordersService.createOrderForSft(
-              new CreateOrderArgs({
-                ownerAddress: transaction.sender,
-                auctionId: parseInt(dataArgs[0], 16),
-                priceToken: 'EGLD',
-                priceAmount: transaction.value,
-                priceNonce: 0,
-              }),
-            );
-          return;
+          this.ordersService.createOrderForSft(
+            new CreateOrderArgs({
+              ownerAddress: transaction.sender,
+              auctionId: parseInt(dataArgs[0], 16),
+              priceToken: 'EGLD',
+              priceAmount: transaction.value,
+              priceNonce: 0,
+            }),
+          );
+          break;
         }
-
         case 'withdraw': {
-          if (await this.isTransactionSuccessful(transaction)) {
-            this.auctionsService.updateAuction(
-              parseInt(dataArgs[0], 16),
-              AuctionStatusEnum.Closed,
-            );
-            return;
-          }
+          this.auctionsService.updateAuction(
+            parseInt(dataArgs[0], 16),
+            AuctionStatusEnum.Closed,
+          );
+          break;
         }
         case 'endAuction': {
-          if (await this.isTransactionSuccessful(transaction)) {
-            this.auctionsService.updateAuction(
-              parseInt(dataArgs[0], 16),
-              AuctionStatusEnum.Ended,
-            );
-            return;
-          }
+          this.auctionsService.updateAuction(
+            parseInt(dataArgs[0], 16),
+            AuctionStatusEnum.Ended,
+          );
+          break;
         }
         default:
           return {};
       }
-    });
+    }
   }
 
-  private async isTransactionSuccessful(transaction: any) {
-    return (
-      (
-        await this.apiService.getService().getTransaction(transaction.hash)
-      ).status.status
-        .valueOf()
-        .toLowerCase() === 'success'
-    );
+  private isTransactionSuccessful(transaction: ShardTransaction) {
+    return transaction.status.toLowerCase() === 'success';
   }
 
   public splitDataArgs(data): string[] | undefined {
