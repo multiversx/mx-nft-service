@@ -15,9 +15,6 @@ import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
-import { assetAuctionLoader } from './db/auctions/asset-auction.loader';
-import { acountAuctionLoader } from './db/auctions/account-auction.loader';
-import { auctionOrdersLoader } from './db/orders/auction-orders.loader';
 import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
@@ -57,10 +54,7 @@ import { CommonModule } from './common.module';
         maxFiles: 5,
       },
       context: () => ({
-        assetAuctionLoader: assetAuctionLoader(),
         auctionLoaderById: auctionLoaderById(),
-        acountAuctionLoader: acountAuctionLoader(),
-        auctionOrdersLoader: auctionOrdersLoader(),
       }),
     }),
     CommonModule,

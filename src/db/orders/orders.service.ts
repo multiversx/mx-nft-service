@@ -5,6 +5,7 @@ import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { QueryRequest } from '../../modules/QueryRequest';
+import { ActiveOrdersProvider } from './active-orders.loader';
 import { OrderEntity } from './order.entity';
 import { OrdersProvider } from './orders.loader';
 
@@ -12,6 +13,7 @@ import { OrdersProvider } from './orders.loader';
 export class OrdersServiceDb {
   constructor(
     private ordersLoader: OrdersProvider,
+    private activeOrdersLoades: ActiveOrdersProvider,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}
@@ -57,6 +59,7 @@ export class OrdersServiceDb {
 
   async updateOrder(order: OrderEntity) {
     this.ordersLoader.clearKey(order.auctionId);
+    this.activeOrdersLoades.clearKey(order.auctionId);
     order.status = OrderStatusEnum.inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);

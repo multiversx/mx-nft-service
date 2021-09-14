@@ -28,7 +28,6 @@ import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
-import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
@@ -36,6 +35,7 @@ import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { OrdersProvider } from 'src/db/orders/orders.loader';
 import { AssetsProvider } from '../assets/assets.loader';
+import { ActiveOrdersProvider } from 'src/db/orders/active-orders.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -44,6 +44,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
+    private activeOrdersProvider: ActiveOrdersProvider,
     private ordersProvider: OrdersProvider,
   ) {
     super();
@@ -184,7 +185,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
     const { id } = auction;
-    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+    const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
+      id,
+    );
 
     return activeOrders?.length > 0
       ? Price.fromEntity(activeOrders[activeOrders.length - 1])
@@ -195,7 +198,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBidder(@Parent() auction: Auction) {
     const { id } = auction;
 
-    const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);
+    const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
+      id,
+    );
     return activeOrders?.length > 0
       ? Account.fromEntity(
           await this.accountsProvider.getAccountByAddress(
@@ -209,7 +214,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const orders = await this.ordersProvider.getOrderByAuctionId(id);
+      const orders = await this.activeOrdersProvider.getOrderByAuctionId(id);
       const availableTokens =
         nrAuctionedTokens - orders?.length || nrAuctionedTokens;
       return availableTokens;
@@ -218,15 +223,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('orders', () => [Order])
-  async orders(
-    @Parent() auction: Auction,
-    @Context()
-    { auctionOrdersLoader: auctionOrdersLoader }: IGraphQLContext,
-  ) {
+  async orders(@Parent() auction: Auction) {
     const { id } = auction;
 
     if (!id) return null;
-    const orderEntities = await auctionOrdersLoader.load(id);
+    const orderEntities = await this.ordersProvider.getOrdersByAuctionId(id);
     return orderEntities?.map((element) => Order.fromEntity(element));
   }
 
