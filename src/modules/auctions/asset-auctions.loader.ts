@@ -13,6 +13,7 @@ import { cacheConfig } from 'src/config';
 export class AuctionsProvider {
   private dataLoader = new DataLoader(
     async (keys: string[]) => await this.getAuctions(keys),
+    { cache: false },
   );
   private redisClient: Redis.Redis;
 

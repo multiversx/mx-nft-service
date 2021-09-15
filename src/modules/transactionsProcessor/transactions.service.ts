@@ -79,10 +79,10 @@ export class TransactionService {
 
   private async processTransactions(transactions: ShardTransaction[]) {
     for (let transaction of transactions) {
+      console.log(
+        `Transaction with tx hash ${transaction.hash} has status '${transaction.status}'and transaction data ${transaction.data}`,
+      );
       if (!this.isTransactionSuccessful(transaction)) {
-        console.log(
-          `Transaction with tx hash ${transaction.hash} is not successful, has status '${transaction.status}'`,
-        );
         continue;
       }
 
