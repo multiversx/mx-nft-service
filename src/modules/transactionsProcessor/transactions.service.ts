@@ -27,7 +27,6 @@ export class TransactionService {
   constructor(
     private auctionsService: AuctionsService,
     private gatewayService: ElrondProxyService,
-    private apiService: ElrondApiService,
     private ordersService: OrdersService,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -152,8 +151,6 @@ export class TransactionService {
           );
           break;
         }
-        default:
-          return {};
       }
     }
   }
