@@ -3,7 +3,7 @@ import {
   AuctionStatusEnum,
   AuctionAbi,
 } from 'src/modules/auctions/models';
-import { nominateVal } from 'src/modules/formatters';
+import denominate, { nominateVal } from 'src/modules/formatters';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 
@@ -39,8 +39,13 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   minBid: string;
 
+  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  minBidDenominated: number;
   @Column()
   maxBid: string;
+
+  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  maxBidDenominated: number;
 
   @Column()
   startDate: string;
@@ -73,7 +78,23 @@ export class AuctionEntity extends BaseEntity {
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
+          minBidDenominated: parseFloat(
+            denominate({
+              input: auction.min_bid.valueOf()?.toString(),
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }),
+          ),
           maxBid: auction.max_bid?.valueOf()?.toString() || '0',
+          maxBidDenominated: parseFloat(
+            denominate({
+              input: auction.max_bid.valueOf()?.toString() || '0',
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }),
+          ),
           startDate: auction.start_time.valueOf().toString(),
           endDate: auction.deadline.valueOf().toString(),
           identifier: `${auction.auctioned_token.token_type
