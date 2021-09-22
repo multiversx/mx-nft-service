@@ -13,6 +13,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService } from 'src/common';
 import { AuctionsProvider } from './asset-auctions.loader';
+import { GroupBy } from '../filtersTypes';
 const hash = require('object-hash');
 
 @Injectable()
@@ -124,10 +125,14 @@ export class AuctionsService {
   }
 
   private async getMappedAuctions(queryRequest: QueryRequest) {
-    const [auctions, count] = await this.auctionServiceDb.getAuctions(
-      queryRequest,
-    );
-
+    let [auctions, count] = [[], 0];
+    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
+      [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
+        queryRequest,
+      );
+    } else {
+      [auctions, count] = await this.auctionServiceDb.getAuctions(queryRequest);
+    }
     return [auctions.map((element) => Auction.fromEntity(element)), count];
   }
 

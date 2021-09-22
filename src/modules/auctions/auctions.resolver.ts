@@ -30,7 +30,7 @@ import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import { FiltersExpression, Sorting } from '../filtersTypes';
+import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
 import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { UseGuards } from '@nestjs/common';
@@ -102,12 +102,20 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
     sorting,
+    @Args({ name: 'grouping', type: () => Grouping, nullable: true })
+    groupBy,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
-      new QueryRequest({ limit, offset, filters, sorting }),
+      new QueryRequest({
+        limit,
+        offset,
+        filters,
+        sorting,
+        groupByOption: groupBy,
+      }),
     );
     const page = connectionFromArraySlice(auctions, pagination, {
       arrayLength: count,

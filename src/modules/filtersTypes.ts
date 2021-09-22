@@ -20,6 +20,13 @@ export enum Sort {
   DESC,
 }
 
+export enum GroupBy {
+  IDENTIFIER,
+}
+
+registerEnumType(GroupBy, {
+  name: 'GroupBy',
+});
 registerEnumType(Operator, {
   name: 'Operator',
 });
@@ -38,6 +45,10 @@ export class Filter {
   values: string[];
   @Field(() => String)
   field: string;
+
+  constructor(init?: Partial<Filter>) {
+    Object.assign(this, init);
+  }
 }
 
 @InputType()
@@ -49,11 +60,17 @@ export class Sorting {
 }
 
 @InputType()
+export class Grouping {
+  @Field(() => GroupBy)
+  groupBy: GroupBy;
+}
+
+@InputType()
 export class FiltersExpression {
   @Field(() => Operator)
   operator: Operator;
   @Field(() => [Filter])
-  filters: [Filter];
+  filters: Filter[];
 }
 
 @InputType()

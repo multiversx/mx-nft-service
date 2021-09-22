@@ -254,6 +254,14 @@ type FollowerResponseEdge {
   node: Account
 }
 
+enum GroupBy {
+  IDENTIFIER
+}
+
+input Grouping {
+  groupBy: GroupBy!
+}
+
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   collection: String!
@@ -375,7 +383,7 @@ type Query {
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
   assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
-  auctions(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
   collections(ownerAddress: String!): [String!]!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
