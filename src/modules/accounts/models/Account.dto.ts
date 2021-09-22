@@ -45,8 +45,8 @@ export class Account {
     return new Account({
       address: account.address,
       description: account?.description,
-      profile: account?.profile,
-      cover: account?.cover,
+      profile: account?.profile?.url,
+      cover: account?.cover?.url,
       herotag: account?.herotag,
       socialLinks: account?.socialLinks?.map(
         (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
