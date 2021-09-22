@@ -126,12 +126,21 @@ export class AuctionsService {
 
   private async getMappedAuctions(queryRequest: QueryRequest) {
     let [auctions, count] = [[], 0];
-    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
-      [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
+
+    if (queryRequest.filters.filters.some((f) => f.field === 'identifier')) {
+      [auctions, count] = await this.auctionServiceDb.getAuctionsForIdentifier(
         queryRequest,
       );
     } else {
-      [auctions, count] = await this.auctionServiceDb.getAuctions(queryRequest);
+      if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
+        [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
+          queryRequest,
+        );
+      } else {
+        [auctions, count] = await this.auctionServiceDb.getAuctions(
+          queryRequest,
+        );
+      }
     }
     return [auctions.map((element) => Auction.fromEntity(element)), count];
   }

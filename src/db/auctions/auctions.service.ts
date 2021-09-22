@@ -57,6 +57,26 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsForIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .orderBy(
+        'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
+      );
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    return await queryBuilder.getManyAndCount();
+  }
+
   async getTrendingAuctions(
     queryRequest: TrendingQueryRequest,
   ): Promise<[AuctionEntity[], number]> {
