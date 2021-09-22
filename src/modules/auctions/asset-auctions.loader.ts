@@ -51,12 +51,13 @@ export class AuctionsProvider {
     );
     if (getAuctionsFromCache.includes(null)) {
       const auctions = await getRepository(AuctionEntity)
-        .createQueryBuilder('auctions')
-        .where(
-          'identifier IN(:...identifiers) AND Status not in ("Closed", "Ended")',
-          {
-            identifiers: identifiers,
-          },
+        .createQueryBuilder('a')
+        .where('a.identifier IN(:...identifiers) AND a.status in ("Running")', {
+          identifiers: identifiers,
+        })
+        .leftJoin('orders', 'o', 'o.auctionId=a.id')
+        .orderBy(
+          'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
         )
         .getMany();
       const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
