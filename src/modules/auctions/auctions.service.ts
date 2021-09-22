@@ -34,15 +34,12 @@ export class AuctionsService {
 
   async saveAuction(
     auctionId: number,
-    collection: string,
-    nonce: string,
+    identifier: string,
   ): Promise<Auction | any> {
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.apiService.getNftByIdentifier(
-        `${collection}-${nonce}`,
-      );
+      const asset = await this.apiService.getNftByIdentifier(identifier);
       const savedAuction = await this.auctionServiceDb.insertAuction(
         AuctionEntity.fromAuctionAbi(
           auctionId,

@@ -3,9 +3,7 @@ import { Field, InputType } from '@nestjs/graphql';
 @InputType()
 export class CreateAssetArgs {
   @Field(() => String)
-  collection: string;
-  @Field(() => String)
-  nonce: string;
+  identifier: string;
   @Field(() => String)
   hash: string;
   @Field(() => String)

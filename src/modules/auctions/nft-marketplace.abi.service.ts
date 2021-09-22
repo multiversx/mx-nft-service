@@ -31,6 +31,7 @@ import {
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
+import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -58,14 +59,17 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     args: BidActionArgs,
   ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let bid = contract.call({
       func: new ContractFunction('bid'),
       value: Balance.fromString(args.price),
       args: [
         new U64Value(new BigNumber(args.auctionId)),
-        BytesValue.fromUTF8(args.collection),
-        new U64Value(new BigNumber(args.nonce)),
+        BytesValue.fromUTF8(collection),
+        new U64Value(new BigNumber(nonce)),
       ],
       gasLimit: new GasLimit(gas.bid),
     });
@@ -106,13 +110,16 @@ export class NftMarketplaceAbiService {
     args: BuySftActionArgs,
   ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
       value: Balance.fromString(args.price),
       args: [
         new U64Value(new BigNumber(args.auctionId)),
-        BytesValue.fromUTF8(args.collection),
-        new U64Value(new BigNumber(args.nonce)),
+        BytesValue.fromUTF8(collection),
+        new U64Value(new BigNumber(nonce)),
       ],
       gasLimit: new GasLimit(gas.endAuction),
     });
@@ -208,9 +215,12 @@ export class NftMarketplaceAbiService {
   }
 
   private getCreateAuctionArgs(args: CreateAuctionArgs): TypedValue[] {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
     let returnArgs: TypedValue[] = [
-      BytesValue.fromUTF8(args.collection),
-      new U64Value(new BigNumber(args.nonce)),
+      BytesValue.fromUTF8(collection),
+      new U64Value(new BigNumber(nonce)),
       new U64Value(new BigNumber(args.quantity)),
       new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
       BytesValue.fromUTF8('auctionToken'),

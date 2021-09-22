@@ -90,3 +90,9 @@ export class AssetsFilter {
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
 }
+
+@InputType()
+export class AssetHistoryFilter {
+  @Field(() => String)
+  identifier: string;
+}
