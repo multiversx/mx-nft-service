@@ -38,6 +38,7 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { OrdersProvider } from 'src/db/orders/orders.loader';
+import { AssetsProvider } from '../assets/assets.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -46,6 +47,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private assetsService: AssetsService,
     private accountsProvider: AccountsProvider,
+    private assetsProvider: AssetsProvider,
     private ordersProvider: OrdersProvider,
   ) {
     super();
@@ -178,14 +180,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
-    const { identifier, status } = auction;
-    return status !== AuctionStatusEnum.Closed &&
-      status !== AuctionStatusEnum.Ended
-      ? await this.assetsService.getAssetByIdentifierAndAddress(
-          elrondConfig.nftMarketplaceAddress,
-          identifier,
-        )
-      : await this.assetsService.getAssetByIdentifier(identifier);
+    const { identifier } = auction;
+    const nft = await this.assetsProvider.getNftByIdentifier(identifier);
+    return Asset.fromNft(nft);
   }
 
   @ResolveField('topBid', () => Price)

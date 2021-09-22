@@ -46,7 +46,6 @@ export class ElrondApiService {
         resourceUrl,
         callback,
       );
-
       profiler.stop();
 
       MetricsCollector.setExternalCall(
@@ -82,6 +81,14 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifierAndAddress.name,
       `accounts/${address}/nfts/${identifier}`,
+      (response) => response,
+    );
+  }
+
+  async getNftsByIdentifier(identifiers: string[]): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getNftsByIdentifier.name,
+      `nfts/?identifiers=${identifiers}`,
       (response) => response,
     );
   }
