@@ -10,6 +10,9 @@ export class OrderEntity extends BaseEntity {
   @Column()
   priceAmount: string;
 
+  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  priceAmountDenominated: number;
+
   @Column()
   priceNonce: number;
 

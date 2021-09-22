@@ -34,6 +34,7 @@ import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
 import { AssetLikesProvider } from './asset-likes.loader';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -142,8 +143,20 @@ export class AssetsResolver extends BaseResolver(Asset) {
       identifier,
     );
     return auctions
-      ? auctions?.map((auction) => Auction.fromEntity(auction))
+      ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
       : null;
+  }
+
+  @ResolveField('lowestAuction', () => Auction)
+  async lowestAuction(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    if (!identifier) {
+      return null;
+    }
+    const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
+      identifier,
+    );
+    return auctions ? Auction.fromEntity(auctions[0]) : null;
   }
 
   @ResolveField('creator', () => Account)

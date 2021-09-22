@@ -1,6 +1,7 @@
 import { isEmpty, map } from 'lodash';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import { Filter, FiltersExpression, Operation, Operator } from './filtersTypes';
+import denominate from './formatters';
 
 type ParamValue = string | number | Array<string | number>;
 
@@ -31,33 +32,45 @@ export default class WhereBuilder<Entity> {
 
   private buildFilter(filter: Filter): string {
     const paramName = `${filter.field}_${++this.paramsCount}`;
-
+    let filterName = `${filter.field}`;
+    let filterValues = filter.values;
+    if (['priceAmount', 'minBid', 'maxBid'].includes(filter.field)) {
+      filterName = `${filter.field}Denominated`;
+      filterValues = filter.values.map((value) =>
+        denominate({
+          input: value,
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }),
+      );
+    }
     const sqlParamName = this.queryBuilderName
-      ? `${this.queryBuilderName}.${filter.field}`
-      : filter.field;
+      ? `${this.queryBuilderName}.${filterName}`
+      : filterName;
 
     switch (filter.op) {
       case Operation.EQ:
-        this.params[paramName] = filter.values[0];
+        this.params[paramName] = filterValues[0];
         return `${sqlParamName} = :${paramName}`;
       case Operation.IN:
-        this.params[paramName] = filter.values;
+        this.params[paramName] = filterValues;
         if (filter.field === 'tags') {
           return this.getTagsFilter(filter, sqlParamName);
         }
         return `${sqlParamName} IN (:${paramName})`;
       case Operation.LIKE:
-        this.params[paramName] = `%${filter.values[0]}%`;
+        this.params[paramName] = `%${filterValues[0]}%`;
         return `${sqlParamName} LIKE :${paramName}`;
       case Operation.GE:
-        this.params[paramName] = `%${filter.values[0]}%`;
+        this.params[paramName] = `${filterValues[0]}`;
         return `${sqlParamName} >= :${paramName}`;
       case Operation.LE:
-        this.params[paramName] = `%${filter.values[0]}%`;
+        this.params[paramName] = `${filterValues[0]}`;
         return `${sqlParamName} <= :${paramName}`;
       case Operation.BETWEEN:
-        this.params[paramName] = `%${filter.values[0]}%`;
-        return `${sqlParamName} BETWEEN '${filter.values[0]}' AND '${filter.values[1]}'`;
+        this.params[paramName] = `%${filterValues[0]}%`;
+        return `${sqlParamName} BETWEEN '${filterValues[0]}' AND '${filterValues[1]}'`;
       default:
         throw new Error(`Unknown filter operation: ${filter.op}`);
     }

@@ -37,6 +37,46 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsGroupBy(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(a.id) OVER (PARTITION BY identifier ORDER BY if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC) AS min_bid
+      from auctions a 
+      Left join orders o on a.id = o.auctionId 
+      WHERE a.status in ('Running')
+      order by if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC )`);
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    this.addOrderBy(queryRequest.sorting, queryBuilder);
+    return await queryBuilder.getManyAndCount();
+  }
+
+  async getAuctionsForIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .orderBy(
+        'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
+      );
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    return await queryBuilder.getManyAndCount();
+  }
+
   async getTrendingAuctions(
     queryRequest: TrendingQueryRequest,
   ): Promise<[AuctionEntity[], number]> {
