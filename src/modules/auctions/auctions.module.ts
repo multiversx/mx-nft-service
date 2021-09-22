@@ -10,6 +10,7 @@ import { OrdersService } from '../orders/order.service';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AuctionsProvider } from './asset-auctions.loader';
+import { AssetsProvider } from '../assets/assets.loader';
 
 @Module({
   providers: [
@@ -19,6 +20,7 @@ import { AuctionsProvider } from './asset-auctions.loader';
     OrdersService,
     RedisCacheService,
     AuctionsProvider,
+    AssetsProvider,
   ],
   imports: [
     ElrondCommunicationModule,
