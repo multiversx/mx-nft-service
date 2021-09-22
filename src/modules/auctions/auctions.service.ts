@@ -127,7 +127,7 @@ export class AuctionsService {
   private async getMappedAuctions(queryRequest: QueryRequest) {
     let [auctions, count] = [[], 0];
 
-    if (queryRequest.filters.filters.some((f) => f.field === 'identifier')) {
+    if (queryRequest?.filters?.filters?.some((f) => f.field === 'identifier')) {
       [auctions, count] = await this.auctionServiceDb.getAuctionsForIdentifier(
         queryRequest,
       );
