@@ -1,13 +1,18 @@
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetsHistoryService } from './assets-history.service';
 import { AssetHistoryFilter } from '../filtersTypes';
 import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
+import { Account } from '../accounts/models';
+import { AccountsProvider } from '../accounts/accounts.loader';
 
 @Resolver(() => AssetHistoryLog)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
-  constructor(private assetsHistoryService: AssetsHistoryService) {
+  constructor(
+    private assetsHistoryService: AssetsHistoryService,
+    private accountsProvider: AccountsProvider,
+  ) {
     super();
   }
 
@@ -25,5 +30,14 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     );
 
     return historyLog;
+  }
+
+  @ResolveField('account', () => Account)
+  async account(@Parent() asset: AssetHistoryLog) {
+    const { address } = asset;
+
+    if (!address) return null;
+    const account = await this.accountsProvider.getAccountByAddress(address);
+    return Account.fromEntity(account);
   }
 }

@@ -19,7 +19,7 @@ export class Order {
   @Field(() => Account, { nullable: true })
   from: Account;
 
-  @Field(() => Auction)
+  @Field(() => Auction, { nullable: true })
   auction: Auction;
 
   @Field(() => Price)

@@ -90,6 +90,7 @@ input AssetHistoryFilter {
 }
 
 type AssetHistoryLog {
+  account: Account!
   action: AssetActionEnum!
   actionDate: String!
   address: String!
@@ -327,7 +328,7 @@ enum Operator {
 }
 
 type Order {
-  auction: Auction!
+  auction: Auction
   auctionId: Int!
   creationDate: DateTime!
   endDate: DateTime
