@@ -56,6 +56,7 @@ type Asset {
   lastSale: DateTime!
   lastSalePrice: Price
   likesCount: Int
+  lowestAuction: Auction
   metadata: Metadata
   name: String
   nonce: Int!

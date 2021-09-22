@@ -28,5 +28,11 @@ export class UpdatePriceAmountToDecimal1631709183116
     );
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      'ALTER TABLE `orders` DROP `priceAmountDenominated`',
+    );
+    await queryRunner.query('ALTER TABLE `auctions` DROP `minBidDenominated`');
+    await queryRunner.query('ALTER TABLE `auctions` DROP `maxBidDenominated`');
+  }
 }
