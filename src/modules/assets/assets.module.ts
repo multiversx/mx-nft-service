@@ -14,6 +14,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { AssetLikesProvider } from './asset-likes.loader';
+import { DataServiceUSD } from '../data.service.usd';
 
 @Module({
   providers: [
@@ -25,6 +26,7 @@ import { AssetLikesProvider } from './asset-likes.loader';
     AssetsHistoryResolver,
     RedisCacheService,
     S3Service,
+    DataServiceUSD,
   ],
   imports: [
     ElrondCommunicationModule,

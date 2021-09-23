@@ -7,6 +7,8 @@ export class Price {
   token: string;
   @Field()
   amount: string;
+  @Field(() => String, { nullable: true })
+  usdAmount: string;
   @Field(() => Int)
   nonce: number;
 

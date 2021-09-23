@@ -26,3 +26,11 @@ export function getCollectionAndNonceFromIdentifier(identifier: string): {
   const nonce = identifier.split('-').slice(2).join('-');
   return { collection, nonce };
 }
+
+export function usdValue(amount: string, usd: number, decimals?: number): any {
+  const sum = (parseFloat(amount) * usd).toFixed(decimals);
+  return parseFloat(sum).toLocaleString('en', {
+    maximumFractionDigits: decimals,
+    minimumFractionDigits: decimals,
+  });
+}

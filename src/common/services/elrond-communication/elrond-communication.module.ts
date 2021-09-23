@@ -5,6 +5,7 @@ import {
   ElrondIdentityService,
   ElrondProxyService,
 } from 'src/common';
+import { ElrondDataService } from './elrond-data.service';
 
 @Module({
   providers: [
@@ -12,12 +13,14 @@ import {
     ElrondApiService,
     ElrondElasticService,
     ElrondIdentityService,
+    ElrondDataService,
   ],
   exports: [
     ElrondProxyService,
     ElrondApiService,
     ElrondElasticService,
     ElrondIdentityService,
+    ElrondDataService,
   ],
 })
 export class ElrondCommunicationModule {}

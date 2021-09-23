@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common/services/elrond-communication/elrond-elastic.service';
-import { nominateVal } from '../formatters';
+import denominate, { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
+import { usdValue } from '../transactionsProcessor/helpers';
+import { DataServiceUSD } from '../data.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {
-  constructor(private elasticService: ElrondElasticService) {}
+  constructor(
+    private elasticService: ElrondElasticService,
+    private dataService: DataServiceUSD,
+  ) {}
 
   async getHistoryLog(
     collection: string,
@@ -23,13 +28,17 @@ export class AssetsHistoryService {
 
     let historyLog: AssetHistoryLog[] = [];
     for (let index = 0; index < res.length; index++) {
-      index = this.mapLogs(res, index, historyLog);
+      index = await this.mapLogs(res, index, historyLog);
     }
 
     return historyLog;
   }
 
-  private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
+  private async mapLogs(
+    res: any,
+    index: number,
+    historyLog: AssetHistoryLog[],
+  ) {
     switch (res[index]._source.events[0].identifier) {
       case AuctionEventEnum.AuctionTokenEvent: {
         historyLog.push(
@@ -74,7 +83,7 @@ export class AssetsHistoryService {
             );
           }
         } else {
-          index = this.mapAuctionEvents(res, index, historyLog);
+          index = await this.mapAuctionEvents(res, index, historyLog);
         }
         break;
       }
@@ -94,7 +103,7 @@ export class AssetsHistoryService {
     return index;
   }
 
-  private mapAuctionEvents(
+  private async mapAuctionEvents(
     res: any,
     index: number,
     historyLog: AssetHistoryLog[],
@@ -123,6 +132,9 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             res[index]._source.events[0].topics[2],
             price,
+            await this.dataService.getPriceForTimestamp(
+              res[index]._source.timestamp,
+            ),
           ),
         );
         historyLog.push(
@@ -133,6 +145,9 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             itemsCount,
             price,
+            await this.dataService.getPriceForTimestamp(
+              res[index]._source.timestamp,
+            ),
           ),
         );
 
@@ -151,6 +166,9 @@ export class AssetsHistoryService {
             res[index]._source.events[1].topics[3].base64ToBech32(),
             count,
             res[index]._source.events[1].topics[4],
+            await this.dataService.getPriceForTimestamp(
+              res[index]._source.timestamp,
+            ),
           ),
         );
         break;
@@ -166,19 +184,33 @@ export class AssetsHistoryService {
     address,
     itemsCount = undefined,
     price = undefined,
+    usdAmount = undefined,
   ): AssetHistoryLog {
     return new AssetHistoryLog({
       action: action,
       address: address,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount
-        ? parseInt(Buffer.from(itemsCount, 'base64').toString('hex'), 16)
+        ? Buffer.from(itemsCount, 'base64').toString('hex')
         : undefined,
       price: price
         ? new Price({
+            nonce: 0,
+            token: 'EGLD',
             amount: Buffer.from(price || '', 'base64')
               .toString('hex')
               .hexBigNumberToString(),
+            usdAmount: usdValue(
+              denominate({
+                input: Buffer.from(price || '', 'base64')
+                  .toString('hex')
+                  .hexBigNumberToString(),
+                denomination: 18,
+                decimals: 18,
+                showLastNonZeroDecimal: true,
+              }),
+              usdAmount || 0,
+            ),
           })
         : undefined,
     });
