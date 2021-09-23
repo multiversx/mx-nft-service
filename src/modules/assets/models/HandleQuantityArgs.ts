@@ -6,10 +6,7 @@ export class HandleQuantityArgs {
   addOrBurnRoleAddress: string;
 
   @Field(() => String)
-  collection: string;
-
-  @Field(() => Int)
-  nonce: number;
+  identifier: string;
 
   @Field(() => Int)
   quantity: number;

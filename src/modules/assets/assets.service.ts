@@ -17,6 +17,7 @@ import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { TransactionNode } from '../transaction';
+import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from './assets-query';
 import {
@@ -88,13 +89,16 @@ export class AssetsService {
   }
 
   async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
     const contract = getSmartContract(args.addOrBurnRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTAddQuantity'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromUTF8(collection),
+        BytesValue.fromHex(nonce),
         BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
@@ -103,13 +107,16 @@ export class AssetsService {
   }
 
   async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
     const contract = getSmartContract(args.addOrBurnRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTBurn'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateVal(args.nonce)),
+        BytesValue.fromUTF8(collection),
+        BytesValue.fromHex(nonce),
         BytesValue.fromHex(nominateVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
@@ -158,13 +165,16 @@ export class AssetsService {
     ownerAddress: string,
     transferNftArgs: TransferNftArgs,
   ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      transferNftArgs.identifier,
+    );
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(transferNftArgs.collection),
-        BytesValue.fromHex(nominateVal(transferNftArgs.nonce || 1)),
+        BytesValue.fromUTF8(collection),
+        BytesValue.fromHex(nonce),
         BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],

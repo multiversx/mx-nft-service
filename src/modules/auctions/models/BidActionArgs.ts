@@ -5,11 +5,9 @@ export class BidActionArgs {
   @Field(() => Int)
   auctionId: number;
   @Field(() => String)
-  collection: string;
+  identifier: string;
   @Field(() => String)
   price: string;
-  @Field(() => String)
-  nonce: string;
 }
 
 @InputType()
@@ -17,9 +15,7 @@ export class BuySftActionArgs {
   @Field(() => Int)
   auctionId: number;
   @Field(() => String)
-  collection: string;
+  identifier: string;
   @Field(() => String)
   price: string;
-  @Field(() => String)
-  nonce: string;
 }

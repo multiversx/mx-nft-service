@@ -85,7 +85,12 @@ type AssetEdge {
   node: Asset
 }
 
+input AssetHistoryFilter {
+  identifier: String!
+}
+
 type AssetHistoryLog {
+  account: Account!
   action: AssetActionEnum!
   actionDate: String!
   address: String!
@@ -177,15 +182,13 @@ enum AuctionTypeEnum {
 
 input BidActionArgs {
   auctionId: Int!
-  collection: String!
-  nonce: String!
+  identifier: String!
   price: String!
 }
 
 input BuySftActionArgs {
   auctionId: Int!
-  collection: String!
-  nonce: String!
+  identifier: String!
   price: String!
 }
 
@@ -204,12 +207,11 @@ input ConnectionArgs {
 }
 
 input CreateAuctionArgs {
-  collection: String!
   deadline: String!
+  identifier: String!
   maxBid: String
   maxOneSftPerPayment: Boolean
   minBid: String!
-  nonce: Int!
   paymentToken: String!
   paymentTokenNonce: Int
   quantity: Int!
@@ -265,8 +267,7 @@ input Grouping {
 
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
-  collection: String!
-  nonce: Int!
+  identifier: String!
   quantity: Int!
 }
 
@@ -327,7 +328,7 @@ enum Operator {
 }
 
 type Order {
-  auction: Auction!
+  auction: Auction
   auctionId: Int!
   creationDate: DateTime!
   endDate: DateTime
@@ -382,7 +383,7 @@ type Price {
 
 type Query {
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
-  assetHistory(collection: String!, nonce: Int!): [AssetHistoryLog!]!
+  assetHistory(filters: AssetHistoryFilter!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
@@ -436,9 +437,8 @@ type TransactionNode {
 }
 
 input TransferNftArgs {
-  collection: String!
   destinationAddress: String!
-  nonce: Int!
+  identifier: String!
   quantity: Int!
 }
 
