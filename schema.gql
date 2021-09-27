@@ -130,11 +130,12 @@ type Auction {
   asset: Asset
   availableTokens: Int
   collection: String!
+  creationDate: DateTime!
   endDate: String!
   id: ID!
   identifier: String!
-  maxBid: Price!
-  minBid: Price!
+  maxBid: MaxBid!
+  minBid: MinBid!
   nonce: Int!
   nrAuctionedTokens: Int
   orders: [Order!]
@@ -143,7 +144,7 @@ type Auction {
   startDate: String!
   status: AuctionStatusEnum
   tags: String
-  topBid: Price
+  topBid: TopBid
   topBidder: Account
   type: AuctionTypeEnum
 }
@@ -280,11 +281,27 @@ input IssueCollectionArgs {
   tokenTicker: String!
 }
 
+type MaxBid {
+  amount: String!
+  nonce: Int!
+  timestamp: Int!
+  token: ID!
+  usdAmount: Float!
+}
+
 type Metadata {
   description: String!
   fileName: String!
   fileType: String!
   fileUri: String!
+}
+
+type MinBid {
+  amount: String!
+  nonce: Int!
+  timestamp: Int!
+  token: ID!
+  usdAmount: Float!
 }
 
 type Mutation {
@@ -335,7 +352,7 @@ type Order {
   from: Account
   id: ID!
   ownerAddress: String!
-  price: Price!
+  price: OrderPrice!
   status: OrderStatusEnum!
 }
 
@@ -349,6 +366,14 @@ type OrderPageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+type OrderPrice {
+  amount: String!
+  nonce: Int!
+  timestamp: Int!
+  token: ID!
+  usdAmount: Float!
 }
 
 enum OrderStatusEnum {
@@ -378,6 +403,7 @@ type PageInfo {
 type Price {
   amount: String!
   nonce: Int!
+  timestamp: Int!
   token: ID!
   usdAmount: String
 }
@@ -421,6 +447,14 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
+}
+
+type TopBid {
+  amount: String!
+  nonce: Int!
+  timestamp: Int!
+  token: ID!
+  usdAmount: Float!
 }
 
 type TransactionNode {

@@ -2,7 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
-import { Price } from '../../assets/models';
+import { OrderPrice, Price } from '../../assets/models';
 import { OrderEntity } from 'src/db/orders/order.entity';
 
 @ObjectType()
@@ -22,8 +22,8 @@ export class Order {
   @Field(() => Auction, { nullable: true })
   auction: Auction;
 
-  @Field(() => Price)
-  price: Price;
+  @Field(() => OrderPrice)
+  price: OrderPrice;
 
   @Field(() => OrderStatusEnum)
   status: OrderStatusEnum;
@@ -47,6 +47,7 @@ export class Order {
             amount: order.priceAmount,
             nonce: order.priceNonce,
             token: order.priceToken,
+            timestamp: new Date(order.creationDate).getTime() / 1000,
           }),
           status: order.status,
           creationDate: order.creationDate,
