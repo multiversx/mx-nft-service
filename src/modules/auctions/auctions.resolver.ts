@@ -23,7 +23,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
-import { Price, TopBid } from '../assets/models';
+import { Price } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
@@ -181,7 +181,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return Asset.fromNft(nft);
   }
 
-  @ResolveField('topBid', () => TopBid)
+  @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
     const { id } = auction;
     const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);

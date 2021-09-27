@@ -1,7 +1,7 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { Account } from 'src/modules/accounts/models';
-import { Asset, MaxBid, MinBid, TopBid } from 'src/modules/assets/models';
+import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
 import { AuctionStatusEnum } from '.';
 import { AuctionTypeEnum } from './AuctionType.enum';
@@ -41,11 +41,11 @@ export class Auction {
   @Field(() => Asset, { nullable: true })
   asset: Asset;
 
-  @Field(() => MinBid)
-  minBid: MinBid;
+  @Field(() => Price)
+  minBid: Price;
 
-  @Field(() => MaxBid)
-  maxBid: MaxBid;
+  @Field(() => Price)
+  maxBid: Price;
 
   @Field(() => String)
   startDate: string;
@@ -59,8 +59,8 @@ export class Auction {
   @Field({ nullable: true })
   tags: string;
 
-  @Field(() => TopBid, { nullable: true })
-  topBid: TopBid;
+  @Field(() => Price, { nullable: true })
+  topBid: Price;
 
   @Field(() => Account, { nullable: true })
   topBidder: Account;
@@ -85,13 +85,13 @@ export class Auction {
           startDate: auction.startDate,
           endDate: auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
-          minBid: new MinBid({
+          minBid: new Price({
             token: 'EGLD',
             nonce: 0,
             amount: auction.minBid,
             timestamp: new Date(auction.creationDate).getTime() / 1000,
           }),
-          maxBid: new MaxBid({
+          maxBid: new Price({
             token: 'EGLD',
             nonce: 0,
             amount: auction.maxBid,

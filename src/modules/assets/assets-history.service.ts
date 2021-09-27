@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common/services/elrond-communication/elrond-elastic.service';
-import denominate, { nominateVal } from '../formatters';
+import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
-import { usdValue } from '../transactionsProcessor/helpers';
 import { DataServiceUSD } from '../data.service.usd';
 
 @Injectable()
