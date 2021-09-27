@@ -14,7 +14,7 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { AssetLikesProvider } from './asset-likes.loader';
-import { DataServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../data.service.usd';
 import { AssetHistoryPriceResolver } from './asset-history-price.resolver';
 
 @Module({
@@ -28,7 +28,7 @@ import { AssetHistoryPriceResolver } from './asset-history-price.resolver';
     AssetHistoryPriceResolver,
     RedisCacheService,
     S3Service,
-    DataServiceUSD,
+    PriceServiceUSD,
   ],
   imports: [
     ElrondCommunicationModule,

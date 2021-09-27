@@ -8,7 +8,7 @@ import { cacheConfig } from 'src/config';
 import { ElrondDataService } from 'src/common/services/elrond-communication/elrond-data.service';
 
 @Injectable()
-export class DataServiceUSD {
+export class PriceServiceUSD {
   private redisClient: Redis.Redis;
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -20,7 +20,7 @@ export class DataServiceUSD {
     );
   }
 
-  getPriceForTimestamp(timestamp: number): Promise<number> {
+  getPriceAtTimestamp(timestamp: number): Promise<number> {
     try {
       const cacheKey = this.getPriceForTimestampCacheKey(timestamp);
       const price = () =>

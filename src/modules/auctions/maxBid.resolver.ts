@@ -1,13 +1,13 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { Price } from '../assets/models';
-import { DataServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../data.service.usd';
 import { usdValue } from '../transactionsProcessor/helpers';
 import denominate from '../formatters';
 
 @Resolver(() => Price)
 export class MaxBidResolver extends BaseResolver(Price) {
-  constructor(private dataService: DataServiceUSD) {
+  constructor(private dataService: PriceServiceUSD) {
     super();
   }
 
@@ -23,7 +23,7 @@ export class MaxBidResolver extends BaseResolver(Price) {
             decimals: 18,
             showLastNonZeroDecimal: true,
           }),
-          await this.dataService.getPriceForTimestamp(timestamp),
+          await this.dataService.getPriceAtTimestamp(timestamp),
           2,
         )
       : null;

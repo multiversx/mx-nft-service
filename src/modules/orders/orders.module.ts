@@ -6,12 +6,12 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { OrderPriceResolver } from './orderPrice.resolver';
-import { DataServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../data.service.usd';
 
 @Module({
   providers: [
     OrdersService,
-    DataServiceUSD,
+    PriceServiceUSD,
     OrdersResolver,
     OrderPriceResolver,
     RedisCacheService,

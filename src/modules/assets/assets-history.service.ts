@@ -5,13 +5,13 @@ import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
-import { DataServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../data.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {
   constructor(
     private elasticService: ElrondElasticService,
-    private dataService: DataServiceUSD,
+    private dataService: PriceServiceUSD,
   ) {}
 
   async getHistoryLog(
@@ -131,7 +131,7 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             res[index]._source.events[0].topics[2],
             price,
-            await this.dataService.getPriceForTimestamp(
+            await this.dataService.getPriceAtTimestamp(
               res[index]._source.timestamp,
             ),
           ),
@@ -144,7 +144,7 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             itemsCount,
             price,
-            await this.dataService.getPriceForTimestamp(
+            await this.dataService.getPriceAtTimestamp(
               res[index]._source.timestamp,
             ),
           ),
@@ -165,7 +165,7 @@ export class AssetsHistoryService {
             res[index]._source.events[1].topics[3].base64ToBech32(),
             count,
             res[index]._source.events[1].topics[4],
-            await this.dataService.getPriceForTimestamp(
+            await this.dataService.getPriceAtTimestamp(
               res[index]._source.timestamp,
             ),
           ),

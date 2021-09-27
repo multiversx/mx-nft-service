@@ -11,7 +11,7 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AuctionsProvider } from './asset-auctions.loader';
 import { AssetsProvider } from '../assets/assets.loader';
-import { DataServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../data.service.usd';
 import { MaxBidResolver } from './maxBid.resolver';
 import { MinBidResolver } from './minBid.resolver';
 import { TopBidResolver } from './topBid.resolver';
@@ -28,7 +28,7 @@ import { TopBidResolver } from './topBid.resolver';
     RedisCacheService,
     AuctionsProvider,
     AssetsProvider,
-    DataServiceUSD,
+    PriceServiceUSD,
   ],
   imports: [
     ElrondCommunicationModule,
