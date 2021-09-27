@@ -11,7 +11,7 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AuctionsProvider } from './asset-auctions.loader';
 import { AssetsProvider } from '../assets/assets.loader';
-import { PriceServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../Price.service.usd';
 import { UsdAmountResolver } from './usd-amount.resolver';
 
 @Module({

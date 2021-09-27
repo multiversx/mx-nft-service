@@ -5,7 +5,7 @@ import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
-import { PriceServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../Price.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {

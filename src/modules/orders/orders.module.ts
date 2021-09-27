@@ -5,7 +5,7 @@ import { OrdersResolver } from './orders.resolver';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
-import { PriceServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../Price.service.usd';
 
 @Module({
   providers: [

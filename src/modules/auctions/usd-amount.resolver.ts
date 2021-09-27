@@ -1,7 +1,7 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { Price } from '../assets/models';
-import { PriceServiceUSD } from '../data.service.usd';
+import { PriceServiceUSD } from '../Price.service.usd';
 import { usdValue } from '../transactionsProcessor/helpers';
 import denominate from '../formatters';
 
