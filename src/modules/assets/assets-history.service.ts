@@ -200,17 +200,7 @@ export class AssetsHistoryService {
             amount: Buffer.from(price || '', 'base64')
               .toString('hex')
               .hexBigNumberToString(),
-            usdAmount: usdValue(
-              denominate({
-                input: Buffer.from(price || '', 'base64')
-                  .toString('hex')
-                  .hexBigNumberToString(),
-                denomination: 18,
-                decimals: 18,
-                showLastNonZeroDecimal: true,
-              }),
-              usdAmount || 0,
-            ),
+            timestamp: res[index]._source.timestamp,
           })
         : undefined,
     });

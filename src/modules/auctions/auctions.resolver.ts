@@ -18,15 +18,12 @@ import {
   BidActionArgs,
   BuySftActionArgs,
   AuctionTypeEnum,
-  AuctionStatusEnum,
 } from './models';
-import { AssetsService } from '../assets/assets.service';
-import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
-import { Price } from '../assets/models';
+import { Price, TopBid } from '../assets/models';
 import AuctionResponse from './models/AuctionResonse';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
@@ -45,7 +42,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
-    private assetsService: AssetsService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private ordersProvider: OrdersProvider,
@@ -185,7 +181,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     return Asset.fromNft(nft);
   }
 
-  @ResolveField('topBid', () => Price)
+  @ResolveField('topBid', () => TopBid)
   async topBid(@Parent() auction: Auction) {
     const { id } = auction;
     const activeOrders = await this.ordersProvider.getOrderByAuctionId(id);

@@ -41,3 +41,6 @@ export class TopBid extends Price {}
 
 @ObjectType()
 export class OrderPrice extends Price {}
+
+@ObjectType()
+export class AssetHistoryPrice extends Price {}

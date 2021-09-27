@@ -95,7 +95,15 @@ type AssetHistoryLog {
   actionDate: String!
   address: String!
   itemCount: String
-  price: Price
+  price: AssetHistoryPrice
+}
+
+type AssetHistoryPrice {
+  amount: String!
+  nonce: Int!
+  timestamp: Int!
+  token: ID!
+  usdAmount: Float!
 }
 
 type AssetPageInfo {
@@ -286,7 +294,7 @@ type MaxBid {
   nonce: Int!
   timestamp: Int!
   token: ID!
-  usdAmount: Float!
+  usdAmount: String!
 }
 
 type Metadata {
@@ -301,7 +309,7 @@ type MinBid {
   nonce: Int!
   timestamp: Int!
   token: ID!
-  usdAmount: Float!
+  usdAmount: String!
 }
 
 type Mutation {
@@ -373,7 +381,7 @@ type OrderPrice {
   nonce: Int!
   timestamp: Int!
   token: ID!
-  usdAmount: Float!
+  usdAmount: String!
 }
 
 enum OrderStatusEnum {
@@ -454,7 +462,7 @@ type TopBid {
   nonce: Int!
   timestamp: Int!
   token: ID!
-  usdAmount: Float!
+  usdAmount: String!
 }
 
 type TransactionNode {

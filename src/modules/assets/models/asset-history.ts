@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Account } from 'src/modules/accounts/models';
 import { AssetActionEnum } from './AssetAction.enum';
-import { Price } from './Price.dto';
+import { AssetHistoryPrice } from './Price.dto';
 @ObjectType()
 export class AssetHistoryLog {
   @Field(() => String)
@@ -14,8 +14,8 @@ export class AssetHistoryLog {
   actionDate: string;
   @Field(() => String, { nullable: true })
   itemCount: string;
-  @Field(() => Price, { nullable: true })
-  price: Price;
+  @Field(() => AssetHistoryPrice, { nullable: true })
+  price: AssetHistoryPrice;
 
   constructor(init?: Partial<AssetHistoryLog>) {
     Object.assign(this, init);

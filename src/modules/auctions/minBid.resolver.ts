@@ -2,6 +2,8 @@ import { Resolver, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { MinBid, Price } from '../assets/models';
 import { DataServiceUSD } from '../data.service.usd';
+import denominate from '../formatters';
+import { usdValue } from '../transactionsProcessor/helpers';
 
 @Resolver(() => MinBid)
 export class MinBidResolver extends BaseResolver(MinBid) {
@@ -9,9 +11,20 @@ export class MinBidResolver extends BaseResolver(MinBid) {
     super();
   }
 
-  @ResolveField(() => Number)
-  async usdAmount(@Parent() auction: Price) {
-    const { timestamp } = auction;
-    return (await this.dataService.getPriceForTimestamp(timestamp)).toString();
+  @ResolveField(() => String)
+  async usdAmount(@Parent() price: MinBid) {
+    const { timestamp, amount } = price;
+
+    return timestamp
+      ? usdValue(
+          denominate({
+            input: amount,
+            denomination: 18,
+            decimals: 18,
+            showLastNonZeroDecimal: true,
+          }),
+          await this.dataService.getPriceForTimestamp(timestamp),
+        )
+      : null;
   }
 }

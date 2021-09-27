@@ -1,18 +1,18 @@
-import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { MaxBid } from '../assets/models';
+import { AssetHistoryPrice, MinBid, Price } from './models';
 import { DataServiceUSD } from '../data.service.usd';
 import { usdValue } from '../transactionsProcessor/helpers';
 import denominate from '../formatters';
 
-@Resolver(() => MaxBid)
-export class MaxBidResolver extends BaseResolver(MaxBid) {
+@Resolver(() => AssetHistoryPrice)
+export class AssetHistoryPriceResolver extends BaseResolver(AssetHistoryPrice) {
   constructor(private dataService: DataServiceUSD) {
     super();
   }
 
-  @ResolveField(() => String)
-  async usdAmount(@Parent() price: MaxBid) {
+  @ResolveField(() => Number)
+  async usdAmount(@Parent() price: AssetHistoryPrice) {
     const { timestamp, amount } = price;
 
     return timestamp
