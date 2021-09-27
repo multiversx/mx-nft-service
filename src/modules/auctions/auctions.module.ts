@@ -12,17 +12,13 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AuctionsProvider } from './asset-auctions.loader';
 import { AssetsProvider } from '../assets/assets.loader';
 import { PriceServiceUSD } from '../data.service.usd';
-import { MaxBidResolver } from './maxBid.resolver';
-import { MinBidResolver } from './minBid.resolver';
-import { TopBidResolver } from './topBid.resolver';
+import { UsdAmountResolver } from './usd-amount.resolver';
 
 @Module({
   providers: [
     AuctionsService,
     AuctionsResolver,
-    MaxBidResolver,
-    MinBidResolver,
-    TopBidResolver,
+    UsdAmountResolver,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,

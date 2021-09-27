@@ -6,7 +6,7 @@ import { usdValue } from '../transactionsProcessor/helpers';
 import denominate from '../formatters';
 
 @Resolver(() => Price)
-export class MaxBidResolver extends BaseResolver(Price) {
+export class UsdAmountResolver extends BaseResolver(Price) {
   constructor(private dataService: PriceServiceUSD) {
     super();
   }

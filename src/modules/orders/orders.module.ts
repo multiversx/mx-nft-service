@@ -5,7 +5,6 @@ import { OrdersResolver } from './orders.resolver';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
-import { OrderPriceResolver } from './orderPrice.resolver';
 import { PriceServiceUSD } from '../data.service.usd';
 
 @Module({
@@ -13,7 +12,6 @@ import { PriceServiceUSD } from '../data.service.usd';
     OrdersService,
     PriceServiceUSD,
     OrdersResolver,
-    OrderPriceResolver,
     RedisCacheService,
   ],
   imports: [ElrondCommunicationModule, OrdersModuleDb, AccountsModuleGraph],
