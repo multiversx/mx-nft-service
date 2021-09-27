@@ -11,16 +11,20 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AuctionsProvider } from './asset-auctions.loader';
 import { AssetsProvider } from '../assets/assets.loader';
+import { PriceServiceUSD } from '../Price.service.usd';
+import { UsdAmountResolver } from './usd-amount.resolver';
 
 @Module({
   providers: [
     AuctionsService,
     AuctionsResolver,
+    UsdAmountResolver,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
     AuctionsProvider,
     AssetsProvider,
+    PriceServiceUSD,
   ],
   imports: [
     ElrondCommunicationModule,

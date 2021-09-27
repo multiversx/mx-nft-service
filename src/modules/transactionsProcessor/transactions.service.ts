@@ -15,7 +15,6 @@ import { OrdersService } from '../orders/order.service';
 import { CreateOrderArgs } from '../orders/models';
 import { ElrondProxyService } from 'src/common';
 import { getDataArgs, getDataFunctionName } from './decoders';
-import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { TransactionHash } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
@@ -137,10 +136,12 @@ export class TransactionService {
           break;
         }
         case 'withdraw': {
-          this.auctionsService.updateAuction(
-            parseInt(dataArgs[0], 16),
-            AuctionStatusEnum.Closed,
-          );
+          if (dataArgs.length > 0) {
+            this.auctionsService.updateAuction(
+              parseInt(dataArgs[0], 16),
+              AuctionStatusEnum.Closed,
+            );
+          }
           break;
         }
         case 'endAuction': {

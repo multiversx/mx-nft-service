@@ -94,7 +94,7 @@ type AssetHistoryLog {
   action: AssetActionEnum!
   actionDate: String!
   address: String!
-  itemCount: Int
+  itemCount: String
   price: Price
 }
 
@@ -130,6 +130,7 @@ type Auction {
   asset: Asset
   availableTokens: Int
   collection: String!
+  creationDate: DateTime!
   endDate: String!
   id: ID!
   identifier: String!
@@ -378,7 +379,9 @@ type PageInfo {
 type Price {
   amount: String!
   nonce: Int!
+  timestamp: Int!
   token: ID!
+  usdAmount: String
 }
 
 type Query {

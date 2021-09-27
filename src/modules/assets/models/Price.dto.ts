@@ -1,12 +1,17 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OrderEntity } from 'src/db/orders/order.entity';
+import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()
 export class Price {
   @Field(() => ID)
   token: string;
+  @Field(() => Int)
+  timestamp: number;
   @Field()
   amount: string;
+  @Field(() => String, { nullable: true })
+  usdAmount: string;
   @Field(() => Int)
   nonce: number;
 
@@ -20,6 +25,7 @@ export class Price {
           token: entity?.priceToken,
           amount: entity?.priceAmount,
           nonce: entity?.priceNonce,
+          timestamp: DateUtils.getTimestamp(entity.creationDate),
         })
       : undefined;
   }

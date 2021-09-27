@@ -5,10 +5,14 @@ import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
+import { PriceServiceUSD } from '../Price.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {
-  constructor(private elasticService: ElrondElasticService) {}
+  constructor(
+    private elasticService: ElrondElasticService,
+    private dataService: PriceServiceUSD,
+  ) {}
 
   async getHistoryLog(
     collection: string,
@@ -172,13 +176,16 @@ export class AssetsHistoryService {
       address: address,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount
-        ? parseInt(Buffer.from(itemsCount, 'base64').toString('hex'), 16)
+        ? Buffer.from(itemsCount, 'base64').toString('hex')
         : undefined,
       price: price
         ? new Price({
+            nonce: 0,
+            token: 'EGLD',
             amount: Buffer.from(price || '', 'base64')
               .toString('hex')
               .hexBigNumberToString(),
+            timestamp: res[index]._source.timestamp,
           })
         : undefined,
     });

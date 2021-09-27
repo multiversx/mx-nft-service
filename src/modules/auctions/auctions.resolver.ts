@@ -18,10 +18,7 @@ import {
   BidActionArgs,
   BuySftActionArgs,
   AuctionTypeEnum,
-  AuctionStatusEnum,
 } from './models';
-import { AssetsService } from '../assets/assets.service';
-import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
 import { Asset } from '../assets/models/Asset.dto';
@@ -45,7 +42,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
-    private assetsService: AssetsService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private ordersProvider: OrdersProvider,

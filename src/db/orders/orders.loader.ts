@@ -24,7 +24,7 @@ export class OrdersProvider {
     );
   }
 
-  async getOrderByAuctionId(auctionId: number): Promise<any> {
+  async getOrderByAuctionId(auctionId: number): Promise<OrderEntity[]> {
     const cacheKey = this.getOrdersForAuctionCacheKey(auctionId);
     const getAuctions = () => this.dataLoader.load(auctionId);
     return this.redisCacheService.getOrSet(
