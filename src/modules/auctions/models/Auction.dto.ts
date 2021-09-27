@@ -3,6 +3,7 @@ import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { Account } from 'src/modules/accounts/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
+import { DateUtils } from 'src/utils/date-utils';
 import { AuctionStatusEnum } from '.';
 import { AuctionTypeEnum } from './AuctionType.enum';
 
@@ -89,13 +90,13 @@ export class Auction {
             token: 'EGLD',
             nonce: 0,
             amount: auction.minBid,
-            timestamp: new Date(auction.creationDate).getTime() / 1000,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           maxBid: new Price({
             token: 'EGLD',
             nonce: 0,
             amount: auction.maxBid,
-            timestamp: new Date(auction.creationDate).getTime() / 1000,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           tags: auction.tags,
           creationDate: auction.creationDate,

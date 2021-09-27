@@ -27,17 +27,13 @@ export class AssetsHistoryService {
 
     let historyLog: AssetHistoryLog[] = [];
     for (let index = 0; index < res.length; index++) {
-      index = await this.mapLogs(res, index, historyLog);
+      index = this.mapLogs(res, index, historyLog);
     }
 
     return historyLog;
   }
 
-  private async mapLogs(
-    res: any,
-    index: number,
-    historyLog: AssetHistoryLog[],
-  ) {
+  private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
     switch (res[index]._source.events[0].identifier) {
       case AuctionEventEnum.AuctionTokenEvent: {
         historyLog.push(
@@ -82,7 +78,7 @@ export class AssetsHistoryService {
             );
           }
         } else {
-          index = await this.mapAuctionEvents(res, index, historyLog);
+          index = this.mapAuctionEvents(res, index, historyLog);
         }
         break;
       }
@@ -102,7 +98,7 @@ export class AssetsHistoryService {
     return index;
   }
 
-  private async mapAuctionEvents(
+  private mapAuctionEvents(
     res: any,
     index: number,
     historyLog: AssetHistoryLog[],
@@ -131,9 +127,6 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             res[index]._source.events[0].topics[2],
             price,
-            await this.dataService.getPriceAtTimestamp(
-              res[index]._source.timestamp,
-            ),
           ),
         );
         historyLog.push(
@@ -144,9 +137,6 @@ export class AssetsHistoryService {
             address.base64ToBech32(),
             itemsCount,
             price,
-            await this.dataService.getPriceAtTimestamp(
-              res[index]._source.timestamp,
-            ),
           ),
         );
 
@@ -165,9 +155,6 @@ export class AssetsHistoryService {
             res[index]._source.events[1].topics[3].base64ToBech32(),
             count,
             res[index]._source.events[1].topics[4],
-            await this.dataService.getPriceAtTimestamp(
-              res[index]._source.timestamp,
-            ),
           ),
         );
         break;
@@ -183,7 +170,6 @@ export class AssetsHistoryService {
     address,
     itemsCount = undefined,
     price = undefined,
-    usdAmount = undefined,
   ): AssetHistoryLog {
     return new AssetHistoryLog({
       action: action,

@@ -4,6 +4,7 @@ import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
 import { Price } from '../../assets/models';
 import { OrderEntity } from 'src/db/orders/order.entity';
+import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()
 export class Order {
@@ -47,7 +48,7 @@ export class Order {
             amount: order.priceAmount,
             nonce: order.priceNonce,
             token: order.priceToken,
-            timestamp: new Date(order.creationDate).getTime() / 1000,
+            timestamp: DateUtils.getTimestamp(order.creationDate),
           }),
           status: order.status,
           creationDate: order.creationDate,
