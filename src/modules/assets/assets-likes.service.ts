@@ -8,7 +8,7 @@ import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import { AssetLikesProvider } from './asset-likes.loader';
+import { AssetLikesProvider } from './asset-likes-count.loader';
 
 @Injectable()
 export class AssetsLikesService {

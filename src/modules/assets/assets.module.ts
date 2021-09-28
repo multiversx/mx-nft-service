@@ -13,8 +13,8 @@ import { S3Service } from '../s3/s3.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
-import { AssetLikesProvider } from './asset-likes.loader';
 import { PriceServiceUSD } from '../Price.service.usd';
+import { AssetLikesProvider } from './asset-likes-count.loader';
 
 @Module({
   providers: [

@@ -11,7 +11,7 @@ import { Number } from 'aws-sdk/clients/iot';
 @Injectable({
   scope: Scope.Operation,
 })
-export class OrdersProvider {
+export class ActiveOrdersProvider {
   private dataLoader = new DataLoader(
     async (keys: number[]) => await this.batchOrders(keys),
     { cache: false },
@@ -24,7 +24,7 @@ export class OrdersProvider {
     );
   }
 
-  async getOrdersByAuctionId(auctionId: number): Promise<any> {
+  async getOrderByAuctionId(auctionId: number): Promise<any> {
     const cacheKey = this.getOrdersForAuctionCacheKey(auctionId);
     const getAuctions = () => this.dataLoader.load(auctionId);
     return this.redisCacheService.getOrSet(
@@ -43,7 +43,7 @@ export class OrdersProvider {
       cacheKeys,
     );
     if (getOrdersFromCache.includes(null)) {
-      const orders = await this.getOrdersForAuctionIds(auctionIds);
+      const orders = await this.getActiveOrdersForAuctionIds(auctionIds);
       const auctionsIdentifiers: { [key: string]: OrderEntity[] } = {};
 
       ({ keys, values } = this.mapReturnData(
@@ -89,11 +89,12 @@ export class OrdersProvider {
     return { keys, values };
   }
 
-  private async getOrdersForAuctionIds(auctionIds: number[]) {
+  private async getActiveOrdersForAuctionIds(auctionIds: number[]) {
+    console.log({ auctionIds });
     return await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')
-      .where(`auctionId IN(:...auctionIds)`, {
+      .where(`auctionId IN(:...auctionIds) and status='active'`, {
         auctionIds: auctionIds,
       })
       .getMany();
@@ -104,6 +105,6 @@ export class OrdersProvider {
   }
 
   private getOrdersForAuctionCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('auction_orders', auctionId);
+    return generateCacheKeyFromParams('auction_active_orders', auctionId);
   }
 }

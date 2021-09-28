@@ -33,8 +33,8 @@ import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
-import { AssetLikesProvider } from './asset-likes.loader';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { AssetLikesProvider } from './asset-likes-count.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
