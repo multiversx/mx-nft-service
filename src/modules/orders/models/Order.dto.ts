@@ -29,7 +29,7 @@ export class Order {
   @Field(() => OrderStatusEnum)
   status: OrderStatusEnum;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   creationDate: Date;
 
   @Field(() => Date, { nullable: true })
