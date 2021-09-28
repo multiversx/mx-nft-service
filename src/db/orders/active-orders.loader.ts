@@ -14,7 +14,7 @@ import { Number } from 'aws-sdk/clients/iot';
 export class ActiveOrdersProvider {
   private dataLoader = new DataLoader(
     async (keys: number[]) => await this.batchOrders(keys),
-    // { cache: false },
+    { cache: false },
   );
   private redisClient: Redis.Redis;
 
