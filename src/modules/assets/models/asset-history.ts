@@ -6,7 +6,7 @@ import { Price } from './Price.dto';
 export class AssetHistoryLog {
   @Field(() => String)
   address: string;
-  @Field(() => Account)
+  @Field(() => Account, { nullable: true })
   account: Account;
   @Field(() => AssetActionEnum)
   action!: AssetActionEnum;

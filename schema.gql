@@ -90,7 +90,7 @@ input AssetHistoryFilter {
 }
 
 type AssetHistoryLog {
-  account: Account!
+  account: Account
   action: AssetActionEnum!
   actionDate: String!
   address: String!
