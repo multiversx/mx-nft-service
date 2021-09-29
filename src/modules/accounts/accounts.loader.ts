@@ -9,6 +9,7 @@ import { AccountIdentity } from 'src/common/services/elrond-communication/models
 export class AccountsProvider {
   private dataLoader = new DataLoader(
     async (keys: string[]) => await this.batchAccounts(keys),
+    { cache: false },
   );
 
   constructor(private accountsService: ElrondIdentityService) {}

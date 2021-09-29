@@ -90,7 +90,6 @@ export class ActiveOrdersProvider {
   }
 
   private async getActiveOrdersForAuctionIds(auctionIds: number[]) {
-    console.log({ auctionIds });
     return await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')
