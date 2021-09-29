@@ -177,7 +177,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { ownerAddress } = asset;
 
     if (!ownerAddress) return null;
-    console.log({ ownerAddress });
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
