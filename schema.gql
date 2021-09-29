@@ -60,8 +60,10 @@ type Asset {
   metadata: Metadata
   name: String
   nonce: Int!
+  owner: Account
+  ownerAddress: String
   owners: [Account!]
-  ownersAddresses: [String!]
+  ownersAddresses: [String]
   royalties: String!
   tags: [String!]
   thumbnailUrl: String
@@ -194,24 +196,16 @@ input BuySftActionArgs {
 }
 
 input ConnectionArgs {
-  """
-  Paginate after opaque cursor
-  """
+  """Paginate after opaque cursor"""
   after: String
 
-  """
-  Paginate before opaque cursor
-  """
+  """Paginate before opaque cursor"""
   before: String
 
-  """
-  Paginate first
-  """
+  """Paginate first"""
   first: Int
 
-  """
-  Paginate last
-  """
+  """Paginate last"""
   last: Int
 }
 
@@ -393,33 +387,14 @@ type Price {
 }
 
 type Query {
-  accounts(
-    filters: AccountsFilter!
-    pagination: ConnectionArgs
-  ): AccountResponse!
+  accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
   assetHistory(filters: AssetHistoryFilter!): [AssetHistoryLog!]!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
-  auctions(
-    filters: FiltersExpression
-    grouping: Grouping
-    pagination: ConnectionArgs
-    sorting: [Sorting!]
-  ): AuctionResponse!
-  auctionsSortByBids(
-    filters: FiltersExpression
-    pagination: ConnectionArgs
-  ): AuctionResponse!
+  auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
   collections(ownerAddress: String!): [String!]!
-  orders(
-    filters: FiltersExpression
-    pagination: ConnectionArgs
-    sorting: [Sorting!]
-  ): OrdersResponse!
-  trendingAuctions(
-    endDate: DateTime!
-    pagination: ConnectionArgs
-    startDate: DateTime!
-  ): AuctionResponse!
+  orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
+  trendingAuctions(endDate: DateTime!, pagination: ConnectionArgs, startDate: DateTime!): AuctionResponse!
 }
 
 input RemoveLikeArgs {
@@ -482,7 +457,5 @@ input UnfollowEntityArgs {
   addressToUnfollow: String!
 }
 
-"""
-The `Upload` scalar type represents a file upload.
-"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload

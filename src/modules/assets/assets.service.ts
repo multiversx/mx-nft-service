@@ -5,8 +5,10 @@ import {
   BytesValue,
   ContractFunction,
   GasLimit,
+  Transaction,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
+import { ElrondProxyService } from 'src/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 import { gas } from 'src/config';
@@ -31,6 +33,7 @@ import {
 export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
+    private gateway: ElrondProxyService,
     private pinataService: PinataService,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
@@ -88,7 +91,10 @@ export class AssetsService {
     return Asset.fromNft(nft);
   }
 
-  async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+  async addQuantity(
+    ownerAddress: string,
+    args: HandleQuantityArgs,
+  ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -103,10 +109,14 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
+    await this.setNonce(transaction, ownerAddress);
     return transaction.toPlainObject();
   }
 
-  async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+  async burnQuantity(
+    ownerAddress: string,
+    args: HandleQuantityArgs,
+  ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -121,6 +131,7 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
+    await this.setNonce(transaction, ownerAddress);
     return transaction.toPlainObject();
   }
 
@@ -158,6 +169,7 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftCreate),
     });
+    await this.setNonce(transaction, ownerAddress);
     return transaction.toPlainObject();
   }
 
@@ -180,7 +192,16 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
+
+    await this.setNonce(transaction, ownerAddress);
     return transaction.toPlainObject();
+  }
+
+  private async setNonce(transaction: Transaction, ownerAddress: string) {
+    transaction.setNonce(
+      (await this.gateway.getService().getAccount(new Address(ownerAddress)))
+        .nonce,
+    );
   }
 
   private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {

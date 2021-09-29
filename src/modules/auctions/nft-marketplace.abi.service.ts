@@ -27,6 +27,7 @@ import {
   U64Value,
   ChainID,
   NetworkConfig,
+  Nonce,
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
@@ -52,6 +53,8 @@ export class NftMarketplaceAbiService {
       args: this.getCreateAuctionArgs(args),
       gasLimit: new GasLimit(gas.startAuction),
     });
+
+    createAuctionTx.setNonce(await this.getNonce(ownerAddress));
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
 
@@ -73,6 +76,8 @@ export class NftMarketplaceAbiService {
       ],
       gasLimit: new GasLimit(gas.bid),
     });
+
+    bid.setNonce(await this.getNonce(ownerAddress));
     return bid.toPlainObject(new Address(ownerAddress));
   }
 
@@ -88,6 +93,8 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.withdraw),
     });
+
+    withdraw.setNonce(await this.getNonce(ownerAddress));
     return withdraw.toPlainObject(new Address(ownerAddress));
   }
 
@@ -102,6 +109,8 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.endAuction),
     });
+
+    endAuction.setNonce(await this.getNonce(ownerAddress));
     return endAuction.toPlainObject(new Address(ownerAddress));
   }
 
@@ -123,6 +132,8 @@ export class NftMarketplaceAbiService {
       ],
       gasLimit: new GasLimit(gas.endAuction),
     });
+
+    buySftAfterEndAuction.setNonce(await this.getNonce(ownerAddress));
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
   }
 
@@ -262,6 +273,14 @@ export class NftMarketplaceAbiService {
       ];
     }
     return returnArgs;
+  }
+
+  private async getNonce(ownerAddress: string): Promise<Nonce> {
+    return (
+      await this.elrondProxyService
+        .getService()
+        .getAccount(new Address(ownerAddress))
+    ).nonce;
   }
 
   private async getFirstQueryResult(
