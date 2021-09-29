@@ -42,6 +42,7 @@
     "@nestjs/typeorm": "^7.1.5",
     "@types/cache-manager": "^3.4.0",
     "@types/winston": "^2.4.4",
+    "@types/ws": "^8.2.0",
     "agentkeepalive": "^4.1.4",
     "apollo-server-express": "^2.22.2",
     "aws-sdk": "^2.974.0",
@@ -58,9 +59,11 @@
     "form-data": "^4.0.0",
     "graphql": "^15.5.0",
     "graphql-modules": "^1.4.4",
+    "graphql-redis-subscriptions": "^2.4.0",
     "graphql-relay": "^0.7.0",
     "graphql-tools": "^7.0.4",
     "graphql-upload": "^12.0.0",
+    "graphql-ws": "^5.5.0",
     "helmet": "^4.4.1",
     "ipfs": "^0.55.1",
     "jwks-rsa": "^2.0.3",
@@ -79,7 +82,9 @@
     "rxjs": "^6.6.6",
     "swagger-ui-express": "^4.1.6",
     "typeorm": "^0.2.32",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "winston-transport": "^4.4.0",
+    "ws": "^8.2.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.6.0",
