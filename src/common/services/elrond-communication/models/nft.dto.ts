@@ -6,6 +6,7 @@ export interface Nft {
   name: string;
   type: string;
   owners: ApiAccount[];
+  owner: string;
   minted: string;
   burnt: string;
   decimals: number;

@@ -88,7 +88,10 @@ export class AssetsService {
     return Asset.fromNft(nft);
   }
 
-  async addQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+  async addQuantity(
+    ownerAddress: string,
+    args: HandleQuantityArgs,
+  ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -103,10 +106,14 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
+
     return transaction.toPlainObject();
   }
 
-  async burnQuantity(args: HandleQuantityArgs): Promise<TransactionNode> {
+  async burnQuantity(
+    ownerAddress: string,
+    args: HandleQuantityArgs,
+  ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -121,6 +128,7 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
+
     return transaction.toPlainObject();
   }
 
@@ -158,6 +166,7 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftCreate),
     });
+
     return transaction.toPlainObject();
   }
 
@@ -180,6 +189,7 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
+
     return transaction.toPlainObject();
   }
 

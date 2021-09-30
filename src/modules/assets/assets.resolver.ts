@@ -79,16 +79,18 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @UseGuards(GqlAuthGuard)
   async addSftQuantity(
     @Args('input') input: HandleQuantityArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.assetsService.addQuantity(input);
+    return await this.assetsService.addQuantity(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async burnQuantity(
     @Args('input') input: HandleQuantityArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.assetsService.burnQuantity(input);
+    return await this.assetsService.burnQuantity(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
@@ -166,6 +168,17 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (!creatorAddress) return null;
     const account = await this.accountsProvider.getAccountByAddress(
       creatorAddress,
+    );
+    return Account.fromEntity(account);
+  }
+
+  @ResolveField(() => Account)
+  async owner(@Parent() asset: Asset) {
+    const { ownerAddress } = asset;
+
+    if (!ownerAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      ownerAddress,
     );
     return Account.fromEntity(account);
   }

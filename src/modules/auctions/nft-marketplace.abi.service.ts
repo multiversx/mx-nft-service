@@ -102,6 +102,7 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auctionId))],
       gasLimit: new GasLimit(gas.endAuction),
     });
+
     return endAuction.toPlainObject(new Address(ownerAddress));
   }
 
