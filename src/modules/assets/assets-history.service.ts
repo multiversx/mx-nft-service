@@ -9,10 +9,7 @@ import { PriceServiceUSD } from '../Price.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {
-  constructor(
-    private elasticService: ElrondElasticService,
-    private dataService: PriceServiceUSD,
-  ) {}
+  constructor(private elasticService: ElrondElasticService) {}
 
   async getHistoryLog(
     collection: string,
@@ -174,6 +171,7 @@ export class AssetsHistoryService {
     return new AssetHistoryLog({
       action: action,
       address: address,
+      transactionHash: res[index]._id,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount
         ? Buffer.from(itemsCount, 'base64').toString('hex')
