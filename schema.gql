@@ -98,6 +98,7 @@ type AssetHistoryLog {
   address: String!
   itemCount: String
   price: Price
+  transactionHash: String!
 }
 
 type AssetPageInfo {

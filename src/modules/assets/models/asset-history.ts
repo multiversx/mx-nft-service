@@ -12,6 +12,8 @@ export class AssetHistoryLog {
   action!: AssetActionEnum;
   @Field(() => String)
   actionDate: string;
+  @Field(() => String)
+  transactionHash: string;
   @Field(() => String, { nullable: true })
   itemCount: string;
   @Field(() => Price, { nullable: true })
