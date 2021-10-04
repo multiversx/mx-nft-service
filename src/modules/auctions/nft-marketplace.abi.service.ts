@@ -69,7 +69,7 @@ export class NftMarketplaceAbiService {
       args: [
         new U64Value(new BigNumber(args.auctionId)),
         BytesValue.fromUTF8(collection),
-        new U64Value(new BigNumber(nonce)),
+        BytesValue.fromHex(nonce),
       ],
       gasLimit: new GasLimit(gas.bid),
     });
@@ -120,7 +120,7 @@ export class NftMarketplaceAbiService {
       args: [
         new U64Value(new BigNumber(args.auctionId)),
         BytesValue.fromUTF8(collection),
-        new U64Value(new BigNumber(nonce)),
+        BytesValue.fromHex(nonce),
       ],
       gasLimit: new GasLimit(gas.endAuction),
     });
@@ -221,7 +221,7 @@ export class NftMarketplaceAbiService {
     );
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(collection),
-      new U64Value(new BigNumber(nonce)),
+      BytesValue.fromHex(nonce),
       new U64Value(new BigNumber(args.quantity)),
       new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
       BytesValue.fromUTF8('auctionToken'),

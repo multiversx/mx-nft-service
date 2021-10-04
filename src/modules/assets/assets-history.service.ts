@@ -5,7 +5,6 @@ import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
 import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
-import { PriceServiceUSD } from '../Price.service.usd';
 
 @Injectable()
 export class AssetsHistoryService {
@@ -17,9 +16,7 @@ export class AssetsHistoryService {
   ): Promise<AssetHistoryLog[]> {
     const res = await this.elasticService.getNftHistory(
       Buffer.from(collection).toString('base64'),
-      Buffer.from(nominateVal(parseInt(nonce)).toString(), 'hex').toString(
-        'base64',
-      ),
+      Buffer.from(nonce, 'hex').toString('base64'),
     );
 
     let historyLog: AssetHistoryLog[] = [];
