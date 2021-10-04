@@ -5,8 +5,8 @@ export class CreateAuctionArgs {
   @Field()
   identifier: string;
 
-  @Field(() => Int)
-  quantity: number;
+  @Field(() => String)
+  quantity: string;
 
   @Field()
   minBid: string;

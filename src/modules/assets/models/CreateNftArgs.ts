@@ -15,8 +15,8 @@ export class CreateNftArgs {
   @Field(() => String)
   collection: string;
 
-  @Field(() => Int)
-  quantity: number;
+  @Field(() => String)
+  quantity: string;
 
   @Field(() => String)
   name: string;

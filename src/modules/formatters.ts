@@ -104,3 +104,10 @@ export function nominateVal(value: number): string {
   }
   return response;
 }
+
+export function nominateStringVal(value: string): string {
+  if (value.length % 2 !== 0) {
+    value = '0' + value;
+  }
+  return value;
+}

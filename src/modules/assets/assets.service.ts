@@ -12,7 +12,7 @@ import { getSmartContract } from 'src/common/services/elrond-communication/smart
 import { gas } from 'src/config';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
-import { nominateVal } from '../formatters';
+import { nominateStringVal, nominateVal } from '../formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
@@ -102,7 +102,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(args.quantity)),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
@@ -124,7 +124,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(args.quantity)),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
@@ -157,7 +157,7 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateVal(args.quantity || 1)),
+        BytesValue.fromHex(nominateStringVal(args.quantity || '1')),
         BytesValue.fromUTF8(args.name),
         BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
         BytesValue.fromUTF8(fileData.hash),
@@ -184,7 +184,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
+        BytesValue.fromHex(nominateStringVal(transferNftArgs.quantity || '1')),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
@@ -198,6 +198,7 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
+    console.log({ nfts });
     const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
