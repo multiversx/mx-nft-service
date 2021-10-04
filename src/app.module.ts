@@ -1,8 +1,6 @@
+import './tracer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
-import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
-import * as winston from 'winston';
-import * as Transport from 'winston-transport';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
 import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
