@@ -157,9 +157,9 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateStringVal(args.quantity || '1')),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
         BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
+        BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
@@ -184,7 +184,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateStringVal(transferNftArgs.quantity || '1')),
+        BytesValue.fromHex(nominateStringVal(transferNftArgs.quantity)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),

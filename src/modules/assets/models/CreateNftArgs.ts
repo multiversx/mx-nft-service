@@ -16,13 +16,13 @@ export class CreateNftArgs {
   collection: string;
 
   @Field(() => String)
-  quantity: string;
+  quantity: string = '1';
 
   @Field(() => String)
   name: string;
 
   @Field(() => String)
-  royalties: string;
+  royalties: string = '0';
 
   @Field(() => AttributeInput)
   attributes: AttributeInput;

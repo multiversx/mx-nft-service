@@ -5,7 +5,7 @@ export class TransferNftArgs {
   @Field(() => String)
   identifier: string;
   @Field(() => String)
-  quantity: string;
+  quantity: string = '1';
   @Field(() => String)
   destinationAddress: string;
 }

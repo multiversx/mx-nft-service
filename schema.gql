@@ -227,8 +227,8 @@ input CreateNftArgs {
   attributes: AttributeInput!
   collection: String!
   name: String!
-  quantity: String!
-  royalties: String!
+  quantity: String = "1"
+  royalties: String = "0"
 }
 
 """
@@ -446,7 +446,7 @@ type TransactionNode {
 input TransferNftArgs {
   destinationAddress: String!
   identifier: String!
-  quantity: String!
+  quantity: String = "1"
 }
 
 input TransferNftCreateRoleArgs {
