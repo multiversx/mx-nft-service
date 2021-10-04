@@ -65,6 +65,7 @@ type Asset {
   owners: [Account!]
   ownersAddresses: [String]
   royalties: String!
+  supply: String!
   tags: [String!]
   thumbnailUrl: String
   type: NftTypeEnum
@@ -218,7 +219,7 @@ input CreateAuctionArgs {
   minBid: String!
   paymentToken: String!
   paymentTokenNonce: Int
-  quantity: Int!
+  quantity: String!
   startDate: String
 }
 
@@ -226,8 +227,8 @@ input CreateNftArgs {
   attributes: AttributeInput!
   collection: String!
   name: String!
-  quantity: Int!
-  royalties: String!
+  quantity: String = "1"
+  royalties: String = "0"
 }
 
 """
@@ -272,7 +273,7 @@ input Grouping {
 input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   identifier: String!
-  quantity: Int!
+  quantity: String!
 }
 
 input IssueCollectionArgs {
@@ -445,7 +446,7 @@ type TransactionNode {
 input TransferNftArgs {
   destinationAddress: String!
   identifier: String!
-  quantity: Int!
+  quantity: String = "1"
 }
 
 input TransferNftCreateRoleArgs {

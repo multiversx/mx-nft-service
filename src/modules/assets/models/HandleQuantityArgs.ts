@@ -8,6 +8,6 @@ export class HandleQuantityArgs {
   @Field(() => String)
   identifier: string;
 
-  @Field(() => Int)
-  quantity: number;
+  @Field(() => String)
+  quantity: string;
 }

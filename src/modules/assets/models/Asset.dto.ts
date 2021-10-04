@@ -46,6 +46,8 @@ export class Asset {
   attributes: string;
   @Field(() => String, { nullable: true })
   balance: string;
+  @Field(() => String)
+  supply: string;
   @Field(() => GraphQLISODateTime)
   lastSale: Date;
   @Field(() => String, { nullable: true })
@@ -88,6 +90,7 @@ export class Asset {
           creationDate: nft.timestamp,
           hash: nft.hash ?? '',
           balance: nft.balance,
+          supply: nft.supply || '1',
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],

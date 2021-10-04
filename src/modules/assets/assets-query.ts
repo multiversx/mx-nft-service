@@ -40,7 +40,7 @@ export class AssetsQuery {
 
   build(): string {
     return this.query
-      ? this.query + '&hasUris=true&withOwner=true'
-      : '?hasUris=true&withOwner=true';
+      ? this.query + '&hasUris=true&withOwner=true&withSupply=true'
+      : '?hasUris=true&withOwner=true&withSupply=true';
   }
 }

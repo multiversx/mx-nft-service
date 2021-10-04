@@ -23,6 +23,7 @@ export interface Nft {
   wiped: string;
   attributes: string;
   balance: string;
+  supply: string;
   creator: string;
   hash: string;
   nonce: number;

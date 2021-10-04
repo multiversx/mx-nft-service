@@ -12,7 +12,7 @@ import { getSmartContract } from 'src/common/services/elrond-communication/smart
 import { gas } from 'src/config';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
-import { nominateVal } from '../formatters';
+import { nominateStringVal, nominateVal } from '../formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
@@ -102,7 +102,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(args.quantity)),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
@@ -124,7 +124,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(args.quantity)),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
@@ -157,9 +157,9 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateVal(args.quantity || 1)),
+        BytesValue.fromHex(nominateStringVal(args.quantity)),
         BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(nominateVal(parseFloat(args.royalties || '0'))),
+        BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
@@ -184,7 +184,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateVal(transferNftArgs.quantity || 1)),
+        BytesValue.fromHex(nominateStringVal(transferNftArgs.quantity)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),

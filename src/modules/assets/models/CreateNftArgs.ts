@@ -15,14 +15,14 @@ export class CreateNftArgs {
   @Field(() => String)
   collection: string;
 
-  @Field(() => Int)
-  quantity: number;
+  @Field(() => String)
+  quantity: string = '1';
 
   @Field(() => String)
   name: string;
 
   @Field(() => String)
-  royalties: string;
+  royalties: string = '0';
 
   @Field(() => AttributeInput)
   attributes: AttributeInput;
