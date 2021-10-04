@@ -198,7 +198,6 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    console.log({ nfts });
     const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
