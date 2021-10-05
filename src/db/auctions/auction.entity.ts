@@ -89,7 +89,7 @@ export class AuctionEntity extends BaseEntity {
           maxBid: auction.max_bid?.valueOf()?.toString() || '0',
           maxBidDenominated: parseFloat(
             denominate({
-              input: auction.max_bid.valueOf()?.toString() || '0',
+              input: auction?.max_bid?.valueOf()?.toString() || '0',
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
