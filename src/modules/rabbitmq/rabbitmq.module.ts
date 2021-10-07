@@ -1,6 +1,6 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { DynamicModule, Module } from '@nestjs/common';
-import { NftTransactionsModule } from './nft-transactions.module';
+import { NftTransactionsModule } from './nft-events.module';
 
 @Module({
   imports: [NftTransactionsModule],

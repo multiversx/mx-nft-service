@@ -35,6 +35,7 @@ export class AuctionsService {
   async saveAuction(
     auctionId: number,
     identifier: string,
+    hash: string,
   ): Promise<Auction | any> {
     try {
       await this.invalidateCache();
@@ -45,6 +46,7 @@ export class AuctionsService {
           auctionId,
           auctionData,
           asset?.tags?.toString(),
+          hash,
         ),
       );
       return savedAuction;
@@ -152,10 +154,11 @@ export class AuctionsService {
   async updateAuction(
     id: number,
     status: AuctionStatusEnum,
+    hash: string,
   ): Promise<Auction | any> {
     await this.invalidateCache();
     await this.auctionsLoader.clearKey(id.toString());
-    return await this.auctionServiceDb.updateAuction(id, status);
+    return await this.auctionServiceDb.updateAuction(id, status, hash);
   }
 
   private getAuctionsCacheKey(request: any) {

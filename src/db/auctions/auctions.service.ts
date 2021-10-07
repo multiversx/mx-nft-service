@@ -131,12 +131,14 @@ export class AuctionsServiceDb {
   async updateAuction(
     auctionId: number,
     status: AuctionStatusEnum,
+    hash: string,
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
     await this.auctionsLoader.clearKey(auction.identifier);
     if (auction) {
       auction.status = status;
+      auction.blockHash = hash;
       return await this.auctionsRepository.save(auction);
     }
     return null;

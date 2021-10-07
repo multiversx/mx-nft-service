@@ -11,6 +11,14 @@ export const CompetingRabbitConsumer = () => {
       queue: `${process.env.RABBITMQ_QUEUE}`,
       exchange: process.env.RABBITMQ_EXCHANGE,
       routingKey: '',
+      queueOptions: {
+        autoDelete: false,
+        durable: true,
+        arguments: {
+          'x-queue-type': 'quorum',
+          'x-single-active-consumer': true,
+        },
+      },
     }),
   );
 };
@@ -21,11 +29,16 @@ export const CompetingRabbitConsumer = () => {
 export const PublicRabbitConsumer = () => {
   return applyDecorators(
     RabbitSubscribe({
-      queue: `${process.env.RABBITMQ_QUEUE}_${uuid.v4()}`,
+      queue: `${process.env.RABBITMQ_QUEUE}`,
       exchange: process.env.RABBITMQ_EXCHANGE,
       routingKey: '',
       queueOptions: {
-        autoDelete: true,
+        autoDelete: false,
+        durable: true,
+        arguments: {
+          'x-queue-type': 'quorum',
+          'x-single-active-consumer': true,
+        },
       },
     }),
   );

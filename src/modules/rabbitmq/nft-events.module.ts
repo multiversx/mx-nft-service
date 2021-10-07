@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { NftTransactionsService } from './nft-transactions.service';
-import { NftTransactionsConsumer } from './nft-transactions.consumer';
+import { NftEventsService } from './nft-events.service';
+import { NftTransactionsConsumer as NftEventsConsumer } from './nft-events.consumer';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 
@@ -9,7 +9,7 @@ import { OrdersModuleGraph } from '../orders/orders.module';
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
   ],
-  providers: [NftTransactionsConsumer, NftTransactionsService],
-  exports: [NftTransactionsService],
+  providers: [NftEventsConsumer, NftEventsService],
+  exports: [NftEventsService],
 })
 export class NftTransactionsModule {}
