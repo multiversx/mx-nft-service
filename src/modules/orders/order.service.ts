@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrdersServiceDb } from 'src/db/orders/orders.service';
 import { CreateOrderArgs, Order } from './models';
-import { Price } from '../assets/models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -83,14 +82,6 @@ export class OrdersService {
 
   private getAuctionsCacheKey(request: QueryRequest) {
     return generateCacheKeyFromParams('orders', hash(request));
-  }
-
-  private getAuctionOrdersCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('orders' + auctionId);
-  }
-
-  private getTopBidCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('topBid' + auctionId);
   }
 
   private async invalidateCache(): Promise<void> {

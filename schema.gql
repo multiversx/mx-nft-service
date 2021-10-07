@@ -47,14 +47,12 @@ type Asset {
   auctions: [Auction!]
   balance: String
   collection: ID!
-  creationDate: String
+  creationDate: Int
   creator: Account
   creatorAddress: String!
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
-  lastSale: DateTime!
-  lastSalePrice: Price
   likesCount: Int
   lowestAuction: Auction
   metadata: Metadata
@@ -95,7 +93,7 @@ input AssetHistoryFilter {
 type AssetHistoryLog {
   account: Account
   action: AssetActionEnum!
-  actionDate: String!
+  actionDate: Int!
   address: String!
   itemCount: String
   price: Price
@@ -134,8 +132,8 @@ type Auction {
   asset: Asset
   availableTokens: Int
   collection: String!
-  creationDate: DateTime!
-  endDate: String!
+  creationDate: Int!
+  endDate: Int!
   id: ID!
   identifier: String!
   maxBid: Price!
@@ -145,7 +143,7 @@ type Auction {
   orders: [Order!]
   owner: Account
   ownerAddress: String
-  startDate: String!
+  startDate: Int!
   status: AuctionStatusEnum
   tags: String
   topBid: Price
@@ -230,11 +228,6 @@ input CreateNftArgs {
   quantity: String = "1"
   royalties: String = "0"
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 input Filter {
   field: String!
@@ -335,8 +328,8 @@ enum Operator {
 type Order {
   auction: Auction
   auctionId: Int!
-  creationDate: DateTime
-  endDate: DateTime
+  creationDate: Int
+  endDate: Int
   from: Account
   id: ID!
   ownerAddress: String!
@@ -396,7 +389,14 @@ type Query {
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
   collections(ownerAddress: String!): [String!]!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
-  trendingAuctions(endDate: DateTime!, pagination: ConnectionArgs, startDate: DateTime!): AuctionResponse!
+  trendingAuctions(
+    """This should be a timestamp"""
+    endDate: Int!
+    pagination: ConnectionArgs
+
+    """This should be a timestamp"""
+    startDate: Int!
+  ): AuctionResponse!
 }
 
 input RemoveLikeArgs {

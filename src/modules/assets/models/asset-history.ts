@@ -10,8 +10,8 @@ export class AssetHistoryLog {
   account: Account;
   @Field(() => AssetActionEnum)
   action!: AssetActionEnum;
-  @Field(() => String)
-  actionDate: string;
+  @Field(() => Int)
+  actionDate: number;
   @Field(() => String)
   transactionHash: string;
   @Field(() => String, { nullable: true })

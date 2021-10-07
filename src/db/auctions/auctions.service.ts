@@ -142,8 +142,11 @@ export class AuctionsServiceDb {
     return null;
   }
 
-  private getSqlDate(date: Date) {
-    return date.toISOString().slice(0, 19).replace('T', ' ');
+  private getSqlDate(timestamp: number) {
+    return new Date(timestamp * 1000)
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', ' ');
   }
 
   private addOrderBy(

@@ -96,10 +96,13 @@ export class TransactionService {
             true,
           );
         const scResults = trans.getSmartContractResults().getResultingCalls();
-        if (scResults.length > 0) {
-          const decodedData = this.splitDataArgs(
-            scResults[scResults.length - 1]?.data,
-          );
+
+        const auctionTokenSC = scResults?.filter(
+          (sc) => !sc?.data?.includes('auctionToken'),
+        );
+
+        if (auctionTokenSC && auctionTokenSC.length > 0) {
+          const decodedData = this.splitDataArgs(auctionTokenSC[0].data);
 
           if (Buffer.from(decodedData[0], 'hex').toString() === 'ok') {
             this.auctionsService.saveAuction(

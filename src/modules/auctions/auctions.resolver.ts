@@ -6,8 +6,6 @@ import {
   Parent,
   Mutation,
   Int,
-  Context,
-  GraphQLISODateTime,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
@@ -152,9 +150,17 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Query(() => AuctionResponse)
   async trendingAuctions(
-    @Args({ name: 'startDate', type: () => GraphQLISODateTime })
+    @Args({
+      name: 'startDate',
+      description: 'This should be a timestamp',
+      type: () => Int,
+    })
     startDate,
-    @Args({ name: 'endDate', type: () => GraphQLISODateTime })
+    @Args({
+      name: 'endDate',
+      description: 'This should be a timestamp',
+      type: () => Int,
+    })
     endDate,
 
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
