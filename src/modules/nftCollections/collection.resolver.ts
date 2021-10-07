@@ -32,7 +32,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async issueSFTCollection(
+  async issueSftCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
     return await this.collectionsService.issueSemiFungible(input);
@@ -48,7 +48,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async transferNFTCreateRole(
+  async transferNftCreateRole(
     @Args('input') input: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
     return await this.collectionsService.transferNFTCreateRole(input);
@@ -56,7 +56,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async stopNFTCreate(
+  async stopNftCreate(
     @Args('input') input: StopNftCreateArgs,
   ): Promise<TransactionNode> {
     return await this.collectionsService.stopNFTCreate(input);

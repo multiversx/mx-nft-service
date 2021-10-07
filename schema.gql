@@ -296,12 +296,12 @@ type Mutation {
   endAuction(auctionId: Int!): TransactionNode!
   follow(input: FollowEntityArgs!): Boolean!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
-  issueSFTCollection(input: IssueCollectionArgs!): TransactionNode!
+  issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
-  stopNFTCreate(input: StopNftCreateArgs!): TransactionNode!
-  transferNFTCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
+  stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
+  transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   unfollow(input: UnfollowEntityArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
