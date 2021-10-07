@@ -28,7 +28,7 @@ export interface Nft {
   hash: string;
   nonce: number;
   royalties: string;
-  timestamp: string;
+  timestamp: number;
   uris: string[];
   url: string;
   thumbnailUrl: string;

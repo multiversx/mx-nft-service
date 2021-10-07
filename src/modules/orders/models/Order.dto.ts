@@ -1,4 +1,11 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  GraphQLISODateTime,
+  GraphQLTimestamp,
+  ID,
+  Int,
+  ObjectType,
+} from '@nestjs/graphql';
 import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
@@ -29,11 +36,11 @@ export class Order {
   @Field(() => OrderStatusEnum)
   status: OrderStatusEnum;
 
-  @Field(() => Date, { nullable: true })
-  creationDate: Date;
+  @Field(() => Int, { nullable: true })
+  creationDate: number;
 
-  @Field(() => Date, { nullable: true })
-  endDate: Date;
+  @Field(() => Int, { nullable: true })
+  endDate: number;
 
   constructor(init?: Partial<Order>) {
     Object.assign(this, init);
@@ -51,8 +58,8 @@ export class Order {
             timestamp: DateUtils.getTimestamp(order.creationDate),
           }),
           status: order.status,
-          creationDate: order.creationDate,
-          endDate: order.modifiedDate,
+          creationDate: DateUtils.getTimestamp(order.creationDate),
+          endDate: DateUtils.getTimestamp(order.modifiedDate),
           auctionId: order.auctionId,
         })
       : null;

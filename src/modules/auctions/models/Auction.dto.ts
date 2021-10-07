@@ -48,14 +48,14 @@ export class Auction {
   @Field(() => Price)
   maxBid: Price;
 
-  @Field(() => String)
-  startDate: string;
+  @Field(() => Int)
+  startDate: number;
 
-  @Field(() => String)
-  endDate: string;
+  @Field(() => Int)
+  endDate: number;
 
-  @Field(() => Date)
-  creationDate: Date;
+  @Field(() => Int)
+  creationDate: number;
 
   @Field({ nullable: true })
   tags: string;
@@ -83,8 +83,8 @@ export class Auction {
           collection: auction.collection,
           nonce: auction.nonce,
           identifier: auction.identifier,
-          startDate: auction.startDate,
-          endDate: auction.endDate,
+          startDate: parseInt(auction.startDate),
+          endDate: parseInt(auction.endDate),
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: 'EGLD',
@@ -99,7 +99,7 @@ export class Auction {
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           tags: auction.tags,
-          creationDate: auction.creationDate,
+          creationDate: DateUtils.getTimestamp(auction.creationDate),
         })
       : null;
   }

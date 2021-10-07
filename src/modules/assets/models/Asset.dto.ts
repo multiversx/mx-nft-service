@@ -1,11 +1,4 @@
-import {
-  ID,
-  ObjectType,
-  GraphQLISODateTime,
-  Field,
-  Int,
-} from '@nestjs/graphql';
-import { Price } from './Price.dto';
+import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
@@ -22,8 +15,6 @@ export class Asset {
   type: NftTypeEnum;
   @Field(() => String)
   identifier!: string;
-  @Field(() => Price, { nullable: true })
-  lastSalePrice: Price = null;
   @Field({ nullable: true })
   hash: string;
   @Field(() => String)
@@ -48,10 +39,8 @@ export class Asset {
   balance: string;
   @Field(() => String)
   supply: string;
-  @Field(() => GraphQLISODateTime)
-  lastSale: Date;
-  @Field(() => String, { nullable: true })
-  creationDate!: string;
+  @Field(() => Int, { nullable: true })
+  creationDate!: number;
   @Field(() => [String])
   uris: string[];
   @Field(() => String, { nullable: true })
@@ -86,7 +75,6 @@ export class Asset {
           ownersAddresses: nft.owners?.map((account) => account.address),
           ownerAddress: nft.owner,
           attributes: nft.attributes ?? '',
-          lastSale: new Date(),
           creationDate: nft.timestamp,
           hash: nft.hash ?? '',
           balance: nft.balance,
