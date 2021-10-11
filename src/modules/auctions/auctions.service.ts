@@ -44,7 +44,7 @@ export class AuctionsService {
         AuctionEntity.fromAuctionAbi(
           auctionId,
           auctionData,
-          asset.tags.toString(),
+          asset?.tags?.toString(),
         ),
       );
       return savedAuction;
