@@ -30,6 +30,6 @@ export class AssetsProvider {
 
   async getNftByIdentifier(identifier: string): Promise<Nft> {
     const nft = await this.dataLoader.load(identifier);
-    return nft[0];
+    return nft && nft.length > 0 ? nft[0] : null;
   }
 }
