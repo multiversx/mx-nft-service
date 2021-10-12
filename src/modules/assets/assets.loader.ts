@@ -9,6 +9,7 @@ import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
 export class AssetsProvider {
   private dataLoader = new DataLoader(
     async (keys: string[]) => await this.batchAssets(keys),
+    { cache: false },
   );
 
   constructor(private apiService: ElrondApiService) {}
