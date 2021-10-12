@@ -126,7 +126,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const assetLikes = await this.assetsLikeProvider.getAssetLikesCount(
       identifier,
     );
-    return assetLikes ? assetLikes[0]?.likesCount : null;
+    return assetLikes ? assetLikes[0]?.likesCount : 0;
   }
 
   @ResolveField('isLiked', () => Boolean)
