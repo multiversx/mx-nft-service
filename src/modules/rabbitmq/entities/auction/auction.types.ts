@@ -1,6 +1,4 @@
-import { GenericEventType } from '../generic.types';
-
-export type BidEventType = GenericEventType & {
+export type BidEventType = {
   collection: string;
   nonce: string;
   auctionId: string;
@@ -9,7 +7,7 @@ export type BidEventType = GenericEventType & {
   currentBid: string;
 };
 
-export type BuySftEventType = GenericEventType & {
+export type BuySftEventType = {
   collection: string;
   nonce: string;
   auctionId: string;
@@ -17,7 +15,7 @@ export type BuySftEventType = GenericEventType & {
   currentBid: string;
 };
 
-export type WithdrawEventType = GenericEventType & {
+export type WithdrawEventType = {
   collection: string;
   nonce: string;
   auctionId: string;
@@ -25,7 +23,7 @@ export type WithdrawEventType = GenericEventType & {
   originalOwner: string;
 };
 
-export type EndAuctionEventType = GenericEventType & {
+export type EndAuctionEventType = {
   collection: string;
   nonce: string;
   auctionId: string;
@@ -34,7 +32,7 @@ export type EndAuctionEventType = GenericEventType & {
   currentBid: string;
 };
 
-export type AuctionTokenEventType = GenericEventType & {
+export type AuctionTokenEventType = {
   collection: string;
   nonce: string;
   auctionId: string;

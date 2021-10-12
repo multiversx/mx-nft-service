@@ -3,7 +3,6 @@ import { CommonModule } from './common.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
 import { RabbitMqModule } from './modules/rabbitmq/rabbitmq.module';
-import { TransactionService } from './modules/transactionsProcessor/transactions.service';
 
 @Module({
   imports: [
@@ -12,7 +11,6 @@ import { TransactionService } from './modules/transactionsProcessor/transactions
     forwardRef(() => OrdersModuleGraph),
     RabbitMqModule.register(),
   ],
-  providers: [TransactionService],
-  exports: [TransactionService, CommonModule],
+  exports: [CommonModule],
 })
 export class RabbitMqProcessorModule {}

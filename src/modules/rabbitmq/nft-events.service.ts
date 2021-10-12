@@ -19,18 +19,14 @@ export class NftEventsService {
     private ordersService: OrdersService,
   ) {}
 
-  public async handleNftAuctionEnded(
-    nftAuctionEndedEvent: any[],
-    hash: string,
-  ) {
-    console.log({ nftAuctionEndedEvent });
+  public async handleNftAuctionEnded(auctionEvents: any[], hash: string) {
+    console.log({ nftAuctionEndedEvent: auctionEvents });
 
-    nftAuctionEndedEvent.forEach((event) => {
+    for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
-          console.log({ topics });
           this.ordersService.createOrder(
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
@@ -45,7 +41,6 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          console.log({ buySftTopics });
           this.ordersService.createOrder(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
@@ -69,7 +64,6 @@ export class NftEventsService {
         case AuctionEventEnum.EndAuctionEvent:
           const endAuction = new EndAuctionEvent(event);
           const topicsEndAuction = endAuction.getTopics();
-          console.log({ topicsEndAuction });
           this.auctionsService.updateAuction(
             parseInt(topicsEndAuction.auctionId, 16),
             AuctionStatusEnum.Ended,
@@ -79,7 +73,6 @@ export class NftEventsService {
         case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
-          console.log({ topicsAuctionToken });
           this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
             `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
@@ -87,6 +80,6 @@ export class NftEventsService {
           );
           break;
       }
-    });
+    }
   }
 }

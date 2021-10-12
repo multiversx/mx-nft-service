@@ -5,6 +5,7 @@ export enum AuctionEventEnum {
   BuySftEvent = 'buySft',
   WithdrawEvent = 'withdraw',
 }
+
 export enum AuctionEventEnumOld {
   AuctionTokenEvent = 'auction_token_event',
   EndAuctionEvent = 'end_auction_event',

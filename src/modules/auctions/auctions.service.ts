@@ -94,6 +94,19 @@ export class AuctionsService {
     }
   }
 
+  async deleteAuctionByHash(blockHash: string): Promise<boolean> {
+    try {
+      return await this.auctionServiceDb.deleteAuctionAndOrdersByHash(
+        blockHash,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while deleteAuction', error, {
+        path: 'AuctionsService.deleteAuctionByHash',
+        blockHash,
+      });
+    }
+  }
+
   async getTrendingAuctions(
     queryRequest: TrendingQueryRequest,
   ): Promise<[Auction[], number]> {

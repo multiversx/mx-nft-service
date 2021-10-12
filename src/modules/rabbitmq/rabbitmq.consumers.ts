@@ -26,11 +26,14 @@ export const CompetingRabbitConsumer = () => {
 /** Public Consumer which will be handled by all instances of the microservice.
  * Make sure the exchange exists.
  */
-export const PublicRabbitConsumer = () => {
+export const PublicRabbitConsumer = (config: {
+  queueName: string;
+  exchange: string;
+}) => {
   return applyDecorators(
     RabbitSubscribe({
-      queue: `${process.env.RABBITMQ_QUEUE}`,
-      exchange: process.env.RABBITMQ_EXCHANGE,
+      queue: config.queueName,
+      exchange: config.exchange,
       routingKey: '',
       queueOptions: {
         autoDelete: false,

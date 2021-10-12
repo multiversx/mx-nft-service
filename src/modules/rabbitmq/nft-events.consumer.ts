@@ -7,11 +7,13 @@ import { PublicRabbitConsumer } from './rabbitmq.consumers';
 export class NftTransactionsConsumer {
   constructor(private readonly nftTransactionsService: NftEventsService) {}
 
-  @PublicRabbitConsumer()
+  @PublicRabbitConsumer({
+    queueName: process.env.RABBITMQ_QUEUE,
+    exchange: process.env.RABBITMQ_EXCHANGE,
+  })
   async consumeAuctionEvents(nftAuctionEvents: any) {
-    console.log({ nftAuctionEndedEvent: nftAuctionEvents });
     await this.nftTransactionsService.handleNftAuctionEnded(
-      nftAuctionEvents.filter(
+      nftAuctionEvents?.events?.filter(
         (e: { address: any }) =>
           e.address === elrondConfig.nftMarketplaceAddress,
       ),
