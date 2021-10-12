@@ -75,7 +75,6 @@ export class OrdersServiceDb {
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
-    console.log({ order });
     this.ordersLoader.clearKey(order.auctionId);
     this.activeOrdersLoades.clearKey(order.auctionId);
     order.status = status;
@@ -93,10 +92,9 @@ export class OrdersServiceDb {
       if (orders.length === 1) {
         return this.ordersRepository.delete(orders[0].id);
       }
-      const indexOf = orders.indexOf(order);
-      console.log({ orders, indexOf });
+      const indexOf = orders.findIndex((o) => o.id === order.id);
       if (indexOf === orders.length - 1) {
-        await this.ordersRepository.delete(orders[length - 1].id);
+        await this.ordersRepository.delete(orders[indexOf].id);
         await this.updateOrderWithStatus(
           orders[indexOf - 1],
           OrderStatusEnum.active,
@@ -107,7 +105,7 @@ export class OrdersServiceDb {
           OrderStatusEnum.active,
         );
         await this.ordersRepository.delete(
-          orders.slice(indexOf + 1).map((o) => o.id),
+          orders.slice(indexOf).map((o) => o.id),
         );
       }
     }
