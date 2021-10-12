@@ -100,13 +100,7 @@ export class OrdersServiceDb {
           OrderStatusEnum.active,
         );
       } else {
-        await this.updateOrderWithStatus(
-          orders[indexOf - 1],
-          OrderStatusEnum.active,
-        );
-        await this.ordersRepository.delete(
-          orders.slice(indexOf).map((o) => o.id),
-        );
+        await this.ordersRepository.delete(orders[indexOf].id);
       }
     }
   }
