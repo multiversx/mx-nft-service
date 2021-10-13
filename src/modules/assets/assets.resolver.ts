@@ -35,6 +35,7 @@ import { AccountsProvider } from '../accounts/accounts.loader';
 import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
+import PageResponse from '../PageResponse';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -61,7 +62,13 @@ export class AssetsResolver extends BaseResolver(Asset) {
       limit,
       filters,
     );
-    return this.mapResponse<Asset>(assets, pagination, count, offset, limit);
+    return PageResponse.mapResponse<Asset>(
+      assets,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -181,23 +188,5 @@ export class AssetsResolver extends BaseResolver(Asset) {
       ownerAddress,
     );
     return Account.fromEntity(account);
-  }
-
-  private mapResponse<T>(
-    returnList: T[],
-    args: ConnectionArgs,
-    count: number,
-    offset: number,
-    limit: number,
-  ) {
-    const page = connectionFromArraySlice(returnList, args, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
   }
 }

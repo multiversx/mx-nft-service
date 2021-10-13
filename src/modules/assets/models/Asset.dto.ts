@@ -19,7 +19,7 @@ export class Asset {
   hash: string;
   @Field(() => String)
   creatorAddress: string;
-  @Field({ nullable: true })
+  @Field(() => Account, { nullable: true })
   creator: Account;
   @Field(() => [String], { nullable: 'itemsAndList' })
   ownersAddresses: string[];

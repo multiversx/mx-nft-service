@@ -92,6 +92,32 @@ export class AssetsFilter {
 }
 
 @InputType()
+export class CollectionsFilter {
+  @Field(() => String, {
+    nullable: true,
+    description: 'The owner of the collection',
+  })
+  ownerAddress: string;
+  @Field(() => String, {
+    nullable: true,
+    description: 'The user that has create role',
+  })
+  creatorAddress: string;
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Flag for can create or not on collection',
+  })
+  canCreate: boolean;
+  @Field(() => String, {
+    nullable: true,
+    description: 'Collection name',
+  })
+  collectionName: string;
+  @Field(() => NftTypeEnum, { nullable: true })
+  type: NftTypeEnum;
+}
+
+@InputType()
 export class AssetHistoryFilter {
   @Field(() => String)
   identifier: string;

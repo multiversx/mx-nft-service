@@ -195,6 +195,56 @@ input BuySftActionArgs {
   price: String!
 }
 
+type Collection {
+  canAddQuantity: Boolean
+  canBurn: Boolean
+  canCreate: Boolean
+  canFreeze: Boolean
+  canPause: Boolean
+  canTransferRole: Boolean
+  canWipe: Boolean
+  collection: String
+  creationDate: Float!
+  name: String!
+  owner: Account
+  ownerAddress: String
+  ticker: String!
+  type: String
+}
+
+type CollectionEdge {
+  cursor: String
+  node: Collection
+}
+
+type CollectionPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type CollectionResponse {
+  edges: [CollectionEdge!]
+  pageData: PageData
+  pageInfo: CollectionPageInfo
+}
+
+input CollectionsFilter {
+  """Flag for can create or not on collection"""
+  canCreate: Boolean
+
+  """Collection name"""
+  collectionName: String
+
+  """The user that has create role"""
+  creatorAddress: String
+
+  """The owner of the collection"""
+  ownerAddress: String
+  type: NftTypeEnum
+}
+
 input ConnectionArgs {
   """Paginate after opaque cursor"""
   after: String
@@ -387,7 +437,7 @@ type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
-  collections(ownerAddress: String!): [String!]!
+  collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   trendingAuctions(
     """This should be a timestamp"""
