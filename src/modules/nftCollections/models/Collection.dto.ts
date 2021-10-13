@@ -42,7 +42,6 @@ export class Collection {
     collectionApi: CollectionApi,
     issuerAddress: string = undefined,
   ) {
-    console.log({ collectionApi });
     return collectionApi
       ? new Collection({
           collection: collectionApi.collection,
