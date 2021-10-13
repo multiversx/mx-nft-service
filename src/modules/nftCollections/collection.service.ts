@@ -85,11 +85,12 @@ export class CollectionsService {
       .addIssuer(filters?.issuer)
       .addSearch(filters?.collectionName)
       .addType(filters?.type)
+      .addCanCreate(filters?.canCreate)
       .addPageSize(offset, limit)
       .build();
 
-    if (filters?.issuer) {
-      return await this.getCollectionsForUser(filters.issuer, apiQuery);
+    if (filters?.creatorAddress) {
+      return await this.getCollectionsForUser(filters.creatorAddress, apiQuery);
     }
 
     return await this.getAllCollections(apiQuery);

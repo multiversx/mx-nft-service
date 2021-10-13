@@ -231,7 +231,16 @@ type CollectionResponse {
 }
 
 input CollectionsFilter {
+  """Flag for can create or not on collection"""
+  canCreate: Boolean
+
+  """Collection name"""
   collectionName: String
+
+  """The user that has create role"""
+  creatorAddress: String
+
+  """The owner of the collection"""
   issuer: String
   type: NftTypeEnum
 }

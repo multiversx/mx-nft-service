@@ -24,6 +24,13 @@ export class CollectionQuery {
     return this;
   }
 
+  addCanCreate(canCreate: boolean): this {
+    if (canCreate === undefined) return this;
+    if (this.query === '') this.query = `?canCreate=${canCreate}`;
+    else this.query = `${this.query}&canCreate=${canCreate}`;
+    return this;
+  }
+
   addPageSize(from: number, size: number): this {
     if (!from || !size) return this;
     if (this.query === '') this.query = `?from=${from}&size=${size}`;
