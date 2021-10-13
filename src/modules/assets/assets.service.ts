@@ -44,7 +44,6 @@ export class AssetsService {
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, query),
     ]);
-
     const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
@@ -66,7 +65,16 @@ export class AssetsService {
       return await this.getlikedByAssets(filters.likedByAddress, limit, offset);
     }
     if (filters?.ownerAddress) {
-      return await this.getAssetsByOwnerAddress(filters, apiQuery);
+      const [assets, count] = await this.getAssetsByOwnerAddress(
+        filters,
+        apiQuery,
+      );
+      return [
+        assets.map((a) => {
+          return { ...a, ownerAddress: filters?.ownerAddress };
+        }),
+        count,
+      ];
     }
 
     return await this.getAssetsWithoutOwner(filters, apiQuery);

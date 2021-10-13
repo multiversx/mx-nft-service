@@ -102,7 +102,7 @@ export class AuctionEntity extends BaseEntity {
             .toString()}-${nominateVal(
             parseInt(auction.auctioned_token.nonce.valueOf().toString()),
           )}`,
-          tags: `,${tags},`,
+          tags: tags ? `,${tags},` : '',
         })
       : null;
   }
