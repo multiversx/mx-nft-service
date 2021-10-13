@@ -7,6 +7,7 @@ import { Logger } from 'winston';
 import * as Agent from 'agentkeepalive';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { elrondConfig } from 'src/config';
+import { CollectionApi } from './models/collection.dto';
 
 @Injectable()
 export class ElrondApiService {
@@ -132,6 +133,44 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftsCount.name,
       `nfts/count${query}`,
+      (response) => response,
+    );
+  }
+
+  async getCollectionsForAddress(
+    address: string = '',
+    query: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddress.name,
+      `accounts/${address}/collections${query}`,
+      (response) => response,
+    );
+  }
+
+  async getCollectionsForAddressCount(
+    address: string = '',
+    query: string = '',
+  ): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressCount.name,
+      `accounts/${address}/collections/count${query}`,
+      (response) => response,
+    );
+  }
+
+  async getCollections(query: string = ''): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `collections${query}`,
+      (response) => response,
+    );
+  }
+
+  async getCollectionsCount(query: string = ''): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsCount.name,
+      `collections/count${query}`,
       (response) => response,
     );
   }

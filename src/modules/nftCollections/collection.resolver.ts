@@ -1,4 +1,11 @@
-import { Resolver, Args, Mutation, Query } from '@nestjs/graphql';
+import {
+  Resolver,
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import {
   StopNftCreateArgs,
@@ -8,16 +15,21 @@ import {
 import { IssueCollectionArgs } from './models';
 import { SetNftRolesArgs } from './models';
 import { TransactionNode } from '../transaction';
-import { ElrondProxyService } from 'src/common/services/elrond-communication/elrond-proxy.service';
 import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
+import CollectionResponse from './models/CollectionResponse';
+import { CollectionsFilter } from '../filtersTypes';
+import ConnectionArgs from '../ConnectionArgs';
+import PageResponse from '../PageResponse';
+import { AccountsProvider } from '../accounts/accounts.loader';
+import { Account } from '../accounts/models';
 
-@Resolver()
+@Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
-    private elrondGateway: ElrondProxyService,
+    private accountsProvider: AccountsProvider,
   ) {
     super();
   }
@@ -62,10 +74,36 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     return await this.collectionsService.stopNFTCreate(input);
   }
 
-  @Query(() => [String])
+  @Query(() => CollectionResponse)
   async collections(
-    @Args('ownerAddress') ownerAddress: string,
-  ): Promise<string[]> {
-    return await this.elrondGateway.getCollections(ownerAddress);
+    @Args({ name: 'filters', type: () => CollectionsFilter, nullable: true })
+    filters,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ): Promise<CollectionResponse> {
+    const { limit, offset } = pagination.pagingParams();
+    const [collections, count] = await this.collectionsService.getCollections(
+      offset,
+      limit,
+      filters,
+    );
+    return PageResponse.mapResponse<Collection>(
+      collections,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
+  }
+
+  @ResolveField('issuer', () => Account)
+  async issuer(@Parent() auction: Collection) {
+    const { issuerAddress } = auction;
+
+    if (!issuerAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      issuerAddress,
+    );
+    return Account.fromEntity(account);
   }
 }

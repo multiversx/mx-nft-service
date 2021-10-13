@@ -34,6 +34,7 @@ import { AccountsProvider } from '../accounts/accounts.loader';
 import { OrdersProvider } from 'src/db/orders/orders.loader';
 import { AssetsProvider } from '../assets/assets.loader';
 import { ActiveOrdersProvider } from 'src/db/orders/active-orders.loader';
+import PageResponse from '../PageResponse';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -114,15 +115,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
         groupByOption: groupBy,
       }),
     );
-    const page = connectionFromArraySlice(auctions, pagination, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
+    return PageResponse.mapResponse<Auction>(
+      auctions,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
   }
 
   @Query(() => AuctionResponse)
@@ -137,15 +136,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
       await this.auctionsService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters }),
       );
-    const page = connectionFromArraySlice(auctions, pagination, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
+
+    return PageResponse.mapResponse<Auction>(
+      auctions,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
   }
 
   @Query(() => AuctionResponse)
@@ -170,15 +168,13 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const [auctions, count] = await this.auctionsService.getTrendingAuctions(
       new TrendingQueryRequest({ limit, offset, startDate, endDate }),
     );
-    const page = connectionFromArraySlice(auctions, pagination, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
+    return PageResponse.mapResponse<Auction>(
+      auctions,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
   }
 
   @ResolveField('asset', () => Asset)

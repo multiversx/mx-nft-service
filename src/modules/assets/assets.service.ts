@@ -215,7 +215,8 @@ export class AssetsService {
     query: string = '',
   ): Promise<[Asset[], number]> {
     if (filters?.identifier) {
-      return [[await this.getAssetByIdentifier(filters.identifier)], 1];
+      const asset = await this.getAssetByIdentifier(filters.identifier);
+      return [[asset], asset ? 1 : 0];
     } else {
       return await this.getAllAssets(query);
     }

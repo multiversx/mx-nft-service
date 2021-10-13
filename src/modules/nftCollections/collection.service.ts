@@ -13,16 +13,20 @@ import {
 import { elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import {
+  Collection,
   IssueCollectionArgs,
   StopNftCreateArgs,
   TransferNftCreateRoleArgs,
 } from './models';
 import { TransactionNode } from '../transaction';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
+import { CollectionsFilter } from '../filtersTypes';
+import { CollectionQuery } from '../assets/collection-query';
+import { ElrondApiService } from 'src/common';
 
 @Injectable()
 export class CollectionsService {
-  constructor() {}
+  constructor(private apiService: ElrondApiService) {}
 
   private readonly esdtSmartContract = getSmartContract(
     elrondConfig.esdtNftAddress,
@@ -70,6 +74,52 @@ export class CollectionsService {
       gasLimit: new GasLimit(gas.setRoles),
     });
     return transaction.toPlainObject();
+  }
+
+  async getCollections(
+    offset: number = 0,
+    limit: number = 10,
+    filters: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    const apiQuery = new CollectionQuery()
+      .addIssuer(filters?.issuer)
+      .addSearch(filters?.collectionName)
+      .addType(filters?.type)
+      .addPageSize(offset, limit)
+      .build();
+
+    if (filters?.issuer) {
+      return await this.getCollectionsForUser(filters.issuer, apiQuery);
+    }
+
+    return await this.getAllCollections(apiQuery);
+  }
+
+  private async getAllCollections(
+    query: string = '',
+  ): Promise<[Collection[], number]> {
+    const [collectionsApi, count] = await Promise.all([
+      this.apiService.getCollections(query),
+      this.apiService.getCollectionsCount(query),
+    ]);
+    const collections = collectionsApi?.map((element) =>
+      Collection.fromCollectionApi(element),
+    );
+    return [collections, count];
+  }
+
+  private async getCollectionsForUser(
+    address: string,
+    query: string = '',
+  ): Promise<[Collection[], number]> {
+    const [collectionsApi, count] = await Promise.all([
+      this.apiService.getCollectionsForAddress(address, query),
+      this.apiService.getCollectionsForAddressCount(address, query),
+    ]);
+    const collections = collectionsApi?.map((element) =>
+      Collection.fromCollectionApi(element, address),
+    );
+    return [collections, count];
   }
 
   private issueToken(args: IssueCollectionArgs, functionName: string) {

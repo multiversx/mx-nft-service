@@ -17,6 +17,7 @@ import { AccountsFilter } from './models/AccountsFilter';
 import { ElrondIdentityService } from 'src/common';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
+import PageResponse from '../PageResponse';
 
 @Resolver(() => Account)
 export class AccountsResolver {
@@ -34,7 +35,7 @@ export class AccountsResolver {
   ): Promise<AccountResponse> {
     const { limit, offset } = pagination.pagingParams();
     const accounts = await this.identityService.getProfiles(filters?.addresses);
-    return this.mapResponse<Account>(
+    return PageResponse.mapResponse<Account>(
       accounts?.map((acc) => Account.fromEntity(acc)),
       pagination,
       accounts?.length,
@@ -63,7 +64,7 @@ export class AccountsResolver {
         followers.map((acc) => acc?.followerAddress),
       );
     }
-    return this.mapResponse<Account>(
+    return PageResponse.mapResponse<Account>(
       accountsFollowers?.map((a) => Account.fromEntity(a)),
       pagination,
       count,
@@ -92,7 +93,7 @@ export class AccountsResolver {
       );
     }
 
-    return this.mapResponse<Account>(
+    return PageResponse.mapResponse<Account>(
       accountsFollowing?.map((a) => Account.fromEntity(a)),
       pagination,
       count,
@@ -120,23 +121,5 @@ export class AccountsResolver {
       user.publicKey,
       input.addressToUnfollow,
     );
-  }
-
-  private mapResponse<T>(
-    returnList: T[],
-    args: ConnectionArgs,
-    count: number,
-    offset: number,
-    limit: number,
-  ) {
-    const page = connectionFromArraySlice(returnList, args, {
-      arrayLength: count,
-      sliceStart: offset || 0,
-    });
-    return {
-      edges: page.edges,
-      pageInfo: page.pageInfo,
-      pageData: { count, limit, offset },
-    };
   }
 }

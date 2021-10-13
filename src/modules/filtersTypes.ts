@@ -92,6 +92,18 @@ export class AssetsFilter {
 }
 
 @InputType()
+export class CollectionsFilter {
+  @Field(() => String, { nullable: true })
+  ownerAddress: string;
+  @Field(() => String, { nullable: true })
+  issuer: string;
+  @Field(() => String, { nullable: true })
+  collectionName: string;
+  @Field(() => NftTypeEnum, { nullable: true })
+  type: NftTypeEnum;
+}
+
+@InputType()
 export class AssetHistoryFilter {
   @Field(() => String)
   identifier: string;
