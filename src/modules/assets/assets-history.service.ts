@@ -3,7 +3,11 @@ import { ElrondElasticService } from 'src/common/services/elrond-communication/e
 import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
-import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
+import {
+  AuctionEventEnum,
+  AuctionEventEnumOld,
+  NftEventEnum,
+} from './models/AuctionEvent.enum';
 import { Price } from './models';
 
 @Injectable()
@@ -29,7 +33,8 @@ export class AssetsHistoryService {
 
   private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
     switch (res[index]._source.events[0].identifier) {
-      case AuctionEventEnum.AuctionTokenEvent: {
+      case AuctionEventEnum.AuctionTokenEvent:
+      case AuctionEventEnumOld.AuctionTokenEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
@@ -40,6 +45,7 @@ export class AssetsHistoryService {
             res[index]._source.events[0].topics[5],
           ),
         );
+        index++;
         break;
       }
       case NftEventEnum.ESDTNFTAddQuantity: {
@@ -69,6 +75,8 @@ export class AssetsHistoryService {
                 AssetActionEnum.Received,
                 res[index]._source.events[0].topics[3].base64ToBech32(),
                 res[index]._source.events[0].topics[2],
+                undefined,
+                res[index]._source.events[0].address,
               ),
             );
           }
@@ -99,7 +107,8 @@ export class AssetsHistoryService {
     historyLog: AssetHistoryLog[],
   ) {
     switch (res[index]._source.events[1].identifier) {
-      case AuctionEventEnum.WithdrawEvent: {
+      case AuctionEventEnum.WithdrawEvent:
+      case AuctionEventEnumOld.WithdrawEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
@@ -111,7 +120,8 @@ export class AssetsHistoryService {
         );
         break;
       }
-      case AuctionEventEnum.EndAuctionEvent: {
+      case AuctionEventEnum.EndAuctionEvent:
+      case AuctionEventEnumOld.EndAuctionEvent: {
         const [, , , itemsCount, address, price] =
           res[index]._source.events[1].topics;
         historyLog.push(
@@ -137,7 +147,8 @@ export class AssetsHistoryService {
 
         break;
       }
-      case AuctionEventEnum.BuySftEvent: {
+      case AuctionEventEnum.BuySftEvent:
+      case AuctionEventEnumOld.BuySftEvent: {
         const count = Buffer.from(
           nominateVal(parseInt('1')).toString(),
           'hex',
@@ -165,10 +176,12 @@ export class AssetsHistoryService {
     address,
     itemsCount = undefined,
     price = undefined,
+    sender = undefined,
   ): AssetHistoryLog {
     return new AssetHistoryLog({
       action: action,
       address: address,
+      senderAddress: sender,
       transactionHash: res[index]._id,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount

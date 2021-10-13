@@ -8,6 +8,10 @@ export class AssetHistoryLog {
   address: string;
   @Field(() => Account, { nullable: true })
   account: Account;
+  @Field(() => String, { nullable: true })
+  senderAddress: string;
+  @Field(() => Account, { nullable: true })
+  senderAccount: Account;
   @Field(() => AssetActionEnum)
   action!: AssetActionEnum;
   @Field(() => Int)
