@@ -97,6 +97,8 @@ type AssetHistoryLog {
   address: String!
   itemCount: String
   price: Price
+  senderAccount: Account
+  senderAddress: String
   transactionHash: String!
 }
 

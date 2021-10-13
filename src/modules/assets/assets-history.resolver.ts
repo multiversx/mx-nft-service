@@ -40,4 +40,15 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     const account = await this.accountsProvider.getAccountByAddress(address);
     return Account.fromEntity(account);
   }
+
+  @ResolveField('senderAccount', () => Account)
+  async senderAccount(@Parent() asset: AssetHistoryLog) {
+    const { senderAddress } = asset;
+
+    if (!senderAddress) return null;
+    const account = await this.accountsProvider.getAccountByAddress(
+      senderAddress,
+    );
+    return Account.fromEntity(account);
+  }
 }
