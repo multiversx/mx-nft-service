@@ -26,10 +26,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    await rabbitMq.listen(
-      parseInt(process.env.RABBITMQ_PORT),
-      process.env.RABBITMQ_LISTEN_URL,
-    );
+    await rabbitMq.listen(5673, '0.0.0.0');
   }
 }
 

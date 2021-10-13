@@ -2,7 +2,7 @@
   "elrond": {
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqcg22wnug7s285fuuwyartwatf5amcps3u00std0ar7",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgq7epdy2nss28tr3966gr9pcxr0w5xvgjpu00s3xhh7y",
     "issueNftCost": 50000000000000000,
     "version": 1,
     "proxyTimeout": 60000,
