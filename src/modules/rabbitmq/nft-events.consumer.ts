@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { elrondConfig } from 'src/config';
 import { NftEventsService } from './nft-events.service';
-import { PublicRabbitConsumer } from './rabbitmq.consumers';
+import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
 @Injectable()
 export class NftTransactionsConsumer {
   constructor(private readonly nftTransactionsService: NftEventsService) {}
 
-  @PublicRabbitConsumer({
+  @CompetingRabbitConsumer({
     queueName: process.env.RABBITMQ_QUEUE,
     exchange: process.env.RABBITMQ_EXCHANGE,
   })

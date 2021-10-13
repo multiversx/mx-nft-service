@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PublicRabbitConsumer } from './rabbitmq.consumers';
+import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 import { RevertEventsService } from './revert.events.service';
 
 @Injectable()
 export class RevertEventsConsumer {
   constructor(private readonly nftTransactionsService: RevertEventsService) {}
 
-  @PublicRabbitConsumer({
+  @CompetingRabbitConsumer({
     queueName: process.env.RABBITMQ_QUEUE_REVERT,
     exchange: process.env.RABBITMQ_EXCHANGE_REVERT,
   })
