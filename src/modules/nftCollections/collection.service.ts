@@ -82,7 +82,7 @@ export class CollectionsService {
     filters: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
-      .addIssuer(filters?.issuer)
+      .addOwner(filters?.ownerAddress)
       .addSearch(filters?.collectionName)
       .addType(filters?.type)
       .addCanCreate(filters?.canCreate)
@@ -118,7 +118,7 @@ export class CollectionsService {
       this.apiService.getCollectionsForAddressCount(address, query),
     ]);
     const collections = collectionsApi?.map((element) =>
-      Collection.fromCollectionApi(element, address),
+      Collection.fromCollectionApi(element),
     );
     return [collections, count];
   }

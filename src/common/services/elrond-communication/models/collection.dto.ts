@@ -3,7 +3,7 @@ export interface CollectionApi {
   name: string;
   type: string;
   ticker: string;
-  issuer: string;
+  owner: string;
   timestamp: number;
   canTransferRole: boolean;
   canPause: boolean;

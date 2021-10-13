@@ -96,13 +96,13 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     );
   }
 
-  @ResolveField('issuer', () => Account)
-  async issuer(@Parent() auction: Collection) {
-    const { issuerAddress } = auction;
+  @ResolveField('owner', () => Account)
+  async owner(@Parent() auction: Collection) {
+    const { ownerAddress } = auction;
 
-    if (!issuerAddress) return null;
+    if (!ownerAddress) return null;
     const account = await this.accountsProvider.getAccountByAddress(
-      issuerAddress,
+      ownerAddress,
     );
     return Account.fromEntity(account);
   }

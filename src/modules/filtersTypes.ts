@@ -97,7 +97,7 @@ export class CollectionsFilter {
     nullable: true,
     description: 'The owner of the collection',
   })
-  issuer: string;
+  ownerAddress: string;
   @Field(() => String, {
     nullable: true,
     description: 'The user that has create role',

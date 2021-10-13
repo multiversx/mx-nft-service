@@ -205,9 +205,9 @@ type Collection {
   canWipe: Boolean
   collection: String
   creationDate: Float!
-  issuer: Account
-  issuerAddress: String
   name: String!
+  owner: Account
+  ownerAddress: String
   ticker: String!
   type: String
 }
@@ -241,7 +241,7 @@ input CollectionsFilter {
   creatorAddress: String
 
   """The owner of the collection"""
-  issuer: String
+  ownerAddress: String
   type: NftTypeEnum
 }
 

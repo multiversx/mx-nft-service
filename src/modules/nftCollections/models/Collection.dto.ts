@@ -12,9 +12,9 @@ export class Collection {
   @Field()
   ticker!: string;
   @Field({ nullable: true })
-  issuerAddress: string;
+  ownerAddress: string;
   @Field({ nullable: true })
-  issuer: Account;
+  owner: Account;
   @Field()
   name: string;
   @Field()
@@ -38,16 +38,13 @@ export class Collection {
     Object.assign(this, init);
   }
 
-  static fromCollectionApi(
-    collectionApi: CollectionApi,
-    issuerAddress: string = undefined,
-  ) {
+  static fromCollectionApi(collectionApi: CollectionApi) {
     return collectionApi
       ? new Collection({
           collection: collectionApi.collection,
           type: NftTypeEnum[collectionApi.type],
           ticker: collectionApi.ticker,
-          issuerAddress: issuerAddress ? issuerAddress : collectionApi.issuer,
+          ownerAddress: collectionApi.owner,
           creationDate: collectionApi.timestamp,
           name: collectionApi.name,
           canTransferRole: collectionApi.canTransferRole,
