@@ -94,8 +94,6 @@ export class AssetsFilter {
 @InputType()
 export class CollectionsFilter {
   @Field(() => String, { nullable: true })
-  ownerAddress: string;
-  @Field(() => String, { nullable: true })
   issuer: string;
   @Field(() => String, { nullable: true })
   collectionName: string;

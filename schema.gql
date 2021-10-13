@@ -233,7 +233,6 @@ type CollectionResponse {
 input CollectionsFilter {
   collectionName: String
   issuer: String
-  ownerAddress: String
   type: NftTypeEnum
 }
 
