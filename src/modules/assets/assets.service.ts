@@ -80,6 +80,17 @@ export class AssetsService {
     return await this.getAssetsWithoutOwner(filters, apiQuery);
   }
 
+  async getAssetsForCollection(
+    filters: AssetsFilter,
+  ): Promise<[any[], string]> {
+    const apiQuery = new AssetsQuery()
+      .addCollection(filters?.collection)
+      .addPageSize(0, 4)
+      .build();
+
+    return await this.getCollectionAssets(apiQuery);
+  }
+
   async getAssetByIdentifierAndAddress(
     onwerAddress: string,
     identifier: string,
@@ -199,6 +210,16 @@ export class AssetsService {
     });
 
     return transaction.toPlainObject();
+  }
+
+  private async getCollectionAssets(
+    query: string = '',
+  ): Promise<[any[], string]> {
+    const [nfts, count] = await Promise.all([
+      this.apiService.getAllNfts(`${query}&fields=thumbnailUrl`),
+      this.apiService.getNftsCount(query),
+    ]);
+    return [nfts, count];
   }
 
   private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {

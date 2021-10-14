@@ -19,16 +19,19 @@ import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import CollectionResponse from './models/CollectionResponse';
-import { CollectionsFilter } from '../filtersTypes';
+import { AssetsFilter, CollectionsFilter } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { Account } from '../accounts/models';
+import { AssetsService } from '../assets/assets.service';
+import { CollectionAsset } from '../assets/models/CollectionAsset.dto';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
+    private assetsService: AssetsService,
     private accountsProvider: AccountsProvider,
   ) {
     super();
@@ -105,5 +108,18 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       ownerAddress,
     );
     return Account.fromEntity(account);
+  }
+
+  @ResolveField('assets', () => [CollectionAsset])
+  async assets(@Parent() auction: Collection) {
+    const { collection } = auction;
+
+    const [assets, count] = await this.assetsService.getAssetsForCollection(
+      new AssetsFilter({ collection: collection }),
+    );
+    return new CollectionAsset({
+      thumbnailUrls: assets.map((a) => a.thumbnailUrl),
+      totalCount: count,
+    });
   }
 }
