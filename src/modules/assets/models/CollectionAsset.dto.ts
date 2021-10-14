@@ -3,7 +3,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 @ObjectType()
 export class CollectionAsset {
   @Field(() => [String], { nullable: 'itemsAndList' })
-  thumbnailUrl: string[];
+  thumbnailUrls: string[];
   @Field(() => String, { nullable: true })
   totalCount: string;
 

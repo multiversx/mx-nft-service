@@ -118,7 +118,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       new AssetsFilter({ collection: collection }),
     );
     return new CollectionAsset({
-      thumbnailUrl: assets.map((a) => a.thumbnailUrl),
+      thumbnailUrls: assets.map((a) => a.thumbnailUrl),
       totalCount: count,
     });
   }

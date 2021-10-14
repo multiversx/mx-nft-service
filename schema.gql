@@ -216,7 +216,7 @@ type Collection {
 }
 
 type CollectionAsset {
-  thumbnailUrl: [String]
+  thumbnailUrls: [String]
   totalCount: String
 }
 
