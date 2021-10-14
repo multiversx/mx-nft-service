@@ -198,6 +198,7 @@ input BuySftActionArgs {
 }
 
 type Collection {
+  assets(pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean

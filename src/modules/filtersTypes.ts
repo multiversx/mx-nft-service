@@ -89,6 +89,9 @@ export class AssetsFilter {
   likedByAddress: string;
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
+  constructor(init?: Partial<AssetsFilter>) {
+    Object.assign(this, init);
+  }
 }
 
 @InputType()
