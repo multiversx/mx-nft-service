@@ -69,7 +69,9 @@ export class AuctionsForAssetProvider {
           auctionsIdentifiers[auction.identifier].push(auction);
         }
       });
-      keys = identifiers.map((i) => this.getAuctionCacheKey(i));
+      keys = identifiers?.map((identifier) =>
+        this.getAuctionCacheKey(identifier),
+      );
       values = identifiers?.map((identifier) =>
         auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
       );

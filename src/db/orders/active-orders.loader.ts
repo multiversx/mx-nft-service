@@ -53,9 +53,11 @@ export class ActiveOrdersProvider {
           ordersAuctionsIds[order.auctionId].push(order);
         }
       });
-      keys = auctionIds.map((i) => this.getOrdersForAuctionCacheKey(i));
-      values = auctionIds?.map((id) =>
-        ordersAuctionsIds[id] ? ordersAuctionsIds[id] : [],
+      keys = auctionIds?.map((auctionId) =>
+        this.getOrdersForAuctionCacheKey(auctionId),
+      );
+      values = auctionIds?.map((auctionId) =>
+        ordersAuctionsIds[auctionId] ? ordersAuctionsIds[auctionId] : [],
       );
       await this.redisCacheService.batchSetCache(
         this.redisClient,

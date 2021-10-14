@@ -23,12 +23,12 @@ export class AuctionProvider {
     );
   }
 
-  async clearKey(identifier: number): Promise<any> {
+  async clearKey(auctionId: number): Promise<any> {
     await this.redisCacheService.del(
       this.redisClient,
-      this.getAuctionCacheKey(identifier),
+      this.getAuctionCacheKey(auctionId),
     );
-    return this.dataLoader.clear(identifier);
+    return this.dataLoader.clear(auctionId);
   }
 
   async getAuctionById(auctionId: number): Promise<any> {
@@ -65,9 +65,11 @@ export class AuctionProvider {
           auctionsIdentifiers[auction.id].push(auction);
         }
       });
-      keys = auctionsIds.map((i) => this.getAuctionCacheKey(i));
-      values = auctionsIds?.map((id) =>
-        auctionsIdentifiers[id] ? auctionsIdentifiers[id] : [],
+      keys = auctionsIds?.map((auctionId) =>
+        this.getAuctionCacheKey(auctionId),
+      );
+      values = auctionsIds?.map((auctionId) =>
+        auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
       );
 
       await this.redisCacheService.batchSetCache(
@@ -76,12 +78,12 @@ export class AuctionProvider {
         values,
         cacheConfig.followersttl,
       );
-      return auctionsIds?.map((identifier) => auctionsIdentifiers[identifier]);
+      return auctionsIds?.map((auctionId) => auctionsIdentifiers[auctionId]);
     }
   };
 
-  private getAuctionsCacheKey(identifiers: number[]) {
-    return identifiers.map((id) => this.getAuctionCacheKey(id));
+  private getAuctionsCacheKey(auctionIds: number[]) {
+    return auctionIds.map((id) => this.getAuctionCacheKey(id));
   }
 
   private getAuctionCacheKey(id: number) {
