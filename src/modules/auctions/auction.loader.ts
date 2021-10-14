@@ -10,9 +10,9 @@ import { cacheConfig } from 'src/config';
 @Injectable({
   scope: Scope.Operation,
 })
-export class AuctionsForAssetProvider {
+export class AuctionProvider {
   private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.getAuctions(keys),
+    async (keys: number[]) => await this.getAuctions(keys),
     { cache: false },
   );
   private redisClient: Redis.Redis;
@@ -23,7 +23,7 @@ export class AuctionsForAssetProvider {
     );
   }
 
-  async clearKey(identifier: string): Promise<any> {
+  async clearKey(identifier: number): Promise<any> {
     await this.redisCacheService.del(
       this.redisClient,
       this.getAuctionCacheKey(identifier),
@@ -31,9 +31,9 @@ export class AuctionsForAssetProvider {
     return this.dataLoader.clear(identifier);
   }
 
-  async getAuctionsByIdentifier(identifier: string): Promise<any> {
-    const cacheKey = this.getAuctionCacheKey(identifier);
-    const getAuctions = () => this.dataLoader.load(identifier);
+  async getAuctionById(auctionId: number): Promise<any> {
+    const cacheKey = this.getAuctionCacheKey(auctionId);
+    const getAuctions = () => this.dataLoader.load(auctionId);
     return this.redisCacheService.getOrSet(
       this.redisClient,
       cacheKey,
@@ -42,8 +42,8 @@ export class AuctionsForAssetProvider {
     );
   }
 
-  private getAuctions = async (identifiers: string[]) => {
-    const cacheKeys = this.getAuctionsCacheKey(identifiers);
+  private getAuctions = async (auctionsIds: number[]) => {
+    const cacheKeys = this.getAuctionsCacheKey(auctionsIds);
     let [keys, values] = [[], []];
     const getAuctionsFromCache = await this.redisCacheService.batchGetCache(
       this.redisClient,
@@ -51,43 +51,40 @@ export class AuctionsForAssetProvider {
     );
     if (getAuctionsFromCache.includes(null)) {
       const auctions = await getRepository(AuctionEntity)
-        .createQueryBuilder('a')
-        .where('a.identifier IN(:...identifiers) AND a.status in ("Running")', {
-          identifiers: identifiers,
+        .createQueryBuilder('auctions')
+        .where('id IN(:...auctionsIds)', {
+          auctionsIds: auctionsIds,
         })
-        .leftJoin('orders', 'o', 'o.auctionId=a.id')
-        .orderBy(
-          'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
-        )
         .getMany();
       const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
 
       auctions.forEach((auction) => {
-        if (!auctionsIdentifiers[auction.identifier]) {
-          auctionsIdentifiers[auction.identifier] = [auction];
+        if (!auctionsIdentifiers[auction.id]) {
+          auctionsIdentifiers[auction.id] = [auction];
         } else {
-          auctionsIdentifiers[auction.identifier].push(auction);
+          auctionsIdentifiers[auction.id].push(auction);
         }
       });
-      keys = identifiers.map((i) => this.getAuctionCacheKey(i));
-      values = identifiers?.map((identifier) =>
-        auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
+      keys = auctionsIds.map((i) => this.getAuctionCacheKey(i));
+      values = auctionsIds?.map((id) =>
+        auctionsIdentifiers[id] ? auctionsIdentifiers[id] : [],
       );
+
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         keys,
         values,
         cacheConfig.followersttl,
       );
-      return identifiers?.map((identifier) => auctionsIdentifiers[identifier]);
+      return auctionsIds?.map((identifier) => auctionsIdentifiers[identifier]);
     }
   };
 
-  private getAuctionsCacheKey(identifiers: string[]) {
+  private getAuctionsCacheKey(identifiers: number[]) {
     return identifiers.map((id) => this.getAuctionCacheKey(id));
   }
 
-  private getAuctionCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('auctions', identifier);
+  private getAuctionCacheKey(id: number) {
+    return generateCacheKeyFromParams('auction', id);
   }
 }

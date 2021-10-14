@@ -1,8 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
-import { utilities as nestWinstonModuleUtilities } from 'nest-winston';
-import * as winston from 'winston';
-import * as Transport from 'winston-transport';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
 import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
@@ -15,7 +12,6 @@ import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
-import { auctionLoaderById } from './db/auctions/auctionLoaderById';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
@@ -53,9 +49,6 @@ import { CommonModule } from './common.module';
         maxFileSize: 100000000,
         maxFiles: 5,
       },
-      context: () => ({
-        auctionLoaderById: auctionLoaderById(),
-      }),
     }),
     CommonModule,
     CollectionModuleGraph,

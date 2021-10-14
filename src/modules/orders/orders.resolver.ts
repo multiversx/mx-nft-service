@@ -16,15 +16,16 @@ import OrdersResponse from './models/OrdersResponse';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
-import { IGraphQLContext } from 'src/db/auctions/graphql.types';
 import { QueryRequest } from '../QueryRequest';
 import { AccountsProvider } from '../accounts/accounts.loader';
+import { AuctionProvider } from '../auctions/auction.loader';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
   constructor(
     private ordersService: OrdersService,
     private accountsProvider: AccountsProvider,
+    private auctionProvider: AuctionProvider,
   ) {
     super();
   }
@@ -65,13 +66,9 @@ export class OrdersResolver extends BaseResolver(Order) {
   }
 
   @ResolveField('auction', () => Auction)
-  async auction(
-    @Parent() order: Order,
-    @Context()
-    { auctionLoaderById: auctionLoaderById }: IGraphQLContext,
-  ) {
+  async auction(@Parent() order: Order) {
     const { auctionId } = order;
-    const auctions = await auctionLoaderById.load(auctionId);
+    const auctions = await this.auctionProvider.getAuctionById(auctionId);
     return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
   }
 }

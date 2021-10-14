@@ -6,6 +6,7 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { PriceServiceUSD } from '../Price.service.usd';
+import { AuctionProvider } from '../auctions/auction.loader';
 
 @Module({
   providers: [
@@ -13,6 +14,7 @@ import { PriceServiceUSD } from '../Price.service.usd';
     PriceServiceUSD,
     OrdersResolver,
     RedisCacheService,
+    AuctionProvider,
   ],
   imports: [ElrondCommunicationModule, OrdersModuleDb, AccountsModuleGraph],
   exports: [OrdersService, RedisCacheService],
