@@ -1,8 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { CollectionApi } from 'src/common/services/elrond-communication/models/collection.dto';
 import { Account } from 'src/modules/accounts/models';
-import { AssetsResolver } from 'src/modules/assets/assets.resolver';
-import AssetsResponse from 'src/modules/assets/AssetsResponse';
+import { CollectionAsset } from 'src/modules/assets/models/CollectionAsset.dto';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 
 @ObjectType()
@@ -18,7 +17,7 @@ export class Collection {
   @Field({ nullable: true })
   owner: Account;
   @Field({ nullable: true })
-  assets: AssetsResponse;
+  assets: CollectionAsset;
   @Field()
   name: string;
   @Field()

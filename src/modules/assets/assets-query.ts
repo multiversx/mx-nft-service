@@ -32,7 +32,7 @@ export class AssetsQuery {
   }
 
   addPageSize(from: number, size: number): this {
-    if (!from || !size) return this;
+    if (!from && !size) return this;
     if (this.query === '') this.query = `?from=${from}&size=${size}`;
     else this.query = `${this.query}&from=${from}&size=${size}`;
     return this;

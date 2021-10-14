@@ -198,7 +198,7 @@ input BuySftActionArgs {
 }
 
 type Collection {
-  assets(pagination: ConnectionArgs): AssetsResponse
+  assets: CollectionAsset
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -213,6 +213,11 @@ type Collection {
   ownerAddress: String
   ticker: String!
   type: String
+}
+
+type CollectionAsset {
+  thumbnailUrl: [String]
+  totalCount: String
 }
 
 type CollectionEdge {

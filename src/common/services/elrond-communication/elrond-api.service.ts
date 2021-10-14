@@ -129,7 +129,7 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsCount(query: string = ''): Promise<number> {
+  async getNftsCount(query: string = ''): Promise<any> {
     return await this.doGetGeneric(
       this.getNftsCount.name,
       `nfts/count${query}`,

@@ -24,9 +24,8 @@ import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { Account } from '../accounts/models';
-import AssetsResponse from '../assets/AssetsResponse';
 import { AssetsService } from '../assets/assets.service';
-import { Asset } from '../assets/models';
+import { CollectionAsset } from '../assets/models/CollectionAsset.dto';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {
@@ -111,26 +110,16 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     return Account.fromEntity(account);
   }
 
-  @ResolveField('assets', () => AssetsResponse)
-  async assets(
-    @Parent() auction: Collection,
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
-  ) {
+  @ResolveField('assets', () => [CollectionAsset])
+  async assets(@Parent() auction: Collection) {
     const { collection } = auction;
-    console.log({ collection });
-    const { limit, offset } = pagination.pagingParams();
-    const [assets, count] = await this.assetsService.getAssets(
-      offset,
-      limit,
+
+    const [assets, count] = await this.assetsService.getAssetsForCollection(
       new AssetsFilter({ collection: collection }),
     );
-    return PageResponse.mapResponse<Asset>(
-      assets,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+    return new CollectionAsset({
+      thumbnailUrl: assets.map((a) => a.thumbnailUrl),
+      totalCount: count,
+    });
   }
 }
