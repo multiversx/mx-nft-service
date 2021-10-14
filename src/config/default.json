@@ -14,8 +14,6 @@
     "keepAliveMaxFreeSockets": 10
   },
   "caching": {
-    "transactionsProcessorRedisClientName": "transactionsProcessor",
-    "transactionsProcessorDbName": 1,
     "ordersRedisClientName": "orders",
     "ordersDbName": 2,
     "ordersttl": 43200,

@@ -50,13 +50,6 @@ if (!!process.env.LOG_FILE) {
         db: 0,
       },
       {
-        name: cacheConfig.transactionsProcessorRedisClientName,
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.transactionsProcessorDbName,
-      },
-      {
         name: cacheConfig.auctionsRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),

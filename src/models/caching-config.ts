@@ -4,8 +4,6 @@
 export class CachingConfig {
   auctionsRedisClientName: string;
   auctionsDbName: number;
-  transactionsProcessorRedisClientName: string;
-  transactionsProcessorDbName: number;
   auctionsttl: number;
   assetsDbName: number;
   assetsRedisClientName: string;
@@ -20,9 +18,4 @@ export class CachingConfig {
   // network config and network status
   networkConfig: number;
   networkStatus: number;
-}
-
-class CacheWithVerify {
-  standard: number;
-  verified: number;
 }
