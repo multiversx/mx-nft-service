@@ -6,12 +6,14 @@ import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
+import { OrdersServiceDb } from '../orders/orders.service';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
     private auctionsLoader: AuctionsProvider,
+    private ordersService: OrdersServiceDb,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -77,6 +79,13 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
+    return this.auctionsRepository
+      .createQueryBuilder()
+      .where({ blockHash: blockHash })
+      .getMany();
+  }
+
   async getTrendingAuctions(
     queryRequest: TrendingQueryRequest,
   ): Promise<[AuctionEntity[], number]> {
@@ -128,18 +137,62 @@ export class AuctionsServiceDb {
     return await this.auctionsRepository.save(auction);
   }
 
+  async deleteAuctionAndOrdersByHash(blockHash: string): Promise<any> {
+    const auctions = await this.getAuctionsForHash(blockHash);
+    if (!auctions || auctions.length === 0) {
+      return true;
+    }
+    await this.rollbackWithdrawAndEndAuction(auctions);
+    await this.rollbackCreateAuction(auctions);
+  }
+
+  private async rollbackCreateAuction(auctions: AuctionEntity[]) {
+    const runningAuction = auctions.filter((a) => a.status === 'Running');
+
+    if (runningAuction.length > 0) {
+      const deleteAuction = await this.auctionsRepository.delete(
+        runningAuction.map((a) => a.id),
+      );
+      if (deleteAuction) {
+        await this.ordersService.deleteOrdersByAuctionId(
+          runningAuction.map((a) => a.id),
+        );
+      }
+    }
+  }
+
+  private async rollbackWithdrawAndEndAuction(auctions: AuctionEntity[]) {
+    const closedAuctins = auctions?.filter((a) => a.status !== 'Running');
+    await this.updateAuctions(
+      closedAuctins?.map((a) => {
+        return {
+          ...a,
+          status: AuctionStatusEnum.Running,
+          modifiedDate: new Date(new Date().toUTCString()),
+        };
+      }),
+    );
+  }
+
   async updateAuction(
     auctionId: number,
     status: AuctionStatusEnum,
+    hash: string,
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
     await this.auctionsLoader.clearKey(auction.identifier);
     if (auction) {
       auction.status = status;
+      auction.blockHash = hash;
       return await this.auctionsRepository.save(auction);
     }
     return null;
+  }
+
+  async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
+    auctions.forEach((a) => this.auctionsLoader.clearKey(a.identifier));
+    return await this.auctionsRepository.save(auctions);
   }
 
   private getSqlDate(timestamp: number) {

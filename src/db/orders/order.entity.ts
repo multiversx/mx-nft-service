@@ -10,7 +10,7 @@ export class OrderEntity extends BaseEntity {
   @Column()
   priceAmount: string;
 
-  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
   priceAmountDenominated: number;
 
   @Column()
@@ -24,6 +24,9 @@ export class OrderEntity extends BaseEntity {
 
   @Column()
   auctionId: number;
+
+  @Column({ length: 64 })
+  blockHash: string;
 
   constructor(init?: Partial<OrderEntity>) {
     super();

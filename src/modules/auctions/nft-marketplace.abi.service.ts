@@ -140,7 +140,7 @@ export class NftMarketplaceAbiService {
     );
     let result = getDataQuery.interpretQueryResponse(data);
 
-    const auction: AuctionAbi = result.firstValue.valueOf();
+    const auction: AuctionAbi = result?.firstValue?.valueOf();
     return auction;
   }
 

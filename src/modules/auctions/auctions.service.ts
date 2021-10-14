@@ -35,6 +35,7 @@ export class AuctionsService {
   async saveAuction(
     auctionId: number,
     identifier: string,
+    hash: string,
   ): Promise<Auction | any> {
     try {
       await this.invalidateCache();
@@ -45,6 +46,7 @@ export class AuctionsService {
           auctionId,
           auctionData,
           asset?.tags?.toString(),
+          hash,
         ),
       );
       return savedAuction;
@@ -88,6 +90,19 @@ export class AuctionsService {
       this.logger.error('An error occurred while get auctions', error, {
         path: 'AuctionsService.getAuctions',
         queryRequest,
+      });
+    }
+  }
+
+  async deleteAuctionByHash(blockHash: string): Promise<boolean> {
+    try {
+      return await this.auctionServiceDb.deleteAuctionAndOrdersByHash(
+        blockHash,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while deleteAuction', error, {
+        path: 'AuctionsService.deleteAuctionByHash',
+        blockHash,
       });
     }
   }
@@ -152,10 +167,11 @@ export class AuctionsService {
   async updateAuction(
     id: number,
     status: AuctionStatusEnum,
+    hash: string,
   ): Promise<Auction | any> {
     await this.invalidateCache();
     await this.auctionsLoader.clearKey(id.toString());
-    return await this.auctionServiceDb.updateAuction(id, status);
+    return await this.auctionServiceDb.updateAuction(id, status, hash);
   }
 
   private getAuctionsCacheKey(request: any) {

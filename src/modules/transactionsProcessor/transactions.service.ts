@@ -108,6 +108,7 @@ export class TransactionService {
             this.auctionsService.saveAuction(
               parseInt(decodedData[1], 16),
               `${Buffer.from(dataArgs[0], 'hex').toString()}-${dataArgs[1]}`,
+              'hash',
             );
           }
         }
@@ -143,6 +144,7 @@ export class TransactionService {
             this.auctionsService.updateAuction(
               parseInt(dataArgs[0], 16),
               AuctionStatusEnum.Closed,
+              'hash',
             );
           }
           break;
@@ -151,6 +153,7 @@ export class TransactionService {
           this.auctionsService.updateAuction(
             parseInt(dataArgs[0], 16),
             AuctionStatusEnum.Ended,
+            'hash',
           );
           break;
         }
@@ -168,6 +171,7 @@ export class TransactionService {
 
   public isAuctionToken(decoded): boolean | undefined {
     if (decoded && decoded.length > 4) {
+      console.log({ decoded });
       const dataEndpointName = Buffer.from(decoded[4], 'hex').toString();
       if (dataEndpointName === 'auctionToken') return true;
     }

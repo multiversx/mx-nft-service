@@ -61,6 +61,19 @@ export class OrdersService {
     }
   }
 
+  async rollbackOrdersByHash(hash: string): Promise<any> {
+    try {
+      await this.invalidateCache();
+
+      return this.orderServiceDb.deleteOrdersByHash(hash);
+    } catch (error) {
+      this.logger.error('An error occurred while creating an order', error, {
+        path: 'OrdersService.rollbackOrdersByHash',
+        hash,
+      });
+    }
+  }
+
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
     const cacheKey = this.getAuctionsCacheKey(queryRequest);
     const getOrders = () => this.getMappedOrders(queryRequest);

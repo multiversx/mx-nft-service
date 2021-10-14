@@ -5,6 +5,7 @@ export class CreateOrderArgs {
   ownerAddress: string;
   priceToken: string;
   priceAmount: string;
+  blockHash: string;
   priceNonce: number;
   auctionId: number;
 
@@ -27,6 +28,7 @@ export class CreateOrderArgs {
         }),
       ),
       priceNonce: args.priceNonce,
+      blockHash: args.blockHash,
     });
   }
 }

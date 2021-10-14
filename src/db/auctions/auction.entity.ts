@@ -39,12 +39,12 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   minBid: string;
 
-  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
   minBidDenominated: number;
   @Column()
   maxBid: string;
 
-  @Column('decimal', { precision: 18, scale: 2, default: 0.0 })
+  @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
   maxBidDenominated: number;
 
   @Column()
@@ -56,12 +56,20 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   tags: string;
 
+  @Column({ length: 64 })
+  blockHash: string;
+
   constructor(init?: Partial<AuctionEntity>) {
     super();
     Object.assign(this, init);
   }
 
-  static fromAuctionAbi(auctionId: number, auction: AuctionAbi, tags: string) {
+  static fromAuctionAbi(
+    auctionId: number,
+    auction: AuctionAbi,
+    tags: string,
+    hash: string,
+  ) {
     return auction
       ? new AuctionEntity({
           id: auctionId,
@@ -103,6 +111,7 @@ export class AuctionEntity extends BaseEntity {
             parseInt(auction.auctioned_token.nonce.valueOf().toString()),
           )}`,
           tags: tags ? `,${tags},` : '',
+          blockHash: hash,
         })
       : null;
   }

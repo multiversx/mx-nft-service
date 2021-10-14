@@ -23,14 +23,28 @@ services:
     depends_on:
       - db
       - redis
+
+  rabbitmq:
+    image: 331leo/rabbitmq3-management-mqtt
+    hostname: rabbitmq
+    environment:
+      HOSTNAME: rabbitmq
+      RABBITMQ_NODENAME: rabbitmq
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: 'password'
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
   db:
-    image: mysql:5.7
+    image: mysql:latest
     container_name: nft-db
     restart: always
     environment:
-      MYSQL_DATABASE: 'db'
+      MYSQL_DATABASE: 'db3'
       # So you don't have to use root, but you can if you like
-      MYSQL_USER: 'user'
+      MYSQL_USER: 'root'
       # You can use whatever password you like
       MYSQL_PASSWORD: 'password'
       # Password for root access
