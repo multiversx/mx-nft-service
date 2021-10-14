@@ -3,11 +3,7 @@ import { ElrondElasticService } from 'src/common/services/elrond-communication/e
 import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetActionEnum } from './models/AssetAction.enum';
-import {
-  AuctionEventEnum,
-  AuctionEventEnumOld,
-  NftEventEnum,
-} from './models/AuctionEvent.enum';
+import { AuctionEventEnum, NftEventEnum } from './models/AuctionEvent.enum';
 import { Price } from './models';
 
 @Injectable()
@@ -33,16 +29,15 @@ export class AssetsHistoryService {
 
   private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
     switch (res[index]._source.events[0].identifier) {
-      case AuctionEventEnum.AuctionTokenEvent:
-      case AuctionEventEnumOld.AuctionTokenEvent: {
+      case AuctionEventEnum.AuctionTokenEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.StartedAuction,
             res[index]._source.address,
-            res[index]._source.events[0].topics[3],
-            res[index]._source.events[0].topics[5],
+            res[index]._source.events[0].topics[4],
+            res[index]._source.events[0].topics[6],
           ),
         );
         index++;
@@ -64,9 +59,9 @@ export class AssetsHistoryService {
         if (res[index]._source.events.length < 2) {
           if (
             !Object.values(AuctionEventEnum).includes(
-              res[index + 1]._source.events[1]?.identifier,
+              res[index + 1]?._source.events[1]?.identifier,
             ) &&
-            res[index]._source.address === res[index]._source.events[0].address
+            res[index]._source.address === res[index]?._source.events[0].address
           ) {
             historyLog.push(
               this.addHistoryLog(
@@ -107,22 +102,20 @@ export class AssetsHistoryService {
     historyLog: AssetHistoryLog[],
   ) {
     switch (res[index]._source.events[1].identifier) {
-      case AuctionEventEnum.WithdrawEvent:
-      case AuctionEventEnumOld.WithdrawEvent: {
+      case AuctionEventEnum.WithdrawEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.ClosedAuction,
-            res[index]._source.events[1].topics[4]?.base64ToBech32() || '',
-            res[index]._source.events[1].topics[3],
+            res[index]._source.events[1].topics[5]?.base64ToBech32() || '',
+            res[index]._source.events[1].topics[4],
           ),
         );
         break;
       }
-      case AuctionEventEnum.EndAuctionEvent:
-      case AuctionEventEnumOld.EndAuctionEvent: {
-        const [, , , itemsCount, address, price] =
+      case AuctionEventEnum.EndAuctionEvent: {
+        const [, , , , itemsCount, address, price] =
           res[index]._source.events[1].topics;
         historyLog.push(
           this.addHistoryLog(
@@ -147,8 +140,7 @@ export class AssetsHistoryService {
 
         break;
       }
-      case AuctionEventEnum.BuySftEvent:
-      case AuctionEventEnumOld.BuySftEvent: {
+      case AuctionEventEnum.BuySftEvent: {
         const count = Buffer.from(
           nominateVal(parseInt('1')).toString(),
           'hex',
@@ -158,9 +150,9 @@ export class AssetsHistoryService {
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.events[1].topics[3].base64ToBech32(),
+            res[index]._source.events[1].topics[4].base64ToBech32(),
             count,
-            res[index]._source.events[1].topics[4],
+            res[index]._source.events[1].topics[5],
           ),
         );
         break;
@@ -185,7 +177,10 @@ export class AssetsHistoryService {
       transactionHash: res[index]._id,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemsCount
-        ? Buffer.from(itemsCount, 'base64').toString('hex')
+        ? parseInt(
+            Buffer.from(itemsCount, 'base64').toString('hex'),
+            16,
+          ).toString()
         : undefined,
       price: price
         ? new Price({
