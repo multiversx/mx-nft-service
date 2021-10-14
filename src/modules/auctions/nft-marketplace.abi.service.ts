@@ -31,7 +31,7 @@ import {
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
-import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class NftMarketplaceAbiService {

@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 import { gas } from 'src/config';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
 import { nominateStringVal, nominateVal } from '../formatters';
@@ -17,7 +18,6 @@ import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { TransactionNode } from '../transaction';
-import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from './assets-query';
 import {

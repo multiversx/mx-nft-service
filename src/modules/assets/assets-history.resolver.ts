@@ -3,9 +3,9 @@ import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetsHistoryService } from './assets-history.service';
 import { AssetHistoryFilter } from '../filtersTypes';
-import { getCollectionAndNonceFromIdentifier } from '../transactionsProcessor/helpers';
 import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Resolver(() => AssetHistoryLog)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
