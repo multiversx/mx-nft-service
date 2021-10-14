@@ -52,8 +52,6 @@ export class ActiveOrdersProvider {
         } else {
           ordersAuctionsIds[order.auctionId].push(order);
         }
-        keys = [...keys, this.getOrdersForAuctionCacheKey(order.auctionId)];
-        values = [...values, order];
       });
       keys = auctionIds.map((i) => this.getOrdersForAuctionCacheKey(i));
       values = auctionIds?.map((id) =>
