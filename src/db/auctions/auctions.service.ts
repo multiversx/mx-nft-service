@@ -76,6 +76,7 @@ export class AuctionsServiceDb {
       );
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
+    this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     return await queryBuilder.getManyAndCount();
   }
 
@@ -205,10 +206,11 @@ export class AuctionsServiceDb {
   private addOrderBy(
     sorting: Sorting[],
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
+    alias: string = null,
   ) {
     sorting?.forEach((sort) =>
       queryBuilder.addOrderBy(
-        sort.field,
+        alias ? `${alias}.${sort.field}` : sort.field,
         Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
       ),
     );
