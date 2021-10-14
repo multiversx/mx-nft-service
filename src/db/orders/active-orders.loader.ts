@@ -44,21 +44,28 @@ export class ActiveOrdersProvider {
     );
     if (getOrdersFromCache.includes(null)) {
       const orders = await this.getActiveOrdersForAuctionIds(auctionIds);
-      const auctionsIdentifiers: { [key: string]: OrderEntity[] } = {};
+      const ordersAuctionsIds: { [key: string]: OrderEntity[] } = {};
 
-      ({ keys, values } = this.mapReturnData(
-        orders,
-        auctionsIdentifiers,
-        keys,
-        values,
-      ));
+      orders.forEach((order) => {
+        if (!ordersAuctionsIds[order.auctionId]) {
+          ordersAuctionsIds[order.auctionId] = [order];
+        } else {
+          ordersAuctionsIds[order.auctionId].push(order);
+        }
+      });
+      keys = auctionIds?.map((auctionId) =>
+        this.getOrdersForAuctionCacheKey(auctionId),
+      );
+      values = auctionIds?.map((auctionId) =>
+        ordersAuctionsIds[auctionId] ? ordersAuctionsIds[auctionId] : [],
+      );
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         keys,
         values,
         cacheConfig.followersttl,
       );
-      return auctionIds.map((auctionId) => auctionsIdentifiers[auctionId]);
+      return auctionIds.map((auctionId) => ordersAuctionsIds[auctionId]);
     }
   };
 
@@ -69,24 +76,6 @@ export class ActiveOrdersProvider {
       this.getOrdersForAuctionCacheKey(auctionId),
     );
     return this.dataLoader.clear(auctionId);
-  }
-
-  private mapReturnData(
-    orders: OrderEntity[],
-    auctionsIdentifiers: { [key: string]: OrderEntity[] },
-    keys: any[],
-    values: any[],
-  ) {
-    orders.forEach((order) => {
-      if (!auctionsIdentifiers[order.auctionId]) {
-        auctionsIdentifiers[order.auctionId] = [order];
-      } else {
-        auctionsIdentifiers[order.auctionId].push(order);
-      }
-      keys = [...keys, this.getOrdersForAuctionCacheKey(order.auctionId)];
-      values = [...values, order];
-    });
-    return { keys, values };
   }
 
   private async getActiveOrdersForAuctionIds(auctionIds: number[]) {

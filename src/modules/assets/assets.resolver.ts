@@ -25,14 +25,13 @@ import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
 import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
-import { connectionFromArraySlice } from 'graphql-relay';
 import { AssetsFilter } from '../filtersTypes';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionsProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
@@ -44,7 +43,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
-    private auctionsProvider: AuctionsProvider,
+    private auctionsProvider: AuctionsForAssetProvider,
   ) {
     super();
   }

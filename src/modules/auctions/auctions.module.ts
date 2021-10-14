@@ -9,10 +9,11 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { OrdersService } from '../orders/order.service';
 import { OrdersModuleDb } from 'src/db/orders/orders.module';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
-import { AuctionsProvider } from './asset-auctions.loader';
+import { AuctionsForAssetProvider } from './asset-auctions.loader';
 import { AssetsProvider } from '../assets/assets.loader';
 import { PriceServiceUSD } from '../Price.service.usd';
 import { UsdAmountResolver } from './usd-amount.resolver';
+import { AuctionProvider } from './auction.loader';
 
 @Module({
   providers: [
@@ -22,7 +23,8 @@ import { UsdAmountResolver } from './usd-amount.resolver';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
-    AuctionsProvider,
+    AuctionsForAssetProvider,
+    AuctionProvider,
     AssetsProvider,
     PriceServiceUSD,
   ],
@@ -38,7 +40,7 @@ import { UsdAmountResolver } from './usd-amount.resolver';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
-    AuctionsProvider,
+    AuctionsForAssetProvider,
   ],
 })
 export class AuctionsModuleGraph {}

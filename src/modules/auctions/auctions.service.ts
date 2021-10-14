@@ -12,7 +12,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService } from 'src/common';
-import { AuctionsProvider } from './asset-auctions.loader';
+import { AuctionsForAssetProvider } from './asset-auctions.loader';
 import { GroupBy } from '../filtersTypes';
 const hash = require('object-hash');
 
@@ -22,7 +22,7 @@ export class AuctionsService {
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
     private apiService: ElrondApiService,
-    private auctionsLoader: AuctionsProvider,
+    private auctionsLoader: AuctionsForAssetProvider,
     private auctionServiceDb: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,

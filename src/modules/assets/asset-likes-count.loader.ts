@@ -25,11 +25,11 @@ export class AssetLikesProvider {
 
   async getAssetLikesCount(identifier: string): Promise<any> {
     const cacheKey = this.getAssetLikeCountCacheKey(identifier);
-    const getAuctions = () => this.dataLoader.load(identifier);
+    const getLikesCount = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
       cacheKey,
-      getAuctions,
+      getLikesCount,
       cacheConfig.followersttl,
     );
   }
@@ -88,6 +88,15 @@ export class AssetLikesProvider {
             },
           ];
         },
+      );
+      keys = identifiers.map((i) => this.getAssetLikeCountCacheKey(i));
+      values = identifiers?.map((identifier) =>
+        assetsIdentifiers[identifier]
+          ? assetsIdentifiers[identifier]
+          : {
+              identifier: identifier,
+              likesCount: 0,
+            },
       );
       await this.redisCacheService.batchSetCache(
         this.redisClient,
