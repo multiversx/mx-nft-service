@@ -37,7 +37,7 @@ export class AssetsHistoryService {
             AssetActionEnum.StartedAuction,
             res[index]._source.address,
             res[index]._source.events[0].topics[4],
-            res[index]._source.events[0].topics[5],
+            res[index]._source.events[0].topics[6],
           ),
         );
         index++;
