@@ -3,10 +3,10 @@ import { NftTypeEnum } from './models/NftTypes.enum';
 export class CollectionQuery {
   private query: string = '';
 
-  addOwner(onwer: string): this {
-    if (!onwer) return this;
-    if (this.query === '') this.query = `?owner=${onwer}`;
-    else this.query = `${this.query}&owner=${onwer}`;
+  addCreator(creator: string): this {
+    if (!creator) return this;
+    if (this.query === '') this.query = `?creator=${creator}`;
+    else this.query = `${this.query}&creator=${creator}`;
     return this;
   }
 

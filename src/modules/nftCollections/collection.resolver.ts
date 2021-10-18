@@ -25,7 +25,10 @@ import PageResponse from '../PageResponse';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { Account } from '../accounts/models';
 import { AssetsService } from '../assets/assets.service';
-import { CollectionAsset } from '../assets/models/CollectionAsset.dto';
+import {
+  CollectionAsset,
+  CollectionAssetModel,
+} from '../assets/models/CollectionAsset.dto';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {
@@ -110,7 +113,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     return Account.fromEntity(account);
   }
 
-  @ResolveField('assets', () => [CollectionAsset])
+  @ResolveField('collectionAsset', () => CollectionAsset)
   async assets(@Parent() auction: Collection) {
     const { collection } = auction;
 
@@ -118,7 +121,13 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       new AssetsFilter({ collection: collection }),
     );
     return new CollectionAsset({
-      thumbnailUrls: assets.map((a) => a.thumbnailUrl),
+      assets: assets.map(
+        (a) =>
+          new CollectionAssetModel({
+            thumbnailUrl: a.thumbnailUrl,
+            identifier: a.identifier,
+          }),
+      ),
       totalCount: count,
     });
   }

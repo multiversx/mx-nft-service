@@ -198,7 +198,6 @@ input BuySftActionArgs {
 }
 
 type Collection {
-  assets: CollectionAsset
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -207,6 +206,7 @@ type Collection {
   canTransferRole: Boolean
   canWipe: Boolean
   collection: String
+  collectionAsset: CollectionAsset!
   creationDate: Float!
   name: String!
   owner: Account
@@ -216,8 +216,13 @@ type Collection {
 }
 
 type CollectionAsset {
-  thumbnailUrls: [String]
+  assets: [CollectionAssetModel]
   totalCount: String
+}
+
+type CollectionAssetModel {
+  identifier: String!
+  thumbnailUrl: String
 }
 
 type CollectionEdge {
@@ -242,14 +247,14 @@ input CollectionsFilter {
   """Flag for can create or not on collection"""
   canCreate: Boolean
 
-  """Collection name"""
-  collectionName: String
-
   """The user that has create role"""
   creatorAddress: String
 
   """The owner of the collection"""
   ownerAddress: String
+
+  """Search by collection name"""
+  search: String
   type: NftTypeEnum
 }
 

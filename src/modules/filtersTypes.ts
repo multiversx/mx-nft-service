@@ -113,9 +113,9 @@ export class CollectionsFilter {
   canCreate: boolean;
   @Field(() => String, {
     nullable: true,
-    description: 'Collection name',
+    description: 'Search by collection name',
   })
-  collectionName: string;
+  search: string;
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
 }

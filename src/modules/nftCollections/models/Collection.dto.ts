@@ -16,8 +16,8 @@ export class Collection {
   ownerAddress: string;
   @Field({ nullable: true })
   owner: Account;
-  @Field({ nullable: true })
-  assets: CollectionAsset;
+  @Field(() => CollectionAsset, { nullable: true })
+  collectionAsset: CollectionAsset;
   @Field()
   name: string;
   @Field()
