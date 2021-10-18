@@ -82,15 +82,15 @@ export class CollectionsService {
     filters: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
-      .addOwner(filters?.ownerAddress)
-      .addSearch(filters?.collectionName)
+      .addCreator(filters?.creatorAddress)
+      .addSearch(filters?.search)
       .addType(filters?.type)
       .addCanCreate(filters?.canCreate)
       .addPageSize(offset, limit)
       .build();
 
-    if (filters?.creatorAddress) {
-      return await this.getCollectionsForUser(filters.creatorAddress, apiQuery);
+    if (filters?.ownerAddress) {
+      return await this.getCollectionsForUser(filters.ownerAddress, apiQuery);
     }
 
     return await this.getAllCollections(apiQuery);

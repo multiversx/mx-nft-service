@@ -216,7 +216,7 @@ export class AssetsService {
     query: string = '',
   ): Promise<[any[], string]> {
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(`${query}&fields=thumbnailUrl`),
+      this.apiService.getAllNfts(`${query}&fields=thumbnailUrl,identifier`),
       this.apiService.getNftsCount(query),
     ]);
     return [nfts, count];
