@@ -134,7 +134,8 @@ export class AuctionsServiceDb {
     return null;
   }
 
-  async insertAuction(auction: AuctionEntity | any): Promise<AuctionEntity> {
+  async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+    this.auctionsLoader.clearKey(auction.identifier);
     return await this.auctionsRepository.save(auction);
   }
 
