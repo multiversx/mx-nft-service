@@ -163,7 +163,7 @@ export class ElrondApiService {
     identifier: string,
   ): Promise<CollectionApi> {
     return await this.doGetGeneric(
-      this.getCollectionForIdentifier.name,
+      this.getCollectionForOwnerAndIdentifier.name,
       `accounts/${address}/collections/${identifier}`,
       (response) => response,
     );
