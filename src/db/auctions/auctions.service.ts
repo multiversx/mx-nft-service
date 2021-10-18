@@ -137,7 +137,7 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier);
     return await this.auctionsRepository.save(auction);
   }
 
@@ -185,7 +185,7 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier);
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -195,15 +195,15 @@ export class AuctionsServiceDb {
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
-    auctions.forEach((a) => {
-      this.invalidateCache(a.identifier);
-    });
+    for (let auction of auctions) {
+      await this.invalidateCache(auction.identifier);
+    }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private invalidateCache(identifier: string) {
-    this.auctionsLoader.clearKey(identifier);
-    this.assetsAuctionsCountLoader.clearKey(identifier);
+  private async invalidateCache(identifier: string) {
+    await this.auctionsLoader.clearKey(identifier);
+    await this.assetsAuctionsCountLoader.clearKey(identifier);
   }
 
   private getSqlDate(timestamp: number) {
