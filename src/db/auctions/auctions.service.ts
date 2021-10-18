@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AssetAuctionsCountProvider } from 'src/modules/assets/asset-auctions-count.loader';
 import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
@@ -13,6 +14,7 @@ import { AuctionEntity } from './auction.entity';
 export class AuctionsServiceDb {
   constructor(
     private auctionsLoader: AuctionsForAssetProvider,
+    private assetsAuctionsCountLoader: AssetAuctionsCountProvider,
     private ordersService: OrdersServiceDb,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
@@ -135,7 +137,7 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    this.auctionsLoader.clearKey(auction.identifier);
+    this.invalidateCache(auction.identifier);
     return await this.auctionsRepository.save(auction);
   }
 
@@ -183,7 +185,7 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.auctionsLoader.clearKey(auction.identifier);
+    this.invalidateCache(auction.identifier);
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -193,8 +195,15 @@ export class AuctionsServiceDb {
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
-    auctions.forEach((a) => this.auctionsLoader.clearKey(a.identifier));
+    auctions.forEach((a) => {
+      this.invalidateCache(a.identifier);
+    });
     return await this.auctionsRepository.save(auctions);
+  }
+
+  private invalidateCache(identifier: string) {
+    this.auctionsLoader.clearKey(identifier);
+    this.assetsAuctionsCountLoader.clearKey(identifier);
   }
 
   private getSqlDate(timestamp: number) {

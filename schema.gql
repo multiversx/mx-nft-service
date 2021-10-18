@@ -66,6 +66,7 @@ type Asset {
   supply: String!
   tags: [String!]
   thumbnailUrl: String
+  totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
   url: String

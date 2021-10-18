@@ -5,14 +5,14 @@ import { getRepository } from 'typeorm';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common/services/redis-cache.service';
 import { cacheConfig } from 'src/config';
-import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AssetLikesProvider {
+export class AssetAuctionsCountProvider {
   private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssetLikesCount(keys),
+    async (keys: string[]) => await this.batchAssetAuctionsCount(keys),
     { cache: false },
   );
   private redisClient: Redis.Redis;
@@ -23,8 +23,8 @@ export class AssetLikesProvider {
     );
   }
 
-  async getAssetLikesCount(identifier: string): Promise<any> {
-    const cacheKey = this.getAssetLikeCountCacheKey(identifier);
+  async getAssetAuctionsCount(identifier: string): Promise<any> {
+    const cacheKey = this.getAssetAuctionsCountCacheKey(identifier);
     const getLikesCount = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
@@ -37,7 +37,7 @@ export class AssetLikesProvider {
   async clearKey(identifier: string): Promise<any> {
     await this.redisCacheService.del(
       this.redisClient,
-      this.getAssetLikeCountCacheKey(identifier),
+      this.getAssetAuctionsCountCacheKey(identifier),
     );
     return this.dataLoader.clear(identifier);
   }
@@ -46,34 +46,36 @@ export class AssetLikesProvider {
     return this.dataLoader.clearAll();
   }
 
-  private batchAssetLikesCount = async (identifiers: string[]) => {
-    const cacheKeys = this.getAssetsLikesCountCacheKeys(identifiers);
+  private batchAssetAuctionsCount = async (identifiers: string[]) => {
+    const cacheKeys = this.getAssetsAuctionsCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
     const getLikes = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
     );
     if (getLikes.includes(null)) {
-      const assetLikes = await getRepository(AssetLikeEntity)
-        .createQueryBuilder('al')
-        .select('al.identifier as identifier')
-        .addSelect('COUNT(al.identifier) as likesCount')
+      const assetAuctions = await getRepository(AuctionEntity)
+        .createQueryBuilder('a')
+        .select('a.identifier as identifier')
+        .addSelect('COUNT(a.identifier) as auctionsCount')
         .where(
-          `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
+          `a.identifier IN(${identifiers.map(
+            (value) => `'${value}'`,
+          )}) and a.status='Running'`,
           {
             identifiers: identifiers,
           },
         )
-        .groupBy('al.identifier')
+        .groupBy('a.identifier')
         .execute();
       const assetsIdentifiers: { [key: string]: any[] } = {};
-      assetLikes.forEach(
-        (asset: { identifier: string; likesCount: string }) => {
+      assetAuctions.forEach(
+        (asset: { identifier: string; auctionsCount: string }) => {
           if (!assetsIdentifiers[asset.identifier]) {
             assetsIdentifiers[asset.identifier] = [
               {
                 identifier: asset.identifier,
-                likesCount: parseInt(asset.likesCount),
+                auctionsCount: asset.auctionsCount,
               },
             ];
           } else {
@@ -81,7 +83,7 @@ export class AssetLikesProvider {
           }
         },
       );
-      keys = identifiers.map((i) => this.getAssetLikeCountCacheKey(i));
+      keys = identifiers.map((i) => this.getAssetAuctionsCountCacheKey(i));
       values = identifiers?.map((identifier) =>
         assetsIdentifiers[identifier]
           ? assetsIdentifiers[identifier]
@@ -100,11 +102,11 @@ export class AssetLikesProvider {
     }
   };
 
-  private getAssetsLikesCountCacheKeys(identifiers: string[]) {
-    return identifiers.map((id) => this.getAssetLikeCountCacheKey(id));
+  private getAssetsAuctionsCountCacheKeys(identifiers: string[]) {
+    return identifiers.map((id) => this.getAssetAuctionsCountCacheKey(id));
   }
 
-  private getAssetLikeCountCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assetLikesCount', identifier);
+  private getAssetAuctionsCountCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('assetAuctionsCount', identifier);
   }
 }

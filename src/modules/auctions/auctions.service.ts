@@ -12,7 +12,6 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService } from 'src/common';
-import { AuctionsForAssetProvider } from './asset-auctions.loader';
 import { GroupBy } from '../filtersTypes';
 const hash = require('object-hash');
 
@@ -22,7 +21,6 @@ export class AuctionsService {
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
     private apiService: ElrondApiService,
-    private auctionsLoader: AuctionsForAssetProvider,
     private auctionServiceDb: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -170,7 +168,6 @@ export class AuctionsService {
     hash: string,
   ): Promise<Auction | any> {
     await this.invalidateCache();
-    await this.auctionsLoader.clearKey(id.toString());
     return await this.auctionServiceDb.updateAuction(id, status, hash);
   }
 

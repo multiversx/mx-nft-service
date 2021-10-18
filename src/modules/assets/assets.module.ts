@@ -15,6 +15,7 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { PriceServiceUSD } from '../Price.service.usd';
 import { AssetLikesProvider } from './asset-likes-count.loader';
+import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { AssetLikesProvider } from './asset-likes-count.loader';
     AssetsLikesService,
     AssetLikesProvider,
     AssetsHistoryService,
+    AssetAuctionsCountProvider,
     AssetsResolver,
     AssetsHistoryResolver,
     RedisCacheService,
