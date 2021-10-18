@@ -62,21 +62,20 @@ export class OrdersServiceDb {
   }
 
   async saveOrder(order: OrderEntity) {
+    this.clearCache(order.auctionId);
     order.status = OrderStatusEnum.active;
     return await this.ordersRepository.save(order);
   }
 
   async updateOrder(order: OrderEntity) {
-    this.ordersLoader.clearKey(order.auctionId);
-    this.activeOrdersLoades.clearKey(order.auctionId);
+    this.clearCache(order.auctionId);
     order.status = OrderStatusEnum.inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
-    this.ordersLoader.clearKey(order.auctionId);
-    this.activeOrdersLoades.clearKey(order.auctionId);
+    this.clearCache(order.auctionId);
     order.status = status;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
@@ -136,5 +135,10 @@ export class OrdersServiceDb {
         Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
       ),
     );
+  }
+
+  private clearCache(auctionId: number) {
+    this.ordersLoader.clearKey(auctionId);
+    this.activeOrdersLoades.clearKey(auctionId);
   }
 }
