@@ -1,4 +1,4 @@
-import { NftTypeEnum } from './models/NftTypes.enum';
+import { NftTypeEnum } from '../assets/models/NftTypes.enum';
 
 export class CollectionQuery {
   private query: string = '';
@@ -7,13 +7,6 @@ export class CollectionQuery {
     if (!creator) return this;
     if (this.query === '') this.query = `?creator=${creator}`;
     else this.query = `${this.query}&creator=${creator}`;
-    return this;
-  }
-
-  addSearch(collectionName: string): this {
-    if (!collectionName) return this;
-    if (this.query === '') this.query = `?search=${collectionName}`;
-    else this.query = `${this.query}&search=${collectionName}`;
     return this;
   }
 

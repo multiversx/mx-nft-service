@@ -248,15 +248,11 @@ export class AssetsService {
     query: string = '',
   ): Promise<[Asset[], number]> {
     if (filters?.identifier) {
-      return [
-        [
-          await this.getAssetByIdentifierAndAddress(
-            filters.ownerAddress,
-            filters.identifier,
-          ),
-        ],
-        1,
-      ];
+      const asset = await this.getAssetByIdentifierAndAddress(
+        filters.ownerAddress,
+        filters.identifier,
+      );
+      return [[asset], asset ? 1 : 0];
     } else {
       return await this.getAssetsForUser(filters.ownerAddress, query);
     }

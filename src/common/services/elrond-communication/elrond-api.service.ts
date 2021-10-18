@@ -148,6 +148,27 @@ export class ElrondApiService {
     );
   }
 
+  async getCollectionForIdentifier(
+    identifier: string = '',
+  ): Promise<CollectionApi> {
+    return await this.doGetGeneric(
+      this.getCollectionForIdentifier.name,
+      `collections/${identifier}`,
+      (response) => response,
+    );
+  }
+
+  async getCollectionForOwnerAndIdentifier(
+    address: string,
+    identifier: string,
+  ): Promise<CollectionApi> {
+    return await this.doGetGeneric(
+      this.getCollectionForIdentifier.name,
+      `accounts/${address}/collections/${identifier}`,
+      (response) => response,
+    );
+  }
+
   async getCollectionsForAddressCount(
     address: string = '',
     query: string = '',

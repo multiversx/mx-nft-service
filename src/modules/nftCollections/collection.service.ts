@@ -21,8 +21,9 @@ import {
 import { TransactionNode } from '../transaction';
 import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 import { CollectionsFilter } from '../filtersTypes';
-import { CollectionQuery } from '../assets/collection-query';
+import { CollectionQuery } from './collection-query';
 import { ElrondApiService } from 'src/common';
+import { CollectionApi } from 'src/common/services/elrond-communication/models/collection.dto';
 
 @Injectable()
 export class CollectionsService {
@@ -83,22 +84,38 @@ export class CollectionsService {
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
       .addCreator(filters?.creatorAddress)
-      .addSearch(filters?.search)
       .addType(filters?.type)
       .addCanCreate(filters?.canCreate)
       .addPageSize(offset, limit)
       .build();
 
     if (filters?.ownerAddress) {
-      return await this.getCollectionsForUser(filters.ownerAddress, apiQuery);
+      const [collections, count] = await this.getCollectionsForUser(
+        filters,
+        apiQuery,
+      );
+      return [
+        collections?.map((element) => Collection.fromCollectionApi(element)),
+        count,
+      ];
     }
 
-    return await this.getAllCollections(apiQuery);
+    return await this.getAllCollections(filters, apiQuery);
   }
 
   private async getAllCollections(
+    filters: CollectionsFilter,
     query: string = '',
   ): Promise<[Collection[], number]> {
+    if (filters?.collection) {
+      const collection = await this.apiService.getCollectionForIdentifier(
+        filters.collection,
+      );
+      return [
+        [Collection.fromCollectionApi(collection)],
+        Collection.fromCollectionApi(collection) ? 1 : 0,
+      ];
+    }
     const [collectionsApi, count] = await Promise.all([
       this.apiService.getCollections(query),
       this.apiService.getCollectionsCount(query),
@@ -110,17 +127,25 @@ export class CollectionsService {
   }
 
   private async getCollectionsForUser(
-    address: string,
+    filters: CollectionsFilter,
     query: string = '',
-  ): Promise<[Collection[], number]> {
+  ): Promise<[CollectionApi[], number]> {
+    if (filters?.collection) {
+      const collection =
+        await this.apiService.getCollectionForOwnerAndIdentifier(
+          filters.ownerAddress,
+          filters.collection,
+        );
+      return [[collection], collection ? 1 : 0];
+    }
     const [collectionsApi, count] = await Promise.all([
-      this.apiService.getCollectionsForAddress(address, query),
-      this.apiService.getCollectionsForAddressCount(address, query),
+      this.apiService.getCollectionsForAddress(filters.ownerAddress, query),
+      this.apiService.getCollectionsForAddressCount(
+        filters.ownerAddress,
+        query,
+      ),
     ]);
-    const collections = collectionsApi?.map((element) =>
-      Collection.fromCollectionApi(element),
-    );
-    return [collections, count];
+    return [collectionsApi, count];
   }
 
   private issueToken(args: IssueCollectionArgs, functionName: string) {
