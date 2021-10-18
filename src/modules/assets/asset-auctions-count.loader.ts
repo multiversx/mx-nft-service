@@ -12,7 +12,7 @@ import { AuctionEntity } from 'src/db/auctions/auction.entity';
 })
 export class AssetAuctionsCountProvider {
   private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssetAuctionsCount(keys),
+    async (keys: string[]) => await this.getAuctionsCountForIdentifiers(keys),
     { cache: false },
   );
   private redisClient: Redis.Redis;
@@ -42,11 +42,11 @@ export class AssetAuctionsCountProvider {
     return this.dataLoader.clear(identifier);
   }
 
-  async clearAll(): Promise<any> {
-    return this.dataLoader.clearAll();
+  async clearAll(): Promise<void> {
+    this.dataLoader.clearAll();
   }
 
-  private batchAssetAuctionsCount = async (identifiers: string[]) => {
+  private getAuctionsCountForIdentifiers = async (identifiers: string[]) => {
     const cacheKeys = this.getAssetsAuctionsCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
     const getLikes = await this.redisCacheService.batchGetCache(
@@ -89,7 +89,7 @@ export class AssetAuctionsCountProvider {
           ? assetsIdentifiers[identifier]
           : {
               identifier: identifier,
-              likesCount: 0,
+              auctionsCount: 0,
             },
       );
       await this.redisCacheService.batchSetCache(
