@@ -35,6 +35,7 @@ import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.lo
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
+import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -43,6 +44,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
+    private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private auctionsProvider: AuctionsForAssetProvider,
   ) {
     super();
@@ -139,6 +141,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
   isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     const { identifier } = asset;
     return this.assetsLikesService.isAssetLiked(identifier, byAddress);
+  }
+
+  @ResolveField('totalRunningAuctions', () => String)
+  async totalRunningAuctions(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    const assetAuctions =
+      await this.assetsAuctionsProvider.getAssetAuctionsCount(identifier);
+    return assetAuctions ? assetAuctions[0]?.auctionsCount : 0;
   }
 
   @ResolveField('auctions', () => [Auction])

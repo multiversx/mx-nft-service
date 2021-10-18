@@ -39,6 +39,8 @@ export class Asset {
   balance: string;
   @Field(() => String)
   supply: string;
+  @Field(() => String, { nullable: true })
+  totalRunningAuctions: string;
   @Field(() => Int, { nullable: true })
   creationDate!: number;
   @Field(() => [String])
