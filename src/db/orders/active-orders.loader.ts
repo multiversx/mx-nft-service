@@ -3,7 +3,7 @@ import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import * as Redis from 'ioredis';
 import { OrderEntity } from './order.entity';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { Number } from 'aws-sdk/clients/iot';

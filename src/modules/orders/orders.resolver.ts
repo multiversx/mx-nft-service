@@ -1,12 +1,4 @@
-import {
-  Resolver,
-  Query,
-  Args,
-  ResolveField,
-  Parent,
-  Mutation,
-  Context,
-} from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { Account } from '../accounts/models/Account.dto';
 import { Auction } from '../auctions/models';
@@ -33,9 +25,9 @@ export class OrdersResolver extends BaseResolver(Order) {
   @Query(() => OrdersResponse)
   async orders(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters,
+    filters: FiltersExpression,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting,
+    sorting: Sorting[],
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {

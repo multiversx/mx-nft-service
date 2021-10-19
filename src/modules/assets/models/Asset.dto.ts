@@ -2,7 +2,7 @@ import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
 import { Auction } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
-import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
+import { Nft } from 'src/common';
 import { Account } from 'src/modules/accounts/models';
 
 @ObjectType()

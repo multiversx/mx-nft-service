@@ -1,4 +1,11 @@
-import { Account } from './models/Account.dto';
+import {
+  Account,
+  AccountsFilter,
+  AccountResponse,
+  FollowEntityArgs,
+  UnfollowEntityArgs,
+} from './models';
+import { UseGuards } from '@nestjs/common';
 import {
   Mutation,
   Query,
@@ -8,14 +15,9 @@ import {
   Parent,
 } from '@nestjs/graphql';
 import { AccountsService } from './accounts.service';
-import { FollowEntityArgs, UnfollowEntityArgs } from './CreateAccountArgs';
-import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../ConnectionArgs';
-import AccountResponse from './models/AccountResponse';
 import { User } from '../user';
-import { AccountsFilter } from './models/AccountsFilter';
 import { ElrondIdentityService } from 'src/common';
-import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import PageResponse from '../PageResponse';
 

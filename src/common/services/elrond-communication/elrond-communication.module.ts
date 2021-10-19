@@ -4,8 +4,8 @@ import {
   ElrondElasticService,
   ElrondIdentityService,
   ElrondProxyService,
+  ElrondDataService,
 } from 'src/common';
-import { ElrondDataService } from './elrond-data.service';
 
 @Module({
   providers: [

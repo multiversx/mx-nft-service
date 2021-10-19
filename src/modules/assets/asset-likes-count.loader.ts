@@ -3,9 +3,9 @@ import { Injectable, Scope } from 'graphql-modules';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
 import * as Redis from 'ioredis';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
+import { AssetLikeEntity } from 'src/db/assets';
 
 @Injectable({
   scope: Scope.Operation,

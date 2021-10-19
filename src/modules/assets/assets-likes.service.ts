@@ -1,10 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AssetLikeEntity } from 'src/db/assets/assets-likes.entity';
-import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import '../../utils/extentions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';

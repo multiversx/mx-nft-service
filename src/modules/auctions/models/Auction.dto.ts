@@ -4,8 +4,7 @@ import { Account } from 'src/modules/accounts/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Order } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';
-import { AuctionStatusEnum } from '.';
-import { AuctionTypeEnum } from './AuctionType.enum';
+import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 
 @ObjectType()
 export class Auction {

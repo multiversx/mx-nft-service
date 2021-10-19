@@ -1,7 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondIdentityService } from 'src/common';
-import { AccountIdentity } from 'src/common/services/elrond-communication/models/account.identity';
+import { AccountIdentity, ElrondIdentityService } from 'src/common';
 
 @Injectable({
   scope: Scope.Operation,

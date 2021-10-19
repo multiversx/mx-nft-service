@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { OrdersServiceDb } from 'src/db/orders/orders.service';
+import { OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order } from './models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';

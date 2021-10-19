@@ -1,5 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { OrderEntity } from 'src/db/orders/order.entity';
+import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()

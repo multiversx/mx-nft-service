@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
-import { OrdersModuleDb } from 'src/db/orders/orders.module';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
+import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { PriceServiceUSD } from '../Price.service.usd';
 import { AuctionProvider } from '../auctions/auction.loader';

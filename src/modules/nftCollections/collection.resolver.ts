@@ -11,9 +11,11 @@ import {
   StopNftCreateArgs,
   Collection,
   TransferNftCreateRoleArgs,
+  IssueCollectionArgs,
+  SetNftRolesArgs,
+  CollectionAsset,
+  CollectionAssetModel,
 } from './models';
-import { IssueCollectionArgs } from './models';
-import { SetNftRolesArgs } from './models';
 import { TransactionNode } from '../transaction';
 import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
@@ -25,10 +27,6 @@ import PageResponse from '../PageResponse';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { Account } from '../accounts/models';
 import { AssetsService } from '../assets/assets.service';
-import {
-  CollectionAsset,
-  CollectionAssetModel,
-} from '../assets/models/CollectionAsset.dto';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {
@@ -83,7 +81,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   @Query(() => CollectionResponse)
   async collections(
     @Args({ name: 'filters', type: () => CollectionsFilter, nullable: true })
-    filters,
+    filters: CollectionsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {

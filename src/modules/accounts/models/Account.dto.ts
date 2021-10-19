@@ -1,10 +1,9 @@
-import { Auction } from '../../auctions/models';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Asset } from '../../assets/models';
-import { Order } from '../../orders/models';
-import { SocialLink } from './SocialLink.dto';
-import { AccountIdentity } from 'src/common/services/elrond-communication/models/account.identity';
-import { FollowerResponse } from './FollowerResponse';
+import { Asset } from 'src/modules/assets/models';
+import { Order } from 'src/modules/orders/models';
+import { SocialLink, FollowerResponse } from '.';
+import { AccountIdentity } from 'src/common';
+import { Auction } from 'src/modules/auctions/models';
 
 @ObjectType()
 export class Account {

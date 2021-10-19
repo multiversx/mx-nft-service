@@ -1,4 +1,4 @@
-import { OrderEntity } from 'src/db/orders/order.entity';
+import { OrderEntity } from 'src/db/orders';
 import denominate from 'src/modules/formatters';
 
 export class CreateOrderArgs {

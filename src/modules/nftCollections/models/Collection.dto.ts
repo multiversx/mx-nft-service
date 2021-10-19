@@ -1,8 +1,8 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { CollectionApi } from 'src/common/services/elrond-communication/models/collection.dto';
+import { CollectionApi } from 'src/common';
 import { Account } from 'src/modules/accounts/models';
-import { CollectionAsset } from 'src/modules/assets/models/CollectionAsset.dto';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
+import { CollectionAsset } from './CollectionAsset.dto';
 
 @ObjectType()
 export class Collection {

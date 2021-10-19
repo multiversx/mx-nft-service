@@ -1,4 +1,4 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, Index, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 
 @Entity('assets_likes')

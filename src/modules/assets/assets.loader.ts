@@ -1,7 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService } from 'src/common';
-import { Nft } from 'src/common/services/elrond-communication/models/nft.dto';
+import { ElrondApiService, Nft } from 'src/common';
 
 @Injectable({
   scope: Scope.Operation,
