@@ -8,7 +8,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { AssetsService } from './assets.service';
+import { AssetsService } from '.';
 import {
   Asset,
   CreateNftArgs,

@@ -1,7 +1,6 @@
 export * from './CreateNftArgs';
 export * from './HandleQuantityArgs';
 export * from './TransferNftArgs';
-export * from './asset-history';
 export * from './add-like.dto';
 export * from './Asset.dto';
 export * from './Attributes.dto';

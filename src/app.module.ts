@@ -15,6 +15,7 @@ import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
+import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 
 @Module({
   providers: [
@@ -53,6 +54,7 @@ import { CommonModule } from './common.module';
     CommonModule,
     CollectionModuleGraph,
     AssetsModuleGraph,
+    AssetHistoryModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,
     AccountsModuleGraph,

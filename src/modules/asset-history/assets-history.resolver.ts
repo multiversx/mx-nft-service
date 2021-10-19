@@ -1,7 +1,7 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog } from './models/asset-history';
-import { AssetsHistoryService } from './assets-history.service';
+import { AssetsHistoryService } from '.';
 import { AssetHistoryFilter } from '../filtersTypes';
 import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';

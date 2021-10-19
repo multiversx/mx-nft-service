@@ -18,7 +18,7 @@ import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { TransactionNode } from '../transaction';
 import { AssetsLikesService } from './assets-likes.service';
-import { AssetsQuery } from './assets-query';
+import { AssetsQuery } from '.';
 import {
   CreateNftArgs,
   TransferNftArgs,

@@ -26,7 +26,7 @@ import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { Account } from '../accounts/models';
-import { AssetsService } from '../assets/assets.service';
+import { AssetsService } from '../assets';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {

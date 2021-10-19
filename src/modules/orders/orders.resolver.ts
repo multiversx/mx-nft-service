@@ -1,10 +1,9 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/Account.dto';
+import { Account } from '../accounts/models';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
-import { Order } from './models';
-import OrdersResponse from './models/OrdersResponse';
+import { Order, OrdersResponse } from './models';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
-import { nominateVal } from '../formatters';
 import {
-  AssetHistoryLog,
   AssetActionEnum,
   AuctionEventEnum,
   NftEventEnum,
   Price,
-} from './models';
+} from '../assets/models';
+import { nominateVal } from '../formatters';
+import { AssetHistoryLog } from './models';
 
 @Injectable()
 export class AssetsHistoryService {
