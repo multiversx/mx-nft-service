@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
-import { AuctionsService } from '../auctions/auctions.service';
+import { AuctionsService } from '../auctions';
 import { AuctionStatusEnum } from '../auctions/models';
 import { CreateOrderArgs } from '../orders/models';
 import { OrdersService } from '../orders/order.service';

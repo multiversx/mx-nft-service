@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheService } from 'src/common';
 import { AssetAuctionsCountProvider } from 'src/modules/assets';
-import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AuctionsForAssetProvider } from 'src/modules/auctions';
 import { OrdersModuleDb } from '../orders/orders.module.db';
 import { AuctionEntity, AuctionsServiceDb } from '.';
 

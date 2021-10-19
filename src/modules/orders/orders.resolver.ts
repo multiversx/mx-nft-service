@@ -9,7 +9,7 @@ import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { QueryRequest } from '../QueryRequest';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionProvider } from '../auctions/auction.loader';
+import { AuctionProvider } from '../auctions';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
