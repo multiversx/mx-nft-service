@@ -3,11 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
+import { OrderStatusEnum } from '../../modules/orders/models';
 import { QueryRequest } from '../../modules/QueryRequest';
-import { ActiveOrdersProvider } from './active-orders.loader';
-import { OrderEntity } from './order.entity';
-import { OrdersProvider } from './orders.loader';
+import { ActiveOrdersProvider, OrderEntity, OrdersProvider } from '.';
 
 @Injectable()
 export class OrdersServiceDb {

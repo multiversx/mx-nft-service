@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Readable } from 'stream';
-import { SimpleConsoleLogger } from 'typeorm';
 import { Logger } from 'winston';
 
 @Injectable()
@@ -27,7 +26,7 @@ export class S3Service {
   }
 
   private async uploadS3(file, bucket, name) {
-    const key = `nfts/file/${String(name)}`;
+    const key = `nfts/asset/${String(name)}`;
     const params = {
       Bucket: bucket,
       Key: key,

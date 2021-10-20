@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { ElrondDataService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import { ElrondDataService } from 'src/common/services/elrond-communication/elrond-data.service';
 
 @Injectable()
 export class PriceServiceUSD {

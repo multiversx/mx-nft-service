@@ -4,7 +4,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
 import * as Redis from 'ioredis';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 
 @Injectable({

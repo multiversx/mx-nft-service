@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { FollowersServiceDb } from './followers.service';
-import { FollowerEntity } from './follower.entity';
+import { FollowerEntity, FollowersServiceDb } from '.';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FollowerEntity])],
   providers: [FollowersServiceDb],
-  exports: [FollowersServiceDb]
+  exports: [FollowersServiceDb],
 })
-export class FollowersModuleDb { }
+export class FollowersModuleDb {}

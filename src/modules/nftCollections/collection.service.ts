@@ -7,7 +7,6 @@ import {
   BytesValue,
   ContractFunction,
   GasLimit,
-  SmartContract,
   TypedValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from 'src/config';
@@ -19,11 +18,9 @@ import {
   TransferNftCreateRoleArgs,
 } from './models';
 import { TransactionNode } from '../transaction';
-import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
 import { CollectionsFilter } from '../filtersTypes';
 import { CollectionQuery } from './collection-query';
-import { ElrondApiService } from 'src/common';
-import { CollectionApi } from 'src/common/services/elrond-communication/models/collection.dto';
+import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
 
 @Injectable()
 export class CollectionsService {

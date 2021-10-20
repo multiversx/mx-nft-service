@@ -1,7 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Account } from 'src/modules/accounts/models';
-import { AssetActionEnum } from './AssetAction.enum';
-import { Price } from './Price.dto';
+import { AssetActionEnum, Price } from 'src/modules/assets/models';
 @ObjectType()
 export class AssetHistoryLog {
   @Field(() => String)

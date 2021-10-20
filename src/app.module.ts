@@ -6,7 +6,7 @@ import { CollectionModuleGraph } from './modules/nftCollections/collection.modul
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
-import { AuctionsModuleDb } from './db/auctions/auctions.module';
+import { AuctionsModuleDb } from './db/auctions/auctions.module.db';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
@@ -15,6 +15,7 @@ import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
+import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 
 @Module({
   providers: [
@@ -53,6 +54,7 @@ import { CommonModule } from './common.module';
     CommonModule,
     CollectionModuleGraph,
     AssetsModuleGraph,
+    AssetHistoryModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,
     AccountsModuleGraph,

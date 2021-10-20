@@ -7,8 +7,7 @@ import {
   GasLimit,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common/services/elrond-communication/elrond-api.service';
-import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
+import { ElrondApiService, getSmartContract } from 'src/common';
 import { gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import '../../utils/extentions';
@@ -19,7 +18,7 @@ import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { TransactionNode } from '../transaction';
 import { AssetsLikesService } from './assets-likes.service';
-import { AssetsQuery } from './assets-query';
+import { AssetsQuery } from '.';
 import {
   CreateNftArgs,
   TransferNftArgs,

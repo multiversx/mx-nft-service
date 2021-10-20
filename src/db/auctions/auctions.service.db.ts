@@ -7,7 +7,7 @@ import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
-import { OrdersServiceDb } from '../orders/orders.service';
+import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 
 @Injectable()

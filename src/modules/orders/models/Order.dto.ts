@@ -1,16 +1,9 @@
-import {
-  Field,
-  GraphQLISODateTime,
-  GraphQLTimestamp,
-  ID,
-  Int,
-  ObjectType,
-} from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
 import { Account } from '../../accounts/models';
 import { Price } from '../../assets/models';
-import { OrderEntity } from 'src/db/orders/order.entity';
+import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()

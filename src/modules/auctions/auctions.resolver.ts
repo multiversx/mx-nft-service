@@ -9,21 +9,19 @@ import {
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/Account.dto';
+import { Account } from '../accounts/models';
 import {
   Auction,
   CreateAuctionArgs,
   BidActionArgs,
   BuySftActionArgs,
   AuctionTypeEnum,
+  AuctionResponse,
 } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
-import { Asset } from '../assets/models/Asset.dto';
 import { Order } from '../orders/models/Order.dto';
-import { Price } from '../assets/models';
-import AuctionResponse from './models/AuctionResonse';
-import { connectionFromArraySlice } from 'graphql-relay';
+import { Asset, Price } from '../assets/models';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
 import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
@@ -31,9 +29,8 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { OrdersProvider } from 'src/db/orders/orders.loader';
+import { OrdersProvider, ActiveOrdersProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
-import { ActiveOrdersProvider } from 'src/db/orders/active-orders.loader';
 import PageResponse from '../PageResponse';
 
 @Resolver(() => Auction)
@@ -97,11 +94,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Query(() => AuctionResponse)
   async auctions(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters,
+    filters: FiltersExpression,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting,
+    sorting: Sorting[],
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
-    groupBy,
+    groupBy: Grouping,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {

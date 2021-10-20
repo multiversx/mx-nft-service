@@ -6,24 +6,23 @@ import {
   Parent,
   Mutation,
   Int,
-  Context,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { AssetsService } from './assets.service';
+import { AssetsService } from '.';
 import {
   Asset,
   CreateNftArgs,
   TransferNftArgs,
   HandleQuantityArgs,
+  AddLikeArgs,
+  RemoveLikeArgs,
+  AssetsResponse,
 } from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
 import { Auction } from '../auctions/models';
-import { AddLikeArgs } from './models/add-like.dto';
-import { RemoveLikeArgs } from './models/remove-like.dto';
 import { AssetsLikesService } from './assets-likes.service';
-import AssetsResponse from './AssetsResponse';
 import ConnectionArgs from '../ConnectionArgs';
 import { AssetsFilter } from '../filtersTypes';
 import { UseGuards } from '@nestjs/common';
@@ -31,7 +30,7 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AuctionsForAssetProvider } from 'src/modules/auctions';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';

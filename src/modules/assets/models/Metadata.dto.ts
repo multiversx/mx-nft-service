@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { NftMetadata } from 'src/common/services/elrond-communication/models/nftMetadata';
+import { NftMetadata } from 'src/common';
 @ObjectType()
 export class Metadata {
   @Field(() => String)

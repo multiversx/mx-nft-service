@@ -5,8 +5,7 @@ import {
   TokenIdentifierValue,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { AuctionStatusEnum } from '.';
-import { AuctionTypeEnum } from './AuctionType.enum';
+import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 
 export interface AuctionAbi {
   auctioned_token: {

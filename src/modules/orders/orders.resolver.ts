@@ -1,24 +1,15 @@
-import {
-  Resolver,
-  Query,
-  Args,
-  ResolveField,
-  Parent,
-  Mutation,
-  Context,
-} from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models/Account.dto';
+import { Account } from '../accounts/models';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
-import { Order } from './models';
-import OrdersResponse from './models/OrdersResponse';
+import { Order, OrdersResponse } from './models';
 import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { QueryRequest } from '../QueryRequest';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionProvider } from '../auctions/auction.loader';
+import { AuctionProvider } from '../auctions';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
@@ -33,9 +24,9 @@ export class OrdersResolver extends BaseResolver(Order) {
   @Query(() => OrdersResponse)
   async orders(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters,
+    filters: FiltersExpression,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting,
+    sorting: Sorting[],
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {

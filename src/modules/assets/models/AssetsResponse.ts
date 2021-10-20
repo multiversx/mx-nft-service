@@ -1,6 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
-import { Auction } from '.';
 import relayTypes from '../../Relay.types';
-
+import { Asset } from '.';
 @ObjectType()
-export class AuctionResponse extends relayTypes<Auction>(Auction) {}
+export class AssetsResponse extends relayTypes<Asset>(Asset) {}

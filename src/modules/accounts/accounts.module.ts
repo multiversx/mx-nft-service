@@ -1,10 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { AccountsResolver } from './accounts.resolver';
 import { AccountsService } from './accounts.service';
-import { FollowersModuleDb } from 'src/db/followers/followers.module';
+import { FollowersModuleDb } from 'src/db/followers/followers.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { AccountsProvider } from './accounts.loader';
+import { ElrondCommunicationModule } from 'src/common';
 
 @Module({
   providers: [AccountsService, AccountsResolver, AccountsProvider],

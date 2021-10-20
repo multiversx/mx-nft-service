@@ -3,7 +3,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
 import * as Redis from 'ioredis';
-import { RedisCacheService } from 'src/common/services/redis-cache.service';
+import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 

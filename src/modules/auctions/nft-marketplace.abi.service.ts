@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { ElrondProxyService } from '../../common/services/elrond-communication/elrond-proxy.service';
 import {
   CreateAuctionArgs,
   AuctionAbi,
@@ -30,7 +29,7 @@ import {
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
-import { getSmartContract } from 'src/common/services/elrond-communication/smart-contract';
+import { ElrondProxyService, getSmartContract } from 'src/common';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()

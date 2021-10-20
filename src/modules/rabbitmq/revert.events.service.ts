@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AuctionsService } from '../auctions/auctions.service';
+import { AuctionsService } from '../auctions';
 import { OrdersService } from '../orders/order.service';
 
 @Injectable()
