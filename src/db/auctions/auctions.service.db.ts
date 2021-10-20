@@ -49,8 +49,10 @@ export class AuctionsServiceDb {
       this.auctionsRepository,
       queryRequest.filters,
     );
+
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
+    queryBuilder.andWhere('endDate>1634818348');
     queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(a.id) OVER (PARTITION BY identifier ORDER BY if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC) AS min_bid
       from auctions a 
       Left join orders o on a.id = o.auctionId 
@@ -117,7 +119,7 @@ export class AuctionsServiceDb {
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status = 'Running' AND ((a.endDate <= ${DateUtils.getCurrentTimestamp()}) OR (o.ownerAddress = '${address}' AND o.status='active' AND a.maxBidDenominated=o.priceAmountDenominated))`,
+        `a.status = 'Running' AND a.type = 'SftOnePerPayment' AND ((a.endDate <= ${DateUtils.getCurrentTimestamp()}) OR (o.ownerAddress = '${address}' AND o.status='active' AND a.maxBidDenominated=o.priceAmountDenominated))`,
       )
       .groupBy('a.id')
       .orderBy('a.Id', 'DESC')
