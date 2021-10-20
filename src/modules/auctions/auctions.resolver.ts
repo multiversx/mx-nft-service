@@ -94,11 +94,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Query(() => AuctionResponse)
   async auctions(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters: FiltersExpression,
+    filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting: Sorting[],
+    sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
-    groupBy: Grouping,
+    groupBy,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -164,6 +164,28 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getTrendingAuctions(
       new TrendingQueryRequest({ limit, offset, startDate, endDate }),
+    );
+    return PageResponse.mapResponse<Auction>(
+      auctions,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
+  }
+
+  @Query(() => AuctionResponse)
+  @UseGuards(GqlAuthGuard)
+  async myClaimableAuctions(
+    @User() user: any,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ) {
+    const { limit, offset } = pagination.pagingParams();
+    const [auctions, count] = await this.auctionsService.getClaimableAuctions(
+      limit,
+      offset,
+      user.publicKey,
     );
     return PageResponse.mapResponse<Auction>(
       auctions,

@@ -24,9 +24,9 @@ export class OrdersResolver extends BaseResolver(Order) {
   @Query(() => OrdersResponse)
   async orders(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters: FiltersExpression,
+    filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting: Sorting[],
+    sorting,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {

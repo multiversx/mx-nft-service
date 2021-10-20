@@ -5,6 +5,7 @@ import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.lo
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
+import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
@@ -96,7 +97,7 @@ export class AuctionsServiceDb {
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status <> 'Ended' AND a.status <> 'Closed' AND o.creationDate  
+        `a.status = 'Running' AND o.creationDate  
         BETWEEN '${this.getSqlDate(queryRequest.startDate)}' 
         AND '${this.getSqlDate(queryRequest.endDate)}'`,
       )
@@ -104,6 +105,24 @@ export class AuctionsServiceDb {
       .orderBy('COUNT(a.Id)', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit)
+      .getManyAndCount();
+  }
+
+  async getClaimableAuctions(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+  ): Promise<[AuctionEntity[], number]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .innerJoin('orders', 'o', 'o.auctionId=a.id')
+      .where(
+        `a.status = 'Running' AND ((a.endDate <= ${DateUtils.getCurrentTimestamp()}) OR (o.ownerAddress = '${address}' AND o.status='active' AND a.maxBidDenominated=o.priceAmountDenominated))`,
+      )
+      .groupBy('a.id')
+      .orderBy('a.Id', 'DESC')
+      .offset(offset)
+      .limit(limit)
       .getManyAndCount();
   }
 
