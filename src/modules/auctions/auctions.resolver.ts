@@ -94,11 +94,11 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Query(() => AuctionResponse)
   async auctions(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters: FiltersExpression,
+    filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting: Sorting[],
+    sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
-    groupBy: Grouping,
+    groupBy,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
