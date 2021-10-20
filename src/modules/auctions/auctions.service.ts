@@ -124,9 +124,50 @@ export class AuctionsService {
     }
   }
 
+  async getClaimableAuctions(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+  ): Promise<[Auction[], number]> {
+    try {
+      const cacheKey = this.getClaimableAuctionsCacheKey(
+        address,
+        limit,
+        offset,
+      );
+      const getTrendingAuctions = () =>
+        this.getMappedClaimableAuctions(limit, offset, address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getTrendingAuctions,
+        30,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', error, {
+        path: 'AuctionsService.getClaimableAuctions',
+        address,
+      });
+    }
+  }
+
   private async getMappedTrendingAuctions(queryRequest: TrendingQueryRequest) {
     const [auctions, count] = await this.auctionServiceDb.getTrendingAuctions(
       queryRequest,
+    );
+
+    return [auctions.map((element) => Auction.fromEntity(element)), count];
+  }
+
+  private async getMappedClaimableAuctions(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+  ) {
+    const [auctions, count] = await this.auctionServiceDb.getClaimableAuctions(
+      limit,
+      offset,
+      address,
     );
 
     return [auctions.map((element) => Auction.fromEntity(element)), count];
@@ -171,6 +212,15 @@ export class AuctionsService {
 
   private getAuctionsCacheKey(request: any) {
     return generateCacheKeyFromParams('auctions', hash(request));
+  }
+
+  private getClaimableAuctionsCacheKey(address: string, limit, offset) {
+    return generateCacheKeyFromParams(
+      'claimable_auctions',
+      address,
+      limit,
+      offset,
+    );
   }
 
   private async invalidateCache(): Promise<void> {

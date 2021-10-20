@@ -174,6 +174,28 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     );
   }
 
+  @Query(() => AuctionResponse)
+  @UseGuards(GqlAuthGuard)
+  async claimableAuctions(
+    @User() user: any,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ) {
+    const { limit, offset } = pagination.pagingParams();
+    const [auctions, count] = await this.auctionsService.getClaimableAuctions(
+      limit,
+      offset,
+      user.publicKey,
+    );
+    return PageResponse.mapResponse<Auction>(
+      auctions,
+      pagination,
+      count,
+      offset,
+      limit,
+    );
+  }
+
   @ResolveField('asset', () => Asset)
   async asset(@Parent() auction: Auction) {
     const { identifier } = auction;
