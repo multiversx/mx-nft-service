@@ -451,8 +451,8 @@ type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
-  claimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   trendingAuctions(
     """This should be a timestamp"""

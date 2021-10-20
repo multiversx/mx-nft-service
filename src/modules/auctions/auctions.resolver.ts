@@ -176,7 +176,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Query(() => AuctionResponse)
   @UseGuards(GqlAuthGuard)
-  async claimableAuctions(
+  async myClaimableAuctions(
     @User() user: any,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
