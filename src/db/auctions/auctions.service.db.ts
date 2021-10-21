@@ -49,10 +49,8 @@ export class AuctionsServiceDb {
       this.auctionsRepository,
       queryRequest.filters,
     );
-
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    queryBuilder.andWhere('endDate>1634818348');
     queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(a.id) OVER (PARTITION BY identifier ORDER BY if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC) AS min_bid
       from auctions a 
       Left join orders o on a.id = o.auctionId 
