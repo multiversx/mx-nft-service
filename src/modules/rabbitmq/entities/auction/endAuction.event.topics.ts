@@ -6,7 +6,7 @@ export class EndAuctionEventsTopics {
   private auctionId: string;
   private nrAuctionTokens: string;
   private currentWinner: Address;
-  private currentBid: string;
+  // private currentBid: string;
 
   constructor(rawTopics: string[]) {
     this.collection = Buffer.from(rawTopics[1], 'base64').toString();
@@ -17,9 +17,9 @@ export class EndAuctionEventsTopics {
       16,
     ).toString();
     this.currentWinner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.currentBid = BigInt(
-      '0x' + Buffer.from(rawTopics[6], 'base64').toString('hex'),
-    ).toString();
+    // this.currentBid = BigInt(
+    //   '0x' + Buffer.from(rawTopics[6], 'base64').toString('hex'),
+    // ).toString();
   }
 
   toPlainObject() {
@@ -29,7 +29,7 @@ export class EndAuctionEventsTopics {
       nonce: this.nonce,
       auctionId: this.auctionId,
       nrAuctionTokens: this.nrAuctionTokens,
-      currentBid: this.currentBid,
+      // currentBid: this.currentBid,
     };
   }
 }
