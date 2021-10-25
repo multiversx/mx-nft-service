@@ -189,7 +189,7 @@ export class AssetsHistoryService {
         ? new Price({
             nonce: 0,
             token: 'EGLD',
-            amount: Buffer.from(price || '', 'base64')
+            amount: Buffer.from(price, 'base64')
               .toString('hex')
               .hexBigNumberToString(),
             timestamp: res[index]._source.timestamp,

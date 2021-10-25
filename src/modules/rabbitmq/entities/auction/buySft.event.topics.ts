@@ -12,9 +12,9 @@ export class BuySftEventsTopics {
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
     this.auctionId = Buffer.from(rawTopics[3], 'base64').toString('hex');
     this.currentWinner = new Address(Buffer.from(rawTopics[4], 'base64'));
-    this.bid = BigInt(
-      '0x' + Buffer.from(rawTopics[5], 'base64').toString('hex'),
-    ).toString();
+    this.bid = Buffer.from(rawTopics[6], 'base64')
+      .toString('hex')
+      .hexBigNumberToString();
   }
 
   toPlainObject() {

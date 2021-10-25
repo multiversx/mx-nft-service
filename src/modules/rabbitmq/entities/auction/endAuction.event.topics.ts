@@ -17,9 +17,9 @@ export class EndAuctionEventsTopics {
       16,
     ).toString();
     this.currentWinner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.currentBid = BigInt(
-      '0x' + Buffer.from(rawTopics[6], 'base64').toString('hex'),
-    ).toString();
+    this.currentBid = Buffer.from(rawTopics[6], 'base64')
+      .toString('hex')
+      .hexBigNumberToString();
   }
 
   toPlainObject() {
