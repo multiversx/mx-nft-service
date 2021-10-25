@@ -69,6 +69,10 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
     try {
+      if (queryRequest.sorting) {
+        return this.getAuctions(queryRequest);
+      }
+
       const identifier = queryRequest.filters.filters.find(
         (x) => x.field === 'identifier',
       ).values[0];
