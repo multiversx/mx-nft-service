@@ -10,6 +10,11 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
+import {
+  getDefaultAuctionsForIdentifierQuery,
+  getDefaultAuctionsForIdentifierQueryCount,
+  getDefaultAuctionsQuery,
+} from './sql.queries';
 
 @Injectable()
 export class AuctionsServiceDb {
@@ -49,13 +54,11 @@ export class AuctionsServiceDb {
       this.auctionsRepository,
       queryRequest.filters,
     );
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(a.id) OVER (PARTITION BY identifier ORDER BY if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC) AS min_bid
-      from auctions a 
-      Left join orders o on a.id = o.auctionId 
-      WHERE a.status in ('Running')
-      order by if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated) ASC )`);
+    queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
+    from (${getDefaultAuctionsQuery(endDate)})`);
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     this.addOrderBy(queryRequest.sorting, queryBuilder);
@@ -65,22 +68,33 @@ export class AuctionsServiceDb {
   async getAuctionsForIdentifier(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
-    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
-      queryRequest.filters,
-      'a',
-    );
-    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
-      filterQueryBuilder.build();
-    queryBuilder
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .orderBy(
-        'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
+    try {
+      if (queryRequest.sorting) {
+        return this.getAuctions(queryRequest);
+      }
+
+      const identifier = queryRequest.filters.filters.find(
+        (x) => x.field === 'identifier',
+      ).values[0];
+      const endDate = DateUtils.getCurrentTimestampPlus(12);
+      const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+        identifier,
+        endDate,
+        queryRequest.limit,
+        queryRequest.offset,
       );
-    queryBuilder.offset(queryRequest.offset);
-    queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
-    return await queryBuilder.getManyAndCount();
+      const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
+        identifier,
+        endDate,
+      );
+      const [auctions, count] = await Promise.all([
+        this.auctionsRepository.query(defaultAuctionsQuery),
+        this.auctionsRepository.query(sqlAuctionsCount),
+      ]);
+      return [auctions, count[0]?.Count];
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {

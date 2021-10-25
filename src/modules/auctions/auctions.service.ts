@@ -156,7 +156,7 @@ export class AuctionsService {
       queryRequest,
     );
 
-    return [auctions.map((element) => Auction.fromEntity(element)), count];
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
   private async getMappedClaimableAuctions(
@@ -170,7 +170,7 @@ export class AuctionsService {
       address,
     );
 
-    return [auctions.map((element) => Auction.fromEntity(element)), count];
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
   private async getMappedAuctions(queryRequest: QueryRequest) {
@@ -191,14 +191,14 @@ export class AuctionsService {
         );
       }
     }
-    return [auctions.map((element) => Auction.fromEntity(element)), count];
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
   private async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
     const [auctions, count] =
       await this.auctionServiceDb.getAuctionsOrderByOrdersCount(queryRequest);
 
-    return [auctions.map((element) => Auction.fromEntity(element)), count];
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
   async updateAuction(
