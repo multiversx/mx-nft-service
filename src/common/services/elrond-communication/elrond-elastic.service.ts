@@ -27,7 +27,7 @@ export class ElrondElasticService {
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
     const body = {
-      size: 10,
+      size: 1000,
       query: {
         nested: {
           path: 'events',

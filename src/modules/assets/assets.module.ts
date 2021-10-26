@@ -10,6 +10,7 @@ import { PriceServiceUSD } from '../Price.service.usd';
 import { AssetAuctionsCountProvider, AssetLikesProvider } from '.';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
+import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
     AssetsLikesService,
     AssetLikesProvider,
     AssetAuctionsCountProvider,
+    AssetAvailableTokensCountProvider,
     AssetsResolver,
     RedisCacheService,
     S3Service,
