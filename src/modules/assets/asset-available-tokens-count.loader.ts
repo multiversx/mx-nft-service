@@ -53,11 +53,11 @@ export class AssetAvailableTokensCountProvider {
   ) => {
     const cacheKeys = this.getAvailableTokensCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
-    const getLikes = await this.redisCacheService.batchGetCache(
+    const getAvailableTokensCount = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
     );
-    if (getLikes.includes(null)) {
+    if (getAvailableTokensCount.includes(null)) {
       const assetAuctions = await getRepository(AuctionEntity).query(
         getAvailableTokensScripts(identifiers),
       );
