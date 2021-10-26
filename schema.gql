@@ -50,6 +50,7 @@ type Asset {
   creationDate: Int
   creator: Account
   creatorAddress: String!
+  hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
@@ -66,6 +67,7 @@ type Asset {
   supply: String!
   tags: [String!]
   thumbnailUrl: String
+  totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
@@ -281,7 +283,7 @@ input CreateAuctionArgs {
   minBid: String!
   paymentToken: String!
   paymentTokenNonce: Int
-  quantity: String!
+  quantity: String = "1"
   startDate: String
 }
 

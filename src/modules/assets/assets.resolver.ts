@@ -35,6 +35,7 @@ import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
+import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -44,6 +45,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
+    private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private auctionsProvider: AuctionsForAssetProvider,
   ) {
     super();
@@ -148,6 +150,26 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const assetAuctions =
       await this.assetsAuctionsProvider.getAssetAuctionsCount(identifier);
     return assetAuctions ? assetAuctions[0]?.auctionsCount : 0;
+  }
+
+  @ResolveField('hasAvailableAuctions', () => Boolean)
+  async hasAvailableAuctions(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    const availableTokens =
+      await this.assetAvailableTokensCountProvider.getAvailableTokensCount(
+        identifier,
+      );
+    return availableTokens && availableTokens[0]?.count > 0 ? true : false;
+  }
+
+  @ResolveField('totalAvailableTokens', () => String)
+  async totalAvailableTokens(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    const availableTokens =
+      await this.assetAvailableTokensCountProvider.getAvailableTokensCount(
+        identifier,
+      );
+    return availableTokens ? availableTokens[0]?.count : 0;
   }
 
   @ResolveField('auctions', () => [Auction])
