@@ -16,7 +16,7 @@ export class BuySftEventsTopics {
     //   .toString('hex')
     //   .hexBigNumberToString();
     this.currentWinner = new Address(Buffer.from(rawTopics[4], 'base64'));
-    this.bid = Buffer.from(rawTopics[6], 'base64')
+    this.bid = Buffer.from(rawTopics[5], 'base64')
       .toString('hex')
       .hexBigNumberToString();
   }
