@@ -26,6 +26,7 @@ import {
   U64Value,
   ChainID,
   NetworkConfig,
+  BigUIntType,
 } from '@elrondnetwork/erdjs';
 import { TransactionNode } from '../transaction';
 import { elrondConfig, gas } from '../../config';
@@ -110,17 +111,11 @@ export class NftMarketplaceAbiService {
     args: BuySftActionArgs,
   ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
-    );
+
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
       value: Balance.fromString(args.price),
-      args: [
-        new U64Value(new BigNumber(args.auctionId)),
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-      ],
+      args: this.getBuySftArguments(args),
       gasLimit: new GasLimit(gas.endAuction),
     });
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
@@ -212,6 +207,28 @@ export class NftMarketplaceAbiService {
       contract.methods.getMarketplaceCutPercentage()
     );
     return await this.getFirstQueryResult(contract, getDataQuery);
+  }
+
+  private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      args.identifier,
+    );
+    let returnArgs: TypedValue[] = [
+      new U64Value(new BigNumber(args.auctionId)),
+      BytesValue.fromUTF8(collection),
+      BytesValue.fromHex(nonce),
+    ];
+    if (args.quantity) {
+      return [
+        ...returnArgs,
+        new OptionalValue(
+          new BigUIntType(),
+          new BigUIntValue(new BigNumber(args.quantity)),
+        ),
+      ];
+    }
+
+    return returnArgs;
   }
 
   private getCreateAuctionArgs(args: CreateAuctionArgs): TypedValue[] {

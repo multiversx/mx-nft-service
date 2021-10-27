@@ -198,6 +198,7 @@ input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
   price: String!
+  quantity: String
 }
 
 type Collection {
@@ -394,6 +395,7 @@ enum Operator {
 type Order {
   auction: Auction
   auctionId: Int!
+  boughtTokensNo: String
   creationDate: Int
   endDate: Int
   from: Account
