@@ -9,13 +9,14 @@ export class BuySftEventsTopics {
   private boughtTokens: string;
 
   constructor(rawTopics: string[]) {
+    console.log({ rawTopics });
     this.collection = Buffer.from(rawTopics[1], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
     this.auctionId = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.boughtTokens = Buffer.from(rawTopics[4], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
-    this.currentWinner = new Address(Buffer.from(rawTopics[5], 'base64'));
+    // this.boughtTokens = Buffer.from(rawTopics[4], 'base64')
+    //   .toString('hex')
+    //   .hexBigNumberToString();
+    this.currentWinner = new Address(Buffer.from(rawTopics[4], 'base64'));
     this.bid = Buffer.from(rawTopics[6], 'base64')
       .toString('hex')
       .hexBigNumberToString();
