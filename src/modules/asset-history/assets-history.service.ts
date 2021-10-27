@@ -8,6 +8,7 @@ import {
 } from '../assets/models';
 import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models';
+const hash = require('object-hash');
 
 @Injectable()
 export class AssetsHistoryService {
@@ -31,19 +32,25 @@ export class AssetsHistoryService {
   }
 
   private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
-    switch (res[index]._source.events[0].identifier) {
+    switch (res[index]?._source.events[0].identifier) {
       case AuctionEventEnum.AuctionTokenEvent: {
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.StartedAuction,
-            res[index]._source.address,
+            res[index]._source.events[1].address,
             res[index]._source.events[0].topics[4],
             res[index]._source.events[0].topics[6],
           ),
         );
-        index++;
+        if (
+          res[index + 1] &&
+          hash(res[index]?._source?.events[1]) ===
+            hash(res[index + 1]?._source?.events[0])
+        ) {
+          index++;
+        }
         break;
       }
       case NftEventEnum.ESDTNFTAddQuantity: {

@@ -18,4 +18,6 @@ export class BuySftActionArgs {
   identifier: string;
   @Field(() => String)
   price: string;
+  @Field(() => String, { nullable: true })
+  quantity: string;
 }

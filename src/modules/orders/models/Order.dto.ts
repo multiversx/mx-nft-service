@@ -14,6 +14,9 @@ export class Order {
   @Field(() => Int)
   auctionId: number;
 
+  @Field(() => String, { nullable: true })
+  boughtTokensNo: string;
+
   @Field(() => String)
   ownerAddress: string;
 
@@ -44,6 +47,7 @@ export class Order {
       ? new Order({
           id: order.id,
           ownerAddress: order.ownerAddress,
+          boughtTokensNo: order.boughtTokensNo,
           price: new Price({
             amount: order.priceAmount,
             nonce: order.priceNonce,

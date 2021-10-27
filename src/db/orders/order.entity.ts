@@ -22,6 +22,9 @@ export class OrderEntity extends BaseEntity {
   @Column({ length: 62 })
   ownerAddress: string;
 
+  @Column({ nullable: true })
+  boughtTokensNo: string;
+
   @Column()
   auctionId: number;
 

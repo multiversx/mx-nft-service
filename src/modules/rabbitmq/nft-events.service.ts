@@ -47,6 +47,7 @@ export class NftEventsService {
               priceAmount: buySftTopics.bid,
               priceNonce: 0,
               blockHash: hash,
+              boughtTokens: buySftTopics.boughtTokens,
             }),
           );
           break;
