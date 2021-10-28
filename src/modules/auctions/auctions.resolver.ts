@@ -29,11 +29,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import {
-  OrdersProvider,
-  ActiveOrdersProvider,
-  OrderEntity,
-} from 'src/db/orders';
+import { OrdersProvider, ActiveOrdersProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
@@ -181,9 +177,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @Query(() => AuctionResponse)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(
-    // @User() user: any,
+    @User() user: any,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -191,7 +187,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const [auctions, count] = await this.auctionsService.getClaimableAuctions(
       limit,
       offset,
-      'erd1uv40ahysflse896x4ktnh6ecx43u7cmy9wnxnvcyp7deg299a4sq6vaywa',
+      user.publicKey,
     );
     return PageResponse.mapResponse<Auction>(
       auctions,
