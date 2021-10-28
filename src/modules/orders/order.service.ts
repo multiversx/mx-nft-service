@@ -55,7 +55,7 @@ export class OrdersService {
       return Order.fromEntity(orderEntity);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', error, {
-        path: 'OrdersService.createOrder',
+        path: 'OrdersService.createOrderForSft',
         createOrderArgs,
       });
     }
