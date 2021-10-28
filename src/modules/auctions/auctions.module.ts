@@ -15,7 +15,6 @@ import { PriceServiceUSD } from '../Price.service.usd';
 import { UsdAmountResolver } from './usd-amount.resolver';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
-import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 
 @Module({
   providers: [
@@ -26,7 +25,6 @@ import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-token
     OrdersService,
     RedisCacheService,
     AuctionsForAssetProvider,
-    AvailableTokensForAuctionProvider,
     AuctionProvider,
     AssetsProvider,
     PriceServiceUSD,
@@ -44,7 +42,6 @@ import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-token
     OrdersService,
     RedisCacheService,
     AuctionsForAssetProvider,
-    AvailableTokensForAuctionProvider,
   ],
 })
 export class AuctionsModuleGraph {}

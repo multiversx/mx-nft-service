@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ActiveOrdersProvider } from 'src/db/orders';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
@@ -46,10 +45,10 @@ export class NftEventsService {
             await this.availableTokens.getAvailableTokensForAuctionId(
               parseInt(buySftTopics.auctionId, 16),
             );
-          const totalRemaining =
-            parseFloat(buySftTopics.boughtTokens) - result
-              ? result[0]?.availableTokens
-              : 0;
+          const totalRemaining = result
+            ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
+            : 0;
+          console.log(totalRemaining);
           if (totalRemaining === 0) {
             this.auctionsService.updateAuction(
               parseInt(buySftTopics.auctionId, 16),
@@ -57,6 +56,7 @@ export class NftEventsService {
               hash,
             );
           }
+          this.availableTokens.clearKey(parseInt(buySftTopics.auctionId, 16));
           this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,

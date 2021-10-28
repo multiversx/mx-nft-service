@@ -7,6 +7,7 @@ import {
   OrdersProvider,
   OrdersServiceDb,
 } from '.';
+import { AvailableTokensForAuctionProvider } from './available-tokens-auction.loader';
 
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity])],
@@ -14,8 +15,14 @@ import {
     OrdersServiceDb,
     OrdersProvider,
     ActiveOrdersProvider,
+    AvailableTokensForAuctionProvider,
     RedisCacheService,
   ],
-  exports: [OrdersServiceDb, OrdersProvider, ActiveOrdersProvider],
+  exports: [
+    OrdersServiceDb,
+    OrdersProvider,
+    ActiveOrdersProvider,
+    AvailableTokensForAuctionProvider,
+  ],
 })
 export class OrdersModuleDb {}

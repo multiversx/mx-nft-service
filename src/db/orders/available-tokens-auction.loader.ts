@@ -1,6 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { Any, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
