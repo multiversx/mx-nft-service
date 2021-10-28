@@ -36,6 +36,7 @@ import {
 } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
+import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -45,69 +46,55 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private activeOrdersProvider: ActiveOrdersProvider,
+    private availableTokensProvider: AvailableTokensForAuctionProvider,
     private ordersProvider: OrdersProvider,
   ) {
     super();
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async createAuction(
     @Args('input') input: CreateAuctionArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.createAuction(
-      'erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th',
-      input,
-    );
+    return await this.nftAbiService.createAuction(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async endAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.endAuction(
-      'erd1uv40ahysflse896x4ktnh6ecx43u7cmy9wnxnvcyp7deg299a4sq6vaywa',
-      auctionId,
-    );
+    return await this.nftAbiService.endAuction(user.publicKey, auctionId);
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async bid(
     @Args('input') input: BidActionArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.bid(
-      'erd1k2s324ww2g0yj38qn2ch2jwctdy8mnfxep94q9arncc6xecg3xaq6mjse8',
-      input,
-    );
+    return await this.nftAbiService.bid(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async buySft(
     @Args('input') input: BuySftActionArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.buySft(
-      'erd1k2s324ww2g0yj38qn2ch2jwctdy8mnfxep94q9arncc6xecg3xaq6mjse8',
-      input,
-    );
+    return await this.nftAbiService.buySft(user.publicKey, input);
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async withdraw(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(
-      'erd1k2s324ww2g0yj38qn2ch2jwctdy8mnfxep94q9arncc6xecg3xaq6mjse8',
-      auctionId,
-    );
+    return await this.nftAbiService.withdraw(user.publicKey, auctionId);
   }
 
   @Query(() => AuctionResponse)
@@ -255,14 +242,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const orders = await this.activeOrdersProvider.getOrderByAuctionId(id);
-      const sum = orders?.reduce(
-        (sum: number, b: OrderEntity) =>
-          sum + (b.boughtTokensNo ? parseFloat(b.boughtTokensNo) : 1),
-        0,
-      );
-      const availableTokens = nrAuctionedTokens - sum || nrAuctionedTokens;
-      return availableTokens;
+      const result =
+        await this.availableTokensProvider.getAvailableTokensForAuctionId(id);
+      return result ? result[0]?.availableTokens : 0;
     }
     return nrAuctionedTokens;
   }

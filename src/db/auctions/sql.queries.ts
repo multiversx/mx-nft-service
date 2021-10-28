@@ -54,7 +54,7 @@ export function getDefaultAuctionsQuery(endDate: number) {
     order by eD, if(price, price, minBidDenominated) ASC )) as temp`;
 }
 
-export function getAvailableTokensScripts(identifiers: string[]) {
+export function getAvailableTokensScriptsByIdentifiers(identifiers: string[]) {
   return `
 SELECT SUM(countA) as count, identifier
   FROM (
@@ -90,4 +90,20 @@ UNION
 		GROUP by a.identifier, availableTokens.total) temp
   GROUP by temp.identifier)) ac
 GROUP by identifier`;
+}
+
+export function getAvailableTokensbyAuctionIds(ids: number[]) {
+  return `SELECT
+	if(o.auctionId,
+	a.nrAuctionedTokens - sum(if(boughtTokensNo, boughtTokensNo, 1)),
+	a.nrAuctionedTokens) as availableTokens,
+	a.id as auctionId
+from
+	auctions a
+left join orders o on
+	a.id = o.auctionId
+WHERE
+	a.id in (${ids})
+GROUP BY
+	a.id `;
 }

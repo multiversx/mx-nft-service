@@ -6,7 +6,7 @@ import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import { getAvailableTokensScripts } from 'src/db/auctions/sql.queries';
+import { getAvailableTokensScriptsByIdentifiers } from 'src/db/auctions/sql.queries';
 
 @Injectable({
   scope: Scope.Operation,
@@ -59,7 +59,7 @@ export class AssetAvailableTokensCountProvider {
     );
     if (getAvailableTokensCount.includes(null)) {
       const assetAuctions = await getRepository(AuctionEntity).query(
-        getAvailableTokensScripts(identifiers),
+        getAvailableTokensScriptsByIdentifiers(identifiers),
       );
 
       const assetsIdentifiers: { [key: string]: any[] } = {};
