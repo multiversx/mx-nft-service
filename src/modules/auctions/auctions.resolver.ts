@@ -32,6 +32,7 @@ import { AccountsProvider } from '../accounts/accounts.loader';
 import { OrdersProvider, ActiveOrdersProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
+import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -41,6 +42,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private activeOrdersProvider: ActiveOrdersProvider,
+    private availableTokensProvider: AvailableTokensForAuctionProvider,
     private ordersProvider: OrdersProvider,
   ) {
     super();
@@ -205,7 +207,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('topBid', () => Price)
   async topBid(@Parent() auction: Auction) {
-    const { id } = auction;
+    const { id, type } = auction;
+    if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
       id,
     );
@@ -217,8 +220,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @ResolveField('topBidder', () => Account)
   async topBidder(@Parent() auction: Auction) {
-    const { id } = auction;
-
+    const { id, type } = auction;
+    if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
       id,
     );
@@ -235,10 +238,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const orders = await this.activeOrdersProvider.getOrderByAuctionId(id);
-      const availableTokens =
-        nrAuctionedTokens - orders?.length || nrAuctionedTokens;
-      return availableTokens;
+      const result =
+        await this.availableTokensProvider.getAvailableTokensForAuctionId(id);
+      return result ? result[0]?.availableTokens : 0;
     }
     return nrAuctionedTokens;
   }

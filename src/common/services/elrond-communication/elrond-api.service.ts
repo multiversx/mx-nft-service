@@ -42,7 +42,6 @@ export class ElrondApiService {
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-
       const response = await this.getService().doGetGeneric(
         resourceUrl,
         callback,
@@ -89,7 +88,7 @@ export class ElrondApiService {
   async getNftsByIdentifier(identifiers: string[]): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifier.name,
-      `nfts/?identifiers=${identifiers}`,
+      `nfts/?identifiers=${identifiers}&hasUris=true&withOwner=true&withSupply=true`,
       (response) => response,
     );
   }

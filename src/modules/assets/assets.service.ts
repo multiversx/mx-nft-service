@@ -5,6 +5,7 @@ import {
   BytesValue,
   ContractFunction,
   GasLimit,
+  U64Value,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService, getSmartContract } from 'src/common';
@@ -25,6 +26,7 @@ import {
   Asset,
   HandleQuantityArgs,
 } from './models';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class AssetsService {
@@ -120,7 +122,7 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateStringVal(args.quantity)),
+        new U64Value(new BigNumber(args.quantity)),
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
@@ -175,7 +177,7 @@ export class AssetsService {
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(args.collection),
-        BytesValue.fromHex(nominateStringVal(args.quantity)),
+        new U64Value(new BigNumber(args.quantity)),
         BytesValue.fromUTF8(args.name),
         BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
         BytesValue.fromUTF8(fileData.hash),
