@@ -38,9 +38,9 @@ export class AccountsResolver {
     const { limit, offset } = pagination.pagingParams();
     const accounts = await this.identityService.getProfiles(filters?.addresses);
     return PageResponse.mapResponse<Account>(
-      accounts?.map((acc) => Account.fromEntity(acc)),
+      accounts?.map((acc) => Account.fromEntity(acc)) || [],
       pagination,
-      accounts?.length,
+      accounts?.length || 0,
       offset,
       limit,
     );

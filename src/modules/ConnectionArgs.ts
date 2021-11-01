@@ -76,7 +76,7 @@ export default class ConnectionArgs implements ConnectionArguments {
   public after?: ConnectionCursor;
 
   @Field(() => Int, { nullable: true, description: 'Paginate first' })
-  public first?: number;
+  public first?: number = 10;
 
   @Field(() => Int, { nullable: true, description: 'Paginate last' })
   public last?: number;
