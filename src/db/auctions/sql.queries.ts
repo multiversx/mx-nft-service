@@ -49,9 +49,30 @@ export function getDefaultAuctionsQuery(endDate: number) {
     (SELECT a.*, o.priceAmountDenominated as price, 163497781945 as eD
     FROM auctions a 
     LEFT JOIN orders o ON o.auctionId=a.id 
-    WHERE a.status='Running'   AND a.endDate> ${endDate}
+    WHERE a.status='Running' AND a.endDate> ${endDate}
     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     order by eD, if(price, price, minBidDenominated) ASC )) as temp`;
+}
+
+export function getDefaultAuctionsQueryForIdentifiers(
+  endDate: number,
+  identifiers: string[],
+) {
+  return ` SELECT a.* FROM auctions a WHERE id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
+  from (((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
+  FROM auctions a 
+  LEFT JOIN orders o ON o.auctionId=a.id 
+  WHERE a.status='Running'  AND a.endDate BETWEEN  UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate}
+  and identifier in (${identifiers.map((value) => `'${value}'`)}) 
+  AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+  UNION All 
+  (SELECT a.*, o.priceAmountDenominated as price, 163497781945 as eD
+  FROM auctions a 
+  LEFT JOIN orders o ON o.auctionId=a.id 
+  WHERE a.status='Running' AND a.endDate> ${endDate} 
+  and identifier in (${identifiers.map((value) => `'${value}'`)}) 
+  AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+  order by eD, if(price, price, minBidDenominated) ASC )) as temp) LIMIT 15`;
 }
 
 export function getAvailableTokensScriptsByIdentifiers(identifiers: string[]) {
