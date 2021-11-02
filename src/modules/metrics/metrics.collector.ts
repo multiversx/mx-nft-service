@@ -16,6 +16,15 @@ export class MetricsCollector {
       });
     }
 
+    if (!MetricsCollector.queryDurationHistogram) {
+      MetricsCollector.queryDurationHistogram = new Histogram({
+        name: 'query_duration',
+        help: 'The time it takes to resolve a query',
+        labelNames: ['query'],
+        buckets: [],
+      });
+    }
+
     if (!MetricsCollector.externalCallsHistogram) {
       MetricsCollector.externalCallsHistogram = new Histogram({
         name: 'external_apis',
