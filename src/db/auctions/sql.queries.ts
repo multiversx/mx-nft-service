@@ -31,7 +31,7 @@ export function getDefaultAuctionsForIdentifierQueryCount(
      AND a.endDate BETWEEN ${DateUtils.getCurrentTimestamp()} AND ${endDate} 
      AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price, 163497781945 as eD
+    (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
     LEFT JOIN orders o ON o.auctionId=a.id 
     WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}    
@@ -46,7 +46,7 @@ export function getDefaultAuctionsQuery(endDate: number) {
     WHERE a.status='Running'  AND a.endDate BETWEEN ${DateUtils.getCurrentTimestamp()} AND ${endDate} 
     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price, 163497781945 as eD
+    (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
     LEFT JOIN orders o ON o.auctionId=a.id 
     WHERE a.status='Running' AND a.endDate> ${endDate}
@@ -66,7 +66,7 @@ export function getDefaultAuctionsQueryForIdentifiers(
   and identifier in (${identifiers.map((value) => `'${value}'`)}) 
   AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
   UNION All 
-  (SELECT a.*, o.priceAmountDenominated as price, 163497781945 as eD
+  (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
   FROM auctions a 
   LEFT JOIN orders o ON o.auctionId=a.id 
   WHERE a.status='Running' AND a.endDate> ${endDate} 
