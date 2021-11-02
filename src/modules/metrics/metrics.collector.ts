@@ -2,6 +2,7 @@ import { register, Histogram, collectDefaultMetrics } from 'prom-client';
 
 export class MetricsCollector {
   private static fieldDurationHistogram: Histogram<string>;
+  private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
@@ -35,6 +36,11 @@ export class MetricsCollector {
     MetricsCollector.fieldDurationHistogram
       .labels(name, path)
       .observe(duration);
+  }
+
+  static setQueryDuration(query: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.queryDurationHistogram.labels(query).observe(duration);
   }
 
   static setExternalCall(system: string, func: string, duration: number) {
