@@ -40,7 +40,7 @@ export class AuctionsForAssetProvider {
       this.redisClient,
       cacheKey,
       getAuctions,
-      cacheConfig.followersttl,
+      30,
     );
   }
 
