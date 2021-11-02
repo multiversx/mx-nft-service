@@ -85,10 +85,13 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsByIdentifier(identifiers: string[]): Promise<Nft[]> {
+  async getNftsByIdentifier(
+    identifiers: string[],
+    offset: number = 0,
+  ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifier.name,
-      `nfts/?identifiers=${identifiers}&hasUris=true&withOwner=true&withSupply=true`,
+      `nfts?identifiers=${identifiers}&hasUris=true&withOwner=true&withSupply=true&limit=${identifiers.length}&offset=${offset}`,
       (response) => response,
     );
   }

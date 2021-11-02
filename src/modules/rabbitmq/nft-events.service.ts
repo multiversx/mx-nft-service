@@ -48,7 +48,6 @@ export class NftEventsService {
           const totalRemaining = result
             ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
             : 0;
-          console.log(totalRemaining);
           if (totalRemaining === 0) {
             this.auctionsService.updateAuction(
               parseInt(buySftTopics.auctionId, 16),

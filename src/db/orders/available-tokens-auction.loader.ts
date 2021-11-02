@@ -44,7 +44,6 @@ export class AvailableTokensForAuctionProvider {
     if (getAvailableTokensFromCache.includes(null)) {
       const results = await this.getAvailableTokensForAuctionIds(auctionIds);
       const auctionsIds: { [key: string]: any[] } = {};
-      console.log(results);
       results.forEach(
         (result: { auctionId: number; availableTokens: number }) => {
           if (!auctionsIds[result.auctionId]) {

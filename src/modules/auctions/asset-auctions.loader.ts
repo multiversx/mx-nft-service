@@ -6,6 +6,8 @@ import { AuctionEntity } from '../../db/auctions/auction.entity';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
+import { getDefaultAuctionsQueryForIdentifiers } from 'src/db/auctions/sql.queries';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable({
   scope: Scope.Operation,
@@ -38,7 +40,7 @@ export class AuctionsForAssetProvider {
       this.redisClient,
       cacheKey,
       getAuctions,
-      cacheConfig.followersttl,
+      30,
     );
   }
 
@@ -49,17 +51,12 @@ export class AuctionsForAssetProvider {
       this.redisClient,
       cacheKeys,
     );
+
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
     if (getAuctionsFromCache.includes(null)) {
-      const auctions = await getRepository(AuctionEntity)
-        .createQueryBuilder('a')
-        .where('a.identifier IN(:...identifiers) AND a.status in ("Running")', {
-          identifiers: identifiers,
-        })
-        .leftJoin('orders', 'o', 'o.auctionId=a.id')
-        .orderBy(
-          'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
-        )
-        .getMany();
+      const auctions = await getRepository(AuctionEntity).query(
+        getDefaultAuctionsQueryForIdentifiers(endDate, identifiers),
+      );
       const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
 
       auctions.forEach((auction) => {

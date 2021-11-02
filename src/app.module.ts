@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
+import { FeaturedNftsModuleGraph } from './modules/featured-nfts/featured-nfts.module';
 
 @Module({
   providers: [
@@ -59,6 +60,7 @@ import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.m
     OrdersModuleGraph,
     AccountsModuleGraph,
     AuctionsModuleDb,
+    FeaturedNftsModuleGraph,
     IpfsModule,
   ],
 })
