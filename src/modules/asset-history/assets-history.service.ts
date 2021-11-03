@@ -160,9 +160,9 @@ export class AssetsHistoryService {
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.events[1].topics[4].base64ToBech32(),
+            res[index]._source.events[1].topics[5].base64ToBech32(),
             count,
-            res[index]._source.events[1].topics[5],
+            res[index]._source.events[1].topics[6],
           ),
         );
         break;
