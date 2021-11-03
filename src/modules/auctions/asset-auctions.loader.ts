@@ -87,6 +87,6 @@ export class AuctionsForAssetProvider {
   }
 
   private getAuctionCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('auctions', identifier);
+    return generateCacheKeyFromParams('default_auction', identifier);
   }
 }
