@@ -13,10 +13,10 @@ import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { AuthModule } from './modules/auth/auth.module';
-import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 import { FeaturedNftsModuleGraph } from './modules/featured-nfts/featured-nfts.module';
+import { loggerMiddleware } from './modules/metrics/logger-middleware';
 
 @Module({
   providers: [
