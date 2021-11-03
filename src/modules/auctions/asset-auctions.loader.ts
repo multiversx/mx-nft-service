@@ -76,7 +76,7 @@ export class AuctionsForAssetProvider {
         this.redisClient,
         keys,
         values,
-        cacheConfig.followersttl,
+        30,
       );
       return identifiers?.map((identifier) => auctionsIdentifiers[identifier]);
     }
@@ -87,6 +87,6 @@ export class AuctionsForAssetProvider {
   }
 
   private getAuctionCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('default_auction', identifier);
+    return generateCacheKeyFromParams('default_auctions', identifier);
   }
 }
