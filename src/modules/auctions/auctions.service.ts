@@ -62,6 +62,7 @@ export class AuctionsService {
         this.redisClient,
         cacheKey,
         getAuctions,
+        60,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', error, {
