@@ -116,7 +116,7 @@ export class NftMarketplaceAbiService {
       func: new ContractFunction('buySft'),
       value: Balance.fromString(args.price),
       args: this.getBuySftArguments(args),
-      gasLimit: new GasLimit(gas.endAuction),
+      gasLimit: new GasLimit(gas.buySft),
     });
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
   }
