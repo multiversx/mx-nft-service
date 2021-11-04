@@ -156,17 +156,16 @@ export class AssetsService {
     ownerAddress: string,
     args: CreateNftArgs,
   ): Promise<TransactionNode> {
-    const file = await args.file;
-    const fileData = await this.pinataService.uploadFile(file);
+    const fileData = await this.pinataService.uploadFile(args.file);
     const fileMetadata = new FileContent({
       description: args.attributes.description,
-      fileType: file.mimetype,
+      fileType: args.file.mimetype,
       fileUri: fileData.url,
-      fileName: file.filename,
+      fileName: args.file.filename,
     });
     const asset = await this.pinataService.uploadText(fileMetadata);
 
-    await this.s3Service.upload(file, fileData.hash);
+    await this.s3Service.upload(args.file, fileData.hash);
     await this.s3Service.uploadText(fileMetadata, asset.hash);
 
     const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;

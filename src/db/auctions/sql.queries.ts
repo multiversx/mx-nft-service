@@ -8,22 +8,25 @@ export function getDefaultAuctionsForIdentifierQuery(
 ) {
   return `(SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
     FROM auctions a 
-    LEFT JOIN 
-    (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+    LEFT JOIN LATERAL 
+    			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}'
      AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate}  
      AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
-    LEFT JOIN 
-    (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+     LEFT JOIN LATERAL 
+    			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, NULL as price, 16349778194537 as eD
-    FROM auctions a 
-    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP))
+    FROM auctions a  
+    LEFT JOIN LATERAL 
+    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+    WHERE a.status='Running' AND a.identifier = '${identifier}' AND (a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+    			OR IF(o.priceAmountDenominated=a.maxBidDenominated, 1, 0)))
     order by eD, if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
 export function getDefaultAuctionsForIdentifierQueryCount(
@@ -32,41 +35,49 @@ export function getDefaultAuctionsForIdentifierQueryCount(
 ) {
   return `SELECT COUNT(1) as Count from ((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
     FROM auctions a 
-    LEFT JOIN 
-    (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+    LEFT JOIN LATERAL 
+    			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}'
      AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate}  
      AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
-    LEFT JOIN 
-    (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+     LEFT JOIN LATERAL 
+    			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, NULL as price, 16349778194537 as eD
-    FROM auctions a 
-    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP))
+    FROM auctions a  
+    LEFT JOIN LATERAL 
+    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+    WHERE a.status='Running' AND a.identifier = '${identifier}' AND (a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+    			OR IF(o.priceAmountDenominated=a.maxBidDenominated, 1, 0)))
     order by eD, if(price, price, minBidDenominated) ASC) as temp`;
 }
 
 export function getDefaultAuctionsQuery(endDate: number) {
   return `((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
     FROM auctions a 
-    LEFT JOIN orders o ON o.auctionId=a.id 
+    LEFT JOIN LATERAL 
+    			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running'  AND a.endDate BETWEEN ${DateUtils.getCurrentTimestamp()} AND ${endDate} 
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+    AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
-    LEFT JOIN orders o ON o.auctionId=a.id 
+    LEFT JOIN LATERAL 
+    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.endDate> ${endDate}
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+    AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     UNION All 
     (SELECT a.*, NULL as price, 16349778194537 as eD
     FROM auctions a 
-    WHERE a.status='Running'  AND a.endDate<  UNIX_TIMESTAMP(CURRENT_TIMESTAMP))
+    LEFT JOIN LATERAL 
+    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+    WHERE a.status='Running' AND 
+    (a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP) OR IF(o.priceAmountDenominated=a.maxBidDenominated, 1, 0)))
     order by eD, if(price, price, minBidDenominated) ASC )) as temp`;
 }
 
@@ -75,29 +86,31 @@ export function getDefaultAuctionsQueryForIdentifiers(
   identifiers: string[],
 ) {
   return `WITH 
-  endingSoon AS (SELECT a.*,o.priceAmountDenominated as price, a.endDate as eD
+  endingSoon AS (SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
           FROM auctions a 
-          LEFT JOIN 
-          (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+          LEFT JOIN LATERAL 
+          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
           WHERE a.status='Running' AND a.identifier in (${identifiers.map(
             (value) => `'${value}'`,
           )})
            AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate} 
-           AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)),
-   
+           AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)),   
   minPrice AS (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
         FROM auctions a 
-        LEFT JOIN 
-        (select * from orders o ORDER by 1 DESC limit 1) as o on o.auctionId = a.id 
+        LEFT JOIN LATERAL 
+        (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
         WHERE a.status='Running' AND a.identifier in (${identifiers.map(
           (value) => `'${value}'`,
         )})  AND a.endDate> ${endDate}
         AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)),
   ended AS 	(SELECT a.*, NULL as price, 16349778194537 as eD
         FROM auctions a 
+        LEFT JOIN LATERAL 
+          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
         WHERE a.status='Running' AND a.identifier in (${identifiers.map(
           (value) => `'${value}'`,
-        )}) AND a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP))
+        )})  AND (a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+        OR IF(o.priceAmountDenominated=a.maxBidDenominated, 1, 0)))
           
 SELECT temp.* from (
   SELECT temp.*, row_number() over (partition by identifier order by eD, if(price, price, minBidDenominated) ASC) as seqnum
