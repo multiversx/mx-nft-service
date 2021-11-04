@@ -64,10 +64,12 @@ export class AvailableTokensForAuctionProvider {
       values = auctionIds?.map((auctionId) =>
         auctionsIds[auctionId]
           ? auctionsIds[auctionId]
-          : {
-              auctionId: auctionId,
-              availableTokens: 0,
-            },
+          : [
+              {
+                auctionId: auctionId,
+                availableTokens: 0,
+              },
+            ],
       );
       await this.redisCacheService.batchSetCache(
         this.redisClient,

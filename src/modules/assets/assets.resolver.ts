@@ -191,7 +191,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     );
     return auctions
       ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
-      : null;
+      : [];
   }
 
   @ResolveField('lowestAuction', () => Auction)
@@ -203,7 +203,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
       identifier,
     );
-    return auctions ? Auction.fromEntity(auctions[0]) : null;
+    return auctions && auctions.length > 0
+      ? Auction.fromEntity(auctions[0])
+      : null;
   }
 
   @ResolveField('creator', () => Account)
