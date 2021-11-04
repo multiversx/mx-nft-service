@@ -37,12 +37,13 @@ export class AuctionsServiceDb {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
+      'a',
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder);
+    this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
 
     return await queryBuilder.getManyAndCount();
   }
