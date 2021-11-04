@@ -87,10 +87,12 @@ export class AssetAuctionsCountProvider {
       values = identifiers?.map((identifier) =>
         assetsIdentifiers[identifier]
           ? assetsIdentifiers[identifier]
-          : {
-              identifier: identifier,
-              auctionsCount: 0,
-            },
+          : [
+              {
+                identifier: identifier,
+                auctionsCount: 0,
+              },
+            ],
       );
       await this.redisCacheService.batchSetCache(
         this.redisClient,
