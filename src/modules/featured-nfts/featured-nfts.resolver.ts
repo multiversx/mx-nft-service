@@ -22,7 +22,7 @@ export class FeaturedNftsResolver extends BaseResolver(Asset) {
       offset,
     );
     return PageResponse.mapResponse<Asset>(
-      assets,
+      assets || [],
       pagination,
       count,
       offset,

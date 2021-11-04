@@ -36,6 +36,7 @@ import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
+import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -80,7 +81,14 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @User() user: any,
   ): Promise<TransactionNode> {
-    input.file = file;
+    const fileData = await file;
+    if (
+      !Object.values(MediaMimeTypeEnum).includes(
+        fileData.mimetype as MediaMimeTypeEnum,
+      )
+    )
+      throw new Error('unsuported_media_type');
+    input.file = fileData;
     return await this.assetsService.createNft(user.publicKey, input);
   }
 
