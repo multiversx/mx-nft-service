@@ -4,7 +4,7 @@ import {
   AuctionAbi,
 } from 'src/modules/auctions/models';
 import denominate, { nominateVal } from 'src/modules/formatters';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 
 @Entity('auctions')
@@ -16,6 +16,7 @@ export class AuctionEntity extends BaseEntity {
   nrAuctionedTokens: number;
 
   @Column({ length: 30 })
+  @Index()
   identifier: string;
 
   @Column()
