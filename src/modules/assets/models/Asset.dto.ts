@@ -21,10 +21,6 @@ export class Asset {
   creatorAddress: string;
   @Field(() => Account, { nullable: true })
   creator: Account;
-  @Field(() => [String], { nullable: 'itemsAndList' })
-  ownersAddresses: string[];
-  @Field(() => [Account], { nullable: true })
-  owners: Account[];
   @Field(() => String, { nullable: true })
   ownerAddress: string;
   @Field(() => Account, { nullable: true })
@@ -78,7 +74,6 @@ export class Asset {
           nonce: nft.nonce ?? 0,
           identifier: nft.identifier,
           creatorAddress: nft.creator ?? '',
-          ownersAddresses: nft.owners?.map((account) => account.address),
           ownerAddress: nft.owner,
           attributes: nft.attributes ?? '',
           creationDate: nft.timestamp,

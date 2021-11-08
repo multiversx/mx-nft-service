@@ -17,6 +17,7 @@ import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 import { FeaturedNftsModuleGraph } from './modules/featured-nfts/featured-nfts.module';
 import { loggerMiddleware } from './modules/metrics/logger-middleware';
+import { OwnersModuleGraph } from './modules/owners/owners.module';
 
 @Module({
   providers: [
@@ -58,6 +59,7 @@ import { loggerMiddleware } from './modules/metrics/logger-middleware';
     AssetHistoryModuleGraph,
     AuctionsModuleGraph,
     OrdersModuleGraph,
+    OwnersModuleGraph,
     AccountsModuleGraph,
     AuctionsModuleDb,
     FeaturedNftsModuleGraph,

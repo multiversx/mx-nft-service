@@ -61,8 +61,6 @@ type Asset {
   nonce: Int!
   owner: Account
   ownerAddress: String
-  owners: [Account!]
-  ownersAddresses: [String]
   royalties: String!
   supply: String!
   tags: [String!]
@@ -428,6 +426,36 @@ type OrdersResponse {
   pageInfo: OrderPageInfo
 }
 
+type Owner {
+  account: Account
+  address: String
+  balance: String
+  identifier: ID
+  owner: Account!
+}
+
+type OwnerEdge {
+  cursor: String
+  node: Owner
+}
+
+type OwnerPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type OwnerResponse {
+  edges: [OwnerEdge!]
+  pageData: PageData
+  pageInfo: OwnerPageInfo
+}
+
+input OwnersFilters {
+  identifier: String!
+}
+
 type PageData {
   count: Int!
   limit: Int!
@@ -459,6 +487,7 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
+  owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   trendingAuctions(
     """This should be a timestamp"""
     endDate: Int!

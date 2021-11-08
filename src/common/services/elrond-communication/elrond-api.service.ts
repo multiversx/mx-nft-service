@@ -8,6 +8,7 @@ import * as Agent from 'agentkeepalive';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
+import { OwnerApi } from './models/onwer.api';
 
 @Injectable()
 export class ElrondApiService {
@@ -100,6 +101,26 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}`,
+      (response) => response,
+    );
+  }
+
+  async getOwnersForIdentifier(
+    identifier: string,
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<OwnerApi[]> {
+    return await this.doGetGeneric(
+      this.getNftByIdentifier.name,
+      `nfts/${identifier}/owners?from=${offset}&size=${limit}`,
+      (response) => response,
+    );
+  }
+
+  async getOwnersForIdentifierCount(identifier: string): Promise<number> {
+    return await this.doGetGeneric(
+      this.getNftByIdentifier.name,
+      `nfts/${identifier}/owners/count`,
       (response) => response,
     );
   }
