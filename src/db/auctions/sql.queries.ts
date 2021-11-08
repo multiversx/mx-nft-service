@@ -179,3 +179,25 @@ WHERE
 GROUP BY
 	a.id `;
 }
+
+export function getAuctionsForIdentifierSortByPrice(
+  identifier: string,
+  limit: number = 10,
+  offset: number = 0,
+) {
+  return `SELECT a.*,o.priceAmountDenominated as price
+  FROM auctions a 
+  LEFT JOIN LATERAL 
+  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+  WHERE a.status='Running' AND a.identifier = '${identifier}'
+  order by if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
+}
+
+export function getAuctionsForIdentifierSortByPriceCount(identifier: string) {
+  return `SELECT COUNT(1) as Count from (SELECT a.*,o.priceAmountDenominated as price
+  FROM auctions a 
+  LEFT JOIN LATERAL 
+  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+  WHERE a.status='Running' AND a.identifier='${identifier}'
+   order by if(price, price, minBidDenominated) ASC) as temp`;
+}

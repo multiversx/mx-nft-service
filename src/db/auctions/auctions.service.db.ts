@@ -11,6 +11,8 @@ import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 import {
+  getAuctionsForIdentifierSortByPrice,
+  getAuctionsForIdentifierSortByPriceCount,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -70,13 +72,20 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
     try {
-      if (queryRequest.sorting) {
-        return this.getAuctions(queryRequest);
-      }
-
       const identifier = queryRequest.filters.filters.find(
         (x) => x.field === 'identifier',
       ).values[0];
+      if (
+        queryRequest?.sorting &&
+        queryRequest?.sorting.some((f) => f.field === 'topBidPrice')
+      ) {
+        return await this.getAuctionsForIdentifierSortByPrice(
+          queryRequest,
+          identifier,
+        );
+      } else if (queryRequest.sorting) {
+        return this.getAuctions(queryRequest);
+      }
       const endDate = DateUtils.getCurrentTimestampPlus(12);
       const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
         identifier,
@@ -184,6 +193,26 @@ export class AuctionsServiceDb {
     }
     await this.rollbackWithdrawAndEndAuction(auctions);
     await this.rollbackCreateAuction(auctions);
+  }
+
+  private async getAuctionsForIdentifierSortByPrice(
+    queryRequest: QueryRequest,
+    identifier: string,
+  ): Promise<[AuctionEntity[], number]> {
+    const [auctions, count] = await Promise.all([
+      this.auctionsRepository.query(
+        getAuctionsForIdentifierSortByPrice(
+          identifier,
+          queryRequest.limit,
+          queryRequest.offset,
+        ),
+      ),
+      this.auctionsRepository.query(
+        getAuctionsForIdentifierSortByPriceCount(identifier),
+      ),
+    ]);
+
+    return [auctions, count[0]?.Count];
   }
 
   private async rollbackCreateAuction(auctions: AuctionEntity[]) {
