@@ -85,10 +85,12 @@ export class AssetLikesProvider {
       values = identifiers?.map((identifier) =>
         assetsIdentifiers[identifier]
           ? assetsIdentifiers[identifier]
-          : {
-              identifier: identifier,
-              likesCount: 0,
-            },
+          : [
+              {
+                identifier: identifier,
+                likesCount: 0,
+              },
+            ],
       );
       await this.redisCacheService.batchSetCache(
         this.redisClient,
