@@ -431,7 +431,6 @@ type Owner {
   address: String
   balance: String
   identifier: ID
-  owner: Account!
 }
 
 type OwnerEdge {
