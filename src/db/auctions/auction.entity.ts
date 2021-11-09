@@ -23,6 +23,7 @@ export class AuctionEntity extends BaseEntity {
   nonce: number;
 
   @Column()
+  @Index('auction_status')
   status: AuctionStatusEnum;
 
   @Column()

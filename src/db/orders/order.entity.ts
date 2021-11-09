@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { BaseEntity } from '../base-entity';
 
@@ -26,6 +26,7 @@ export class OrderEntity extends BaseEntity {
   boughtTokensNo: string;
 
   @Column()
+  @Index('order_auction_id')
   auctionId: number;
 
   @Column({ length: 64 })
