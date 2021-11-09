@@ -12,4 +12,8 @@ export class DateUtils {
   static getCurrentTimestamp(): number {
     return new Date(new Date().toUTCString()).getTime() / 1000;
   }
+
+  static getDateFromTimestampWithoutTime(timestamp: number) {
+    return new Date(timestamp * 1000).toJSON().slice(0, 10);
+  }
 }

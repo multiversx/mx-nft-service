@@ -5,6 +5,7 @@ import { ElrondDataService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class PriceServiceUSD {
@@ -53,7 +54,10 @@ export class PriceServiceUSD {
     }
   }
 
-  private getPriceForTimestampCacheKey(filters) {
-    return generateCacheKeyFromParams('priceUSD', filters);
+  private getPriceForTimestampCacheKey(timestamp) {
+    return generateCacheKeyFromParams(
+      'priceUSD',
+      DateUtils.getDateFromTimestampWithoutTime(timestamp),
+    );
   }
 }
