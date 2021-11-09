@@ -43,7 +43,7 @@ export class OwnersResolver {
   }
 
   @ResolveField(() => Account)
-  async owner(@Parent() owner: Owner) {
+  async account(@Parent() owner: Owner) {
     const { address } = owner;
 
     if (!address) return null;
