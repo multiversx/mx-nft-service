@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { fileStorage } from 'src/config';
 import { UploadToIpfsResult } from './ipfs.model';
 import { FileContent } from './file.content';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 const axios = require('axios');
 
 const FormData = require('form-data');
 
 @Injectable()
 export class PinataService {
-  constructor() {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/pinning/pinFileToIPFS`;
@@ -28,7 +32,14 @@ export class PinataService {
       });
       return this.mapReturnType(response.data.IpfsHash);
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'An error occurred while trying to add file to pinata.',
+        {
+          path: 'PinataService.uploadFile',
+          exception: error.toString(),
+          cacheKey: file,
+        },
+      );
       return;
     }
   }
@@ -44,7 +55,14 @@ export class PinataService {
 
       return this.mapReturnType(response.data.IpfsHash);
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        'An error occurred while trying to add file to pinata.',
+        {
+          path: 'PinataService.uploadText',
+          exception: error.toString(),
+          cacheKey: fileMetadata,
+        },
+      );
       return;
     }
   }

@@ -42,6 +42,7 @@ export class AssetsLikesService {
       this.logger.error("An error occurred while loading asset's liked.", {
         path: 'AssetsService.getAssetLiked',
         address,
+        exception: err.toString(),
       });
     }
   }
@@ -62,6 +63,7 @@ export class AssetsLikesService {
         path: 'AssetsService.isAssetLiked',
         identifier,
         address,
+        exception: err.toString(),
       });
       return Promise.resolve(false);
     }
@@ -77,7 +79,7 @@ export class AssetsLikesService {
         path: 'AssetsService.addLike',
         identifier,
         address,
-        err,
+        exception: err.toString(),
       });
       return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }
@@ -93,7 +95,7 @@ export class AssetsLikesService {
         path: 'AssetsService.removeLike',
         identifier,
         address,
-        err,
+        exception: err.toString(),
       });
       return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }

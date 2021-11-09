@@ -34,8 +34,9 @@ export class PriceServiceUSD {
       this.logger.error(
         'An error occurred while getting the price for timestamp.',
         {
-          path: 'DataServiceUSD.getPriceForTimestamp',
+          path: 'PriceServiceUSD.getPriceForTimestamp',
           timestamp,
+          exception: err.toString(),
         },
       );
     }
@@ -46,7 +47,8 @@ export class PriceServiceUSD {
       return this.dataService.getQuotesHistoricalLatest();
     } catch (err) {
       this.logger.error('An error occurred while getting the latest price.', {
-        path: 'DataServiceUSD.getLatestPrice',
+        path: 'PriceServiceUSD.getLatestPrice',
+        exception: err.toString(),
       });
     }
   }

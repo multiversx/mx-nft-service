@@ -39,9 +39,10 @@ export class OrdersService {
       }
       return Order.fromEntity(orderEntity);
     } catch (error) {
-      this.logger.error('An error occurred while creating an order', error, {
+      this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrder',
         createOrderArgs,
+        exception: error.toString(),
       });
     }
   }
@@ -54,9 +55,10 @@ export class OrdersService {
       );
       return Order.fromEntity(orderEntity);
     } catch (error) {
-      this.logger.error('An error occurred while creating an order', error, {
+      this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrderForSft',
         createOrderArgs,
+        exception: error.toString(),
       });
     }
   }
@@ -67,9 +69,10 @@ export class OrdersService {
 
       return this.orderServiceDb.deleteOrdersByHash(hash);
     } catch (error) {
-      this.logger.error('An error occurred while creating an order', error, {
+      this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
         hash,
+        exception: error.toString(),
       });
     }
   }
