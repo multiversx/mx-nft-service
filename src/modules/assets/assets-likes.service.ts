@@ -71,9 +71,17 @@ export class AssetsLikesService {
 
   async addLike(identifier: string, address: string): Promise<boolean> {
     try {
-      await this.saveAssetLikeEntity(identifier, address);
-      await this.invalidateCache(identifier, address);
-      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
+      const isLiked = await this.assetsLikesRepository.isAssetLiked(
+        identifier,
+        address,
+      );
+      if (isLiked) {
+        return true;
+      } else {
+        await this.saveAssetLikeEntity(identifier, address);
+        await this.invalidateCache(identifier, address);
+        return true;
+      }
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
