@@ -1,13 +1,13 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
 import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
 export class OrderEntity extends BaseEntity {
-  @Column()
+  @Column({ length: 20 })
   priceToken: string;
 
-  @Column()
+  @Column({ length: 62 })
   priceAmount: string;
 
   @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
@@ -16,16 +16,18 @@ export class OrderEntity extends BaseEntity {
   @Column()
   priceNonce: number;
 
-  @Column()
+  @Column({ length: 8 })
+  @Index('order_status')
   status: OrderStatusEnum;
 
   @Column({ length: 62 })
   ownerAddress: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 62 })
   boughtTokensNo: string;
 
   @Column()
+  @Index('order_auction_id')
   auctionId: number;
 
   @Column({ length: 64 })

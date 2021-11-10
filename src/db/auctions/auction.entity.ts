@@ -22,7 +22,8 @@ export class AuctionEntity extends BaseEntity {
   @Column()
   nonce: number;
 
-  @Column()
+  @Column({ length: 10 })
+  @Index('auction_status')
   status: AuctionStatusEnum;
 
   @Column()
@@ -49,10 +50,10 @@ export class AuctionEntity extends BaseEntity {
   maxBidDenominated: number;
 
   @Column()
-  startDate: string;
+  startDate: number;
 
   @Column()
-  endDate: string;
+  endDate: number;
 
   @Column()
   tags: string;
@@ -104,8 +105,8 @@ export class AuctionEntity extends BaseEntity {
               showLastNonZeroDecimal: true,
             }),
           ),
-          startDate: auction.start_time.valueOf().toString(),
-          endDate: auction.deadline.valueOf().toString(),
+          startDate: parseInt(auction.start_time.valueOf().toString()),
+          endDate: parseInt(auction.deadline.valueOf().toString()),
           identifier: `${auction.auctioned_token.token_type
             .valueOf()
             .toString()}-${nominateVal(
