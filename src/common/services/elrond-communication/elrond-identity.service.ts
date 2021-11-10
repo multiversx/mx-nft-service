@@ -1,12 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
+import { Logger } from 'winston';
 import { AccountIdentity } from './models/account.identity';
 const axios = require('axios');
 
 @Injectable()
 export class ElrondIdentityService {
-  constructor() {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   async getProfiles(addresses: string[]): Promise<AccountIdentity[]> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/multiple`;
@@ -34,7 +38,14 @@ export class ElrondIdentityService {
         return accounts[key];
       });
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        `An error occurred while calling the elrond api service on url ${url}`,
+        {
+          path: 'ElrondIdentityService.getProfiles',
+          addresses: addresses,
+          exception: error.toString(),
+        },
+      );
       return;
     }
   }

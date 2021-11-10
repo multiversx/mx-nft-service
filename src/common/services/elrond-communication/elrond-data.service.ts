@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
+import { Logger } from 'winston';
 const axios = require('axios');
 
 @Injectable()
 export class ElrondDataService {
-  constructor() {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   async getQuotesHistoricalTimestamp(timestamp: number): Promise<number> {
     const url = `${process.env.ELROND_DATA}/closing/quoteshistorical/egld/price/${timestamp}`;
@@ -28,7 +32,13 @@ export class ElrondDataService {
 
       return data;
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        `An error occurred while calling the elrond data service on url ${url}`,
+        {
+          path: `ElrondDataService.${ElrondDataService.name}`,
+          error,
+        },
+      );
       return;
     }
   }
@@ -54,7 +64,13 @@ export class ElrondDataService {
 
       return data;
     } catch (error) {
-      console.log(error);
+      this.logger.error(
+        `An error occurred while calling the elrond data service on url ${url}`,
+        {
+          path: `ElrondDataService.${ElrondDataService.name}`,
+          error,
+        },
+      );
       return;
     }
   }

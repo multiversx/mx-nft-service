@@ -5,6 +5,7 @@ import { ElrondDataService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class PriceServiceUSD {
@@ -34,8 +35,9 @@ export class PriceServiceUSD {
       this.logger.error(
         'An error occurred while getting the price for timestamp.',
         {
-          path: 'DataServiceUSD.getPriceForTimestamp',
+          path: 'PriceServiceUSD.getPriceForTimestamp',
           timestamp,
+          exception: err.toString(),
         },
       );
     }
@@ -46,12 +48,16 @@ export class PriceServiceUSD {
       return this.dataService.getQuotesHistoricalLatest();
     } catch (err) {
       this.logger.error('An error occurred while getting the latest price.', {
-        path: 'DataServiceUSD.getLatestPrice',
+        path: 'PriceServiceUSD.getLatestPrice',
+        exception: err.toString(),
       });
     }
   }
 
-  private getPriceForTimestampCacheKey(filters) {
-    return generateCacheKeyFromParams('priceUSD', filters);
+  private getPriceForTimestampCacheKey(timestamp) {
+    return generateCacheKeyFromParams(
+      'priceUSD',
+      DateUtils.getDateFromTimestampWithoutTime(timestamp),
+    );
   }
 }

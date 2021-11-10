@@ -42,6 +42,7 @@ export class AssetsLikesService {
       this.logger.error("An error occurred while loading asset's liked.", {
         path: 'AssetsService.getAssetLiked',
         address,
+        exception: err.toString(),
       });
     }
   }
@@ -62,6 +63,7 @@ export class AssetsLikesService {
         path: 'AssetsService.isAssetLiked',
         identifier,
         address,
+        exception: err.toString(),
       });
       return Promise.resolve(false);
     }
@@ -69,15 +71,23 @@ export class AssetsLikesService {
 
   async addLike(identifier: string, address: string): Promise<boolean> {
     try {
-      await this.saveAssetLikeEntity(identifier, address);
-      await this.invalidateCache(identifier, address);
-      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
+      const isLiked = await this.assetsLikesRepository.isAssetLiked(
+        identifier,
+        address,
+      );
+      if (isLiked) {
+        return true;
+      } else {
+        await this.saveAssetLikeEntity(identifier, address);
+        await this.invalidateCache(identifier, address);
+        return true;
+      }
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'AssetsService.addLike',
         identifier,
         address,
-        err,
+        exception: err.toString(),
       });
       return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }
@@ -93,7 +103,7 @@ export class AssetsLikesService {
         path: 'AssetsService.removeLike',
         identifier,
         address,
-        err,
+        exception: err.toString(),
       });
       return await this.assetsLikesRepository.isAssetLiked(identifier, address);
     }

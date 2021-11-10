@@ -36,7 +36,7 @@ export class AccountsService {
         path: 'AccountsService.follow',
         address,
         followAddress,
-        err,
+        exception: err.toString(),
       });
       return false;
     }
@@ -51,7 +51,7 @@ export class AccountsService {
         path: 'AccountsService.follow',
         address,
         unfollowAddress,
-        err,
+        exception: err.toString(),
       });
       return false;
     }
@@ -76,6 +76,7 @@ export class AccountsService {
       this.logger.error('An error occurred while getting all followers', {
         path: 'AccountsService.getFollowers',
         address,
+        exception: err.toString(),
       });
       return Promise.resolve([[], 0]);
     }
@@ -100,6 +101,7 @@ export class AccountsService {
       this.logger.error('An error occurred while getting all following', {
         path: 'AccountsService.getFollowing',
         address,
+        exception: err.toString(),
       });
       return Promise.resolve([[], 0]);
     }

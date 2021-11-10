@@ -107,6 +107,7 @@ export class AssetAvailableTokensCountProvider {
         {
           path: 'AssetAvailableTokensCountProvider.getAvailableTokensCountForIdentifiers',
           identifiers,
+          exception: error.toString(),
         },
       );
     }

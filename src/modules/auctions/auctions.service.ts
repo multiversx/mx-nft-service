@@ -50,6 +50,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while savind an auction', error, {
         path: 'AuctionsService.saveAuction',
         auctionId,
+        exception: error.toString(),
       });
     }
   }
@@ -65,9 +66,10 @@ export class AuctionsService {
         30,
       );
     } catch (error) {
-      this.logger.error('An error occurred while get auctions', error, {
+      this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',
         queryRequest,
+        exception: error.toString(),
       });
     }
   }
@@ -84,9 +86,10 @@ export class AuctionsService {
         getAuctions,
       );
     } catch (error) {
-      this.logger.error('An error occurred while get auctions', error, {
+      this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',
         queryRequest,
+        exception: error.toString(),
       });
     }
   }
@@ -97,9 +100,10 @@ export class AuctionsService {
         blockHash,
       );
     } catch (error) {
-      this.logger.error('An error occurred while deleteAuction', error, {
+      this.logger.error('An error occurred while deleteAuction', {
         path: 'AuctionsService.deleteAuctionByHash',
         blockHash,
+        exception: error.toString(),
       });
     }
   }
@@ -118,9 +122,10 @@ export class AuctionsService {
         cacheConfig.auctionsttl,
       );
     } catch (error) {
-      this.logger.error('An error occurred while get auctions', error, {
+      this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getTrendingAuctions',
         queryRequest,
+        exception: error.toString(),
       });
     }
   }
@@ -145,9 +150,10 @@ export class AuctionsService {
         30,
       );
     } catch (error) {
-      this.logger.error('An error occurred while get auctions', error, {
+      this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getClaimableAuctions',
         address,
+        exception: error.toString(),
       });
     }
   }
