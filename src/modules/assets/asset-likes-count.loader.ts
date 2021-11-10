@@ -25,6 +25,11 @@ export class AssetLikesProvider {
 
   async getAssetLikesCount(identifier: string): Promise<any> {
     const cacheKey = this.getAssetLikeCountCacheKey(identifier);
+    try {
+      await this.dataLoader.load(identifier);
+    } catch (error) {
+      console.log('getAssetLikesCount ', error.toString());
+    }
     const getLikesCount = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
