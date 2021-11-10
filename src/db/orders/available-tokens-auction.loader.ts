@@ -79,6 +79,7 @@ export class AvailableTokensForAuctionProvider {
       );
       return auctionIds.map((auctionId) => auctionsIds[auctionId]);
     }
+    return getAvailableTokensFromCache;
   };
 
   async clearKey(auctionId: Number): Promise<any> {

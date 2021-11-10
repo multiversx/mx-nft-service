@@ -25,11 +25,6 @@ export class AssetLikesProvider {
 
   async getAssetLikesCount(identifier: string): Promise<any> {
     const cacheKey = this.getAssetLikeCountCacheKey(identifier);
-    try {
-      await this.dataLoader.load(identifier);
-    } catch (error) {
-      console.log('getAssetLikesCount ', error.toString());
-    }
     const getLikesCount = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
@@ -54,63 +49,58 @@ export class AssetLikesProvider {
   private batchAssetLikesCount = async (identifiers: string[]) => {
     const cacheKeys = this.getAssetsLikesCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
-    const getLikes = await this.redisCacheService.batchGetCache(
+    const getLikesCount = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
     );
-    if (getLikes.includes(null)) {
-      try {
-        const assetLikes = await getRepository(AssetLikeEntity)
-          .createQueryBuilder('al')
-          .select('al.identifier as identifier')
-          .addSelect('COUNT(al.identifier) as likesCount')
-          .where(
-            `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
-            {
-              identifiers: identifiers,
-            },
-          )
-          .groupBy('al.identifier')
-          .execute();
-        const assetsIdentifiers: { [key: string]: any[] } = {};
-        assetLikes?.forEach(
-          (asset: { identifier: string; likesCount: string }) => {
-            if (!assetsIdentifiers[asset.identifier]) {
-              assetsIdentifiers[asset.identifier] = [
-                {
-                  identifier: asset.identifier,
-                  likesCount: parseInt(asset.likesCount),
-                },
-              ];
-            } else {
-              assetsIdentifiers[asset.identifier].push(asset);
-            }
+    if (getLikesCount.includes(null)) {
+      const assetLikes = await getRepository(AssetLikeEntity)
+        .createQueryBuilder('al')
+        .select('al.identifier as identifier')
+        .addSelect('COUNT(al.identifier) as likesCount')
+        .where(
+          `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
+          {
+            identifiers: identifiers,
           },
-        );
-        keys = identifiers?.map((i) => this.getAssetLikeCountCacheKey(i));
-        values = identifiers?.map((identifier) =>
-          assetsIdentifiers[identifier]
-            ? assetsIdentifiers[identifier]
-            : [
-                {
-                  identifier: identifier,
-                  likesCount: 0,
-                },
-              ],
-        );
-
-        console.log('testing loader ', { keys, values });
-        await this.redisCacheService.batchSetCache(
-          this.redisClient,
-          keys,
-          values,
-          cacheConfig.followersttl,
-        );
-        return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
-      } catch (error) {
-        console.log('extraaaaa', error);
-      }
+        )
+        .groupBy('al.identifier')
+        .execute();
+      const assetsIdentifiers: { [key: string]: any[] } = {};
+      assetLikes?.forEach(
+        (asset: { identifier: string; likesCount: string }) => {
+          if (!assetsIdentifiers[asset.identifier]) {
+            assetsIdentifiers[asset.identifier] = [
+              {
+                identifier: asset.identifier,
+                likesCount: parseInt(asset.likesCount),
+              },
+            ];
+          } else {
+            assetsIdentifiers[asset.identifier].push(asset);
+          }
+        },
+      );
+      keys = identifiers?.map((i) => this.getAssetLikeCountCacheKey(i));
+      values = identifiers?.map((identifier) =>
+        assetsIdentifiers[identifier]
+          ? assetsIdentifiers[identifier]
+          : [
+              {
+                identifier: identifier,
+                likesCount: 0,
+              },
+            ],
+      );
+      await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        keys,
+        values,
+        cacheConfig.followersttl,
+      );
+      return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
     }
+    return getLikesCount;
   };
 
   private getAssetsLikesCountCacheKeys(identifiers: string[]) {

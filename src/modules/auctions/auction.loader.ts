@@ -80,6 +80,7 @@ export class AuctionProvider {
       );
       return auctionsIds?.map((auctionId) => auctionsIdentifiers[auctionId]);
     }
+    return getAuctionsFromCache;
   };
 
   private getAuctionsCacheKey(auctionIds: number[]) {

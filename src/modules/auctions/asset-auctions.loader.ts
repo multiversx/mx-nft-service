@@ -36,12 +36,6 @@ export class AuctionsForAssetProvider {
   async getAuctionsByIdentifier(identifier: string): Promise<any> {
     const cacheKey = this.getAuctionCacheKey(identifier);
 
-    try {
-      await this.dataLoader.load(identifier);
-    } catch (error) {
-      console.log('getAuctionsByIdentifier ', error.toString());
-    }
-
     const getAuctions = () => this.dataLoader.load(identifier);
     return this.redisCacheService.getOrSet(
       this.redisClient,
@@ -87,6 +81,7 @@ export class AuctionsForAssetProvider {
       );
       return identifiers?.map((identifier) => auctionsIdentifiers[identifier]);
     }
+    return getAuctionsFromCache;
   };
 
   private getAuctionsCacheKey(identifiers: string[]) {

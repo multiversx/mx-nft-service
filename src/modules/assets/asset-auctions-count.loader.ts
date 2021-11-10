@@ -49,11 +49,9 @@ export class AssetAuctionsCountProvider {
   private getAuctionsCountForIdentifiers = async (identifiers: string[]) => {
     const cacheKeys = this.getAssetsAuctionsCountCacheKeys(identifiers);
     let [keys, values] = [[], []];
-    const getLikes = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getLikes.includes(null)) {
+    const getAuctionsCountFromCache =
+      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+    if (getAuctionsCountFromCache.includes(null)) {
       const assetAuctions = await getRepository(AuctionEntity)
         .createQueryBuilder('a')
         .select('a.identifier as identifier')
@@ -102,6 +100,7 @@ export class AssetAuctionsCountProvider {
       );
       return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
     }
+    return getAuctionsCountFromCache;
   };
 
   private getAssetsAuctionsCountCacheKeys(identifiers: string[]) {

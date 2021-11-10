@@ -67,6 +67,7 @@ export class ActiveOrdersProvider {
       );
       return auctionIds.map((auctionId) => ordersAuctionsIds[auctionId]);
     }
+    return getOrdersFromCache;
   };
 
   async clearKey(auctionId: Number): Promise<any> {

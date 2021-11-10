@@ -65,6 +65,7 @@ export class OrdersProvider {
       );
       return auctionIds.map((auctionId) => ordersAuctionsIds[auctionId]);
     }
+    return getOrdersFromCache;
   };
 
   async clearKey(auctionId: Number): Promise<any> {

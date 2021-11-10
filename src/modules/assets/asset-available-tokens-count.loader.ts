@@ -101,6 +101,7 @@ export class AssetAvailableTokensCountProvider {
         );
         return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
       }
+      return getAvailableTokensCount;
     } catch (error) {
       this.logger.error(
         'An error occurred while loading available token count.',
