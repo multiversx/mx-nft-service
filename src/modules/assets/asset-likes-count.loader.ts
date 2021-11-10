@@ -59,53 +59,57 @@ export class AssetLikesProvider {
       cacheKeys,
     );
     if (getLikes.includes(null)) {
-      const assetLikes = await getRepository(AssetLikeEntity)
-        .createQueryBuilder('al')
-        .select('al.identifier as identifier')
-        .addSelect('COUNT(al.identifier) as likesCount')
-        .where(
-          `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
-          {
-            identifiers: identifiers,
+      try {
+        const assetLikes = await getRepository(AssetLikeEntity)
+          .createQueryBuilder('al')
+          .select('al.identifier as identifier')
+          .addSelect('COUNT(al.identifier) as likesCount')
+          .where(
+            `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
+            {
+              identifiers: identifiers,
+            },
+          )
+          .groupBy('al.identifier')
+          .execute();
+        const assetsIdentifiers: { [key: string]: any[] } = {};
+        assetLikes?.forEach(
+          (asset: { identifier: string; likesCount: string }) => {
+            if (!assetsIdentifiers[asset.identifier]) {
+              assetsIdentifiers[asset.identifier] = [
+                {
+                  identifier: asset.identifier,
+                  likesCount: parseInt(asset.likesCount),
+                },
+              ];
+            } else {
+              assetsIdentifiers[asset.identifier].push(asset);
+            }
           },
-        )
-        .groupBy('al.identifier')
-        .execute();
-      const assetsIdentifiers: { [key: string]: any[] } = {};
-      assetLikes.forEach(
-        (asset: { identifier: string; likesCount: string }) => {
-          if (!assetsIdentifiers[asset.identifier]) {
-            assetsIdentifiers[asset.identifier] = [
-              {
-                identifier: asset.identifier,
-                likesCount: parseInt(asset.likesCount),
-              },
-            ];
-          } else {
-            assetsIdentifiers[asset.identifier].push(asset);
-          }
-        },
-      );
-      keys = identifiers.map((i) => this.getAssetLikeCountCacheKey(i));
-      values = identifiers?.map((identifier) =>
-        assetsIdentifiers[identifier]
-          ? assetsIdentifiers[identifier]
-          : [
-              {
-                identifier: identifier,
-                likesCount: 0,
-              },
-            ],
-      );
+        );
+        keys = identifiers?.map((i) => this.getAssetLikeCountCacheKey(i));
+        values = identifiers?.map((identifier) =>
+          assetsIdentifiers[identifier]
+            ? assetsIdentifiers[identifier]
+            : [
+                {
+                  identifier: identifier,
+                  likesCount: 0,
+                },
+              ],
+        );
 
-      console.log('testing loader ', { keys, values });
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        cacheConfig.followersttl,
-      );
-      return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
+        console.log('testing loader ', { keys, values });
+        await this.redisCacheService.batchSetCache(
+          this.redisClient,
+          keys,
+          values,
+          cacheConfig.followersttl,
+        );
+        return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
+      } catch (error) {
+        console.log('extraaaaa', error);
+      }
     }
   };
 
