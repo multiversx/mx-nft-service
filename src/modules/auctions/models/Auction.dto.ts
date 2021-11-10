@@ -82,8 +82,8 @@ export class Auction {
           collection: auction.collection,
           nonce: auction.nonce,
           identifier: auction.identifier,
-          startDate: parseInt(auction.startDate),
-          endDate: parseInt(auction.endDate),
+          startDate: auction.startDate,
+          endDate: auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: 'EGLD',
