@@ -97,6 +97,8 @@ export class AssetLikesProvider {
               },
             ],
       );
+
+      console.log({ keys, values });
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         keys,
