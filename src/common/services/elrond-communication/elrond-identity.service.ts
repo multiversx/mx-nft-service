@@ -43,7 +43,7 @@ export class ElrondIdentityService {
         {
           path: 'ElrondIdentityService.getProfiles',
           addresses: addresses,
-          exception: error.toString(),
+          exception: error,
         },
       );
       return;
