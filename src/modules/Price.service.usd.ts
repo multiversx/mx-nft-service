@@ -37,7 +37,7 @@ export class PriceServiceUSD {
         {
           path: 'PriceServiceUSD.getPriceForTimestamp',
           timestamp,
-          exception: err.toString(),
+          exception: err,
         },
       );
     }
@@ -49,7 +49,7 @@ export class PriceServiceUSD {
     } catch (err) {
       this.logger.error('An error occurred while getting the latest price.', {
         path: 'PriceServiceUSD.getLatestPrice',
-        exception: err.toString(),
+        exception: err,
       });
     }
   }
