@@ -1,43 +1,28 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import * as Redis from 'ioredis';
 import { OrderEntity } from './order.entity';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { Number } from 'aws-sdk/clients/iot';
+import { BaseProvider } from 'src/modules/assets/base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class ActiveOrdersProvider {
-  private dataLoader = new DataLoader(
-    async (keys: number[]) => await this.batchOrders(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
-    );
-  }
-
-  async getOrderByAuctionId(auctionId: number): Promise<any> {
-    const cacheKey = this.getOrdersForAuctionCacheKey(auctionId);
-    const getAuctions = () => this.dataLoader.load(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getAuctions,
-      cacheConfig.followersttl,
+export class ActiveOrdersProvider extends BaseProvider<number> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'auction_active_orders',
+      redisCacheService,
+      new DataLoader(async (keys: number[]) => await this.batchOrders(keys), {
+        cache: false,
+      }),
     );
   }
 
   private batchOrders = async (auctionIds: number[]) => {
-    const cacheKeys = this.getOrdersForAuctionCacheKeys(auctionIds);
-    let [keys, values] = [[], []];
+    const cacheKeys = this.getCacheKeys(auctionIds);
+    let [keys, values] = [cacheKeys, []];
     const getOrdersFromCache = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
@@ -53,9 +38,6 @@ export class ActiveOrdersProvider {
           ordersAuctionsIds[order.auctionId].push(order);
         }
       });
-      keys = auctionIds?.map((auctionId) =>
-        this.getOrdersForAuctionCacheKey(auctionId),
-      );
       values = auctionIds?.map((auctionId) =>
         ordersAuctionsIds[auctionId] ? ordersAuctionsIds[auctionId] : [],
       );
@@ -70,15 +52,6 @@ export class ActiveOrdersProvider {
     return getOrdersFromCache;
   };
 
-  async clearKey(auctionId: Number): Promise<any> {
-    this.dataLoader.clearAll();
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getOrdersForAuctionCacheKey(auctionId),
-    );
-    return this.dataLoader.clear(auctionId);
-  }
-
   private async getActiveOrdersForAuctionIds(auctionIds: number[]) {
     return await getRepository(OrderEntity)
       .createQueryBuilder('orders')
@@ -87,13 +60,5 @@ export class ActiveOrdersProvider {
         auctionIds: auctionIds,
       })
       .getMany();
-  }
-
-  private getOrdersForAuctionCacheKeys(auctionId: number[]) {
-    return auctionId.map((id) => this.getOrdersForAuctionCacheKey(id));
-  }
-
-  private getOrdersForAuctionCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('auction_active_orders', auctionId);
   }
 }

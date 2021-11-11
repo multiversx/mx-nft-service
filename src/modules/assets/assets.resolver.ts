@@ -140,9 +140,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('likesCount', () => Int)
   async likesCount(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const assetLikes = await this.assetsLikeProvider.getAssetLikesCount(
-      identifier,
-    );
+    const assetLikes = await this.assetsLikeProvider.load(identifier);
     return assetLikes ? assetLikes[0]?.likesCount : 0;
   }
 
@@ -155,28 +153,25 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('totalRunningAuctions', () => String)
   async totalRunningAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const assetAuctions =
-      await this.assetsAuctionsProvider.getAssetAuctionsCount(identifier);
+    const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
     return assetAuctions ? assetAuctions[0]?.auctionsCount : 0;
   }
 
   @ResolveField('hasAvailableAuctions', () => Boolean)
   async hasAvailableAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const availableTokens =
-      await this.assetAvailableTokensCountProvider.getAvailableTokensCount(
-        identifier,
-      );
+    const availableTokens = await this.assetAvailableTokensCountProvider.load(
+      identifier,
+    );
     return availableTokens && availableTokens[0]?.count > 0 ? true : false;
   }
 
   @ResolveField('totalAvailableTokens', () => String)
   async totalAvailableTokens(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const availableTokens =
-      await this.assetAvailableTokensCountProvider.getAvailableTokensCount(
-        identifier,
-      );
+    const availableTokens = await this.assetAvailableTokensCountProvider.load(
+      identifier,
+    );
     return availableTokens ? availableTokens[0]?.count : 0;
   }
 

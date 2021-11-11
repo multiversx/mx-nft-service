@@ -41,10 +41,9 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const result =
-            await this.availableTokens.getAvailableTokensForAuctionId(
-              parseInt(buySftTopics.auctionId, 16),
-            );
+          const result = await this.availableTokens.load(
+            parseInt(buySftTopics.auctionId, 16),
+          );
           const totalRemaining = result
             ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
             : 0;

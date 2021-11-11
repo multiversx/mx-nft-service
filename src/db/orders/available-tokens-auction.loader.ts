@@ -1,44 +1,32 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { Number } from 'aws-sdk/clients/iot';
 import { getAvailableTokensbyAuctionIds } from '../auctions/sql.queries';
 import { AuctionEntity } from '../auctions';
+import { BaseProvider } from 'src/modules/assets/base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AvailableTokensForAuctionProvider {
-  private dataLoader = new DataLoader(
-    async (keys: number[]) => await this.batchGetAvailableTokens(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
-    );
-  }
-
-  async getAvailableTokensForAuctionId(auctionId: number): Promise<any> {
-    const cacheKey = this.getAvailableTokensForAuctionCacheKey(auctionId);
-    const getAuctions = () => this.dataLoader.load(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getAuctions,
-      cacheConfig.followersttl,
+export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'auction_available_tokens',
+      redisCacheService,
+      new DataLoader(
+        async (keys: number[]) => await this.batchGetAvailableTokens(keys),
+        {
+          cache: false,
+        },
+      ),
     );
   }
 
   private batchGetAvailableTokens = async (auctionIds: number[]) => {
-    const cacheKeys = this.getOrdersForAuctionCacheKeys(auctionIds);
-    let [keys, values] = [[], []];
+    const cacheKeys = this.getCacheKeys(auctionIds);
+    let [keys, values] = [cacheKeys, []];
     const getAvailableTokensFromCache =
       await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
     if (getAvailableTokensFromCache.includes(null)) {
@@ -57,9 +45,6 @@ export class AvailableTokensForAuctionProvider {
             auctionsIds[result.auctionId].push(result);
           }
         },
-      );
-      keys = auctionIds?.map((auctionId) =>
-        this.getAvailableTokensForAuctionCacheKey(auctionId),
       );
       values = auctionIds?.map((auctionId) =>
         auctionsIds[auctionId]
@@ -82,26 +67,9 @@ export class AvailableTokensForAuctionProvider {
     return getAvailableTokensFromCache;
   };
 
-  async clearKey(auctionId: Number): Promise<any> {
-    this.dataLoader.clearAll();
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getAvailableTokensForAuctionCacheKey(auctionId),
-    );
-    return this.dataLoader.clear(auctionId);
-  }
-
   private async getAvailableTokensForAuctionIds(auctionIds: number[]) {
     return await await getRepository(AuctionEntity).query(
       getAvailableTokensbyAuctionIds(auctionIds),
     );
-  }
-
-  private getOrdersForAuctionCacheKeys(auctionId: number[]) {
-    return auctionId.map((id) => this.getAvailableTokensForAuctionCacheKey(id));
-  }
-
-  private getAvailableTokensForAuctionCacheKey(auctionId: number) {
-    return generateCacheKeyFromParams('auction_available_tokens', auctionId);
   }
 }

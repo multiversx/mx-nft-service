@@ -59,7 +59,7 @@ export class OrdersResolver extends BaseResolver(Order) {
   @ResolveField('auction', () => Auction)
   async auction(@Parent() order: Order) {
     const { auctionId } = order;
-    const auctions = await this.auctionProvider.getAuctionById(auctionId);
+    const auctions = await this.auctionProvider.load(auctionId);
     return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
   }
 }

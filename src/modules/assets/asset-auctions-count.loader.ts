@@ -1,54 +1,30 @@
 import DataLoader = require('dataloader');
 import { Injectable, Scope } from 'graphql-modules';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
-import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { BaseProvider } from './base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AssetAuctionsCountProvider {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.getAuctionsCountForIdentifiers(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+export class AssetAuctionsCountProvider extends BaseProvider<string> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'assetAuctionsCount',
+      redisCacheService,
+      new DataLoader(
+        async (keys: string[]) =>
+          await this.getAuctionsCountForIdentifiers(keys),
+        { cache: false },
+      ),
     );
-  }
-
-  async getAssetAuctionsCount(identifier: string): Promise<any> {
-    const cacheKey = this.getAssetAuctionsCountCacheKey(identifier);
-    const getLikesCount = () => this.dataLoader.load(identifier);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getLikesCount,
-      cacheConfig.followersttl,
-    );
-  }
-
-  async clearKey(identifier: string): Promise<any> {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getAssetAuctionsCountCacheKey(identifier),
-    );
-    return this.dataLoader.clear(identifier);
-  }
-
-  async clearAll(): Promise<void> {
-    this.dataLoader.clearAll();
   }
 
   private getAuctionsCountForIdentifiers = async (identifiers: string[]) => {
-    const cacheKeys = this.getAssetsAuctionsCountCacheKeys(identifiers);
-    let [keys, values] = [[], []];
+    const cacheKeys = this.getCacheKeys(identifiers);
+    let [keys, values] = [cacheKeys, []];
     const getAuctionsCountFromCache =
       await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
     if (getAuctionsCountFromCache.includes(null)) {
@@ -81,7 +57,6 @@ export class AssetAuctionsCountProvider {
           }
         },
       );
-      keys = identifiers.map((i) => this.getAssetAuctionsCountCacheKey(i));
       values = identifiers?.map((identifier) =>
         assetsIdentifiers[identifier]
           ? assetsIdentifiers[identifier]
@@ -102,12 +77,4 @@ export class AssetAuctionsCountProvider {
     }
     return getAuctionsCountFromCache;
   };
-
-  private getAssetsAuctionsCountCacheKeys(identifiers: string[]) {
-    return identifiers.map((id) => this.getAssetAuctionsCountCacheKey(id));
-  }
-
-  private getAssetAuctionsCountCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assetAuctionsCount', identifier);
-  }
 }
