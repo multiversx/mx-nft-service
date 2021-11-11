@@ -181,9 +181,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (!identifier) {
       return null;
     }
-    const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
-      identifier,
-    );
+    const auctions = await this.auctionsProvider.load(identifier);
     return auctions
       ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
       : [];
@@ -195,9 +193,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (!identifier) {
       return null;
     }
-    const auctions = await this.auctionsProvider.getAuctionsByIdentifier(
-      identifier,
-    );
+    const auctions = await this.auctionsProvider.load(identifier);
     return auctions && auctions.length > 0
       ? Auction.fromEntity(auctions[0])
       : null;

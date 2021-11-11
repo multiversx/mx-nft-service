@@ -14,59 +14,33 @@ export class AssetAvailableTokensCountProvider extends BaseProvider<string> {
     super(
       'availableTokensCount',
       redisCacheService,
-      new DataLoader(
-        async (keys: string[]) =>
-          await this.getAvailableTokensCountForIdentifiers(keys),
-        { cache: false },
-      ),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
     );
   }
 
-  private getAvailableTokensCountForIdentifiers = async (
+  mapValuesForRedis(
     identifiers: string[],
-  ) => {
-    const cacheKeys = this.getCacheKeys(identifiers);
-    let [keys, values] = [cacheKeys, []];
-    const getAvailableTokensCount = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getAvailableTokensCount.includes(null)) {
-      const assetAuctions = await getRepository(AuctionEntity).query(
-        getAvailableTokensScriptsByIdentifiers(identifiers),
-      );
-
-      const assetsIdentifiers: { [key: string]: any[] } = {};
-      assetAuctions.forEach((asset: { identifier: string; count: string }) => {
-        if (!assetsIdentifiers[asset.identifier]) {
-          assetsIdentifiers[asset.identifier] = [
+    assetsIdentifiers: { [key: string]: any[] },
+  ) {
+    return identifiers?.map((identifier) =>
+      assetsIdentifiers[identifier]
+        ? assetsIdentifiers[identifier]
+        : [
             {
-              identifier: asset.identifier,
-              count: asset.count,
+              identifier: identifier,
+              count: 0,
             },
-          ];
-        } else {
-          assetsIdentifiers[asset.identifier].push(asset);
-        }
-      });
-      values = identifiers?.map((identifier) =>
-        assetsIdentifiers[identifier]
-          ? assetsIdentifiers[identifier]
-          : [
-              {
-                identifier: identifier,
-                count: 0,
-              },
-            ],
-      );
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        30,
-      );
-      return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
-    }
-    return getAvailableTokensCount;
-  };
+          ],
+    );
+  }
+
+  async getDataFromDb(identifiers: string[]) {
+    const availableTokens = await getRepository(AuctionEntity).query(
+      getAvailableTokensScriptsByIdentifiers(identifiers),
+    );
+
+    return availableTokens?.groupBy((auction) => auction.identifier);
+  }
 }

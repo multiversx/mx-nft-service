@@ -28,12 +28,7 @@ export class AuctionProvider extends BaseProvider<number> {
       cacheKeys,
     );
     if (getAuctionsFromCache.includes(null)) {
-      const auctions = await getRepository(AuctionEntity)
-        .createQueryBuilder('auctions')
-        .where('id IN(:...auctionsIds)', {
-          auctionsIds: auctionsIds,
-        })
-        .getMany();
+      const auctions = await this.getDataFromDb(auctionsIds);
       const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
 
       auctions.forEach((auction) => {
@@ -43,9 +38,7 @@ export class AuctionProvider extends BaseProvider<number> {
           auctionsIdentifiers[auction.id].push(auction);
         }
       });
-      values = auctionsIds?.map((auctionId) =>
-        auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
-      );
+      values = this.mapValuesForRedis(auctionsIds, auctionsIdentifiers);
 
       await this.redisCacheService.batchSetCache(
         this.redisClient,
@@ -57,4 +50,24 @@ export class AuctionProvider extends BaseProvider<number> {
     }
     return getAuctionsFromCache;
   };
+
+  mapValuesForRedis(
+    auctionsIds: number[],
+    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
+  ) {
+    return auctionsIds?.map((auctionId) =>
+      auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
+    );
+  }
+
+  async getDataFromDb(auctionsIds: number[]) {
+    const auctions = await getRepository(AuctionEntity)
+      .createQueryBuilder('auctions')
+      .where('id IN(:...auctionsIds)', {
+        auctionsIds: auctionsIds,
+      })
+      .getMany();
+
+    return auctions?.groupBy((auction) => auction.id);
+  }
 }

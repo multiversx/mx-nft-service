@@ -13,19 +13,24 @@ export abstract class BaseProvider<T> {
   protected redisCacheService: RedisCacheService;
 
   constructor(
-    private keyName: string,
+    private cacheKeyName: string,
     redisCacheService: RedisCacheService,
     private dataLoader: {
       load: (arg0: T) => any;
       clear: (arg0: T) => any;
       clearAll: () => any;
     },
+    private ttl: number = cacheConfig.followersttl,
   ) {
     this.redisCacheService = redisCacheService;
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
     );
   }
+
+  abstract mapValuesForRedis(identifiers: T[], assetsIdentifiers): any;
+
+  abstract getDataFromDb(identifiers: T[]): Promise<any[]>;
 
   async load(key: T): Promise<any> {
     const cacheKey = this.getCacheKey(key);
@@ -34,7 +39,7 @@ export abstract class BaseProvider<T> {
       this.redisClient,
       cacheKey,
       getLikesCount,
-      cacheConfig.followersttl,
+      this.ttl,
     );
   }
 
@@ -47,11 +52,32 @@ export abstract class BaseProvider<T> {
     return this.dataLoader.clearAll();
   }
 
+  batchLoad = async (keys: T[]) => {
+    const cacheKeys = this.getCacheKeys(keys);
+    let [redisKeys, values] = [cacheKeys, []];
+    const getDataFromRedis = await this.redisCacheService.batchGetCache(
+      this.redisClient,
+      cacheKeys,
+    );
+    if (getDataFromRedis.includes(null)) {
+      const dataKeys = await this.getDataFromDb(keys);
+      values = this.mapValuesForRedis(keys, dataKeys);
+      await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        redisKeys,
+        values,
+        this.ttl,
+      );
+      return values;
+    }
+    return getDataFromRedis;
+  };
+
   getCacheKeys(key: T[]) {
     return key.map((id) => this.getCacheKey(id));
   }
 
   getCacheKey(key: T) {
-    return generateCacheKeyFromParams(this.keyName, key);
+    return generateCacheKeyFromParams(this.cacheKeyName, key);
   }
 }

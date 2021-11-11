@@ -3,7 +3,6 @@ import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import { OrderEntity } from './order.entity';
 import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { BaseProvider } from 'src/modules/assets/base.loader';
 
 @Injectable({
@@ -14,51 +13,30 @@ export class ActiveOrdersProvider extends BaseProvider<number> {
     super(
       'auction_active_orders',
       redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchOrders(keys), {
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
         cache: false,
       }),
     );
   }
 
-  private batchOrders = async (auctionIds: number[]) => {
-    const cacheKeys = this.getCacheKeys(auctionIds);
-    let [keys, values] = [cacheKeys, []];
-    const getOrdersFromCache = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
+  mapValuesForRedis(
+    auctionIds: number[],
+    ordersAuctionsIds: { [key: string]: OrderEntity[] },
+  ) {
+    return auctionIds?.map((auctionId) =>
+      ordersAuctionsIds[auctionId] ? ordersAuctionsIds[auctionId] : [],
     );
-    if (getOrdersFromCache.includes(null)) {
-      const orders = await this.getActiveOrdersForAuctionIds(auctionIds);
-      const ordersAuctionsIds: { [key: string]: OrderEntity[] } = {};
+  }
 
-      orders.forEach((order) => {
-        if (!ordersAuctionsIds[order.auctionId]) {
-          ordersAuctionsIds[order.auctionId] = [order];
-        } else {
-          ordersAuctionsIds[order.auctionId].push(order);
-        }
-      });
-      values = auctionIds?.map((auctionId) =>
-        ordersAuctionsIds[auctionId] ? ordersAuctionsIds[auctionId] : [],
-      );
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        cacheConfig.followersttl,
-      );
-      return auctionIds.map((auctionId) => ordersAuctionsIds[auctionId]);
-    }
-    return getOrdersFromCache;
-  };
-
-  private async getActiveOrdersForAuctionIds(auctionIds: number[]) {
-    return await getRepository(OrderEntity)
+  async getDataFromDb(auctionIds: number[]) {
+    const orders = await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')
       .where(`auctionId IN(:...auctionIds) and status='active'`, {
         auctionIds: auctionIds,
       })
       .getMany();
+
+    return orders?.groupBy((asset) => asset.auctionId);
   }
 }
