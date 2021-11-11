@@ -44,7 +44,7 @@ export class FeaturedNftsService {
     } catch (err) {
       this.logger.error('An error occurred while loading featured nfts.', {
         path: 'FeaturedNftsService.getFeaturedNfts',
-        exception: err.toString(),
+        exception: err,
       });
     }
   }

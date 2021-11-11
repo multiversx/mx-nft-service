@@ -39,7 +39,7 @@ export class ElrondIdentityService {
       });
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond api service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${url}`,
         {
           path: 'ElrondIdentityService.getProfiles',
           addresses: addresses,

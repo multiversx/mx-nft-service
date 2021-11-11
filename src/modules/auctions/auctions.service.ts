@@ -50,7 +50,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while savind an auction', error, {
         path: 'AuctionsService.saveAuction',
         auctionId,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -69,7 +69,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',
         queryRequest,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -89,7 +89,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',
         queryRequest,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -103,7 +103,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while deleteAuction', {
         path: 'AuctionsService.deleteAuctionByHash',
         blockHash,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -125,7 +125,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getTrendingAuctions',
         queryRequest,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -153,7 +153,7 @@ export class AuctionsService {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getClaimableAuctions',
         address,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
