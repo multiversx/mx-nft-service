@@ -16,7 +16,8 @@ export class ElrondIdentityService {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/multiple`;
     const profiler = new PerformanceProfiler(`getProfiles ${url}`);
 
-    let request: any = { addresses: addresses };
+    const uniqueAddresses = [...new Set(addresses)];
+    let request: any = { addresses: uniqueAddresses };
 
     try {
       let response = await axios.post(url, request, {
@@ -39,11 +40,11 @@ export class ElrondIdentityService {
       });
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond api service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${url}`,
         {
           path: 'ElrondIdentityService.getProfiles',
           addresses: addresses,
-          exception: error.toString(),
+          exception: error,
         },
       );
       return;

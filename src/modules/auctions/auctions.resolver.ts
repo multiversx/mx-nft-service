@@ -209,9 +209,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBid(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
-      id,
-    );
+    const activeOrders = await this.activeOrdersProvider.load(id);
 
     return activeOrders?.length > 0
       ? Price.fromEntity(activeOrders[activeOrders.length - 1])
@@ -222,9 +220,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBidder(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.activeOrdersProvider.getOrderByAuctionId(
-      id,
-    );
+    const activeOrders = await this.activeOrdersProvider.load(id);
     return activeOrders?.length > 0
       ? Account.fromEntity(
           await this.accountsProvider.getAccountByAddress(
@@ -238,8 +234,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const result =
-        await this.availableTokensProvider.getAvailableTokensForAuctionId(id);
+      const result = await this.availableTokensProvider.load(id);
       return result ? result[0]?.availableTokens : 0;
     }
     return nrAuctionedTokens;
@@ -250,7 +245,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const { id } = auction;
 
     if (!id) return null;
-    const orderEntities = await this.ordersProvider.getOrdersByAuctionId(id);
+    const orderEntities = await this.ordersProvider.load(id);
     return orderEntities?.map((element) => Order.fromEntity(element));
   }
 

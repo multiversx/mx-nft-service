@@ -42,7 +42,7 @@ export class OrdersService {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrder',
         createOrderArgs,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -58,7 +58,7 @@ export class OrdersService {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrderForSft',
         createOrderArgs,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }
@@ -72,7 +72,7 @@ export class OrdersService {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
         hash,
-        exception: error.toString(),
+        exception: error,
       });
     }
   }

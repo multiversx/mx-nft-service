@@ -1,92 +1,42 @@
 import DataLoader = require('dataloader');
 import { Injectable, Scope } from 'graphql-modules';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
-import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { getDefaultAuctionsQueryForIdentifiers } from 'src/db/auctions/sql.queries';
 import { DateUtils } from 'src/utils/date-utils';
+import { BaseProvider } from '../assets/base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AuctionsForAssetProvider {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.getAuctions(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
-    );
-  }
-
-  async clearKey(identifier: string): Promise<any> {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getAuctionCacheKey(identifier),
-    );
-    return this.dataLoader.clear(identifier);
-  }
-
-  async getAuctionsByIdentifier(identifier: string): Promise<any> {
-    const cacheKey = this.getAuctionCacheKey(identifier);
-    const getAuctions = () => this.dataLoader.load(identifier);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getAuctions,
+export class AuctionsForAssetProvider extends BaseProvider<string> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'default_auctions',
+      redisCacheService,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
       30,
     );
   }
 
-  private getAuctions = async (identifiers: string[]) => {
-    const cacheKeys = this.getAuctionsCacheKey(identifiers);
-    let [keys, values] = [[], []];
-    const getAuctionsFromCache = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
+  mapValuesForRedis(
+    identifiers: string[],
+    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
+  ) {
+    return identifiers?.map((identifier) =>
+      auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
     );
-
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
-    if (getAuctionsFromCache.includes(null)) {
-      const auctions = await getRepository(AuctionEntity).query(
-        getDefaultAuctionsQueryForIdentifiers(endDate, identifiers),
-      );
-      const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
-
-      auctions.forEach((auction) => {
-        if (!auctionsIdentifiers[auction.identifier]) {
-          auctionsIdentifiers[auction.identifier] = [auction];
-        } else {
-          auctionsIdentifiers[auction.identifier].push(auction);
-        }
-      });
-      keys = identifiers?.map((identifier) =>
-        this.getAuctionCacheKey(identifier),
-      );
-      values = identifiers?.map((identifier) =>
-        auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
-      );
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        30,
-      );
-      return identifiers?.map((identifier) => auctionsIdentifiers[identifier]);
-    }
-  };
-
-  private getAuctionsCacheKey(identifiers: string[]) {
-    return identifiers.map((id) => this.getAuctionCacheKey(id));
   }
 
-  private getAuctionCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('default_auctions', identifier);
+  async getDataFromDb(identifiers: string[]) {
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
+    const auctions = await getRepository(AuctionEntity).query(
+      getDefaultAuctionsQueryForIdentifiers(endDate, identifiers),
+    );
+
+    return auctions?.groupBy((auction) => auction.identifier);
   }
 }

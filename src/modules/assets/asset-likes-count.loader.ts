@@ -1,112 +1,51 @@
 import DataLoader = require('dataloader');
+import '../../utils/extentions';
 import { Injectable, Scope } from 'graphql-modules';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
-import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { AssetLikeEntity } from 'src/db/assets';
+import { BaseProvider } from './base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AssetLikesProvider {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssetLikesCount(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+export class AssetLikesProvider extends BaseProvider<string> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'assetLikesCount',
+      redisCacheService,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
     );
   }
 
-  async getAssetLikesCount(identifier: string): Promise<any> {
-    const cacheKey = this.getAssetLikeCountCacheKey(identifier);
-    const getLikesCount = () => this.dataLoader.load(identifier);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getLikesCount,
-      cacheConfig.followersttl,
+  mapValuesForRedis(
+    identifiers: string[],
+    assetsIdentifiers: { [key: string]: any[] },
+  ) {
+    return identifiers?.map((identifier) =>
+      assetsIdentifiers[identifier]
+        ? assetsIdentifiers[identifier]
+        : [
+            {
+              identifier: identifier,
+              likesCount: 0,
+            },
+          ],
     );
   }
 
-  async clearKey(identifier: string): Promise<any> {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getAssetLikeCountCacheKey(identifier),
-    );
-    return this.dataLoader.clear(identifier);
-  }
-
-  async clearAll(): Promise<any> {
-    return this.dataLoader.clearAll();
-  }
-
-  private batchAssetLikesCount = async (identifiers: string[]) => {
-    const cacheKeys = this.getAssetsLikesCountCacheKeys(identifiers);
-    let [keys, values] = [[], []];
-    const getLikes = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getLikes.includes(null)) {
-      const assetLikes = await getRepository(AssetLikeEntity)
-        .createQueryBuilder('al')
-        .select('al.identifier as identifier')
-        .addSelect('COUNT(al.identifier) as likesCount')
-        .where(
-          `al.identifier IN(${identifiers.map((value) => `'${value}'`)})`,
-          {
-            identifiers: identifiers,
-          },
-        )
-        .groupBy('al.identifier')
-        .execute();
-      const assetsIdentifiers: { [key: string]: any[] } = {};
-      assetLikes.forEach(
-        (asset: { identifier: string; likesCount: string }) => {
-          if (!assetsIdentifiers[asset.identifier]) {
-            assetsIdentifiers[asset.identifier] = [
-              {
-                identifier: asset.identifier,
-                likesCount: parseInt(asset.likesCount),
-              },
-            ];
-          } else {
-            assetsIdentifiers[asset.identifier].push(asset);
-          }
-        },
-      );
-      keys = identifiers.map((i) => this.getAssetLikeCountCacheKey(i));
-      values = identifiers?.map((identifier) =>
-        assetsIdentifiers[identifier]
-          ? assetsIdentifiers[identifier]
-          : [
-              {
-                identifier: identifier,
-                likesCount: 0,
-              },
-            ],
-      );
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        cacheConfig.followersttl,
-      );
-      return identifiers?.map((identifier) => assetsIdentifiers[identifier]);
-    }
-  };
-
-  private getAssetsLikesCountCacheKeys(identifiers: string[]) {
-    return identifiers.map((id) => this.getAssetLikeCountCacheKey(id));
-  }
-
-  private getAssetLikeCountCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assetLikesCount', identifier);
+  async getDataFromDb(identifiers: string[]) {
+    const assetsLike = await getRepository(AssetLikeEntity)
+      .createQueryBuilder('al')
+      .select('al.identifier as identifier')
+      .addSelect('COUNT(al.identifier) as likesCount')
+      .where(`al.identifier IN(${identifiers.map((value) => `'${value}'`)})`, {
+        identifiers: identifiers,
+      })
+      .groupBy('al.identifier')
+      .execute();
+    return assetsLike?.groupBy((asset) => asset.identifier);
   }
 }

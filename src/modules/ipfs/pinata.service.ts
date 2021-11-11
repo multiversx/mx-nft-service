@@ -36,7 +36,7 @@ export class PinataService {
         'An error occurred while trying to add file to pinata.',
         {
           path: 'PinataService.uploadFile',
-          exception: error.toString(),
+          exception: error,
           cacheKey: file,
         },
       );
@@ -59,7 +59,7 @@ export class PinataService {
         'An error occurred while trying to add file to pinata.',
         {
           path: 'PinataService.uploadText',
-          exception: error.toString(),
+          exception: error,
           cacheKey: fileMetadata,
         },
       );

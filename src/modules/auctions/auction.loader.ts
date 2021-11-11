@@ -1,61 +1,34 @@
 import DataLoader = require('dataloader');
 import { Injectable, Scope } from 'graphql-modules';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
-import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
+import { BaseProvider } from '../assets/base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AuctionProvider {
-  private dataLoader = new DataLoader(
-    async (keys: number[]) => await this.getAuctions(keys),
-    { cache: false },
-  );
-  private redisClient: Redis.Redis;
-
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
-    );
-  }
-
-  async clearKey(auctionId: number): Promise<any> {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getAuctionCacheKey(auctionId),
-    );
-    return this.dataLoader.clear(auctionId);
-  }
-
-  async getAuctionById(auctionId: number): Promise<any> {
-    const cacheKey = this.getAuctionCacheKey(auctionId);
-    const getAuctions = () => this.dataLoader.load(auctionId);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getAuctions,
-      cacheConfig.followersttl,
+export class AuctionProvider extends BaseProvider<number> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(
+      'auction',
+      redisCacheService,
+      new DataLoader(async (keys: number[]) => await this.getAuctions(keys), {
+        cache: false,
+      }),
     );
   }
 
   private getAuctions = async (auctionsIds: number[]) => {
-    const cacheKeys = this.getAuctionsCacheKey(auctionsIds);
-    let [keys, values] = [[], []];
+    const cacheKeys = this.getCacheKeys(auctionsIds);
+    let [keys, values] = [cacheKeys, []];
     const getAuctionsFromCache = await this.redisCacheService.batchGetCache(
       this.redisClient,
       cacheKeys,
     );
     if (getAuctionsFromCache.includes(null)) {
-      const auctions = await getRepository(AuctionEntity)
-        .createQueryBuilder('auctions')
-        .where('id IN(:...auctionsIds)', {
-          auctionsIds: auctionsIds,
-        })
-        .getMany();
+      const auctions = await this.getDataFromDb(auctionsIds);
       const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
 
       auctions.forEach((auction) => {
@@ -65,12 +38,7 @@ export class AuctionProvider {
           auctionsIdentifiers[auction.id].push(auction);
         }
       });
-      keys = auctionsIds?.map((auctionId) =>
-        this.getAuctionCacheKey(auctionId),
-      );
-      values = auctionsIds?.map((auctionId) =>
-        auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
-      );
+      values = this.mapValuesForRedis(auctionsIds, auctionsIdentifiers);
 
       await this.redisCacheService.batchSetCache(
         this.redisClient,
@@ -80,13 +48,26 @@ export class AuctionProvider {
       );
       return auctionsIds?.map((auctionId) => auctionsIdentifiers[auctionId]);
     }
+    return getAuctionsFromCache;
   };
 
-  private getAuctionsCacheKey(auctionIds: number[]) {
-    return auctionIds.map((id) => this.getAuctionCacheKey(id));
+  mapValuesForRedis(
+    auctionsIds: number[],
+    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
+  ) {
+    return auctionsIds?.map((auctionId) =>
+      auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
+    );
   }
 
-  private getAuctionCacheKey(id: number) {
-    return generateCacheKeyFromParams('auction', id);
+  async getDataFromDb(auctionsIds: number[]) {
+    const auctions = await getRepository(AuctionEntity)
+      .createQueryBuilder('auctions')
+      .where('id IN(:...auctionsIds)', {
+        auctionsIds: auctionsIds,
+      })
+      .getMany();
+
+    return auctions?.groupBy((auction) => auction.id);
   }
 }

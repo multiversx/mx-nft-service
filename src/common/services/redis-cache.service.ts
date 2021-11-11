@@ -31,7 +31,7 @@ export class RedisCacheService {
         'An error occurred while trying to get from redis cache.',
         {
           path: 'redis-cache.service.get',
-          exception: err.toString(),
+          exception: err,
           cacheKey: cacheKey,
         },
       );
@@ -56,7 +56,7 @@ export class RedisCacheService {
         'An error occurred while trying to set in redis cache.',
         {
           path: 'redis-cache.service.set',
-          exception: err.toString(),
+          exception: err,
           cacheKey: cacheKey,
         },
       );
@@ -91,7 +91,7 @@ export class RedisCacheService {
         'An error occurred while trying to get batch of keys from redis cache.',
         {
           path: 'redis-cache.service.batchGetCache',
-          exception: error.toString(),
+          exception: error,
           cacheKeys: keys,
         },
       );
@@ -137,7 +137,7 @@ export class RedisCacheService {
         'An error occurred while trying to set batch of keys from redis cache.',
         {
           path: 'redis-cache.service.batchSetCache',
-          exception: error.toString(),
+          exception: error,
           cacheKeys: keys,
         },
       );
@@ -158,7 +158,7 @@ export class RedisCacheService {
         'An error occurred while trying to delete from redis cache.',
         {
           path: 'redis-cache.service.del',
-          exception: err.toString(),
+          exception: err,
           cacheKey: cacheKey,
         },
       );
@@ -187,7 +187,7 @@ export class RedisCacheService {
         'An error occurred while trying to delete from redis cache by pattern.',
         {
           path: 'redis-cache.service.delByPattern',
-          exception: err.toString(),
+          exception: err,
           cacheKey: cacheKey,
         },
       );
@@ -200,7 +200,7 @@ export class RedisCacheService {
     } catch (err) {
       this.logger.error('An error occurred while trying to flush the db', {
         path: 'redis-cache.service.flushDb',
-        exception: err.toString(),
+        exception: err,
       });
     }
   }
@@ -272,7 +272,7 @@ export class RedisCacheService {
       } catch (err) {
         this.logger.error(`An error occurred while trying to load value.`, {
           path: 'redis-cache.service.createValueFunc',
-          exception: err.toString(),
+          exception: err,
           key,
           region,
         });
