@@ -19,6 +19,7 @@ export interface Nft {
   canWipe: boolean;
   canAddSpecialRoles: boolean;
   canTransferNFTCreateRole: boolean;
+  isWhitelistedStorage: boolean;
   wiped: string;
   attributes: string;
   balance: string;
