@@ -14,42 +14,11 @@ export class AuctionProvider extends BaseProvider<number> {
     super(
       'auction',
       redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.getAuctions(keys), {
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
         cache: false,
       }),
     );
   }
-
-  private getAuctions = async (auctionsIds: number[]) => {
-    const cacheKeys = this.getCacheKeys(auctionsIds);
-    let [keys, values] = [cacheKeys, []];
-    const getAuctionsFromCache = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getAuctionsFromCache.includes(null)) {
-      const auctions = await this.getDataFromDb(auctionsIds);
-      const auctionsIdentifiers: { [key: string]: AuctionEntity[] } = {};
-
-      auctions.forEach((auction) => {
-        if (!auctionsIdentifiers[auction.id]) {
-          auctionsIdentifiers[auction.id] = [auction];
-        } else {
-          auctionsIdentifiers[auction.id].push(auction);
-        }
-      });
-      values = this.mapValuesForRedis(auctionsIds, auctionsIdentifiers);
-
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        keys,
-        values,
-        cacheConfig.followersttl,
-      );
-      return auctionsIds?.map((auctionId) => auctionsIdentifiers[auctionId]);
-    }
-    return getAuctionsFromCache;
-  };
 
   mapValuesForRedis(
     auctionsIds: number[],
@@ -67,7 +36,6 @@ export class AuctionProvider extends BaseProvider<number> {
         auctionsIds: auctionsIds,
       })
       .getMany();
-
     return auctions?.groupBy((auction) => auction.id);
   }
 }
