@@ -18,7 +18,7 @@ export class AssetsHistoryService {
     collection: string,
     nonce: string,
     limit: number,
-    offset: number,
+    offset: string,
   ): Promise<AssetHistoryLog[]> {
     const res = await this.elasticService.getNftHistory(
       Buffer.from(collection).toString('base64'),
@@ -31,7 +31,6 @@ export class AssetsHistoryService {
     for (let index = 0; index < res.length; index++) {
       index = this.mapLogs(res, index, historyLog);
     }
-
     return historyLog;
   }
 

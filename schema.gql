@@ -354,6 +354,20 @@ input HandleQuantityArgs {
   quantity: String!
 }
 
+input HistoryPagination {
+  """Paginate after opaque cursor"""
+  after: String
+
+  """Paginate before opaque cursor"""
+  before: String
+
+  """Paginate first"""
+  first: Int = 10
+
+  """Paginate last"""
+  last: Int
+}
+
 input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -498,7 +512,7 @@ type Price {
 
 type Query {
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
-  assetHistory(filters: AssetHistoryFilter!, pagination: ConnectionArgs): AssetHistoryResponse!
+  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!

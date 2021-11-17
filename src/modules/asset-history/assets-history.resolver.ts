@@ -6,9 +6,9 @@ import { AssetHistoryFilter } from '../filtersTypes';
 import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
 import { AssetHistoryResponse } from './models';
+import ConnectionArgs, { HistoryPagination } from '../ConnectionArgs';
 
 @Resolver(() => AssetHistoryResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
@@ -23,10 +23,11 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
   async assetHistory(
     @Args({ name: 'filters', type: () => AssetHistoryFilter })
     filters,
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
+    @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
+    pagination: HistoryPagination,
   ): Promise<AssetHistoryResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const limit = pagination.first;
+    const offset = pagination.after;
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
@@ -37,14 +38,8 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
       offset,
     );
 
-    console.log(limit, offset, historyLog);
-    return PageResponse.mapResponse<AssetHistoryLog>(
-      historyLog || [],
-      pagination,
-      historyLog?.length || 0,
-      offset,
-      limit,
-    );
+    console.log(limit, offset);
+    return;
   }
 
   @ResolveField('account', () => Account)
@@ -66,4 +61,22 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     );
     return Account.fromEntity(account);
   }
+
+  // static mapResponse<T>(
+  //   returnList: T[],
+  //   args: ConnectionArgs,
+  //   count: number,
+  //   offset: number,
+  //   limit: number,
+  // ) {
+  //   const page = connectionFromArraySlice(returnList, args, {
+  //     arrayLength: count,
+  //     sliceStart: offset || 0,
+  //   });
+  //   return {
+  //     edges: page.edges,
+  //     pageInfo: page.pageInfo,
+  //     pageData: { count, limit, offset },
+  //   };
+  // }
 }

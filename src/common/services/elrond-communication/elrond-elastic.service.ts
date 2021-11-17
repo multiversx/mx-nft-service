@@ -26,7 +26,7 @@ export class ElrondElasticService {
     collection: string,
     nonce: string,
     l: number,
-    o: number,
+    o: string,
   ): Promise<any> {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
@@ -34,7 +34,6 @@ export class ElrondElasticService {
     console.log({ collection, nonce });
     const body = {
       size: l,
-      from: o,
       query: {
         nested: {
           path: 'events',
