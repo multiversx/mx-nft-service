@@ -25,41 +25,53 @@ export class ElrondElasticService {
   async getNftHistory(
     collection: string,
     nonce: string,
-    l: number,
-    o: string,
-  ): Promise<any> {
+    size: number,
+    timestamp: number | string,
+  ): Promise<[HitResponse[], number]> {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
-    console.log({ collection, nonce });
     const body = {
-      size: l,
+      size: size,
       query: {
-        nested: {
-          path: 'events',
-          query: {
-            bool: {
-              must: [
-                {
-                  match: {
-                    'events.topics': collection,
-                  },
+        bool: {
+          must: [
+            {
+              range: {
+                timestamp: {
+                  lt: timestamp,
                 },
-                {
-                  match: {
-                    'events.topics': nonce,
-                  },
-                },
-              ],
-              must_not: [
-                {
-                  match: {
-                    'events.identifier': 'bid',
-                  },
-                },
-              ],
+              },
             },
-          },
+            {
+              nested: {
+                path: 'events',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          'events.topics': collection,
+                        },
+                      },
+                      {
+                        match: {
+                          'events.topics': nonce,
+                        },
+                      },
+                    ],
+                    must_not: [
+                      {
+                        match: {
+                          'events.identifier': 'bid',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       sort: [
@@ -70,7 +82,6 @@ export class ElrondElasticService {
         },
       ],
     };
-    console.log({ body });
     try {
       const response: ApiResponse<SearchResponse> = await this.client.search({
         body,
@@ -91,14 +102,14 @@ export class ElrondElasticService {
           }
         }
       });
-      return responseMap;
+      return [responseMap, response.body.hits.total];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',
         address: nonce,
         exception: e.toString(),
       });
-      return 0;
+      return [[], 0];
     }
   }
 }

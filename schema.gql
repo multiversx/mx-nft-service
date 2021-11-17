@@ -355,17 +355,11 @@ input HandleQuantityArgs {
 }
 
 input HistoryPagination {
-  """Paginate after opaque cursor"""
-  after: String
-
-  """Paginate before opaque cursor"""
-  before: String
-
   """Paginate first"""
   first: Int = 10
 
-  """Paginate last"""
-  last: Int
+  """Timestamp from where to start"""
+  timestamp: Int
 }
 
 input IssueCollectionArgs {

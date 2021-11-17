@@ -6,9 +6,9 @@ import { AssetHistoryFilter } from '../filtersTypes';
 import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import PageResponse from '../PageResponse';
 import { AssetHistoryResponse } from './models';
-import ConnectionArgs, { HistoryPagination } from '../ConnectionArgs';
+import { HistoryPagination } from '../ConnectionArgs';
+import { Edge } from 'graphql-relay';
 
 @Resolver(() => AssetHistoryResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
@@ -26,20 +26,22 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
   ): Promise<AssetHistoryResponse> {
-    const limit = pagination.first;
-    const offset = pagination.after;
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
     const historyLog = await this.assetsHistoryService.getHistoryLog(
       collection,
       nonce,
-      limit,
-      offset,
+      pagination.first,
+      pagination.timestamp,
     );
 
-    console.log(limit, offset);
-    return;
+    return AssetsHistoryResolver.mapResponse(
+      historyLog || [],
+      historyLog?.length || 0,
+      pagination.timestamp,
+      pagination.first,
+    );
   }
 
   @ResolveField('account', () => Account)
@@ -62,21 +64,31 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     return Account.fromEntity(account);
   }
 
-  // static mapResponse<T>(
-  //   returnList: T[],
-  //   args: ConnectionArgs,
-  //   count: number,
-  //   offset: number,
-  //   limit: number,
-  // ) {
-  //   const page = connectionFromArraySlice(returnList, args, {
-  //     arrayLength: count,
-  //     sliceStart: offset || 0,
-  //   });
-  //   return {
-  //     edges: page.edges,
-  //     pageInfo: page.pageInfo,
-  //     pageData: { count, limit, offset },
-  //   };
-  // }
+  static mapResponse(
+    returnList: AssetHistoryLog[],
+    count: number,
+    offset: number | string,
+    limit: number,
+  ) {
+    return {
+      edges: returnList.map(
+        (elem) =>
+          new HistoryEdge<AssetHistoryLog>({
+            cursor: elem.actionDate.toString(),
+            node: elem,
+          }),
+      ),
+      pageInfo: null,
+      pageData: { count, limit, offset },
+    };
+  }
+}
+
+export class HistoryEdge<T> implements Edge<T> {
+  node: T;
+  cursor: string;
+
+  constructor(init?: Partial<HistoryEdge<T>>) {
+    Object.assign(this, init);
+  }
 }

@@ -87,20 +87,13 @@ export default class ConnectionArgs implements ConnectionArguments {
 }
 
 @InputType()
-export class HistoryPagination implements ConnectionArguments {
-  @Field({ nullable: true, description: 'Paginate before opaque cursor' })
-  public before?: string;
-
-  @Field({ nullable: true, description: 'Paginate after opaque cursor' })
-  public after?: string;
-
+export class HistoryPagination {
   @Field(() => Int, { nullable: true, description: 'Paginate first' })
   public first?: number = 10;
 
-  @Field(() => Int, { nullable: true, description: 'Paginate last' })
-  public last?: number;
-
-  pagingParams() {
-    return getPagingParameters(this);
-  }
+  @Field(() => Int, {
+    nullable: true,
+    description: 'Timestamp from where to start',
+  })
+  public timestamp?: number;
 }
