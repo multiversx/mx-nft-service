@@ -22,12 +22,19 @@ export class ElrondElasticService {
     });
   }
 
-  async getNftHistory(collection: string, nonce: string): Promise<any> {
+  async getNftHistory(
+    collection: string,
+    nonce: string,
+    l: number,
+    o: number,
+  ): Promise<any> {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
+    console.log({ collection, nonce });
     const body = {
-      size: 1000,
+      size: l,
+      from: o,
       query: {
         nested: {
           path: 'events',
@@ -45,6 +52,13 @@ export class ElrondElasticService {
                   },
                 },
               ],
+              must_not: [
+                {
+                  match: {
+                    'events.identifier': 'bid',
+                  },
+                },
+              ],
             },
           },
         },
@@ -57,6 +71,7 @@ export class ElrondElasticService {
         },
       ],
     };
+    console.log({ body });
     try {
       const response: ApiResponse<SearchResponse> = await this.client.search({
         body,

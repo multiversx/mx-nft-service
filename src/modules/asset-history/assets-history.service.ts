@@ -17,10 +17,14 @@ export class AssetsHistoryService {
   async getHistoryLog(
     collection: string,
     nonce: string,
+    limit: number,
+    offset: number,
   ): Promise<AssetHistoryLog[]> {
     const res = await this.elasticService.getNftHistory(
       Buffer.from(collection).toString('base64'),
       Buffer.from(nonce, 'hex').toString('base64'),
+      limit,
+      offset,
     );
 
     let historyLog: AssetHistoryLog[] = [];
