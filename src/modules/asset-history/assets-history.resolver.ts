@@ -7,8 +7,7 @@ import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetHistoryResponse } from './models';
-import { HistoryPagination } from '../ConnectionArgs';
-import { Edge } from 'graphql-relay';
+import { HistoryEdge, HistoryPagination } from '../ConnectionArgs';
 import { DateUtils } from 'src/utils/date-utils';
 
 @Resolver(() => AssetHistoryResponse)
@@ -39,7 +38,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
       historyLog,
     );
 
-    return AssetsHistoryResolver.mapResponse(
+    return this.mapResponse(
       historyLog || [],
       pagination.timestamp,
       pagination.first,
@@ -66,7 +65,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     return Account.fromEntity(account);
   }
 
-  static mapResponse(
+  private mapResponse(
     returnList: AssetHistoryLog[],
     offset: number | string,
     limit: number,
@@ -92,14 +91,5 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
       },
       pageData: { count: returnList?.length, limit, offset: startTimestamp },
     };
-  }
-}
-
-export class HistoryEdge<T> implements Edge<T> {
-  node: T;
-  cursor: string;
-
-  constructor(init?: Partial<HistoryEdge<T>>) {
-    Object.assign(this, init);
   }
 }

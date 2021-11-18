@@ -1,6 +1,7 @@
 import {
   ConnectionArguments,
   ConnectionCursor,
+  Edge,
   fromGlobalId,
 } from 'graphql-relay';
 import { Field, Int, InputType } from '@nestjs/graphql';
@@ -96,4 +97,13 @@ export class HistoryPagination {
     description: 'Timestamp from where to start',
   })
   public timestamp?: number;
+}
+
+export class HistoryEdge<T> implements Edge<T> {
+  node: T;
+  cursor: string;
+
+  constructor(init?: Partial<HistoryEdge<T>>) {
+    Object.assign(this, init);
+  }
 }
