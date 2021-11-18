@@ -45,7 +45,9 @@ export class AssetsService {
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, query),
     ]);
-    const assets = nfts.map((element) => Asset.fromNft(element));
+    const assets = nfts
+      ?.filter((e) => e.isWhitelistedStorage)
+      .map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -227,7 +229,9 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    const assets = nfts?.map((element) => Asset.fromNft(element));
+    const assets = nfts
+      ?.filter((e) => e.isWhitelistedStorage)
+      .map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
