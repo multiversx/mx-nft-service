@@ -102,7 +102,7 @@ export class ElrondElasticService {
           }
         }
       });
-      return [responseMap, response.body.hits.total];
+      return [responseMap, response.body.hits.total.value];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',

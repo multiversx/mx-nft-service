@@ -29,7 +29,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
-    const historyLog = await this.assetsHistoryService.getHistoryLog(
+    const [historyLog, count] = await this.assetsHistoryService.getHistoryLog(
       collection,
       nonce,
       pagination.first,
@@ -38,7 +38,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
 
     return AssetsHistoryResolver.mapResponse(
       historyLog || [],
-      historyLog?.length || 0,
+      count,
       pagination.timestamp,
       pagination.first,
     );
@@ -71,14 +71,18 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     limit: number,
   ) {
     return {
-      edges: returnList.map(
+      edges: returnList?.map(
         (elem) =>
           new HistoryEdge<AssetHistoryLog>({
             cursor: elem.actionDate.toString(),
             node: elem,
           }),
       ),
-      pageInfo: null,
+      pageInfo: {
+        startCursor: returnList[0].actionDate,
+        endCursor: returnList[returnList.length - 1].actionDate,
+        hasNextPage: returnList.length < count,
+      },
       pageData: { count, limit, offset },
     };
   }

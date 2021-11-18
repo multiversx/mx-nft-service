@@ -19,7 +19,7 @@ export class AssetsHistoryService {
     nonce: string,
     limit: number,
     timestamp: string | number,
-  ): Promise<AssetHistoryLog[]> {
+  ): Promise<[AssetHistoryLog[], number]> {
     const [elasticLogs, totalHits] = await this.elasticService.getNftHistory(
       Buffer.from(collection).toString('base64'),
       Buffer.from(nonce, 'hex').toString('base64'),
@@ -31,7 +31,7 @@ export class AssetsHistoryService {
     for (let index = 0; index < elasticLogs.length; index++) {
       index = this.mapLogs(elasticLogs, index, historyLog);
     }
-    if (historyLog.length === limit) return historyLog;
+    if (historyLog.length === limit) return [historyLog, totalHits];
     else {
       if (totalHits > limit) {
         const res = await this.elasticService.getNftHistory(
@@ -45,6 +45,7 @@ export class AssetsHistoryService {
           index = this.mapLogs(res, index, historyLog);
           index++;
         }
+        if (historyLog.length === limit) return [historyLog, totalHits];
       }
     }
   }

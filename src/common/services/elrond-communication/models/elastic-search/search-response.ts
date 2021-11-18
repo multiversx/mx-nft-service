@@ -6,7 +6,10 @@ export interface SearchResponse {
   timed_out: boolean;
   _shards: ShardsResponse;
   hits: {
-    total: number;
+    total: {
+      value: number;
+      relation: string;
+    };
     max_score: number;
     hits: HitResponse[];
   };
