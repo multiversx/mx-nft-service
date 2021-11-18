@@ -9,6 +9,7 @@ import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetHistoryResponse } from './models';
 import { HistoryPagination } from '../ConnectionArgs';
 import { Edge } from 'graphql-relay';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Resolver(() => AssetHistoryResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
@@ -29,16 +30,17 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
-    const [historyLog, count] = await this.assetsHistoryService.getHistoryLog(
+    let [historyLog] = [[], 0];
+    await this.assetsHistoryService.getHistoryLog(
       collection,
       nonce,
       pagination.first,
       pagination.timestamp,
+      historyLog,
     );
 
     return AssetsHistoryResolver.mapResponse(
       historyLog || [],
-      count,
       pagination.timestamp,
       pagination.first,
     );
@@ -66,10 +68,15 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
 
   static mapResponse(
     returnList: AssetHistoryLog[],
-    count: number,
     offset: number | string,
     limit: number,
   ) {
+    const startTimestamp = offset
+      ? offset
+      : returnList.length > 0
+      ? returnList[0].actionDate
+      : DateUtils.getCurrentTimestamp();
+
     return {
       edges: returnList?.map(
         (elem) =>
@@ -81,9 +88,9 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
       pageInfo: {
         startCursor: returnList[0].actionDate,
         endCursor: returnList[returnList.length - 1].actionDate,
-        hasNextPage: returnList.length < count,
+        hasNextPage: returnList?.length === limit,
       },
-      pageData: { count, limit, offset },
+      pageData: { count: returnList?.length, limit, offset: startTimestamp },
     };
   }
 }
