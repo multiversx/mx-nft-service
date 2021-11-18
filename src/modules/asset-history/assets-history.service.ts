@@ -34,7 +34,6 @@ export class AssetsHistoryService {
       index = this.mapLogs(elasticLogs, index, historyLog);
     }
     if (historyLog.length < limit && totalHits > 0) {
-      console.log('din nou');
       return await this.getHistoryLog(
         collection,
         nonce,
