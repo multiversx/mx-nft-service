@@ -10,7 +10,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService, RedisCacheService } from 'src/common';
-import { GroupBy } from '../filtersTypes';
+import { GroupBy, Operation } from '../filtersTypes';
 const hash = require('object-hash');
 
 @Injectable()
@@ -183,7 +183,11 @@ export class AuctionsService {
   private async getMappedAuctions(queryRequest: QueryRequest) {
     let [auctions, count] = [[], 0];
 
-    if (queryRequest?.filters?.filters?.some((f) => f.field === 'identifier')) {
+    if (
+      queryRequest?.filters?.filters?.some(
+        (f) => f.field === 'identifier' && f.op === Operation.EQ,
+      )
+    ) {
       [auctions, count] = await this.auctionServiceDb.getAuctionsForIdentifier(
         queryRequest,
       );
