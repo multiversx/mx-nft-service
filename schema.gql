@@ -103,6 +103,26 @@ type AssetHistoryLog {
   transactionHash: String!
 }
 
+type AssetHistoryLogEdge {
+  cursor: String
+  node: AssetHistoryLog
+}
+
+type AssetHistoryLogPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type AssetHistoryResponse {
+  account: Account!
+  edges: [AssetHistoryLogEdge!]
+  pageData: PageData
+  pageInfo: AssetHistoryLogPageInfo
+  senderAccount: Account!
+}
+
 type AssetPageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -334,6 +354,14 @@ input HandleQuantityArgs {
   quantity: String!
 }
 
+input HistoryPagination {
+  """Paginate first"""
+  first: Int = 10
+
+  """Timestamp from where to start"""
+  timestamp: Int
+}
+
 input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -478,7 +506,7 @@ type Price {
 
 type Query {
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
-  assetHistory(filters: AssetHistoryFilter!): [AssetHistoryLog!]!
+  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!

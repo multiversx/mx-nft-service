@@ -6,8 +6,11 @@ import { AssetHistoryFilter } from '../filtersTypes';
 import { Account } from '../accounts/models';
 import { AccountsProvider } from '../accounts/accounts.loader';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { AssetHistoryResponse } from './models';
+import { HistoryEdge, HistoryPagination } from '../ConnectionArgs';
+import { DateUtils } from 'src/utils/date-utils';
 
-@Resolver(() => AssetHistoryLog)
+@Resolver(() => AssetHistoryResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
   constructor(
     private assetsHistoryService: AssetsHistoryService,
@@ -16,20 +19,30 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     super();
   }
 
-  @Query(() => [AssetHistoryLog])
+  @Query(() => AssetHistoryResponse)
   async assetHistory(
     @Args({ name: 'filters', type: () => AssetHistoryFilter })
     filters,
-  ): Promise<AssetHistoryLog[]> {
+    @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
+    pagination: HistoryPagination,
+  ): Promise<AssetHistoryResponse> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
-    const historyLog = await this.assetsHistoryService.getHistoryLog(
+    let [historyLog] = [[], 0];
+    await this.assetsHistoryService.getHistoryLog(
       collection,
       nonce,
+      pagination.first,
+      pagination.timestamp,
+      historyLog,
     );
 
-    return historyLog;
+    return this.mapResponse(
+      historyLog || [],
+      pagination.timestamp,
+      pagination.first,
+    );
   }
 
   @ResolveField('account', () => Account)
@@ -50,5 +63,33 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
       senderAddress,
     );
     return Account.fromEntity(account);
+  }
+
+  private mapResponse(
+    returnList: AssetHistoryLog[],
+    offset: number | string,
+    limit: number,
+  ) {
+    const startTimestamp = offset
+      ? offset
+      : returnList.length > 0
+      ? returnList[0].actionDate
+      : DateUtils.getCurrentTimestamp();
+
+    return {
+      edges: returnList?.map(
+        (elem) =>
+          new HistoryEdge<AssetHistoryLog>({
+            cursor: elem.actionDate.toString(),
+            node: elem,
+          }),
+      ),
+      pageInfo: {
+        startCursor: returnList[0].actionDate,
+        endCursor: returnList[returnList.length - 1].actionDate,
+        hasNextPage: returnList?.length === limit,
+      },
+      pageData: { count: returnList?.length, limit, offset: startTimestamp },
+    };
   }
 }

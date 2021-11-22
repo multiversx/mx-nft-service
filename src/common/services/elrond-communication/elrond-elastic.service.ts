@@ -22,31 +22,56 @@ export class ElrondElasticService {
     });
   }
 
-  async getNftHistory(collection: string, nonce: string): Promise<any> {
+  async getNftHistory(
+    collection: string,
+    nonce: string,
+    size: number,
+    timestamp: number | string,
+  ): Promise<[HitResponse[], number]> {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
     const body = {
-      size: 1000,
+      size: size,
       query: {
-        nested: {
-          path: 'events',
-          query: {
-            bool: {
-              must: [
-                {
-                  match: {
-                    'events.topics': collection,
-                  },
+        bool: {
+          must: [
+            {
+              range: {
+                timestamp: {
+                  lt: timestamp,
                 },
-                {
-                  match: {
-                    'events.topics': nonce,
-                  },
-                },
-              ],
+              },
             },
-          },
+            {
+              nested: {
+                path: 'events',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        match: {
+                          'events.topics': collection,
+                        },
+                      },
+                      {
+                        match: {
+                          'events.topics': nonce,
+                        },
+                      },
+                    ],
+                    must_not: [
+                      {
+                        match: {
+                          'events.identifier': 'bid',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
         },
       },
       sort: [
@@ -77,14 +102,14 @@ export class ElrondElasticService {
           }
         }
       });
-      return responseMap;
+      return [responseMap, response.body.hits.total.value];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',
         address: nonce,
         exception: e.toString(),
       });
-      return 0;
+      return [[], 0];
     }
   }
 }

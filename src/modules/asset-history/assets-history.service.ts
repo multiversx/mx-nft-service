@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
+import { DateUtils } from 'src/utils/date-utils';
 import {
   AssetActionEnum,
   AuctionEventEnum,
@@ -17,18 +18,30 @@ export class AssetsHistoryService {
   async getHistoryLog(
     collection: string,
     nonce: string,
+    limit: number,
+    timestamp: string | number = DateUtils.getCurrentTimestamp(),
+    historyLog: AssetHistoryLog[],
   ): Promise<AssetHistoryLog[]> {
-    const res = await this.elasticService.getNftHistory(
+    let elasticLogs = [];
+    let totalHits = 0;
+    [elasticLogs, totalHits] = await this.elasticService.getNftHistory(
       Buffer.from(collection).toString('base64'),
       Buffer.from(nonce, 'hex').toString('base64'),
+      limit,
+      timestamp,
     );
-
-    let historyLog: AssetHistoryLog[] = [];
-    for (let index = 0; index < res.length; index++) {
-      index = this.mapLogs(res, index, historyLog);
+    for (let index = 0; index < elasticLogs.length; index++) {
+      index = this.mapLogs(elasticLogs, index, historyLog);
     }
-
-    return historyLog;
+    if (historyLog.length < limit && totalHits > 0) {
+      return await this.getHistoryLog(
+        collection,
+        nonce,
+        limit,
+        timestamp,
+        historyLog,
+      );
+    }
   }
 
   private mapLogs(res: any, index: number, historyLog: AssetHistoryLog[]) {
@@ -175,7 +188,7 @@ export class AssetsHistoryService {
     res: any,
     index: number,
     action: AssetActionEnum,
-    address,
+    address: any,
     itemsCount = undefined,
     price = undefined,
     sender = undefined,
