@@ -509,7 +509,7 @@ type Query {
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
-  auctionsSortByBids(filters: FiltersExpression, pagination: ConnectionArgs): AuctionResponse!
+  auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!

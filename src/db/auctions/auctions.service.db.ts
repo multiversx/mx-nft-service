@@ -13,6 +13,7 @@ import { AuctionEntity } from './auction.entity';
 import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
+  getAuctionsOrderByNoBidsQuery,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -56,6 +57,7 @@ export class AuctionsServiceDb {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
+      'a',
     );
     const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
@@ -152,20 +154,44 @@ export class AuctionsServiceDb {
       .getManyAndCount();
   }
 
+  async getAuctionsOrderByOrdersCountGroupByIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .andWhere(
+        `a.id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier ORDER BY COUNT(id) DESC) 
+    from (${getAuctionsOrderByNoBidsQuery()})`,
+      )
+      .groupBy('a.id')
+      .orderBy('COUNT(a.Id)', 'DESC')
+      .offset(queryRequest.offset)
+      .limit(queryRequest.limit);
+
+    return await queryBuilder.getManyAndCount();
+  }
+
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
-      'auctions',
+      'a',
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     queryBuilder
-      .leftJoin('orders', 'o', 'o.auctionId=auctions.id')
-      .groupBy('auctions.id')
-      .orderBy('COUNT(auctions.Id)', 'DESC')
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .orderBy('COUNT(a.Id)', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
 
