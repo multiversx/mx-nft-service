@@ -19,7 +19,7 @@ export function getDefaultAuctionsForIdentifierQuery(
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1)))
+    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     order by eD, if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
 export function getDefaultAuctionsForIdentifierQueryCount(
@@ -39,7 +39,7 @@ export function getDefaultAuctionsForIdentifierQueryCount(
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1)))
+    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
     order by eD, if(price, price, minBidDenominated) ASC) as temp`;
 }
 
