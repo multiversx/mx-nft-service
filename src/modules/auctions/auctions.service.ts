@@ -206,8 +206,16 @@ export class AuctionsService {
   }
 
   private async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
-    const [auctions, count] =
-      await this.auctionServiceDb.getAuctionsOrderByOrdersCount(queryRequest);
+    let [auctions, count] = [[], 0];
+    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
+      [auctions, count] =
+        await this.auctionServiceDb.getAuctionsOrderByOrdersCountGroupByIdentifier(
+          queryRequest,
+        );
+    } else {
+      [auctions, count] =
+        await this.auctionServiceDb.getAuctionsOrderByOrdersCount(queryRequest);
+    }
 
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }

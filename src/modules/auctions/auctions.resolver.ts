@@ -128,13 +128,15 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async auctionsSortByBids(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
+    @Args({ name: 'grouping', type: () => Grouping, nullable: true })
+    groupBy,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] =
       await this.auctionsService.getAuctionsOrderByNoBids(
-        new QueryRequest({ limit, offset, filters }),
+        new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
       );
 
     return PageResponse.mapResponse<Auction>(

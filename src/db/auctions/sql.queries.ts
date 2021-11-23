@@ -180,3 +180,11 @@ export function getAuctionsForIdentifierSortByPriceCount(identifier: string) {
   WHERE a.status='Running' AND a.identifier='${identifier}'
    order by if(price, price, minBidDenominated) ASC) as temp`;
 }
+
+export function getAuctionsOrderByNoBidsQuery() {
+  return `SELECT	a.*	FROM auctions a
+    	LEFT JOIN orders o ON o.auctionId = a.id
+		  WHERE	a.status = 'Running'
+		  GROUP BY a.id
+		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
+}
