@@ -57,7 +57,7 @@ export function getDefaultAuctionsQuery(endDate: number) {
     (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.endDate> ${endDate}
     AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)))
-    order by eD, if(price, price, minBidDenominated) ASC )) as temp`;
+    order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
 export function getDefaultAuctionsQueryForIdentifiers(
