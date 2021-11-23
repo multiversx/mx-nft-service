@@ -33,6 +33,7 @@ import { OrdersProvider, ActiveOrdersProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
+import { Selections } from '@jenyus-org/nestjs-graphql-utils';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -199,10 +200,17 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('asset', () => Asset)
-  async asset(@Parent() auction: Auction) {
+  async asset(
+    @Parent() auction: Auction,
+    @Selections('asset', ['*.']) fields: string[],
+  ) {
     const { identifier } = auction;
-    const nft = await this.assetsProvider.getNftByIdentifier(identifier);
-    return Asset.fromNft(nft);
+    if (this.hasToResolveAsset(fields)) {
+      const nft = await this.assetsProvider.getNftByIdentifier(identifier);
+      return Asset.fromNft(nft);
+    }
+
+    return new Asset({ identifier: identifier });
   }
 
   @ResolveField('topBid', () => Price)
@@ -258,5 +266,17 @@ export class AuctionsResolver extends BaseResolver(Auction) {
       ownerAddress,
     );
     return Account.fromEntity(account);
+  }
+
+  private hasToResolveAsset(fields: string[]) {
+    return (
+      fields.filter(
+        (x) =>
+          x !== 'totalAvailableTokens' &&
+          x !== 'totalRunningAuctions' &&
+          x !== 'identifier' &&
+          x !== 'hasAvailableAuctions',
+      ).length > 0
+    );
   }
 }
