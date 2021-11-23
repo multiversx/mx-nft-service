@@ -38,7 +38,7 @@ export class AssetsHistoryService {
         collection,
         nonce,
         limit,
-        timestamp,
+        historyLog[historyLog.length - 1].actionDate,
         historyLog,
       );
     }
