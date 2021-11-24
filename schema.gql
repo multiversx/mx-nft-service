@@ -115,12 +115,10 @@ type AssetHistoryLogPageInfo {
   startCursor: String
 }
 
-type AssetHistoryResponse {
-  account: Account!
+type AssetHistoryLogResponse {
   edges: [AssetHistoryLogEdge!]
   pageData: PageData
   pageInfo: AssetHistoryLogPageInfo
-  senderAccount: Account!
 }
 
 type AssetPageInfo {
@@ -506,7 +504,7 @@ type Price {
 
 type Query {
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
-  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryResponse!
+  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!

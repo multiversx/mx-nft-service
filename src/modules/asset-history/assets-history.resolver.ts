@@ -3,29 +3,24 @@ import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetsHistoryService } from '.';
 import { AssetHistoryFilter } from '../filtersTypes';
-import { Account } from '../accounts/models';
-import { AccountsProvider } from '../accounts/accounts.loader';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { AssetHistoryResponse } from './models';
+import { AssetHistoryLogResponse } from './models';
 import { HistoryEdge, HistoryPagination } from '../ConnectionArgs';
 import { DateUtils } from 'src/utils/date-utils';
 
-@Resolver(() => AssetHistoryResponse)
+@Resolver(() => AssetHistoryLogResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
-  constructor(
-    private assetsHistoryService: AssetsHistoryService,
-    private accountsProvider: AccountsProvider,
-  ) {
+  constructor(private assetsHistoryService: AssetsHistoryService) {
     super();
   }
 
-  @Query(() => AssetHistoryResponse)
+  @Query(() => AssetHistoryLogResponse)
   async assetHistory(
     @Args({ name: 'filters', type: () => AssetHistoryFilter })
     filters,
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
-  ): Promise<AssetHistoryResponse> {
+  ): Promise<AssetHistoryLogResponse> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
@@ -45,29 +40,9 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     );
   }
 
-  @ResolveField('account', () => Account)
-  async account(@Parent() asset: AssetHistoryLog) {
-    const { address } = asset;
-
-    if (!address) return null;
-    const account = await this.accountsProvider.getAccountByAddress(address);
-    return Account.fromEntity(account);
-  }
-
-  @ResolveField('senderAccount', () => Account)
-  async senderAccount(@Parent() asset: AssetHistoryLog) {
-    const { senderAddress } = asset;
-
-    if (!senderAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      senderAddress,
-    );
-    return Account.fromEntity(account);
-  }
-
   private mapResponse(
     returnList: AssetHistoryLog[],
-    offset: number | string,
+    offset: number,
     limit: number,
   ) {
     const startTimestamp = offset
