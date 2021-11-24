@@ -37,7 +37,7 @@ export class FeaturedNftsService {
         getAssetLiked,
         cacheConfig.assetsttl,
       );
-      const nfts = await this.apiService.getNftsByIdentifier(
+      const nfts = await this.apiService.getNftsByIdentifiers(
         featuredNfts.map((x) => x.identifier),
       );
       return [nfts.map((nft) => Asset.fromNft(nft)), count];

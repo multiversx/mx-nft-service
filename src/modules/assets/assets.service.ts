@@ -59,6 +59,7 @@ export class AssetsService {
     const apiQuery = new AssetsQuery()
       .addCreator(filters?.creatorAddress)
       .addTags(filters?.tags)
+      .addIdentifiers(filters?.identifiers)
       .addCollection(filters?.collection)
       .addType(filters?.type)
       .addPageSize(offset, limit)
@@ -108,6 +109,11 @@ export class AssetsService {
   async getAssetByIdentifier(identifier: string): Promise<Asset> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
     return Asset.fromNft(nft);
+  }
+
+  async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
+    const nfts = await this.apiService.getNftsByIdentifiers(identifiers);
+    return nfts.map((nft) => Asset.fromNft(nft));
   }
 
   async addQuantity(
@@ -229,6 +235,7 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
+    console.log(nfts);
     const assets = nfts
       ?.filter((e) => e.isWhitelistedStorage)
       .map((element) => Asset.fromNft(element));
@@ -273,10 +280,9 @@ export class AssetsService {
         offset,
         likedByAddress,
       );
-    const assetsPromises = assetsLiked.map((element) =>
-      this.getAssetByIdentifier(element.identifier),
+    const assets = await this.getAssetsForIdentifiers(
+      assetsLiked.map((e) => e.identifier),
     );
-    const assets = await Promise.all(assetsPromises);
 
     return [assets, assetsCount];
   }

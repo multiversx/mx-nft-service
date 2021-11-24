@@ -132,6 +132,7 @@ input AssetsFilter {
   collection: String
   creatorAddress: String
   identifier: String
+  identifiers: [String!]
   likedByAddress: String
   ownerAddress: String
   tags: [String!]

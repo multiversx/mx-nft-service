@@ -81,6 +81,8 @@ export class AssetsFilter {
   creatorAddress: string;
   @Field(() => String, { nullable: true })
   identifier: string;
+  @Field(() => [String], { nullable: true })
+  identifiers: string[];
   @Field(() => String, { nullable: true })
   collection: string;
   @Field(() => [String], { nullable: true })

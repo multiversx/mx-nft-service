@@ -17,6 +17,14 @@ export class AssetsQuery {
     return this;
   }
 
+  addIdentifiers(identifiers: string[]): this {
+    if (!identifiers) return this;
+    if (this.query === '') this.query = `?identifiers=${identifiers}`;
+    else this.query = `${this.query}&identifiers=${identifiers}`;
+    console.log(this.query);
+    return this;
+  }
+
   addCollection(collection: string): this {
     if (!collection) return this;
     if (this.query === '') this.query = `?collection=${collection}`;
