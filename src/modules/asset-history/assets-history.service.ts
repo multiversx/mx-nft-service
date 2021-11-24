@@ -31,7 +31,11 @@ export class AssetsHistoryService {
       timestamp,
     );
     for (let index = 0; index < elasticLogs.length; index++) {
-      index = this.mapLogs(elasticLogs, index, historyLog);
+      if (historyLog.length === limit) {
+        break;
+      } else {
+        index = this.mapLogs(elasticLogs, index, historyLog);
+      }
     }
     if (historyLog.length < limit && totalHits > 0) {
       return await this.getHistoryLog(
@@ -140,26 +144,29 @@ export class AssetsHistoryService {
       case AuctionEventEnum.EndAuctionEvent: {
         const [, , , , itemsCount, address, price] =
           res[index]._source.events[1].topics;
-        historyLog.push(
-          this.addHistoryLog(
-            res,
-            index,
-            AssetActionEnum.Bought,
-            address.base64ToBech32(),
-            res[index]._source.events[0].topics[2],
-            price,
-          ),
-        );
-        historyLog.push(
-          this.addHistoryLog(
-            res,
-            index,
-            AssetActionEnum.EndedAuction,
-            address.base64ToBech32(),
-            itemsCount,
-            price,
-          ),
-        );
+        if (price) {
+          historyLog.push(
+            this.addHistoryLog(
+              res,
+              index,
+              AssetActionEnum.Bought,
+              address.base64ToBech32(),
+              res[index]._source.events[0].topics[2],
+              price,
+            ),
+          );
+        } else {
+          historyLog.push(
+            this.addHistoryLog(
+              res,
+              index,
+              AssetActionEnum.EndedAuction,
+              address.base64ToBech32(),
+              itemsCount,
+              price,
+            ),
+          );
+        }
 
         break;
       }

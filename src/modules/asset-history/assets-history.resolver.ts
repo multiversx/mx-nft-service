@@ -48,7 +48,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     const startTimestamp = offset
       ? offset
       : returnList.length > 0
-      ? returnList[0].actionDate
+      ? returnList[0]?.actionDate
       : DateUtils.getCurrentTimestamp();
 
     return {
@@ -60,8 +60,8 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
           }),
       ),
       pageInfo: {
-        startCursor: returnList[0].actionDate,
-        endCursor: returnList[returnList.length - 1].actionDate,
+        startCursor: startTimestamp,
+        endCursor: returnList[returnList.length - 1]?.actionDate,
         hasNextPage: returnList?.length === limit,
       },
       pageData: { count: returnList?.length, limit, offset: startTimestamp },
