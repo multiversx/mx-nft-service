@@ -21,7 +21,6 @@ export class AssetsQuery {
     if (!identifiers) return this;
     if (this.query === '') this.query = `?identifiers=${identifiers}`;
     else this.query = `${this.query}&identifiers=${identifiers}`;
-    console.log(this.query);
     return this;
   }
 

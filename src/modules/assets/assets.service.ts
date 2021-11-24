@@ -235,7 +235,6 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    console.log(nfts);
     const assets = nfts
       ?.filter((e) => e.isWhitelistedStorage)
       .map((element) => Asset.fromNft(element));
