@@ -14,7 +14,7 @@ export class AssetsProvider {
   constructor(private apiService: ElrondApiService) {}
 
   batchAssets = async (keys: string[]) => {
-    const nfts = await this.apiService.getNftsByIdentifier(keys);
+    const nfts = await this.apiService.getNftsByIdentifiers(keys);
     const assetsIdentifiers: { [key: string]: Nft[] } = {};
 
     nfts.forEach((nft) => {
