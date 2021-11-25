@@ -208,8 +208,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   ) {
     const { identifier } = auction;
     if (this.hasToResolveAsset(fields)) {
-      const nft = await this.assetsProvider.getNftByIdentifier(identifier);
-      return Asset.fromNft(nft);
+      const nft = await this.assetsProvider.load(identifier);
+      return nft ? Asset.fromNft(nft[0]) : null;
     }
 
     return new Asset({ identifier: identifier });

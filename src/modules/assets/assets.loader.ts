@@ -1,35 +1,42 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService, Nft } from 'src/common';
+import * as Redis from 'ioredis';
+import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
+import { cacheConfig } from 'src/config';
+import { BaseProvider } from './base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AssetsProvider {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssets(keys),
-    { cache: false },
-  );
+export class AssetsProvider extends BaseProvider<string> {
+  constructor(
+    redisCacheService: RedisCacheService,
+    private apiService: ElrondApiService,
+  ) {
+    super(
+      'assets',
+      redisCacheService,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
+    );
+  }
 
-  constructor(private apiService: ElrondApiService) {}
+  async getDataFromDb(identifiers: string[]) {
+    const nfts = await this.apiService.getNftsByIdentifiers(
+      identifiers,
+      0,
+      '&withOwner=true',
+    );
+    return nfts?.groupBy((asset) => asset.identifier);
+  }
 
-  batchAssets = async (keys: string[]) => {
-    const nfts = await this.apiService.getNftsByIdentifiers(keys);
-    const assetsIdentifiers: { [key: string]: Nft[] } = {};
-
-    nfts.forEach((nft) => {
-      if (!assetsIdentifiers[nft.identifier]) {
-        assetsIdentifiers[nft.identifier] = [nft];
-      } else {
-        assetsIdentifiers[nft.identifier].push(nft);
-      }
+  mapValuesForRedis(
+    identifiers: string[],
+    assetsIdentifiers: { [key: string]: any[] },
+  ) {
+    return identifiers.map((identifier) => {
+      return assetsIdentifiers[identifier];
     });
-    let resp = keys.map((identifier) => assetsIdentifiers[identifier]);
-    return resp;
-  };
-
-  async getNftByIdentifier(identifier: string): Promise<Nft> {
-    const nft = await this.dataLoader.load(identifier);
-    return nft && nft.length > 0 ? nft[0] : null;
   }
 }
