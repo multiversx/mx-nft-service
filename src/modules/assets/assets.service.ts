@@ -7,9 +7,13 @@ import {
   GasLimit,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { Injectable } from '@nestjs/common';
-import { ElrondApiService, getSmartContract } from 'src/common';
-import { gas } from 'src/config';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  ElrondApiService,
+  getSmartContract,
+  RedisCacheService,
+} from 'src/common';
+import { cacheConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
@@ -27,15 +31,27 @@ import {
   HandleQuantityArgs,
 } from './models';
 import BigNumber from 'bignumber.js';
+import * as Redis from 'ioredis';
+import { Logger } from 'winston';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+const hash = require('object-hash');
 
 @Injectable()
 export class AssetsService {
+  private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
     private pinataService: PinataService,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
-  ) {}
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.followersRedisClientName,
+    );
+  }
 
   async getAssetsForUser(
     address: string,
@@ -45,9 +61,7 @@ export class AssetsService {
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, query),
     ]);
-    const assets = nfts
-      ?.filter((e) => e.isWhitelistedStorage)
-      .map((element) => Asset.fromNft(element));
+    const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -106,7 +120,27 @@ export class AssetsService {
     return Asset.fromNft(nft);
   }
 
-  async getAssetByIdentifier(identifier: string): Promise<Asset> {
+  private async getAsset(identifier): Promise<[Asset[], number]> {
+    try {
+      const cacheKey = this.getAssetsCacheKey(identifier);
+      const getAsset = () => this.getMappedAssetByIdentifier(identifier);
+      const asset = await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAsset,
+        cacheConfig.followersttl,
+      );
+      return [[asset], asset ? 1 : 0];
+    } catch (error) {
+      this.logger.error('An error occurred while get asset by identifier', {
+        path: 'AssetsService.getAsset',
+        identifier,
+        exception: error,
+      });
+    }
+  }
+
+  async getMappedAssetByIdentifier(identifier: string): Promise<Asset> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
     return Asset.fromNft(nft);
   }
@@ -235,9 +269,7 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    const assets = nfts
-      ?.filter((e) => e.isWhitelistedStorage)
-      .map((element) => Asset.fromNft(element));
+    const assets = nfts.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -246,10 +278,28 @@ export class AssetsService {
     query: string = '',
   ): Promise<[Asset[], number]> {
     if (filters?.identifier) {
-      const asset = await this.getAssetByIdentifier(filters.identifier);
-      return [[asset], asset ? 1 : 0];
+      return await this.getAsset(filters?.identifier);
     } else {
-      return await this.getAllAssets(query);
+      return await this.getOrSetAssets(query);
+    }
+  }
+
+  private async getOrSetAssets(query: string): Promise<[Asset[], number]> {
+    try {
+      const cacheKey = this.getAssetsQueryCacheKey(query);
+      const getAssets = () => this.getAllAssets(query);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAssets,
+        cacheConfig.followersttl,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get assets', {
+        path: 'AssetsService.getAssets',
+        query,
+        exception: error,
+      });
     }
   }
 
@@ -284,5 +334,13 @@ export class AssetsService {
     );
 
     return [assets, assetsCount];
+  }
+
+  private getAssetsCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('assets', identifier);
+  }
+
+  private getAssetsQueryCacheKey(request: any) {
+    return generateCacheKeyFromParams('assets', hash(request));
   }
 }

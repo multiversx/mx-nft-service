@@ -31,6 +31,8 @@ export class Asset {
   royalties: string;
   @Field(() => String)
   attributes: string;
+  @Field(() => Boolean)
+  isWhitelistedStorage: boolean;
   @Field(() => String, { nullable: true })
   balance: string;
   @Field(() => String)
@@ -87,6 +89,7 @@ export class Asset {
           thumbnailUrl: nft.thumbnailUrl || '',
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
+          isWhitelistedStorage: nft.isWhitelistedStorage,
         })
       : null;
   }

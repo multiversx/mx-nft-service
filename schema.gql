@@ -54,6 +54,7 @@ type Asset {
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
+  isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
   metadata: Metadata
