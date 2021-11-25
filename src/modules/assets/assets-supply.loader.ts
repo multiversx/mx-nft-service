@@ -20,21 +20,16 @@ export class AssetsSupplyLoader {
       0,
       '&withSupply=true&fields=identifier,supply',
     );
-    const assetsIdentifiers: { [key: string]: Nft[] } = {};
+    const assetsIdentifiers: { [key: string]: Nft[] } = nfts.groupBy(
+      (item) => item.identifier,
+    );
 
-    nfts.forEach((nft) => {
-      if (!assetsIdentifiers[nft.identifier]) {
-        assetsIdentifiers[nft.identifier] = [nft];
-      } else {
-        assetsIdentifiers[nft.identifier].push(nft);
-      }
-    });
     let resp = keys.map((identifier) => assetsIdentifiers[identifier]);
     return resp;
   };
 
-  async getSupply(identifier: string): Promise<Nft> {
+  async getSupply(identifier: string): Promise<string> {
     const nft = await this.dataLoader.load(identifier);
-    return nft && nft.length > 0 ? nft[0] : null;
+    return nft && nft.length > 0 ? nft[0].supply : null;
   }
 }
