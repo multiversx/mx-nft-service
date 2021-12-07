@@ -17,7 +17,7 @@ export class AccountsProvider {
     const accounts = await this.accountsService.getProfiles(keys);
     const accountsAddreses: { [key: string]: AccountIdentity[] } = {};
 
-    accounts.forEach((account) => {
+    accounts?.forEach((account) => {
       if (!accountsAddreses[account.address]) {
         accountsAddreses[account.address] = [account];
       } else {
@@ -30,6 +30,6 @@ export class AccountsProvider {
 
   async getAccountByAddress(userId: string): Promise<AccountIdentity> {
     const user = await this.dataLoader.load(userId);
-    return user[0];
+    return user ? user[0] : null;
   }
 }

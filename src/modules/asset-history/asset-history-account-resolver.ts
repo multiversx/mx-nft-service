@@ -16,7 +16,7 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
 
     if (!address) return null;
     const account = await this.accountsProvider.getAccountByAddress(address);
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, address);
   }
 
   @ResolveField('senderAccount', () => Account, { nullable: true })
@@ -27,6 +27,6 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
     const account = await this.accountsProvider.getAccountByAddress(
       senderAddress,
     );
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, senderAddress);
   }
 }

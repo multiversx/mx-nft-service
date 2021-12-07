@@ -1,4 +1,4 @@
-import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 @ObjectType()
 export class TransactionNode {
   @Field(() => Int)
@@ -19,8 +19,8 @@ export class TransactionNode {
   chainID: string;
   @Field()
   version: number;
-  @Field()
+  @Field({ nullable: true })
   options: string;
-  @Field()
+  @Field({ nullable: true })
   status: string;
 }

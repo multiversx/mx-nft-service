@@ -48,6 +48,6 @@ export class OwnersResolver {
 
     if (!address) return null;
     const account = await this.accountsProvider.getAccountByAddress(address);
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, address);
   }
 }
