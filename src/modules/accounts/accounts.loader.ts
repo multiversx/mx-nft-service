@@ -15,16 +15,12 @@ export class AccountsProvider {
 
   batchAccounts = async (keys: string[]) => {
     const accounts = await this.accountsService.getProfiles(keys);
-    const accountsAddreses: { [key: string]: AccountIdentity[] } = {};
+    const accountsAddreses: { [key: string]: AccountIdentity[] } =
+      accounts?.groupBy((a) => a.address);
 
-    accounts?.forEach((account) => {
-      if (!accountsAddreses[account.address]) {
-        accountsAddreses[account.address] = [account];
-      } else {
-        accountsAddreses[account.address].push(account);
-      }
-    });
-    let resp = keys.map((address) => accountsAddreses[address]);
+    let resp = keys.map((address) =>
+      accountsAddreses ? accountsAddreses[address] : null,
+    );
     return resp;
   };
 
