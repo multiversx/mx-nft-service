@@ -17,6 +17,7 @@ import {
   AddLikeArgs,
   RemoveLikeArgs,
   AssetsResponse,
+  NftTypeEnum,
 } from './models';
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
@@ -37,6 +38,7 @@ import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
 import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
+import { AssetsSupplyLoader } from './assets-supply.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -45,6 +47,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
+    private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private auctionsProvider: AuctionsForAssetProvider,
@@ -142,6 +145,18 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const assetLikes = await this.assetsLikeProvider.load(identifier);
     return assetLikes ? assetLikes[0]?.likesCount : 0;
+  }
+
+  @ResolveField('supply', () => String)
+  async supply(@Parent() asset: Asset) {
+    const { identifier, type, supply } = asset;
+    if (type === NftTypeEnum.NonFungibleESDT) {
+      return '1';
+    }
+    if (supply) {
+      return supply;
+    }
+    return await this.assetSupplyProvider.getSupply(identifier);
   }
 
   @ResolveField('isLiked', () => Boolean)

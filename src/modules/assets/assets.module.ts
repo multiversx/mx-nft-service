@@ -11,12 +11,14 @@ import { AssetAuctionsCountProvider, AssetLikesProvider } from '.';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
+import { AssetsSupplyLoader } from './assets-supply.loader';
 
 @Module({
   providers: [
     AssetsService,
     AssetsLikesService,
     AssetLikesProvider,
+    AssetsSupplyLoader,
     AssetAuctionsCountProvider,
     AssetAvailableTokensCountProvider,
     AssetsResolver,
@@ -38,6 +40,7 @@ import { AssetAvailableTokensCountProvider } from './asset-available-tokens-coun
     RedisCacheService,
     S3Service,
     AssetLikesProvider,
+    AssetsSupplyLoader,
   ],
 })
 export class AssetsModuleGraph {}

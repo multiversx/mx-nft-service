@@ -1,4 +1,3 @@
-import DataLoader = require('dataloader');
 import { Injectable, Scope } from 'graphql-modules';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import * as Redis from 'ioredis';
