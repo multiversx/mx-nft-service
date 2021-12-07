@@ -130,7 +130,7 @@ export class AssetsService {
         getAsset,
         cacheConfig.followersttl,
       );
-      return [[asset], asset ? 1 : 0];
+      return [asset, asset ? 1 : 0];
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
         path: 'AssetsService.getAsset',
