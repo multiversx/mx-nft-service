@@ -25,7 +25,9 @@ export class AssetsSupplyLoader {
     );
 
     let resp = keys.map((identifier) =>
-      assetsIdentifiers[identifier] ? assetsIdentifiers[identifier] : null,
+      assetsIdentifiers && assetsIdentifiers[identifier]
+        ? assetsIdentifiers[identifier]
+        : null,
     );
     return resp;
   };
