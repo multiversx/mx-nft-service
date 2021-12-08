@@ -33,7 +33,7 @@ async function bootstrap() {
     await rabbitMq.listen(5673, '0.0.0.0');
   }
 
-  if (process.env.ENABLE_UPDATE_AUCTION === 'true') {
+  if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
     let processorApp = await NestFactory.create(ClaimableAuctionsModule);
     await processorApp.listen(6011);
   }
