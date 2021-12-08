@@ -220,6 +220,10 @@ export class AuctionsService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
+  async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
+    return await this.auctionServiceDb.getAuctionsThatReachedDeadline();
+  }
+
   async updateAuction(
     id: number,
     status: AuctionStatusEnum,
@@ -227,6 +231,15 @@ export class AuctionsService {
   ): Promise<Auction | any> {
     await this.invalidateCache();
     return await this.auctionServiceDb.updateAuction(id, status, hash);
+  }
+
+  async getAuctionById(id: number): Promise<AuctionEntity> {
+    return await this.auctionServiceDb.getAuction(id);
+  }
+
+  async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
+    await this.invalidateCache();
+    return await this.auctionServiceDb.updateAuctions(auctions);
   }
 
   private getAuctionsCacheKey(request: any) {

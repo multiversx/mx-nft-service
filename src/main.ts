@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ClaimableAuctionsModule } from './crons/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
@@ -30,6 +31,11 @@ async function bootstrap() {
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
     await rabbitMq.listen(5673, '0.0.0.0');
+  }
+
+  if (process.env.ENABLE_UPDATE_AUCTION === 'true') {
+    let processorApp = await NestFactory.create(ClaimableAuctionsModule);
+    await processorApp.listen(6011);
   }
 }
 

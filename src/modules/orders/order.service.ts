@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { OrdersServiceDb } from 'src/db/orders';
+import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order } from './models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -24,7 +24,7 @@ export class OrdersService {
     );
   }
 
-  async createOrder(createOrderArgs: CreateOrderArgs): Promise<Order> {
+  async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
       const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
         createOrderArgs.auctionId,
@@ -37,7 +37,7 @@ export class OrdersService {
       if (orderEntity && activeOrder) {
         await this.orderServiceDb.updateOrder(activeOrder);
       }
-      return Order.fromEntity(orderEntity);
+      return orderEntity;
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrder',

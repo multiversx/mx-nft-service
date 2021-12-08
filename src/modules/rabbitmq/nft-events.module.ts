@@ -6,6 +6,7 @@ import { OrdersModuleGraph } from '../orders/orders.module';
 import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
+import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tokens-count.loader';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-token
     RevertEventsConsumer,
     RevertEventsService,
     AvailableTokensForAuctionProvider,
+    AssetAvailableTokensCountProvider,
   ],
   exports: [NftEventsService],
 })
