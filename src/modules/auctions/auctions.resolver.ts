@@ -208,8 +208,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   ) {
     const { identifier } = auction;
     if (this.hasToResolveAsset(fields)) {
-      const nft = await this.assetsProvider.load(identifier);
-      return nft ? Asset.fromNft(nft[0]) : null;
+      return await this.assetsProvider.load(identifier);
     }
 
     return new Asset({ identifier: identifier });
@@ -236,6 +235,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
           await this.accountsProvider.getAccountByAddress(
             activeOrders[activeOrders.length - 1].ownerAddress,
           ),
+          activeOrders[activeOrders.length - 1].ownerAddress,
         )
       : null;
   }
@@ -267,7 +267,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, ownerAddress);
   }
 
   private hasToResolveAsset(fields: string[]) {

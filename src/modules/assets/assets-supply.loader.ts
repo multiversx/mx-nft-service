@@ -20,11 +20,15 @@ export class AssetsSupplyLoader {
       0,
       '&withSupply=true&fields=identifier,supply',
     );
-    const assetsIdentifiers: { [key: string]: Nft[] } = nfts.groupBy(
+    const assetsIdentifiers: { [key: string]: Nft[] } = nfts?.groupBy(
       (item) => item.identifier,
     );
 
-    let resp = keys.map((identifier) => assetsIdentifiers[identifier]);
+    let resp = keys.map((identifier) =>
+      assetsIdentifiers && assetsIdentifiers[identifier]
+        ? assetsIdentifiers[identifier]
+        : null,
+    );
     return resp;
   };
 

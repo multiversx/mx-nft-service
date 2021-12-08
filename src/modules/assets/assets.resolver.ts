@@ -222,7 +222,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const account = await this.accountsProvider.getAccountByAddress(
       creatorAddress,
     );
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, creatorAddress);
   }
 
   @ResolveField(() => Account)
@@ -233,6 +233,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, ownerAddress);
   }
 }

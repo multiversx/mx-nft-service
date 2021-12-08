@@ -108,7 +108,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     const account = await this.accountsProvider.getAccountByAddress(
       ownerAddress,
     );
-    return Account.fromEntity(account);
+    return Account.fromEntity(account, ownerAddress);
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)

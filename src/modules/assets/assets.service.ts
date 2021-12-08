@@ -337,7 +337,7 @@ export class AssetsService {
   }
 
   private getAssetsCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assets', identifier);
+    return generateCacheKeyFromParams('asset', identifier);
   }
 
   private getAssetsQueryCacheKey(request: any) {

@@ -40,16 +40,18 @@ export class Account {
     Object.assign(this, init);
   }
 
-  static fromEntity(account: AccountIdentity) {
-    return new Account({
-      address: account.address,
-      description: account?.description,
-      profile: account?.profile?.url,
-      cover: account?.cover?.url,
-      herotag: account?.herotag,
-      socialLinks: account?.socialLinks?.map(
-        (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
-      ),
-    });
+  static fromEntity(account: AccountIdentity, address: string = '') {
+    return account
+      ? new Account({
+          address: account.address,
+          description: account?.description,
+          profile: account?.profile?.url,
+          cover: account?.cover?.url,
+          herotag: account?.herotag,
+          socialLinks: account?.socialLinks?.map(
+            (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
+          ),
+        })
+      : new Account({ address: address });
   }
 }
