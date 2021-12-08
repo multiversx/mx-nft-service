@@ -6,7 +6,7 @@ import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enu
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { DateUtils } from 'src/utils/date-utils';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { LessThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
@@ -205,6 +205,14 @@ export class AuctionsServiceDb {
       });
     }
     return null;
+  }
+
+  async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.endDate <= ${DateUtils.getCurrentTimestamp()}`)
+      .getMany();
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {

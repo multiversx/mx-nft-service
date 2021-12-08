@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
+import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tokens-count.loader';
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
 import { AuctionStatusEnum } from '../auctions/models';
@@ -17,6 +18,7 @@ import {
 export class NftEventsService {
   constructor(
     private auctionsService: AuctionsService,
+    private availableTokensCount: AssetAvailableTokensCountProvider,
     private availableTokens: AvailableTokensForAuctionProvider,
     private ordersService: OrdersService,
   ) {}
@@ -27,7 +29,10 @@ export class NftEventsService {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
-          this.ordersService.createOrder(
+          const auction = await this.auctionsService.getAuctionById(
+            parseInt(topics.auctionId, 16),
+          );
+          const order = await this.ordersService.createOrder(
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
               auctionId: parseInt(topics.auctionId, 16),
@@ -37,10 +42,22 @@ export class NftEventsService {
               blockHash: hash,
             }),
           );
+
+          this.availableTokensCount.clearKey(auction.identifier);
+          if (auction.maxBidDenominated === order.priceAmountDenominated) {
+            this.auctionsService.updateAuction(
+              auction.id,
+              AuctionStatusEnum.Claimable,
+              hash,
+            );
+          }
           break;
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
+          const auctionSft = await this.auctionsService.getAuctionById(
+            parseInt(buySftTopics.auctionId, 16),
+          );
           const result = await this.availableTokens.load(
             parseInt(buySftTopics.auctionId, 16),
           );
@@ -54,7 +71,8 @@ export class NftEventsService {
               hash,
             );
           }
-          this.availableTokens.clearKey(parseInt(buySftTopics.auctionId, 16));
+          this.availableTokens.clearKey(auctionSft.id);
+          this.availableTokensCount.clearKey(auctionSft.identifier);
           this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,

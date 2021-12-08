@@ -193,6 +193,7 @@ type AuctionResponse {
 }
 
 enum AuctionStatusEnum {
+  Claimable
   Closed
   Ended
   None
