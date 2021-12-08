@@ -143,7 +143,9 @@ export class AuctionsServiceDb {
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status = 'Running' AND a.type <> 'SftOnePerPayment' AND 
+        `a.status = '${
+          AuctionStatusEnum.Claimable
+        }' AND a.type <> 'SftOnePerPayment' AND 
         ((a.endDate <= ${DateUtils.getCurrentTimestamp()} AND o.ownerAddress = '${address}' AND o.status='active')
         OR (o.ownerAddress = '${address}' AND o.status='active' AND a.maxBidDenominated=o.priceAmountDenominated))`,
       )
