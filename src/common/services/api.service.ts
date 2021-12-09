@@ -32,13 +32,9 @@ export class ApiService {
 
   private getConfig(timeout: number | undefined): AxiosRequestConfig {
     timeout = timeout || this.defaultTimeout;
-
-    let headers = {};
-
     return {
       timeout,
       httpAgent: this.getKeepAliveAgent(),
-      headers,
       transformResponse: [
         (data) => {
           try {
@@ -53,7 +49,7 @@ export class ApiService {
 
   async get(
     url: string,
-    timeout: number | undefined = undefined,
+    timeout?: number,
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
     timeout = timeout || this.defaultTimeout;
