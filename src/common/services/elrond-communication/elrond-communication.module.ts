@@ -6,9 +6,11 @@ import {
   ElrondProxyService,
   ElrondDataService,
 } from 'src/common';
+import { ApiService } from '../api.service';
 
 @Module({
   providers: [
+    ApiService,
     ElrondProxyService,
     ElrondApiService,
     ElrondElasticService,
@@ -16,6 +18,7 @@ import {
     ElrondDataService,
   ],
   exports: [
+    ApiService,
     ElrondProxyService,
     ElrondApiService,
     ElrondElasticService,

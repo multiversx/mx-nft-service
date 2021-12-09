@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { HitResponse, SearchResponse } from './models/elastic-search';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { ApiService } from '../api.service';
 
 export interface AddressTransactionCount {
   contractAddress: string;
@@ -13,14 +13,11 @@ export interface AddressTransactionCount {
 
 @Injectable()
 export class ElrondElasticService {
-  private client: Client;
+  private readonly url = process.env.ELROND_ELASTICSEARCH + '/logs';
   constructor(
+    private readonly apiService: ApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {
-    this.client = new Client({
-      node: process.env.ELROND_ELASTICSEARCH + '/logs',
-    });
-  }
+  ) {}
 
   async getNftHistory(
     collection: string,
@@ -31,6 +28,7 @@ export class ElrondElasticService {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
+    const url = `${this.url}/_search`;
     const body = {
       size: size,
       query: {
@@ -83,10 +81,8 @@ export class ElrondElasticService {
       ],
     };
     try {
-      const response: ApiResponse<SearchResponse> = await this.client.search({
-        body,
-      });
-
+      const response = await this.apiService.post(url, body);
+      const data: SearchResponse = response?.data;
       profiler.stop();
       MetricsCollector.setExternalCall(
         ElrondElasticService.name,
@@ -94,7 +90,7 @@ export class ElrondElasticService {
         profiler.duration,
       );
       let responseMap: HitResponse[] = [];
-      response.body.hits.hits.forEach((hit) => {
+      data.hits.hits.forEach((hit) => {
         for (const event of hit._source.events) {
           if (event.topics[0] === collection && event.topics[1] === nonce) {
             responseMap.push(hit);
@@ -102,7 +98,7 @@ export class ElrondElasticService {
           }
         }
       });
-      return [responseMap, response.body.hits.total.value];
+      return [responseMap, data.hits.total.value];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',
