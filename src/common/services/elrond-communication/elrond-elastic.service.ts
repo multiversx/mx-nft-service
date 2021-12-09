@@ -90,7 +90,7 @@ export class ElrondElasticService {
         profiler.duration,
       );
       let responseMap: HitResponse[] = [];
-      data.hits.hits.forEach((hit) => {
+      data?.hits?.hits.forEach((hit) => {
         for (const event of hit._source.events) {
           if (event.topics[0] === collection && event.topics[1] === nonce) {
             responseMap.push(hit);
@@ -98,7 +98,7 @@ export class ElrondElasticService {
           }
         }
       });
-      return [responseMap, data.hits.total.value];
+      return [responseMap, data?.hits?.total.value];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',
