@@ -3,13 +3,14 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { Logger } from 'winston';
+import { ApiService } from '../api.service';
 import { AccountIdentity } from './models/account.identity';
-const axios = require('axios');
 
 @Injectable()
 export class ElrondIdentityService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly apiService: ApiService,
   ) {}
 
   async getProfiles(addresses: string[]): Promise<AccountIdentity[]> {
@@ -20,12 +21,7 @@ export class ElrondIdentityService {
     let request: any = { addresses: uniqueAddresses };
 
     try {
-      let response = await axios.post(url, request, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
+      let response = await this.apiService.post(url, request);
       profiler.stop();
 
       MetricsCollector.setExternalCall(

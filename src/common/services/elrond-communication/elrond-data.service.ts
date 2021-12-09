@@ -3,12 +3,14 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { Logger } from 'winston';
+import { ApiService } from '../api.service';
 const axios = require('axios');
 
 @Injectable()
 export class ElrondDataService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly apiService: ApiService,
   ) {}
 
   async getQuotesHistoricalTimestamp(timestamp: number): Promise<number> {
@@ -18,9 +20,7 @@ export class ElrondDataService {
     );
 
     try {
-      let { data } = await axios.get(url, {
-        timeout: 10000,
-      });
+      let { data } = await this.apiService.get(url);
 
       profiler.stop();
 
