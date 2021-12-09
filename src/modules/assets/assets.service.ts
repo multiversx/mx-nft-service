@@ -58,10 +58,10 @@ export class AssetsService {
     query: string = '',
   ): Promise<[Asset[], number]> {
     const [nfts, count] = await Promise.all([
-      this.apiService.getNftsForUser(address, query),
+      this.apiService.getNftsForUser(address, query + '&withMetadata=true'),
       this.apiService.getNftsForUserCount(address, query),
     ]);
-    const assets = nfts.map((element) => Asset.fromNft(element));
+    const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -88,7 +88,7 @@ export class AssetsService {
         apiQuery,
       );
       return [
-        assets.map((a) => {
+        assets?.map((a) => {
           return { ...a, ownerAddress: filters?.ownerAddress };
         }),
         count,
@@ -147,7 +147,7 @@ export class AssetsService {
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
     const nfts = await this.apiService.getNftsByIdentifiers(identifiers);
-    return nfts.map((nft) => Asset.fromNft(nft));
+    return nfts?.map((nft) => Asset.fromNft(nft));
   }
 
   async addQuantity(
@@ -269,7 +269,7 @@ export class AssetsService {
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
-    const assets = nfts.map((element) => Asset.fromNft(element));
+    const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
 
@@ -330,7 +330,7 @@ export class AssetsService {
         likedByAddress,
       );
     const assets = await this.getAssetsForIdentifiers(
-      assetsLiked.map((e) => e.identifier),
+      assetsLiked?.map((e) => e.identifier),
     );
 
     return [assets, assetsCount];
