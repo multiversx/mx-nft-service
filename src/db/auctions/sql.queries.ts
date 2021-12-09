@@ -11,15 +11,13 @@ export function getDefaultAuctionsForIdentifierQuery(
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}'
-     AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate}  
-     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+     AND a.endDate <= ${endDate})
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate > ${endDate})
     order by eD, if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
 export function getDefaultAuctionsForIdentifierQueryCount(
@@ -31,15 +29,13 @@ export function getDefaultAuctionsForIdentifierQueryCount(
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' AND a.identifier = '${identifier}'
-     AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate}  
-     AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+     AND a.endDate <= ${endDate})
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate}
-    AND IF(o.status='active' AND o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+    WHERE a.status='Running' AND a.identifier = '${identifier}' AND a.endDate> ${endDate})
     order by eD, if(price, price, minBidDenominated) ASC) as temp`;
 }
 
@@ -48,15 +44,13 @@ export function getDefaultAuctionsQuery(endDate: number) {
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running'  AND a.endDate BETWEEN ${DateUtils.getCurrentTimestamp()} AND ${endDate} 
-    AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1))
+    WHERE a.status='Running' AND a.endDate <= ${endDate})
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
     LEFT JOIN LATERAL 
     (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' AND a.endDate> ${endDate}
-    AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)))
+    WHERE a.status='Running' AND a.endDate> ${endDate}))
     order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
