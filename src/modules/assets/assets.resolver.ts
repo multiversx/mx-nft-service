@@ -175,10 +175,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('hasAvailableAuctions', () => Boolean)
   async hasAvailableAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const availableTokens = await this.assetAvailableTokensCountProvider.load(
-      identifier,
-    );
-    return availableTokens && availableTokens[0]?.count > 0 ? true : false;
+    const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
+    return assetAuctions && assetAuctions[0]?.auctionsCount > 0 ? true : false;
   }
 
   @ResolveField('totalAvailableTokens', () => String)

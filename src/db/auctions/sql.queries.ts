@@ -72,33 +72,21 @@ export function getDefaultAuctionsQueryForIdentifiers(
           WHERE a.status='Running' AND a.identifier in (${identifiers.map(
             (value) => `'${value}'`,
           )})
-           AND a.endDate BETWEEN UNIX_TIMESTAMP(CURRENT_TIMESTAMP) AND ${endDate} 
-           AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)),   
+           AND a.endDate <= ${endDate}),   
   minPrice AS (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
         FROM auctions a 
         LEFT JOIN LATERAL 
         (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
         WHERE a.status='Running' AND a.identifier in (${identifiers.map(
           (value) => `'${value}'`,
-        )})  AND a.endDate> ${endDate}
-        AND IF(o.priceAmountDenominated=a.maxBidDenominated, 0, 1)),
-  ended AS 	(SELECT a.*, NULL as price, 16349778194537 as eD
-        FROM auctions a 
-        LEFT JOIN LATERAL 
-          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-        WHERE a.status='Running' AND a.identifier in (${identifiers.map(
-          (value) => `'${value}'`,
-        )})  AND (a.endDate< UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
-        OR IF(o.priceAmountDenominated=a.maxBidDenominated, 1, 0)))
-          
+        )})  AND a.endDate> ${endDate})
+     
 SELECT temp.* from (
   SELECT temp.*, row_number() over (partition by identifier order by eD, if(price, price, minBidDenominated) ASC) as seqnum
    from (
      select * from endingSoon       
     UNION All 
     select * from minPrice   
-    UNION All
-    select * from ended    
   order by eD, if(price, price, minBidDenominated) ASC
   ) as temp) temp
   WHERE  temp.seqnum <=10;
@@ -116,15 +104,9 @@ SELECT SUM(countA) as count, identifier
 		auctions a
 	  WHERE a.status = 'Running'
 		AND a.type <> 'SftOnePerPayment'
-		AND a.endDate > UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
-		AND NOT EXISTS (
-		SELECT 1 from orders o
-		WHERE a.id = o.auctionId
-      AND o.status = 'active'
-			AND a.maxBidDenominated = o.priceAmountDenominated)
-      AND a.identifier in (${identifiers.map((value) => `'${value}'`)}) 
+    AND a.identifier in (${identifiers.map((value) => `'${value}'`)}) 
 	  GROUP by a.identifier)
-UNION 
+    UNION 
     (SELECT max(temp.countA) as countA, temp.identifier
     FROM 
 		(SELECT (Sum(a.nrAuctionedTokens) - if (availableTokens.total, sum(availableTokens.total),0)) as countA, a.identifier
@@ -136,7 +118,6 @@ UNION
 		on availableTokens.auctionId = a.id
 	WHERE a.status = 'Running'
     AND a.type = 'SftOnePerPayment'
-    AND a.endDate > UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
     AND a.identifier in (${identifiers.map((value) => `'${value}'`)}) 
 		GROUP by a.identifier, availableTokens.total) temp
   GROUP by temp.identifier)) ac
