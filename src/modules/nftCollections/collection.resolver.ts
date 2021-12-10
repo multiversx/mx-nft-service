@@ -43,6 +43,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   async issueNftCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.collectionsService.issueNft(input);
   }
 
@@ -51,6 +54,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   async issueSftCollection(
     @Args('input') input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.collectionsService.issueSemiFungible(input);
   }
 
@@ -59,6 +65,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   async setRoles(
     @Args('input') input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.collectionsService.setNftRoles(input);
   }
 
@@ -67,6 +76,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   async transferNftCreateRole(
     @Args('input') input: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.collectionsService.transferNFTCreateRole(input);
   }
 
@@ -75,6 +87,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   async stopNftCreate(
     @Args('input') input: StopNftCreateArgs,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.collectionsService.stopNFTCreate(input);
   }
 
@@ -85,6 +100,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
+    if (process.env.NODE_ENV === 'production') {
+      return new CollectionResponse();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] = await this.collectionsService.getCollections(
       offset,

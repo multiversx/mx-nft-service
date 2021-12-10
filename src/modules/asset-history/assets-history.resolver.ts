@@ -21,6 +21,9 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
   ): Promise<AssetHistoryLogResponse> {
+    if (process.env.NODE_ENV === 'production') {
+      return new AssetHistoryLogResponse();
+    }
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );

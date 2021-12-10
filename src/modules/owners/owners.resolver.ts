@@ -27,6 +27,9 @@ export class OwnersResolver {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<OwnerResponse> {
+    if (process.env.NODE_ENV === 'production') {
+      return new OwnerResponse();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [owners, count] = await this.ownersService.getOwnersForIdentifier(
       filters?.identifier,

@@ -55,6 +55,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args('input') input: CreateAuctionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.nftAbiService.createAuction(user.publicKey, input);
   }
 
@@ -64,6 +67,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.nftAbiService.endAuction(user.publicKey, auctionId);
   }
 
@@ -73,6 +79,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args('input') input: BidActionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.nftAbiService.bid(user.publicKey, input);
   }
 
@@ -82,6 +91,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args('input') input: BuySftActionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.nftAbiService.buySft(user.publicKey, input);
   }
 
@@ -91,6 +103,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.nftAbiService.withdraw(user.publicKey, auctionId);
   }
 
@@ -105,6 +120,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
       new QueryRequest({
@@ -133,6 +151,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] =
       await this.auctionsService.getAuctionsOrderByNoBids(
@@ -166,6 +187,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getTrendingAuctions(
       new TrendingQueryRequest({ limit, offset, startDate, endDate }),
@@ -186,6 +210,9 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getClaimableAuctions(
       limit,
