@@ -63,6 +63,7 @@ type Asset {
   owner: Account
   ownerAddress: String
   royalties: String!
+  scamInfo: ScamInfo
   supply: String!
   tags: [String!]
   thumbnailUrl: String
@@ -528,6 +529,11 @@ type Query {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+type ScamInfo {
+  info: String!
+  type: String!
 }
 
 input SetNftRolesArgs {

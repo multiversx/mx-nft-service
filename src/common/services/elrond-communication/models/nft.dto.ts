@@ -34,10 +34,16 @@ export interface Nft {
   thumbnailUrl: string;
   tags: string[];
   metadata: NftMetadata;
+  scamInfo: NftScamInfo;
 }
 
 export interface ApiAccount {
   address: string;
   balance: string;
   herotag: string;
+}
+
+export interface NftScamInfo {
+  type: string;
+  info: string;
 }
