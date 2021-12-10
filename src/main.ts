@@ -8,6 +8,7 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  process.on('warning', (e) => console.warn(e.stack));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
