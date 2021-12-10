@@ -86,6 +86,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     const fileData = await file;
     if (
       !Object.values(MediaMimeTypeEnum).includes(
@@ -103,6 +106,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args('input') input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.assetsService.addQuantity(user.publicKey, input);
   }
 
@@ -112,6 +118,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args('input') input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
     return await this.assetsService.burnQuantity(user.publicKey, input);
   }
 
@@ -130,6 +139,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args('input') input: AddLikeArgs,
     @User() user: any,
   ): Promise<boolean> {
+    if (process.env.NODE_ENV === 'production') {
+      return Promise.resolve(false);
+    }
     return this.assetsLikesService.addLike(input.identifier, user.publicKey);
   }
 
@@ -139,6 +151,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
     @Args('input') input: RemoveLikeArgs,
     @User() user: any,
   ): Promise<boolean> {
+    if (process.env.NODE_ENV === 'production') {
+      return Promise.resolve(false);
+    }
     return this.assetsLikesService.removeLike(input.identifier, user.publicKey);
   }
 

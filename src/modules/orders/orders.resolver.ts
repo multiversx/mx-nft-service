@@ -30,6 +30,9 @@ export class OrdersResolver extends BaseResolver(Order) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
+    if (process.env.NODE_ENV === 'production') {
+      return new OrdersResponse();
+    }
     const { limit, offset } = pagination.pagingParams();
     const [orders, count] = await this.ordersService.getOrders(
       new QueryRequest({ limit, offset, filters, sorting }),
