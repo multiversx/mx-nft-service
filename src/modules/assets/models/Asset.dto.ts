@@ -36,7 +36,7 @@ export class Asset {
   isWhitelistedStorage: boolean;
   @Field(() => String, { nullable: true })
   balance: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   supply: string;
   @Field(() => String, { nullable: true })
   totalRunningAuctions: string;

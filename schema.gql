@@ -64,7 +64,7 @@ type Asset {
   ownerAddress: String
   royalties: String!
   scamInfo: ScamInfo
-  supply: String!
+  supply: String
   tags: [String!]
   thumbnailUrl: String
   totalAvailableTokens: String
@@ -532,8 +532,8 @@ input RemoveLikeArgs {
 }
 
 type ScamInfo {
-  info: String!
-  type: String!
+  info: String
+  type: String
 }
 
 input SetNftRolesArgs {

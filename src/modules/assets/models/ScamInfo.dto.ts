@@ -1,11 +1,11 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import { NftScamInfo } from 'src/common';
 import { ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   type: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   info: string;
 
   constructor(init?: Partial<ScamInfo>) {

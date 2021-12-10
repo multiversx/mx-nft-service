@@ -3,6 +3,8 @@ import DataLoader = require('dataloader');
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { BaseProvider } from './base.loader';
 import { Asset } from './models';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { ScamInfo } from './models/ScamInfo.dto';
 
 @Injectable({
   scope: Scope.Operation,
@@ -27,7 +29,10 @@ export class AssetsProvider extends BaseProvider<string> {
       0,
       '&withOwner=true&withMetadata=true',
     );
-    return nfts?.groupBy((asset) => asset.identifier);
+    const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
+    this.batchScamInfo(identifiers, nftsGrouped);
+
+    return nftsGrouped;
   }
 
   mapValuesForRedis(
@@ -37,5 +42,36 @@ export class AssetsProvider extends BaseProvider<string> {
     return identifiers.map((identifier) => {
       return Asset.fromNft(assetsIdentifiers[identifier][0]);
     });
+  }
+
+  batchScamInfo = async (identifiers: string[], data) => {
+    const cacheKeys = this.getCacheKeysForScam(identifiers);
+    let [redisKeys, values] = [cacheKeys, []];
+    const getDataFromRedis = await this.redisCacheService.batchGetCache(
+      this.redisClient,
+      cacheKeys,
+    );
+    if (getDataFromRedis.includes(null)) {
+      values = identifiers.map((identifier) => {
+        return ScamInfo.fromNftScamInfo(data[identifier][0].scamInfo);
+      });
+
+      await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        redisKeys,
+        values,
+        1800,
+      );
+      return values;
+    }
+    return getDataFromRedis;
+  };
+
+  getCacheKeysForScam(key: string[]) {
+    return key.map((id) => this.getCacheKeyForScam(id));
+  }
+
+  getCacheKeyForScam(key: string) {
+    return generateCacheKeyFromParams('asset_scam_info', key);
   }
 }
