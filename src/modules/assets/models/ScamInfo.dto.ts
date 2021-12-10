@@ -4,7 +4,7 @@ import { ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {
   @Field(() => String, { nullable: true })
-  type: string;
+  type: ScamInfoTypeEnum;
   @Field(() => String, { nullable: true })
   info: string;
 
