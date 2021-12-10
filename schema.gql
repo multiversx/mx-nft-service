@@ -533,7 +533,12 @@ input RemoveLikeArgs {
 
 type ScamInfo {
   info: String
-  type: String
+  type: ScamInfoTypeEnum
+}
+
+enum ScamInfoTypeEnum {
+  potentialScam
+  scam
 }
 
 input SetNftRolesArgs {

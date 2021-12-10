@@ -3,7 +3,7 @@ import { NftScamInfo } from 'src/common';
 import { ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {
-  @Field(() => String, { nullable: true })
+  @Field(() => ScamInfoTypeEnum, { nullable: true })
   type: ScamInfoTypeEnum;
   @Field(() => String, { nullable: true })
   info: string;
