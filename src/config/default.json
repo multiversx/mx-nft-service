@@ -9,8 +9,6 @@
     "timeoutLimit": 30000,
     "keepAlive": true,
     "keepAliveTimeout": 50000,
-    "keepAliveTimeoutDownstream": 51000,
-    "keepAliveTimeoutUpstream": 50000,
     "keepAliveFreeSocketTimeout": 30000,
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10

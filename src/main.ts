@@ -1,5 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClaimableAuctionsModule } from './crons/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
@@ -8,6 +8,8 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -18,6 +20,12 @@ async function bootstrap() {
   );
 
   app.useGlobalInterceptors(new LoggingInterceptor());
+
+  const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
+  httpServer.keepAliveTimeout = parseInt(
+    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
+  );
+
   await app.listen(process.env.PORT);
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {

@@ -19,7 +19,7 @@ export class ApiService {
           keepAlive: true,
           maxSockets: Infinity,
           maxFreeSockets: 10,
-          timeout: elrondConfig.keepAliveTimeoutDownstream, // active socket keepalive
+          timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM), // active socket keepalive
           freeSocketTimeout: 30000, // free socket keepalive for 30 seconds
         });
       } else {

@@ -159,6 +159,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('likesCount', () => Int)
   async likesCount(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return 0;
+    }
     const { identifier } = asset;
     const assetLikes = await this.assetsLikeProvider.load(identifier);
     return assetLikes ? assetLikes[0]?.likesCount : 0;
@@ -178,12 +181,18 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('isLiked', () => Boolean)
   isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
+    if (process.env.NODE_ENV === 'production') {
+      return Promise.resolve(false);
+    }
     const { identifier } = asset;
     return this.assetsLikesService.isAssetLiked(identifier, byAddress);
   }
 
   @ResolveField('totalRunningAuctions', () => String)
   async totalRunningAuctions(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return '0';
+    }
     const { identifier } = asset;
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
     return assetAuctions ? assetAuctions[0]?.auctionsCount : 0;
@@ -191,6 +200,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('hasAvailableAuctions', () => Boolean)
   async hasAvailableAuctions(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return Promise.resolve(false);
+    }
     const { identifier } = asset;
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
     return assetAuctions && assetAuctions[0]?.auctionsCount > 0 ? true : false;
@@ -198,6 +210,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('totalAvailableTokens', () => String)
   async totalAvailableTokens(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return 0;
+    }
     const { identifier } = asset;
     const availableTokens = await this.assetAvailableTokensCountProvider.load(
       identifier,
@@ -214,6 +229,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('auctions', () => [Auction])
   async auctions(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return [];
+    }
     const { identifier } = asset;
     if (!identifier) {
       return null;
@@ -226,6 +244,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('lowestAuction', () => Auction)
   async lowestAuction(@Parent() asset: Asset) {
+    if (process.env.NODE_ENV === 'production') {
+      return null;
+    }
     const { identifier } = asset;
     if (!identifier) {
       return null;
