@@ -17,14 +17,14 @@ export class ElrondProxyService {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,
       maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
-      timeout: elrondConfig.keepAliveTimeout,
+      timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
     };
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
 
     this.proxy = new ProxyProvider(process.env.ELROND_GATEWAY, {
-      timeout: elrondConfig.proxyTimeout,
+      timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       httpAgent: elrondConfig.keepAlive ? httpAgent : null,
       httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
     });

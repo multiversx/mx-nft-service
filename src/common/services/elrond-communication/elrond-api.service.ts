@@ -19,7 +19,7 @@ export class ElrondApiService {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,
       maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
-      timeout: elrondConfig.keepAliveTimeout,
+      timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
     };
     const httpAgent = new Agent(keepAliveOptions);
