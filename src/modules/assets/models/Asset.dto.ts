@@ -4,6 +4,7 @@ import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common';
 import { Account } from 'src/modules/accounts/models';
+import { ScamInfo } from './ScamInfo.dto';
 
 @ObjectType()
 export class Asset {
@@ -35,7 +36,7 @@ export class Asset {
   isWhitelistedStorage: boolean;
   @Field(() => String, { nullable: true })
   balance: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   supply: string;
   @Field(() => String, { nullable: true })
   totalRunningAuctions: string;
@@ -63,6 +64,8 @@ export class Asset {
   isLiked: boolean;
   @Field(() => Metadata, { nullable: true })
   metadata: Metadata;
+  @Field(() => ScamInfo, { nullable: true })
+  scamInfo: ScamInfo;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -89,6 +92,7 @@ export class Asset {
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,
+          scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
         })
       : null;
   }

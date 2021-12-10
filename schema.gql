@@ -63,7 +63,8 @@ type Asset {
   owner: Account
   ownerAddress: String
   royalties: String!
-  supply: String!
+  scamInfo: ScamInfo
+  supply: String
   tags: [String!]
   thumbnailUrl: String
   totalAvailableTokens: String
@@ -528,6 +529,16 @@ type Query {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+type ScamInfo {
+  info: String
+  type: ScamInfoTypeEnum
+}
+
+enum ScamInfoTypeEnum {
+  potentialScam
+  scam
 }
 
 input SetNftRolesArgs {

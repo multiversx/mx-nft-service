@@ -39,6 +39,7 @@ import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
 import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { AssetsSupplyLoader } from './assets-supply.loader';
+import { AssetScamInfoProvider } from './assets-scam-info.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -51,6 +52,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private auctionsProvider: AuctionsForAssetProvider,
+    private assetScamProvider: AssetScamInfoProvider,
   ) {
     super();
   }
@@ -186,6 +188,13 @@ export class AssetsResolver extends BaseResolver(Asset) {
       identifier,
     );
     return availableTokens ? availableTokens[0]?.count : 0;
+  }
+
+  @ResolveField('scamInfo', () => String)
+  async scamInfo(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    const availableTokens = await this.assetScamProvider.load(identifier);
+    return availableTokens;
   }
 
   @ResolveField('auctions', () => [Auction])

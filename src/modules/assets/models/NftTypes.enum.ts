@@ -8,3 +8,12 @@ export enum NftTypeEnum {
 registerEnumType(NftTypeEnum, {
   name: 'NftTypeEnum',
 });
+
+export enum ScamInfoTypeEnum {
+  potentialScam = 'potentialScam',
+  scam = 'scam',
+}
+
+registerEnumType(ScamInfoTypeEnum, {
+  name: 'ScamInfoTypeEnum',
+});
