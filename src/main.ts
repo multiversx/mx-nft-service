@@ -25,7 +25,6 @@ async function bootstrap() {
   httpServer.keepAliveTimeout = parseInt(
     process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
   );
-  httpServer.headersTimeout = parseInt(process.env.KEEPALIVE_TIMEOUT_UPSTREAM);
 
   await app.listen(process.env.PORT);
 
