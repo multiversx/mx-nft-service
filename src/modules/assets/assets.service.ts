@@ -292,7 +292,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAssets,
-        cacheConfig.followersttl,
+        30,
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {
