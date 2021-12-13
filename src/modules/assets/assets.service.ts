@@ -169,7 +169,7 @@ export class AssetsService {
       gasLimit: new GasLimit(gas.addQuantity),
     });
 
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async burnQuantity(
@@ -191,7 +191,7 @@ export class AssetsService {
       gasLimit: new GasLimit(gas.burnQuantity),
     });
 
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async createNft(
@@ -245,13 +245,13 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateStringVal(transferNftArgs.quantity)),
+        new U64Value(new BigNumber(transferNftArgs.quantity)),
         new AddressValue(new Address(transferNftArgs.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
 
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   private async getCollectionAssets(
