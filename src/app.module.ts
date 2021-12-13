@@ -36,6 +36,7 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
       buildSchemaOptions: {
         fieldMiddleware: [loggerMiddleware],
       },
+      introspection: process.env.NODE_ENV !== 'production',
       sortSchema: true,
       playground: true,
       formatError: (error: GraphQLError) => {
