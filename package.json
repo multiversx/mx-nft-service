@@ -46,7 +46,7 @@
     "agentkeepalive": "^4.1.4",
     "amqp-connection-manager": "^3.7.0",
     "amqplib": "^0.8.0",
-    "apollo-server-express": "^2.22.2",
+    "apollo-server-express": "^2.25.2",
     "aws-sdk": "^2.974.0",
     "axios": "^0.21.1",
     "axios-retry": "^3.1.8",

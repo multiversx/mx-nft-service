@@ -1,16 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as Agent from 'agentkeepalive';
 import { elrondConfig } from 'src/config';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
 
-  constructor() {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
@@ -63,7 +67,6 @@ export class ApiService {
       }
 
       if (!handled) {
-        let logger = new Logger(ApiService.name);
         let customError = {
           method: 'GET',
           url,
@@ -73,7 +76,7 @@ export class ApiService {
           name: error.name,
         };
 
-        logger.error(customError);
+        this.logger.error(customError);
 
         throw customError;
       }
@@ -109,8 +112,7 @@ export class ApiService {
           name: error.name,
         };
 
-        let logger = new Logger(ApiService.name);
-        logger.error(customError);
+        this.logger.error(customError);
 
         throw customError;
       }

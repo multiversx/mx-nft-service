@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Args } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog } from './models/asset-history';
 import { AssetsHistoryService } from '.';
@@ -21,9 +21,6 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
   ): Promise<AssetHistoryLogResponse> {
-    if (process.env.NODE_ENV === 'production') {
-      return new AssetHistoryLogResponse();
-    }
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
