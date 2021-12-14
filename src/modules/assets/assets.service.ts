@@ -230,16 +230,13 @@ export class AssetsService {
     const fileData = await this.pinataService.uploadFile(args.file);
     const fileMetadata = new FileContent({
       description: args.attributes.description,
-      fileType: args.file.mimetype,
-      fileUri: fileData.url,
-      fileName: args.file.filename,
     });
-    const asset = await this.pinataService.uploadText(fileMetadata);
+    const assetMetadata = await this.pinataService.uploadText(fileMetadata);
 
     await this.s3Service.upload(args.file, fileData.hash);
-    await this.s3Service.uploadText(fileMetadata, asset.hash);
+    await this.s3Service.uploadText(fileMetadata, assetMetadata.hash);
 
-    const attributes = `tags:${args.attributes.tags};metadata:${asset.hash}`;
+    const attributes = `tags:${args.attributes.tags};metadata:${assetMetadata.hash}`;
 
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({

@@ -57,6 +57,7 @@ type Asset {
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
+  media: Media
   metadata: Metadata
   name: String
   nonce: Int!
@@ -373,11 +374,15 @@ input IssueCollectionArgs {
   tokenTicker: String!
 }
 
+type Media {
+  fileSize: String
+  fileType: String
+  thumbnailUrl: String
+  url: String
+}
+
 type Metadata {
   description: String!
-  fileName: String!
-  fileType: String!
-  fileUri: String!
 }
 
 type Mutation {

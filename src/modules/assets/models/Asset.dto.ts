@@ -5,6 +5,7 @@ import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common';
 import { Account } from 'src/modules/accounts/models';
 import { ScamInfo } from './ScamInfo.dto';
+import { Media } from './Media.dto';
 
 @ObjectType()
 export class Asset {
@@ -66,6 +67,8 @@ export class Asset {
   metadata: Metadata;
   @Field(() => ScamInfo, { nullable: true })
   scamInfo: ScamInfo;
+  @Field(() => Media, { nullable: true })
+  media: Media[];
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -94,6 +97,7 @@ export class Asset {
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,
           scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
+          media: nft.media?.map((m) => Media.fromNftMedia(m)),
         })
       : null;
   }

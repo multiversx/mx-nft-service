@@ -1,5 +1,3 @@
-import { NftMetadata } from './nftMetadata';
-
 export interface Nft {
   collection: string;
   identifier: string;
@@ -34,16 +32,22 @@ export interface Nft {
   thumbnailUrl: string;
   tags: string[];
   metadata: NftMetadata;
+  media: NftMedia[];
   scamInfo: NftScamInfo;
 }
 
-export interface ApiAccount {
-  address: string;
-  balance: string;
-  herotag: string;
+export interface NftMedia {
+  url: string;
+  thumbnailUrl: string;
+  fileType: string;
+  fileSize;
 }
 
 export interface NftScamInfo {
   type: string;
   info: string;
+}
+
+export interface NftMetadata {
+  description: string;
 }
