@@ -264,11 +264,17 @@ export class AssetsService {
     return [nfts, count];
   }
 
-  private async getAllAssets(query: string = ''): Promise<[Asset[], number]> {
+  private async getAllAssets(
+    query: string = '',
+  ): Promise<[Asset[], number] | any> {
     const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
+    if (!nfts || !count) {
+      return;
+    }
+
     const assets = nfts?.map((element) => Asset.fromNft(element));
     return [assets, count];
   }
