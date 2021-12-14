@@ -57,11 +57,19 @@ export class ElrondApiService {
 
       return response;
     } catch (error) {
+      let customError = {
+        method: 'GET',
+        resourceUrl,
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
       this.logger.error(
         `An error occurred while calling the elrond api service on url ${resourceUrl}`,
         {
           path: `ElrondApiService.${name}`,
-          error,
+          error: customError,
         },
       );
     }
