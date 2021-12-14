@@ -65,18 +65,19 @@ export class AssetsResolver extends BaseResolver(Asset) {
     pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [assets, count] = await this.assetsService.getAssets(
-      offset,
-      limit,
-      filters,
-    );
-    return PageResponse.mapResponse<Asset>(
-      assets,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+    const response = await this.assetsService.getAssets(offset, limit, filters);
+    if (response) {
+      const [assets, count] = response;
+      return PageResponse.mapResponse<Asset>(
+        assets,
+        pagination,
+        count,
+        offset,
+        limit,
+      );
+    } else {
+      return new AssetsResponse();
+    }
   }
 
   @Mutation(() => TransactionNode)
