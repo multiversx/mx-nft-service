@@ -13,12 +13,14 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
+import { IsAssetLikedProvider } from './asset-is-liked.loader';
 
 @Module({
   providers: [
     AssetsService,
     AssetsLikesService,
     AssetLikesProvider,
+    IsAssetLikedProvider,
     AssetsSupplyLoader,
     AssetAuctionsCountProvider,
     AssetScamInfoProvider,

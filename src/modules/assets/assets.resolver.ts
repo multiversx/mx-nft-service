@@ -40,6 +40,7 @@ import { AssetAvailableTokensCountProvider } from './asset-available-tokens-coun
 import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
+import { IsAssetLikedProvider } from './asset-is-liked.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -48,6 +49,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
+    private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
@@ -181,12 +183,16 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('isLiked', () => Boolean)
-  isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
+  async isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     if (process.env.NODE_ENV === 'production') {
       return Promise.resolve(false);
     }
+
     const { identifier } = asset;
-    return this.assetsLikesService.isAssetLiked(identifier, byAddress);
+    const assetLikes = await this.isAssetLikedProvider.load(
+      `${identifier}_${byAddress}`,
+    );
+    return assetLikes ? !!+assetLikes[0]?.liked : false;
   }
 
   @ResolveField('totalRunningAuctions', () => String)
