@@ -18,6 +18,6 @@ export class ScamInfo {
           type: ScamInfoTypeEnum[scamInfo.type],
           info: scamInfo.info,
         })
-      : null;
+      : new ScamInfo();
   }
 }
