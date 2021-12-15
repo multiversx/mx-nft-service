@@ -157,7 +157,9 @@ export class AssetsService {
         getAsset,
         cacheConfig.followersttl,
       );
-      return new CollectionType({ items: [asset], count: asset ? 1 : 0 });
+      return asset
+        ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
+        : null;
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
         path: 'AssetsService.getAsset',
@@ -345,7 +347,9 @@ export class AssetsService {
         filters.ownerAddress,
         filters.identifier,
       );
-      return new CollectionType({ count: asset ? 1 : 0, items: [asset] });
+      return asset
+        ? new CollectionType({ count: asset ? 1 : 0, items: [asset] })
+        : null;
     } else {
       return await this.getAssetsForUser(filters.ownerAddress, query);
     }
