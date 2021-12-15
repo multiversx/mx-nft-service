@@ -1,4 +1,3 @@
-import './tracer';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
