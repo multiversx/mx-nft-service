@@ -29,12 +29,14 @@ import {
   TransferNftArgs,
   Asset,
   HandleQuantityArgs,
+  CollectionType,
 } from './models';
 import BigNumber from 'bignumber.js';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { AssetScamInfoProvider } from './assets-scam-info.loader';
 const hash = require('object-hash');
 
 @Injectable()
@@ -43,6 +45,7 @@ export class AssetsService {
   constructor(
     private apiService: ElrondApiService,
     private pinataService: PinataService,
+    private assetScamLoader: AssetScamInfoProvider,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -56,7 +59,7 @@ export class AssetsService {
   async getAssetsForUser(
     address: string,
     query: string = '',
-  ): Promise<[Asset[], number]> {
+  ): Promise<CollectionType<Asset>> {
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(
         address,
@@ -65,14 +68,14 @@ export class AssetsService {
       this.apiService.getNftsForUserCount(address, query),
     ]);
     const assets = nfts?.map((element) => Asset.fromNft(element));
-    return [assets, count];
+    return new CollectionType({ count, items: assets });
   }
 
   async getAssets(
     offset: number = 0,
     limit: number = 10,
     filters: AssetsFilter,
-  ): Promise<[Asset[], number]> {
+  ): Promise<CollectionType<Asset>> {
     const apiQuery = new AssetsQuery()
       .addCreator(filters?.creatorAddress)
       .addTags(filters?.tags)
@@ -83,22 +86,41 @@ export class AssetsService {
       .build();
 
     if (filters?.likedByAddress) {
-      return await this.getlikedByAssets(filters.likedByAddress, limit, offset);
+      const response = await this.getlikedByAssets(
+        filters.likedByAddress,
+        limit,
+        offset,
+      );
+      this.assetScamLoader.batchScamInfo(
+        response.items?.map((a) => a.identifier),
+        response.items?.groupBy((asset) => asset.identifier),
+      );
+      return response;
     }
     if (filters?.ownerAddress) {
-      const [assets, count] = await this.getAssetsByOwnerAddress(
-        filters,
-        apiQuery,
-      );
-      return [
-        assets?.map((a) => {
+      const response = await this.getAssetsByOwnerAddress(filters, apiQuery);
+      if (response) {
+        this.assetScamLoader.batchScamInfo(
+          response.items?.map((a) => a.identifier),
+          response.items?.groupBy((asset) => asset.identifier),
+        );
+      }
+      return new CollectionType({
+        count: response?.count,
+        items: response?.items?.map((a) => {
           return { ...a, ownerAddress: filters?.ownerAddress };
         }),
-        count,
-      ];
+      });
     }
 
-    return await this.getAssetsWithoutOwner(filters, apiQuery);
+    const response = await this.getAssetsWithoutOwner(filters, apiQuery);
+    if (response) {
+      this.assetScamLoader.batchScamInfo(
+        response.items?.map((a) => a.identifier),
+        response.items?.groupBy((asset) => asset.identifier),
+      );
+    }
+    return response;
   }
 
   async getAssetsForCollection(
@@ -123,7 +145,7 @@ export class AssetsService {
     return Asset.fromNft(nft);
   }
 
-  private async getAsset(identifier): Promise<[Asset[], number]> {
+  private async getAsset(identifier): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
@@ -133,7 +155,7 @@ export class AssetsService {
         getAsset,
         cacheConfig.followersttl,
       );
-      return [[asset], asset ? 1 : 0];
+      return new CollectionType({ items: [asset], count: asset ? 1 : 0 });
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
         path: 'AssetsService.getAsset',
@@ -269,23 +291,23 @@ export class AssetsService {
 
   private async getAllAssets(
     query: string = '',
-  ): Promise<[Asset[], number] | any> {
+  ): Promise<CollectionType<Asset>> {
     const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
     if (!nfts || !count) {
-      return;
+      return null;
     }
 
     const assets = nfts?.map((element) => Asset.fromNft(element));
-    return [assets, count];
+    return new CollectionType({ count, items: assets });
   }
 
   private async getAssetsWithoutOwner(
     filters: AssetsFilter,
     query: string = '',
-  ): Promise<[Asset[], number]> {
+  ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       return await this.getAsset(filters?.identifier);
     } else {
@@ -293,7 +315,7 @@ export class AssetsService {
     }
   }
 
-  private async getOrSetAssets(query: string): Promise<[Asset[], number]> {
+  private async getOrSetAssets(query: string): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
       const getAssets = () => this.getAllAssets(query);
@@ -315,13 +337,13 @@ export class AssetsService {
   private async getAssetsByOwnerAddress(
     filters: AssetsFilter,
     query: string = '',
-  ): Promise<[Asset[], number]> {
+  ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       const asset = await this.getAssetByIdentifierAndAddress(
         filters.ownerAddress,
         filters.identifier,
       );
-      return [[asset], asset ? 1 : 0];
+      return new CollectionType({ count: asset ? 1 : 0, items: [asset] });
     } else {
       return await this.getAssetsForUser(filters.ownerAddress, query);
     }
@@ -331,7 +353,7 @@ export class AssetsService {
     likedByAddress: string,
     limit: number,
     offset: number,
-  ): Promise<[Asset[], number]> {
+  ): Promise<CollectionType<Asset>> {
     const [assetsLiked, assetsCount] =
       await this.assetsLikedService.getAssetLiked(
         limit,
@@ -342,7 +364,7 @@ export class AssetsService {
       assetsLiked?.map((e) => e.identifier),
     );
 
-    return [assets, assetsCount];
+    return new CollectionType({ items: assets, count: assetsCount });
   }
 
   private getAssetsCacheKey(identifier: string) {

@@ -11,3 +11,4 @@ export * from './remove-like.dto';
 export * from './NftTypes.enum';
 export * from './AuctionEvent.enum';
 export * from './AssetAction.enum';
+export * from './Collection.type';
