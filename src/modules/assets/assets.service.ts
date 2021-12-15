@@ -37,6 +37,7 @@ import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
+import { AssetsSupplyLoader } from './assets-supply.loader';
 const hash = require('object-hash');
 
 @Injectable()
@@ -46,6 +47,7 @@ export class AssetsService {
     private apiService: ElrondApiService,
     private pinataService: PinataService,
     private assetScamLoader: AssetScamInfoProvider,
+    private assetSupplyLoader: AssetsSupplyLoader,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -91,20 +93,12 @@ export class AssetsService {
         limit,
         offset,
       );
-      this.assetScamLoader.batchScamInfo(
-        response.items?.map((a) => a.identifier),
-        response.items?.groupBy((asset) => asset.identifier),
-      );
+      this.addToCache(response);
       return response;
     }
     if (filters?.ownerAddress) {
       const response = await this.getAssetsByOwnerAddress(filters, apiQuery);
-      if (response) {
-        this.assetScamLoader.batchScamInfo(
-          response.items?.map((a) => a.identifier),
-          response.items?.groupBy((asset) => asset.identifier),
-        );
-      }
+      await this.addToCache(response);
       return new CollectionType({
         count: response?.count,
         items: response?.items?.map((a) => {
@@ -114,13 +108,21 @@ export class AssetsService {
     }
 
     const response = await this.getAssetsWithoutOwner(filters, apiQuery);
+    this.addToCache(response);
+    return response;
+  }
+
+  private async addToCache(response: CollectionType<Asset>) {
     if (response) {
-      this.assetScamLoader.batchScamInfo(
+      await this.assetScamLoader.batchScamInfo(
+        response.items?.map((a) => a.identifier),
+        response.items?.groupBy((asset) => asset.identifier),
+      );
+      await this.assetSupplyLoader.batchSupplyInfo(
         response.items?.map((a) => a.identifier),
         response.items?.groupBy((asset) => asset.identifier),
       );
     }
-    return response;
   }
 
   async getAssetsForCollection(

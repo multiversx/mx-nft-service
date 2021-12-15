@@ -99,6 +99,7 @@ export class ElrondApiService {
     offset: number = 0,
     query: string = '&withOwner=true&withSupply=true',
   ): Promise<Nft[]> {
+    console.log(888888888888);
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
       `nfts?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}&hasUris=true${query}`,

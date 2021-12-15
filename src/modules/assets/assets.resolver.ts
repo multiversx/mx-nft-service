@@ -175,7 +175,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (supply) {
       return supply;
     }
-    return await this.assetSupplyProvider.getSupply(identifier);
+    const assetSupply = await this.assetSupplyProvider.load(identifier);
+    return assetSupply ? assetSupply[0]?.supply : 0;
   }
 
   @ResolveField('isLiked', () => Boolean)
