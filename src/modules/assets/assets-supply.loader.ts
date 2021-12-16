@@ -1,39 +1,66 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService, Nft } from 'src/common';
+import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
+import { BaseProvider } from './base.loader';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AssetsSupplyLoader {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAssetsSupply(keys),
-    { cache: false },
-  );
+export class AssetsSupplyLoader extends BaseProvider<string> {
+  constructor(
+    redisCacheService: RedisCacheService,
+    private apiService: ElrondApiService,
+  ) {
+    super(
+      'asset_supply',
+      redisCacheService,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
+      5,
+    );
+  }
 
-  constructor(private apiService: ElrondApiService) {}
-
-  batchAssetsSupply = async (keys: string[]) => {
-    const uniqueKeys = [...new Set(keys)];
+  async getDataFromDb(identifiers: string[]) {
     const nfts = await this.apiService.getNftsByIdentifiers(
-      uniqueKeys,
+      identifiers,
       0,
       '&withSupply=true&fields=identifier,supply',
     );
-    const assetsIdentifiers: { [key: string]: Nft[] } = nfts?.groupBy(
-      (item) => item.identifier,
-    );
+    return nfts?.groupBy((asset) => asset.identifier);
+  }
 
-    let resp = keys.map((identifier) =>
+  mapValuesForRedis(
+    identifiers: string[],
+    assetsIdentifiers: { [key: string]: any[] },
+  ) {
+    return identifiers.map((identifier) =>
       assetsIdentifiers && assetsIdentifiers[identifier]
         ? assetsIdentifiers[identifier]
         : null,
     );
-    return resp;
-  };
-
-  async getSupply(identifier: string): Promise<string> {
-    const nft = await this.dataLoader.load(identifier);
-    return nft && nft.length > 0 ? nft[0].supply : null;
   }
+
+  public batchSupplyInfo = async (identifiers: string[], data: any) => {
+    const cacheKeys = this.getCacheKeys(identifiers);
+    let [redisKeys, values] = [cacheKeys, []];
+    const getDataFromRedis = await this.redisCacheService.batchGetCache(
+      this.redisClient,
+      cacheKeys,
+    );
+    if (getDataFromRedis.includes(null)) {
+      values = identifiers.map((identifier) =>
+        data && data[identifier] ? data[identifier] : null,
+      );
+
+      await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        redisKeys,
+        values,
+        3,
+      );
+      return values;
+    }
+    return getDataFromRedis;
+  };
 }

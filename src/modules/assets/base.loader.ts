@@ -32,14 +32,7 @@ export abstract class BaseProvider<T> {
   abstract getDataFromDb(identifiers: T[]): Promise<any[]>;
 
   async load(key: T): Promise<any> {
-    const cacheKey = this.getCacheKey(key);
-    const getLikesCount = () => this.dataLoader.load(key);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getLikesCount,
-      this.ttl,
-    );
+    return this.dataLoader.load(key);
   }
 
   async clearKey(key: T): Promise<any> {

@@ -8,6 +8,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { AssetLikesProvider } from './asset-likes-count.loader';
+import { IsAssetLikedProvider } from './asset-is-liked.loader';
 
 @Injectable()
 export class AssetsLikesService {
@@ -15,6 +16,7 @@ export class AssetsLikesService {
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     private assetsLikeProvider: AssetLikesProvider,
+    private isAssetLikedLikeProvider: IsAssetLikedProvider,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -44,28 +46,6 @@ export class AssetsLikesService {
         address,
         exception: err,
       });
-    }
-  }
-
-  isAssetLiked(identifier: string, address: string): Promise<boolean> {
-    try {
-      const cacheKey = this.getAssetLikedCacheKey(identifier, address);
-      const getIsAssetLiked = () =>
-        this.assetsLikesRepository.isAssetLiked(identifier, address);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getIsAssetLiked,
-        cacheConfig.followersttl,
-      );
-    } catch (err) {
-      this.logger.error('An error occurred while checking if asset is liked.', {
-        path: 'AssetsService.isAssetLiked',
-        identifier,
-        address,
-        exception: err,
-      });
-      return Promise.resolve(false);
     }
   }
 
@@ -118,6 +98,7 @@ export class AssetsLikesService {
     address: string,
   ): Promise<void> {
     await this.assetsLikeProvider.clearKey(identifier);
+    await this.isAssetLikedLikeProvider.clearKey(`${identifier}_${address}`);
     await this.invalidateAssetLikeCache(identifier, address);
     await this.invalidateAssetLikedByCount(address);
   }

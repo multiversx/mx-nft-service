@@ -41,4 +41,27 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
       );
     });
   }
+
+  public batchScamInfo = async (identifiers: string[], data: any) => {
+    const cacheKeys = this.getCacheKeys(identifiers);
+    let [redisKeys, values] = [cacheKeys, []];
+    const getDataFromRedis = await this.redisCacheService.batchGetCache(
+      this.redisClient,
+      cacheKeys,
+    );
+    if (getDataFromRedis.includes(null)) {
+      values = identifiers.map((identifier) => {
+        return ScamInfo.fromNftScamInfo(data[identifier][0].scamInfo);
+      });
+
+      await this.redisCacheService.batchSetCache(
+        this.redisClient,
+        redisKeys,
+        values,
+        1800,
+      );
+      return values;
+    }
+    return getDataFromRedis;
+  };
 }
