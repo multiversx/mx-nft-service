@@ -57,7 +57,7 @@ type Asset {
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
-  media: Media
+  media: [Media!]
   metadata: Metadata
   name: String
   nonce: Int!

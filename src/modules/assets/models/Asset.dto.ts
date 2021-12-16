@@ -67,7 +67,7 @@ export class Asset {
   metadata: Metadata;
   @Field(() => ScamInfo, { nullable: true })
   scamInfo: ScamInfo;
-  @Field(() => Media, { nullable: true })
+  @Field(() => [Media], { nullable: true })
   media: Media[];
 
   constructor(init?: Partial<Asset>) {
