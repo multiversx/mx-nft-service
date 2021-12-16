@@ -57,7 +57,7 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
         this.redisClient,
         redisKeys,
         values,
-        3,
+        5,
       );
       return values;
     }
