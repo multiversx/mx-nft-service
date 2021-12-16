@@ -1,11 +1,11 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field } from '@nestjs/graphql';
 import { NftMetadata } from 'src/common';
 @ObjectType()
 export class Metadata {
   @Field(() => String)
   description: string;
   @Field(() => String)
-  fileType!: string;
+  fileType: string;
   @Field(() => String)
   fileUri: string;
   @Field(() => String)
