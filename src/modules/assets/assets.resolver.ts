@@ -224,8 +224,8 @@ export class AssetsResolver extends BaseResolver(Asset) {
   @ResolveField('scamInfo', () => String)
   async scamInfo(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const availableTokens = await this.assetScamProvider.load(identifier);
-    return availableTokens;
+    const scamInfo = await this.assetScamProvider.load(identifier);
+    return scamInfo && Object.keys(scamInfo).length !== 0 ? scamInfo : null;
   }
 
   @ResolveField('auctions', () => [Auction])
