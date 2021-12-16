@@ -113,7 +113,7 @@ export class AssetsService {
   }
 
   private async addToCache(response: CollectionType<Asset>) {
-    if (response) {
+    if (response?.count && response?.items) {
       await this.assetScamLoader.batchScamInfo(
         response.items?.map((a) => a.identifier),
         response.items?.groupBy((asset) => asset.identifier),
