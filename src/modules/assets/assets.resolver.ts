@@ -168,12 +168,9 @@ export class AssetsResolver extends BaseResolver(Asset) {
 
   @ResolveField('supply', () => String)
   async supply(@Parent() asset: Asset) {
-    const { identifier, type, supply } = asset;
+    const { identifier, type } = asset;
     if (type === NftTypeEnum.NonFungibleESDT) {
       return '1';
-    }
-    if (supply) {
-      return supply;
     }
     const assetSupply = await this.assetSupplyProvider.load(identifier);
     return assetSupply ? assetSupply[0]?.supply : 0;

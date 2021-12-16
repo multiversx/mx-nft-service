@@ -84,6 +84,7 @@ export class Asset {
           creationDate: nft.timestamp,
           hash: nft.hash ?? '',
           balance: nft.balance,
+          supply: nft.supply,
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
