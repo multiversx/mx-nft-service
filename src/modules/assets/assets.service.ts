@@ -276,8 +276,12 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });
-
-    return transaction.toPlainObject(new Address(ownerAddress));
+    let response = transaction.toPlainObject(new Address(ownerAddress));
+    response.gasLimit = Math.max(
+      750_000 + response.data.length * 1_500,
+      gas.nftTransfer,
+    );
+    return response;
   }
 
   private async getCollectionAssets(

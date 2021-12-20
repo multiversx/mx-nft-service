@@ -58,7 +58,7 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
         this.redisClient,
         redisKeys,
         values,
-        1800,
+        300,
       );
       return values;
     }
