@@ -24,7 +24,7 @@ export class ElrondElasticService {
     nonce: string,
     size: number,
     timestamp: number | string,
-  ): Promise<[HitResponse[], number]> {
+  ): Promise<[HitResponse[], number, number]> {
     const profiler = new PerformanceProfiler(
       `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
     );
@@ -98,14 +98,18 @@ export class ElrondElasticService {
           }
         }
       });
-      return [responseMap, data?.hits?.total.value];
+      return [
+        responseMap,
+        data?.hits?.total.value,
+        data?.hits?.hits[data?.hits?.hits?.length - 1]?._source.timestamp,
+      ];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: 'elrond-elastic.service.getNftHistory',
         address: nonce,
         exception: e.toString(),
       });
-      return [[], 0];
+      return [[], 0, 0];
     }
   }
 }
