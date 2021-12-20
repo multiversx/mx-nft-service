@@ -17,9 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       (process.env.NODE_ENV === 'development' ||
         process.env.NODE_ENV === 'test' ||
         process.env.NODE_ENV === 'staging') &&
-      !!req.headers['X-NFT-ADDRESS']
+      !!req.headers['x-nft-address']
     ) {
-      const address = req.headers['X-NFT-ADDRESS'];
+      const address = req.headers['x-nft-address'];
       const user = {
         publicKey: address,
       };
