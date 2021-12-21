@@ -206,7 +206,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   @Query(() => String)
   async marketplaceCutPercentage() {
     if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
+      return '';
     }
     const royalties = await this.nftAbiService.getCutPercentage();
     return royalties;
@@ -220,7 +220,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     if (process.env.NODE_ENV === 'production') {
-      return '';
+      return new TransactionNode();
     }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getClaimableAuctions(
