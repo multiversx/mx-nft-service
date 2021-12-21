@@ -13,7 +13,7 @@ import {
   getSmartContract,
   RedisCacheService,
 } from 'src/common';
-import { cacheConfig, gas } from 'src/config';
+import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import '../../utils/extentions';
 import { AssetsFilter } from '../filtersTypes';
@@ -281,7 +281,10 @@ export class AssetsService {
       750_000 + response.data.length * 1_500,
       gas.nftTransfer,
     );
-    return response;
+    return {
+      ...response,
+      chainID: elrondConfig.chainID,
+    };
   }
 
   private async getCollectionAssets(
