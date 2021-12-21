@@ -201,7 +201,7 @@ export class NftMarketplaceAbiService {
     return await this.getFirstQueryResult(contract, getDataQuery);
   }
 
-  async getCutPercentage(): Promise<any> {
+  async getCutPercentage(): Promise<BigUIntType> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getMarketplaceCutPercentage()

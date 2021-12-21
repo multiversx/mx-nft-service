@@ -203,6 +203,15 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     );
   }
 
+  @Query(() => String)
+  async marketplaceCutPercentage() {
+    if (process.env.NODE_ENV === 'production') {
+      return new TransactionNode();
+    }
+    const royalties = await this.nftAbiService.getCutPercentage();
+    return royalties;
+  }
+
   @Query(() => AuctionResponse)
   @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(
