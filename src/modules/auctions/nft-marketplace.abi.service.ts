@@ -162,7 +162,9 @@ export class NftMarketplaceAbiService {
         new U64Value(new BigNumber(auctionId)),
       ])
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   async getDeadline(auctionId: string): Promise<TypedValue> {
@@ -170,7 +172,8 @@ export class NftMarketplaceAbiService {
     let getDataQuery = <Interaction>(
       contract.methods.getDeadline([new U64Value(new BigNumber(auctionId))])
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   async getMinMaxBid(auctionId: string): Promise<TypedValue> {
@@ -178,7 +181,8 @@ export class NftMarketplaceAbiService {
     let getDataQuery = <Interaction>(
       contract.methods.getMinMaxBid([new U64Value(new BigNumber(auctionId))])
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   async getCurrentWinningBid(auctionId: string): Promise<TypedValue> {
@@ -188,7 +192,8 @@ export class NftMarketplaceAbiService {
         new U64Value(new BigNumber(auctionId)),
       ])
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   async getCurrentWinner(auctionId: string): Promise<TypedValue> {
@@ -198,7 +203,8 @@ export class NftMarketplaceAbiService {
         new U64Value(new BigNumber(auctionId)),
       ])
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   async getCutPercentage(): Promise<string> {
@@ -206,7 +212,8 @@ export class NftMarketplaceAbiService {
     let getDataQuery = <Interaction>(
       contract.methods.getMarketplaceCutPercentage()
     );
-    return await this.getFirstQueryResult(contract, getDataQuery);
+    const response = await this.getFirstQueryResult(contract, getDataQuery);
+    return response.firstValue.valueOf().toFixed();
   }
 
   private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {
@@ -291,6 +298,6 @@ export class NftMarketplaceAbiService {
     );
 
     let result = interaction.interpretQueryResponse(data);
-    return result.firstValue.valueOf();
+    return result;
   }
 }
