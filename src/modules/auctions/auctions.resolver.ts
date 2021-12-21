@@ -220,7 +220,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
+      return '';
     }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getClaimableAuctions(
