@@ -35,7 +35,7 @@
   },
 
   "gas": {
-    "nftCreate": 60000000,
+    "nftCreate": 250000,
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
@@ -46,7 +46,7 @@
     "setRoles": 60000000,
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
-    "burnQuantity": 10000000,
-    "addQuantity": 10000000
+    "burnQuantity": 60000,
+    "addQuantity": 60000
   }
 }

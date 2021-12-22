@@ -197,8 +197,13 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.addQuantity),
     });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
 
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return {
+      ...response,
+      gasLimit: gas.addQuantity,
+      chainID: elrondConfig.chainID,
+    };
   }
 
   async burnQuantity(
@@ -219,8 +224,13 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.burnQuantity),
     });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
 
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return {
+      ...response,
+      gasLimit: gas.burnQuantity,
+      chainID: elrondConfig.chainID,
+    };
   }
 
   async createNft(
@@ -253,8 +263,13 @@ export class AssetsService {
       ],
       gasLimit: new GasLimit(gas.nftCreate),
     });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
 
-    return transaction.toPlainObject();
+    return {
+      ...response,
+      gasLimit: gas.nftCreate + response.data.length * 1_500,
+      chainID: elrondConfig.chainID,
+    };
   }
 
   async transferNft(
