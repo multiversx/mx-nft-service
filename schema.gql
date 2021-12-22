@@ -382,10 +382,10 @@ type Media {
 }
 
 type Metadata {
-  description: String!
-  fileName: String!
-  fileType: String!
-  fileUri: String!
+  description: String
+  fileName: String
+  fileType: String
+  fileUri: String
 }
 
 type Mutation {

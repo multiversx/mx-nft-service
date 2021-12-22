@@ -2,13 +2,13 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { NftMetadata } from 'src/common';
 @ObjectType()
 export class Metadata {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   description: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   fileType: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   fileUri: string;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   fileName: string;
 
   constructor(init?: Partial<Metadata>) {
@@ -18,10 +18,10 @@ export class Metadata {
   static fromNftMetadata(metadata: NftMetadata) {
     return metadata
       ? new Metadata({
-          description: metadata.description ?? '',
-          fileName: metadata.fileName ?? '',
-          fileType: metadata.fileType ?? '',
-          fileUri: metadata.fileUri ?? '',
+          description: metadata?.description,
+          fileName: metadata?.fileName,
+          fileType: metadata?.fileType,
+          fileUri: metadata?.fileUri,
         })
       : null;
   }
