@@ -28,8 +28,6 @@ export interface Nft {
   royalties: string;
   timestamp: number;
   uris: string[];
-  url: string;
-  thumbnailUrl: string;
   tags: string[];
   metadata: NftMetadata;
   media: NftMedia[];
