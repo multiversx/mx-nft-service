@@ -4,7 +4,7 @@ import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tok
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
 import { AuctionStatusEnum } from '../auctions/models';
-import { CreateOrderArgs } from '../orders/models';
+import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
 import { OrdersService } from '../orders/order.service';
 import {
   AuctionTokenEvent,
@@ -23,7 +23,7 @@ export class NftEventsService {
     private ordersService: OrdersService,
   ) {}
 
-  public async handleNftAuctionEnded(auctionEvents: any[], hash: string) {
+  public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
@@ -40,6 +40,7 @@ export class NftEventsService {
               priceAmount: topics.currentBid,
               priceNonce: 0,
               blockHash: hash,
+              status: OrderStatusEnum.Active,
             }),
           );
 
@@ -81,6 +82,7 @@ export class NftEventsService {
               priceAmount: buySftTopics.bid,
               priceNonce: 0,
               blockHash: hash,
+              status: OrderStatusEnum.Bought,
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
@@ -101,6 +103,10 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             AuctionStatusEnum.Ended,
             hash,
+          );
+          this.ordersService.updateOrder(
+            parseInt(topicsEndAuction.auctionId, 16),
+            OrderStatusEnum.Bought,
           );
           break;
         case AuctionEventEnum.AuctionTokenEvent:

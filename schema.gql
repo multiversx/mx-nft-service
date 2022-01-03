@@ -377,15 +377,13 @@ input IssueCollectionArgs {
 type Media {
   fileSize: String
   fileType: String
+  originalUrl: String
   thumbnailUrl: String
   url: String
 }
 
 type Metadata {
   description: String
-  fileName: String
-  fileType: String
-  fileUri: String
 }
 
 type Mutation {
@@ -454,8 +452,9 @@ type OrderPageInfo {
 }
 
 enum OrderStatusEnum {
-  active
-  inactive
+  Active
+  Bought
+  Inactive
 }
 
 type OrdersResponse {

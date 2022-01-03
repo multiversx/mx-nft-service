@@ -12,7 +12,7 @@ export class NftTransactionsConsumer {
     exchange: process.env.RABBITMQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
-    await this.nftTransactionsService.handleNftAuctionEnded(
+    await this.nftTransactionsService.handleNftAuctionEvents(
       nftAuctionEvents?.events?.filter(
         (e: { address: any }) =>
           e.address === elrondConfig.nftMarketplaceAddress,

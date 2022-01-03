@@ -220,7 +220,7 @@ export class AuctionsServiceDb {
     return await this.auctionsRepository.save(auction);
   }
 
-  async deleteAuctionAndOrdersByHash(blockHash: string): Promise<any> {
+  async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
     const auctions = await this.getAuctionsForHash(blockHash);
     if (!auctions || auctions.length === 0) {
       return true;

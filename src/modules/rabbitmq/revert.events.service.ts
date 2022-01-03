@@ -10,7 +10,7 @@ export class RevertEventsService {
   ) {}
 
   public async handleNftAuctionEnded(revertEvent: any) {
-    await this.auctionsService.deleteAuctionByHash(revertEvent.hash);
+    await this.auctionsService.rollbackAuctionByHash(revertEvent.hash);
     await this.ordersService.rollbackOrdersByHash(revertEvent.hash);
   }
 }

@@ -38,6 +38,7 @@ export interface Nft {
 
 export interface NftMedia {
   url: string;
+  originalUrl: string;
   thumbnailUrl: string;
   fileType: string;
   fileSize;
@@ -50,7 +51,4 @@ export interface NftScamInfo {
 
 export interface NftMetadata {
   description: string;
-  fileUri: string;
-  fileType: string;
-  fileName: string;
 }

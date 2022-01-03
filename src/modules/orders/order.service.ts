@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
-import { CreateOrderArgs, Order } from './models';
+import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -47,6 +47,31 @@ export class OrdersService {
     }
   }
 
+  async updateOrder(
+    auctionId: number,
+    status: OrderStatusEnum,
+  ): Promise<OrderEntity> {
+    try {
+      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
+        auctionId,
+      );
+
+      await this.invalidateCache();
+      const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
+        activeOrder,
+        status,
+      );
+
+      return orderEntity;
+    } catch (error) {
+      this.logger.error('An error occurred while updating order for auction', {
+        path: 'OrdersService.updateOrder',
+        auctionId,
+        exception: error,
+      });
+    }
+  }
+
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
       await this.invalidateCache();
@@ -67,7 +92,7 @@ export class OrdersService {
     try {
       await this.invalidateCache();
 
-      return this.orderServiceDb.deleteOrdersByHash(hash);
+      return this.orderServiceDb.rollbackOrdersByHash(hash);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
