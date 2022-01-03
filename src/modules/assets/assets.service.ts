@@ -155,7 +155,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAsset,
-        cacheConfig.followersttl,
+        1800,
       );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
