@@ -19,9 +19,6 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          fileName: metadata?.fileName,
-          fileType: metadata?.fileType,
-          fileUri: metadata?.fileUri,
         })
       : null;
   }

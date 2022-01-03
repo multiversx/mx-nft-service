@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
-import { CreateOrderArgs, Order } from './models';
+import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -42,6 +42,31 @@ export class OrdersService {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrder',
         createOrderArgs,
+        exception: error,
+      });
+    }
+  }
+
+  async updateOrder(
+    auctionId: number,
+    status: OrderStatusEnum,
+  ): Promise<OrderEntity> {
+    try {
+      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
+        auctionId,
+      );
+
+      await this.invalidateCache();
+      const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
+        activeOrder,
+        status,
+      );
+
+      return orderEntity;
+    } catch (error) {
+      this.logger.error('An error occurred while updating order for auction', {
+        path: 'OrdersService.updateOrder',
+        auctionId,
         exception: error,
       });
     }

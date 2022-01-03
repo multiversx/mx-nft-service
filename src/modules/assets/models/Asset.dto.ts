@@ -91,8 +91,6 @@ export class Asset {
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
-          url: nft.url || '',
-          thumbnailUrl: nft.thumbnailUrl || '',
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,

@@ -1,5 +1,5 @@
 import { ApiProvider } from '@elrondnetwork/erdjs';
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Nft } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
@@ -57,11 +57,14 @@ export class ElrondApiService {
 
       return response;
     } catch (error) {
+      if (error.inner?.response?.status === HttpStatus.NOT_FOUND) {
+        return;
+      }
       let customError = {
         method: 'GET',
         resourceUrl,
-        response: error.response?.data,
-        status: error.response?.status,
+        response: error.inner?.response?.data,
+        status: error.inner?.response?.status,
         message: error.message,
         name: error.name,
       };

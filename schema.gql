@@ -377,6 +377,7 @@ input IssueCollectionArgs {
 type Media {
   fileSize: String
   fileType: String
+  originalUrl: String
   thumbnailUrl: String
   url: String
 }
@@ -454,8 +455,9 @@ type OrderPageInfo {
 }
 
 enum OrderStatusEnum {
-  active
-  inactive
+  Active
+  Bought
+  Inactive
 }
 
 type OrdersResponse {
