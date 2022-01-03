@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { Logger } from 'winston';
 import { ApiService } from '../api.service';
 import { AccountIdentity } from './models/account.identity';
