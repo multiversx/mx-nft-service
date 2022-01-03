@@ -4,6 +4,7 @@ export class MetricsCollector {
   private static fieldDurationHistogram: Histogram<string>;
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
+  private static redisDurationHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
   static ensureIsInitialized() {
@@ -57,6 +58,10 @@ export class MetricsCollector {
     MetricsCollector.externalCallsHistogram
       .labels(system, func)
       .observe(duration);
+  }
+
+  static setRedisDuration(action: string, duration: number) {
+    MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
   }
 
   static async getMetrics(): Promise<string> {

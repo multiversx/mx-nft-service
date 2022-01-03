@@ -3,6 +3,8 @@ import { isNil } from '@nestjs/common/utils/shared.utils';
 import * as Redis from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisService } from 'nestjs-redis';
+import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
 import { promisify } from 'util';
 import { Logger } from 'winston';
@@ -69,6 +71,7 @@ export class RedisCacheService {
     keys: string[],
     region: string = null,
   ): Promise<T[]> {
+    let profiler = new PerformanceProfiler();
     const chunks = this.getChunks(
       keys.map((key) => generateCacheKey(key, region)),
       100,
@@ -96,6 +99,9 @@ export class RedisCacheService {
         },
       );
       return;
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('KEYS', profiler.duration);
     }
   }
 
@@ -106,6 +112,7 @@ export class RedisCacheService {
     ttl: number,
     region: string = null,
   ) {
+    let profiler = new PerformanceProfiler();
     try {
       const mapKeys = keys.map((key) => generateCacheKey(key, region));
       const chunks = this.getChunks(
@@ -142,6 +149,9 @@ export class RedisCacheService {
         },
       );
       return;
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('MSET', profiler.duration);
     }
   }
 
@@ -212,8 +222,11 @@ export class RedisCacheService {
     ttl: number = this.DEFAULT_TTL,
     region: string = null,
   ): Promise<any> {
+    let profiler = new PerformanceProfiler();
     const cachedData = await this.get(client, key, region);
     if (!isNil(cachedData)) {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('GET', profiler.duration);
       return cachedData;
     }
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(
@@ -223,6 +236,9 @@ export class RedisCacheService {
     );
     const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
+    profiler.stop();
+    MetricsCollector.setRedisDuration('SET', profiler.duration);
+
     return value;
   }
 
