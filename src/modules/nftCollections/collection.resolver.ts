@@ -140,7 +140,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       assets: assets.map(
         (a) =>
           new CollectionAssetModel({
-            thumbnailUrl: a.thumbnailUrl,
+            thumbnailUrl: a.media?.length > 0 ? a.media[0].thumbnailUrl : null,
             identifier: a.identifier,
           }),
       ),
