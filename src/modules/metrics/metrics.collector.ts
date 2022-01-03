@@ -39,6 +39,14 @@ export class MetricsCollector {
       MetricsCollector.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
     }
+    if (!MetricsCollector.redisDurationHistogram) {
+      MetricsCollector.redisDurationHistogram = new Histogram({
+        name: 'redis_duration',
+        help: 'Redis Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
   }
 
   static setFieldDuration(name: string, path: string, duration: number) {
