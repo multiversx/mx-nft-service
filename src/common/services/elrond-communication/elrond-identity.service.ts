@@ -15,20 +15,13 @@ export class ElrondIdentityService {
 
   async getProfiles(addresses: string[]): Promise<AccountIdentity[]> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/multiple`;
-    const profiler = new PerformanceProfiler(`getProfiles ${url}`);
 
     const uniqueAddresses = [...new Set(addresses)];
     let request: any = { addresses: uniqueAddresses };
 
     try {
       let response = await this.apiService.post(url, request);
-      profiler.stop();
 
-      MetricsCollector.setExternalCall(
-        ElrondIdentityService.name,
-        'getProfiles',
-        profiler.duration,
-      );
       const accounts = response.data.info;
       return Object.keys(accounts).map(function (key, index) {
         accounts[key] = { ...accounts[key], address: key };

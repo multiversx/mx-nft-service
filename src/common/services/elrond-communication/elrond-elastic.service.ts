@@ -25,9 +25,6 @@ export class ElrondElasticService {
     size: number,
     timestamp: number | string,
   ): Promise<[HitResponse[], number, number]> {
-    const profiler = new PerformanceProfiler(
-      `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
-    );
     const url = `${this.url}/_search`;
     const body = {
       size: size,
@@ -83,12 +80,6 @@ export class ElrondElasticService {
     try {
       const response = await this.apiService.post(url, body);
       const data: SearchResponse = response?.data;
-      profiler.stop();
-      MetricsCollector.setExternalCall(
-        ElrondElasticService.name,
-        'getNftHistory',
-        profiler.duration,
-      );
       let responseMap: HitResponse[] = [];
       data?.hits?.hits.forEach((hit) => {
         for (const event of hit._source.events) {

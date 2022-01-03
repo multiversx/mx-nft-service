@@ -120,7 +120,6 @@ export class ApiService {
       profiler.stop();
       MetricsCollector.setExternalCall(
         this.getHostname(url),
-        '',
         profiler.duration,
       );
     }

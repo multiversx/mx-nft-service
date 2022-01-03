@@ -52,7 +52,7 @@ export class MetricsCollector {
     MetricsCollector.queryDurationHistogram.labels(query).observe(duration);
   }
 
-  static setExternalCall(system: string, func: string, duration: number) {
+  static setExternalCall(system: string, duration: number, func: string = '') {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.externalCallsHistogram
       .labels(system, func)

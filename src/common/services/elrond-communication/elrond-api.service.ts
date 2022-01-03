@@ -51,8 +51,8 @@ export class ElrondApiService {
 
       MetricsCollector.setExternalCall(
         ElrondApiService.name,
-        name,
         profiler.duration,
+        name,
       );
 
       return response;
