@@ -108,7 +108,11 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (process.env.NODE_ENV === 'production') {
       return new TransactionNode();
     }
-    return await this.assetsService.addQuantity(user.publicKey, input);
+    return await this.assetsService.addBurnQuantity(
+      user.publicKey,
+      input,
+      'ESDTNFTAddQuantity',
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -120,7 +124,11 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (process.env.NODE_ENV === 'production') {
       return new TransactionNode();
     }
-    return await this.assetsService.burnQuantity(user.publicKey, input);
+    return await this.assetsService.addBurnQuantity(
+      user.publicKey,
+      input,
+      'ESDTNFTBurn',
+    );
   }
 
   @Mutation(() => TransactionNode)

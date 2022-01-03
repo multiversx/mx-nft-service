@@ -46,7 +46,6 @@
     "setRoles": 60000000,
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
-    "burnQuantity": 60000,
-    "addQuantity": 60000
+    "addBurnQuantity": 200000
   }
 }

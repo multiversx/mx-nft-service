@@ -179,56 +179,29 @@ export class AssetsService {
     return nfts?.map((nft) => Asset.fromNft(nft));
   }
 
-  async addQuantity(
+  async addBurnQuantity(
     ownerAddress: string,
     args: HandleQuantityArgs,
+    functionName: string,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
     const contract = getSmartContract(args.addOrBurnRoleAddress);
     const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTAddQuantity'),
+      func: new ContractFunction(functionName),
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
         new U64Value(new BigNumber(args.quantity)),
       ],
-      gasLimit: new GasLimit(gas.addQuantity),
+      gasLimit: new GasLimit(gas.addBurnQuantity),
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
 
     return {
       ...response,
-      gasLimit: gas.addQuantity,
-      chainID: elrondConfig.chainID,
-    };
-  }
-
-  async burnQuantity(
-    ownerAddress: string,
-    args: HandleQuantityArgs,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
-    );
-    const contract = getSmartContract(args.addOrBurnRoleAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTBurn'),
-      value: Balance.egld(0),
-      args: [
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateStringVal(args.quantity)),
-      ],
-      gasLimit: new GasLimit(gas.burnQuantity),
-    });
-    let response = transaction.toPlainObject(new Address(ownerAddress));
-
-    return {
-      ...response,
-      gasLimit: gas.burnQuantity,
       chainID: elrondConfig.chainID,
     };
   }
