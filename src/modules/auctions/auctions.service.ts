@@ -94,14 +94,14 @@ export class AuctionsService {
     }
   }
 
-  async deleteAuctionByHash(blockHash: string): Promise<boolean> {
+  async rollbackAuctionByHash(blockHash: string): Promise<boolean> {
     try {
-      return await this.auctionServiceDb.deleteAuctionAndOrdersByHash(
+      return await this.auctionServiceDb.rollbackAuctionAndOrdersByHash(
         blockHash,
       );
     } catch (error) {
-      this.logger.error('An error occurred while deleteAuction', {
-        path: 'AuctionsService.deleteAuctionByHash',
+      this.logger.error('An error occurred while rollback Auctions', {
+        path: 'AuctionsService.rollbackAuctionByHash',
         blockHash,
         exception: error,
       });

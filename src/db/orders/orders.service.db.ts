@@ -79,7 +79,7 @@ export class OrdersServiceDb {
     return await this.ordersRepository.save(order);
   }
 
-  async deleteOrdersByHash(blockHash: string) {
+  async rollbackOrdersByHash(blockHash: string) {
     const ordersByHash = await this.getOrdersByBlockHash(blockHash);
     if (!ordersByHash || ordersByHash.length === 0) {
       return true;

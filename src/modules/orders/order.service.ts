@@ -92,7 +92,7 @@ export class OrdersService {
     try {
       await this.invalidateCache();
 
-      return this.orderServiceDb.deleteOrdersByHash(hash);
+      return this.orderServiceDb.rollbackOrdersByHash(hash);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
