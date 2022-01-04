@@ -4,6 +4,12 @@ import { NftMetadata } from 'src/common';
 export class Metadata {
   @Field(() => String, { nullable: true })
   description: string;
+  @Field(() => String, { nullable: true })
+  fileType: string;
+  @Field(() => String, { nullable: true })
+  fileUri: string;
+  @Field(() => String, { nullable: true })
+  fileName: string;
 
   constructor(init?: Partial<Metadata>) {
     Object.assign(this, init);

@@ -59,6 +59,10 @@ export class Asset {
   likesCount: number;
   @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
+  @Field(() => String, { nullable: true })
+  url: string;
+  @Field(() => String, { nullable: true })
+  thumbnailUrl: string;
   @Field(() => Metadata, { nullable: true })
   metadata: Metadata;
   @Field(() => ScamInfo, { nullable: true })
