@@ -36,7 +36,7 @@ export class SmartContractProfiler extends SmartContract {
 
     profiler.stop();
 
-    MetricsCollector.setExternalCall('vm.query', func.name, profiler.duration);
+    MetricsCollector.setExternalCall('vm.query', profiler.duration, func.name);
 
     return result;
   }

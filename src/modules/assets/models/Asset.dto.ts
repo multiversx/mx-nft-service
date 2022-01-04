@@ -49,10 +49,6 @@ export class Asset {
   creationDate!: number;
   @Field(() => [String])
   uris: string[];
-  @Field(() => String, { nullable: true })
-  url: string;
-  @Field(() => String, { nullable: true })
-  thumbnailUrl: string;
   @Field(() => [Auction], { nullable: true })
   auctions: Auction[];
   @Field(() => Auction, { nullable: true })

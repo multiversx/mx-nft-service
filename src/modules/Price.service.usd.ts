@@ -43,17 +43,6 @@ export class PriceServiceUSD {
     }
   }
 
-  getLatestPrice(): Promise<number> {
-    try {
-      return this.dataService.getQuotesHistoricalLatest();
-    } catch (err) {
-      this.logger.error('An error occurred while getting the latest price.', {
-        path: 'PriceServiceUSD.getLatestPrice',
-        exception: err,
-      });
-    }
-  }
-
   private getPriceForTimestampCacheKey(timestamp) {
     return generateCacheKeyFromParams(
       'priceUSD',

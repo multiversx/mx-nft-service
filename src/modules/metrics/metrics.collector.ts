@@ -4,6 +4,7 @@ export class MetricsCollector {
   private static fieldDurationHistogram: Histogram<string>;
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
+  private static redisDurationHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
   static ensureIsInitialized() {
@@ -38,6 +39,14 @@ export class MetricsCollector {
       MetricsCollector.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
     }
+    if (!MetricsCollector.redisDurationHistogram) {
+      MetricsCollector.redisDurationHistogram = new Histogram({
+        name: 'redis_duration',
+        help: 'Redis Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
   }
 
   static setFieldDuration(name: string, path: string, duration: number) {
@@ -52,11 +61,15 @@ export class MetricsCollector {
     MetricsCollector.queryDurationHistogram.labels(query).observe(duration);
   }
 
-  static setExternalCall(system: string, func: string, duration: number) {
+  static setExternalCall(system: string, duration: number, func: string = '') {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.externalCallsHistogram
       .labels(system, func)
       .observe(duration);
+  }
+
+  static setRedisDuration(action: string, duration: number) {
+    MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
   }
 
   static async getMetrics(): Promise<string> {

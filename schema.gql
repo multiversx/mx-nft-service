@@ -67,12 +67,10 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String
 }
 
 enum AssetActionEnum {
