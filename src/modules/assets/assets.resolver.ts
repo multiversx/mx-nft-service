@@ -22,7 +22,7 @@ import {
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
-import { Auction } from '../auctions/models';
+import { Auction, AuctionResponse } from '../auctions/models';
 import { AssetsLikesService } from './assets-likes.service';
 import ConnectionArgs from '../ConnectionArgs';
 import { AssetsFilter } from '../filtersTypes';
@@ -240,21 +240,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     return scamInfo && Object.keys(scamInfo).length !== 0 ? scamInfo : null;
-  }
-
-  @ResolveField('auctions', () => [Auction])
-  async auctions(@Parent() asset: Asset) {
-    if (process.env.NODE_ENV === 'production') {
-      return [];
-    }
-    const { identifier } = asset;
-    if (!identifier) {
-      return null;
-    }
-    const auctions = await this.auctionsProvider.load(identifier);
-    return auctions
-      ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
-      : [];
   }
 
   @ResolveField('lowestAuction', () => Auction)

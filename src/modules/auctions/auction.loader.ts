@@ -3,7 +3,6 @@ import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
 import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { BaseProvider } from '../assets/base.loader';
 
 @Injectable({

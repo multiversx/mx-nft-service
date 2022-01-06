@@ -3,8 +3,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
 import { RedisCacheService } from 'src/common';
-import { getDefaultAuctionsQueryForIdentifiers } from 'src/db/auctions/sql.queries';
-import { DateUtils } from 'src/utils/date-utils';
+import { getAuctionsForAsset } from 'src/db/auctions/sql.queries';
 import { BaseProvider } from '../assets/base.loader';
 
 @Injectable({
@@ -32,11 +31,13 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
   }
 
   async getDataFromDb(identifiers: string[]) {
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const auctions = await getRepository(AuctionEntity).query(
-      getDefaultAuctionsQueryForIdentifiers(endDate, identifiers),
+      getAuctionsForAsset(
+        identifiers.map((value) => value.split('_')[0]),
+        parseInt(identifiers[0].split('_')[1]),
+        parseInt(identifiers[0].split('_')[2]),
+      ),
     );
-
-    return auctions?.groupBy((auction) => auction.identifier);
+    return auctions?.groupBy((auction) => auction.batchKey);
   }
 }

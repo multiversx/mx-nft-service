@@ -16,6 +16,7 @@ import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
 import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
+import { AssetAuctionResolver } from './asset-auction.resolver';
 
 @Module({
   providers: [
@@ -30,6 +31,7 @@ import { ContentValidation } from './content.validation.service';
     AssetScamInfoProvider,
     AssetAvailableTokensCountProvider,
     AssetsResolver,
+    AssetAuctionResolver,
     RedisCacheService,
     S3Service,
     PriceServiceUSD,

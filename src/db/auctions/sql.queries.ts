@@ -54,37 +54,24 @@ export function getDefaultAuctionsQuery(endDate: number) {
     order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
-export function getDefaultAuctionsQueryForIdentifiers(
-  endDate: number,
+export function getAuctionsForAsset(
   identifiers: string[],
+  offset: number = 0,
+  limit: number = 2,
 ) {
-  return `WITH 
-  endingSoon AS (SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
-          FROM auctions a 
-          LEFT JOIN LATERAL 
-          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-          WHERE a.status='Running' AND a.identifier in (${identifiers.map(
-            (value) => `'${value}'`,
-          )})
-           AND a.endDate <= ${endDate}),   
-  minPrice AS (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
-        FROM auctions a 
-        LEFT JOIN LATERAL 
-        (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-        WHERE a.status='Running' AND a.identifier in (${identifiers.map(
-          (value) => `'${value}'`,
-        )})  AND a.endDate> ${endDate})
-     
-SELECT temp.* from (
-  SELECT temp.*, row_number() over (partition by identifier order by eD, if(price, price, minBidDenominated) ASC) as seqnum
-   from (
-     select * from endingSoon       
-    UNION All 
-    select * from minPrice   
-  order by eD, if(price, price, minBidDenominated) ASC
-  ) as temp) temp
-  WHERE  temp.seqnum <=10;
-`;
+  return `
+  SELECT temp.*, CONCAT(temp.identifier,"_",${offset},"_",${limit}) as batchKey from (
+    SELECT temp.*,
+      row_number() over (partition by identifier order by id ASC) as seqnum,
+      COUNT(identifier) OVER(partition by identifier) as totalCount 
+    from
+      (
+      SELECT a.* FROM auctions a
+      WHERE a.identifier IN (${identifiers.map((value) => `'${value}'`)})
+        AND a.status = 'Claimable'
+      order by id ASC
+    ) as temp) temp
+  WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
 }
 
 export function getAvailableTokensScriptsByIdentifiers(identifiers: string[]) {
