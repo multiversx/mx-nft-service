@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { DateUtils } from 'src/utils/date-utils';
 import {
   AssetActionEnum,
@@ -91,7 +92,10 @@ export class AssetsHistoryService {
             !Object.values(AuctionEventEnum).includes(
               res[index + 1]?._source.events[1]?.identifier,
             ) &&
-            res[index]._source.address === res[index]?._source.events[0].address
+            res[index]._source.address ===
+              res[index]?._source.events[0].address &&
+            res[index]._source.events[0].topics[3].base64ToBech32() !==
+              elrondConfig.nftMarketplaceAddress
           ) {
             historyLog.push(
               this.addHistoryLog(
