@@ -31,8 +31,6 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionsForAssetProvider } from 'src/modules/auctions';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
@@ -43,6 +41,7 @@ import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
 import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
+import { AuctionsForAssetProvider } from '../auctions/asset-auctions.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {

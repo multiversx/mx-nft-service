@@ -1,3 +1,4 @@
+export * from './auction-orders.loader';
 export * from './asset-auctions.loader';
 export * from './auction.loader';
 export * from './auctions.service';

@@ -165,7 +165,7 @@ type Auction {
   minBid: Price!
   nonce: Int!
   nrAuctionedTokens: Int
-  orders: [Order!]
+  orders(pagination: ConnectionArgs): OrdersResponse
   owner: Account
   ownerAddress: String
   startDate: Int!
