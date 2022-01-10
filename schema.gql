@@ -44,7 +44,6 @@ input AddLikeArgs {
 
 type Asset {
   attributes: String!
-  auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
   collection: ID!
   creationDate: Int
@@ -64,6 +63,7 @@ type Asset {
   owner: Account
   ownerAddress: String
   royalties: String!
+  runningAuctions(pagination: ConnectionArgs): AuctionResponse
   scamInfo: ScamInfo
   supply: String
   tags: [String!]

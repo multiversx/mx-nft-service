@@ -50,7 +50,7 @@ export class Asset {
   @Field(() => [String])
   uris: string[];
   @Field(() => AuctionResponse, { nullable: true })
-  auctions: AuctionResponse;
+  runningAuctions: AuctionResponse;
   @Field(() => Auction, { nullable: true })
   lowestAuction: Auction;
   @Field(() => [String], { nullable: true })

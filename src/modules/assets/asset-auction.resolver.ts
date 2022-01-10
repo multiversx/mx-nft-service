@@ -14,7 +14,7 @@ export class AssetAuctionResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField(() => AuctionResponse)
-  async auctions(
+  async runningAuctions(
     @Parent() asset: Asset,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
