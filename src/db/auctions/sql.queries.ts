@@ -101,7 +101,7 @@ export function getAuctionsForAsset(
       (
       SELECT a.* FROM auctions a
       WHERE a.identifier IN (${identifiers.map((value) => `'${value}'`)})
-        AND a.status = 'Claimable'
+        AND a.status = 'Running'
       order by id ASC
     ) as temp) temp
   WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
