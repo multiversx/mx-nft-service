@@ -4,12 +4,13 @@ import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
 import { RedisCacheService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
-import { getAuctionsForAsset } from 'src/db/auctions/sql.queries';
+import { getLowestAuctionForIdentifiers } from 'src/db/auctions/sql.queries';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable({
   scope: Scope.Operation,
 })
-export class AuctionsForAssetProvider extends BaseProvider<string> {
+export class LowestAuctionProvider extends BaseProvider<string> {
   constructor(redisCacheService: RedisCacheService) {
     super(
       'default_auctions',
@@ -20,7 +21,6 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
       30,
     );
   }
-
   mapValuesForRedis(
     identifiers: string[],
     auctionsIdentifiers: { [key: string]: AuctionEntity[] },
@@ -31,13 +31,11 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
   }
 
   async getDataFromDb(identifiers: string[]) {
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const auctions = await getRepository(AuctionEntity).query(
-      getAuctionsForAsset(
-        identifiers.map((value) => value.split('_')[0]),
-        parseInt(identifiers[0].split('_')[1]),
-        parseInt(identifiers[0].split('_')[2]),
-      ),
+      getLowestAuctionForIdentifiers(endDate, identifiers),
     );
-    return auctions?.groupBy((auction) => auction.batchKey);
+
+    return auctions?.groupBy((auction) => auction.identifier);
   }
 }

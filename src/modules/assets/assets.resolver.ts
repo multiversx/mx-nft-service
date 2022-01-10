@@ -41,7 +41,7 @@ import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
 import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
-import { AuctionsForAssetProvider } from '../auctions/asset-auctions.loader';
+import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -54,7 +54,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
-    private auctionsProvider: AuctionsForAssetProvider,
+    private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
     private contentValidation: ContentValidation,
   ) {
@@ -250,7 +250,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (!identifier) {
       return null;
     }
-    const auctions = await this.auctionsProvider.load(identifier);
+    const auctions = await this.lowestAuctionProvider.load(identifier);
     return auctions && auctions.length > 0
       ? Auction.fromEntity(auctions[0])
       : null;

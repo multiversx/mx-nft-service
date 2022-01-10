@@ -17,6 +17,7 @@ import { IsAssetLikedProvider } from './asset-is-liked.loader';
 import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
 import { AssetAuctionResolver } from './asset-auction.resolver';
+import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
 
 @Module({
   providers: [
@@ -26,6 +27,7 @@ import { AssetAuctionResolver } from './asset-auction.resolver';
     ContentValidation,
     AssetLikesProvider,
     IsAssetLikedProvider,
+    LowestAuctionProvider,
     AssetsSupplyLoader,
     AssetAuctionsCountProvider,
     AssetScamInfoProvider,
