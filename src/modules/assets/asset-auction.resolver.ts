@@ -35,7 +35,7 @@ export class AssetAuctionResolver extends BaseResolver(Asset) {
         ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
         : [],
       pagination,
-      auctions ? auctions[0].totalCount : 0,
+      auctions && auctions.length > 0 ? auctions[0].totalCount : 0,
       offset,
       limit,
     );
