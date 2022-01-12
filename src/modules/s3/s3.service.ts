@@ -31,6 +31,7 @@ export class S3Service {
       Bucket: bucket,
       Key: key,
       Body: file,
+      ContentType: file.mimetype,
     };
 
     const s3 = this.getS3();
