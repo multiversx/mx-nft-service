@@ -49,8 +49,11 @@ export class Asset {
   creationDate!: number;
   @Field(() => [String])
   uris: string[];
-  @Field(() => AuctionResponse, { nullable: true })
-  runningAuctions: AuctionResponse;
+  @Field(() => AuctionResponse, {
+    nullable: true,
+    description: 'This will return only the running query!',
+  })
+  auctions: AuctionResponse;
   @Field(() => Auction, { nullable: true })
   lowestAuction: Auction;
   @Field(() => [String], { nullable: true })
