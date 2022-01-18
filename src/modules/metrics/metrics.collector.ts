@@ -69,6 +69,7 @@ export class MetricsCollector {
   }
 
   static setRedisDuration(action: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
     MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
   }
 
