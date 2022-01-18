@@ -56,8 +56,8 @@ export class Auction {
   @Field(() => Int)
   creationDate: number;
 
-  @Field({ nullable: true })
-  tags: string;
+  @Field(() => [String], { nullable: true })
+  tags: string[];
 
   @Field(() => Price, { nullable: true })
   topBid: Price;
@@ -97,7 +97,7 @@ export class Auction {
             amount: auction.maxBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
-          tags: auction.tags,
+          tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
         })
       : null;
