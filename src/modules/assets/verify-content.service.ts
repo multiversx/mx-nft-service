@@ -19,12 +19,12 @@ export class VerifyContentService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
-  async checkContentSensitivity(image: any) {
+  async checkContentSensitivity(file: any) {
     const client = getClarifaiClient();
     const metadata = new grpc.Metadata();
     metadata.set('authorization', `Key ${process.env.CLARIFAI_APP_KEY}`);
 
-    const request = await this.getRequest(image);
+    const request = await this.getRequest(file);
     if (request)
       client.postModelOutputs(request, metadata, (err, response) => {
         if (err) {
@@ -53,26 +53,10 @@ export class VerifyContentService {
           this.logger.warning(customError);
           return;
         }
-
-        console.log(
-          'Predicted concepts, with confidence values:',
-          response.getOutputsList()[0].getData(),
-        );
-        for (const c of response
-          .getOutputsList()[0]
-          .getData()
-          .getConceptsList()) {
-          if (
-            c.getName() === 'nsfw' &&
-            c.getValue() <= parseFloat(process.env.CLARIFAI_TRESHOLD)
-          ) {
-            throw new InapropriateContentError('Inapropriate content');
-          }
-
-          console.log(
-            parseInt(process.env.CLARIFAI_TRESHOLD),
-            c.getName() + ': ' + c.getValue(),
-          );
+        if (file.mimetype.includes('image'))
+          this.processImagePredictions(response);
+        if (file.mimetype.includes('video')) {
+          this.processVideoPredictions(response);
         }
       });
   }
@@ -119,6 +103,38 @@ export class VerifyContentService {
       ),
     );
     return request;
+  }
+
+  private processVideoPredictions(response: service.MultiOutputResponse) {
+    for (const frame of response
+      .getOutputsList()[0]
+      .getData()
+      .getFramesList()) {
+      for (const c of frame.getData().getConceptsList()) {
+        if (
+          c.getName() === 'nsfw' &&
+          c.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
+        ) {
+          throw new InapropriateContentError('Inapropriate content');
+        }
+      }
+    }
+  }
+
+  private processImagePredictions(response: service.MultiOutputResponse) {
+    for (const c of response.getOutputsList()[0].getData().getConceptsList()) {
+      if (
+        c.getName() === 'nsfw' &&
+        c.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
+      ) {
+        throw new InapropriateContentError('Inapropriate content');
+      }
+
+      console.log(
+        parseInt(process.env.CLARIFAI_TRESHOLD),
+        c.getName() + ': ' + c.getValue(),
+      );
+    }
   }
 
   async readStreamToBuffer(readStream: ReadStream): Promise<Buffer> {
