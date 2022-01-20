@@ -82,11 +82,11 @@ export class AssetsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async createNft(
     @Args('input') input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
     if (process.env.NODE_ENV === 'production') {
       return new TransactionNode();
@@ -100,7 +100,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     ).getStatus();
     if (contentStatus) {
       input.file = fileData;
-      return await this.assetsService.createNft('user.publicKey', input);
+      return await this.assetsService.createNft(user.publicKey, input);
     }
   }
 
