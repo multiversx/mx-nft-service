@@ -41,6 +41,8 @@ import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { VerifyContentService } from './verify-content.service';
+import { ContentValidation } from './content.validation.service';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -55,6 +57,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private auctionsProvider: AuctionsForAssetProvider,
     private assetScamProvider: AssetScamInfoProvider,
+    private contentValidation: ContentValidation,
   ) {
     super();
   }
@@ -89,14 +92,17 @@ export class AssetsResolver extends BaseResolver(Asset) {
       return new TransactionNode();
     }
     const fileData = await file;
-    if (
-      !Object.values(MediaMimeTypeEnum).includes(
-        fileData.mimetype as MediaMimeTypeEnum,
-      )
-    )
-      throw new Error('unsuported_media_type');
-    input.file = fileData;
-    return await this.assetsService.createNft(user.publicKey, input);
+
+    const contentStatus = (
+      await this.contentValidation
+        .checkContentType(fileData)
+        .checkContentSensitivity(fileData)
+    ).getStatus();
+    if (contentStatus) {
+      input.file = fileData;
+      return await this.assetsService.createNft(user.publicKey, input);
+    }
+    throw Error('Invalid content');
   }
 
   @Mutation(() => TransactionNode)

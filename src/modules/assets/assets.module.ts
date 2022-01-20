@@ -14,11 +14,15 @@ import { AssetAvailableTokensCountProvider } from './asset-available-tokens-coun
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { VerifyContentService } from './verify-content.service';
+import { ContentValidation } from './content.validation.service';
 
 @Module({
   providers: [
     AssetsService,
     AssetsLikesService,
+    VerifyContentService,
+    ContentValidation,
     AssetLikesProvider,
     IsAssetLikedProvider,
     AssetsSupplyLoader,
