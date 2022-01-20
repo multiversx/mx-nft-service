@@ -28,7 +28,6 @@ export class ContentValidation {
       await this.verifyContentService.checkContentSensitivity(fileData);
     } catch (error) {
       if (error instanceof InapropriateContentError) {
-        this.logger.warning(error.message);
         throw error;
       } else {
         this.logger.error(error);
