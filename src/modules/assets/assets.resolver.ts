@@ -102,6 +102,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
       input.file = fileData;
       return await this.assetsService.createNft(user.publicKey, input);
     }
+    throw Error('Invalid content');
   }
 
   @Mutation(() => TransactionNode)
