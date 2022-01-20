@@ -69,7 +69,7 @@ export class VerifyContentService {
           return reject(customError);
         }
         if (file.mimetype.includes('image')) {
-          this.processImagePredictions(response, reject);
+          resolve(this.processImagePredictions(response, reject));
         }
         if (file.mimetype.includes('video')) {
           resolve(this.processVideoPredictions(response, reject));
