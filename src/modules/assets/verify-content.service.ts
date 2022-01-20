@@ -4,28 +4,47 @@ import * as clarifai from '../../../node_modules/clarifai-nodejs-grpc/proto/clar
 import * as service from '../../../node_modules/clarifai-nodejs-grpc/proto/clarifai/api/service_pb';
 import * as resources from '../../../node_modules/clarifai-nodejs-grpc/proto/clarifai/api/resources_pb';
 import { InapropriateContentError } from 'src/models/errors/inapropriate-content.error';
-import { Inject } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
-
-function getClarifaiClient() {
-  return new clarifai.V2Client(
-    process.env.CLARIFAI_API_DOMAIN,
-    grpc.ChannelCredentials.createSsl(),
-  );
-}
 
 export class VerifyContentService {
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
   async checkContentSensitivity(file: any) {
-    const client = getClarifaiClient();
+    const client = this.getClarifaiClient();
     const metadata = new grpc.Metadata();
     metadata.set('authorization', `Key ${process.env.CLARIFAI_APP_KEY}`);
 
     const request = await this.getRequest(file);
-    if (request)
+    if (request) {
+      await this.getPredictions(client, request, metadata, file);
+    }
+  }
+
+  private getClarifaiClient() {
+    return new clarifai.V2Client(
+      process.env.CLARIFAI_API_DOMAIN,
+      grpc.ChannelCredentials.createSsl(),
+    );
+  }
+
+  private async getRequest(file): Promise<service.PostModelOutputsRequest> {
+    const readStream = await file.createReadStream();
+    const fileBuffer = await this.readStreamToBuffer(readStream);
+    const imageBytes = Uint8Array.from(fileBuffer);
+    const request = new service.PostModelOutputsRequest();
+    request.setModelId(process.env.CLARIFAI_MODEL_ID);
+    if (file.mimetype.includes('image'))
+      return this.addImageInput(request, imageBytes);
+    if (file.mimetype.includes('video')) {
+      return this.addVideoInput(request, imageBytes);
+    }
+    return;
+  }
+
+  private getPredictions(
+    client: clarifai.V2Client,
+    request: service.PostModelOutputsRequest,
+    metadata: grpc.Metadata,
+    file: any,
+  ) {
+    return new Promise((resolve, reject) => {
       client.postModelOutputs(request, metadata, (err, response) => {
         if (err) {
           let customError = {
@@ -33,9 +52,7 @@ export class VerifyContentService {
             message: err.message,
             name: err.name,
           };
-
-          this.logger.error(customError);
-          return;
+          return reject(customError);
         }
 
         if (response.getStatus().getCode() !== 10000) {
@@ -49,32 +66,16 @@ export class VerifyContentService {
               response.getStatus().getDetails(),
             name: err.name,
           };
-
-          this.logger.warning(customError);
-          return;
+          return reject(customError);
         }
-        if (file.mimetype.includes('image'))
-          this.processImagePredictions(response);
+        if (file.mimetype.includes('image')) {
+          this.processImagePredictions(response, reject);
+        }
         if (file.mimetype.includes('video')) {
-          this.processVideoPredictions(response);
+          resolve(this.processVideoPredictions(response, reject));
         }
       });
-  }
-
-  private async getRequest(image): Promise<service.PostModelOutputsRequest> {
-    const readStream = await image.createReadStream();
-    const fileType = await this.readStreamToBuffer(readStream);
-
-    const imageBytes = Uint8Array.from(fileType);
-    const request = new service.PostModelOutputsRequest();
-    request.setModelId(process.env.CLARIFAI_MODEL_ID);
-    if (image.mimetype.includes('image'))
-      return this.addImageInput(request, imageBytes);
-    if (image.mimetype.includes('video')) {
-      return this.addVideoInput(request, imageBytes);
-    }
-
-    return;
+    });
   }
 
   private addImageInput(
@@ -105,39 +106,42 @@ export class VerifyContentService {
     return request;
   }
 
-  private processVideoPredictions(response: service.MultiOutputResponse) {
-    for (const frame of response
-      .getOutputsList()[0]
-      .getData()
-      .getFramesList()) {
-      for (const c of frame.getData().getConceptsList()) {
-        if (
-          c.getName() === 'nsfw' &&
-          c.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
-        ) {
-          throw new InapropriateContentError('Inapropriate content');
-        }
+  private processImagePredictions(
+    response: service.MultiOutputResponse,
+    reject: (reason?: any) => void,
+  ) {
+    const concepts = response.getOutputsList()[0].getData().getConceptsList();
+    for (const concept of concepts) {
+      this.checkNsfw(concept, reject);
+    }
+  }
+
+  private processVideoPredictions(
+    response: service.MultiOutputResponse,
+    reject: (reason?: any) => void,
+  ) {
+    const frames = response.getOutputsList()[0].getData().getFramesList();
+    for (const frame of frames) {
+      const concepts = frame.getData().getConceptsList();
+      for (const concept of concepts) {
+        this.checkNsfw(concept, reject);
       }
     }
   }
 
-  private processImagePredictions(response: service.MultiOutputResponse) {
-    for (const c of response.getOutputsList()[0].getData().getConceptsList()) {
-      if (
-        c.getName() === 'nsfw' &&
-        c.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
-      ) {
-        throw new InapropriateContentError('Inapropriate content');
-      }
-
-      console.log(
-        parseInt(process.env.CLARIFAI_TRESHOLD),
-        c.getName() + ': ' + c.getValue(),
-      );
+  private checkNsfw(
+    concept: resources.Concept,
+    reject: (reason?: any) => void,
+  ) {
+    if (
+      concept.getName() === 'nsfw' &&
+      concept.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
+    ) {
+      reject(new InapropriateContentError('Inapropriate content'));
     }
   }
 
-  async readStreamToBuffer(readStream: ReadStream): Promise<Buffer> {
+  private async readStreamToBuffer(readStream: ReadStream): Promise<Buffer> {
     let chunks = [];
     try {
       for await (const chunk of readStream) {

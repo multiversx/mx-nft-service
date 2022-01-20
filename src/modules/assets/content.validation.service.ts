@@ -1,6 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { InapropriateContentError } from 'src/models/errors/inapropriate-content.error';
+import { UnsuportedMimetypeError } from 'src/models/errors/unsuported-mimetype.error';
 import { Logger } from 'winston';
 import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { VerifyContentService } from './verify-content.service';
@@ -8,8 +9,8 @@ import { VerifyContentService } from './verify-content.service';
 export class ContentValidation {
   private status: boolean = true;
   private verifyContentService: VerifyContentService;
-  constructor(@Inject(WINSTON_MODULE_PROVIDER) logger: Logger) {
-    this.verifyContentService = new VerifyContentService(logger);
+  constructor(@Inject(WINSTON_MODULE_PROVIDER) private logger: Logger) {
+    this.verifyContentService = new VerifyContentService();
   }
 
   public checkContentType(fileData): this {
@@ -18,7 +19,7 @@ export class ContentValidation {
         fileData.mimetype as MediaMimeTypeEnum,
       )
     )
-      throw new Error('unsuported_media_type');
+      throw new UnsuportedMimetypeError('unsuported_media_type');
     return this;
   }
 
@@ -26,9 +27,11 @@ export class ContentValidation {
     try {
       await this.verifyContentService.checkContentSensitivity(fileData);
     } catch (error) {
-      if (error.getType() === typeof InapropriateContentError) throw error;
-      else {
-        console.log(error);
+      if (error instanceof InapropriateContentError) {
+        this.logger.warning(error.message);
+        throw error;
+      } else {
+        this.logger.error(error);
         return;
       }
     }
