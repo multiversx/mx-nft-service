@@ -35,11 +35,9 @@ import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
-import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
-import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
 import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
 

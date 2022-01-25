@@ -14,10 +14,10 @@ import { AssetAvailableTokensCountProvider } from './asset-available-tokens-coun
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
-import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
 import { AssetAuctionResolver } from './asset-auction.resolver';
 import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
+import { VerifyContentService } from './verify-content.service';
 
 @Module({
   providers: [
