@@ -110,9 +110,9 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       filters,
     );
     return PageResponse.mapResponse<Collection>(
-      collections,
+      collections || [],
       pagination,
-      count,
+      count || 0,
       offset,
       limit,
     );
@@ -137,7 +137,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
       new AssetsFilter({ collection: collection }),
     );
     return new CollectionAsset({
-      assets: assets.map(
+      assets: assets?.map(
         (a) =>
           new CollectionAssetModel({
             thumbnailUrl: a.media?.length > 0 ? a.media[0].thumbnailUrl : null,
