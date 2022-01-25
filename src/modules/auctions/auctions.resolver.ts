@@ -29,7 +29,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { OrdersProvider, ActiveOrdersProvider } from 'src/db/orders';
+import { OrdersProvider, LastOrderProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
@@ -42,9 +42,8 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
-    private activeOrdersProvider: ActiveOrdersProvider,
+    private lastOrderProvider: LastOrderProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
-    private ordersProvider: OrdersProvider,
   ) {
     super();
   }
@@ -254,7 +253,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBid(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.activeOrdersProvider.load(id);
+    const activeOrders = await this.lastOrderProvider.load(id);
 
     return activeOrders?.length > 0
       ? Price.fromEntity(activeOrders[activeOrders.length - 1])
@@ -265,7 +264,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBidder(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.activeOrdersProvider.load(id);
+    const activeOrders = await this.lastOrderProvider.load(id);
     return activeOrders?.length > 0
       ? Account.fromEntity(
           await this.accountsProvider.getAccountByAddress(
@@ -284,15 +283,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
       return result ? result[0]?.availableTokens : 0;
     }
     return nrAuctionedTokens;
-  }
-
-  @ResolveField('orders', () => [Order])
-  async orders(@Parent() auction: Auction) {
-    const { id } = auction;
-
-    if (!id) return null;
-    const orderEntities = await this.ordersProvider.load(id);
-    return orderEntities?.map((element) => Order.fromEntity(element));
   }
 
   @ResolveField('owner', () => Account)

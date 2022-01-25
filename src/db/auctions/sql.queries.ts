@@ -54,7 +54,7 @@ export function getDefaultAuctionsQuery(endDate: number) {
     order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
-export function getDefaultAuctionsQueryForIdentifiers(
+export function getLowestAuctionForIdentifiers(
   endDate: number,
   identifiers: string[],
 ) {
@@ -83,8 +83,47 @@ SELECT temp.* from (
     select * from minPrice   
   order by eD, if(price, price, minBidDenominated) ASC
   ) as temp) temp
-  WHERE  temp.seqnum <=10;
+  WHERE  temp.seqnum <=1;
 `;
+}
+
+export function getAuctionsForAsset(
+  identifiers: string[],
+  offset: number = 0,
+  limit: number = 2,
+) {
+  return `
+  SELECT temp.*, CONCAT(temp.identifier,"_",${offset},"_",${limit}) as batchKey from (
+    SELECT temp.*,
+      row_number() over (partition by identifier order by id ASC) as seqnum,
+      COUNT(identifier) OVER(partition by identifier) as totalCount 
+    from
+      (
+      SELECT a.* FROM auctions a
+      WHERE a.identifier IN (${identifiers.map((value) => `'${value}'`)})
+        AND a.status = 'Running'
+      order by id ASC
+    ) as temp) temp
+  WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
+}
+
+export function getOrdersForAuctions(
+  ids: string[],
+  offset: number = 0,
+  limit: number = 2,
+) {
+  return `
+  SELECT temp.*, CONCAT(temp.auctionId,"_",${offset},"_",${limit}) as batchKey from (
+    SELECT temp.*,
+      row_number() over (partition by auctionId order by priceAmount DESC) as seqnum,
+      COUNT(auctionId) OVER(partition by auctionId) as totalCount 
+    from
+      (
+      SELECT * FROM orders
+      WHERE auctionId IN (${ids.map((value) => `'${value}'`)})
+      order by priceAmount DESC
+    ) as temp) temp
+  WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
 }
 
 export function getAvailableTokensScriptsByIdentifiers(identifiers: string[]) {

@@ -1,5 +1,5 @@
 import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
-import { Auction } from '../../auctions/models';
+import { Auction, AuctionResponse } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common';
@@ -49,8 +49,11 @@ export class Asset {
   creationDate!: number;
   @Field(() => [String])
   uris: string[];
-  @Field(() => [Auction], { nullable: true })
-  auctions: Auction[];
+  @Field(() => AuctionResponse, {
+    nullable: true,
+    description: 'This will return only the running query!',
+  })
+  auctions: AuctionResponse;
   @Field(() => Auction, { nullable: true })
   lowestAuction: Auction;
   @Field(() => [String], { nullable: true })

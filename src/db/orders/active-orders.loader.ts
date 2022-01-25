@@ -8,7 +8,7 @@ import { BaseProvider } from 'src/modules/assets/base.loader';
 @Injectable({
   scope: Scope.Operation,
 })
-export class ActiveOrdersProvider extends BaseProvider<number> {
+export class LastOrderProvider extends BaseProvider<number> {
   constructor(redisCacheService: RedisCacheService) {
     super(
       'auction_active_orders',
@@ -32,9 +32,12 @@ export class ActiveOrdersProvider extends BaseProvider<number> {
     const orders = await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')
-      .where(`auctionId IN(:...auctionIds) and status='active'`, {
-        auctionIds: auctionIds,
-      })
+      .where(
+        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
+        {
+          auctionIds: auctionIds,
+        },
+      )
       .getMany();
 
     return orders?.groupBy((asset) => asset.auctionId);

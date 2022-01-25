@@ -1,9 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
   AuctionsService,
-  AuctionsForAssetProvider,
   AuctionProvider,
   NftMarketplaceAbiService,
+  AuctionsOrdersProvider,
 } from '.';
 import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
@@ -15,16 +15,20 @@ import { PriceServiceUSD } from '../Price.service.usd';
 import { UsdAmountResolver } from './usd-amount.resolver';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
+import { AuctionsForAssetProvider } from './asset-auctions.loader';
+import { AuctionOrdersResolver } from './auction-orders.resolver';
 
 @Module({
   providers: [
     AuctionsService,
     AuctionsResolver,
     UsdAmountResolver,
+    AuctionOrdersResolver,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
     AuctionsForAssetProvider,
+    AuctionsOrdersProvider,
     AuctionProvider,
     AssetsProvider,
     PriceServiceUSD,

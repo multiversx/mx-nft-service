@@ -6,7 +6,7 @@ import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enu
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { DateUtils } from 'src/utils/date-utils';
-import { LessThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';

@@ -5,13 +5,13 @@ import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
 import { QueryRequest } from '../../modules/QueryRequest';
-import { ActiveOrdersProvider, OrderEntity, OrdersProvider } from '.';
+import { LastOrderProvider, OrderEntity, OrdersProvider } from '.';
 
 @Injectable()
 export class OrdersServiceDb {
   constructor(
     private ordersLoader: OrdersProvider,
-    private activeOrdersLoades: ActiveOrdersProvider,
+    private lastOrderLoader: LastOrderProvider,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}
@@ -112,7 +112,7 @@ export class OrdersServiceDb {
   async deleteOrdersByAuctionId(auctionIds: number[]) {
     auctionIds.forEach((auctionId) => {
       this.ordersLoader.clearKey(auctionId);
-      this.activeOrdersLoades.clearKey(auctionId);
+      this.lastOrderLoader.clearKey(auctionId);
     });
 
     return await this.ordersRepository
@@ -137,6 +137,6 @@ export class OrdersServiceDb {
 
   private clearCache(auctionId: number) {
     this.ordersLoader.clearKey(auctionId);
-    this.activeOrdersLoades.clearKey(auctionId);
+    this.lastOrderLoader.clearKey(auctionId);
   }
 }

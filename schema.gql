@@ -44,7 +44,9 @@ input AddLikeArgs {
 
 type Asset {
   attributes: String!
-  auctions: [Auction!]
+
+  """This will return only the running query!"""
+  auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
   collection: ID!
   creationDate: Int
@@ -165,7 +167,7 @@ type Auction {
   minBid: Price!
   nonce: Int!
   nrAuctionedTokens: Int
-  orders: [Order!]
+  orders(pagination: ConnectionArgs): OrdersResponse
   owner: Account
   ownerAddress: String
   startDate: Int!

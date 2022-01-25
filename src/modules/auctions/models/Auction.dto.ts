@@ -2,7 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { Account } from 'src/modules/accounts/models';
 import { Asset, Price } from 'src/modules/assets/models';
-import { Order } from 'src/modules/orders/models';
+import { OrdersResponse } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';
 import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 
@@ -65,8 +65,8 @@ export class Auction {
   @Field(() => Account, { nullable: true })
   topBidder: Account;
 
-  @Field(() => [Order], { nullable: true })
-  orders: Order[];
+  @Field(() => OrdersResponse, { nullable: true })
+  orders: OrdersResponse;
 
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);

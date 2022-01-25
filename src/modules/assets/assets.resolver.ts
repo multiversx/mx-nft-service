@@ -22,7 +22,7 @@ import {
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
-import { Auction } from '../auctions/models';
+import { Auction, AuctionResponse } from '../auctions/models';
 import { AssetsLikesService } from './assets-likes.service';
 import ConnectionArgs from '../ConnectionArgs';
 import { AssetsFilter } from '../filtersTypes';
@@ -31,18 +31,15 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { Account } from '../accounts/models/Account.dto';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { AuctionsForAssetProvider } from 'src/modules/auctions';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
-import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
-import { VerifyContentService } from './verify-content.service';
 import { ContentValidation } from './content.validation.service';
+import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {
@@ -55,7 +52,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
-    private auctionsProvider: AuctionsForAssetProvider,
+    private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
     private contentValidation: ContentValidation,
   ) {
@@ -242,21 +239,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     return scamInfo && Object.keys(scamInfo).length !== 0 ? scamInfo : null;
   }
 
-  @ResolveField('auctions', () => [Auction])
-  async auctions(@Parent() asset: Asset) {
-    if (process.env.NODE_ENV === 'production') {
-      return [];
-    }
-    const { identifier } = asset;
-    if (!identifier) {
-      return null;
-    }
-    const auctions = await this.auctionsProvider.load(identifier);
-    return auctions
-      ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
-      : [];
-  }
-
   @ResolveField('lowestAuction', () => Auction)
   async lowestAuction(@Parent() asset: Asset) {
     if (process.env.NODE_ENV === 'production') {
@@ -266,7 +248,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     if (!identifier) {
       return null;
     }
-    const auctions = await this.auctionsProvider.load(identifier);
+    const auctions = await this.lowestAuctionProvider.load(identifier);
     return auctions && auctions.length > 0
       ? Auction.fromEntity(auctions[0])
       : null;
