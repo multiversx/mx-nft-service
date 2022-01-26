@@ -94,10 +94,14 @@ export class AuctionsServiceDb {
         endDate,
         queryRequest.limit,
         queryRequest.offset,
+        queryRequest.filters?.filters?.find((x) => x.field === 'status')
+          ?.values,
       );
       const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
         identifier,
         endDate,
+        queryRequest.filters?.filters?.find((x) => x.field === 'status')
+          ?.values,
       );
       const [auctions, count] = await Promise.all([
         this.auctionsRepository.query(defaultAuctionsQuery),
