@@ -36,6 +36,7 @@ export class AuctionEntity extends BaseEntity {
   paymentNonce: number;
 
   @Column({ length: 62 })
+  @Index('auction_owner')
   ownerAddress: string;
 
   @Column()

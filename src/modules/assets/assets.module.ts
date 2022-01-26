@@ -6,7 +6,6 @@ import { AssetsLikesRepository } from 'src/db/assets';
 import { S3Service } from '../s3/s3.service';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
-import { PriceServiceUSD } from '../Price.service.usd';
 import { AssetAuctionsCountProvider, AssetLikesProvider } from '.';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
@@ -36,7 +35,6 @@ import { VerifyContentService } from './verify-content.service';
     AssetAuctionResolver,
     RedisCacheService,
     S3Service,
-    PriceServiceUSD,
   ],
   imports: [
     ElrondCommunicationModule,

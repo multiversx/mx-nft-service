@@ -21,6 +21,7 @@ export class OrderEntity extends BaseEntity {
   status: OrderStatusEnum;
 
   @Column({ length: 62 })
+  @Index('order_owner')
   ownerAddress: string;
 
   @Column({ nullable: true, length: 62 })
