@@ -11,12 +11,12 @@ import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
 import { AssetsProvider } from '../assets';
-import { PriceServiceUSD } from '../Price.service.usd';
 import { UsdAmountResolver } from './usd-amount.resolver';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { AuctionsForAssetProvider } from './asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
+import { UsdPriceLoader } from './usd-price.loader';
 
 @Module({
   providers: [
@@ -31,7 +31,7 @@ import { AuctionOrdersResolver } from './auction-orders.resolver';
     AuctionsOrdersProvider,
     AuctionProvider,
     AssetsProvider,
-    PriceServiceUSD,
+    UsdPriceLoader,
   ],
   imports: [
     ElrondCommunicationModule,
