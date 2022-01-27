@@ -1,6 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
+import {
+  LastOrderProvider,
+  LastOrderTopBidProvider,
+  OrderEntity,
+  OrdersServiceDb,
+} from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -9,6 +14,7 @@ import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
+import { AuctionsOrdersProvider } from '../auctions';
 const hash = require('object-hash');
 
 @Injectable()
@@ -16,6 +22,8 @@ export class OrdersService {
   private redisClient: Redis.Redis;
   constructor(
     private orderServiceDb: OrdersServiceDb,
+    private lastOrderProvider: LastOrderProvider,
+    private lastTopBidderProvider: LastOrderTopBidProvider,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -30,7 +38,7 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      await this.invalidateCache();
+      await this.invalidateCache(createOrderArgs.auctionId);
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -56,7 +64,7 @@ export class OrdersService {
         auctionId,
       );
 
-      await this.invalidateCache();
+      await this.invalidateCache(auctionId);
       const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
         activeOrder,
         status,
@@ -74,7 +82,7 @@ export class OrdersService {
 
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.invalidateCache();
+      await this.invalidateCache(createOrderArgs.auctionId);
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -125,7 +133,9 @@ export class OrdersService {
     return generateCacheKeyFromParams('orders', hash(request));
   }
 
-  private async invalidateCache(): Promise<void> {
+  private async invalidateCache(auctionId: number = 0): Promise<void> {
+    await this.lastOrderProvider.clearKey(auctionId);
+    await this.lastTopBidderProvider.clearKey(auctionId);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }
