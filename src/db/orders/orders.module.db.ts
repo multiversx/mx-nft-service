@@ -24,6 +24,7 @@ import { AvailableTokensForAuctionProvider } from './available-tokens-auction.lo
     OrdersServiceDb,
     OrdersProvider,
     LastOrderProvider,
+    LastOrderTopBidProvider,
     AvailableTokensForAuctionProvider,
   ],
 })
