@@ -28,7 +28,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { LastOrderProvider } from 'src/db/orders';
+import { LastOrderProvider, LastOrderTopBidProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
@@ -43,7 +43,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private topBidderAccountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrderProvider,
-    private topBidderProvider: LastOrderProvider,
+    private topBidderProvider: LastOrderTopBidProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();

@@ -17,9 +17,7 @@ export class UsdPriceLoader extends BaseProvider<number> {
     super(
       'priceUSD',
       redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
       cacheConfig.followersttl,
     );
   }

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheService } from 'src/common';
 import {
   LastOrderProvider,
+  LastOrderTopBidProvider,
   OrderEntity,
   OrdersProvider,
   OrdersServiceDb,
@@ -15,6 +16,7 @@ import { AvailableTokensForAuctionProvider } from './available-tokens-auction.lo
     OrdersServiceDb,
     OrdersProvider,
     LastOrderProvider,
+    LastOrderTopBidProvider,
     AvailableTokensForAuctionProvider,
     RedisCacheService,
   ],

@@ -8,7 +8,7 @@ import { BaseProvider } from 'src/modules/assets/base.loader';
 @Injectable({
   scope: Scope.Operation,
 })
-export class LastOrderProvider extends BaseProvider<number> {
+export class LastOrderTopBidProvider extends BaseProvider<number> {
   constructor(redisCacheService: RedisCacheService) {
     super(
       'auction_active_orders',
