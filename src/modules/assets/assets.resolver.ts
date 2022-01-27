@@ -47,6 +47,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
+    private creatorsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
@@ -259,7 +260,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { creatorAddress } = asset;
 
     if (!creatorAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
+    const account = await this.creatorsProvider.getAccountByAddress(
       creatorAddress,
     );
     return Account.fromEntity(account, creatorAddress);

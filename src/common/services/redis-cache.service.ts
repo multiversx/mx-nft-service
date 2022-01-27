@@ -101,7 +101,7 @@ export class RedisCacheService {
       return;
     } finally {
       profiler.stop();
-      MetricsCollector.setRedisDuration('KEYS', profiler.duration);
+      MetricsCollector.setRedisDuration('MGET', profiler.duration);
     }
   }
 

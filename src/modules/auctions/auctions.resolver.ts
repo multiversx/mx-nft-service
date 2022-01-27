@@ -20,7 +20,6 @@ import {
 } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
-import { Order } from '../orders/models/Order.dto';
 import { Asset, Price } from '../assets/models';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
@@ -29,7 +28,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { OrdersProvider, LastOrderProvider } from 'src/db/orders';
+import { LastOrderProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
@@ -41,8 +40,10 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
+    private topBidderAccountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrderProvider,
+    private topBidderProvider: LastOrderProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();
@@ -264,10 +265,10 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   async topBidder(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.lastOrderProvider.load(id);
+    const activeOrders = await this.topBidderProvider.load(id);
     return activeOrders?.length > 0
       ? Account.fromEntity(
-          await this.accountsProvider.getAccountByAddress(
+          await this.topBidderAccountsProvider.getAccountByAddress(
             activeOrders[activeOrders.length - 1].ownerAddress,
           ),
           activeOrders[activeOrders.length - 1].ownerAddress,
