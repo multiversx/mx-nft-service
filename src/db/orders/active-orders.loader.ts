@@ -13,7 +13,9 @@ export class LastOrderProvider extends BaseProvider<number> {
     super(
       'auction_active_orders',
       redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
+        cache: false,
+      }),
     );
   }
 
