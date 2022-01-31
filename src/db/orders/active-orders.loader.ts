@@ -1,12 +1,12 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import { OrderEntity } from './order.entity';
 import { RedisCacheService } from 'src/common';
 import { BaseProvider } from 'src/modules/assets/base.loader';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class LastOrderProvider extends BaseProvider<number> {
   constructor(redisCacheService: RedisCacheService) {

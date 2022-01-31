@@ -1,10 +1,9 @@
-import { Injectable, Scope } from 'graphql-modules';
+import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
 import { ElrondIdentityService, RedisCacheService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
-
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AccountsProvider extends BaseProvider<string> {
   constructor(

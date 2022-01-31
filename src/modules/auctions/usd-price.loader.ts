@@ -1,13 +1,13 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { ElrondDataService, RedisCacheService } from 'src/common';
 import { BaseProvider } from 'src/modules/assets/base.loader';
 import { cacheConfig } from 'src/config';
 import { DateUtils } from 'src/utils/date-utils';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class UsdPriceLoader extends BaseProvider<number> {
   constructor(

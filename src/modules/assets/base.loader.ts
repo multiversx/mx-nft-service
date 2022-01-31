@@ -1,11 +1,11 @@
-import { Injectable, Scope } from 'graphql-modules';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export abstract class BaseProvider<T> {
   protected redisClient: Redis.Redis;
@@ -37,6 +37,7 @@ export abstract class BaseProvider<T> {
 
   async clearKey(key: T): Promise<any> {
     await this.redisCacheService.del(this.redisClient, this.getCacheKey(key));
+    this.dataLoader.clearAll();
     return this.dataLoader.clear(key);
   }
 
