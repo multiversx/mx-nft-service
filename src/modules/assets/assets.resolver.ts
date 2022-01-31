@@ -47,7 +47,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private assetsService: AssetsService,
     private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
-    private creatorsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
@@ -260,9 +259,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { creatorAddress } = asset;
 
     if (!creatorAddress) return null;
-    const account = await this.creatorsProvider.getAccountByAddress(
-      creatorAddress,
-    );
+    const account = await this.accountsProvider.load(creatorAddress);
     return Account.fromEntity(account, creatorAddress);
   }
 
@@ -271,9 +268,7 @@ export class AssetsResolver extends BaseResolver(Asset) {
     const { ownerAddress } = asset;
 
     if (!ownerAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      ownerAddress,
-    );
+    const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account, ownerAddress);
   }
 }

@@ -50,7 +50,7 @@ export class OwnersResolver {
     const { address } = owner;
 
     if (!address) return null;
-    const account = await this.accountsProvider.getAccountByAddress(address);
+    const account = await this.accountsProvider.load(address);
     return Account.fromEntity(account, address);
   }
 }

@@ -312,7 +312,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   private async getAccount(fields: string[], ownerAddress: any) {
     const account = this.hasToResolveAccount(fields)
       ? Account.fromEntity(
-          await this.accountsProvider.getAccountByAddress(ownerAddress),
+          await this.accountsProvider.load(ownerAddress),
           ownerAddress,
         )
       : Account.fromEntity(null, ownerAddress);

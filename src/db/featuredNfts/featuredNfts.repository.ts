@@ -20,7 +20,7 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
     limit: number = 20,
     offset: number = 0,
   ): Promise<[FeaturedNftEntity[], number]> {
-    const featuredNfts = await this.createQueryBuilder('featuredNfts')
+    const featuredNfts = this.createQueryBuilder('featuredNfts')
       .skip(offset)
       .take(limit)
       .getManyAndCount();
