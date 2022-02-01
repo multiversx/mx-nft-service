@@ -267,7 +267,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   ) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.topBidderProvider.load(id);
+    const activeOrders = await this.lastOrderProvider.load(id);
     if (activeOrders?.length <= 0) return null;
     return await this.getAccount(
       fields,
