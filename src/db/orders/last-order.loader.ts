@@ -12,9 +12,7 @@ export class LastOrdersProvider extends BaseProvider<number> {
   constructor(lastOrder: LastOrderRedisHandler) {
     super(
       lastOrder,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 
