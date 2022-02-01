@@ -15,7 +15,7 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
     const { address } = asset;
 
     if (!address) return null;
-    const account = await this.accountsProvider.getAccountByAddress(address);
+    const account = await this.accountsProvider.load(address);
     return Account.fromEntity(account, address);
   }
 
@@ -24,9 +24,7 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
     const { senderAddress } = asset;
 
     if (!senderAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      senderAddress,
-    );
+    const account = await this.accountsProvider.load(senderAddress);
     return Account.fromEntity(account, senderAddress);
   }
 }

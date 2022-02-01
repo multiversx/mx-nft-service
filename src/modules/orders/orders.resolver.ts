@@ -53,9 +53,7 @@ export class OrdersResolver extends BaseResolver(Order) {
     const { ownerAddress } = order;
 
     if (!ownerAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      ownerAddress,
-    );
+    const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account, ownerAddress);
   }
 

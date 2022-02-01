@@ -261,18 +261,18 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('topBidder', () => Account)
-  async topBidder(@Parent() auction: Auction) {
+  async topBidder(
+    @Parent() auction: Auction,
+    @Selections('topBidder', ['*.']) fields: string[],
+  ) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
-    const activeOrders = await this.lastOrderProvider.load(id);
-    return activeOrders?.length > 0
-      ? Account.fromEntity(
-          await this.accountsProvider.getAccountByAddress(
-            activeOrders[activeOrders.length - 1].ownerAddress,
-          ),
-          activeOrders[activeOrders.length - 1].ownerAddress,
-        )
-      : null;
+    const activeOrders = await this.topBidderProvider.load(id);
+    if (activeOrders?.length <= 0) return null;
+    return await this.getAccount(
+      fields,
+      activeOrders[activeOrders.length - 1].ownerAddress,
+    );
   }
 
   @ResolveField('availableTokens', () => Int)
@@ -286,14 +286,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Auction) {
+  async owner(
+    @Parent() auction: Auction,
+    @Selections('owner', ['*.']) fields: string[],
+  ) {
     const { ownerAddress } = auction;
 
     if (!ownerAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      ownerAddress,
-    );
-    return Account.fromEntity(account, ownerAddress);
+    return await this.getAccount(fields, ownerAddress);
   }
 
   private hasToResolveAsset(fields: string[]) {
@@ -305,6 +305,22 @@ export class AuctionsResolver extends BaseResolver(Auction) {
           x !== 'identifier' &&
           x !== 'hasAvailableAuctions',
       ).length > 0
+    );
+  }
+
+  private async getAccount(fields: string[], ownerAddress: any) {
+    const account = this.hasToResolveAccount(fields)
+      ? Account.fromEntity(
+          await this.accountsProvider.load(ownerAddress),
+          ownerAddress,
+        )
+      : Account.fromEntity(null, ownerAddress);
+    return account;
+  }
+
+  private hasToResolveAccount(fields: string[]) {
+    return (
+      fields.length > 1 || (fields.length === 1 && fields[0] !== 'address')
     );
   }
 }

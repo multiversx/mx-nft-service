@@ -1,31 +1,26 @@
-import { Injectable, Scope } from 'graphql-modules';
+import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { AccountIdentity, ElrondIdentityService } from 'src/common';
-
+import { ElrondIdentityService, RedisCacheService } from 'src/common';
+import { BaseProvider } from '../assets/base.loader';
+import { AccountsRedisHandler } from './accounts.redis-handler';
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
-export class AccountsProvider {
-  private dataLoader = new DataLoader(
-    async (keys: string[]) => await this.batchAccounts(keys),
-    { cache: false },
-  );
-
-  constructor(private accountsService: ElrondIdentityService) {}
-
-  batchAccounts = async (keys: string[]) => {
-    const accounts = await this.accountsService.getProfiles(keys);
-    const accountsAddreses: { [key: string]: AccountIdentity[] } =
-      accounts?.groupBy((a) => a.address);
-
-    let resp = keys.map((address) =>
-      accountsAddreses ? accountsAddreses[address] : null,
+export class AccountsProvider extends BaseProvider<string> {
+  constructor(
+    private accountsService: ElrondIdentityService,
+    accountsRedisHandler: AccountsRedisHandler,
+  ) {
+    super(
+      accountsRedisHandler,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
-    return resp;
-  };
-
-  async getAccountByAddress(userId: string): Promise<AccountIdentity> {
-    const user = await this.dataLoader.load(userId);
-    return user ? user[0] : null;
   }
+
+  getData = async (keys: string[]): Promise<any[]> => {
+    const accounts = await this.accountsService.getProfiles(keys);
+    const accountsAddreses = accounts?.groupBy((a) => a.address);
+
+    return accountsAddreses;
+  };
 }
