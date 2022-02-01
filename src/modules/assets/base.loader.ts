@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { RedisDataloaderHandler } from './redis-dataloader.handler';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export abstract class BaseProvider<T> {
   constructor(
     private redisHandler: RedisDataloaderHandler<T>,
