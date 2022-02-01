@@ -21,6 +21,7 @@ import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';
 import { UsdPriceLoader } from './usd-price.loader';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
+import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 
 @Module({
   providers: [
@@ -41,6 +42,7 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
     AssetsProvider,
     UsdPriceRedisHandler,
     UsdPriceLoader,
+    LastOrderRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
@@ -56,6 +58,7 @@ import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
     RedisCacheService,
     AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
+    LastOrderRedisHandler,
   ],
 })
 export class AuctionsModuleGraph {}

@@ -4,7 +4,6 @@ import {
   AssetsResolver,
   AssetsLikesService,
   AssetAuctionsCountProvider,
-  AssetAuctionsCountRedisHandler,
 } from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -29,6 +28,7 @@ import { AssetLikesProviderRedisHandler } from './asset-likes-count.redis-handle
 import { LowestAuctionRedisHandler } from '../auctions/lowest-auctions.redis-handler';
 import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
+import { AssetAuctionsCountRedisHandler } from './asset-auctions-count.redis-handler';
 
 @Module({
   providers: [
