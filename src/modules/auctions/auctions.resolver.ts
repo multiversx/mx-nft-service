@@ -29,11 +29,11 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { OrdersProvider, LastOrderProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 import { Selections } from '@jenyus-org/nestjs-graphql-utils';
+import { LastOrdersProvider } from 'src/db/orders/last-order.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -42,7 +42,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
-    private lastOrderProvider: LastOrderProvider,
+    private lastOrderProvider: LastOrdersProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();

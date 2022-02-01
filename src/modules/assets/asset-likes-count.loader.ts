@@ -1,42 +1,23 @@
 import DataLoader = require('dataloader');
 import '../../utils/extentions';
-import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
-import { RedisCacheService } from 'src/common';
 import { AssetLikeEntity } from 'src/db/assets';
 import { BaseProvider } from './base.loader';
+import { AssetLikesProviderRedisHandler } from './asset-likes-count.redis-handler';
+import { Injectable } from '@nestjs/common';
 
-@Injectable({
-  scope: Scope.Operation,
-})
+@Injectable()
 export class AssetLikesProvider extends BaseProvider<string> {
-  constructor(redisCacheService: RedisCacheService) {
+  constructor(assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler) {
     super(
-      'assetLikesCount',
-      redisCacheService,
+      assetLikesProviderRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
         cache: false,
       }),
     );
   }
 
-  mapValuesForRedis(
-    identifiers: string[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return identifiers?.map((identifier) =>
-      assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier]
-        : [
-            {
-              identifier: identifier,
-              likesCount: 0,
-            },
-          ],
-    );
-  }
-
-  async getDataFromDb(identifiers: string[]) {
+  async getData(identifiers: string[]) {
     const assetsLike = await getRepository(AssetLikeEntity)
       .createQueryBuilder('al')
       .select('al.identifier as identifier')

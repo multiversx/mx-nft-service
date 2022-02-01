@@ -1,36 +1,25 @@
 import DataLoader = require('dataloader');
-import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { RedisCacheService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
 import { getAuctionsForAsset } from 'src/db/auctions/sql.queries';
+import { Injectable, Scope } from '@nestjs/common';
+import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AuctionsForAssetProvider extends BaseProvider<string> {
-  constructor(redisCacheService: RedisCacheService) {
+  constructor(auctionsForAssetRedisHandler: AuctionsForAssetRedisHandler) {
     super(
-      'default_auctions',
-      redisCacheService,
+      auctionsForAssetRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
         cache: false,
       }),
-      30,
     );
   }
 
-  mapValuesForRedis(
-    identifiers: string[],
-    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
-  ) {
-    return identifiers?.map((identifier) =>
-      auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
-    );
-  }
-
-  async getDataFromDb(identifiers: string[]) {
+  async getData(identifiers: string[]) {
     const auctions = await getRepository(AuctionEntity).query(
       getAuctionsForAsset(
         identifiers.map((value) => value.split('_')[0]),

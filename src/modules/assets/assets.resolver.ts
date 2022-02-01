@@ -35,10 +35,10 @@ import { AssetLikesProvider } from './asset-likes-count.loader';
 import PageResponse from '../PageResponse';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
+import { ContentValidation } from './content.validation.service';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
-import { ContentValidation } from './content.validation.service';
 import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
 
 @Resolver(() => Asset)
@@ -51,10 +51,10 @@ export class AssetsResolver extends BaseResolver(Asset) {
     private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
+    private contentValidation: ContentValidation,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
-    private contentValidation: ContentValidation,
   ) {
     super();
   }

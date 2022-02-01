@@ -1,34 +1,24 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import { OrderEntity } from './order.entity';
-import { RedisCacheService } from 'src/common';
 import { BaseProvider } from 'src/modules/assets/base.loader';
+import { OrdersRedisHandler } from './orders.redis-handler';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class OrdersProvider extends BaseProvider<number> {
-  constructor(redisCacheService: RedisCacheService) {
+  constructor(ordersRedisHandler: OrdersRedisHandler) {
     super(
-      'auction_orders',
-      redisCacheService,
+      ordersRedisHandler,
       new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
         cache: false,
       }),
     );
   }
 
-  mapValuesForRedis(
-    auctionIds: number[],
-    ordersAuctionsIds: { [key: string]: OrderEntity[] },
-  ) {
-    return auctionIds?.map((id) =>
-      ordersAuctionsIds[id] ? ordersAuctionsIds[id] : [],
-    );
-  }
-
-  async getDataFromDb(auctionIds: number[]) {
+  async getData(auctionIds: number[]) {
     const orders = await getRepository(OrderEntity)
       .createQueryBuilder('orders')
       .orderBy('priceAmount', 'DESC')

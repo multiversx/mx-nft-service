@@ -237,6 +237,10 @@ export class AuctionsService {
     return await this.auctionServiceDb.getAuction(id);
   }
 
+  async getAvailableTokens(id: number): Promise<number> {
+    return await this.auctionServiceDb.getAvailableTokens(id);
+  }
+
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
     await this.invalidateCache();
     return await this.auctionServiceDb.updateAuctions(auctions);

@@ -5,13 +5,14 @@ import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
 import { QueryRequest } from '../../modules/QueryRequest';
-import { LastOrderProvider, OrderEntity, OrdersProvider } from '.';
+import { OrderEntity, OrdersProvider } from '.';
+import { LastOrdersProvider } from './last-order.loader';
 
 @Injectable()
 export class OrdersServiceDb {
   constructor(
     private ordersLoader: OrdersProvider,
-    private lastOrderLoader: LastOrderProvider,
+    private lastOrderLoader: LastOrdersProvider,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}

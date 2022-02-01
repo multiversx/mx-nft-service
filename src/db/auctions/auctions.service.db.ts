@@ -14,6 +14,7 @@ import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
   getAuctionsOrderByNoBidsQuery,
+  getAvailableTokensbyAuctionId,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -209,6 +210,12 @@ export class AuctionsServiceDb {
       });
     }
     return null;
+  }
+
+  async getAvailableTokens(id: number): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensbyAuctionId(id),
+    );
   }
 
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
