@@ -114,13 +114,15 @@ export class AssetsService {
 
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
+      let assetsWithSupply = response.items.filter((x) => x.supply);
+      console.log('assetsWithSupply', assetsWithSupply);
       await this.assetScamLoader.batchScamInfo(
         response.items?.map((a) => a.identifier),
         response.items?.groupBy((asset) => asset.identifier),
       );
       await this.assetSupplyLoader.batchSupplyInfo(
-        response.items?.map((a) => a.identifier),
-        response.items?.groupBy((asset) => asset.identifier),
+        assetsWithSupply?.map((a) => a.identifier),
+        assetsWithSupply?.groupBy((asset) => asset.identifier),
       );
     }
   }
