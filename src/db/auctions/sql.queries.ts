@@ -123,13 +123,13 @@ export function getOrdersForAuctions(
   return `
   SELECT temp.*, CONCAT(temp.auctionId,"_",${offset},"_",${limit}) as batchKey from (
     SELECT temp.*,
-      row_number() over (partition by auctionId order by priceAmount DESC) as seqnum,
+      row_number() over (partition by auctionId order by priceAmountDenominated DESC) as seqnum,
       COUNT(auctionId) OVER(partition by auctionId) as totalCount 
     from
       (
       SELECT * FROM orders
       WHERE auctionId IN (${ids.map((value) => `'${value}'`)})
-      order by priceAmount DESC
+      order by priceAmountDenominated DESC
     ) as temp) temp
   WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
 }
