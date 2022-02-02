@@ -185,11 +185,14 @@ export class RedisCacheService {
       const stream = client.scanStream({ match: cacheKey, count: 100 });
       var pipeline = client.pipeline();
       let keys = [];
+      console.log('key pattern: ', key);
       stream.on('data', async function (resultKeys) {
         for (var i = 0; i < resultKeys.length; i++) {
           keys.push(resultKeys[i]);
           pipeline.del(resultKeys[i]);
         }
+
+        console.log('found keys: ', keys);
         if (keys.length > 100) {
           pipeline.exec(() => {
             console.log('one batch delete complete');
