@@ -12,9 +12,7 @@ export class UsdPriceLoader extends BaseProvider<number> {
   ) {
     super(
       usdPriceLoaderRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 

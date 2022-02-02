@@ -3,6 +3,7 @@ import DataLoader = require('dataloader');
 import { ElrondIdentityService, RedisCacheService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
 import { AccountsRedisHandler } from './accounts.redis-handler';
+
 @Injectable({
   scope: Scope.REQUEST,
 })

@@ -4,16 +4,16 @@ import { getRepository } from 'typeorm';
 import { AssetLikeEntity } from 'src/db/assets';
 import { BaseProvider } from './base.loader';
 import { AssetLikesProviderRedisHandler } from './asset-likes-count.redis-handler';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 
-@Injectable()
+@Injectable({
+  scope: Scope.REQUEST,
+})
 export class AssetLikesProvider extends BaseProvider<string> {
   constructor(assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler) {
     super(
       assetLikesProviderRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

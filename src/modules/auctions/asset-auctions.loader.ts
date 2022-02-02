@@ -13,9 +13,7 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
   constructor(auctionsForAssetRedisHandler: AuctionsForAssetRedisHandler) {
     super(
       auctionsForAssetRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

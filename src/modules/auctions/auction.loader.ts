@@ -1,12 +1,12 @@
+import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
 import { BaseProvider } from '../assets/base.loader';
 import { AuctionsRedisHandler } from './auctions.redis-handler';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AuctionProvider extends BaseProvider<number> {
   constructor(auctionsRedisHandler: AuctionsRedisHandler) {

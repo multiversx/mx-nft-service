@@ -3,16 +3,16 @@ import { getRepository } from 'typeorm';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { BaseProvider } from './base.loader';
 import { AssetAuctionsCountRedisHandler } from './asset-auctions-count.redis-handler';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 
-@Injectable()
+@Injectable({
+  scope: Scope.REQUEST,
+})
 export class AssetAuctionsCountProvider extends BaseProvider<string> {
   constructor(assetAuctionsCountRedisHandler: AssetAuctionsCountRedisHandler) {
     super(
       assetAuctionsCountRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

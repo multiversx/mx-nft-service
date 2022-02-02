@@ -14,9 +14,7 @@ export class LowestAuctionProvider extends BaseProvider<string> {
   constructor(lowestAuctionProviderRedisHandler: LowestAuctionRedisHandler) {
     super(
       lowestAuctionProviderRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

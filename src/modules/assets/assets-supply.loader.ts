@@ -14,9 +14,7 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
   ) {
     super(
       assetsSupplyRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

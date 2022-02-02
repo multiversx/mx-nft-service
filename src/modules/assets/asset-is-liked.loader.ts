@@ -3,17 +3,17 @@ import '../../utils/extentions';
 import { getRepository } from 'typeorm';
 import { AssetLikeEntity } from 'src/db/assets';
 import { BaseProvider } from './base.loader';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { IsAssetLikedRedisHandler } from './asset-is-liked.redis-handler';
 
-@Injectable()
+@Injectable({
+  scope: Scope.REQUEST,
+})
 export class IsAssetLikedProvider extends BaseProvider<string> {
   constructor(isAssetLikedRedisHandler: IsAssetLikedRedisHandler) {
     super(
       isAssetLikedRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 
