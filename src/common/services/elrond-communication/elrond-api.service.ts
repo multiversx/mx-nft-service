@@ -110,7 +110,6 @@ export class ElrondApiService {
   }
 
   async getNftByIdentifier(identifier: string): Promise<Nft> {
-    console.log('getNftByIdentifier', identifier);
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}?withSupply=true`,

@@ -31,7 +31,6 @@ export class AssetsSupplyRedisHandler extends RedisDataloaderHandler<string> {
       values = identifiers.map((identifier) =>
         data && data[identifier] ? data[identifier] : null,
       );
-      console.log('batchSupplyInfo', values);
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         redisKeys,

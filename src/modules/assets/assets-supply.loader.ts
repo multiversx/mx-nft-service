@@ -24,7 +24,6 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
       0,
       '&withSupply=true&fields=identifier,supply',
     );
-    console.log('nfts supply ', nfts, identifiers);
     return nfts?.groupBy((asset) => asset.identifier);
   }
 
