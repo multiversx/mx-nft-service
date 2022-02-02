@@ -1,34 +1,22 @@
+import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { Injectable, Scope } from 'graphql-modules';
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { RedisCacheService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
+import { AuctionsRedisHandler } from './auctions.redis-handler';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AuctionProvider extends BaseProvider<number> {
-  constructor(redisCacheService: RedisCacheService) {
+  constructor(auctionsRedisHandler: AuctionsRedisHandler) {
     super(
-      'auction',
-      redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      auctionsRedisHandler,
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 
-  mapValuesForRedis(
-    auctionsIds: number[],
-    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
-  ) {
-    return auctionsIds?.map((auctionId) =>
-      auctionsIdentifiers[auctionId] ? auctionsIdentifiers[auctionId] : [],
-    );
-  }
-
-  async getDataFromDb(auctionsIds: number[]) {
+  async getData(auctionsIds: number[]) {
     const auctions = await getRepository(AuctionEntity)
       .createQueryBuilder('auctions')
       .where('id IN(:...auctionsIds)', {

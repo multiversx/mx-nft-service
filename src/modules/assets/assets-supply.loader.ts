@@ -1,27 +1,24 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
+import { ElrondApiService } from 'src/common';
 import { BaseProvider } from './base.loader';
+import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AssetsSupplyLoader extends BaseProvider<string> {
   constructor(
-    redisCacheService: RedisCacheService,
+    private assetsSupplyRedisHandler: AssetsSupplyRedisHandler,
     private apiService: ElrondApiService,
   ) {
     super(
-      'asset_supply',
-      redisCacheService,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
-      5,
+      assetsSupplyRedisHandler,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 
-  async getDataFromDb(identifiers: string[]) {
+  async getData(identifiers: string[]) {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
@@ -42,25 +39,6 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
   }
 
   public batchSupplyInfo = async (identifiers: string[], data: any) => {
-    const cacheKeys = this.getCacheKeys(identifiers);
-    let [redisKeys, values] = [cacheKeys, []];
-    const getDataFromRedis = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getDataFromRedis.includes(null)) {
-      values = identifiers.map((identifier) =>
-        data && data[identifier] ? data[identifier] : null,
-      );
-
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        redisKeys,
-        values,
-        5,
-      );
-      return values;
-    }
-    return getDataFromRedis;
+    return this.assetsSupplyRedisHandler.batchSupplyInfo(identifiers, data);
   };
 }

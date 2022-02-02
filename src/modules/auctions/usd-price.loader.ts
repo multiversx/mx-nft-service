@@ -1,30 +1,22 @@
-import { Injectable, Scope } from 'graphql-modules';
+import { Injectable } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { ElrondDataService, RedisCacheService } from 'src/common';
+import { ElrondDataService } from 'src/common';
 import { BaseProvider } from 'src/modules/assets/base.loader';
-import { cacheConfig } from 'src/config';
-import { DateUtils } from 'src/utils/date-utils';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 
-@Injectable({
-  scope: Scope.Operation,
-})
+@Injectable()
 export class UsdPriceLoader extends BaseProvider<number> {
   constructor(
-    redisCacheService: RedisCacheService,
+    usdPriceLoaderRedisHandler: UsdPriceRedisHandler,
     private dataService: ElrondDataService,
   ) {
     super(
-      'priceUSD',
-      redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
-      cacheConfig.followersttl,
+      usdPriceLoaderRedisHandler,
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 
-  async getDataFromDb(timestamps: number[]) {
+  async getData(timestamps: number[]) {
     const response = await Promise.all(
       timestamps.map(async (timestamp) => {
         return {
@@ -44,13 +36,6 @@ export class UsdPriceLoader extends BaseProvider<number> {
       assetsIdentifiers && assetsIdentifiers[identifier]
         ? assetsIdentifiers[identifier][0]
         : null,
-    );
-  }
-
-  getCacheKey(key: number) {
-    return generateCacheKeyFromParams(
-      'priceUSD',
-      DateUtils.getDateFromTimestampWithoutTime(key),
     );
   }
 }

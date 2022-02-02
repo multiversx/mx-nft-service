@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
-import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tokens-count.loader';
+import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
+import { AssetAvailableTokensCountRedisHandler } from '../assets/asset-available-tokens-count.redis-handler';
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
 import { AuctionStatusEnum } from '../auctions/models';
@@ -18,8 +18,8 @@ import {
 export class NftEventsService {
   constructor(
     private auctionsService: AuctionsService,
-    private availableTokensCount: AssetAvailableTokensCountProvider,
-    private availableTokens: AvailableTokensForAuctionProvider,
+    private availableTokens: AvailableTokensForAuctionRedisHandler,
+    private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersService,
   ) {}
 
@@ -59,7 +59,7 @@ export class NftEventsService {
           const auctionSft = await this.auctionsService.getAuctionById(
             parseInt(buySftTopics.auctionId, 16),
           );
-          const result = await this.availableTokens.load(
+          const result = await this.auctionsService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
           );
           const totalRemaining = result
@@ -72,8 +72,6 @@ export class NftEventsService {
               hash,
             );
           }
-          this.availableTokens.clearKey(auctionSft.id);
-          this.availableTokensCount.clearKey(auctionSft.identifier);
           this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
@@ -86,6 +84,9 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
+
+          this.availableTokens.clearKey(auctionSft.id);
+          this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);

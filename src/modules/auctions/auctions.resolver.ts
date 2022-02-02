@@ -20,7 +20,6 @@ import {
 } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
-import { Order } from '../orders/models/Order.dto';
 import { Asset, Price } from '../assets/models';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
@@ -29,11 +28,11 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../user';
 import { AccountsProvider } from '../accounts/accounts.loader';
-import { OrdersProvider, LastOrderProvider } from 'src/db/orders';
 import { AssetsProvider } from '../assets/assets.loader';
 import PageResponse from '../PageResponse';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 import { Selections } from '@jenyus-org/nestjs-graphql-utils';
+import { LastOrdersProvider } from 'src/db/orders/last-order.loader';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {
@@ -42,7 +41,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
-    private lastOrderProvider: LastOrderProvider,
+    private lastOrderProvider: LastOrdersProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();
@@ -261,18 +260,18 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('topBidder', () => Account)
-  async topBidder(@Parent() auction: Auction) {
+  async topBidder(
+    @Parent() auction: Auction,
+    @Selections('topBidder', ['*.']) fields: string[],
+  ) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.lastOrderProvider.load(id);
-    return activeOrders?.length > 0
-      ? Account.fromEntity(
-          await this.accountsProvider.getAccountByAddress(
-            activeOrders[activeOrders.length - 1].ownerAddress,
-          ),
-          activeOrders[activeOrders.length - 1].ownerAddress,
-        )
-      : null;
+    if (activeOrders?.length <= 0) return null;
+    return await this.getAccount(
+      fields,
+      activeOrders[activeOrders.length - 1].ownerAddress,
+    );
   }
 
   @ResolveField('availableTokens', () => Int)
@@ -286,14 +285,14 @@ export class AuctionsResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Auction) {
+  async owner(
+    @Parent() auction: Auction,
+    @Selections('owner', ['*.']) fields: string[],
+  ) {
     const { ownerAddress } = auction;
 
     if (!ownerAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      ownerAddress,
-    );
-    return Account.fromEntity(account, ownerAddress);
+    return await this.getAccount(fields, ownerAddress);
   }
 
   private hasToResolveAsset(fields: string[]) {
@@ -305,6 +304,22 @@ export class AuctionsResolver extends BaseResolver(Auction) {
           x !== 'identifier' &&
           x !== 'hasAvailableAuctions',
       ).length > 0
+    );
+  }
+
+  private async getAccount(fields: string[], ownerAddress: any) {
+    const account = this.hasToResolveAccount(fields)
+      ? Account.fromEntity(
+          await this.accountsProvider.load(ownerAddress),
+          ownerAddress,
+        )
+      : Account.fromEntity(null, ownerAddress);
+    return account;
+  }
+
+  private hasToResolveAccount(fields: string[]) {
+    return (
+      fields.length > 1 || (fields.length === 1 && fields[0] !== 'address')
     );
   }
 }

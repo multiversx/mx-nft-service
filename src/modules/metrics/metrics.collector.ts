@@ -1,22 +1,12 @@
 import { register, Histogram, collectDefaultMetrics } from 'prom-client';
 
 export class MetricsCollector {
-  private static fieldDurationHistogram: Histogram<string>;
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
   static ensureIsInitialized() {
-    if (!MetricsCollector.fieldDurationHistogram) {
-      MetricsCollector.fieldDurationHistogram = new Histogram({
-        name: 'field_duration',
-        help: 'The time it takes to resolve a field',
-        labelNames: ['name', 'path'],
-        buckets: [],
-      });
-    }
-
     if (!MetricsCollector.queryDurationHistogram) {
       MetricsCollector.queryDurationHistogram = new Histogram({
         name: 'query_duration',
@@ -47,13 +37,6 @@ export class MetricsCollector {
         buckets: [],
       });
     }
-  }
-
-  static setFieldDuration(name: string, path: string, duration: number) {
-    MetricsCollector.ensureIsInitialized();
-    MetricsCollector.fieldDurationHistogram
-      .labels(name, path)
-      .observe(duration);
   }
 
   static setQueryDuration(query: string, duration: number) {

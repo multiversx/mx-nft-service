@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { Auction, AuctionStatusEnum } from './models';
-import { AuctionEntity, AuctionsServiceDb } from 'src/db/auctions';
+import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -11,6 +11,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { GroupBy, Operation } from '../filtersTypes';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 const hash = require('object-hash');
 
 @Injectable()
@@ -235,6 +236,10 @@ export class AuctionsService {
 
   async getAuctionById(id: number): Promise<AuctionEntity> {
     return await this.auctionServiceDb.getAuction(id);
+  }
+
+  async getAvailableTokens(id: number): Promise<number> {
+    return await this.auctionServiceDb.getAvailableTokens(id);
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {

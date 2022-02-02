@@ -123,9 +123,7 @@ export class CollectionsResolver extends BaseResolver(Collection) {
     const { ownerAddress } = auction;
 
     if (!ownerAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      ownerAddress,
-    );
+    const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account, ownerAddress);
   }
 

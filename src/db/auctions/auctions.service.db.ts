@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AssetAuctionsCountProvider } from 'src/modules/assets/asset-auctions-count.loader';
-import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/asset-auctions-count.redis-handler';
+import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
 import { Sort, Sorting } from 'src/modules/filtersTypes';
@@ -14,6 +14,7 @@ import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
   getAuctionsOrderByNoBidsQuery,
+  getAvailableTokensbyAuctionId,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -22,8 +23,8 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private auctionsLoader: AuctionsForAssetProvider,
-    private assetsAuctionsCountLoader: AssetAuctionsCountProvider,
+    private auctionsLoader: AuctionsForAssetRedisHandler,
+    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private ordersService: OrdersServiceDb,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
@@ -209,6 +210,12 @@ export class AuctionsServiceDb {
       });
     }
     return null;
+  }
+
+  async getAvailableTokens(id: number): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensbyAuctionId(id),
+    );
   }
 
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {

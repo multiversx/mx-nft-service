@@ -3,20 +3,25 @@ import {
   AuctionsService,
   AuctionProvider,
   NftMarketplaceAbiService,
+  AuctionsRedisHandler,
   AuctionsOrdersProvider,
+  AuctionsOrdersRedisHandler,
 } from '.';
 import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
-import { AssetsProvider } from '../assets';
+import { AssetsProvider, AssetstRedisHandler } from '../assets';
 import { UsdAmountResolver } from './usd-amount.resolver';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
-import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { AuctionsForAssetProvider } from './asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
+import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';
 import { UsdPriceLoader } from './usd-price.loader';
+import { UsdPriceRedisHandler } from './usd-price.redis-handler';
+import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
+import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 
 @Module({
   providers: [
@@ -27,25 +32,33 @@ import { UsdPriceLoader } from './usd-price.loader';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
+    AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
+    AuctionsOrdersRedisHandler,
     AuctionsOrdersProvider,
     AuctionProvider,
+    AuctionsRedisHandler,
+    AssetstRedisHandler,
     AssetsProvider,
+    UsdPriceRedisHandler,
     UsdPriceLoader,
+    LastOrderRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
     AuctionsModuleDb,
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
-    OrdersModuleDb,
+    forwardRef(() => OrdersModuleDb),
   ],
   exports: [
     AuctionsService,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
+    AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
+    LastOrderRedisHandler,
   ],
 })
 export class AuctionsModuleGraph {}

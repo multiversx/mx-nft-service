@@ -9,6 +9,8 @@ import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
+import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
+import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 const hash = require('object-hash');
 
 @Injectable()
@@ -16,6 +18,8 @@ export class OrdersService {
   private redisClient: Redis.Redis;
   constructor(
     private orderServiceDb: OrdersServiceDb,
+    private lastOrderRedisHandler: LastOrderRedisHandler,
+    private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -30,7 +34,7 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      await this.invalidateCache();
+      await this.invalidateCache(createOrderArgs.auctionId);
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -56,7 +60,7 @@ export class OrdersService {
         auctionId,
       );
 
-      await this.invalidateCache();
+      await this.invalidateCache(auctionId);
       const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
         activeOrder,
         status,
@@ -74,7 +78,7 @@ export class OrdersService {
 
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.invalidateCache();
+      await this.invalidateCache(createOrderArgs.auctionId);
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -125,7 +129,9 @@ export class OrdersService {
     return generateCacheKeyFromParams('orders', hash(request));
   }
 
-  private async invalidateCache(): Promise<void> {
+  private async invalidateCache(auctionId: number = 0): Promise<void> {
+    await this.lastOrderRedisHandler.clearKey(auctionId);
+    await this.auctionAvailableTokens.clearKey(auctionId);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }

@@ -38,9 +38,9 @@ export class FeaturedNftsService {
         cacheConfig.assetsttl,
       );
       const nfts = await this.apiService.getNftsByIdentifiers(
-        featuredNfts.map((x) => x.identifier),
+        featuredNfts?.map((x) => x.identifier),
       );
-      return [nfts.map((nft) => Asset.fromNft(nft)), count];
+      return [nfts?.map((nft) => Asset.fromNft(nft)), count];
     } catch (err) {
       this.logger.error('An error occurred while loading featured nfts.', {
         path: 'FeaturedNftsService.getFeaturedNfts',

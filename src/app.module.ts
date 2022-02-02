@@ -16,7 +16,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 import { FeaturedNftsModuleGraph } from './modules/featured-nfts/featured-nfts.module';
-import { loggerMiddleware } from './modules/metrics/logger-middleware';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 
 @Module({
@@ -33,9 +32,6 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
-      buildSchemaOptions: {
-        fieldMiddleware: [loggerMiddleware],
-      },
       introspection: process.env.NODE_ENV !== 'production',
       playground: true,
       sortSchema: true,

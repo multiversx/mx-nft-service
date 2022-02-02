@@ -1,42 +1,25 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import { RedisCacheService } from 'src/common';
 import { getAvailableTokensbyAuctionIds } from '../auctions/sql.queries';
 import { AuctionEntity } from '../auctions';
 import { BaseProvider } from 'src/modules/assets/base.loader';
+import { Injectable, Scope } from '@nestjs/common';
+import { AvailableTokensForAuctionRedisHandler } from './available-tokens-auctions.redis-handler';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
-  constructor(redisCacheService: RedisCacheService) {
-    super(
-      'auction_available_tokens',
-      redisCacheService,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
-    );
-  }
-
-  mapValuesForRedis(
-    auctionIds: number[],
-    auctionsIds: { [key: string]: any[] },
+  constructor(
+    availableTokensForAuctionRedisHandler: AvailableTokensForAuctionRedisHandler,
   ) {
-    return auctionIds?.map((auctionId) =>
-      auctionsIds[auctionId]
-        ? auctionsIds[auctionId]
-        : [
-            {
-              auctionId: auctionId,
-              availableTokens: 0,
-            },
-          ],
+    super(
+      availableTokensForAuctionRedisHandler,
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 
-  async getDataFromDb(auctionIds: number[]) {
+  async getData(auctionIds: number[]) {
     const auctions = await getRepository(AuctionEntity).query(
       getAvailableTokensbyAuctionIds(auctionIds),
     );

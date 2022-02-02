@@ -1,29 +1,26 @@
-import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { ElrondApiService } from 'src/common';
 import { BaseProvider } from './base.loader';
-import { Asset } from './models';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
+import { AssetstRedisHandler } from './assets.redis-handler';
+import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.REQUEST,
 })
 export class AssetsProvider extends BaseProvider<string> {
   constructor(
-    redisCacheService: RedisCacheService,
+    assetstRedisHandler: AssetstRedisHandler,
     private assetScamLoader: AssetScamInfoProvider,
     private apiService: ElrondApiService,
   ) {
     super(
-      'asset',
-      redisCacheService,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      assetstRedisHandler,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 
-  async getDataFromDb(identifiers: string[]) {
+  async getData(identifiers: string[]) {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
@@ -33,14 +30,5 @@ export class AssetsProvider extends BaseProvider<string> {
     this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
 
     return nftsGrouped;
-  }
-
-  mapValuesForRedis(
-    identifiers: string[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return identifiers.map((identifier) => {
-      return Asset.fromNft(assetsIdentifiers[identifier][0]);
-    });
   }
 }

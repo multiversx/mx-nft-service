@@ -5,13 +5,15 @@ import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
 import { QueryRequest } from '../../modules/QueryRequest';
-import { LastOrderProvider, OrderEntity, OrdersProvider } from '.';
+import { OrderEntity } from '.';
+import { OrdersRedisHandler } from './orders.redis-handler';
+import { LastOrderRedisHandler } from './last-order.redis-handler';
 
 @Injectable()
 export class OrdersServiceDb {
   constructor(
-    private ordersLoader: OrdersProvider,
-    private lastOrderLoader: LastOrderProvider,
+    private ordersRedisHandler: OrdersRedisHandler,
+    private lastOrderRedisHandler: LastOrderRedisHandler,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}
@@ -111,8 +113,8 @@ export class OrdersServiceDb {
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
     auctionIds.forEach((auctionId) => {
-      this.ordersLoader.clearKey(auctionId);
-      this.lastOrderLoader.clearKey(auctionId);
+      this.ordersRedisHandler.clearKeyByPattern(auctionId);
+      this.lastOrderRedisHandler.clearKey(auctionId);
     });
 
     return await this.ordersRepository
@@ -136,7 +138,7 @@ export class OrdersServiceDb {
   }
 
   private clearCache(auctionId: number) {
-    this.ordersLoader.clearKey(auctionId);
-    this.lastOrderLoader.clearKey(auctionId);
+    this.ordersRedisHandler.clearKeyByPattern(auctionId);
+    this.lastOrderRedisHandler.clearKey(auctionId);
   }
 }

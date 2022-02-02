@@ -5,8 +5,8 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
-import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
-import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tokens-count.loader';
+import { AssetAvailableTokensCountRedisHandler } from '../assets/asset-available-tokens-count.redis-handler';
+import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 
 @Module({
   imports: [
@@ -18,8 +18,8 @@ import { AssetAvailableTokensCountProvider } from '../assets/asset-available-tok
     NftEventsService,
     RevertEventsConsumer,
     RevertEventsService,
-    AvailableTokensForAuctionProvider,
-    AssetAvailableTokensCountProvider,
+    AvailableTokensForAuctionRedisHandler,
+    AssetAvailableTokensCountRedisHandler,
   ],
   exports: [NftEventsService],
 })
