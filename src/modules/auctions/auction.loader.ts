@@ -12,9 +12,7 @@ export class AuctionProvider extends BaseProvider<number> {
   constructor(auctionsRedisHandler: AuctionsRedisHandler) {
     super(
       auctionsRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 

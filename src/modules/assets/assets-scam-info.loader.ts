@@ -14,9 +14,7 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
   ) {
     super(
       assetScamInfoRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
 

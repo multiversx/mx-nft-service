@@ -13,9 +13,7 @@ export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
   ) {
     super(
       availableTokensForAuctionRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
-        cache: false,
-      }),
+      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
     );
   }
 
