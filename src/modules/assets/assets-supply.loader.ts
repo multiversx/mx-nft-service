@@ -24,21 +24,12 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
       0,
       '&withSupply=true&fields=identifier,supply',
     );
+    console.log('nfts supply ', nfts, identifiers);
     return nfts?.groupBy((asset) => asset.identifier);
   }
 
-  mapValuesForRedis(
-    identifiers: string[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return identifiers.map((identifier) =>
-      assetsIdentifiers && assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier]
-        : null,
-    );
-  }
-
   public batchSupplyInfo = async (identifiers: string[], data: any) => {
+    console.log(222222222222222222);
     return this.assetsSupplyRedisHandler.batchSupplyInfo(identifiers, data);
   };
 }
