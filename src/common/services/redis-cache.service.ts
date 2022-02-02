@@ -182,7 +182,7 @@ export class RedisCacheService {
   ): Promise<void> {
     const cacheKey = generateCacheKey(key, region);
     try {
-      const stream = client.scanStream({ match: cacheKey, count: 100 });
+      const stream = client.scanStream({ match: `${cacheKey}*`, count: 100 });
       var pipeline = client.pipeline();
       let keys = [];
       console.log('key pattern: ', key);
