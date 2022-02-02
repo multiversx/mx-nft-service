@@ -72,8 +72,6 @@ export class NftEventsService {
               hash,
             );
           }
-          this.availableTokens.clearKey(auctionSft.id);
-          this.availableTokensCount.clearKey(auctionSft.identifier);
           this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
@@ -86,6 +84,9 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
+
+          this.availableTokens.clearKey(auctionSft.id);
+          this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);

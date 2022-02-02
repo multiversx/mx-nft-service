@@ -19,7 +19,8 @@ export class OrdersService {
   constructor(
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
-    private availableTokens: AvailableTokensForAuctionRedisHandler,
+    private assetAvailableTokens: AvailableTokensForAuctionRedisHandler,
+    private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -131,7 +132,7 @@ export class OrdersService {
 
   private async invalidateCache(auctionId: number = 0): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
-    await this.availableTokens.clearKey(auctionId);
+    await this.auctionAvailableTokens.clearKey(auctionId);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }

@@ -113,7 +113,7 @@ export class OrdersServiceDb {
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
     auctionIds.forEach((auctionId) => {
-      this.ordersRedisHandler.clearKey(auctionId);
+      this.ordersRedisHandler.clearKeyByPattern(auctionId);
       this.lastOrderRedisHandler.clearKey(auctionId);
     });
 
@@ -138,7 +138,7 @@ export class OrdersServiceDb {
   }
 
   private clearCache(auctionId: number) {
-    this.ordersRedisHandler.clearKey(auctionId);
+    this.ordersRedisHandler.clearKeyByPattern(auctionId);
     this.lastOrderRedisHandler.clearKey(auctionId);
   }
 }
