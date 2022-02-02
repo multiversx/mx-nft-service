@@ -10,6 +10,7 @@ import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
+import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 const hash = require('object-hash');
 
 @Injectable()
@@ -18,6 +19,7 @@ export class OrdersService {
   constructor(
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
+    private availableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -129,6 +131,7 @@ export class OrdersService {
 
   private async invalidateCache(auctionId: number = 0): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
+    await this.availableTokens.clearKey(auctionId);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }
