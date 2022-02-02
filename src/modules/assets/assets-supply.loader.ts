@@ -29,7 +29,6 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
   }
 
   public batchSupplyInfo = async (identifiers: string[], data: any) => {
-    console.log(222222222222222222);
     return this.assetsSupplyRedisHandler.batchSupplyInfo(identifiers, data);
   };
 }
