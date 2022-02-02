@@ -183,14 +183,28 @@ export class RedisCacheService {
     const cacheKey = generateCacheKey(key, region);
     try {
       const stream = client.scanStream({ match: cacheKey, count: 100 });
+      var pipeline = client.pipeline();
       let keys = [];
-      stream.on('data', function (resultKeys) {
+      stream.on('data', async function (resultKeys) {
         for (var i = 0; i < resultKeys.length; i++) {
           keys.push(resultKeys[i]);
+          pipeline.del(resultKeys[i]);
+        }
+        if (keys.length > 100) {
+          pipeline.exec(() => {
+            console.log('one batch delete complete');
+          });
+          keys = [];
+          pipeline = client.pipeline();
         }
       });
       stream.on('end', function () {
-        client.unlink(keys);
+        pipeline.exec(() => {
+          console.log('final batch delete complete');
+        });
+      });
+      stream.on('error', function (err) {
+        console.log('error', err);
       });
     } catch (err) {
       this.logger.error(
