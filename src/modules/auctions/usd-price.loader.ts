@@ -27,15 +27,4 @@ export class UsdPriceLoader extends BaseProvider<number> {
     );
     return response?.groupBy((asset) => asset.timestamp);
   }
-
-  mapValuesForRedis(
-    identifiers: number[],
-    assetsIdentifiers: { [key: number]: any[] },
-  ) {
-    return identifiers.map((identifier) =>
-      assetsIdentifiers && assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier][0]
-        : null,
-    );
-  }
 }
