@@ -19,7 +19,6 @@ export class OrdersService {
   constructor(
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
-    private assetAvailableTokens: AvailableTokensForAuctionRedisHandler,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,

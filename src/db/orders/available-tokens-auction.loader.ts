@@ -3,10 +3,12 @@ import { getRepository } from 'typeorm';
 import { getAvailableTokensbyAuctionIds } from '../auctions/sql.queries';
 import { AuctionEntity } from '../auctions';
 import { BaseProvider } from 'src/modules/assets/base.loader';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { AvailableTokensForAuctionRedisHandler } from './available-tokens-auctions.redis-handler';
 
-@Injectable()
+@Injectable({
+  scope: Scope.REQUEST,
+})
 export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
   constructor(
     availableTokensForAuctionRedisHandler: AvailableTokensForAuctionRedisHandler,
