@@ -181,33 +181,22 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<void> {
     const cacheKey = generateCacheKey(key, region);
+    let profiler = new PerformanceProfiler();
     try {
       const stream = client.scanStream({ match: `${cacheKey}*`, count: 100 });
-      var pipeline = client.pipeline();
       let keys = [];
-      console.log('key pattern: ', key);
       stream.on('data', async function (resultKeys) {
         for (var i = 0; i < resultKeys.length; i++) {
           keys.push(resultKeys[i]);
-          pipeline.del(resultKeys[i]);
         }
+        const dels = keys.map((key) => ['del', key]);
 
-        console.log('found keys: ', keys);
-        if (keys.length > 100) {
-          pipeline.exec(() => {
-            console.log('one batch delete complete');
-          });
-          keys = [];
-          pipeline = client.pipeline();
-        }
+        const multi = client.multi(dels);
+        await promisify(multi.exec).call(multi);
       });
+
       stream.on('end', function () {
-        pipeline.exec(() => {
-          console.log('final batch delete complete');
-        });
-      });
-      stream.on('error', function (err) {
-        console.log('error', err);
+        console.log('final batch delete complete');
       });
     } catch (err) {
       this.logger.error(
@@ -218,6 +207,9 @@ export class RedisCacheService {
           cacheKey: cacheKey,
         },
       );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('MDEL', profiler.duration);
     }
   }
 

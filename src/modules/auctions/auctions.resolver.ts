@@ -20,7 +20,6 @@ import {
 } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { TransactionNode } from '../transaction';
-import { Order } from '../orders/models/Order.dto';
 import { Asset, Price } from '../assets/models';
 import ConnectionArgs from '../ConnectionArgs';
 import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
