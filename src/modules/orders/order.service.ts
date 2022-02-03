@@ -32,6 +32,7 @@ export class OrdersService {
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
+      await this.invalidateCache(createOrderArgs.auctionId);
       const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
         createOrderArgs.auctionId,
       );
