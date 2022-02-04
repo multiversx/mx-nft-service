@@ -64,7 +64,7 @@ export class VerifyContentService {
               response.getStatus().getDescription() +
               '\n' +
               response.getStatus().getDetails(),
-            name: err?.name,
+            name: 'ContentSensitivityError',
           };
           return reject(customError);
         }
