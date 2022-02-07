@@ -1,7 +1,7 @@
 import { envload } from './env_load';
 envload();
 import * as config from 'config';
-import { CachingConfig } from '../models';
+import { CachingConfig } from '../common/models';
 
 /**
  * Wallet object configuration.

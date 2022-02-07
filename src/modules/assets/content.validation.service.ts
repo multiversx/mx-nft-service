@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { InapropriateContentError } from 'src/models/errors/inapropriate-content.error';
-import { UnsuportedMimetypeError } from 'src/models/errors/unsuported-mimetype.error';
+import { InapropriateContentError } from 'src/common/models/errors/inapropriate-content.error';
+import { UnsuportedMimetypeError } from 'src/common/models/errors/unsuported-mimetype.error';
 import { Logger } from 'winston';
 import { MediaMimeTypeEnum } from './models/MediaTypes.enum';
 import { VerifyContentService } from './verify-content.service';

@@ -1,5 +1,5 @@
-import { Entity, EntityRepository, Repository } from 'typeorm';
-import { getAccountStatsQuery } from '../auctions/sql.queries';
+import { EntityRepository, Repository } from 'typeorm';
+import { getAccountStatsQuery } from '../account-stats/stats.querries';
 import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)

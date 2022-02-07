@@ -17,6 +17,7 @@ import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
 import { FeaturedNftsModuleGraph } from './modules/featured-nfts/featured-nfts.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
+import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 
 @Module({
   providers: [
@@ -58,6 +59,7 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
     OrdersModuleGraph,
     OwnersModuleGraph,
     AccountsModuleGraph,
+    AccountsStatsModuleGraph,
     AuctionsModuleDb,
     FeaturedNftsModuleGraph,
     IpfsModule,
