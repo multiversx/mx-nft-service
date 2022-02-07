@@ -8,13 +8,30 @@ services:
       - '6379:6379'
     expose:
       - '6379'
-  api:
-    restart: always
-    build: .
-    container_name: api
-    ports:
-      - '3005:3005'
-    command: bash -c "npm run run-migrations && npm run start:dev"
+  # api:
+  #   restart: always
+  #   build: .
+  #   container_name: api
+  #   ports:
+  #     - '3005:3005'
+  #   command: bash -c "npm run run-migrations && npm run start:dev"
+  #   volumes:
+  #     - ./src:/usr/src/app/src
+  #     - ./test:/usr/src/app/test
+  #   env_file:
+  #     - .env.example
+  #   depends_on:
+  #     - db
+  #     - redis
+
+  rabbitmq:
+    image: 331leo/rabbitmq3-management-mqtt
+    hostname: rabbitmq
+    environment:
+      HOSTNAME: rabbitmq
+      RABBITMQ_NODENAME: rabbitmq
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: 'password'
     volumes:
       - ./src:/usr/src/app/src
       - ./test:/usr/src/app/test
