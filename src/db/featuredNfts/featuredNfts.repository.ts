@@ -1,3 +1,4 @@
+import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { EntityRepository, Repository } from 'typeorm';
 import { FeaturedNftEntity } from './featuredNft.entity';
 
@@ -9,7 +10,9 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
     identifiers: string[],
   ): Promise<[FeaturedNftEntity[], number]> {
     const featuredNfts = await this.createQueryBuilder('featuredNfts')
+      .innerJoin('auctions', 'a', 'featuredNfts.identifier=a.identifier')
       .where('identifier in (:identifiers)', { identifiers: identifiers })
+      .andWhere(`a.status='${AuctionStatusEnum.Running}'`)
       .skip(offset)
       .take(limit)
       .getManyAndCount();
@@ -21,6 +24,8 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
     offset: number = 0,
   ): Promise<[FeaturedNftEntity[], number]> {
     const featuredNfts = await this.createQueryBuilder('featuredNfts')
+      .innerJoin('auctions', 'a', 'featuredNfts.identifier=a.identifier')
+      .where(`a.status='${AuctionStatusEnum.Running}'`)
       .skip(offset)
       .take(limit)
       .getManyAndCount();
