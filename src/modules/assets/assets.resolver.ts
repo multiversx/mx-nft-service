@@ -22,7 +22,7 @@ import {
 import { GraphQLUpload } from 'apollo-server-express';
 import { FileUpload } from 'graphql-upload';
 import { TransactionNode } from '../transaction';
-import { Auction, AuctionResponse } from '../auctions/models';
+import { Auction } from '../auctions/models';
 import { AssetsLikesService } from './assets-likes.service';
 import ConnectionArgs from '../ConnectionArgs';
 import { AssetsFilter } from '../filtersTypes';

@@ -19,7 +19,7 @@ export class ContentValidation {
         fileData.mimetype as MediaMimeTypeEnum,
       )
     )
-      throw new UnsuportedMimetypeError('unsuported_media_type');
+      throw new UnsuportedMimetypeError('Unsupported media type');
     return this;
   }
 
