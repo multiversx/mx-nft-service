@@ -1,74 +1,150 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Logger } from 'winston';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { AccountStatsRepository } from 'src/db/assets/account-stats.repository';
+import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
+import { AssetsQuery } from '../assets';
 
 @Injectable()
 export class AccountsStatsService {
   private redisClient: Redis.Redis;
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private accountsStatsRepository: AccountStatsRepository,
+    private apiService: ElrondApiService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
     );
   }
-  async getStats(addresses: string[]): Promise<any> {
+
+  async getStats(address: string): Promise<any> {
     try {
-      const cacheKey = 'this.getFollowersCacheKey(addresses[0])';
-      const getAccountsStats = () =>
-        this.accountsStatsRepository.getAccountStats(addresses);
+      const cacheKey = this.getStatsCacheKey(address);
+      const getAccountStats = () =>
+        this.accountsStatsRepository.getAccountStats(address);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAccountsStats,
+        getAccountStats,
         cacheConfig.followersttl,
       );
     } catch (err) {
-      this.logger.error('An error occurred while getting all followers', {
-        path: 'AccountsService.getFollowers',
-        addresses,
-        exception: err,
+      this.logger.error('An error occurred while getting stats for account', {
+        path: 'AccountsStatsService.getStats',
+        address,
+        exception: err?.message,
       });
-      return Promise.resolve([[], 0]);
+      return Promise.resolve(AccountStatsEntity);
     }
   }
 
-  private getFollowersCacheKey(
-    identifier: string,
-    offset: number,
-    limit: number,
-  ) {
-    return generateCacheKeyFromParams('followers', identifier, offset, limit);
+  private getStatsCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_stats', address);
   }
 
-  private getFollowingCacheKey(
-    identifier: string,
-    offset: number,
-    limit: number,
-  ) {
-    return generateCacheKeyFromParams('following', identifier, offset, limit);
+  async getClaimableCount(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getClaimableCacheKey(address);
+      const getAccountClaimableCount = () =>
+        this.accountsStatsRepository.getAccountClaimableCount(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAccountClaimableCount,
+        cacheConfig.followersttl,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting stats for account', {
+        path: 'AccountsStatsService.getStats',
+        address,
+        exception: err?.message,
+      });
+      return Promise.resolve(AccountStatsEntity);
+    }
   }
 
-  private async invalidateFollowersKey(address: string): Promise<void> {
-    const cacheKey = generateCacheKeyFromParams('followers', address);
-    return await this.redisCacheService.delByPattern(
-      this.redisClient,
-      `${cacheKey}_*`,
-    );
+  private getClaimableCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_claimable_count', address);
   }
 
-  private async invalidateFollowingKey(address: string): Promise<void> {
-    const cacheKey = generateCacheKeyFromParams('following', address);
-    return await this.redisCacheService.delByPattern(
-      this.redisClient,
-      `${cacheKey}_*`,
-    );
+  async getCollectedCount(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getCollectedCacheKey(address);
+      const getAccountStats = () =>
+        this.apiService.getNftsForUserCount(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAccountStats,
+        cacheConfig.followersttl,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting collected count', {
+        path: 'AccountsStatsService.getCollectedCount',
+        address,
+        exception: err?.message,
+      });
+      return Promise.resolve(AccountStatsEntity);
+    }
+  }
+
+  private getCollectedCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_collected', address);
+  }
+
+  async getCollectionsCount(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getCollectionsCacheKey(address);
+      const getCollectionsCount = () =>
+        this.apiService.getCollectionsForAddressCount(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getCollectionsCount,
+        5,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting collections Count ', {
+        path: 'AccountsStatsService.getCollectionsCount',
+        address,
+        exception: err?.message,
+      });
+      return Promise.resolve(AccountStatsEntity);
+    }
+  }
+
+  private getCollectionsCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_collections', address);
+  }
+
+  async getCreationsCount(address: string): Promise<any> {
+    try {
+      const query = new AssetsQuery().addCreator(address).build();
+      const cacheKey = this.getCreationsCacheKey(address);
+      const getAccountStats = () => this.apiService.getNftsCount(query);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAccountStats,
+        cacheConfig.followersttl,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting creations count', {
+        path: 'AccountsStatsService.getCreationsCount',
+        address,
+        exception: err?.message,
+      });
+      return Promise.resolve(AccountStatsEntity);
+    }
+  }
+
+  private getCreationsCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_creations', address);
   }
 }

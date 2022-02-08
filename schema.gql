@@ -35,17 +35,18 @@ type AccountResponse {
 }
 
 type AccountStats {
-  Auctions: String
-  Claimable: String
-  Collected: String
-  Collections: String
-  Orders: String
   address: ID
+  auctions: String
   biddingBalance: String
+  claimable: String
+  collected: String
+  collections: String
+  creations: String
+  orders: String
 }
 
 input AccountStatsFilter {
-  addresses: [String!]!
+  address: String!
 }
 
 input AccountsFilter {

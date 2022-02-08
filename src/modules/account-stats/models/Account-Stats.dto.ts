@@ -7,15 +7,17 @@ export class AccountStats {
   @Field({ nullable: true })
   biddingBalance: string;
   @Field({ nullable: true })
-  Collected: string;
+  creations: string;
   @Field({ nullable: true })
-  Collections: string;
+  collected: string;
   @Field({ nullable: true })
-  Auctions: string;
+  collections: string;
   @Field({ nullable: true })
-  Orders: string;
+  auctions: string;
   @Field({ nullable: true })
-  Claimable: string;
+  orders: string;
+  @Field({ nullable: true })
+  claimable: string;
 
   constructor(init?: Partial<AccountStats>) {
     Object.assign(this, init);
