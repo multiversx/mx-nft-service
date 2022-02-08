@@ -63,7 +63,7 @@ export class VerifyContentService {
               'Received failed status: ' +
               response?.getStatus()?.getDescription() +
               '\n' +
-              response.getStatus().getDetails(),
+              response?.getStatus()?.getDetails(),
             name: 'ContentSensitivityError',
           };
           return reject(customError);
@@ -72,7 +72,6 @@ export class VerifyContentService {
           resolve(this.processImagePredictions(response, reject));
         }
         if (file.mimetype.includes('video')) {
-          console.log(11111111111111111);
           resolve(this.processVideoPredictions(response, reject));
         }
       });
@@ -141,7 +140,6 @@ export class VerifyContentService {
     response: service.PostWorkflowResultsResponse,
     reject: (reason?: any) => void,
   ) {
-    console.log('video ');
     const results = response.getResultsList()[0];
     this.processNsfwVideoPredictions(results.getOutputsList()[0], reject);
     this.processLogoVideoPredictions(results.getOutputsList()[1], reject);
@@ -164,13 +162,10 @@ export class VerifyContentService {
     output: resources.Output,
     reject: (reason?: any) => void,
   ) {
-    for (const region of output.getData().getRegionsList()) {
-      console.log('region ', region);
-      for (const frame of region.getData().getFramesList()) {
-        console.log('frame ', frame);
-        const concepts = frame.getData().getConceptsList();
+    for (const frame of output.getData().getFramesList()) {
+      for (const region of frame.getData().getRegionsList()) {
+        const concepts = region.getData().getConceptsList();
         for (const concept of concepts) {
-          console.log('concept ', concept);
           this.checkLogo(concept, reject);
         }
       }
