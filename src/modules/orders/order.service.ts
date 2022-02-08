@@ -11,6 +11,7 @@ import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
+import { AccountsStatsService } from '../account-stats/accounts-stats.service';
 const hash = require('object-hash');
 
 @Injectable()
@@ -19,6 +20,7 @@ export class OrdersService {
   constructor(
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
+    private accountStats: AccountsStatsService,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -34,7 +36,10 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      await this.invalidateCache(createOrderArgs.auctionId);
+      await this.invalidateCache(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -60,7 +65,7 @@ export class OrdersService {
         auctionId,
       );
 
-      await this.invalidateCache(auctionId);
+      await this.invalidateCache(auctionId, activeOrder.ownerAddress);
       const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
         activeOrder,
         status,
@@ -78,7 +83,10 @@ export class OrdersService {
 
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.invalidateCache(createOrderArgs.auctionId);
+      await this.invalidateCache(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -129,9 +137,13 @@ export class OrdersService {
     return generateCacheKeyFromParams('orders', hash(request));
   }
 
-  private async invalidateCache(auctionId: number = 0): Promise<void> {
+  private async invalidateCache(
+    auctionId: number = 0,
+    ownerAddress: string = '',
+  ): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
+    await this.accountStats.invalidateStats(ownerAddress);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }

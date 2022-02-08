@@ -22,6 +22,7 @@ import { UsdPriceLoader } from './usd-price.loader';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
+import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
 
 @Module({
   providers: [
@@ -50,6 +51,7 @@ import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
     forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleDb),
+    forwardRef(() => AccountsStatsModuleGraph),
   ],
   exports: [
     AuctionsService,

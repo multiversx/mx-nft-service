@@ -3,7 +3,7 @@ import { grpc } from '../../../node_modules/clarifai-nodejs-grpc';
 import * as clarifai from '../../../node_modules/clarifai-nodejs-grpc/proto/clarifai/api/service_grpc_pb';
 import * as service from '../../../node_modules/clarifai-nodejs-grpc/proto/clarifai/api/service_pb';
 import * as resources from '../../../node_modules/clarifai-nodejs-grpc/proto/clarifai/api/resources_pb';
-import { InapropriateContentError } from 'src/models/errors/inapropriate-content.error';
+import { InapropriateContentError } from 'src/common/models/errors/inapropriate-content.error';
 
 export class VerifyContentService {
   async checkContentSensitivity(file: any) {

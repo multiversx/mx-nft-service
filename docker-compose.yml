@@ -33,6 +33,23 @@ services:
       RABBITMQ_DEFAULT_USER: 'user'
       RABBITMQ_DEFAULT_PASS: 'password'
     volumes:
+      - ./src:/usr/src/app/src
+      - ./test:/usr/src/app/test
+    env_file:
+      - .env.example
+    depends_on:
+      - db
+      - redis
+
+  rabbitmq:
+    image: 331leo/rabbitmq3-management-mqtt
+    hostname: rabbitmq
+    environment:
+      HOSTNAME: rabbitmq
+      RABBITMQ_NODENAME: rabbitmq
+      RABBITMQ_DEFAULT_USER: 'user'
+      RABBITMQ_DEFAULT_PASS: 'password'
+    volumes:
       - /var/lib/rabbitmq
     ports:
       - 5672:5672

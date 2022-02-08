@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/asset-auctions-count.redis-handler';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
@@ -26,6 +27,7 @@ export class AuctionsServiceDb {
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private ordersService: OrdersServiceDb,
+    private accountStats: AccountsStatsService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -227,7 +229,7 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    await this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier, auction.ownerAddress);
     return await this.auctionsRepository.save(auction);
   }
 
@@ -295,7 +297,7 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier, auction.ownerAddress);
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -306,12 +308,13 @@ export class AuctionsServiceDb {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     for (let auction of auctions) {
-      await this.invalidateCache(auction.identifier);
+      await this.invalidateCache(auction.identifier, auction.ownerAddress);
     }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private async invalidateCache(identifier: string) {
+  private async invalidateCache(identifier: string, address: string) {
+    await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
   }

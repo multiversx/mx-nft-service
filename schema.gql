@@ -34,6 +34,21 @@ type AccountResponse {
   pageInfo: AccountPageInfo
 }
 
+type AccountStats {
+  address: ID
+  auctions: String
+  biddingBalance: String
+  claimable: String
+  collected: String
+  collections: String
+  creations: String
+  orders: String
+}
+
+input AccountStatsFilter {
+  address: String!
+}
+
 input AccountsFilter {
   addresses: [String!]!
 }
@@ -519,6 +534,7 @@ type Price {
 }
 
 type Query {
+  accountStats(filters: AccountStatsFilter!): AccountStats!
   accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!

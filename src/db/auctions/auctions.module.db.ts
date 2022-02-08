@@ -6,9 +6,14 @@ import { AuctionEntity } from '.';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions/asset-auctions.redis-handler';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/asset-auctions-count.redis-handler';
 import { AuctionsServiceDb } from './auctions.service.db';
+import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-stats.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AuctionEntity]), OrdersModuleDb],
+  imports: [
+    TypeOrmModule.forFeature([AuctionEntity]),
+    OrdersModuleDb,
+    AccountsStatsModuleGraph,
+  ],
   providers: [
     AuctionsServiceDb,
     AuctionsForAssetRedisHandler,
