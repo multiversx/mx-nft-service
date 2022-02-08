@@ -27,17 +27,6 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
     return nfts?.groupBy((asset) => asset.identifier);
   }
 
-  mapValuesForRedis(
-    identifiers: string[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return identifiers.map((identifier) =>
-      assetsIdentifiers && assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier]
-        : null,
-    );
-  }
-
   public batchSupplyInfo = async (identifiers: string[], data: any) => {
     return this.assetsSupplyRedisHandler.batchSupplyInfo(identifiers, data);
   };
