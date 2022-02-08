@@ -57,14 +57,17 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountClaimableCount,
-        cacheConfig.followersttl,
+        5,
       );
     } catch (err) {
-      this.logger.error('An error occurred while getting stats for account', {
-        path: 'AccountsStatsService.getStats',
-        address,
-        exception: err?.message,
-      });
+      this.logger.error(
+        'An error occurred while getting claimable count for account',
+        {
+          path: 'AccountsStatsService.getClaimableCount',
+          address,
+          exception: err?.message,
+        },
+      );
       return Promise.resolve(AccountStatsEntity);
     }
   }
@@ -82,7 +85,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        cacheConfig.followersttl,
+        5,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting collected count', {
@@ -132,7 +135,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        cacheConfig.followersttl,
+        5,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting creations count', {
@@ -146,5 +149,12 @@ export class AccountsStatsService {
 
   private getCreationsCacheKey(address: string) {
     return generateCacheKeyFromParams('account_creations', address);
+  }
+
+  public invalidateStats(address: string) {
+    return this.redisCacheService.del(
+      this.redisClient,
+      this.getStatsCacheKey(address),
+    );
   }
 }

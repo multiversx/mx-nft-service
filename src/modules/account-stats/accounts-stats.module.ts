@@ -11,6 +11,6 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([AccountStatsRepository]),
   ],
-  exports: [RedisCacheService],
+  exports: [RedisCacheService, AccountsStatsService],
 })
 export class AccountsStatsModuleGraph {}

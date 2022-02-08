@@ -1,4 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
+import { nominateAmount } from 'src/modules/formatters';
 
 @ObjectType()
 export class AccountStats {
@@ -21,5 +23,16 @@ export class AccountStats {
 
   constructor(init?: Partial<AccountStats>) {
     Object.assign(this, init);
+  }
+
+  static fromEntity(account: AccountStatsEntity, address: string = '') {
+    return account
+      ? new AccountStats({
+          address: account.address,
+          auctions: account.auctions,
+          biddingBalance: nominateAmount(account.biddingBalance),
+          orders: account.orders,
+        })
+      : new AccountStats({ address: address });
   }
 }

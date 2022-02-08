@@ -8,9 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { AccountStats } from './models/Account-Stats.dto';
 import { AccountsStatsService } from './accounts-stats.service';
-import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { User } from '../user';
 import { AccountStatsFilter } from './models/Account-Stats.Filter';
 
 @Resolver(() => AccountStats)
@@ -23,23 +20,20 @@ export class AccountsStatsResolver {
     filters,
   ): Promise<AccountStats> {
     const account = await this.accountsStatsService.getStats(filters?.address);
-    return account;
+    return AccountStats.fromEntity(account[0], filters?.address);
   }
 
-  @UseGuards(GqlAuthGuard)
-  @ResolveField('claimable', () => Int)
-  async claimable(@Parent() stats: AccountStats, @User() user: any) {
+  @ResolveField(() => Int)
+  async claimable(@Parent() stats: AccountStats) {
     const { address } = stats;
     const claimableCount = await this.accountsStatsService.getClaimableCount(
       address,
     );
-    return claimableCount ? claimableCount[0]?.claimable : 0;
+    return claimableCount || 0;
   }
 
-  @UseGuards(GqlAuthGuard)
-  @ResolveField('collected', () => Int)
-  async collected(@Parent() stats: AccountStats, @User() user: any) {
-    console.log(user);
+  @ResolveField(() => Int)
+  async collected(@Parent() stats: AccountStats) {
     const { address } = stats;
     const collectedCount = await this.accountsStatsService.getCollectedCount(
       address,
@@ -47,9 +41,8 @@ export class AccountsStatsResolver {
     return collectedCount || 0;
   }
 
-  @UseGuards(GqlAuthGuard)
-  @ResolveField('collections', () => Int)
-  async creations(@Parent() stats: AccountStats, @User() user: any) {
+  @ResolveField(() => Int)
+  async collections(@Parent() stats: AccountStats) {
     const { address } = stats;
     const collectedCount = await this.accountsStatsService.getCollectionsCount(
       address,
@@ -57,11 +50,10 @@ export class AccountsStatsResolver {
     return collectedCount || 0;
   }
 
-  @UseGuards(GqlAuthGuard)
-  @ResolveField('creations', () => Int)
-  async collections(@Parent() stats: AccountStats) {
+  @ResolveField(() => Int)
+  async creations(@Parent() stats: AccountStats) {
     const { address } = stats;
-    const collectedCount = await this.accountsStatsService.getCollectedCount(
+    const collectedCount = await this.accountsStatsService.getCreationsCount(
       address,
     );
     return collectedCount || 0;
