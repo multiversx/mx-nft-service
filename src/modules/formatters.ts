@@ -1,3 +1,6 @@
+import BigNumber from 'bignumber.js';
+import { elrondConfig } from 'src/config';
+
 function format(
   big: string,
   denomination: number,
@@ -112,29 +115,7 @@ export function nominateStringVal(value: string): string {
   return value;
 }
 
-export function nominateAmount(input: string) {
-  const parts = input.toString().split('.');
-  const denomination = 18;
-
-  if (parts[1]) {
-    while (
-      parts[1].substring(parts[1].length - 1) === '0' &&
-      parts[1].length > 1
-    ) {
-      parts[1] = parts[1].substring(0, parts[1].length - 1);
-    }
-  }
-
-  let count = parts[1] ? denomination - parts[1].length : denomination;
-
-  count = count < 0 ? 0 : count;
-
-  let transformed = parts.join('') + '0'.repeat(count);
-
-  // remove beginning zeros
-  while (transformed.substring(0, 1) === '0' && transformed.length > 1) {
-    transformed = transformed.substring(1);
-  }
-
-  return transformed;
-}
+export const nominateAmount = (tokenAmount: string): string =>
+  new BigNumber(tokenAmount)
+    .multipliedBy(`1e+${elrondConfig.decimals}`)
+    .toFixed();
