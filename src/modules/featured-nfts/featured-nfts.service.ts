@@ -35,7 +35,7 @@ export class FeaturedNftsService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        cacheConfig.assetsttl,
+        1800,
       );
       const nfts = await this.apiService.getNftsByIdentifiers(
         featuredNfts?.map((x) => x.identifier),
