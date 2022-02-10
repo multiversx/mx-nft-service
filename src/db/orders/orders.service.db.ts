@@ -63,7 +63,6 @@ export class OrdersServiceDb {
 
   async saveOrder(order: OrderEntity) {
     this.clearCache(order.auctionId);
-    order.status = OrderStatusEnum.Active;
     return await this.ordersRepository.save(order);
   }
 
