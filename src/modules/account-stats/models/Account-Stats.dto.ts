@@ -28,7 +28,7 @@ export class AccountStats {
   static fromEntity(account: AccountStatsEntity, address: string = '') {
     return account
       ? new AccountStats({
-          address: account.address,
+          address: address,
           auctions: account.auctions,
           biddingBalance: nominateAmount(account.biddingBalance),
           orders: account.orders,
