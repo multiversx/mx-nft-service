@@ -17,7 +17,7 @@ export interface AuctionAbi {
     token_type: TokenIdentifierValue;
     nonce: U64Value;
   };
-  auction_type: AuctionTypeEnum;
+  auction_type: any;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
   max_bid: OptionValue;
