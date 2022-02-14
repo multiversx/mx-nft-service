@@ -10,8 +10,6 @@ import { AuctionsModuleDb } from './db/auctions/auctions.module.db';
 import { AccountsModuleGraph } from './modules/accounts/accounts.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { DataLoaderInterceptor } from 'nestjs-graphql-dataloader';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
@@ -20,12 +18,6 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 
 @Module({
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: DataLoaderInterceptor,
-    },
-  ],
   imports: [
     AuthModule,
     ConfigModule.forRoot({
