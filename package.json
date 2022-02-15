@@ -39,7 +39,7 @@
     "@nestjs/passport": "^7.1.5",
     "@nestjs/platform-express": "^7.6.18",
     "@nestjs/schedule": "^0.4.3",
-    "@nestjs/typeorm": "^7.1.5",
+    "@nestjs/typeorm": "^8.0.0",
     "@types/cache-manager": "^3.4.0",
     "@types/winston": "^2.4.4",
     "agentkeepalive": "^4.1.4",
@@ -76,10 +76,10 @@
     "prom-client": "^13.1.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.6.6",
+    "rxjs": "^7.5.4",
     "save": "^2.4.0",
     "swagger-ui-express": "^4.3.0",
-    "typeorm": "^0.2.32",
+    "typeorm": "^0.2.41",
     "winston": "^3.3.3"
   },
   "devDependencies": {

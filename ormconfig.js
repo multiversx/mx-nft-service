@@ -14,6 +14,7 @@ module.exports = {
   type: 'mysql',
   synchronize: false,
   dropSchema: false,
+  logging: process.env.DB_LOGGING,
   replication: {
     master: db,
     slaves: dbSlaves,
