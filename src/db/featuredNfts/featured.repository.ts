@@ -16,17 +16,6 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
       .getManyAndCount();
     return featuredNfts;
   }
-
-  async getFeaturedCollections(
-    limit: number = 20,
-    offset: number = 0,
-  ): Promise<[FeaturedNftEntity[], number]> {
-    const featuredNfts = await this.createQueryBuilder('featuredCollections')
-      .skip(offset)
-      .take(limit)
-      .getManyAndCount();
-    return featuredNfts;
-  }
 }
 
 @EntityRepository(FeaturedCollectionEntity)
