@@ -52,6 +52,22 @@ export class Filter {
 }
 
 @InputType()
+export class ChildFilter {
+  @Field(() => Operation)
+  op: Operation;
+  @Field(() => [String])
+  values: string[];
+  @Field(() => String)
+  field: string;
+  @Field(() => String, { nullable: true })
+  relationField: String;
+
+  constructor(init?: Partial<Filter>) {
+    Object.assign(this, init);
+  }
+}
+
+@InputType()
 export class Sorting {
   @Field(() => String)
   field: string;
@@ -71,6 +87,16 @@ export class FiltersExpression {
   operator: Operator;
   @Field(() => [Filter])
   filters: Filter[];
+  @Field(() => [ChildExpression], { nullable: true })
+  childExpressions: [ChildExpression];
+}
+
+@InputType()
+export class ChildExpression {
+  @Field(() => Operator)
+  operator: Operator;
+  @Field(() => [ChildFilter])
+  filters: ChildFilter[];
 }
 
 @InputType()

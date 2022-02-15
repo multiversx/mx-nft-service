@@ -16,16 +16,16 @@ export default class JoinBuilder<Entity> {
   }
 
   private buildJoinEntitiesRec(fe: FiltersExpression) {
-    forEach(fe.filters, (filter: { field: string }) =>
-      this.addJoinEntity(filter.field),
+    forEach(fe.filters, (filter: { field: string; relationField: string }) =>
+      this.addJoinEntity(filter.field, filter.relationField),
     );
+    forEach(fe.childExpressions, (child) => this.buildJoinEntitiesRec(child));
   }
 
   private addJoinEntity(field: string, relationField?: string) {
     const entityName = field.split('.')[0];
-
     if (relationField && !this.joinedEntities.has(entityName)) {
-      this.queryBuilder.leftJoinAndSelect(relationField, entityName);
+      this.queryBuilder.leftJoin(relationField, entityName);
       this.joinedEntities.add(entityName);
     }
   }

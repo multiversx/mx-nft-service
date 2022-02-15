@@ -239,6 +239,18 @@ input BuySftActionArgs {
   quantity: String
 }
 
+input ChildExpression {
+  filters: [ChildFilter!]!
+  operator: Operator!
+}
+
+input ChildFilter {
+  field: String!
+  op: Operation!
+  relationField: String
+  values: [String!]!
+}
+
 type Collection {
   canAddQuantity: Boolean
   canBurn: Boolean
@@ -341,6 +353,7 @@ input Filter {
 }
 
 input FiltersExpression {
+  childExpressions: [ChildExpression!]
   filters: [Filter!]!
   operator: Operator!
 }

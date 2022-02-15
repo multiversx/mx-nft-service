@@ -4,8 +4,9 @@ import {
   AuctionAbi,
 } from 'src/modules/auctions/models';
 import denominate, { nominateVal } from 'src/modules/formatters';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
+import { OrderEntity } from '../orders';
 
 @Entity('auctions')
 export class AuctionEntity extends BaseEntity {
@@ -61,6 +62,9 @@ export class AuctionEntity extends BaseEntity {
 
   @Column({ length: 64 })
   blockHash: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.auction)
+  orders: OrderEntity[];
 
   constructor(init?: Partial<AuctionEntity>) {
     super();
