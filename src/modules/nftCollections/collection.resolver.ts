@@ -5,6 +5,7 @@ import {
   Query,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import {
@@ -128,11 +129,16 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)
-  async assets(@Parent() auction: Collection) {
+  async assets(
+    @Parent() auction: Collection,
+    @Args('assetsCount', { nullable: true, type: () => Int })
+    assetsCount: number = 4,
+  ) {
     const { collection } = auction;
 
     const [assets, count] = await this.assetsService.getAssetsForCollection(
       new AssetsFilter({ collection: collection }),
+      assetsCount,
     );
     return new CollectionAsset({
       assets: assets?.map(

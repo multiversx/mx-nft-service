@@ -12,3 +12,16 @@ export class FeaturedNftEntity {
     Object.assign(this, init);
   }
 }
+
+@Entity('featured_collections')
+export class FeaturedCollectionEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column({ length: 25 })
+  @Index()
+  identifier: string;
+
+  constructor(init?: Partial<FeaturedCollectionEntity>) {
+    Object.assign(this, init);
+  }
+}
