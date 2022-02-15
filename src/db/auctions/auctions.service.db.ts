@@ -151,8 +151,7 @@ export class AuctionsServiceDb {
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
         `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND 
-        ((o.ownerAddress = '${address}' AND o.status='active')
-        OR (a.ownerAddress = '${address}'))`,
+        ((o.ownerAddress = '${address}' AND o.status='active'))`,
       )
       .groupBy('a.id')
       .orderBy('a.Id', 'DESC')
