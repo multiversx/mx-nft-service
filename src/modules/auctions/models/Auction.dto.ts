@@ -73,8 +73,9 @@ export class Auction {
   }
 
   static fromEntity(auction: AuctionEntity) {
-    return auction
-      ? new Auction({
+    return !auction
+      ? null
+      : new Auction({
           id: auction.id,
           status: auction.status,
           type: auction.type,
@@ -99,7 +100,6 @@ export class Auction {
           }),
           tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
-        })
-      : null;
+        });
   }
 }
