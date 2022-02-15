@@ -7,7 +7,7 @@ import {
 } from 'src/db/featuredNfts';
 import { FeaturedCollectionsResolver } from './featured-collections.resolver';
 import { FeaturedNftsResolver } from './featured-nfts.resolver';
-import { FeaturedService } from './featured-nfts.service';
+import { FeaturedService } from './featured.service';
 
 @Module({
   providers: [
@@ -23,4 +23,4 @@ import { FeaturedService } from './featured-nfts.service';
   ],
   exports: [RedisCacheService],
 })
-export class FeaturedNftsModuleGraph {}
+export class FeaturedModuleGraph {}

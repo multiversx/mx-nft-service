@@ -13,7 +13,7 @@ import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common.module';
 import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.module';
-import { FeaturedNftsModuleGraph } from './modules/featured/featured-nfts.module';
+import { FeaturedModuleGraph } from './modules/featured/featured.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 
@@ -53,7 +53,7 @@ import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats
     AccountsModuleGraph,
     AccountsStatsModuleGraph,
     AuctionsModuleDb,
-    FeaturedNftsModuleGraph,
+    FeaturedModuleGraph,
     IpfsModule,
   ],
 })

@@ -3,7 +3,7 @@ import { Asset, AssetsResponse } from '../assets/models';
 import { BaseResolver } from '../base.resolver';
 import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
-import { FeaturedService } from './featured-nfts.service';
+import { FeaturedService } from './featured.service';
 
 @Resolver(() => Asset)
 export class FeaturedNftsResolver extends BaseResolver(Asset) {

@@ -5,7 +5,7 @@ import ConnectionArgs from '../ConnectionArgs';
 import { Collection } from '../nftCollections/models';
 import CollectionResponse from '../nftCollections/models/CollectionResponse';
 import PageResponse from '../PageResponse';
-import { FeaturedService } from './featured-nfts.service';
+import { FeaturedService } from './featured.service';
 
 @Resolver(() => Asset)
 export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
