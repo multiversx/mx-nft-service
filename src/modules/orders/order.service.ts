@@ -115,7 +115,7 @@ export class OrdersService {
     }
   }
 
-  async getOrders(queryRequest: QueryRequest): Promise<[any[], number]> {
+  async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
     const cacheKey = this.getAuctionsCacheKey(queryRequest);
     const getOrders = () => this.getMappedOrders(queryRequest);
     return this.redisCacheService.getOrSet(
