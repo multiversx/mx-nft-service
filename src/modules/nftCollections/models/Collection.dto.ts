@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { CollectionApi } from 'src/common';
+import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/accounts/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
@@ -36,14 +36,17 @@ export class Collection {
   canBurn: boolean;
   @Field({ nullable: true })
   canAddQuantity: boolean;
+  @Field(() => [CollectionRole], { nullable: true })
+  roles: CollectionRole[];
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
   }
 
   static fromCollectionApi(collectionApi: CollectionApi) {
-    return collectionApi
-      ? new Collection({
+    return !collectionApi
+      ? null
+      : new Collection({
           collection: collectionApi.collection,
           type: NftTypeEnum[collectionApi.type],
           ticker: collectionApi.ticker,
@@ -57,7 +60,30 @@ export class Collection {
           canWipe: collectionApi.canWipe,
           canAddQuantity: collectionApi.canAddQuantity,
           canCreate: collectionApi.canCreate,
-        })
-      : null;
+          roles: collectionApi.roles?.map((role) =>
+            CollectionRole.fromRoleApi(role),
+          ),
+        });
+  }
+}
+
+@ObjectType()
+export class CollectionRole {
+  @Field()
+  address?: string;
+  @Field(() => [String])
+  roles: string[];
+
+  constructor(init?: Partial<CollectionRole>) {
+    Object.assign(this, init);
+  }
+
+  static fromRoleApi(role: RolesApi) {
+    return !role
+      ? null
+      : new CollectionRole({
+          address: role.address,
+          roles: role.roles,
+        });
   }
 }
