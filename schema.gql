@@ -265,6 +265,7 @@ type Collection {
   name: String!
   owner: Account
   ownerAddress: String
+  roles: [CollectionRole!]
   ticker: String!
   type: String
 }
@@ -295,6 +296,11 @@ type CollectionResponse {
   edges: [CollectionEdge!]
   pageData: PageData
   pageInfo: CollectionPageInfo
+}
+
+type CollectionRole {
+  address: String!
+  roles: [String!]!
 }
 
 input CollectionsFilter {

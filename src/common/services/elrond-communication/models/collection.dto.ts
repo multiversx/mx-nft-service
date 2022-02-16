@@ -12,4 +12,10 @@ export interface CollectionApi {
   canCreate: boolean;
   canBurn: boolean;
   canAddQuantity: boolean;
+  roles: RolesApi[];
+}
+
+export interface RolesApi {
+  address: string;
+  roles: string[];
 }
