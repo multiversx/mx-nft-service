@@ -260,7 +260,7 @@ type Collection {
   canTransferRole: Boolean
   canWipe: Boolean
   collection: String
-  collectionAsset: CollectionAsset!
+  collectionAsset(assetsCount: Int): CollectionAsset!
   creationDate: Float!
   name: String!
   owner: Account
@@ -554,6 +554,7 @@ type Query {
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!

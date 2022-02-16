@@ -172,6 +172,17 @@ export class ElrondApiService {
     );
   }
 
+  async getCollectionsByIdentifiers(
+    identifiers: string[],
+    offset: number = 0,
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getNftsByIdentifiers.name,
+      `collections?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}`,
+      (response) => response,
+    );
+  }
+
   async getCollectionsForAddress(
     address: string = '',
     query: string = '',

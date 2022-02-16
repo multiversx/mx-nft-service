@@ -130,10 +130,11 @@ export class AssetsService {
 
   async getAssetsForCollection(
     filters: AssetsFilter,
+    limit: number = 4,
   ): Promise<[any[], string]> {
     const apiQuery = new AssetsQuery()
       .addCollection(filters?.collection)
-      .addPageSize(0, 4)
+      .addPageSize(0, limit)
       .build();
 
     return await this.getCollectionAssets(apiQuery);
