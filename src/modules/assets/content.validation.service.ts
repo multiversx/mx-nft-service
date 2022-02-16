@@ -31,7 +31,7 @@ export class ContentValidation {
         throw error;
       } else {
         this.logger.error(error);
-        return;
+        return this;
       }
     }
     return this;
