@@ -1,22 +1,29 @@
 export function getAccountStatsQuery(address: string) {
   return `
   WITH 
-  auctionsStats as (SELECT COUNT(*) auctions,	a.ownerAddress as address FROM	auctions a
+  auctionsStats AS (SELECT COUNT(*) auctions,	a.ownerAddress AS address FROM	auctions a
       WHERE
           a.ownerAddress = '${address}'
           AND a.status in ('Running', 'Claimable')
       ), 
       
-    ordersCount as (SELECT COUNT(*) orders, SUM(o.priceAmountDenominated) as biddingBalance, ownerAddress  FROM orders o
+    ordersCount AS (SELECT COUNT(*) orders, o.ownerAddress
+      FROM orders o
+      INNER JOIN auctions a ON a.id=o.auctiONId
       WHERE o.ownerAddress = '${address}'
-          AND o.status = 'Active'
-      )
+      AND o.status in ('Active','Inactive') AND a.status='Running'
+      ),
+      biddingBalanceOrders AS (SELECT SUM(o.priceAmountDenominated) AS biddingBalance, o.ownerAddress AS orderAddress
+      FROM orders o WHERE o.ownerAddress = '${address}'
+            AND o.status ='Active'
+      ) 
   
-SELECT auctions, if(orders, orders,0) as orders, if(biddingBalance, biddingBalance, 0) as biddingBalance, address
-from
+SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalance, 0) AS biddingBalance, address
+FROM
   (
-  select * from auctionsStats a
-  left join ordersCount b on a.address = b.ownerAddress
+  SELECT * from auctionsStats a
+  LEFT JOIN ordersCount b ON a.address = b.ownerAddress
+  LEFT JOIN biddingBalanceOrders bb ON a.address = bb.orderAddress
   ) temp
   `;
 }
