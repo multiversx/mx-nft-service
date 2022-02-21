@@ -1,6 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import DataLoader = require('dataloader');
-import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import { BaseProvider } from './base.loader';
 
 @Injectable({
@@ -25,7 +25,7 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
-      '&withSupply=true&fields=identifier,supply',
+      '&withSupply=true&source=elastic&fields=identifier,supply',
     );
     return nfts?.groupBy((asset) => asset.identifier);
   }
