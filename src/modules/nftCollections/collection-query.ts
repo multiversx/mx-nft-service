@@ -32,6 +32,6 @@ export class CollectionQuery {
   }
 
   build(): string {
-    return this.query;
+    return this.query ? this.query + '&source=elastic' : '?source=elastic';
   }
 }
