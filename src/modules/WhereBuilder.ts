@@ -45,7 +45,7 @@ export default class WhereBuilder<Entity> {
           denomination: 18,
           decimals: 2,
           showLastNonZeroDecimal: true,
-        }),
+        }).replace(',', ''),
       );
     }
     const sqlParamName = this.queryBuilderName
