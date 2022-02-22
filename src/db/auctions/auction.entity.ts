@@ -99,7 +99,7 @@ export class AuctionEntity extends BaseEntity {
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
-            }),
+            }).replace(',', ''),
           ),
           maxBid: auction.max_bid?.valueOf()?.toString() || '0',
           maxBidDenominated: parseFloat(
@@ -108,7 +108,7 @@ export class AuctionEntity extends BaseEntity {
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
-            }),
+            }).replace(',', ''),
           ),
           startDate: parseInt(auction.start_time.valueOf().toString()),
           endDate: parseInt(auction.deadline.valueOf().toString()),

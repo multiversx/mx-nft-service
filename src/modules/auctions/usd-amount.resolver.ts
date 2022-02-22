@@ -23,7 +23,7 @@ export class UsdAmountResolver extends BaseResolver(Price) {
             denomination: 18,
             decimals: 18,
             showLastNonZeroDecimal: true,
-          }),
+          }).replace(',', ''),
           priceUsd?.value,
           2,
         )
