@@ -1,9 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Asset } from 'src/modules/assets/models';
-import { Order } from 'src/modules/orders/models';
-import { SocialLink, FollowerResponse } from '.';
 import { AccountIdentity } from 'src/common';
-import { Auction } from 'src/modules/auctions/models';
+import { SocialLink } from './SocialLink.dto';
 
 @ObjectType()
 export class Account {
@@ -20,21 +17,6 @@ export class Account {
 
   @Field(() => [SocialLink], { nullable: true })
   socialLinks: SocialLink[];
-
-  @Field(() => [Asset], { nullable: true })
-  assets: Asset[];
-
-  @Field(() => [Order], { nullable: true })
-  orders: Order[];
-
-  @Field(() => [Auction], { nullable: true })
-  auctions: Auction[];
-
-  @Field(() => FollowerResponse, { nullable: true })
-  followers: FollowerResponse;
-
-  @Field(() => FollowerResponse, { nullable: true })
-  following: FollowerResponse;
 
   constructor(init?: Partial<Account>) {
     Object.assign(this, init);

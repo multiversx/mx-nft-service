@@ -9,7 +9,6 @@ import { IpfsModule } from '../ipfs/ipfs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsLikesRepository } from 'src/db/assets';
 import { S3Service } from '../s3/s3.service';
-import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
@@ -29,6 +28,8 @@ import { LowestAuctionRedisHandler } from '../auctions/lowest-auctions.redis-han
 import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { AssetAuctionsCountRedisHandler } from './asset-auctions-count.redis-handler';
+import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
 
 @Module({
   providers: [
@@ -54,10 +55,11 @@ import { AssetAuctionsCountRedisHandler } from './asset-auctions-count.redis-han
     AssetAuctionResolver,
     RedisCacheService,
     S3Service,
+    AccountsProvider,
+    AccountsRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
-    forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,

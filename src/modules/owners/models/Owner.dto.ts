@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { OwnerApi } from 'src/common/services/elrond-communication/models/onwer.api';
-import { Account } from 'src/modules/accounts/models';
+import { Account } from 'src/modules/account-stats/models';
 
 @ObjectType()
 export class Owner {

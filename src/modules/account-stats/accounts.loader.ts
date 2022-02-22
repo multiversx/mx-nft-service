@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { ElrondIdentityService, RedisCacheService } from 'src/common';
+import { ElrondIdentityService } from 'src/common';
 import { BaseProvider } from '../assets/base.loader';
 import { AccountsRedisHandler } from './accounts.redis-handler';
 

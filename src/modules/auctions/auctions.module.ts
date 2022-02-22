@@ -9,7 +9,6 @@ import {
 } from '.';
 import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
-import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
 import { AssetsProvider, AssetstRedisHandler } from '../assets';
@@ -23,6 +22,8 @@ import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
+import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
 
 @Module({
   providers: [
@@ -44,11 +45,12 @@ import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module
     UsdPriceRedisHandler,
     UsdPriceLoader,
     LastOrderRedisHandler,
+    AccountsProvider,
+    AccountsRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
     AuctionsModuleDb,
-    forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleDb),
     forwardRef(() => AccountsStatsModuleGraph),

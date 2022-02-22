@@ -3,8 +3,8 @@ import { ElrondCommunicationModule } from '../../common/services/elrond-communic
 import { CollectionsResolver } from './collection.resolver';
 import { CollectionsService } from './collection.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
-import { AccountsProvider } from '../accounts/accounts.loader';
-import { AccountsRedisHandler } from '../accounts/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
 
 @Module({
   providers: [

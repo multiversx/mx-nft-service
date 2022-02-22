@@ -1,8 +1,8 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog as AssetHistoryLog } from './models';
-import { Account } from '../accounts/models/Account.dto';
-import { AccountsProvider } from '../accounts/accounts.loader';
+import { Account } from '../account-stats/models/Account.dto';
+import { AccountsProvider } from '../account-stats/accounts.loader';
 
 @Resolver(() => AssetHistoryLog)
 export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
