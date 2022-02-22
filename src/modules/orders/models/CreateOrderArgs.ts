@@ -28,7 +28,7 @@ export class CreateOrderArgs {
           denomination: 18,
           decimals: 18,
           showLastNonZeroDecimal: true,
-        }),
+        }).replace(',', ''),
       ),
       priceNonce: args.priceNonce,
       boughtTokensNo: args.boughtTokens,
