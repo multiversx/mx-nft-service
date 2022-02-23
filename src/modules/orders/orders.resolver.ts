@@ -1,6 +1,5 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../base.resolver';
-import { Account } from '../accounts/models';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { Order, OrdersResponse } from './models';
@@ -8,8 +7,9 @@ import { FiltersExpression, Sorting } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { QueryRequest } from '../QueryRequest';
-import { AccountsProvider } from '../accounts/accounts.loader';
+import { AccountsProvider } from '../account-stats/accounts.loader';
 import { AuctionProvider } from '../auctions';
+import { Account } from '../account-stats/models';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {

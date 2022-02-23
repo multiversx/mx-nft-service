@@ -1,8 +1,9 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AssetsHistoryResolver, AssetsHistoryService } from '.';
-import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AssetHistoryAccountResolver } from './asset-history-account-resolver';
+import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
 
 @Module({
   providers: [
@@ -10,8 +11,10 @@ import { AssetHistoryAccountResolver } from './asset-history-account-resolver';
     AssetsHistoryResolver,
     AssetHistoryAccountResolver,
     RedisCacheService,
+    AccountsProvider,
+    AccountsRedisHandler,
   ],
-  imports: [ElrondCommunicationModule, forwardRef(() => AccountsModuleGraph)],
+  imports: [ElrondCommunicationModule],
   exports: [RedisCacheService],
 })
 export class AssetHistoryModuleGraph {}

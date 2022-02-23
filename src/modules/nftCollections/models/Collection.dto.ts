@@ -1,6 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
-import { Account } from 'src/modules/accounts/models';
+import { Account } from 'src/modules/account-stats/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
 

@@ -25,9 +25,9 @@ import CollectionResponse from './models/CollectionResponse';
 import { AssetsFilter, CollectionsFilter } from '../filtersTypes';
 import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
-import { AccountsProvider } from '../accounts/accounts.loader';
-import { Account } from '../accounts/models';
+import { AccountsProvider } from '../account-stats/accounts.loader';
 import { AssetsService } from '../assets';
+import { Account } from '../account-stats/models';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {

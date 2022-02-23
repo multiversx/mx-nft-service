@@ -1,17 +1,10 @@
 import { OwnerResponse, OwnersFilters, Owner } from './models';
-import {
-  Mutation,
-  Query,
-  Resolver,
-  Args,
-  ResolveField,
-  Parent,
-} from '@nestjs/graphql';
+import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { OwnersService } from './owners.service';
 import ConnectionArgs from '../ConnectionArgs';
 import PageResponse from '../PageResponse';
-import { AccountsProvider } from '../accounts/accounts.loader';
-import { Account } from '../accounts/models';
+import { AccountsProvider } from '../account-stats/accounts.loader';
+import { Account } from '../account-stats/models';
 
 @Resolver(() => Owner)
 export class OwnersResolver {

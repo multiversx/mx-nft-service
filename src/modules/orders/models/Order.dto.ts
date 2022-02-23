@@ -1,10 +1,10 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OrderStatusEnum } from './order-status.enum';
 import { Auction } from '../../auctions/models';
-import { Account } from '../../accounts/models';
 import { Price } from '../../assets/models';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
+import { Account } from 'src/modules/account-stats/models';
 
 @ObjectType()
 export class Order {

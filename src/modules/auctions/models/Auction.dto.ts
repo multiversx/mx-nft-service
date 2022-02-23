@@ -1,6 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import { Account } from 'src/modules/accounts/models';
+import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { OrdersResponse } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';

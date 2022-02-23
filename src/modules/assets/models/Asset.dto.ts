@@ -3,9 +3,9 @@ import { Auction, AuctionResponse } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common';
-import { Account } from 'src/modules/accounts/models';
 import { ScamInfo } from './ScamInfo.dto';
 import { Media } from './Media.dto';
+import { Account } from 'src/modules/account-stats/models';
 
 @ObjectType()
 export class Asset {

@@ -4,34 +4,11 @@
 
 type Account {
   address: ID
-  assets: [Asset!]
-  auctions: [Auction!]
   cover: String
   description: String
-  followers(pagination: ConnectionArgs): FollowerResponse
-  following(pagination: ConnectionArgs): FollowerResponse
   herotag: String
-  orders: [Order!]
   profile: String
   socialLinks: [SocialLink!]
-}
-
-type AccountEdge {
-  cursor: String
-  node: Account
-}
-
-type AccountPageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
-type AccountResponse {
-  edges: [AccountEdge!]
-  pageData: PageData
-  pageInfo: AccountPageInfo
 }
 
 type AccountStats {
@@ -47,10 +24,6 @@ type AccountStats {
 
 input AccountStatsFilter {
   address: String!
-}
-
-input AccountsFilter {
-  addresses: [String!]!
 }
 
 input AddLikeArgs {
@@ -364,21 +337,6 @@ input FiltersExpression {
   operator: Operator!
 }
 
-input FollowEntityArgs {
-  addressToFollow: String!
-}
-
-type FollowerResponse {
-  edges: [FollowerResponseEdge!]
-  pageData: PageData
-  pageInfo: PageInfo
-}
-
-type FollowerResponseEdge {
-  cursor: String!
-  node: Account
-}
-
 enum GroupBy {
   IDENTIFIER
 }
@@ -434,7 +392,6 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
-  follow(input: FollowEntityArgs!): Boolean!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -442,7 +399,6 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
-  unfollow(input: UnfollowEntityArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
 
@@ -537,13 +493,6 @@ type PageData {
   offset: Int!
 }
 
-type PageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
 type Price {
   amount: String!
   nonce: Int!
@@ -554,7 +503,6 @@ type Price {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
-  accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
@@ -640,10 +588,6 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
-}
-
-input UnfollowEntityArgs {
-  addressToUnfollow: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
