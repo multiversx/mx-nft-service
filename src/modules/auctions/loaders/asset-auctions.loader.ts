@@ -1,7 +1,7 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { BaseProvider } from '../assets/base.loader';
+import { AuctionEntity } from '../../../db/auctions/auction.entity';
+import { BaseProvider } from '../../assets/base.loader';
 import { getAuctionsForAsset } from 'src/db/auctions/sql.queries';
 import { Injectable, Scope } from '@nestjs/common';
 import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';

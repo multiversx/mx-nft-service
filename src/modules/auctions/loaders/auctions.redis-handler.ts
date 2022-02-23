@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { AuctionEntity } from 'src/db/auctions';
-import { RedisDataloaderHandler } from '../assets/redis-dataloader.handler';
+import { RedisDataloaderHandler } from '../../assets/redis-dataloader.handler';
 
 @Injectable()
 export class AuctionsRedisHandler extends RedisDataloaderHandler<number> {

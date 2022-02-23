@@ -34,7 +34,7 @@ import { ContentValidation } from './content.validation.service';
 import { AssetsSupplyLoader } from './assets-supply.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { IsAssetLikedProvider } from './asset-is-liked.loader';
-import { LowestAuctionProvider } from '../auctions/lowest-auctions.loader';
+import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loader';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';

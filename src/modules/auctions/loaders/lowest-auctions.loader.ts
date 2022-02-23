@@ -1,11 +1,11 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { BaseProvider } from '../assets/base.loader';
 import { getLowestAuctionForIdentifiers } from 'src/db/auctions/sql.queries';
 import { DateUtils } from 'src/utils/date-utils';
 import { LowestAuctionRedisHandler } from './lowest-auctions.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
+import { BaseProvider } from 'src/modules/assets/base.loader';
+import { AuctionEntity } from 'src/db/auctions';
 
 @Injectable({
   scope: Scope.REQUEST,

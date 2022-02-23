@@ -1,8 +1,8 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { BaseProvider } from 'src/modules/assets/base.loader';
 import { getRepository } from 'typeorm';
-import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { BaseProvider } from '../assets/base.loader';
 import { AuctionsRedisHandler } from './auctions.redis-handler';
 
 @Injectable({

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
+import { RedisDataloaderHandler } from 'src/modules/assets/redis-dataloader.handler';
 import { DateUtils } from 'src/utils/date-utils';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisDataloaderHandler } from '../assets/redis-dataloader.handler';
 
 @Injectable()
 export class UsdPriceRedisHandler extends RedisDataloaderHandler<number> {
