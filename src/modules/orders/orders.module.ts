@@ -4,10 +4,11 @@ import { OrdersResolver } from './orders.resolver';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AuctionProvider, AuctionsRedisHandler } from '../auctions';
-import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
-import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
+import { OrdersRedisHandler } from './loaders/orders.redis-handler';
+import { OrdersProvider } from './loaders/orders.loader';
 
 @Module({
   providers: [
@@ -19,12 +20,10 @@ import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
     LastOrderRedisHandler,
     AccountsProvider,
     AccountsRedisHandler,
+    OrdersProvider,
+    OrdersRedisHandler,
   ],
-  imports: [
-    ElrondCommunicationModule,
-    OrdersModuleDb,
-    forwardRef(() => AccountsStatsModuleGraph),
-  ],
-  exports: [OrdersService, RedisCacheService],
+  imports: [forwardRef(() => OrdersModuleDb)],
+  exports: [OrdersService, RedisCacheService, LastOrderRedisHandler],
 })
 export class OrdersModuleGraph {}

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { CollectionsResolver } from './collection.resolver';
 import { CollectionsService } from './collection.service';
-import { AssetsModuleGraph } from '../assets/assets.module';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { ElrondCommunicationModule } from 'src/common';
 
 @Module({
   providers: [
@@ -13,7 +12,6 @@ import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
     AccountsRedisHandler,
     AccountsProvider,
   ],
-  imports: [ElrondCommunicationModule, AssetsModuleGraph],
-  exports: [CollectionsService],
+  imports: [ElrondCommunicationModule],
 })
 export class CollectionModuleGraph {}

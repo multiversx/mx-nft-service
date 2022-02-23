@@ -1,8 +1,8 @@
 import DataLoader = require('dataloader');
-import '../../utils/extentions';
+import '../../../utils/extentions';
 import { getRepository } from 'typeorm';
 import { AssetLikeEntity } from 'src/db/assets';
-import { BaseProvider } from './base.loader';
+import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { IsAssetLikedRedisHandler } from './asset-is-liked.redis-handler';
 

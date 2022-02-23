@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import DataLoader = require('dataloader');
 import { ElrondDataService } from 'src/common';
-import { BaseProvider } from 'src/modules/assets/base.loader';
+import { BaseProvider } from '../common/base.loader';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 
 @Injectable()

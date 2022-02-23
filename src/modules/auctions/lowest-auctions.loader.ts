@@ -1,7 +1,7 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import { AuctionEntity } from '../../db/auctions/auction.entity';
-import { BaseProvider } from '../assets/base.loader';
+import { BaseProvider } from '../common/base.loader';
 import { getLowestAuctionForIdentifiers } from 'src/db/auctions/sql.queries';
 import { DateUtils } from 'src/utils/date-utils';
 import { LowestAuctionRedisHandler } from './lowest-auctions.redis-handler';

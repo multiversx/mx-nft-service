@@ -28,7 +28,7 @@ import {
   NetworkConfig,
   BigUIntType,
 } from '@elrondnetwork/erdjs';
-import { TransactionNode } from '../transaction';
+import { TransactionNode } from '../common/transaction';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
   ElrondProxyService,

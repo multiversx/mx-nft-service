@@ -17,10 +17,10 @@ import {
   StopNftCreateArgs,
   TransferNftCreateRoleArgs,
 } from './models';
-import { TransactionNode } from '../transaction';
-import { CollectionsFilter } from '../filtersTypes';
 import { CollectionQuery } from './collection-query';
 import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
+import { TransactionNode } from '../common/transaction';
+import { CollectionsFilter } from '../common/filters/filtersTypes';
 
 @Injectable()
 export class CollectionsService {

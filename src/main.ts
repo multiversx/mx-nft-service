@@ -8,7 +8,9 @@ import { PrivateAppModule } from './private.app.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 
 async function bootstrap() {
-  BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
+  BigNumber.config({
+    EXPONENTIAL_AT: [-30, 30],
+  });
   const app = await NestFactory.create(AppModule);
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
@@ -44,7 +46,7 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
-    let processorApp = await NestFactory.create(ClaimableAuctionsModule);
+    const processorApp = await NestFactory.create(ClaimableAuctionsModule);
     await processorApp.listen(6011);
   }
 }

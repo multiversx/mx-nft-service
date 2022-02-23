@@ -1,8 +1,8 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Asset, AssetsResponse } from '../assets/models';
-import { BaseResolver } from '../base.resolver';
-import ConnectionArgs from '../ConnectionArgs';
-import PageResponse from '../PageResponse';
+import { BaseResolver } from '../common/base.resolver';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/filters/PageResponse';
 import { FeaturedService } from './featured.service';
 
 @Resolver(() => Asset)

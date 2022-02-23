@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
-import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/asset-auctions-count.redis-handler';
-import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
+import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
+import { AuctionsForAssetRedisHandler } from 'src/modules/auctions/asset-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
-import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { Sort, Sorting } from 'src/modules/filtersTypes';
+import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
+import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
+import {
+  QueryRequest,
+  TrendingQueryRequest,
+} from 'src/modules/common/filters/QueryRequest';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 import {
@@ -24,8 +27,8 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private auctionsLoader: AuctionsForAssetRedisHandler,
-    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
+    private auctionsRedisHandler: AuctionsForAssetRedisHandler,
+    private assetsAuctionsRedisHandler: AssetAuctionsCountRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
     @InjectRepository(AuctionEntity)
@@ -314,8 +317,8 @@ export class AuctionsServiceDb {
 
   private async invalidateCache(identifier: string, address: string) {
     await this.accountStats.invalidateStats(address);
-    await this.auctionsLoader.clearKey(identifier);
-    await this.assetsAuctionsCountLoader.clearKey(identifier);
+    await this.auctionsRedisHandler.clearKey(identifier);
+    await this.assetsAuctionsRedisHandler.clearKey(identifier);
   }
 
   private getSqlDate(timestamp: number) {

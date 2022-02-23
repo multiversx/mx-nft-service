@@ -1,12 +1,15 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
-import { AssetHistoryLog } from './models/asset-history';
+import { BaseResolver } from '../common/base.resolver';
+import { AssetHistoryLog } from './models/asset-history.dto';
 import { AssetsHistoryService } from '.';
-import { AssetHistoryFilter } from '../filtersTypes';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetHistoryLogResponse } from './models';
-import { HistoryEdge, HistoryPagination } from '../ConnectionArgs';
+import {
+  HistoryEdge,
+  HistoryPagination,
+} from '../common/filters/ConnectionArgs';
 import { DateUtils } from 'src/utils/date-utils';
+import { AssetHistoryFilter } from '../common/filters/filtersTypes';
 
 @Resolver(() => AssetHistoryLogResponse)
 export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {

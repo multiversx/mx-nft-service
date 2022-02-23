@@ -8,7 +8,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
-import { BaseResolver } from '../base.resolver';
+import { BaseResolver } from '../common/base.resolver';
 import {
   Auction,
   CreateAuctionArgs,
@@ -18,21 +18,28 @@ import {
   AuctionResponse,
 } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { TransactionNode } from '../transaction';
 import { Asset, Price } from '../assets/models';
-import ConnectionArgs from '../ConnectionArgs';
-import { FiltersExpression, Grouping, Sorting } from '../filtersTypes';
-import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { User } from '../user';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AssetsProvider } from '../assets/assets.loader';
-import PageResponse from '../PageResponse';
-import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
+import { User } from '../auth/user';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Selections } from '@jenyus-org/nestjs-graphql-utils';
-import { LastOrdersProvider } from 'src/db/orders/last-order.loader';
 import { Account } from '../account-stats/models';
+import { AssetsProvider } from '../assets/loaders/assets.loader';
+import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
+import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
+import { TransactionNode } from '../common/transaction';
+import {
+  FiltersExpression,
+  Grouping,
+  Sorting,
+} from '../common/filters/filtersTypes';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import {
+  QueryRequest,
+  TrendingQueryRequest,
+} from '../common/filters/QueryRequest';
+import PageResponse from '../common/filters/PageResponse';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {

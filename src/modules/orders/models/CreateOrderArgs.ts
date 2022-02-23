@@ -1,5 +1,5 @@
 import { OrderEntity } from 'src/db/orders';
-import denominate from 'src/modules/formatters';
+import denominate from 'src/utils/formatters';
 import { OrderStatusEnum } from '.';
 
 export class CreateOrderArgs {

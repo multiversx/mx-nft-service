@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
-import { AssetAvailableTokensCountRedisHandler } from '../assets/asset-available-tokens-count.redis-handler';
+import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
+import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { AuctionStatusEnum } from '../auctions/models';
 import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
 import { OrdersService } from '../orders/order.service';

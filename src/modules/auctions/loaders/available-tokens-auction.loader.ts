@@ -1,10 +1,10 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import { getAvailableTokensbyAuctionIds } from '../auctions/sql.queries';
-import { AuctionEntity } from '../auctions';
-import { BaseProvider } from 'src/modules/assets/base.loader';
+import { getAvailableTokensbyAuctionIds } from '../../../db/auctions/sql.queries';
+import { AuctionEntity } from '../../../db/auctions';
 import { Injectable, Scope } from '@nestjs/common';
 import { AvailableTokensForAuctionRedisHandler } from './available-tokens-auctions.redis-handler';
+import { BaseProvider } from 'src/modules/common/base.loader';
 
 @Injectable({
   scope: Scope.REQUEST,

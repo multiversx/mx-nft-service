@@ -1,32 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheService } from 'src/common';
-import { OrderEntity, OrdersProvider, OrdersServiceDb } from '.';
-import { LastOrdersProvider } from './last-order.loader';
-import { AvailableTokensForAuctionProvider } from './available-tokens-auction.loader';
-import { AvailableTokensForAuctionRedisHandler } from './available-tokens-auctions.redis-handler';
-import { LastOrderRedisHandler } from './last-order.redis-handler';
-import { OrdersRedisHandler } from './orders.redis-handler';
+import { OrderEntity, OrdersServiceDb } from '.';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrderEntity])],
-  providers: [
-    RedisCacheService,
-    AvailableTokensForAuctionRedisHandler,
-    OrdersServiceDb,
-    OrdersRedisHandler,
-    OrdersProvider,
-    LastOrderRedisHandler,
-    LastOrdersProvider,
-    AvailableTokensForAuctionProvider,
+  imports: [
+    TypeOrmModule.forFeature([OrderEntity]),
+    forwardRef(() => OrdersModuleDb),
   ],
-  exports: [
-    RedisCacheService,
-    AvailableTokensForAuctionRedisHandler,
-    OrdersServiceDb,
-    OrdersProvider,
-    LastOrdersProvider,
-    AvailableTokensForAuctionProvider,
-  ],
+  providers: [RedisCacheService, OrdersServiceDb],
+  exports: [RedisCacheService, OrdersServiceDb],
 })
 export class OrdersModuleDb {}

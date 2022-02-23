@@ -1,8 +1,8 @@
 import DataLoader = require('dataloader');
 import { ElrondApiService } from 'src/common';
-import { BaseProvider } from './base.loader';
 import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
+import { BaseProvider } from 'src/modules/common/base.loader';
 
 @Injectable({
   scope: Scope.REQUEST,

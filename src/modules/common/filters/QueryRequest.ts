@@ -1,4 +1,4 @@
-import { FiltersExpression, Grouping, Sorting } from 'src/modules/filtersTypes';
+import { FiltersExpression, Grouping, Sorting } from './filtersTypes';
 
 export class QueryRequest {
   limit: number = 20;

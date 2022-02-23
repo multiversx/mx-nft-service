@@ -1,9 +1,9 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
-import { OrderEntity } from './order.entity';
-import { BaseProvider } from 'src/modules/assets/base.loader';
+import { OrderEntity } from '../../../db/orders/order.entity';
 import { Injectable, Scope } from '@nestjs/common';
 import { LastOrderRedisHandler } from './last-order.redis-handler';
+import { BaseProvider } from 'src/modules/common/base.loader';
 
 @Injectable({
   scope: Scope.REQUEST,

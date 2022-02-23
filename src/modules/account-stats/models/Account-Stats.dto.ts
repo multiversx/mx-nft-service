@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
-import { nominateAmount } from 'src/modules/formatters';
+import { nominateAmount } from 'src/utils/formatters';
 
 @ObjectType()
 export class AccountStats {

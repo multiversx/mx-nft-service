@@ -1,7 +1,7 @@
 import { isEmpty, map } from 'lodash';
+import denominate from 'src/utils/formatters';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import { Filter, FiltersExpression, Operation, Operator } from './filtersTypes';
-import denominate from './formatters';
 
 type ParamValue = string | number | Array<string | number>;
 

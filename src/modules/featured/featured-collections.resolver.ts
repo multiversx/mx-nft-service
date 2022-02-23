@@ -1,10 +1,10 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Asset, AssetsResponse } from '../assets/models';
-import { BaseResolver } from '../base.resolver';
-import ConnectionArgs from '../ConnectionArgs';
+import { BaseResolver } from '../common/base.resolver';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/filters/PageResponse';
 import { Collection } from '../nftCollections/models';
 import CollectionResponse from '../nftCollections/models/CollectionResponse';
-import PageResponse from '../PageResponse';
 import { FeaturedService } from './featured.service';
 
 @Resolver(() => Asset)

@@ -1,15 +1,15 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
+import { BaseResolver } from '../common/base.resolver';
 import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { Order, OrdersResponse } from './models';
-import { FiltersExpression, Sorting } from '../filtersTypes';
-import ConnectionArgs from '../ConnectionArgs';
 import { connectionFromArraySlice } from 'graphql-relay';
-import { QueryRequest } from '../QueryRequest';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AuctionProvider } from '../auctions';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
+import { AuctionProvider } from '../auctions/auction.loader';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import { FiltersExpression, Sorting } from '../common/filters/filtersTypes';
+import { QueryRequest } from '../common/filters/QueryRequest';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {

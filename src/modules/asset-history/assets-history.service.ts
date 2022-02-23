@@ -8,7 +8,7 @@ import {
   NftEventEnum,
   Price,
 } from '../assets/models';
-import { nominateVal } from '../formatters';
+import { nominateVal } from '../../utils/formatters';
 import { AssetHistoryLog } from './models';
 const hash = require('object-hash');
 
