@@ -1,5 +1,5 @@
 import { connectionFromArraySlice } from 'graphql-relay';
-import ConnectionArgs from './ConnectionArgs';
+import ConnectionArgs from './filters/ConnectionArgs';
 
 export default class PageResponse {
   static mapResponse<T>(

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
-import { QueryRequest } from '../../modules/QueryRequest';
 import { OrderEntity } from '.';
 import { OrdersRedisHandler } from './orders.redis-handler';
 import { LastOrderRedisHandler } from './last-order.redis-handler';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
+import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 
 @Injectable()
 export class OrdersServiceDb {

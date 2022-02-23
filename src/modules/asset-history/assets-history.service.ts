@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
 import { elrondConfig } from 'src/config';
+import { nominateVal } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import {
   AssetActionEnum,
@@ -8,7 +9,6 @@ import {
   NftEventEnum,
   Price,
 } from '../assets/models';
-import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models';
 const hash = require('object-hash');
 

@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
-import { QueryRequest } from '../QueryRequest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisCacheService } from 'src/common';
@@ -12,6 +11,7 @@ import { cacheConfig } from 'src/config';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 import { AccountsStatsService } from '../account-stats/accounts-stats.service';
+import { QueryRequest } from '../common/filters/QueryRequest';
 const hash = require('object-hash');
 
 @Injectable()

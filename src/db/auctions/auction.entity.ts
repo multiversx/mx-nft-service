@@ -3,7 +3,7 @@ import {
   AuctionStatusEnum,
   AuctionAbi,
 } from 'src/modules/auctions/models';
-import denominate, { nominateVal } from 'src/modules/formatters';
+import denominate, { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';

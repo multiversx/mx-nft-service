@@ -1,5 +1,5 @@
-import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
-import { NftTypeEnum } from './assets/models/NftTypes.enum';
+import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { NftTypeEnum } from '../../assets/models/NftTypes.enum';
 
 export enum Operator {
   AND,

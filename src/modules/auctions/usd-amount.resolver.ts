@@ -1,9 +1,9 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
+import { BaseResolver } from '../common/base.resolver';
 import { Price } from '../assets/models';
-import denominate from '../formatters';
 import { usdValue } from 'src/utils/helpers';
 import { UsdPriceLoader } from './usd-price.loader';
+import denominate from 'src/utils/formatters';
 
 @Resolver(() => Price)
 export class UsdAmountResolver extends BaseResolver(Price) {
