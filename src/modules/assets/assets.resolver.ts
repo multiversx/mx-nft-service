@@ -26,7 +26,7 @@ import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { Account } from '../account-stats/models/Account.dto';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetLikesProvider } from './asset-likes-count.loader';
 import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';

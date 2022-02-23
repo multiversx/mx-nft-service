@@ -22,8 +22,8 @@ import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
   providers: [

@@ -21,7 +21,7 @@ import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import CollectionResponse from './models/CollectionResponse';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsService } from '../assets';
 import { Account } from '../account-stats/models';
 import { TransactionNode } from '../common/transaction';

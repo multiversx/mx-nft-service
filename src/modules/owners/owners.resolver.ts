@@ -1,7 +1,7 @@
 import { OwnerResponse, OwnersFilters, Owner } from './models';
 import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { OwnersService } from './owners.service';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';

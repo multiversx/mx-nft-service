@@ -4,7 +4,7 @@ import { Auction } from '../auctions/models';
 import { OrdersService } from './order.service';
 import { Order, OrdersResponse } from './models';
 import { connectionFromArraySlice } from 'graphql-relay';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AuctionProvider } from '../auctions';
 import { Account } from '../account-stats/models';
 import { FiltersExpression, Sorting } from '../common/filters/filtersTypes';

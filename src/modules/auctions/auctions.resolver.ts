@@ -21,7 +21,7 @@ import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsProvider } from '../assets/assets.loader';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 import { Selections } from '@jenyus-org/nestjs-graphql-utils';

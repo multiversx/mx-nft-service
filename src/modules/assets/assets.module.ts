@@ -28,8 +28,8 @@ import { LowestAuctionRedisHandler } from '../auctions/lowest-auctions.redis-han
 import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { AssetAuctionsCountRedisHandler } from './asset-auctions-count.redis-handler';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
   providers: [
