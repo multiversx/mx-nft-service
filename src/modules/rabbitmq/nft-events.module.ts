@@ -5,8 +5,8 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
-import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
+import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 
 @Module({
   imports: [

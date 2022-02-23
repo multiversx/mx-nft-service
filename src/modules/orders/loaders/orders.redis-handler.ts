@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
+import { OrderEntity } from 'src/db/orders/order.entity';
 import { RedisDataloaderHandler } from 'src/modules/assets/redis-dataloader.handler';
-import { OrderEntity } from '.';
 
 @Injectable()
 export class OrdersRedisHandler extends RedisDataloaderHandler<number> {

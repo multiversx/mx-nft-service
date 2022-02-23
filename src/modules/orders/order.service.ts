@@ -7,10 +7,10 @@ import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
-import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
-import { AvailableTokensForAuctionRedisHandler } from 'src/db/orders/available-tokens-auctions.redis-handler';
 import { AccountsStatsService } from '../account-stats/accounts-stats.service';
 import { QueryRequest } from '../common/filters/QueryRequest';
+import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
+import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
 const hash = require('object-hash');
 
 @Injectable()
