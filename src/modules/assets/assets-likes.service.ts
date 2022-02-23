@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
-import '../../utils/extentions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import { AssetLikesProvider } from './asset-likes-count.loader';
-import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
+import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 
 @Injectable()
 export class AssetsLikesService {

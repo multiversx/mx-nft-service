@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { ScamInfo } from './models/ScamInfo.dto';
-import { RedisDataloaderHandler } from './redis-dataloader.handler';
+import { ScamInfo } from '../models/ScamInfo.dto';
+import { RedisDataloaderHandler } from '../redis-dataloader.handler';
 
 @Injectable()
-export class AssetsSupplyRedisHandler extends RedisDataloaderHandler<string> {
+export class AssetScamInfoRedisHandler extends RedisDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'asset_supply', 5);
+    super(redisCacheService, 'asset_scam_info', 1800);
   }
 
   mapValues(
     identifiers: string[],
     assetsIdentifiers: { [key: string]: any[] },
   ) {
-    return identifiers.map((identifier) =>
-      assetsIdentifiers && assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier]
-        : null,
-    );
+    return identifiers.map((identifier) => {
+      return ScamInfo.fromNftScamInfo(
+        assetsIdentifiers[identifier][0].scamInfo,
+      );
+    });
   }
 
-  public batchSupplyInfo = async (identifiers: string[], data: any) => {
+  public batchScamInfo = async (identifiers: string[], data: any) => {
     const cacheKeys = this.getCacheKeys(identifiers);
     let [redisKeys, values] = [cacheKeys, []];
     const getDataFromRedis = await this.redisCacheService.batchGetCache(
@@ -28,14 +28,15 @@ export class AssetsSupplyRedisHandler extends RedisDataloaderHandler<string> {
       cacheKeys,
     );
     if (getDataFromRedis.includes(null)) {
-      values = identifiers.map((identifier) =>
-        data && data[identifier] ? data[identifier] : null,
-      );
+      values = identifiers.map((identifier) => {
+        return ScamInfo.fromNftScamInfo(data[identifier][0].scamInfo);
+      });
+
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         redisKeys,
         values,
-        5,
+        300,
       );
       return values;
     }

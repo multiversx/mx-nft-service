@@ -1,19 +1,19 @@
 import DataLoader = require('dataloader');
 import { ElrondApiService } from 'src/common';
-import { BaseProvider } from './base.loader';
-import { AssetsSupplyRedisHandler } from './assets-supply.redis-handler';
+import { BaseProvider } from '../base.loader';
+import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
-export class AssetsSupplyLoader extends BaseProvider<string> {
+export class AssetScamInfoProvider extends BaseProvider<string> {
   constructor(
-    private assetsSupplyRedisHandler: AssetsSupplyRedisHandler,
+    private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
     private apiService: ElrondApiService,
   ) {
     super(
-      assetsSupplyRedisHandler,
+      assetScamInfoRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
     );
   }
@@ -22,12 +22,12 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
-      '&withSupply=true&fields=identifier,supply',
+      '&withOwner=true&withMetadata=true&fields=identifier,scamInfo',
     );
     return nfts?.groupBy((asset) => asset.identifier);
   }
 
-  public batchSupplyInfo = async (identifiers: string[], data: any) => {
-    return this.assetsSupplyRedisHandler.batchSupplyInfo(identifiers, data);
+  public batchScamInfo = async (identifiers: string[], data: any) => {
+    return this.assetScamInfoRedisHandler.batchScamInfo(identifiers, data);
   };
 }

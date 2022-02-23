@@ -27,19 +27,19 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { Account } from '../account-stats/models/Account.dto';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
-import { AssetLikesProvider } from './asset-likes-count.loader';
-import { AssetAuctionsCountProvider } from './asset-auctions-count.loader';
-import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
+import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
+import { AssetAuctionsCountProvider } from './loaders/asset-auctions-count.loader';
+import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
 import { ContentValidation } from './content.validation.service';
-import { AssetsSupplyLoader } from './assets-supply.loader';
-import { AssetScamInfoProvider } from './assets-scam-info.loader';
-import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
+import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
+import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loader';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../common/user';
+import { User } from '../auth/user';
 
 @Resolver(() => Asset)
 export class AssetsResolver extends BaseResolver(Asset) {

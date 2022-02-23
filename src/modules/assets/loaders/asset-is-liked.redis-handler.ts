@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { RedisDataloaderHandler } from './redis-dataloader.handler';
+import { RedisDataloaderHandler } from '../redis-dataloader.handler';
 
 @Injectable()
-export class AssetAuctionsCountRedisHandler extends RedisDataloaderHandler<string> {
+export class IsAssetLikedRedisHandler extends RedisDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'assetAuctionsCount');
+    super(redisCacheService, 'isAssetLiked');
   }
 
   mapValues(
@@ -18,7 +18,7 @@ export class AssetAuctionsCountRedisHandler extends RedisDataloaderHandler<strin
         : [
             {
               identifier: identifier,
-              auctionsCount: 0,
+              liked: 0,
             },
           ],
     );

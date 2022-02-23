@@ -22,7 +22,7 @@ import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
-import { AssetsProvider } from '../assets/assets.loader';
+import { AssetsProvider } from '../assets/loaders/assets.loader';
 import { AvailableTokensForAuctionProvider } from 'src/db/orders/available-tokens-auction.loader';
 import { Selections } from '@jenyus-org/nestjs-graphql-utils';
 import { LastOrdersProvider } from 'src/db/orders/last-order.loader';
@@ -39,7 +39,7 @@ import {
   TrendingQueryRequest,
 } from '../common/filters/QueryRequest';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../common/user';
+import { User } from '../auth/user';
 
 @Resolver(() => Auction)
 export class AuctionsResolver extends BaseResolver(Auction) {

@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import '../../utils/extentions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ElrondApiService, RedisCacheService } from 'src/common';

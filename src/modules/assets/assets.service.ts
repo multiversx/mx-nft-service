@@ -15,7 +15,6 @@ import {
 } from 'src/common';
 import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import '../../utils/extentions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
@@ -34,8 +33,8 @@ import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { AssetScamInfoProvider } from './assets-scam-info.loader';
-import { AssetsSupplyLoader } from './assets-supply.loader';
+import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
+import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TransactionNode } from '../common/transaction';
 const hash = require('object-hash');
