@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import {
   CreateAuctionArgs,
   AuctionAbi,

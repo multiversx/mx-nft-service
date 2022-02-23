@@ -15,6 +15,7 @@ import {
 } from 'src/common';
 import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import '../../utils/extentions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';

@@ -1,5 +1,6 @@
 import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
+import '../../../utils/extentions';
 import { AssetLikeEntity } from 'src/db/assets';
 import { BaseProvider } from '../base.loader';
 import { Injectable, Scope } from '@nestjs/common';

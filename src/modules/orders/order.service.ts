@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';

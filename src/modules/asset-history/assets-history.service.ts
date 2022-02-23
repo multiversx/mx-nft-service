@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import { ElrondElasticService } from 'src/common';
 import { elrondConfig } from 'src/config';
 import { nominateVal } from 'src/utils';
