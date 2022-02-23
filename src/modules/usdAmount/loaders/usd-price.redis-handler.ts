@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import { RedisDataloaderHandler } from 'src/modules/assets/redis-dataloader.handler';
+import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
 import { DateUtils } from 'src/utils/date-utils';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 

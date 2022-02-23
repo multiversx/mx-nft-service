@@ -4,7 +4,7 @@ import { getLowestAuctionForIdentifiers } from 'src/db/auctions/sql.queries';
 import { DateUtils } from 'src/utils/date-utils';
 import { LowestAuctionRedisHandler } from './lowest-auctions.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
-import { BaseProvider } from 'src/modules/assets/base.loader';
+import { BaseProvider } from 'src/modules/common/base.loader';
 import { AuctionEntity } from 'src/db/auctions';
 
 @Injectable({

@@ -1,6 +1,6 @@
 import DataLoader = require('dataloader');
 import { ElrondApiService } from 'src/common';
-import { BaseProvider } from '../base.loader';
+import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
 
