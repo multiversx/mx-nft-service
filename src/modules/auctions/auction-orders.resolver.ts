@@ -1,11 +1,11 @@
 import { Resolver, ResolveField, Parent, Args } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
+import { BaseResolver } from '../common/base.resolver';
 import { AuctionsOrdersProvider } from '.';
 import { Auction } from './models';
-import ConnectionArgs from '../ConnectionArgs';
-import PageResponse from '../PageResponse';
 import { Order, OrdersResponse } from '../orders/models';
 import { OrderEntity } from 'src/db/orders';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Auction)
 export class AuctionOrdersResolver extends BaseResolver(Auction) {

@@ -7,7 +7,7 @@ import {
   Parent,
   Int,
 } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
+import { BaseResolver } from '../common/base.resolver';
 import {
   StopNftCreateArgs,
   Collection,
@@ -17,17 +17,20 @@ import {
   CollectionAsset,
   CollectionAssetModel,
 } from './models';
-import { TransactionNode } from '../transaction';
 import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import CollectionResponse from './models/CollectionResponse';
-import { AssetsFilter, CollectionsFilter } from '../filtersTypes';
-import ConnectionArgs from '../ConnectionArgs';
-import PageResponse from '../PageResponse';
-import { AccountsProvider } from '../account-stats/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsService } from '../assets';
 import { Account } from '../account-stats/models';
+import { TransactionNode } from '../common/transaction';
+import {
+  AssetsFilter,
+  CollectionsFilter,
+} from '../common/filters/filtersTypes';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Collection)
 export class CollectionsResolver extends BaseResolver(Collection) {

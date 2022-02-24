@@ -15,6 +15,7 @@ import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.m
 import { FeaturedModuleGraph } from './modules/featured/featured.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
+import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats
     AccountsStatsModuleGraph,
     AuctionsModuleDb,
     FeaturedModuleGraph,
+    UsdAmountModuleGraph,
     IpfsModule,
   ],
 })

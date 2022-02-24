@@ -1,17 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
-import '../../utils/extentions';
 import { Auction, AuctionStatusEnum } from './models';
+import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { QueryRequest, TrendingQueryRequest } from '../QueryRequest';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService, RedisCacheService } from 'src/common';
-import { GroupBy, Operation } from '../filtersTypes';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import {
+  QueryRequest,
+  TrendingQueryRequest,
+} from '../common/filters/QueryRequest';
+import { GroupBy, Operation } from '../common/filters/filtersTypes';
 const hash = require('object-hash');
 
 @Injectable()

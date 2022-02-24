@@ -1,4 +1,5 @@
 import { Address } from '@elrondnetwork/erdjs';
+import '../../../../utils/extentions';
 
 export class EndAuctionEventsTopics {
   private collection: string;

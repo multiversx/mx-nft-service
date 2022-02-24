@@ -1,0 +1,26 @@
+import { Injectable } from '@nestjs/common';
+import { RedisCacheService } from 'src/common';
+import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+
+@Injectable()
+export class AssetAvailableTokensCountRedisHandler extends RedisDataloaderHandler<string> {
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, 'availableTokensCount');
+  }
+
+  mapValues(
+    identifiers: string[],
+    assetsIdentifiers: { [key: string]: any[] },
+  ) {
+    return identifiers?.map((identifier) =>
+      assetsIdentifiers[identifier]
+        ? assetsIdentifiers[identifier]
+        : [
+            {
+              identifier: identifier,
+              count: 0,
+            },
+          ],
+    );
+  }
+}

@@ -1,5 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
-import relayTypes from '../../Relay.types';
+import relayTypes from 'src/modules/common/Relay.types';
 import { Owner } from './Owner.dto';
 
 @ObjectType()

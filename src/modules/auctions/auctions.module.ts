@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
   AuctionsService,
-  AuctionProvider,
   NftMarketplaceAbiService,
   AuctionsRedisHandler,
   AuctionsOrdersProvider,
@@ -11,40 +10,42 @@ import { AuctionsResolver } from './auctions.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
-import { AssetsProvider, AssetstRedisHandler } from '../assets';
-import { UsdAmountResolver } from './usd-amount.resolver';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
-import { AuctionsForAssetProvider } from './asset-auctions.loader';
+import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
-import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';
-import { UsdPriceLoader } from './usd-price.loader';
-import { UsdPriceRedisHandler } from './usd-price.redis-handler';
+import { AuctionsForAssetRedisHandler } from './loaders/asset-auctions.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
-import { LastOrderRedisHandler } from 'src/db/orders/last-order.redis-handler';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
-import { AccountsProvider } from '../account-stats/accounts.loader';
-import { AccountsRedisHandler } from '../account-stats/accounts.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { AuctionProvider } from './loaders/auction.loader';
+import { AssetstRedisHandler } from '../assets/loaders/assets.redis-handler';
+import { AssetsProvider } from '../assets/loaders/assets.loader';
+import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
+import { AvailableTokensForAuctionRedisHandler } from './loaders/available-tokens-auctions.redis-handler';
+import { LastOrderRedisHandler } from '../orders/loaders/last-order.redis-handler';
+import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 
 @Module({
   providers: [
     AuctionsService,
     AuctionsResolver,
-    UsdAmountResolver,
     AuctionOrdersResolver,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
     AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
+    AvailableTokensForAuctionRedisHandler,
+    AvailableTokensForAuctionProvider,
     AuctionsOrdersRedisHandler,
     AuctionsOrdersProvider,
     AuctionProvider,
     AuctionsRedisHandler,
     AssetstRedisHandler,
     AssetsProvider,
-    UsdPriceRedisHandler,
-    UsdPriceLoader,
     LastOrderRedisHandler,
+    LastOrdersProvider,
     AccountsProvider,
     AccountsRedisHandler,
   ],

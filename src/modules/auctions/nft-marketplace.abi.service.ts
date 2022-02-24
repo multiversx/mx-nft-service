@@ -28,7 +28,6 @@ import {
   NetworkConfig,
   BigUIntType,
 } from '@elrondnetwork/erdjs';
-import { TransactionNode } from '../transaction';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
   ElrondProxyService,
@@ -40,6 +39,7 @@ import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TransactionNode } from '../common/transaction';
 
 @Injectable()
 export class NftMarketplaceAbiService {
