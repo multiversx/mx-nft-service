@@ -12,6 +12,7 @@ import { AccountsStatsService } from '../account-stats/accounts-stats.service';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
+import { TimeConstants } from 'src/utils/time-utils';
 const hash = require('object-hash');
 
 @Injectable()
@@ -122,7 +123,7 @@ export class OrdersService {
       this.redisClient,
       cacheKey,
       getOrders,
-      cacheConfig.ordersttl,
+      TimeConstants.oneDay,
     );
   }
 

@@ -40,6 +40,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -231,7 +232,7 @@ export class NftMarketplaceAbiService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        cacheConfig.followersttl,
+        TimeConstants.oneWeek,
       );
 
       return cutPercentage;

@@ -38,6 +38,7 @@ import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TransactionNode } from '../common/transaction';
+import { TimeConstants } from 'src/utils/time-utils';
 const hash = require('object-hash');
 
 @Injectable()
@@ -159,7 +160,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAsset,
-        1800,
+        30 * TimeConstants.oneMinute,
       );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
@@ -323,7 +324,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAssets,
-        30,
+        30 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {

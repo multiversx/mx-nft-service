@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AssetsSupplyRedisHandler extends RedisDataloaderHandler<string> {
@@ -34,7 +35,7 @@ export class AssetsSupplyRedisHandler extends RedisDataloaderHandler<string> {
         this.redisClient,
         redisKeys,
         values,
-        5,
+        5 * TimeConstants.oneSecond,
       );
       return values;
     }

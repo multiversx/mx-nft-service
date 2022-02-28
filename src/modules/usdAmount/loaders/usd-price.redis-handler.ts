@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
 import { DateUtils } from 'src/utils/date-utils';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class UsdPriceRedisHandler extends RedisDataloaderHandler<number> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'priceUSD', cacheConfig.followersttl);
+    super(redisCacheService, 'priceUSD', TimeConstants.oneWeek);
   }
 
   mapValues(

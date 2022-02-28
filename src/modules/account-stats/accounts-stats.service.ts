@@ -8,6 +8,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
 import { AssetsQuery } from '../assets';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AccountsStatsService {
@@ -32,7 +33,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        cacheConfig.followersttl,
+        TimeConstants.oneWeek,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting stats for account', {
@@ -57,7 +58,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountClaimableCount,
-        5,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error(
@@ -85,7 +86,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        5,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting collected count', {
@@ -110,7 +111,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getCollectionsCount,
-        5,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting collections Count ', {
@@ -135,7 +136,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        5,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting creations count', {

@@ -3,6 +3,7 @@ import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export abstract class RedisDataloaderHandler<T> {
@@ -12,7 +13,7 @@ export abstract class RedisDataloaderHandler<T> {
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
-    private ttl: number = cacheConfig.followersttl,
+    private ttl: number = TimeConstants.oneWeek,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
