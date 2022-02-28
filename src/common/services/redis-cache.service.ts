@@ -290,7 +290,6 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<number> {
     const cacheKey = generateCacheKey(key, region);
-    console.log(1111111111, cacheKey);
     try {
       const newValue = await client.incr(cacheKey);
       if (ttl) {
