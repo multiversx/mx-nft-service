@@ -11,6 +11,7 @@ import {
   Price,
 } from '../assets/models';
 import { AssetHistoryLog } from './models';
+import BigNumber from 'bignumber.js';
 const hash = require('object-hash');
 
 @Injectable()
@@ -179,18 +180,16 @@ export class AssetsHistoryService {
         break;
       }
       case AuctionEventEnum.BuySftEvent: {
-        const count = Buffer.from(
-          nominateVal(parseInt('1')).toString(),
-          'hex',
-        ).toString('base64');
+        const [, , , , itemsCount, address, price] =
+          res[index]._source.events[1].topics;
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.events[1].topics[5].base64ToBech32(),
-            count,
-            res[index]._source.events[1].topics[6],
+            address.base64ToBech32(),
+            itemsCount,
+            price,
           ),
         );
         break;
@@ -208,25 +207,29 @@ export class AssetsHistoryService {
     price = undefined,
     sender = undefined,
   ): AssetHistoryLog {
+    const minPrice = Buffer.from(price, 'base64')
+      .toString('hex')
+      .hexBigNumberToString();
+    const itemCountString = itemsCount
+      ? Buffer.from(itemsCount, 'base64').toString('hex').hexBigNumberToString()
+      : undefined;
+    const totalPrice =
+      price && itemCountString
+        ? new BigNumber(minPrice).multipliedBy(itemCountString)
+        : undefined;
+
     return new AssetHistoryLog({
       action: action,
       address: address,
       senderAddress: sender,
       transactionHash: res[index]._id,
       actionDate: res[index]._source.timestamp || '',
-      itemCount: itemsCount
-        ? parseInt(
-            Buffer.from(itemsCount, 'base64').toString('hex'),
-            16,
-          ).toString()
-        : undefined,
-      price: price
+      itemCount: itemCountString ? itemCountString.toString() : undefined,
+      price: totalPrice
         ? new Price({
             nonce: 0,
             token: 'EGLD',
-            amount: Buffer.from(price, 'base64')
-              .toString('hex')
-              .hexBigNumberToString(),
+            amount: totalPrice.toFixed(),
             timestamp: res[index]._source.timestamp,
           })
         : undefined,
