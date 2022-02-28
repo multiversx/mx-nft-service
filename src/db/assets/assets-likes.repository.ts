@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { DeleteResult, EntityRepository, Repository } from 'typeorm';
 import { AssetLikeEntity } from './assets-likes.entity';
 
 @EntityRepository(AssetLikeEntity)
@@ -29,6 +29,14 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     return count > 0;
   }
 
+  async getAssetLikesCount(identifier: string): Promise<number> {
+    return await this.count({
+      where: {
+        identifier,
+      },
+    });
+  }
+
   async addLike(assetLikeEntity: AssetLikeEntity): Promise<AssetLikeEntity> {
     try {
       return await this.save(assetLikeEntity);
@@ -41,8 +49,8 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     }
   }
 
-  removeLike(identifier: string, address: string): Promise<any> {
-    return this.delete({
+  async removeLike(identifier: string, address: string): Promise<DeleteResult> {
+    return await this.delete({
       identifier,
       address,
     });

@@ -11,6 +11,7 @@ import {
 } from 'src/db/featuredNfts';
 import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class FeaturedService {
@@ -39,7 +40,7 @@ export class FeaturedService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        1800,
+        30 * TimeConstants.oneMinute,
       );
       const nfts = await this.apiService.getNftsByIdentifiers(
         featuredNfts?.map((x) => x.identifier),
@@ -70,7 +71,7 @@ export class FeaturedService {
           this.redisClient,
           cacheKey,
           getFeaturedCollections,
-          1800,
+          30 * TimeConstants.oneMinute,
         );
       const collections = await this.apiService.getCollectionsByIdentifiers(
         featuredCollections?.map((x) => x.identifier),

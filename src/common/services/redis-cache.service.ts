@@ -40,6 +40,7 @@ export class RedisCacheService {
       return null;
     }
   }
+
   async set(
     client: Redis.Redis,
     key: string,
@@ -280,6 +281,46 @@ export class RedisCacheService {
 
       return result;
     }, []);
+  }
+
+  async increment(
+    client: Redis.Redis,
+    key: string,
+    ttl: number = null,
+    region: string = null,
+  ): Promise<number> {
+    const cacheKey = generateCacheKey(key, region);
+    try {
+      const newValue = await client.incr(cacheKey);
+      if (ttl) {
+        await client.expire(cacheKey, ttl);
+      }
+      return newValue;
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to increment redis key ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    }
+  }
+
+  async decrement(
+    client: Redis.Redis,
+    key: string,
+    ttl: number = null,
+    region: string = null,
+  ): Promise<number> {
+    const cacheKey = generateCacheKey(key, region);
+    try {
+      const newValue = await client.decr(cacheKey);
+      if (ttl) {
+        await client.expire(cacheKey, ttl);
+      }
+      return newValue;
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to decrement redis key ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    }
   }
 
   private buildInternalCreateValueFunc(

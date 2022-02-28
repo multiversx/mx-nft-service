@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { ScamInfo } from '../models/ScamInfo.dto';
 import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AssetScamInfoRedisHandler extends RedisDataloaderHandler<string> {
@@ -36,7 +37,7 @@ export class AssetScamInfoRedisHandler extends RedisDataloaderHandler<string> {
         this.redisClient,
         redisKeys,
         values,
-        300,
+        5 * TimeConstants.oneMinute,
       );
       return values;
     }

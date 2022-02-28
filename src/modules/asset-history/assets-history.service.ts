@@ -207,14 +207,14 @@ export class AssetsHistoryService {
     price = undefined,
     sender = undefined,
   ): AssetHistoryLog {
-    const minPrice = Buffer.from(price, 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    const minPrice = price
+      ? Buffer.from(price, 'base64').toString('hex').hexBigNumberToString()
+      : undefined;
     const itemCountString = itemsCount
       ? Buffer.from(itemsCount, 'base64').toString('hex').hexBigNumberToString()
       : undefined;
     const totalPrice =
-      price && itemCountString
+      minPrice && itemCountString
         ? new BigNumber(minPrice).multipliedBy(itemCountString)
         : undefined;
 

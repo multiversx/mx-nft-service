@@ -15,6 +15,7 @@ import {
   TrendingQueryRequest,
 } from '../common/filters/QueryRequest';
 import { GroupBy, Operation } from '../common/filters/filtersTypes';
+import { TimeConstants } from 'src/utils/time-utils';
 const hash = require('object-hash');
 
 @Injectable()
@@ -67,7 +68,7 @@ export class AuctionsService {
         this.redisClient,
         cacheKey,
         getAuctions,
-        30,
+        30 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -123,7 +124,7 @@ export class AuctionsService {
         this.redisClient,
         cacheKey,
         getTrendingAuctions,
-        cacheConfig.auctionsttl,
+        TimeConstants.oneHour,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -151,7 +152,7 @@ export class AuctionsService {
         this.redisClient,
         cacheKey,
         getTrendingAuctions,
-        30,
+        30 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {

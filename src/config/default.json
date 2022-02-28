@@ -17,16 +17,12 @@
   "caching": {
     "ordersRedisClientName": "orders",
     "ordersDbName": 2,
-    "ordersttl": 43200,
     "assetsRedisClientName": "assets",
     "assetsDbName": 3,
-    "assetsttl": 43200,
     "auctionsRedisClientName": "auctions",
     "auctionsDbName": 4,
-    "auctionsttl": 43200,
     "followersRedisClientName": "followers",
-    "followersDbName": 5,
-    "followersttl": 70200
+    "followersDbName": 5
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
