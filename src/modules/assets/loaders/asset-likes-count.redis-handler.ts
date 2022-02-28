@@ -14,13 +14,8 @@ export class AssetLikesProviderRedisHandler extends RedisDataloaderHandler<strin
   ) {
     return identifiers?.map((identifier) =>
       assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier]
-        : [
-            {
-              identifier: identifier,
-              likesCount: 0,
-            },
-          ],
+        ? parseInt(assetsIdentifiers[identifier][0].likesCount)
+        : 0,
     );
   }
 }
