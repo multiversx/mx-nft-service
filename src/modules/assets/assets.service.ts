@@ -85,6 +85,8 @@ export class AssetsService {
       .addIdentifiers(filters?.identifiers)
       .addCollection(filters?.collection)
       .addType(filters?.type)
+      .withOwner()
+      .withSupply()
       .addPageSize(offset, limit)
       .build();
 
