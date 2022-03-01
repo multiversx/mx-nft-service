@@ -1,5 +1,6 @@
 export * from './assets.service';
-export * from './assets.resolver';
+export * from './assets-queries.resolver';
+export * from './assets-mutations.resolver';
 export * from './loaders/assets.redis-handler';
 export * from './loaders/assets.loader';
 export * from './assets-query';
