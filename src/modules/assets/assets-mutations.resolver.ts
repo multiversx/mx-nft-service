@@ -38,6 +38,18 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     if (process.env.NODE_ENV === 'production') {
       return new TransactionNode();
     }
+    input.file = await file;
+    return await this.assetsService.createNft(user.publicKey, input);
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(GqlAuthGuard)
+  async verifyContent(
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
+  ): Promise<Boolean> {
+    if (process.env.NODE_ENV === 'production') {
+      return false;
+    }
     const fileData = await file;
 
     const contentStatus = (
@@ -46,8 +58,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
         .checkContentSensitivity(fileData)
     ).getStatus();
     if (contentStatus) {
-      input.file = fileData;
-      return await this.assetsService.createNft(user.publicKey, input);
+      return true;
     }
     throw Error('Invalid content');
   }
