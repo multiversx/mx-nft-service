@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
   AssetsService,
-  AssetsResolver,
+  AssetsQueriesResolver,
   AssetsLikesService,
   AssetAuctionsCountProvider,
 } from '.';
@@ -30,6 +30,7 @@ import { AssetScamInfoRedisHandler } from './loaders/assets-scam-info.redis-hand
 import { AssetAuctionsCountRedisHandler } from './loaders/asset-auctions-count.redis-handler';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { AssetsMutationsResolver } from './assets-mutations.resolver';
 
 @Module({
   providers: [
@@ -51,7 +52,8 @@ import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-ha
     AssetScamInfoProvider,
     AssetAvailableTokensCountRedisHandler,
     AssetAvailableTokensCountProvider,
-    AssetsResolver,
+    AssetsQueriesResolver,
+    AssetsMutationsResolver,
     AssetAuctionResolver,
     RedisCacheService,
     S3Service,

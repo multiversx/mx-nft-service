@@ -4,33 +4,17 @@ import {
   Args,
   ResolveField,
   Parent,
-  Mutation,
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsService } from '.';
-import {
-  Asset,
-  CreateNftArgs,
-  TransferNftArgs,
-  HandleQuantityArgs,
-  AddLikeArgs,
-  RemoveLikeArgs,
-  AssetsResponse,
-  NftTypeEnum,
-} from './models';
-import { GraphQLUpload } from 'apollo-server-express';
-import { FileUpload } from 'graphql-upload';
+import { Asset, AssetsResponse, NftTypeEnum } from './models';
 import { Auction } from '../auctions/models';
-import { AssetsLikesService } from './assets-likes.service';
-import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { Account } from '../account-stats/models/Account.dto';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
 import { AssetAuctionsCountProvider } from './loaders/asset-auctions-count.loader';
 import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
-import { ContentValidation } from './content.validation.service';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
@@ -38,20 +22,16 @@ import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loade
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
-import { TransactionNode } from '../common/transaction';
-import { User } from '../auth/user';
 
 @Resolver(() => Asset)
-export class AssetsResolver extends BaseResolver(Asset) {
+export class AssetsQueriesResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsService,
-    private assetsLikesService: AssetsLikesService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
-    private contentValidation: ContentValidation,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
@@ -76,95 +56,6 @@ export class AssetsResolver extends BaseResolver(Asset) {
       offset,
       limit,
     );
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async createNft(
-    @Args('input') input: CreateNftArgs,
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    const fileData = await file;
-
-    const contentStatus = (
-      await this.contentValidation
-        .checkContentType(fileData)
-        .checkContentSensitivity(fileData)
-    ).getStatus();
-    if (contentStatus) {
-      input.file = fileData;
-      return await this.assetsService.createNft(user.publicKey, input);
-    }
-    throw Error('Invalid content');
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async addSftQuantity(
-    @Args('input') input: HandleQuantityArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.assetsService.addBurnQuantity(
-      user.publicKey,
-      input,
-      'ESDTNFTAddQuantity',
-    );
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async burnQuantity(
-    @Args('input') input: HandleQuantityArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.assetsService.addBurnQuantity(
-      user.publicKey,
-      input,
-      'ESDTNFTBurn',
-    );
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async transferNft(
-    @Args('input') input: TransferNftArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    return await this.assetsService.transferNft(user.publicKey, input);
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
-  addLike(
-    @Args('input') input: AddLikeArgs,
-    @User() user: any,
-  ): Promise<boolean> {
-    if (process.env.NODE_ENV === 'production') {
-      return Promise.resolve(false);
-    }
-    return this.assetsLikesService.addLike(input.identifier, user.publicKey);
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
-  removeLike(
-    @Args('input') input: RemoveLikeArgs,
-    @User() user: any,
-  ): Promise<boolean> {
-    if (process.env.NODE_ENV === 'production') {
-      return Promise.resolve(false);
-    }
-    return this.assetsLikesService.removeLike(input.identifier, user.publicKey);
   }
 
   @ResolveField('likesCount', () => Int)
