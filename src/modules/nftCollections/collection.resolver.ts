@@ -5,6 +5,7 @@ import {
   Query,
   ResolveField,
   Parent,
+  Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import {
@@ -127,6 +128,8 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   @ResolveField('collectionAsset', () => CollectionAsset)
   async collectionAssets(
     @Parent() collectionResponse: Collection,
+    @Args('assetsCount', { nullable: true, type: () => Int })
+    assetsCount: number = 4,
   ): Promise<CollectionAsset> {
     const { collection } = collectionResponse;
     return new CollectionAsset({
