@@ -13,6 +13,7 @@ export class NftTransactionsConsumer {
     exchange: process.env.RABBITMQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
+    console.log(nftAuctionEvents);
     await this.nftTransactionsService.handleNftMintEvents(
       nftAuctionEvents?.events?.filter(
         (e) => e.identifier === NftEventEnum.ESDTNFTCreate,
