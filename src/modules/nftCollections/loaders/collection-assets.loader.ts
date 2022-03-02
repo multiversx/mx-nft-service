@@ -20,7 +20,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const promises = identifiers.map((identifier) =>
+    const getNftsPromises = identifiers.map((identifier) =>
       this.apiService.getAllNfts(
         `${this.getQueryForCollection(
           identifier,
@@ -28,13 +28,16 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
       ),
     );
 
-    const promisesResponse = await Promise.all(promises);
+    const getNftsResponse = await Promise.all(getNftsPromises);
 
-    const rest = promisesResponse.map((promise) =>
-      promise.groupBy((nft) => nft.collection),
+    const nftsGroupByCollection = getNftsResponse.map((nftArray) =>
+      nftArray.groupBy((nft) => nft.collection),
     );
-    const obj = rest.reduce((o, t) => Object.assign(o, t));
-    return obj;
+    return this.mapKeyArrayObject(nftsGroupByCollection);
+  }
+
+  private mapKeyArrayObject(nftsGroupByCollection: any[]) {
+    return nftsGroupByCollection.reduce((o, t) => Object.assign(o, t));
   }
 
   private getQueryForCollection(identifier: string): string {

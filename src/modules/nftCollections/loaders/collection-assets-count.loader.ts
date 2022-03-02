@@ -20,16 +20,15 @@ export class CollectionAssetsCountProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const promises = identifiers.map((identifier) =>
+    const getCountPromises = identifiers.map((identifier) =>
       this.apiService.getNftsCountForCollection(
         this.getQueryForCollection(identifier),
         identifier,
       ),
     );
 
-    const promisesResponse = await Promise.all(promises);
-    const returnR = promisesResponse.groupBy((item) => item.collection);
-    return returnR;
+    const nftsCountResponse = await Promise.all(getCountPromises);
+    return nftsCountResponse?.groupBy((item) => item.collection);
   }
 
   private getQueryForCollection(identifier: string): string {

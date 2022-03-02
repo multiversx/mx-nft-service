@@ -16,13 +16,8 @@ export class CollectionAssetsRedisHandler extends RedisDataloaderHandler<string>
   ) {
     return collectionIdentifiers.map((identifier) => {
       return assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier].map(
-            (a) =>
-              new CollectionAssetModel({
-                thumbnailUrl:
-                  a.media?.length > 0 ? a.media[0].thumbnailUrl : null,
-                identifier: a.identifier,
-              }),
+        ? assetsIdentifiers[identifier].map((a) =>
+            CollectionAssetModel.fromNft(a),
           )
         : [];
     });
