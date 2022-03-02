@@ -6,6 +6,7 @@ export class CollectionAsset {
   assets: CollectionAssetModel[];
   @Field(() => String, { nullable: true })
   totalCount: string;
+  collectionIdentifer: string;
 
   constructor(init?: Partial<CollectionAsset>) {
     Object.assign(this, init);

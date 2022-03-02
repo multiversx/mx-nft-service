@@ -172,6 +172,18 @@ export class ElrondApiService {
     );
   }
 
+  async getNftsCountForCollection(
+    query: string = '',
+    collection,
+  ): Promise<{ totalCount: string; collection: string }> {
+    const totalCount = await this.doGetGeneric(
+      this.getNftsCount.name,
+      `nfts/count${query}`,
+      (response) => response,
+    );
+    return { totalCount, collection };
+  }
+
   async getCollectionsByIdentifiers(
     identifiers: string[],
     offset: number = 0,

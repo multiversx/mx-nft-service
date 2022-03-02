@@ -1,0 +1,41 @@
+import DataLoader = require('dataloader');
+import { BaseProvider } from 'src/modules/common/base.loader';
+import { Injectable, Scope } from '@nestjs/common';
+import { ElrondApiService } from 'src/common';
+import { AssetsQuery } from 'src/modules/assets/assets-query';
+import { CollectionAssetsCountRedisHandler } from './collection-assets-count.redis-handler';
+
+@Injectable({
+  scope: Scope.REQUEST,
+})
+export class CollectionAssetsCountProvider extends BaseProvider<string> {
+  constructor(
+    collectionAssetsHandler: CollectionAssetsCountRedisHandler,
+    private apiService: ElrondApiService,
+  ) {
+    super(
+      collectionAssetsHandler,
+      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
+    );
+  }
+
+  async getData(identifiers: string[]) {
+    const promises = identifiers.map((identifier) =>
+      this.apiService.getNftsCountForCollection(
+        this.getQueryForCollection(identifier),
+        identifier,
+      ),
+    );
+
+    const promisesResponse = await Promise.all(promises);
+    const returnR = promisesResponse.groupBy((item) => item.collection);
+    return returnR;
+  }
+
+  private getQueryForCollection(identifier: string): string {
+    return new AssetsQuery()
+      .addCollection(identifier)
+      .addPageSize(0, 4)
+      .build();
+  }
+}

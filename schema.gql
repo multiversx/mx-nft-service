@@ -233,7 +233,7 @@ type Collection {
   canTransferRole: Boolean
   canWipe: Boolean
   collection: String
-  collectionAsset(assetsCount: Int): CollectionAsset!
+  collectionAsset: CollectionAsset!
   creationDate: Float!
   name: String!
   owner: Account

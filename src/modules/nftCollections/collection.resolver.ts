@@ -5,7 +5,6 @@ import {
   Query,
   ResolveField,
   Parent,
-  Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import {
@@ -15,20 +14,15 @@ import {
   IssueCollectionArgs,
   SetNftRolesArgs,
   CollectionAsset,
-  CollectionAssetModel,
 } from './models';
 import { CollectionsService } from './collection.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
-import { AssetsService } from '../assets';
 import { Account } from '../account-stats/models';
 import { TransactionNode } from '../common/transaction';
-import {
-  AssetsFilter,
-  CollectionsFilter,
-} from '../common/filters/filtersTypes';
+import { CollectionsFilter } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
@@ -36,7 +30,6 @@ import PageResponse from '../common/PageResponse';
 export class CollectionsResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
-    private assetsService: AssetsService,
     private accountsProvider: AccountsProvider,
   ) {
     super();
@@ -132,26 +125,12 @@ export class CollectionsResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)
-  async assets(
-    @Parent() auction: Collection,
-    @Args('assetsCount', { nullable: true, type: () => Int })
-    assetsCount: number = 4,
-  ) {
-    const { collection } = auction;
-
-    const [assets, count] = await this.assetsService.getAssetsForCollection(
-      new AssetsFilter({ collection: collection }),
-      assetsCount,
-    );
+  async collectionAssets(
+    @Parent() collectionResponse: Collection,
+  ): Promise<CollectionAsset> {
+    const { collection } = collectionResponse;
     return new CollectionAsset({
-      assets: assets?.map(
-        (a) =>
-          new CollectionAssetModel({
-            thumbnailUrl: a.media?.length > 0 ? a.media[0].thumbnailUrl : null,
-            identifier: a.identifier,
-          }),
-      ),
-      totalCount: count,
+      collectionIdentifer: collection,
     });
   }
 }
