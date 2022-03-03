@@ -15,7 +15,7 @@ import {
   CreateAuctionRequest,
   BidRequest,
   BuySftRequest,
-} from './models/services';
+} from './models/requests';
 
 @Resolver(() => Auction)
 export class AuctionsMutationsResolver extends BaseResolver(Auction) {

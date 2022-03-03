@@ -1,7 +1,6 @@
 import {
   Resolver,
   Args,
-  Mutation,
   Query,
   ResolveField,
   Parent,
@@ -17,78 +16,23 @@ import {
   CollectionAsset,
 } from './models';
 import { CollectionsService } from './collection.service';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { UseGuards } from '@nestjs/common';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import { TransactionNode } from '../common/transaction';
-import { CollectionsFilter } from '../common/filters/filtersTypes';
+import {
+  AssetsFilter,
+  CollectionsFilter,
+} from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Collection)
-export class CollectionsResolver extends BaseResolver(Collection) {
+export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
     private accountsProvider: AccountsProvider,
   ) {
     super();
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async issueNftCollection(
-    @Args('input') input: IssueCollectionArgs,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.collectionsService.issueNft(input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async issueSftCollection(
-    @Args('input') input: IssueCollectionArgs,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.collectionsService.issueSemiFungible(input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async setRoles(
-    @Args('input') input: SetNftRolesArgs,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.collectionsService.setNftRoles(input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async transferNftCreateRole(
-    @Args('input') input: TransferNftCreateRoleArgs,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.collectionsService.transferNFTCreateRole(input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async stopNftCreate(
-    @Args('input') input: StopNftCreateArgs,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.collectionsService.stopNFTCreate(input);
   }
 
   @Query(() => CollectionResponse)

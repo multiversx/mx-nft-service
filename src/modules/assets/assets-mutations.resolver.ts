@@ -21,7 +21,7 @@ import {
   CreateNftRequest,
   UpdateQuantityRequest,
   TransferNftRequest,
-} from './models/services';
+} from './models/requests';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {

@@ -43,7 +43,7 @@ import {
   UpdateQuantityRequest,
   CreateNftRequest,
   TransferNftRequest,
-} from './models/services';
+} from './models/requests';
 const hash = require('object-hash');
 
 @Injectable()

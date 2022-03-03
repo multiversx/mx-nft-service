@@ -45,7 +45,7 @@ import {
   BidRequest,
   BuySftRequest,
   CreateAuctionRequest,
-} from './models/services';
+} from './models/requests';
 
 @Injectable()
 export class NftMarketplaceAbiService {
