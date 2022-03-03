@@ -4,6 +4,8 @@ import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { AuctionStatusEnum } from '../auctions/models';
+import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
+import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
 import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
 import { OrdersService } from '../orders/order.service';
 import {
@@ -13,6 +15,7 @@ import {
   EndAuctionEvent,
   WithdrawEvent,
 } from './entities/auction';
+import { MintEvent } from './entities/auction/mint.event';
 
 @Injectable()
 export class NftEventsService {
@@ -20,6 +23,8 @@ export class NftEventsService {
     private auctionsService: AuctionsService,
     private availableTokens: AvailableTokensForAuctionRedisHandler,
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
+    private collectionAssetsCount: CollectionAssetsCountRedisHandler,
+    private collectionAssets: CollectionAssetsRedisHandler,
     private ordersService: OrdersService,
   ) {}
 
@@ -120,6 +125,15 @@ export class NftEventsService {
           );
           break;
       }
+    }
+  }
+
+  public async handleNftMintEvents(mintEvents: any[], hash: string) {
+    for (let event of mintEvents) {
+      const mintEvent = new MintEvent(event);
+      const topics = mintEvent.getTopics();
+      this.collectionAssets.clearKey(topics.collection);
+      this.collectionAssetsCount.clearKey(topics.collection);
     }
   }
 }

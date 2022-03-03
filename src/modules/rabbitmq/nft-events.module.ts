@@ -7,6 +7,8 @@ import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
+import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
+import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/avail
     RevertEventsService,
     AvailableTokensForAuctionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
+    CollectionAssetsCountRedisHandler,
+    CollectionAssetsRedisHandler,
   ],
   exports: [NftEventsService],
 })
