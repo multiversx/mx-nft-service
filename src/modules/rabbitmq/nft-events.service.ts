@@ -130,7 +130,6 @@ export class NftEventsService {
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
-      console.log(event);
       const mintEvent = new MintEvent(event);
       const topics = mintEvent.getTopics();
       this.collectionAssets.clearKey(topics.collection);
