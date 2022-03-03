@@ -6,7 +6,8 @@ import {
   AuctionsOrdersProvider,
   AuctionsOrdersRedisHandler,
 } from '.';
-import { AuctionsResolver } from './auctions.resolver';
+import { AuctionsQueriesResolver } from './auctions-queries.resolver';
+import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
@@ -29,7 +30,8 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 @Module({
   providers: [
     AuctionsService,
-    AuctionsResolver,
+    AuctionsQueriesResolver,
+    AuctionsMutationsResolver,
     AuctionOrdersResolver,
     NftMarketplaceAbiService,
     OrdersService,
