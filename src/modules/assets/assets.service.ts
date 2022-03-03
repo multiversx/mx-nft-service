@@ -39,6 +39,11 @@ import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TransactionNode } from '../common/transaction';
 import { TimeConstants } from 'src/utils/time-utils';
+import {
+  UpdateQuantityRequest,
+  CreateNftRequest,
+  TransferNftRequest,
+} from './models/requests';
 const hash = require('object-hash');
 
 @Injectable()
@@ -186,22 +191,21 @@ export class AssetsService {
     return nfts?.map((nft) => Asset.fromNft(nft));
   }
 
-  async addBurnQuantity(
+  async updateQuantity(
     ownerAddress: string,
-    args: HandleQuantityArgs,
-    functionName: string,
+    request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
+      request.identifier,
     );
-    const contract = getSmartContract(args.addOrBurnRoleAddress);
+    const contract = getSmartContract(request.updateQuantityRoleAddress);
     const transaction = contract.call({
-      func: new ContractFunction(functionName),
+      func: new ContractFunction(request.functionName),
       value: Balance.egld(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(args.quantity)),
+        new U64Value(new BigNumber(request.quantity)),
       ],
       gasLimit: new GasLimit(gas.addBurnQuantity),
     });
@@ -215,28 +219,29 @@ export class AssetsService {
 
   async createNft(
     ownerAddress: string,
-    args: CreateNftArgs,
+    request: CreateNftRequest,
   ): Promise<TransactionNode> {
-    const fileData = await this.pinataService.uploadFile(args.file);
+    const file = await request.file;
+    const fileData = await this.pinataService.uploadFile(file);
     const fileMetadata = new FileContent({
-      description: args.attributes.description,
+      description: request.attributes.description,
     });
     const assetMetadata = await this.pinataService.uploadText(fileMetadata);
 
-    await this.s3Service.upload(args.file, fileData.hash);
+    await this.s3Service.upload(file, fileData.hash);
     await this.s3Service.uploadText(fileMetadata, assetMetadata.hash);
 
-    const attributes = `tags:${args.attributes.tags};metadata:${assetMetadata.hash}`;
+    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
 
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
       value: Balance.egld(0),
       args: [
-        BytesValue.fromUTF8(args.collection),
-        new U64Value(new BigNumber(args.quantity)),
-        BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
+        BytesValue.fromUTF8(request.collection),
+        new U64Value(new BigNumber(request.quantity)),
+        BytesValue.fromUTF8(request.name),
+        BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
@@ -254,10 +259,10 @@ export class AssetsService {
 
   async transferNft(
     ownerAddress: string,
-    transferNftArgs: TransferNftArgs,
+    transferRequest: TransferNftRequest,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      transferNftArgs.identifier,
+      transferRequest.identifier,
     );
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
@@ -266,8 +271,8 @@ export class AssetsService {
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(transferNftArgs.quantity)),
-        new AddressValue(new Address(transferNftArgs.destinationAddress)),
+        new U64Value(new BigNumber(transferRequest.quantity)),
+        new AddressValue(new Address(transferRequest.destinationAddress)),
       ],
       gasLimit: new GasLimit(gas.nftTransfer),
     });

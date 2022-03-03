@@ -4,19 +4,11 @@ import {
   Args,
   ResolveField,
   Parent,
-  Mutation,
   Int,
 } from '@nestjs/graphql';
 import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../common/base.resolver';
-import {
-  Auction,
-  CreateAuctionArgs,
-  BidActionArgs,
-  BuySftActionArgs,
-  AuctionTypeEnum,
-  AuctionResponse,
-} from './models';
+import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
@@ -42,7 +34,7 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 
 @Resolver(() => Auction)
-export class AuctionsResolver extends BaseResolver(Auction) {
+export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsService,
     private nftAbiService: NftMarketplaceAbiService,
@@ -52,66 +44,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async createAuction(
-    @Args('input') input: CreateAuctionArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.nftAbiService.createAuction(user.publicKey, input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async endAuction(
-    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.nftAbiService.endAuction(user.publicKey, auctionId);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async bid(
-    @Args('input') input: BidActionArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.nftAbiService.bid(user.publicKey, input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async buySft(
-    @Args('input') input: BuySftActionArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.nftAbiService.buySft(user.publicKey, input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async withdraw(
-    @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.nftAbiService.withdraw(user.publicKey, auctionId);
   }
 
   @Query(() => AuctionResponse)
@@ -125,9 +57,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getAuctions(
       new QueryRequest({
@@ -156,9 +85,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] =
       await this.auctionsService.getAuctionsOrderByNoBids(
@@ -192,9 +118,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getTrendingAuctions(
       new TrendingQueryRequest({ limit, offset, startDate, endDate }),
@@ -210,11 +133,7 @@ export class AuctionsResolver extends BaseResolver(Auction) {
 
   @Query(() => String)
   async marketplaceCutPercentage() {
-    if (process.env.NODE_ENV === 'production') {
-      return '';
-    }
-    const royalties = await this.nftAbiService.getCutPercentage();
-    return royalties;
+    return await this.nftAbiService.getCutPercentage();
   }
 
   @Query(() => AuctionResponse)
@@ -224,9 +143,6 @@ export class AuctionsResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count] = await this.auctionsService.getClaimableAuctions(
       limit,

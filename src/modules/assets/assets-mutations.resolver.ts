@@ -17,6 +17,11 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { ContentValidation } from './content.validation.service';
 import { TransactionNode } from '../common/transaction';
 import { User } from '../auth/user';
+import {
+  CreateNftRequest,
+  UpdateQuantityRequest,
+  TransferNftRequest,
+} from './models/requests';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {
@@ -35,11 +40,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @User() user: any,
   ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    input.file = await file;
-    return await this.assetsService.createNft(user.publicKey, input);
+    const request = CreateNftRequest.fromArgs(input, file);
+    return await this.assetsService.createNft(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -69,14 +71,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args('input') input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.assetsService.addBurnQuantity(
-      user.publicKey,
-      input,
-      'ESDTNFTAddQuantity',
-    );
+    const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTAddQuantity');
+    return await this.assetsService.updateQuantity(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -85,14 +81,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args('input') input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
-    if (process.env.NODE_ENV === 'production') {
-      return new TransactionNode();
-    }
-    return await this.assetsService.addBurnQuantity(
-      user.publicKey,
-      input,
-      'ESDTNFTBurn',
-    );
+    const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
+    return await this.assetsService.updateQuantity(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -101,7 +91,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args('input') input: TransferNftArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.assetsService.transferNft(user.publicKey, input);
+    const request = TransferNftRequest.fromArgs(input);
+    return await this.assetsService.transferNft(user.publicKey, request);
   }
 
   @Mutation(() => Boolean)
@@ -110,9 +101,6 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args('input') input: AddLikeArgs,
     @User() user: any,
   ): Promise<boolean> {
-    if (process.env.NODE_ENV === 'production') {
-      return Promise.resolve(false);
-    }
     return this.assetsLikesService.addLike(input.identifier, user.publicKey);
   }
 
@@ -122,9 +110,6 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args('input') input: RemoveLikeArgs,
     @User() user: any,
   ): Promise<boolean> {
-    if (process.env.NODE_ENV === 'production') {
-      return Promise.resolve(false);
-    }
     return this.assetsLikesService.removeLike(input.identifier, user.publicKey);
   }
 }

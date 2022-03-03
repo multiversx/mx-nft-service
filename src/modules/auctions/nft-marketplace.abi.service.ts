@@ -41,6 +41,11 @@ import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
 import { TimeConstants } from 'src/utils/time-utils';
+import {
+  BidRequest,
+  BuySftRequest,
+  CreateAuctionRequest,
+} from './models/requests';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -59,7 +64,7 @@ export class NftMarketplaceAbiService {
 
   async createAuction(
     ownerAddress: string,
-    args: CreateAuctionArgs,
+    args: CreateAuctionRequest,
   ): Promise<TransactionNode> {
     const contract = getSmartContract(ownerAddress);
 
@@ -74,17 +79,17 @@ export class NftMarketplaceAbiService {
 
   async bid(
     ownerAddress: string,
-    args: BidActionArgs,
+    request: BidRequest,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
+      request.identifier,
     );
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let bid = contract.call({
       func: new ContractFunction('bid'),
-      value: Balance.fromString(args.price),
+      value: Balance.fromString(request.price),
       args: [
-        new U64Value(new BigNumber(args.auctionId)),
+        new U64Value(new BigNumber(request.auctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
       ],
@@ -125,14 +130,14 @@ export class NftMarketplaceAbiService {
 
   async buySft(
     ownerAddress: string,
-    args: BuySftActionArgs,
+    request: BuySftRequest,
   ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
 
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
-      value: Balance.fromString(args.price),
-      args: this.getBuySftArguments(args),
+      value: Balance.fromString(request.price),
+      args: this.getBuySftArguments(request),
       gasLimit: new GasLimit(gas.buySft),
     });
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));

@@ -10,16 +10,17 @@ import {
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
-import {
-  Collection,
-  IssueCollectionArgs,
-  StopNftCreateArgs,
-  TransferNftCreateRoleArgs,
-} from './models';
+import { Collection } from './models';
 import { CollectionQuery } from './collection-query';
 import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
 import { TransactionNode } from '../common/transaction';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
+import {
+  IssueCollectionRequest,
+  StopNftCreateRequest,
+  TransferNftCreateRoleRequest,
+  SetNftRolesRequest,
+} from './models/requests';
 
 @Injectable()
 export class CollectionsService {
@@ -29,30 +30,34 @@ export class CollectionsService {
     elrondConfig.esdtNftAddress,
   );
 
-  async issueNft(args: IssueCollectionArgs): Promise<TransactionNode> {
-    return this.issueToken(args, 'issueNonFungible');
+  async issueToken(request: IssueCollectionRequest) {
+    let transactionArgs = this.getIssueTokenArguments(request);
+
+    const transaction = this.esdtSmartContract.call({
+      func: new ContractFunction(request.collectionType),
+      value: Balance.fromString(elrondConfig.issueNftCost),
+      args: transactionArgs,
+      gasLimit: new GasLimit(gas.issueToken),
+    });
+    return transaction.toPlainObject();
   }
 
-  async issueSemiFungible(args: IssueCollectionArgs): Promise<TransactionNode> {
-    return this.issueToken(args, 'issueSemiFungible');
-  }
-
-  async stopNFTCreate(args: StopNftCreateArgs): Promise<TransactionNode> {
-    const smartContract = getSmartContract(args.ownerAddress);
+  async stopNFTCreate(request: StopNftCreateRequest): Promise<TransactionNode> {
+    const smartContract = getSmartContract(request.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
       value: Balance.egld(0),
-      args: [BytesValue.fromUTF8(args.collection)],
+      args: [BytesValue.fromUTF8(request.collection)],
       gasLimit: new GasLimit(gas.stopNFTCreate),
     });
     return transaction.toPlainObject();
   }
 
   async transferNFTCreateRole(
-    args: TransferNftCreateRoleArgs,
+    request: TransferNftCreateRoleRequest,
   ): Promise<TransactionNode> {
-    const smartContract = getSmartContract(args.ownerAddress);
-    let transactionArgs = this.getTransferCreateRoleArgs(args);
+    const smartContract = getSmartContract(request.ownerAddress);
+    let transactionArgs = this.getTransferCreateRoleArgs(request);
     const transaction = smartContract.call({
       func: new ContractFunction('transferNFTCreateRole'),
       value: Balance.egld(0),
@@ -62,7 +67,7 @@ export class CollectionsService {
     return transaction.toPlainObject();
   }
 
-  async setNftRoles(args: SetNftRolesArgs): Promise<TransactionNode> {
+  async setNftRoles(args: SetNftRolesRequest): Promise<TransactionNode> {
     let transactionArgs = this.getSetRolesArgs(args);
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction('setSpecialRole'),
@@ -144,19 +149,7 @@ export class CollectionsService {
     return [collectionsApi, count];
   }
 
-  private issueToken(args: IssueCollectionArgs, functionName: string) {
-    let transactionArgs = this.getIssueTokenArguments(args);
-
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction(functionName),
-      value: Balance.fromString(elrondConfig.issueNftCost),
-      args: transactionArgs,
-      gasLimit: new GasLimit(gas.issueToken),
-    });
-    return transaction.toPlainObject();
-  }
-
-  private getIssueTokenArguments(args: IssueCollectionArgs) {
+  private getIssueTokenArguments(args: IssueCollectionRequest) {
     let transactionArgs = [
       BytesValue.fromUTF8(args.tokenName),
       BytesValue.fromUTF8(args.tokenTicker),
@@ -193,7 +186,7 @@ export class CollectionsService {
     return transactionArgs;
   }
 
-  private getTransferCreateRoleArgs(args: TransferNftCreateRoleArgs) {
+  private getTransferCreateRoleArgs(args: TransferNftCreateRoleRequest) {
     let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.collection)];
     args.addressToTransferList.forEach((address) => {
       transactionArgs.push(new AddressValue(new Address(address)));

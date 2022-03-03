@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
-import { CollectionsResolver } from './collection.resolver';
+import { CollectionsQueriesResolver } from './collection-queries.resolver';
 import { CollectionsService } from './collection.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
@@ -10,16 +10,18 @@ import { CollectionAssetsRedisHandler } from './loaders/collection-assets.redis-
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { CollectionAssetsCountRedisHandler } from './loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsResolver } from './collection-assets.resolver';
+import { CollectionsMutationsResolver } from './collection-mutations.resolver';
 
 @Module({
   providers: [
     CollectionsService,
-    CollectionsResolver,
     CollectionAssetsResolver,
     CollectionAssetsProvider,
     CollectionAssetsRedisHandler,
     CollectionAssetsCountProvider,
     CollectionAssetsCountRedisHandler,
+    CollectionsQueriesResolver,
+    CollectionsMutationsResolver,
     AccountsRedisHandler,
     AccountsProvider,
   ],
