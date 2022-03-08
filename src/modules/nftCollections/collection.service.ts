@@ -40,7 +40,7 @@ export class CollectionsService {
     private redisCacheService: RedisCacheService,
     private cacheService: CacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
+    this.redisClient = this.cacheService.getClient(
       cacheConfig.followersRedisClientName,
     );
   }
@@ -147,6 +147,8 @@ export class CollectionsService {
   }
 
   async getFilteredCollections(
+    offset: number = 0,
+    limit: number = 10,
     filters: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getFullCollections();
@@ -161,6 +163,7 @@ export class CollectionsService {
     collections = collections.filter(
       (token) => parseInt(token.collectionAsset.totalCount) >= 4,
     );
+    collections = collections.slice(offset, offset + limit);
 
     return [collections, count];
   }
@@ -175,74 +178,67 @@ export class CollectionsService {
   }
 
   public async getFullCollectionsRaw(): Promise<[Collection[], number]> {
-    const cachedCollections = await this.redisCacheService.get(
-      this.redisClient,
-      CacheInfo.AllCollections.key,
-    );
-
-    const filterdCollections: Collection[] = cachedCollections
-      ? cachedCollections[0]?.filter(
-          (t: { collectionAsset: { totalCount: string } }) =>
-            parseInt(t?.collectionAsset?.totalCount) >= 4,
-        )
-      : null;
+    const size = 25;
+    let page = 0;
 
     const totalCount = await this.apiService.getCollectionsCount('');
     let collectionsResponse: Collection[] = [];
-    const size = 10;
-    let page = 0;
     do {
       const collections = await this.apiService.getCollections(
-        `?source=elastic&page=${page}&size=${size}`,
+        `?source=elastic&from=${page}&size=${size}`,
       );
-      let localCollections = collections.map((colection) =>
-        Collection.fromCollectionApi(colection),
+      let localCollections = collections.map((collection) =>
+        Collection.fromCollectionApi(collection),
       );
-
-      let getNftsCollections = [];
-      const nftsCountResponse = await this.getNftCountsRaw(
-        collections.map((collection) => collection.collection),
+      let getNftsCollections = await this.getCollectionNftsCount(
+        localCollections,
       );
 
-      nftsCountResponse.forEach((nftCount) => {
-        localCollections.forEach((el) => {
-          if (el.collection == nftCount.collection)
-            el.collectionAsset = new CollectionAsset({
-              totalCount: nftCount.totalCount,
-            });
-          const cachedCollection = filterdCollections?.find(
-            (f) => f.collection === el.collection,
-          );
-          if (cachedCollection) {
-            el.collectionAsset = {
-              ...el.collectionAsset,
-              assets: cachedCollection?.collectionAsset?.assets,
-            };
-          }
-        });
-
-        if (parseInt(nftCount?.totalCount) > 0) {
-          getNftsCollections.push(nftCount.collection);
-        }
-      });
-
-      let nftsGroupByCollection = await this.getNftsRaw(getNftsCollections);
-
-      localCollections.forEach((el) => {
-        nftsGroupByCollection.forEach((item) => {
-          if (el.collection == item.key)
-            el.collectionAsset = {
-              ...el.collectionAsset,
-              assets: item.value,
-            };
-        });
-      });
+      await this.getCollectionAssets(getNftsCollections, localCollections);
       collectionsResponse.push(...localCollections);
-      page = page + size - 1;
-    } while (page <= 5);
+      page = page + size;
+    } while (page < totalCount);
 
     console.log('Update redis');
     return [collectionsResponse, totalCount];
+  }
+
+  private async getCollectionAssets(
+    getNftsCollections: any[],
+    localCollections: Collection[],
+  ) {
+    let nftsGroupByCollection = await this.getNftsRaw(getNftsCollections);
+
+    localCollections.forEach((el) => {
+      nftsGroupByCollection.forEach((item) => {
+        if (el.collection == item.key)
+          el.collectionAsset = {
+            ...el.collectionAsset,
+            assets: item.value,
+          };
+      });
+    });
+    return localCollections;
+  }
+
+  private async getCollectionNftsCount(localCollections: Collection[]) {
+    let getNftsCollections = [];
+    const nftsCountResponse = await this.getNftCountsRaw(
+      localCollections.map((collection) => collection.collection),
+    );
+    for (const nftCount of nftsCountResponse) {
+      for (const el of localCollections) {
+        if (el.collection == nftCount.collection)
+          el.collectionAsset = new CollectionAsset({
+            totalCount: nftCount.totalCount,
+          });
+      }
+
+      if (parseInt(nftCount?.totalCount) > 0) {
+        getNftsCollections.push(nftCount.collection);
+      }
+    }
+    return getNftsCollections;
   }
 
   private async getNftCountsRaw(collections: string[]) {
@@ -265,10 +261,7 @@ export class CollectionsService {
       .map((value) => value.key);
 
     if (getDataFromRedis.includes(null)) {
-      let data = this.getNftsCount(getNotCachedNfts);
-      if (data instanceof Promise) {
-        data = await data;
-      }
+      let data = await this.getNftsCount(getNotCachedNfts);
 
       returnValues.forEach((item) => {
         if (item.value === null) item.value = data[item.key][0];
@@ -308,10 +301,8 @@ export class CollectionsService {
       .filter((item) => item.value === null)
       .map((value) => value.key);
     if (getDataFromRedis.includes(null)) {
-      let data = this.getNfts(getNotCachedNfts);
-      if (data instanceof Promise) {
-        data = await data;
-      }
+      let data = await this.getNfts(getNotCachedNfts);
+
       returnValues.forEach((item) => {
         if (item.value === null)
           item.value = data[item.key].map((a) =>
@@ -356,7 +347,6 @@ export class CollectionsService {
     let nftsGroupByCollection: { [key: string]: any[] } = {};
 
     nftsResponse.forEach((nfts) => {
-      console.log(222222222, nftsResponse, nfts);
       nftsGroupByCollection[nfts[0]?.collection] = nfts;
     });
     return nftsGroupByCollection;

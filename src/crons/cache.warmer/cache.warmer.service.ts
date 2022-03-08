@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsService } from 'src/modules/nftCollections/collection.service';
@@ -15,16 +14,15 @@ export class CacheWarmerService {
   private redisClient: Redis.Redis;
   constructor(
     private collectionsService: CollectionsService,
-    private redisCacheService: RedisCacheService,
     private cacheService: CacheService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
+    this.redisClient = this.cacheService.getClient(
       cacheConfig.followersRedisClientName,
     );
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleEsdtTokenInvalidations() {
     await Locker.lock(
       'Collections tokens invalidations',

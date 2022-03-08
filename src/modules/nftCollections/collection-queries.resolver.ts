@@ -32,17 +32,14 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
-    if (process.env.NODE_ENV === 'production') {
-      return new CollectionResponse();
-    }
-    const [collections, count] =
-      await this.collectionsService.getFilteredCollections(filters);
     const { limit, offset } = pagination.pagingParams();
-    // const [collections, count] = await this.collectionsService.getCollections(
-    //   offset,
-    //   limit,
-    //   filters,
-    // );
+    const [collections, count] =
+      await this.collectionsService.getFilteredCollections(
+        offset,
+        limit,
+        filters,
+      );
+
     return PageResponse.mapResponse<Collection>(
       collections || [],
       pagination,

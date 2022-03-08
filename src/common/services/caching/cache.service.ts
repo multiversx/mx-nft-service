@@ -15,6 +15,9 @@ export class CacheService {
     private readonly redisCacheService: RedisCacheService,
   ) {}
 
+  getClient(clientName: string): Redis.Redis {
+    return this.redisCacheService.getClient(clientName);
+  }
   async getOrSetCache<T>(
     client,
     key: string,
