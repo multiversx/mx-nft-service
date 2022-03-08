@@ -7,7 +7,6 @@ import { AuctionsServiceDb } from './auctions.service.db';
 import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-stats.module';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
-import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import { LocalCacheService } from 'src/common/services/caching/local.cache.servi
     AuctionsServiceDb,
     AuctionsForAssetRedisHandler,
     AssetAuctionsCountRedisHandler,
-    LocalCacheService,
     RedisCacheService,
   ],
   exports: [AuctionsServiceDb, RedisCacheService],

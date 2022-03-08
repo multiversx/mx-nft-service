@@ -1,8 +1,8 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { Module } from '@nestjs/common';
+import { RedisCacheService } from 'src/common';
 import { CommonModule } from 'src/common.module';
+import { CacheService } from 'src/common/services/caching/cache.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
-import { CollectionModuleGraph } from 'src/modules/nftCollections/collection.module';
 import { CollectionsService } from 'src/modules/nftCollections/collection.service';
 import { CacheWarmerService } from './cache.warmer.service';
 
@@ -12,6 +12,7 @@ import { CacheWarmerService } from './cache.warmer.service';
     CollectionsService,
     RedisCacheService,
     LocalCacheService,
+    CacheService,
     CacheWarmerService,
   ],
   exports: [CommonModule],

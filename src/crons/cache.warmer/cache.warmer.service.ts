@@ -8,6 +8,7 @@ import { CollectionsService } from 'src/modules/nftCollections/collection.servic
 import { Locker } from 'src/utils/locker';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
+import { CacheService } from 'src/common/services/caching/cache.service';
 
 @Injectable()
 export class CacheWarmerService {
@@ -15,6 +16,7 @@ export class CacheWarmerService {
   constructor(
     private collectionsService: CollectionsService,
     private redisCacheService: RedisCacheService,
+    private cacheService: CacheService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -39,7 +41,7 @@ export class CacheWarmerService {
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.redisCacheService.setCache(this.redisClient, key, data, ttl);
+    await this.cacheService.setCache(this.redisClient, key, data, ttl);
     // await this.refreshCacheKey(key, ttl);
   }
 }

@@ -31,7 +31,6 @@ import { AssetAuctionsCountRedisHandler } from './loaders/asset-auctions-count.r
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 import { AssetsMutationsResolver } from './assets-mutations.resolver';
-import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 
 @Module({
   providers: [
@@ -57,7 +56,6 @@ import { LocalCacheService } from 'src/common/services/caching/local.cache.servi
     AssetsMutationsResolver,
     AssetAuctionResolver,
     RedisCacheService,
-    LocalCacheService,
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,
@@ -73,7 +71,6 @@ import { LocalCacheService } from 'src/common/services/caching/local.cache.servi
     AssetsService,
     AssetsLikesService,
     RedisCacheService,
-    LocalCacheService,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,

@@ -4,14 +4,12 @@ import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
 import { AssetHistoryAccountResolver } from './asset-history-account-resolver';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
-import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 
 @Module({
   providers: [
     AssetsHistoryService,
     AssetsHistoryResolver,
     AssetHistoryAccountResolver,
-    LocalCacheService,
     RedisCacheService,
     AccountsProvider,
     AccountsRedisHandler,

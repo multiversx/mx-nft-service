@@ -30,6 +30,7 @@ import {
 import { AssetsQuery } from '../assets/assets-query';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { CacheService } from 'src/common/services/caching/cache.service';
 
 @Injectable()
 export class CollectionsService {
@@ -37,6 +38,7 @@ export class CollectionsService {
   constructor(
     private apiService: ElrondApiService,
     private redisCacheService: RedisCacheService,
+    private cacheService: CacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
@@ -164,7 +166,7 @@ export class CollectionsService {
   }
 
   async getFullCollections(): Promise<[Collection[], number]> {
-    return await this.redisCacheService.getOrSetCache(
+    return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
