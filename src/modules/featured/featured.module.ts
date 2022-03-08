@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
@@ -11,6 +12,7 @@ import { FeaturedService } from './featured.service';
 
 @Module({
   providers: [
+    LocalCacheService,
     RedisCacheService,
     FeaturedService,
     FeaturedNftsResolver,

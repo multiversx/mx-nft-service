@@ -2,7 +2,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
-import { ClaimableAuctionsModule } from './crons/claimable.auction.module';
+import { CacheWarmerAuctionsModule } from './crons/cache.warmer/cache.warmer.module';
+import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
@@ -46,6 +47,11 @@ async function bootstrap() {
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
     let processorApp = await NestFactory.create(ClaimableAuctionsModule);
     await processorApp.listen(6011);
+  }
+
+  if (process.env.ENABLE_CACHE_WARMER === 'true') {
+    let processorApp = await NestFactory.create(CacheWarmerAuctionsModule);
+    await processorApp.listen(6012);
   }
 }
 

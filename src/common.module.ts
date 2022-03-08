@@ -10,8 +10,9 @@ import { RedisModule } from 'nestjs-redis';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
-import { RedisCacheService } from './common/services/redis-cache.service';
+import { RedisCacheService } from './common/services/caching/redis-cache.service';
 import { cacheConfig } from './config';
+import { LocalCacheService } from './common/services/caching/local.cache.service';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -84,7 +85,7 @@ if (!!process.env.LOG_FILE) {
     }),
     ElrondCommunicationModule,
   ],
-  providers: [RedisCacheService],
+  providers: [RedisCacheService, LocalCacheService],
   exports: [ElrondCommunicationModule],
 })
 export class CommonModule {}

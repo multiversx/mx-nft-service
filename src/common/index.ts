@@ -1,2 +1,2 @@
 export * from './services/elrond-communication';
-export * from './services/redis-cache.service';
+export * from './services/caching/redis-cache.service';

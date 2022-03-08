@@ -8,6 +8,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
 import { promisify } from 'util';
 import { Logger } from 'winston';
+import { LocalCacheService } from './local.cache.service';
 
 @Injectable()
 export class RedisCacheService {
@@ -15,6 +16,7 @@ export class RedisCacheService {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly redisService: RedisService,
+    private readonly localCacheService: LocalCacheService,
   ) {}
 
   getClient(clientName: string): Redis.Redis {
@@ -65,6 +67,104 @@ export class RedisCacheService {
       );
       return;
     }
+  }
+
+  async getOrSetCache<T>(
+    client,
+    key: string,
+    promise: () => Promise<T>,
+    remoteTtl: number = this.DEFAULT_TTL,
+    localTtl: number | undefined = undefined,
+    forceRefresh: boolean = false,
+  ): Promise<T> {
+    if (!localTtl) {
+      localTtl = remoteTtl / 2;
+    }
+
+    const profiler = new PerformanceProfiler(`vmQuery:${key}`);
+
+    if (!forceRefresh) {
+      const cachedValue = await this.getCacheLocal<T>(key);
+      if (cachedValue !== undefined) {
+        profiler.stop(`Local Cache hit for key ${key}`);
+        return cachedValue;
+      }
+
+      const cached = await this.get(client, key);
+      if (cached !== undefined && cached !== null) {
+        profiler.stop(`Remote Cache hit for key ${key}`);
+
+        // we only set ttl to half because we don't know what the real ttl of the item is and we want it to work good in most scenarios
+        await this.setCacheLocal<T>(key, cached, localTtl);
+        return cached;
+      }
+    }
+
+    const value = await this.executeWithPendingPromise(
+      `caching:set:${key}`,
+      promise,
+    );
+    profiler.stop(`Cache miss for key ${key}`);
+
+    if (localTtl > 0) {
+      await this.setCacheLocal<T>(key, value, localTtl);
+    }
+
+    if (remoteTtl > 0) {
+      await this.set(client, key, value, remoteTtl);
+    }
+    return value;
+  }
+
+  async setCacheLocal<T>(
+    key: string,
+    value: T,
+    ttl: number = this.DEFAULT_TTL,
+  ): Promise<T> {
+    return await this.localCacheService.setCacheValue<T>(key, value, ttl);
+  }
+
+  async getCacheLocal<T>(key: string): Promise<T | undefined> {
+    return await this.localCacheService.getCacheValue<T>(key);
+  }
+
+  // async refreshCacheLocal<T>(
+  //   client: Redis.Redis,
+  //   key: string,
+  //   ttl: number = this.DEFAULT_TTL,
+  // ): Promise<T | undefined> {
+  //   const value = await this.get(client, key);
+  //   if (value) {
+  //     await this.setCacheLocal<T>(key, value, ttl);
+  //   } else {
+  //     this.logger.info(`Deleting local cache key '${key}'`);
+  //     await this.deleteInCacheLocal(key);
+  //   }
+
+  //   return value;
+  // }
+
+  // public async getCache<T>(
+  //   client: Redis.Redis,
+  //   key: string,
+  // ): Promise<T | undefined> {
+  //   const value = await this.getCacheLocal<T>(key);
+  //   if (value) {
+  //     return value;
+  //   }
+
+  //   return await this.get(client, key);
+  // }
+
+  public async setCache<T>(
+    client: Redis.Redis,
+    key: string,
+    value: T,
+    ttl: number = this.DEFAULT_TTL,
+  ): Promise<T> {
+    await this.setCacheLocal<T>(key, value, ttl);
+    await this.set(client, key, value, ttl);
+    return value;
   }
 
   async batchGetCache<T>(
@@ -155,6 +255,10 @@ export class RedisCacheService {
       MetricsCollector.setRedisDuration('MSET', profiler.duration);
     }
   }
+
+  // async deleteInCacheLocal(key: string) {
+  //   await this.localCacheService.deleteCacheKey(key);
+  // }
 
   async del(
     client: Redis.Redis,
@@ -267,6 +371,28 @@ export class RedisCacheService {
     const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
     return value;
+  }
+
+  pendingPromises: { [key: string]: Promise<any> } = {};
+
+  private async executeWithPendingPromise<T>(
+    key: string,
+    promise: () => Promise<T>,
+  ): Promise<T> {
+    let pendingGetRemote = this.pendingPromises[key];
+    if (pendingGetRemote) {
+      return await pendingGetRemote;
+    } else {
+      try {
+        pendingGetRemote = promise();
+
+        this.pendingPromises[key] = pendingGetRemote;
+
+        return await pendingGetRemote;
+      } finally {
+        delete this.pendingPromises[key];
+      }
+    }
   }
 
   private getChunks<T>(array: T[], size = 25): T[][] {

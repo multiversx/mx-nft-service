@@ -26,6 +26,7 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { AvailableTokensForAuctionRedisHandler } from './loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from '../orders/loaders/last-order.redis-handler';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
+import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 
 @Module({
   providers: [
@@ -36,6 +37,7 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,
+    LocalCacheService,
     AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
     AvailableTokensForAuctionRedisHandler,
