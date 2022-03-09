@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export abstract class BaseCollectionsAssetsRedisHandler {
@@ -50,7 +50,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
         this.redisClient,
         redisKeys,
         values,
-        CacheInfo.AllCollections.ttl,
+        TimeConstants.oneDay,
       );
       return values;
     }
