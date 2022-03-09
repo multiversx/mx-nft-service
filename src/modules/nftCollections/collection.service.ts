@@ -26,6 +26,7 @@ import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CacheService } from 'src/common/services/caching/cache.service';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class CollectionsService {
@@ -167,7 +168,7 @@ export class CollectionsService {
       this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
-      CacheInfo.AllCollections.ttl,
+      TimeConstants.oneHour,
     );
   }
 
@@ -188,7 +189,6 @@ export class CollectionsService {
       page = page + size;
     } while (page < totalCount);
 
-    console.log('Update redis');
     return [collectionsResponse, totalCount];
   }
 
@@ -209,11 +209,11 @@ export class CollectionsService {
       getNftsCollections,
     );
 
-    localCollections.forEach((el) => {
+    localCollections.forEach((collection) => {
       nftsGroupByCollection.forEach((item) => {
-        if (el.collection == item.key)
-          el.collectionAsset = {
-            ...el.collectionAsset,
+        if (collection.collection == item.key)
+          collection.collectionAsset = {
+            ...collection.collectionAsset,
             assets: item.value,
           };
       });
@@ -228,16 +228,16 @@ export class CollectionsService {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
-    for (const nftCount of nftsCountResponse) {
-      for (const el of localCollections) {
-        if (el.collection == nftCount.collection)
-          el.collectionAsset = new CollectionAsset({
-            totalCount: nftCount.totalCount,
+    for (const collectionNftsCount of nftsCountResponse) {
+      for (const collection of localCollections) {
+        if (collection.collection == collectionNftsCount.collection)
+          collection.collectionAsset = new CollectionAsset({
+            totalCount: collectionNftsCount.totalCount,
           });
       }
 
-      if (parseInt(nftCount?.totalCount) > 0) {
-        getNftsCollections.push(nftCount.collection);
+      if (parseInt(collectionNftsCount?.totalCount) > 0) {
+        getNftsCollections.push(collectionNftsCount.collection);
       }
     }
     return getNftsCollections;

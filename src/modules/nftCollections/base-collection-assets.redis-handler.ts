@@ -38,11 +38,11 @@ export abstract class BaseCollectionsAssetsRedisHandler {
       });
     }
 
-    const getNotCachedNfts = returnValues
+    const getNotCachedKeys = returnValues
       .filter((item) => item.value === null)
       .map((value) => value.key);
-    if (getDataFromRedis.includes(null)) {
-      let data = await this.getData(getNotCachedNfts);
+    if (getNotCachedKeys?.length > 0) {
+      let data = await this.getData(getNotCachedKeys);
 
       values = this.mapValues(returnValues, data);
 

@@ -8,6 +8,7 @@ import { Locker } from 'src/utils/locker';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
 import { CacheService } from 'src/common/services/caching/cache.service';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class CacheWarmerService {
@@ -31,7 +32,7 @@ export class CacheWarmerService {
         await this.invalidateKey(
           CacheInfo.AllCollections.key,
           tokens,
-          CacheInfo.AllCollections.ttl,
+          TimeConstants.oneHour,
         );
       },
       true,
