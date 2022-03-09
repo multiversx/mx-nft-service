@@ -10,14 +10,9 @@ import {
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
-import { Collection, CollectionAsset, CollectionAssetModel } from './models';
+import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import {
-  CollectionApi,
-  ElrondApiService,
-  getSmartContract,
-  RedisCacheService,
-} from 'src/common';
+import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
 import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
@@ -27,9 +22,7 @@ import {
   TransferNftCreateRoleRequest,
   SetNftRolesRequest,
 } from './models/requests';
-import { AssetsQuery } from '../assets/assets-query';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheService } from 'src/common/services/caching/cache.service';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
@@ -47,10 +40,6 @@ export class CollectionsService {
       cacheConfig.followersRedisClientName,
     );
   }
-
-  private readonly esdtSmartContract = getSmartContract(
-    elrondConfig.esdtNftAddress,
-  );
 
   async issueToken(request: IssueCollectionRequest) {
     let transactionArgs = this.getIssueTokenArguments(request);
@@ -112,18 +101,20 @@ export class CollectionsService {
       .addPageSize(offset, limit)
       .build();
 
-    if (filters?.ownerAddress) {
-      const [collections, count] = await this.getCollectionsForUser(
-        filters,
-        apiQuery,
-      );
-      return [
-        collections?.map((element) => Collection.fromCollectionApi(element)),
-        count,
-      ];
+    if (filters) {
+      if (filters.ownerAddress) {
+        const [collections, count] = await this.getCollectionsForUser(
+          filters,
+          apiQuery,
+        );
+        return [
+          collections?.map((element) => Collection.fromCollectionApi(element)),
+          count,
+        ];
+      }
+      return await this.getAllCollections(filters, apiQuery);
     }
-
-    return await this.getAllCollections(filters, apiQuery);
+    return await this.getFilteredCollections(offset, limit, filters);
   }
 
   private async getAllCollections(
@@ -149,7 +140,7 @@ export class CollectionsService {
     return [collections, count];
   }
 
-  async getFilteredCollections(
+  private async getFilteredCollections(
     offset: number = 0,
     limit: number = 10,
     filters: CollectionsFilter,
@@ -171,7 +162,7 @@ export class CollectionsService {
     return [collections, count];
   }
 
-  async getFullCollections(): Promise<[Collection[], number]> {
+  private async getFullCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllCollections.key,
@@ -184,14 +175,13 @@ export class CollectionsService {
     const size = 25;
     let page = 0;
 
-    const totalCount = await this.apiService.getCollectionsCount('');
+    const totalCount = await this.apiService.getCollectionsCount();
     let collectionsResponse: Collection[] = [];
     do {
       const mappedCollections = await this.getMappedCollections(page, size);
 
-      let getNftsCollections = await this.getCollectionNftsCount(
-        mappedCollections,
-      );
+      let getNftsCollections =
+        await this.mapNftsCountAndGetRetrievableCollections(mappedCollections);
 
       await this.getCollectionAssets(getNftsCollections, mappedCollections);
       collectionsResponse.push(...mappedCollections);
@@ -231,7 +221,9 @@ export class CollectionsService {
     return localCollections;
   }
 
-  private async getCollectionNftsCount(localCollections: Collection[]) {
+  private async mapNftsCountAndGetRetrievableCollections(
+    localCollections: Collection[],
+  ) {
     let getNftsCollections = [];
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
@@ -318,11 +310,7 @@ export class CollectionsService {
     return transactionArgs;
   }
 
-  getCacheKeys(cacheConstant: string, key: string[]) {
-    return key.map((id) => this.getCacheKey(cacheConstant, id));
-  }
-
-  getCacheKey(cacheConstant: string, key: string) {
-    return generateCacheKeyFromParams(cacheConstant, key);
-  }
+  private readonly esdtSmartContract = getSmartContract(
+    elrondConfig.esdtNftAddress,
+  );
 }

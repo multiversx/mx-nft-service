@@ -33,12 +33,11 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] =
-      await this.collectionsService.getFilteredCollections(
-        offset,
-        limit,
-        filters,
-      );
+    const [collections, count] = await this.collectionsService.getCollections(
+      offset,
+      limit,
+      filters,
+    );
 
     return PageResponse.mapResponse<Collection>(
       collections || [],
