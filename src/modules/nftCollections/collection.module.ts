@@ -13,6 +13,8 @@ import { CollectionAssetsResolver } from './collection-assets.resolver';
 import { CollectionsMutationsResolver } from './collection-mutations.resolver';
 import { CacheService } from 'src/common/services/caching/cache.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
+import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
+import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 
 @Module({
   providers: [
@@ -28,6 +30,8 @@ import { LocalCacheService } from 'src/common/services/caching/local.cache.servi
     AccountsProvider,
     CacheService,
     LocalCacheService,
+    CollectionsNftsRedisHandler,
+    CollectionsNftsCountRedisHandler,
   ],
   imports: [ElrondCommunicationModule, AssetsModuleGraph],
   exports: [CollectionsService, LocalCacheService],

@@ -22,7 +22,7 @@ export class CacheWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleEsdtTokenInvalidations() {
     await Locker.lock(
       'Collections tokens invalidations',
