@@ -14,7 +14,12 @@ export class CollectionAssetsCountRedisHandler extends RedisDataloaderHandler<st
     assetsIdentifiers: { [key: string]: any[] },
   ) {
     return collectionIdentifiers.map((identifier) => {
-      return assetsIdentifiers[identifier][0]?.totalCount || 0;
+      return assetsIdentifiers[identifier]
+        ? {
+            collection: identifier,
+            totalCount: assetsIdentifiers[identifier][0]?.totalCount,
+          }
+        : { collection: identifier, totalCount: 0 };
     });
   }
 }

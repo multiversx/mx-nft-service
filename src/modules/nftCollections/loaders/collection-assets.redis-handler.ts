@@ -16,10 +16,13 @@ export class CollectionAssetsRedisHandler extends RedisDataloaderHandler<string>
   ) {
     return collectionIdentifiers.map((identifier) => {
       return assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier].map((a) =>
-            CollectionAssetModel.fromNft(a),
-          )
-        : [];
+        ? {
+            key: identifier,
+            value: assetsIdentifiers[identifier].map((a) =>
+              CollectionAssetModel.fromNft(a),
+            ),
+          }
+        : { key: identifier, value: [] };
     });
   }
 }

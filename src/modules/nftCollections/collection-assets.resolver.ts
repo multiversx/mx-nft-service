@@ -22,7 +22,7 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     const assetsCount = await this.collectionAssetsCountProvider.load(
       collectionIdentifer,
     );
-    return assetsCount;
+    return assetsCount ? assetsCount.totalCount : 0;
   }
 
   @ResolveField('assets', () => CollectionAsset)
@@ -32,6 +32,6 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
-    return response;
+    return response ? response.value : [];
   }
 }
