@@ -7,7 +7,7 @@ export function getAccountStatsQuery(address: string) {
           AND a.status in ('Running', 'Claimable')
       ), 
       
-    ordersCount AS (SELECT COUNT(*) orders, o.ownerAddress
+    ordersCount AS (COUNT(DISTINCT o.auctionId) orders, o.ownerAddress
       FROM orders o
       INNER JOIN auctions a ON a.id=o.auctiONId
       WHERE o.ownerAddress = '${address}'
