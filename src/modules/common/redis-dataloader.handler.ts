@@ -14,12 +14,11 @@ export abstract class RedisDataloaderHandler<T> {
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
     private ttl: number = TimeConstants.oneWeek,
+    redisClientName = cacheConfig.followersRedisClientName,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
-    );
+    this.redisClient = this.redisCacheService.getClient(redisClientName);
   }
   abstract mapValues(keys: T[], dataKeys): any;
 

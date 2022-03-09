@@ -14,7 +14,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.collectionsRedisClientName,
     );
   }
   protected abstract mapValues(

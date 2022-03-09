@@ -18,7 +18,7 @@ export class CacheWarmerService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.collectionsRedisClientName,
     );
   }
 
@@ -40,6 +40,5 @@ export class CacheWarmerService {
 
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
-    // await this.refreshCacheKey(key, ttl);
   }
 }

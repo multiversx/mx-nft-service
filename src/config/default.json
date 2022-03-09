@@ -22,7 +22,9 @@
     "auctionsRedisClientName": "auctions",
     "auctionsDbName": 4,
     "followersRedisClientName": "followers",
-    "followersDbName": 5
+    "followersDbName": 5,
+    "collectionsRedisClientName": "collections",
+    "collectionsDbName": 6
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
