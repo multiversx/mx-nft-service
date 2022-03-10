@@ -35,9 +35,9 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     let nftsResponse = await Promise.all(getNftsPromises);
     let nftsGroupByCollection: { [key: string]: any[] } = {};
 
-    nftsResponse.forEach((nfts) => {
+    for (const nfts of nftsResponse) {
       nftsGroupByCollection[nfts[0]?.collection] = nfts;
-    });
+    }
     return nftsGroupByCollection;
   }
 

@@ -209,15 +209,17 @@ export class CollectionsService {
       getNftsCollections,
     );
 
-    localCollections.forEach((collection) => {
-      nftsGroupByCollection.forEach((item) => {
-        if (collection.collection == item.key)
+    for (const collection of localCollections) {
+      for (const groupByCollection of nftsGroupByCollection) {
+        if (collection.collection == groupByCollection.key) {
           collection.collectionAsset = {
             ...collection.collectionAsset,
-            assets: item.value,
+            assets: groupByCollection.value,
           };
-      });
-    });
+        }
+      }
+    }
+
     return localCollections;
   }
 
@@ -230,10 +232,11 @@ export class CollectionsService {
     );
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
-        if (collection.collection == collectionNftsCount.collection)
+        if (collection.collection == collectionNftsCount.collection) {
           collection.collectionAsset = new CollectionAsset({
             totalCount: collectionNftsCount.totalCount,
           });
+        }
       }
 
       if (parseInt(collectionNftsCount?.totalCount) > 0) {

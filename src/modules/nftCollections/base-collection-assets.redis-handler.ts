@@ -10,6 +10,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
   protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
   private cacheKeyName: string;
+  private defaultTtl = TimeConstants.oneDay;
   constructor(redisCacheService: RedisCacheService, cacheKeyName: string) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
@@ -50,7 +51,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
         this.redisClient,
         redisKeys,
         values,
-        TimeConstants.oneDay,
+        this.defaultTtl,
       );
       return values;
     }
