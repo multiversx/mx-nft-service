@@ -38,7 +38,7 @@ export class CollectionsService {
     private cacheService: CacheService,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.collectionsRedisClientName,
     );
   }
 
@@ -183,6 +183,8 @@ export class CollectionsService {
       await this.mapCollectionNfts(mappedCollections);
 
       collectionsResponse.push(...mappedCollections);
+
+      // console.log(collectionsResponse[0].collectionAsset);
       from = from + size;
     } while (from < totalCount && from <= 9975);
     const uniqueCollections = [
@@ -190,6 +192,7 @@ export class CollectionsService {
         collectionsResponse.map((item) => [item.collection, item]),
       ).values(),
     ];
+    // console.log(i);
     return [uniqueCollections, uniqueCollections.length];
   }
 
@@ -230,6 +233,7 @@ export class CollectionsService {
       for (const collection of localCollections) {
         if (collection.collection == collectionNftsCount.collection) {
           collection.collectionAsset = new CollectionAsset({
+            collectionIdentifer: collectionNftsCount.collection,
             totalCount: collectionNftsCount.totalCount,
           });
         }
