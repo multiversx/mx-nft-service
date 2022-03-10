@@ -174,22 +174,26 @@ export class CollectionsService {
 
   public async getFullCollectionsRaw(): Promise<[Collection[], number]> {
     const size = 25;
-    let page = 0;
+    let from = 0;
 
     const totalCount = await this.apiService.getCollectionsCount();
     let collectionsResponse: Collection[] = [];
     do {
-      const mappedCollections = await this.getMappedCollections(page, size);
+      let mappedCollections = await this.getMappedCollections(from, size);
 
-      let getNftsCollections =
-        await this.mapNftsCountAndGetRetrievableCollections(mappedCollections);
+      mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
 
-      await this.getCollectionAssets(getNftsCollections, mappedCollections);
+      await this.mapCollectionNfts(mappedCollections);
+
       collectionsResponse.push(...mappedCollections);
-      page = page + size;
-    } while (page < totalCount || page <= 10000);
-
-    return [collectionsResponse, totalCount];
+      from = from + size;
+    } while (from < totalCount || from <= 10000);
+    const uniqueCollections = [
+      ...new Map(
+        collectionsResponse.map((item) => [item.collection, item]),
+      ).values(),
+    ];
+    return [uniqueCollections, uniqueCollections.length];
   }
 
   private async getMappedCollections(page: number, size: number) {
@@ -201,17 +205,14 @@ export class CollectionsService {
     );
   }
 
-  private async getCollectionAssets(
-    getNftsCollections: any[],
-    localCollections: Collection[],
-  ) {
+  private async mapCollectionNfts(localCollections: Collection[]) {
     let nftsGroupByCollection = await this.collectionNftsRedis.batchLoad(
-      getNftsCollections,
+      localCollections?.map((item) => item.collection),
     );
 
     for (const collection of localCollections) {
       for (const groupByCollection of nftsGroupByCollection) {
-        if (collection.collection == groupByCollection.key) {
+        if (collection.collection === groupByCollection.key) {
           collection.collectionAsset = {
             ...collection.collectionAsset,
             assets: groupByCollection.value,
@@ -223,13 +224,11 @@ export class CollectionsService {
     return localCollections;
   }
 
-  private async mapNftsCountAndGetRetrievableCollections(
-    localCollections: Collection[],
-  ) {
-    let getNftsCollections = [];
+  private async mapCollectionNftsCount(localCollections: Collection[]) {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
+
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
         if (collection.collection == collectionNftsCount.collection) {
@@ -238,12 +237,13 @@ export class CollectionsService {
           });
         }
       }
-
-      if (parseInt(collectionNftsCount?.totalCount) > 0) {
-        getNftsCollections.push(collectionNftsCount.collection);
-      }
     }
-    return getNftsCollections;
+    localCollections = localCollections.filter(
+      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+    );
+    return localCollections.filter(
+      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+    );
   }
 
   private async getCollectionsForUser(
