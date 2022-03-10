@@ -155,9 +155,6 @@ export class CollectionsService {
       count = 1;
     }
 
-    collections = collections.filter(
-      (token) => parseInt(token.collectionAsset.totalCount) >= 4,
-    );
     collections = collections.slice(offset, offset + limit);
 
     return [collections, count];
