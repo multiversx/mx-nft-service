@@ -187,7 +187,7 @@ export class CollectionsService {
       await this.getCollectionAssets(getNftsCollections, mappedCollections);
       collectionsResponse.push(...mappedCollections);
       page = page + size;
-    } while (page < totalCount);
+    } while (page < totalCount || page <= 10000);
 
     return [collectionsResponse, totalCount];
   }
