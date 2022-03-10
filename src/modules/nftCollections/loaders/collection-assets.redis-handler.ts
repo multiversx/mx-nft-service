@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
+import { cacheConfig } from 'src/config';
 import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionAssetModel } from '../models';
@@ -7,7 +8,12 @@ import { CollectionAssetModel } from '../models';
 @Injectable()
 export class CollectionAssetsRedisHandler extends RedisDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'collectionAssets', TimeConstants.oneDay);
+    super(
+      redisCacheService,
+      'collectionAssets',
+      TimeConstants.oneDay,
+      cacheConfig.collectionsRedisClientName,
+    );
   }
 
   mapValues(
@@ -16,10 +22,13 @@ export class CollectionAssetsRedisHandler extends RedisDataloaderHandler<string>
   ) {
     return collectionIdentifiers.map((identifier) => {
       return assetsIdentifiers[identifier]
-        ? assetsIdentifiers[identifier].map((a) =>
-            CollectionAssetModel.fromNft(a),
-          )
-        : [];
+        ? {
+            key: identifier,
+            value: assetsIdentifiers[identifier].map((a) =>
+              CollectionAssetModel.fromNft(a),
+            ),
+          }
+        : { key: identifier, value: [] };
     });
   }
 }

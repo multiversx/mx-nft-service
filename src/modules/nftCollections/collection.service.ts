@@ -8,11 +8,12 @@ import {
   GasLimit,
   TypedValue,
 } from '@elrondnetwork/erdjs';
-import { elrondConfig, gas } from 'src/config';
+import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
-import { Collection } from './models';
+import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
+import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
 import {
@@ -21,14 +22,25 @@ import {
   TransferNftCreateRoleRequest,
   SetNftRolesRequest,
 } from './models/requests';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { CacheService } from 'src/common/services/caching/cache.service';
+import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
+import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class CollectionsService {
-  constructor(private apiService: ElrondApiService) {}
-
-  private readonly esdtSmartContract = getSmartContract(
-    elrondConfig.esdtNftAddress,
-  );
+  private redisClient: Redis.Redis;
+  constructor(
+    private apiService: ElrondApiService,
+    private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
+    private collectionNftsRedis: CollectionsNftsRedisHandler,
+    private cacheService: CacheService,
+  ) {
+    this.redisClient = this.cacheService.getClient(
+      cacheConfig.followersRedisClientName,
+    );
+  }
 
   async issueToken(request: IssueCollectionRequest) {
     let transactionArgs = this.getIssueTokenArguments(request);
@@ -90,18 +102,20 @@ export class CollectionsService {
       .addPageSize(offset, limit)
       .build();
 
-    if (filters?.ownerAddress) {
-      const [collections, count] = await this.getCollectionsForUser(
-        filters,
-        apiQuery,
-      );
-      return [
-        collections?.map((element) => Collection.fromCollectionApi(element)),
-        count,
-      ];
+    if (filters && Object.keys(filters).length > 0) {
+      if (filters.ownerAddress) {
+        const [collections, count] = await this.getCollectionsForUser(
+          filters,
+          apiQuery,
+        );
+        return [
+          collections?.map((element) => Collection.fromCollectionApi(element)),
+          count,
+        ];
+      }
+      return await this.getAllCollections(filters, apiQuery);
     }
-
-    return await this.getAllCollections(filters, apiQuery);
+    return await this.getFilteredCollections(offset, limit, filters);
   }
 
   private async getAllCollections(
@@ -125,6 +139,108 @@ export class CollectionsService {
       Collection.fromCollectionApi(element),
     );
     return [collections, count];
+  }
+
+  private async getFilteredCollections(
+    offset: number = 0,
+    limit: number = 10,
+    filters: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    let [collections, count] = await this.getFullCollections();
+
+    if (filters?.collection) {
+      collections = collections.filter(
+        (token) => token.collection === filters.collection,
+      );
+      count = 1;
+    }
+
+    collections = collections.slice(offset, offset + limit);
+
+    return [collections, count];
+  }
+
+  private async getFullCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.AllCollections.key,
+      async () => await this.getFullCollectionsRaw(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getFullCollectionsRaw(): Promise<[Collection[], number]> {
+    const size = 25;
+    let from = 0;
+
+    const totalCount = await this.apiService.getCollectionsCount();
+    let collectionsResponse: Collection[] = [];
+    do {
+      let mappedCollections = await this.getMappedCollections(from, size);
+
+      mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
+
+      await this.mapCollectionNfts(mappedCollections);
+
+      collectionsResponse.push(...mappedCollections);
+      from = from + size;
+    } while (from < totalCount || from <= 10000);
+    const uniqueCollections = [
+      ...new Map(
+        collectionsResponse.map((item) => [item.collection, item]),
+      ).values(),
+    ];
+    return [uniqueCollections, uniqueCollections.length];
+  }
+
+  private async getMappedCollections(page: number, size: number) {
+    const collections = await this.apiService.getCollections(
+      new CollectionQuery().addPageSize(page, size).build(),
+    );
+    return collections.map((collection) =>
+      Collection.fromCollectionApi(collection),
+    );
+  }
+
+  private async mapCollectionNfts(localCollections: Collection[]) {
+    let nftsGroupByCollection = await this.collectionNftsRedis.batchLoad(
+      localCollections?.map((item) => item.collection),
+    );
+
+    for (const collection of localCollections) {
+      for (const groupByCollection of nftsGroupByCollection) {
+        if (collection.collection === groupByCollection.key) {
+          collection.collectionAsset = {
+            ...collection.collectionAsset,
+            assets: groupByCollection.value,
+          };
+        }
+      }
+    }
+
+    return localCollections;
+  }
+
+  private async mapCollectionNftsCount(localCollections: Collection[]) {
+    const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
+      localCollections.map((collection) => collection.collection),
+    );
+
+    for (const collectionNftsCount of nftsCountResponse) {
+      for (const collection of localCollections) {
+        if (collection.collection == collectionNftsCount.collection) {
+          collection.collectionAsset = new CollectionAsset({
+            totalCount: collectionNftsCount.totalCount,
+          });
+        }
+      }
+    }
+    localCollections = localCollections.filter(
+      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+    );
+    return localCollections.filter(
+      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+    );
   }
 
   private async getCollectionsForUser(
@@ -193,4 +309,8 @@ export class CollectionsService {
     });
     return transactionArgs;
   }
+
+  private readonly esdtSmartContract = getSmartContract(
+    elrondConfig.esdtNftAddress,
+  );
 }

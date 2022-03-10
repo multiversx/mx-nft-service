@@ -7,22 +7,12 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import {
-  StopNftCreateArgs,
-  Collection,
-  TransferNftCreateRoleArgs,
-  IssueCollectionArgs,
-  SetNftRolesArgs,
-  CollectionAsset,
-} from './models';
+import { Collection, CollectionAsset } from './models';
 import { CollectionsService } from './collection.service';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import {
-  AssetsFilter,
-  CollectionsFilter,
-} from '../common/filters/filtersTypes';
+import { CollectionsFilter } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
@@ -42,15 +32,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
-    if (process.env.NODE_ENV === 'production') {
-      return new CollectionResponse();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] = await this.collectionsService.getCollections(
       offset,
       limit,
       filters,
     );
+
     return PageResponse.mapResponse<Collection>(
       collections || [],
       pagination,
@@ -75,7 +63,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     @Args('assetsCount', { nullable: true, type: () => Int })
     assetsCount: number = 4,
   ): Promise<CollectionAsset> {
-    const { collection } = collectionResponse;
+    const { collection, collectionAsset } = collectionResponse;
+    if (collectionAsset) return collectionAsset;
     return new CollectionAsset({
       collectionIdentifer: collection,
     });

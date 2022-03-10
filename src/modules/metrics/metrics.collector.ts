@@ -4,6 +4,7 @@ export class MetricsCollector {
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
+  private static jobsHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
   static ensureIsInitialized() {
@@ -37,6 +38,15 @@ export class MetricsCollector {
         buckets: [],
       });
     }
+
+    if (!MetricsCollector.jobsHistogram) {
+      MetricsCollector.jobsHistogram = new Histogram({
+        name: 'jobs',
+        help: 'Jobs',
+        labelNames: ['job_identifier', 'result'],
+        buckets: [],
+      });
+    }
   }
 
   static setQueryDuration(query: string, duration: number) {
@@ -54,6 +64,13 @@ export class MetricsCollector {
   static setRedisDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
+  }
+  static setJobResult(
+    job: string,
+    result: 'success' | 'error',
+    duration: number,
+  ) {
+    MetricsCollector.jobsHistogram.labels(job, result).observe(duration);
   }
 
   static async getMetrics(): Promise<string> {

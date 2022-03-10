@@ -32,9 +32,6 @@ export class CollectionAssetsCountProvider extends BaseProvider<string> {
   }
 
   private getQueryForCollection(identifier: string): string {
-    return new AssetsQuery()
-      .addCollection(identifier)
-      .addPageSize(0, 4)
-      .build();
+    return new AssetsQuery().addCollection(identifier).build();
   }
 }

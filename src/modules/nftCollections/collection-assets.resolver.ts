@@ -15,21 +15,23 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
 
   @ResolveField('totalCount', () => String)
   async totalCount(@Parent() collectionAsset: CollectionAsset) {
-    const { collectionIdentifer } = collectionAsset;
+    const { collectionIdentifer, totalCount } = collectionAsset;
 
     if (!collectionIdentifer) return null;
+    if (totalCount) return totalCount;
     const assetsCount = await this.collectionAssetsCountProvider.load(
       collectionIdentifer,
     );
-    return assetsCount;
+    return assetsCount?.totalCount ?? 0;
   }
 
   @ResolveField('assets', () => CollectionAsset)
-  async assets(@Parent() auction: CollectionAsset) {
-    const { collectionIdentifer } = auction;
+  async assets(@Parent() collectionAsset: CollectionAsset) {
+    const { collectionIdentifer, assets } = collectionAsset;
+    if (assets) return assets;
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
-    return response;
+    return response?.value ?? [];
   }
 }
