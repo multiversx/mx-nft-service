@@ -16,16 +16,16 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     super(redisCacheService, 'collectionAssets');
   }
   mapValues(returnValues: { key: string; value: any }[], data: any) {
+    const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
         item.value = data[item.key]
           ? data[item.key].map((a) => CollectionAssetModel.fromNft(a))
           : null;
-      } else {
-        item.value = { key: item.key, value: item.value };
+        redisValues.push(item);
       }
     }
-    return returnValues;
+    return redisValues;
   }
 
   async getData(keys: string[]) {

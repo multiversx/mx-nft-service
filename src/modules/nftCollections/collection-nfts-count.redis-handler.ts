@@ -15,16 +15,15 @@ export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedis
     super(redisCacheService, 'collectionAssetsCount');
   }
   mapValues(returnValues: { key: string; value: any }[], data: any) {
+    const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = data[item.key][0];
-      } else {
-        item.value = { key: item.key, value: item.value };
+        item.value = data[item.key][0].value;
+        redisValues.push(item);
       }
     }
-    return returnValues.map((item) => {
-      return item.value;
-    });
+
+    return redisValues;
   }
 
   async getData(keys: string[]) {

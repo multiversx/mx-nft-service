@@ -43,22 +43,19 @@ export abstract class BaseCollectionsAssetsRedisHandler {
     const getNotCachedKeys = returnValues
       .filter((item) => item.value === null)
       .map((value) => value.key);
-    console.log(3333333, getNotCachedKeys);
     if (getNotCachedKeys?.length > 0) {
       let data = await this.getData(getNotCachedKeys);
 
       values = this.mapValues(returnValues, data);
 
-      console.log(22, values);
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         redisKeys,
         values,
         this.defaultTtl,
       );
-      return values;
+      return returnValues;
     }
-    console.log(getDataFromRedis);
     return getDataFromRedis;
   }
 

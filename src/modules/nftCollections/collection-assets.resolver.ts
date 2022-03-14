@@ -24,7 +24,7 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     const assetsCount = await this.collectionAssetsCountProvider.load(
       collectionIdentifer,
     );
-    return assetsCount.totalCount;
+    return assetsCount?.value ?? 0;
   }
 
   @ResolveField('assets', () => CollectionAsset)
