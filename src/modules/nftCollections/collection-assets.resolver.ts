@@ -36,6 +36,8 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
+
+    console.log('333333', { response });
     return response?.value ?? [];
   }
 }
