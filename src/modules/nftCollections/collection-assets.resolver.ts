@@ -20,6 +20,7 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     console.log('$$$$$$$$$$$', { totalCount, collectionIdentifer });
     if (!collectionIdentifer) return null;
     if (totalCount) return totalCount;
+    console.log('11111111', { totalCount, collectionIdentifer });
     const assetsCount = await this.collectionAssetsCountProvider.load(
       collectionIdentifer,
     );
@@ -31,6 +32,7 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     const { collectionIdentifer, assets } = collectionAsset;
     console.log('##########', { collectionIdentifer, assets });
     if (assets) return assets;
+    console.log('222222222222222', { collectionIdentifer, assets });
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
