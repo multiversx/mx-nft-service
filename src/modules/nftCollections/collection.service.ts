@@ -180,7 +180,7 @@ export class CollectionsService {
 
       mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
 
-      await this.mapCollectionNfts(mappedCollections);
+      mappedCollections = await this.mapCollectionNfts(mappedCollections);
 
       collectionsResponse.push(...mappedCollections);
 

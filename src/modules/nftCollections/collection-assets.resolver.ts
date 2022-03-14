@@ -30,9 +30,9 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
   @ResolveField('assets', () => CollectionAsset)
   async assets(@Parent() collectionAsset: CollectionAsset) {
     const { collectionIdentifer, assets } = collectionAsset;
-    console.log('##########', { collectionIdentifer, assets });
+    console.log('##########', { collectionIdentifer });
     if (assets) return assets;
-    console.log('222222222222222', { collectionIdentifer, assets });
+    console.log('222222222222222', { collectionIdentifer });
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
