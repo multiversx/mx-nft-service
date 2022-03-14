@@ -184,7 +184,6 @@ export class CollectionsService {
 
       collectionsResponse.push(...mappedCollections);
 
-      // console.log(collectionsResponse[0].collectionAsset);
       from = from + size;
     } while (from < totalCount && from <= 9975);
     const uniqueCollections = [
@@ -192,7 +191,6 @@ export class CollectionsService {
         collectionsResponse.map((item) => [item.collection, item]),
       ).values(),
     ];
-    // console.log(i);
     return [uniqueCollections, uniqueCollections.length];
   }
 
@@ -200,7 +198,7 @@ export class CollectionsService {
     const collections = await this.apiService.getCollections(
       new CollectionQuery().addPageSize(page, size).build(),
     );
-    return collections.map((collection) =>
+    return collections?.map((collection) =>
       Collection.fromCollectionApi(collection),
     );
   }
