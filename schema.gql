@@ -399,7 +399,7 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
-  verifyContent(file: Upload!): TransactionNode!
+  verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
 

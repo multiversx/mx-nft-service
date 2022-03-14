@@ -44,7 +44,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     return await this.assetsService.createNft(user.publicKey, request);
   }
 
-  @Mutation(() => TransactionNode)
+  @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
   async verifyContent(
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
