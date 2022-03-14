@@ -229,10 +229,10 @@ export class CollectionsService {
 
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
-        if (collection.collection == collectionNftsCount.collection) {
+        if (collection.collection == collectionNftsCount.key) {
           collection.collectionAsset = new CollectionAsset({
-            collectionIdentifer: collectionNftsCount.collection,
-            totalCount: collectionNftsCount.totalCount,
+            collectionIdentifer: collectionNftsCount.key,
+            totalCount: collectionNftsCount.value,
           });
         }
       }

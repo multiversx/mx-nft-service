@@ -27,26 +27,29 @@ export abstract class BaseCollectionsAssetsRedisHandler {
   async batchLoad(keys: string[]) {
     const cacheKeys = this.getCacheKeys(keys);
     let [redisKeys, values] = [cacheKeys, []];
-    const getDataFromRedis = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
+    const getDataFromRedis: { key: string; value: any }[] =
+      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
     const returnValues: { key: string; value: any }[] = [];
     for (let index = 0; index < keys.length; index++) {
-      returnValues.push({
-        key: keys[index],
-        value: getDataFromRedis[index],
-      });
+      if (getDataFromRedis[index]) {
+        returnValues.push(getDataFromRedis[index]);
+      } else {
+        returnValues.push({
+          key: keys[index],
+          value: getDataFromRedis[index]?.value ?? null,
+        });
+      }
     }
-
     const getNotCachedKeys = returnValues
       .filter((item) => item.value === null)
       .map((value) => value.key);
+    console.log(3333333, getNotCachedKeys);
     if (getNotCachedKeys?.length > 0) {
       let data = await this.getData(getNotCachedKeys);
 
       values = this.mapValues(returnValues, data);
 
+      console.log(22, values);
       await this.redisCacheService.batchSetCache(
         this.redisClient,
         redisKeys,
@@ -55,6 +58,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
       );
       return values;
     }
+    console.log(getDataFromRedis);
     return getDataFromRedis;
   }
 
