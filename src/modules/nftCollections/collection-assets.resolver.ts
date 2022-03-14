@@ -17,17 +17,19 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
   async totalCount(@Parent() collectionAsset: CollectionAsset) {
     const { collectionIdentifer, totalCount } = collectionAsset;
 
+    console.log('$$$$$$$$$$$', { totalCount, collectionIdentifer });
     if (!collectionIdentifer) return null;
     if (totalCount) return totalCount;
     const assetsCount = await this.collectionAssetsCountProvider.load(
       collectionIdentifer,
     );
-    return assetsCount?.totalCount ?? 0;
+    return assetsCount.totalCount;
   }
 
   @ResolveField('assets', () => CollectionAsset)
   async assets(@Parent() collectionAsset: CollectionAsset) {
     const { collectionIdentifer, assets } = collectionAsset;
+    console.log('##########', { collectionIdentifer, assets });
     if (assets) return assets;
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
