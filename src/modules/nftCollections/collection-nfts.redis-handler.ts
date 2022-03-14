@@ -18,7 +18,9 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   mapValues(returnValues: { key: string; value: any }[], data: any) {
     returnValues.forEach((item) => {
       if (item.value === null)
-        item.value = data[item.key].map((a) => CollectionAssetModel.fromNft(a));
+        item.value = data[item.key]
+          ? data[item.key].map((a) => CollectionAssetModel.fromNft(a))
+          : null;
     });
     return returnValues;
   }
