@@ -38,7 +38,7 @@ export class CollectionsService {
     private cacheService: CacheService,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.collectionsRedisClientName,
     );
   }
 
@@ -155,7 +155,7 @@ export class CollectionsService {
       count = 1;
     }
 
-    collections = collections.slice(offset, offset + limit);
+    collections = collections?.slice(offset, offset + limit);
 
     return [collections, count];
   }
@@ -180,11 +180,12 @@ export class CollectionsService {
 
       mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
 
-      await this.mapCollectionNfts(mappedCollections);
+      mappedCollections = await this.mapCollectionNfts(mappedCollections);
 
       collectionsResponse.push(...mappedCollections);
+
       from = from + size;
-    } while (from < totalCount || from <= 10000);
+    } while (from < totalCount && from <= 9975);
     const uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),
@@ -197,7 +198,7 @@ export class CollectionsService {
     const collections = await this.apiService.getCollections(
       new CollectionQuery().addPageSize(page, size).build(),
     );
-    return collections.map((collection) =>
+    return collections?.map((collection) =>
       Collection.fromCollectionApi(collection),
     );
   }
@@ -228,19 +229,18 @@ export class CollectionsService {
 
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
-        if (collection.collection == collectionNftsCount.collection) {
+        if (collection.collection == collectionNftsCount.key) {
           collection.collectionAsset = new CollectionAsset({
-            totalCount: collectionNftsCount.totalCount,
+            collectionIdentifer: collectionNftsCount.key,
+            totalCount: collectionNftsCount.value,
           });
         }
       }
     }
     localCollections = localCollections.filter(
-      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+      (x) => parseInt(x.collectionAsset?.totalCount) >= 4,
     );
-    return localCollections.filter(
-      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
-    );
+    return localCollections;
   }
 
   private async getCollectionsForUser(

@@ -175,13 +175,13 @@ export class ElrondApiService {
   async getNftsCountForCollection(
     query: string = '',
     collection,
-  ): Promise<{ totalCount: string; collection: string }> {
+  ): Promise<{ value: string; key: string }> {
     const totalCount = await this.doGetGeneric(
       this.getNftsCount.name,
       `nfts/count${query}`,
       (response) => response,
     );
-    return { totalCount, collection };
+    return { key: collection, value: totalCount };
   }
 
   async getCollectionsByIdentifiers(

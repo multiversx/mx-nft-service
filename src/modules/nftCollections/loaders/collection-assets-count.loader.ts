@@ -28,7 +28,7 @@ export class CollectionAssetsCountProvider extends BaseProvider<string> {
     );
 
     const nftsCountResponse = await Promise.all(getCountPromises);
-    return nftsCountResponse?.groupBy((item) => item.collection);
+    return nftsCountResponse?.groupBy((item) => item.key);
   }
 
   private getQueryForCollection(identifier: string): string {

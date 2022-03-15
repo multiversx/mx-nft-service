@@ -22,10 +22,10 @@ export class CollectionAssetsCountRedisHandler extends RedisDataloaderHandler<st
     return collectionIdentifiers.map((identifier) => {
       return assetsIdentifiers[identifier]
         ? {
-            collection: identifier,
-            totalCount: assetsIdentifiers[identifier][0]?.totalCount,
+            key: identifier,
+            value: assetsIdentifiers[identifier][0]?.value,
           }
-        : { collection: identifier, totalCount: 0 };
+        : { key: identifier, value: 0 };
     });
   }
 }
