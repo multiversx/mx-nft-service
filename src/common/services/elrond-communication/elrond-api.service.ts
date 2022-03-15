@@ -22,7 +22,6 @@ export class ElrondApiService {
       timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
     };
-    console.log({ keepAliveOptions }, elrondConfig.proxyTimeout);
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
 
