@@ -63,6 +63,9 @@ export class Collection {
           roles: collectionApi.roles?.map((role) =>
             CollectionRole.fromRoleApi(role),
           ),
+          collectionAsset: new CollectionAsset({
+            collectionIdentifer: collectionApi.collection,
+          }),
         });
   }
 }
