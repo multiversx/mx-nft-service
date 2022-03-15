@@ -67,6 +67,8 @@ export abstract class BaseCollectionsAssetsRedisHandler {
         });
       }
     }
+    console.log(keys.length, getDataFromRedis.length, returnValues.length);
+
     return returnValues;
   }
 
