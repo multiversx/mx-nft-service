@@ -155,7 +155,7 @@ export class CollectionsService {
       count = 1;
     }
 
-    collections = collections.slice(offset, offset + limit);
+    collections = collections?.slice(offset, offset + limit);
 
     return [collections, count];
   }
@@ -238,11 +238,9 @@ export class CollectionsService {
       }
     }
     localCollections = localCollections.filter(
-      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
+      (x) => parseInt(x.collectionAsset?.totalCount) >= 4,
     );
-    return localCollections.filter(
-      (x) => parseInt(x.collectionAsset.totalCount) >= 4,
-    );
+    return localCollections;
   }
 
   private async getCollectionsForUser(
