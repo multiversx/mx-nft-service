@@ -1,0 +1,31 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+import { ApiService } from '../api.service';
+
+@Injectable()
+export class ElrondStatsService {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly apiService: ApiService,
+  ) {}
+
+  async getTrending(dimension: 'identifier' | 'collection'): Promise<string[]> {
+    const url = `${process.env.ELROND_STATS}api/v1/trending/${dimension}`;
+
+    try {
+      const response = await this.apiService.get(url);
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond stats service on url ${url}`,
+        {
+          path: 'ElrondStatsService.getTrending',
+          dimension,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
+}

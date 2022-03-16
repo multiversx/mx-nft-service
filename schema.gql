@@ -515,6 +515,7 @@ type Query {
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
+  trendingAssets: [Asset!]!
   trendingAuctions(
     """This should be a timestamp"""
     endDate: Int!
