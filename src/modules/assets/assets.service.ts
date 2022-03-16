@@ -44,6 +44,7 @@ import {
   CreateNftRequest,
   TransferNftRequest,
 } from './models/requests';
+import { AssetsOwnerLoader } from './loaders/assets-owner.loader';
 const hash = require('object-hash');
 
 @Injectable()
@@ -54,6 +55,7 @@ export class AssetsService {
     private pinataService: PinataService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
+    private assetOwnerLoader: AssetsOwnerLoader,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -132,6 +134,12 @@ export class AssetsService {
       await this.assetSupplyLoader.batchSupplyInfo(
         assetsWithSupply?.map((a) => a.identifier),
         assetsWithSupply?.groupBy((asset) => asset.identifier),
+      );
+
+      let assetsWithOwner = response.items.filter((x) => x.ownerAddress);
+      await this.assetOwnerLoader.batchOwnerAddress(
+        assetsWithOwner?.map((a) => a.identifier),
+        assetsWithOwner?.groupBy((asset) => asset.identifier),
       );
     }
   }

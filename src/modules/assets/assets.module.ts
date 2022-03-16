@@ -31,6 +31,8 @@ import { AssetAuctionsCountRedisHandler } from './loaders/asset-auctions-count.r
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 import { AssetsMutationsResolver } from './assets-mutations.resolver';
+import { AssetsOwnerLoader } from './loaders/assets-owner.loader';
+import { AssetsOwnerRedisHandler } from './loaders/assets-owner.redis-handler';
 
 @Module({
   providers: [
@@ -46,6 +48,8 @@ import { AssetsMutationsResolver } from './assets-mutations.resolver';
     LowestAuctionProvider,
     AssetsSupplyRedisHandler,
     AssetsSupplyLoader,
+    AssetsOwnerRedisHandler,
+    AssetsOwnerLoader,
     AssetAuctionsCountRedisHandler,
     AssetAuctionsCountProvider,
     AssetScamInfoRedisHandler,
