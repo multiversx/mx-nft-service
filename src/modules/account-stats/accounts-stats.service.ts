@@ -156,8 +156,9 @@ export class AccountsStatsService {
     return generateCacheKeyFromParams('account_creations', address);
   }
 
-  public invalidateStats(address: string) {
-    return this.redisCacheService.del(
+  public async invalidateStats(address: string) {
+    console.log('invalidateStats', { address });
+    return await this.redisCacheService.del(
       this.redisClient,
       this.getStatsCacheKey(address),
     );
