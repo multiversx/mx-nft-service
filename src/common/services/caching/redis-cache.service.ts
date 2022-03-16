@@ -162,6 +162,7 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<void> {
     const cacheKey = generateCacheKey(key, region);
+    console.log({ cacheKey });
     try {
       await client.del(cacheKey);
     } catch (err) {
