@@ -157,7 +157,6 @@ export class AccountsStatsService {
   }
 
   public async invalidateStats(address: string) {
-    console.log('invalidateStats', { address });
     return await this.redisCacheService.del(
       this.redisClient,
       this.getStatsCacheKey(address),

@@ -161,7 +161,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAsset,
-        TimeConstants.oneWeek,
+        TimeConstants.oneDay,
       );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
