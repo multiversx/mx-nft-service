@@ -55,7 +55,7 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number]> {
     try {
-      if (this.filtersForRunningEndDate(queryRequest)) {
+      if (this.filtersForRunningAndEndDate(queryRequest)) {
         return await this.getEndingAuctions(queryRequest);
       }
 
@@ -153,7 +153,7 @@ export class AuctionsGetterService {
     return await this.auctionServiceDb.getAvailableTokens(id);
   }
 
-  private filtersForRunningEndDate(queryRequest: QueryRequest) {
+  private filtersForRunningAndEndDate(queryRequest: QueryRequest) {
     return (
       queryRequest?.filters?.filters?.length === 2 &&
       queryRequest.filters.filters.filter(
@@ -180,6 +180,9 @@ export class AuctionsGetterService {
       )
     ) {
       let [auctions, count] = await this.getAuctionsToday();
+      auctions = auctions.filter(
+        (a) => a.endDate > DateUtils.getCurrentTimestamp(),
+      );
       auctions = auctions?.slice(
         queryRequest.offset,
         queryRequest.offset + queryRequest.limit,
@@ -188,6 +191,9 @@ export class AuctionsGetterService {
       return [auctions?.map((item) => Auction.fromEntity(item)), count];
     }
     let [auctions, count] = await this.getAuctionsEndingInAMonth();
+    auctions = auctions.filter(
+      (a) => a.endDate > DateUtils.getCurrentTimestamp(),
+    );
     auctions = auctions?.slice(
       queryRequest.offset,
       queryRequest.offset + queryRequest.limit,
