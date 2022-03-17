@@ -170,6 +170,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   async owner(@Parent() asset: Asset) {
     const { ownerAddress } = asset;
 
+    console.log({ ownerAddress });
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account, ownerAddress);

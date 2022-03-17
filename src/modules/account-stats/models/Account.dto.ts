@@ -23,6 +23,7 @@ export class Account {
   }
 
   static fromEntity(account: AccountIdentity, address: string = '') {
+    console.log({ account, address });
     return account
       ? new Account({
           address: account.address,
