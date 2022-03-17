@@ -22,13 +22,7 @@ import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
-import {
-  CreateNftArgs,
-  TransferNftArgs,
-  Asset,
-  HandleQuantityArgs,
-  CollectionType,
-} from './models';
+import { Asset, CollectionType } from './models';
 import BigNumber from 'bignumber.js';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
@@ -167,7 +161,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAsset,
-        30 * TimeConstants.oneMinute,
+        TimeConstants.oneDay,
       );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })

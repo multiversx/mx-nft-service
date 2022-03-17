@@ -16,7 +16,8 @@ export class NftTransactionsConsumer {
     await this.nftTransactionsService.handleNftMintEvents(
       nftAuctionEvents?.events?.filter(
         (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTCreate,
+          e.identifier === NftEventEnum.ESDTNFTCreate ||
+          e.identifier === NftEventEnum.ESDTNFTTransfer,
       ),
       nftAuctionEvents.hash,
     );
