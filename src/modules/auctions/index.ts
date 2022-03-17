@@ -4,5 +4,6 @@ export * from './loaders/asset-auctions.loader';
 export * from './loaders/asset-auctions.redis-handler';
 export * from './loaders/auction.loader';
 export * from './loaders/auctions.redis-handler';
-export * from './auctions.service';
+export * from './auctions-setter.service';
+export * from './auctions-getter.service';
 export * from './nft-marketplace.abi.service';

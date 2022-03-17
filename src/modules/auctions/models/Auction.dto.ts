@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { AuctionWithBidsCount } from 'src/db/auctions/auctionWithBidCount.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { OrdersResponse } from 'src/modules/orders/models';
@@ -72,7 +73,7 @@ export class Auction {
     Object.assign(this, init);
   }
 
-  static fromEntity(auction: AuctionEntity) {
+  static fromEntity(auction: AuctionEntity | AuctionWithBidsCount) {
     return !auction
       ? null
       : new Auction({

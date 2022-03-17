@@ -8,4 +8,14 @@ export class CacheInfo {
     key: 'allCollections',
     ttl: TimeConstants.oneHour,
   };
+
+  static AuctionsEndingToday: CacheInfo = {
+    key: 'auctionsEndingToday',
+    ttl: TimeConstants.oneHour,
+  };
+
+  static AuctionsEndingInAMonth: CacheInfo = {
+    key: 'auctionsEndingInAMonth',
+    ttl: TimeConstants.oneHour,
+  };
 }
