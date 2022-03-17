@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { ElrondApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
-import { AssetstRedisHandler } from './assets.redis-handler';
+import { AssetsRedisHandler } from './assets.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
 
 @Injectable({
@@ -10,7 +10,7 @@ import { Injectable, Scope } from '@nestjs/common';
 })
 export class AssetsProvider extends BaseProvider<string> {
   constructor(
-    assetstRedisHandler: AssetstRedisHandler,
+    assetstRedisHandler: AssetsRedisHandler,
     private assetScamLoader: AssetScamInfoProvider,
     private apiService: ElrondApiService,
   ) {

@@ -22,7 +22,6 @@ import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loade
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
-import { AssetsOwnerLoader } from './loaders/assets-owner.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -32,7 +31,6 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetsLikeProvider: AssetLikesProvider,
     private isAssetLikedProvider: IsAssetLikedProvider,
     private assetSupplyProvider: AssetsSupplyLoader,
-    private assetOwnerProvider: AssetsOwnerLoader,
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
@@ -78,17 +76,6 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     }
     const assetSupply = await this.assetSupplyProvider.load(identifier);
     return assetSupply ? assetSupply[0]?.supply : 0;
-  }
-
-  @ResolveField('ownerAddress', () => String)
-  async ownerAddress(@Parent() asset: Asset) {
-    const { identifier, type } = asset;
-    if (type === NftTypeEnum.SemiFungibleESDT) {
-      return '';
-    }
-    const assetOwner = await this.assetOwnerProvider.load(identifier);
-    console.log({ assetOwner });
-    return assetOwner ? assetOwner[0]?.owner : '';
   }
 
   @ResolveField('isLiked', () => Boolean)

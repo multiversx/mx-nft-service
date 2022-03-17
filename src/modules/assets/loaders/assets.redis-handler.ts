@@ -4,7 +4,7 @@ import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.hand
 import { Asset } from '../models';
 
 @Injectable()
-export class AssetstRedisHandler extends RedisDataloaderHandler<string> {
+export class AssetsRedisHandler extends RedisDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
     super(redisCacheService, 'asset');
   }

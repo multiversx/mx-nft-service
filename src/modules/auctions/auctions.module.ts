@@ -20,7 +20,7 @@ import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 import { AuctionProvider } from './loaders/auction.loader';
-import { AssetstRedisHandler } from '../assets/loaders/assets.redis-handler';
+import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
 import { AssetsProvider } from '../assets/loaders/assets.loader';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { AvailableTokensForAuctionRedisHandler } from './loaders/available-tokens-auctions.redis-handler';
@@ -44,7 +44,7 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     AuctionsOrdersProvider,
     AuctionProvider,
     AuctionsRedisHandler,
-    AssetstRedisHandler,
+    AssetsRedisHandler,
     AssetsProvider,
     LastOrderRedisHandler,
     LastOrdersProvider,

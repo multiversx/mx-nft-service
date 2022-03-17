@@ -22,13 +22,7 @@ import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
-import {
-  CreateNftArgs,
-  TransferNftArgs,
-  Asset,
-  HandleQuantityArgs,
-  CollectionType,
-} from './models';
+import { Asset, CollectionType } from './models';
 import BigNumber from 'bignumber.js';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
@@ -44,7 +38,6 @@ import {
   CreateNftRequest,
   TransferNftRequest,
 } from './models/requests';
-import { AssetsOwnerLoader } from './loaders/assets-owner.loader';
 const hash = require('object-hash');
 
 @Injectable()
@@ -55,7 +48,6 @@ export class AssetsService {
     private pinataService: PinataService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
-    private assetOwnerLoader: AssetsOwnerLoader,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -135,12 +127,6 @@ export class AssetsService {
         assetsWithSupply?.map((a) => a.identifier),
         assetsWithSupply?.groupBy((asset) => asset.identifier),
       );
-
-      let assetsWithOwner = response.items.filter((x) => x.ownerAddress);
-      await this.assetOwnerLoader.batchOwnerAddress(
-        assetsWithOwner?.map((a) => a.identifier),
-        assetsWithOwner?.groupBy((asset) => asset.identifier),
-      );
     }
   }
 
@@ -175,7 +161,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAsset,
-        30 * TimeConstants.oneMinute,
+        TimeConstants.oneWeek,
       );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })

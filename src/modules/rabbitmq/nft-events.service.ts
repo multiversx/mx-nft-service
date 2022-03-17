@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
-import { AuctionEventEnum } from '../assets/models/AuctionEvent.enum';
+import {
+  AuctionEventEnum,
+  NftEventEnum,
+} from '../assets/models/AuctionEvent.enum';
 import { AuctionsService } from '../auctions';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { AuctionStatusEnum } from '../auctions/models';
@@ -16,6 +20,7 @@ import {
   WithdrawEvent,
 } from './entities/auction';
 import { MintEvent } from './entities/auction/mint.event';
+import { TransferEvent } from './entities/auction/transfer.event';
 
 @Injectable()
 export class NftEventsService {
@@ -25,6 +30,7 @@ export class NftEventsService {
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
     private collectionAssets: CollectionAssetsRedisHandler,
+    private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
   ) {}
 
@@ -130,10 +136,24 @@ export class NftEventsService {
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
-      const mintEvent = new MintEvent(event);
-      const topics = mintEvent.getTopics();
-      this.collectionAssets.clearKey(topics.collection);
-      this.collectionAssetsCount.clearKey(topics.collection);
+      switch (event.identifier) {
+        case NftEventEnum.ESDTNFTCreate:
+          const mintEvent = new MintEvent(event);
+          const createTopics = mintEvent.getTopics();
+          this.collectionAssets.clearKey(createTopics.collection);
+          this.collectionAssetsCount.clearKey(createTopics.collection);
+
+          break;
+
+        case NftEventEnum.ESDTNFTTransfer:
+          const transferEvent = new TransferEvent(event);
+          const transferTopics = transferEvent.getTopics();
+          this.assetsRedisHandler.clearKey(
+            `${transferTopics.collection}-${transferTopics.nonce}`,
+          );
+
+          break;
+      }
     }
   }
 }
