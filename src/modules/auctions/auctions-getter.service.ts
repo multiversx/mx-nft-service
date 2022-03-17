@@ -275,7 +275,7 @@ export class AuctionsGetterService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  public async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
+  private async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
     let [auctions, count] = [[], 0];
     if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
       [auctions, count] =
