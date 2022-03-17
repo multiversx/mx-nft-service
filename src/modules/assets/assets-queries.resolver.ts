@@ -87,7 +87,8 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return '';
     }
     const assetOwner = await this.assetOwnerProvider.load(identifier);
-    return assetOwner ? assetOwner[0]?.owner : 0;
+    console.log({ assetOwner });
+    return assetOwner ? assetOwner[0]?.owner : '';
   }
 
   @ResolveField('isLiked', () => Boolean)
