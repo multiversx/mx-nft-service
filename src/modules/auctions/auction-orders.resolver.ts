@@ -19,9 +19,6 @@ export class AuctionOrdersResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return [];
-    }
     const { limit, offset } = pagination.pagingParams();
     const { id } = auction;
     if (!id) {

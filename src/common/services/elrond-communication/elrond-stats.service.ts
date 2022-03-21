@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ApiService } from '../api.service';
+import { NftViewsCount } from './models/nft-views.dto';
 
 @Injectable()
 export class ElrondStatsService {
@@ -22,6 +23,25 @@ export class ElrondStatsService {
         {
           path: 'ElrondStatsService.getTrending',
           dimension,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
+
+  async getNftsViewsCount(identifier: string): Promise<NftViewsCount> {
+    const url = `${process.env.ELROND_STATS}api/v1/views/nfts/${identifier}/count`;
+
+    try {
+      const response = await this.apiService.get(url);
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond stats service on url ${url}`,
+        {
+          path: 'ElrondStatsService.getNftsViewsCount',
+          identifier,
           exception: error,
         },
       );

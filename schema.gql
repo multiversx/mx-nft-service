@@ -63,6 +63,7 @@ type Asset {
   type: NftTypeEnum
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
+  viewsCount: Int
 }
 
 enum AssetActionEnum {
