@@ -5,7 +5,7 @@ import {
   AuctionEventEnum,
   NftEventEnum,
 } from '../assets/models/AuctionEvent.enum';
-import { AuctionsService } from '../auctions';
+import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { AuctionStatusEnum } from '../auctions/models';
 import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
@@ -25,7 +25,8 @@ import { TransferEvent } from './entities/auction/transfer.event';
 @Injectable()
 export class NftEventsService {
   constructor(
-    private auctionsService: AuctionsService,
+    private auctionsService: AuctionsSetterService,
+    private auctionsGetterService: AuctionsGetterService,
     private availableTokens: AvailableTokensForAuctionRedisHandler,
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
@@ -40,7 +41,7 @@ export class NftEventsService {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
-          const auction = await this.auctionsService.getAuctionById(
+          const auction = await this.auctionsGetterService.getAuctionById(
             parseInt(topics.auctionId, 16),
           );
           const order = await this.ordersService.createOrder(
@@ -67,10 +68,10 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const auctionSft = await this.auctionsService.getAuctionById(
+          const auctionSft = await this.auctionsGetterService.getAuctionById(
             parseInt(buySftTopics.auctionId, 16),
           );
-          const result = await this.auctionsService.getAvailableTokens(
+          const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
           );
           const totalRemaining = result

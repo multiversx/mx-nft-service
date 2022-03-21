@@ -1,10 +1,11 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
-  AuctionsService,
+  AuctionsSetterService,
   NftMarketplaceAbiService,
   AuctionsRedisHandler,
   AuctionsOrdersProvider,
   AuctionsOrdersRedisHandler,
+  AuctionsGetterService,
 } from '.';
 import { AuctionsQueriesResolver } from './auctions-queries.resolver';
 import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
@@ -29,7 +30,8 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 
 @Module({
   providers: [
-    AuctionsService,
+    AuctionsSetterService,
+    AuctionsGetterService,
     AuctionsQueriesResolver,
     AuctionsMutationsResolver,
     AuctionOrdersResolver,
@@ -59,7 +61,8 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     forwardRef(() => AccountsStatsModuleGraph),
   ],
   exports: [
-    AuctionsService,
+    AuctionsSetterService,
+    AuctionsGetterService,
     NftMarketplaceAbiService,
     OrdersService,
     RedisCacheService,

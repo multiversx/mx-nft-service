@@ -207,6 +207,18 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.*')
+      .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.endDate <= ${endDate}`)
+      .execute();
+  }
+
   async getAuction(id: number): Promise<AuctionEntity> {
     if (id || id === 0) {
       return await this.auctionsRepository.findOne({

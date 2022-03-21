@@ -2,6 +2,8 @@ declare global {
   interface Array<T> {
     groupBy(predicate: (item: T) => any): any;
     remove(element: T): number;
+    sorted(predicate?: (element: T) => number): T[];
+    sortedDescending(predicate?: (element: T) => number): T[];
   }
 }
 
@@ -30,6 +32,28 @@ Array.prototype.remove = function <T>(element: T): number {
   }
 
   return index;
+};
+
+Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
+  const cloned = [...this];
+
+  if (predicate) {
+    cloned.sort((a, b) => predicate(a) - predicate(b));
+  } else {
+    cloned.sort((a, b) => a - b);
+  }
+
+  return cloned;
+};
+
+Array.prototype.sortedDescending = function <T>(
+  predicate?: (item: T) => number,
+): T[] {
+  const sorted = this.sorted(predicate);
+
+  sorted.reverse();
+
+  return sorted;
 };
 
 export {};

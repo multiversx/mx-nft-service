@@ -2,13 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Auction, AuctionStatusEnum } from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
-import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import {
   QueryRequest,
@@ -16,14 +15,15 @@ import {
 } from '../common/filters/QueryRequest';
 import { GroupBy, Operation } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { DateUtils } from 'src/utils/date-utils';
+import { AuctionWithBidsCount } from 'src/db/auctions/auctionWithBidCount.dto';
 const hash = require('object-hash');
 
 @Injectable()
-export class AuctionsService {
+export class AuctionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
-    private nftAbiService: NftMarketplaceAbiService,
-    private apiService: ElrondApiService,
     private auctionServiceDb: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -33,41 +33,13 @@ export class AuctionsService {
     );
   }
 
-  async saveAuction(
-    auctionId: number,
-    identifier: string,
-    hash: string,
-  ): Promise<Auction | any> {
-    try {
-      await this.invalidateCache();
-      const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.apiService.getNftByIdentifier(identifier);
-      const savedAuction = await this.auctionServiceDb.insertAuction(
-        AuctionEntity.fromAuctionAbi(
-          auctionId,
-          auctionData,
-          asset?.tags?.toString(),
-          hash,
-        ),
-      );
-      return savedAuction;
-    } catch (error) {
-      this.logger.error('An error occurred while savind an auction', error, {
-        path: 'AuctionsService.saveAuction',
-        auctionId,
-        exception: error,
-      });
-    }
-  }
-
   async getAuctions(queryRequest: QueryRequest): Promise<[Auction[], number]> {
     try {
       const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      const getAuctions = () => this.getMappedAuctions(queryRequest);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAuctions,
+        () => this.getMappedAuctions(queryRequest),
         30 * TimeConstants.oneSecond,
       );
     } catch (error) {
@@ -83,33 +55,23 @@ export class AuctionsService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number]> {
     try {
-      const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      const getAuctions = () => this.getMappedAuctionsOrderBids(queryRequest);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAuctions,
-      );
-    } catch (error) {
-      this.logger.error('An error occurred while get auctions', {
-        path: 'AuctionsService.getAuctions',
-        queryRequest,
-        exception: error,
-      });
-    }
-  }
+      if (this.filtersForRunningAndEndDate(queryRequest)) {
+        return await this.getEndingAuctions(queryRequest);
+      }
 
-  async rollbackAuctionByHash(blockHash: string): Promise<boolean> {
-    try {
-      return await this.auctionServiceDb.rollbackAuctionAndOrdersByHash(
-        blockHash,
+      const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      return this.redisCacheService.getOrSet(this.redisClient, cacheKey, () =>
+        this.getMappedAuctionsOrderBids(queryRequest),
       );
     } catch (error) {
-      this.logger.error('An error occurred while rollback Auctions', {
-        path: 'AuctionsService.rollbackAuctionByHash',
-        blockHash,
-        exception: error,
-      });
+      this.logger.error(
+        'An error occurred while get auctions order by number of bids',
+        {
+          path: 'AuctionsService.getAuctionsOrderByNoBids',
+          queryRequest,
+          exception: error,
+        },
+      );
     }
   }
 
@@ -117,17 +79,14 @@ export class AuctionsService {
     queryRequest: TrendingQueryRequest,
   ): Promise<[Auction[], number]> {
     try {
-      const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      const getTrendingAuctions = () =>
-        this.getMappedTrendingAuctions(queryRequest);
       return this.redisCacheService.getOrSet(
         this.redisClient,
-        cacheKey,
-        getTrendingAuctions,
+        this.getAuctionsCacheKey(queryRequest),
+        () => this.getMappedTrendingAuctions(queryRequest),
         TimeConstants.oneHour,
       );
     } catch (error) {
-      this.logger.error('An error occurred while get auctions', {
+      this.logger.error('An error occurred while get trending auctions', {
         path: 'AuctionsService.getTrendingAuctions',
         queryRequest,
         exception: error,
@@ -146,12 +105,10 @@ export class AuctionsService {
         limit,
         offset,
       );
-      const getTrendingAuctions = () =>
-        this.getMappedClaimableAuctions(limit, offset, address);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getTrendingAuctions,
+        () => this.getMappedClaimableAuctions(limit, offset, address),
         30 * TimeConstants.oneSecond,
       );
     } catch (error) {
@@ -161,6 +118,114 @@ export class AuctionsService {
         exception: error,
       });
     }
+  }
+
+  public async getRunningAuctionsEndingBefore(endDate: number) {
+    let auctions: AuctionWithBidsCount[] =
+      await this.auctionServiceDb.getAuctionsEndingBefore(endDate);
+    auctions = auctions?.map((item) => new AuctionWithBidsCount(item));
+
+    const group: { key: string; value: AuctionWithBidsCount[] } =
+      auctions?.groupBy((a) => a.identifier);
+    let groupedAuctions = [];
+    for (const key in group) {
+      groupedAuctions = [
+        ...groupedAuctions,
+        group[key].sortedDescending(
+          (i: { ordersCount: any }) => i.ordersCount,
+        )[0],
+      ];
+    }
+
+    groupedAuctions = groupedAuctions?.sortedDescending((a) => a.ordersCount);
+    return [groupedAuctions, groupedAuctions?.length];
+  }
+
+  async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
+    return await this.auctionServiceDb.getAuctionsThatReachedDeadline();
+  }
+
+  async getAuctionById(id: number): Promise<AuctionEntity> {
+    return await this.auctionServiceDb.getAuction(id);
+  }
+
+  async getAvailableTokens(id: number): Promise<number> {
+    return await this.auctionServiceDb.getAvailableTokens(id);
+  }
+
+  private filtersForRunningAndEndDate(queryRequest: QueryRequest) {
+    return (
+      queryRequest?.filters?.filters?.length === 2 &&
+      queryRequest.filters.filters.filter(
+        (item) => item.field === 'status' || item.field === 'endDate',
+      ).length === 2 &&
+      queryRequest.filters.filters.find(
+        (f) =>
+          f.field === 'endDate' &&
+          f.values.length === 1 &&
+          parseInt(f.values[0]) < DateUtils.getCurrentTimestampPlusDays(30),
+      )
+    );
+  }
+
+  private async getEndingAuctions(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
+    if (
+      queryRequest.filters.filters.find(
+        (f) =>
+          f.field === 'endDate' &&
+          f.values.length === 1 &&
+          parseInt(f.values[0]) < DateUtils.getCurrentTimestampPlusMinute(10),
+      )
+    ) {
+      let [auctions, count] = await this.getAuctionsToday();
+      auctions = auctions.filter(
+        (a) => a.endDate > DateUtils.getCurrentTimestamp(),
+      );
+      auctions = auctions?.slice(
+        queryRequest.offset,
+        queryRequest.offset + queryRequest.limit,
+      );
+
+      return [auctions?.map((item) => Auction.fromEntity(item)), count];
+    }
+    let [auctions, count] = await this.getAuctionsEndingInAMonth();
+    auctions = auctions.filter(
+      (a) => a.endDate > DateUtils.getCurrentTimestamp(),
+    );
+    auctions = auctions?.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions?.map((item) => Auction.fromEntity(item)), count];
+  }
+
+  private async getAuctionsToday(): Promise<[AuctionWithBidsCount[], number]> {
+    return await this.redisCacheService.getOrSet(
+      this.redisClient,
+      CacheInfo.AuctionsEndingToday.key,
+      () =>
+        this.getRunningAuctionsEndingBefore(
+          DateUtils.getCurrentTimestampPlus(24),
+        ),
+      TimeConstants.oneHour,
+    );
+  }
+
+  private async getAuctionsEndingInAMonth(): Promise<
+    [AuctionWithBidsCount[], number]
+  > {
+    return await this.redisCacheService.getOrSet(
+      this.redisClient,
+      CacheInfo.AuctionsEndingInAMonth.key,
+      () =>
+        this.getRunningAuctionsEndingBefore(
+          DateUtils.getCurrentTimestampPlusDays(30),
+        ),
+      TimeConstants.oneHour,
+    );
   }
 
   private async getMappedTrendingAuctions(queryRequest: TrendingQueryRequest) {
@@ -225,46 +290,20 @@ export class AuctionsService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
-    return await this.auctionServiceDb.getAuctionsThatReachedDeadline();
-  }
-
-  async updateAuction(
-    id: number,
-    status: AuctionStatusEnum,
-    hash: string,
-  ): Promise<Auction | any> {
-    await this.invalidateCache();
-    return await this.auctionServiceDb.updateAuction(id, status, hash);
-  }
-
-  async getAuctionById(id: number): Promise<AuctionEntity> {
-    return await this.auctionServiceDb.getAuction(id);
-  }
-
-  async getAvailableTokens(id: number): Promise<number> {
-    return await this.auctionServiceDb.getAvailableTokens(id);
-  }
-
-  async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
-    await this.invalidateCache();
-    return await this.auctionServiceDb.updateAuctions(auctions);
-  }
-
   private getAuctionsCacheKey(request: any) {
     return generateCacheKeyFromParams('auctions', hash(request));
   }
 
-  private getClaimableAuctionsCacheKey(address: string, limit, offset) {
+  private getClaimableAuctionsCacheKey(
+    address: string,
+    limit: number,
+    offset: number,
+  ) {
     return generateCacheKeyFromParams(
       'claimable_auctions',
       address,
       limit,
       offset,
     );
-  }
-
-  private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.flushDb(this.redisClient);
   }
 }

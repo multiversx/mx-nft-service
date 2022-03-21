@@ -6,7 +6,6 @@ import {
   Parent,
   Int,
 } from '@nestjs/graphql';
-import { AuctionsService } from './auctions.service';
 import { BaseResolver } from '../common/base.resolver';
 import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -28,15 +27,15 @@ import {
   QueryRequest,
   TrendingQueryRequest,
 } from '../common/filters/QueryRequest';
-import { TransactionNode } from '../common/transaction';
 import { User } from '../auth/user';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
+import { AuctionsGetterService } from './auctions-getter.service';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   constructor(
-    private auctionsService: AuctionsService,
+    private auctionsService: AuctionsGetterService,
     private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,

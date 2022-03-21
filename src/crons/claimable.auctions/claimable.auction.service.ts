@@ -1,14 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { AuctionsService } from 'src/modules/auctions';
+import {
+  AuctionsGetterService,
+  AuctionsSetterService,
+} from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { Logger } from 'winston';
 
 @Injectable()
 export class ClaimableAuctionsService {
   constructor(
-    private auctionService: AuctionsService,
+    private auctionSetterService: AuctionsSetterService,
+    private auctionGetterService: AuctionsGetterService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -16,9 +20,9 @@ export class ClaimableAuctionsService {
   async updateClaimableAuctions() {
     try {
       const endedAuctions =
-        await this.auctionService.getAuctionsThatReachedDeadline();
+        await this.auctionGetterService.getAuctionsThatReachedDeadline();
 
-      await this.auctionService.updateAuctions(
+      await this.auctionSetterService.updateAuctions(
         endedAuctions?.map((a) => {
           return {
             ...a,
