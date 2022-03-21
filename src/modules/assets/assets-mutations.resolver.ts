@@ -49,9 +49,6 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   async verifyContent(
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
   ): Promise<Boolean> {
-    if (process.env.NODE_ENV === 'production') {
-      return false;
-    }
     const fileData = await file;
 
     const contentStatus = (

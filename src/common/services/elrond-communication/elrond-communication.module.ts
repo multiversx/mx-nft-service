@@ -5,6 +5,7 @@ import {
   ElrondIdentityService,
   ElrondProxyService,
   ElrondDataService,
+  ElrondStatsService,
 } from 'src/common';
 import { ApiService } from '../api.service';
 
@@ -13,6 +14,7 @@ import { ApiService } from '../api.service';
     ApiService,
     ElrondProxyService,
     ElrondApiService,
+    ElrondStatsService,
     ElrondElasticService,
     ElrondIdentityService,
     ElrondDataService,
@@ -20,6 +22,7 @@ import { ApiService } from '../api.service';
   exports: [
     ApiService,
     ElrondProxyService,
+    ElrondStatsService,
     ElrondApiService,
     ElrondElasticService,
     ElrondIdentityService,

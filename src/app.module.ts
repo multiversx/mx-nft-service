@@ -16,6 +16,7 @@ import { FeaturedModuleGraph } from './modules/featured/featured.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
+import { TrendingModuleGraph } from './modules/trending/trending.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
     AuctionsModuleDb,
     FeaturedModuleGraph,
     UsdAmountModuleGraph,
+    TrendingModuleGraph,
     IpfsModule,
   ],
 })

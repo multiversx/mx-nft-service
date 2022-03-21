@@ -19,9 +19,6 @@ export class AssetAuctionResolver extends BaseResolver(Asset) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    if (process.env.NODE_ENV === 'production') {
-      return [];
-    }
     const { limit, offset } = pagination.pagingParams();
     const { identifier } = asset;
     if (!identifier) {

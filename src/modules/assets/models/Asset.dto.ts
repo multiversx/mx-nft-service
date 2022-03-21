@@ -60,6 +60,8 @@ export class Asset {
   tags: string[];
   @Field(() => Int, { nullable: true })
   likesCount: number;
+  @Field(() => Int, { nullable: true })
+  viewsCount: number;
   @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
   @Field(() => String, {
