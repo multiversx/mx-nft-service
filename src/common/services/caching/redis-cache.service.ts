@@ -162,10 +162,8 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<void> {
     const cacheKey = generateCacheKey(key, region);
-    console.log('redis account ', { cacheKey });
     try {
-      const response = await client.del(cacheKey);
-      console.log('delete response ', response);
+      await client.del(cacheKey);
     } catch (err) {
       this.logger.error(
         'An error occurred while trying to delete from redis cache.',
