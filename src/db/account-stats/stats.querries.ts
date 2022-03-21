@@ -22,8 +22,8 @@ SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalan
 FROM
   (
   SELECT * from auctionsStats a
-  LEFT JOIN ordersCount b ON a.address = b.ownerAddress
-  LEFT JOIN biddingBalanceOrders bb ON a.address = bb.orderAddress
+  LEFT JOIN ordersCount b ON b.ownerAddress = '${address}'
+  LEFT JOIN biddingBalanceOrders bb ON bb.orderAddress = '${address}'
   ) temp
   `;
 }
