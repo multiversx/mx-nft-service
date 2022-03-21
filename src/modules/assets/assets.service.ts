@@ -325,7 +325,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAssets,
-        30 * TimeConstants.oneSecond,
+        15 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {
