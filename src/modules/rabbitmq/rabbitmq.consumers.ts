@@ -7,6 +7,7 @@ import { applyDecorators } from '@nestjs/common';
 export const CompetingRabbitConsumer = (config: {
   queueName: string;
   exchange: string;
+  dlqExchange: string;
 }) => {
   return applyDecorators(
     RabbitSubscribe({
@@ -21,7 +22,7 @@ export const CompetingRabbitConsumer = (config: {
           'x-queue-mode': 'lazy',
           'x-single-active-consumer': true,
         },
-        deadLetterExchange: 'nft_dead_letter_exchange',
+        deadLetterExchange: config.dlqExchange,
       },
     }),
   );

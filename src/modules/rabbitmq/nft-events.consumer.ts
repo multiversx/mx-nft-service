@@ -11,6 +11,7 @@ export class NftTransactionsConsumer {
   @CompetingRabbitConsumer({
     queueName: process.env.RABBITMQ_QUEUE,
     exchange: process.env.RABBITMQ_EXCHANGE,
+    dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     await this.nftTransactionsService.handleNftMintEvents(
