@@ -124,7 +124,7 @@ export class ElrondApiService {
   ): Promise<OwnerApi[]> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}/owners?from=${offset}&size=${limit}`,
+      `nfts/${identifier}/accounts?from=${offset}&size=${limit}`,
       (response) => response,
     );
   }
@@ -132,7 +132,7 @@ export class ElrondApiService {
   async getOwnersForIdentifierCount(identifier: string): Promise<number> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}/owners/count`,
+      `nfts/${identifier}/accounts/count`,
       (response) => response,
     );
   }
