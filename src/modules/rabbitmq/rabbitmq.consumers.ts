@@ -28,7 +28,7 @@ export const CompetingRabbitConsumer = (config: {
           'x-queue-mode': 'lazy',
           'x-single-active-consumer': true,
         },
-        // deadLetterExchange: config.dlqExchange,
+        deadLetterExchange: config.dlqExchange,
       },
     }),
   );
