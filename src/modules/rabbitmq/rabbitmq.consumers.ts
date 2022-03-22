@@ -20,6 +20,7 @@ export const CompetingRabbitConsumer = (config: {
           'x-queue-type': 'classic',
           'x-queue-mode': 'lazy',
           'x-single-active-consumer': true,
+          'x-dead-letter-exchange': 'nft_dead_letter_exchange',
         },
       },
     }),
