@@ -78,16 +78,7 @@ export class AssetsService {
     limit: number = 10,
     filters: AssetsFilter,
   ): Promise<CollectionType<Asset>> {
-    const apiQuery = new AssetsQuery()
-      .addCreator(filters?.creatorAddress)
-      .addTags(filters?.tags)
-      .addIdentifiers(filters?.identifiers)
-      .addCollection(filters?.collection)
-      .addType(filters?.type)
-      .withOwner()
-      .withSupply()
-      .addPageSize(offset, limit)
-      .build();
+    const apiQuery = this.getApiQuery(filters, offset, limit);
 
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
@@ -112,6 +103,19 @@ export class AssetsService {
     const response = await this.getAssetsWithoutOwner(filters, apiQuery);
     this.addToCache(response);
     return response;
+  }
+
+  private getApiQuery(filters: AssetsFilter, offset: number, limit: number) {
+    return new AssetsQuery()
+      .addCreator(filters?.creatorAddress)
+      .addTags(filters?.tags)
+      .addIdentifiers(filters?.identifiers)
+      .addCollection(filters?.collection)
+      .addType(filters?.type)
+      .withOwner()
+      .withSupply()
+      .addPageSize(offset, limit)
+      .build();
   }
 
   private async addToCache(response: CollectionType<Asset>) {
@@ -325,7 +329,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAssets,
-        15 * TimeConstants.oneSecond,
+        5 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {
