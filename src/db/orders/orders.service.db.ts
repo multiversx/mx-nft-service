@@ -134,6 +134,9 @@ export class OrdersServiceDb {
         Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
       ),
     );
+    if (!sorting.find((sort) => sort.field === 'id')) {
+      queryBuilder.addOrderBy('id', 'DESC');
+    }
   }
 
   private clearCache(auctionId: number) {
