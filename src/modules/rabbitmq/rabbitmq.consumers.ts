@@ -19,7 +19,7 @@ export const CompetingRabbitConsumer = (config: {
       queue: config.queueName,
       exchange: config.exchange,
       routingKey: '',
-      errorHandler: requeueErrorHandler,
+      errorHandler: defaultNackErrorHandler,
       queueOptions: {
         autoDelete: false,
         durable: true,
