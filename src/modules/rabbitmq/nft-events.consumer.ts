@@ -19,28 +19,21 @@ export class NftTransactionsConsumer {
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
-  async consumeAuctionEvents(nftAuctionEvents: any, amqpMsg: ConsumeMessage) {
-    try {
-      await this.nftTransactionsService.handleNftMintEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { identifier: NftEventEnum }) =>
-            e.identifier === NftEventEnum.ESDTNFTCreate ||
-            e.identifier === NftEventEnum.ESDTNFTTransfer,
-        ),
-        nftAuctionEvents.hash,
-      );
-      await this.nftTransactionsService.handleNftAuctionEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { address: any }) =>
-            e.address === elrondConfig.nftMarketplaceAddress,
-        ),
-        nftAuctionEvents.hash,
-      );
-    } catch (error) {
-      this.logger.error(`An error occurred while messages from rabbit.`, {
-        path: 'NftTransactionsConsumer.consumeAuctionEvents',
-        exception: error.message,
-      });
-    }
+  async consumeAuctionEvents(nftAuctionEvents: any) {
+    await this.nftTransactionsService.handleNftMintEvents(
+      nftAuctionEvents?.events?.filter(
+        (e: { identifier: NftEventEnum }) =>
+          e.identifier === NftEventEnum.ESDTNFTCreate ||
+          e.identifier === NftEventEnum.ESDTNFTTransfer,
+      ),
+      nftAuctionEvents.hash,
+    );
+    await this.nftTransactionsService.handleNftAuctionEvents(
+      nftAuctionEvents?.events?.filter(
+        (e: { address: any }) =>
+          e.address === elrondConfig.nftMarketplaceAddress,
+      ),
+      nftAuctionEvents.hash,
+    );
   }
 }
