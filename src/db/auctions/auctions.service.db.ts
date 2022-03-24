@@ -351,5 +351,8 @@ export class AuctionsServiceDb {
         Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
       ),
     );
+    if (!sorting.find((sort) => sort.field === 'id')) {
+      queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+    }
   }
 }
