@@ -70,6 +70,7 @@ export class MetricsCollector {
     result: 'success' | 'error',
     duration: number,
   ) {
+    MetricsCollector.ensureIsInitialized();
     MetricsCollector.jobsHistogram.labels(job, result).observe(duration);
   }
 
