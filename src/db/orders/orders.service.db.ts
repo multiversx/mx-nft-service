@@ -128,14 +128,16 @@ export class OrdersServiceDb {
     sorting: Sorting[],
     queryBuilder: SelectQueryBuilder<OrderEntity>,
   ) {
-    sorting?.forEach((sort) =>
-      queryBuilder.addOrderBy(
-        sort.field,
-        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
-      ),
-    );
-    if (!sorting.find((sort) => sort.field === 'id')) {
-      queryBuilder.addOrderBy('id', 'DESC');
+    if (sorting) {
+      sorting?.forEach((sort) =>
+        queryBuilder.addOrderBy(
+          sort.field,
+          Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+        ),
+      );
+      if (!sorting.find((sort) => sort.field === 'id')) {
+        queryBuilder.addOrderBy('id', 'DESC');
+      }
     }
   }
 

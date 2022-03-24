@@ -345,14 +345,16 @@ export class AuctionsServiceDb {
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
     alias: string = null,
   ) {
-    sorting?.forEach((sort) =>
-      queryBuilder.addOrderBy(
-        alias ? `${alias}.${sort.field}` : sort.field,
-        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
-      ),
-    );
-    if (!sorting.find((sort) => sort.field === 'id')) {
-      queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+    if (sorting) {
+      sorting?.forEach((sort) =>
+        queryBuilder.addOrderBy(
+          alias ? `${alias}.${sort.field}` : sort.field,
+          Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+        ),
+      );
+      if (!sorting.find((sort) => sort.field === 'id')) {
+        queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+      }
     }
   }
 }
