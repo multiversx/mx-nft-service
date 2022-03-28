@@ -23,10 +23,10 @@ import {
   SetNftRolesRequest,
 } from './models/requests';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CacheService } from 'src/common/services/caching/cache.service';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService } from 'src/common/services/caching/caching.service';
 
 @Injectable()
 export class CollectionsService {
@@ -35,7 +35,7 @@ export class CollectionsService {
     private apiService: ElrondApiService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
-    private cacheService: CacheService,
+    private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.collectionsRedisClientName,
@@ -185,7 +185,7 @@ export class CollectionsService {
       collectionsResponse.push(...mappedCollections);
 
       from = from + size;
-    } while (from < totalCount && from <= 9975);
+    } while (from < totalCount && from <= 99);
     const uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),

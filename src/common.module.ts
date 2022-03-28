@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,6 +13,7 @@ import { ElrondCommunicationModule } from './common/services/elrond-communicatio
 import { RedisCacheService } from './common/services/caching/redis-cache.service';
 import { cacheConfig } from './config';
 import { LocalCacheService } from './common/services/caching/local.cache.service';
+import { CachingModule } from './common/services/caching/caching.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -38,6 +39,7 @@ if (!!process.env.LOG_FILE) {
 
 @Module({
   imports: [
+    forwardRef(() => CachingModule),
     ScheduleModule.forRoot(),
     ConfigModule,
     WinstonModule.forRoot({
@@ -93,6 +95,6 @@ if (!!process.env.LOG_FILE) {
     ElrondCommunicationModule,
   ],
   providers: [RedisCacheService, LocalCacheService],
-  exports: [ElrondCommunicationModule],
+  exports: [ElrondCommunicationModule, CachingModule],
 })
 export class CommonModule {}

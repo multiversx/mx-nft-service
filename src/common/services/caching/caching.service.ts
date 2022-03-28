@@ -1,16 +1,14 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
-import { Logger } from 'winston';
+import { TimeConstants } from 'src/utils/time-utils';
 import { LocalCacheService } from './local.cache.service';
 import { RedisCacheService } from './redis-cache.service';
 
 @Injectable()
-export class CacheService {
+export class CachingService {
   private DEFAULT_TTL = 300;
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly localCacheService: LocalCacheService,
     private readonly redisCacheService: RedisCacheService,
   ) {}
@@ -96,5 +94,24 @@ export class CacheService {
         delete this.pendingPromises[key];
       }
     }
+  }
+
+  async deleteInCacheLocal(key: string) {
+    await this.localCacheService.deleteCacheKey(key);
+  }
+
+  async refreshCacheLocal<T>(
+    redisClient,
+    key: string,
+    ttl: number = TimeConstants.oneHour,
+  ): Promise<T | undefined> {
+    const value = await this.redisCacheService.get(redisClient, key);
+    if (value) {
+      await this.localCacheService.setCacheValue<T>(key, value, ttl);
+    } else {
+      await this.deleteInCacheLocal(key);
+    }
+
+    return value;
   }
 }
