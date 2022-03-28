@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { ElrondCommunicationModule } from 'src/common';
 import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
@@ -11,7 +11,6 @@ import { FeaturedService } from './featured.service';
 
 @Module({
   providers: [
-    RedisCacheService,
     FeaturedService,
     FeaturedNftsResolver,
     FeaturedCollectionsResolver,
@@ -21,6 +20,5 @@ import { FeaturedService } from './featured.service';
     TypeOrmModule.forFeature([FeaturedNftsRepository]),
     TypeOrmModule.forFeature([FeaturedCollectionsRepository]),
   ],
-  exports: [RedisCacheService],
 })
 export class FeaturedModuleGraph {}

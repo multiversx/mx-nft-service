@@ -10,7 +10,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsLikesRepository } from 'src/db/assets';
 import { S3Service } from '../s3/s3.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
-import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
@@ -59,7 +59,6 @@ import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
     AssetsQueriesResolver,
     AssetsMutationsResolver,
     AssetAuctionResolver,
-    RedisCacheService,
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,
@@ -74,7 +73,6 @@ import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
   exports: [
     AssetsService,
     AssetsLikesService,
-    RedisCacheService,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,
