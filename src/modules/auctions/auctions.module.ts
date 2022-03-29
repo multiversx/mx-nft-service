@@ -12,7 +12,7 @@ import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { OrdersService } from '../orders/order.service';
-import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
 import { AuctionsForAssetRedisHandler } from './loaders/asset-auctions.redis-handler';
@@ -37,7 +37,6 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     AuctionOrdersResolver,
     NftMarketplaceAbiService,
     OrdersService,
-    RedisCacheService,
     AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
     AvailableTokensForAuctionRedisHandler,
@@ -65,7 +64,6 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     AuctionsGetterService,
     NftMarketplaceAbiService,
     OrdersService,
-    RedisCacheService,
     AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
     LastOrderRedisHandler,

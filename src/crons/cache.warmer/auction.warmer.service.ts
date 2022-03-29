@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Locker } from 'src/utils/locker';
 import { cacheConfig } from 'src/config';
-import { CacheService } from 'src/common/services/caching/cache.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
@@ -13,8 +14,9 @@ import { DateUtils } from 'src/utils/date-utils';
 export class AuctionsWarmerService {
   private redisClient: Redis.Redis;
   constructor(
+    @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
-    private cacheService: CacheService,
+    private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.auctionsRedisClientName,
@@ -61,5 +63,14 @@ export class AuctionsWarmerService {
 
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
+    await this.refreshCacheKey(key, ttl);
+  }
+
+  private async refreshCacheKey(key: string, ttl: number) {
+    await this.clientProxy.emit('refreshCacheKey', {
+      key,
+      ttl,
+      redisClientName: cacheConfig.auctionsRedisClientName,
+    });
   }
 }

@@ -18,12 +18,7 @@ import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset
     AuctionsServiceDb,
     AuctionsForAssetRedisHandler,
     AssetAuctionsCountRedisHandler,
-    RedisCacheService,
   ],
-  exports: [
-    AuctionsServiceDb,
-    RedisCacheService,
-    TypeOrmModule.forFeature([AuctionEntity]),
-  ],
+  exports: [AuctionsServiceDb, TypeOrmModule.forFeature([AuctionEntity])],
 })
 export class AuctionsModuleDb {}

@@ -1,11 +1,13 @@
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
+import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 
 async function bootstrap() {
@@ -53,6 +55,32 @@ async function bootstrap() {
     let processorApp = await NestFactory.create(CacheWarmerModule);
     await processorApp.listen(6012);
   }
+
+  const logger = new Logger('Bootstrapper');
+
+  const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    PubSubListenerModule,
+    {
+      transport: Transport.REDIS,
+      options: {
+        url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
+        retryAttempts: 100,
+        retryDelay: 1000,
+        retry_strategy: function (_: any) {
+          return 1000;
+        },
+      },
+    },
+  );
+
+  pubSubApp.listen();
+
+  logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
+  logger.log(
+    `Claimable job is active: ${process.env.ENABLE_CLAIMABLE_AUCTIONS}`,
+  );
+  logger.log(`Cache warmer active: ${process.env.ENABLE_CACHE_WARMER}`);
+  logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
 }
 
 bootstrap();

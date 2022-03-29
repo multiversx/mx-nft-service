@@ -11,7 +11,7 @@ import { CollectionAssetsCountProvider } from './loaders/collection-assets-count
 import { CollectionAssetsCountRedisHandler } from './loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsResolver } from './collection-assets.resolver';
 import { CollectionsMutationsResolver } from './collection-mutations.resolver';
-import { CacheService } from 'src/common/services/caching/cache.service';
+import { CachingService } from 'src/common/services/caching/caching.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
@@ -28,7 +28,7 @@ import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-
     CollectionsMutationsResolver,
     AccountsRedisHandler,
     AccountsProvider,
-    CacheService,
+    CachingService,
     LocalCacheService,
     CollectionsNftsRedisHandler,
     CollectionsNftsCountRedisHandler,

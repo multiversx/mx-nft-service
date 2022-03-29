@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Auction, AuctionStatusEnum } from './models';
+import { Auction } from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -18,6 +18,7 @@ import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { DateUtils } from 'src/utils/date-utils';
 import { AuctionWithBidsCount } from 'src/db/auctions/auctionWithBidCount.dto';
+import { CachingService } from 'src/common/services/caching/caching.service';
 const hash = require('object-hash');
 
 @Injectable()
@@ -25,6 +26,7 @@ export class AuctionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private auctionServiceDb: AuctionsServiceDb,
+    private cacheService: CachingService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -60,8 +62,11 @@ export class AuctionsGetterService {
       }
 
       const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      return this.redisCacheService.getOrSet(this.redisClient, cacheKey, () =>
-        this.getMappedAuctionsOrderBids(queryRequest),
+      return this.cacheService.getOrSetCache(
+        this.redisClient,
+        cacheKey,
+        async () => this.getMappedAuctionsOrderBids(queryRequest),
+        TimeConstants.oneHour,
       );
     } catch (error) {
       this.logger.error(
@@ -157,8 +162,11 @@ export class AuctionsGetterService {
     return (
       queryRequest?.filters?.filters?.length === 2 &&
       queryRequest.filters.filters.filter(
-        (item) => item.field === 'status' || item.field === 'endDate',
-      ).length === 2 &&
+        (item) =>
+          item.field === 'status' ||
+          item.field === 'endDate' ||
+          item.field === 'startDate',
+      ).length === 3 &&
       queryRequest.filters.filters.find(
         (f) =>
           f.field === 'endDate' &&
@@ -275,7 +283,9 @@ export class AuctionsGetterService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  private async getMappedAuctionsOrderBids(queryRequest: QueryRequest) {
+  private async getMappedAuctionsOrderBids(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
     let [auctions, count] = [[], 0];
     if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
       [auctions, count] =
