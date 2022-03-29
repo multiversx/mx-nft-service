@@ -26,6 +26,7 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<any> {
     const cacheKey = generateCacheKey(key, region);
+    let profiler = new PerformanceProfiler();
     try {
       return JSON.parse(await client.get(cacheKey));
     } catch (err) {
@@ -38,6 +39,9 @@ export class RedisCacheService {
         },
       );
       return null;
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('GET', profiler.duration);
     }
   }
 
@@ -52,6 +56,8 @@ export class RedisCacheService {
       return;
     }
     const cacheKey = generateCacheKey(key, region);
+
+    let profiler = new PerformanceProfiler();
     try {
       await client.set(cacheKey, JSON.stringify(value), 'EX', ttl);
     } catch (err) {
@@ -64,6 +70,9 @@ export class RedisCacheService {
         },
       );
       return;
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('SET', profiler.duration);
     }
   }
 
@@ -162,6 +171,7 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<void> {
     const cacheKey = generateCacheKey(key, region);
+    let profiler = new PerformanceProfiler();
     try {
       await client.del(cacheKey);
     } catch (err) {
@@ -173,6 +183,9 @@ export class RedisCacheService {
           cacheKey: cacheKey,
         },
       );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('DEL', profiler.duration);
     }
   }
 
@@ -232,11 +245,8 @@ export class RedisCacheService {
     ttl: number = this.DEFAULT_TTL,
     region: string = null,
   ): Promise<any> {
-    let profiler = new PerformanceProfiler();
     const cachedData = await this.get(client, key, region);
     if (!isNil(cachedData)) {
-      profiler.stop();
-      MetricsCollector.setRedisDuration('GET', profiler.duration);
       return cachedData;
     }
     const internalCreateValueFunc = this.buildInternalCreateValueFunc(
@@ -246,8 +256,6 @@ export class RedisCacheService {
     );
     const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
-    profiler.stop();
-    MetricsCollector.setRedisDuration('SET', profiler.duration);
 
     return value;
   }
@@ -290,6 +298,8 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<number> {
     const cacheKey = generateCacheKey(key, region);
+
+    let profiler = new PerformanceProfiler();
     try {
       const newValue = await client.incr(cacheKey);
       if (ttl) {
@@ -300,6 +310,9 @@ export class RedisCacheService {
       this.logger.error(
         `An error occurred while trying to increment redis key ${cacheKey}. Exception: ${err?.toString()}.`,
       );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('INCR', profiler.duration);
     }
   }
 
@@ -310,6 +323,8 @@ export class RedisCacheService {
     region: string = null,
   ): Promise<number> {
     const cacheKey = generateCacheKey(key, region);
+
+    let profiler = new PerformanceProfiler();
     try {
       const newValue = await client.decr(cacheKey);
       if (ttl) {
@@ -320,6 +335,9 @@ export class RedisCacheService {
       this.logger.error(
         `An error occurred while trying to decrement redis key ${cacheKey}. Exception: ${err?.toString()}.`,
       );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('DECR', profiler.duration);
     }
   }
 
