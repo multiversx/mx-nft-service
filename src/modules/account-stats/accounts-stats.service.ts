@@ -63,7 +63,7 @@ export class AccountsStatsService {
         this.redisClient,
         cacheKey,
         getAccountStats,
-        TimeConstants.oneDay,
+        TimeConstants.oneHour,
       );
     } catch (err) {
       this.logger.error(
