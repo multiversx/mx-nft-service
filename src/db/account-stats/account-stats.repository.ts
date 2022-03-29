@@ -1,12 +1,19 @@
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { EntityRepository, Repository } from 'typeorm';
 import { AuctionEntity } from '../auctions';
-import { getAccountStatsQuery } from './stats.querries';
+import {
+  getOwnerAccountStatsQuery,
+  getPublicAccountStatsQuery,
+} from './stats.querries';
 
 @EntityRepository(AuctionEntity)
 export class AccountStatsRepository extends Repository<AuctionEntity> {
-  async getAccountStats(address: string): Promise<any> {
-    return await this.query(getAccountStatsQuery(address));
+  async getPublicAccountStats(address: string): Promise<any> {
+    return await this.query(getPublicAccountStatsQuery(address));
+  }
+
+  async getOnwerAccountStats(address: string): Promise<any> {
+    return await this.query(getOwnerAccountStatsQuery(address));
   }
 
   async getAccountClaimableCount(address: string): Promise<any> {

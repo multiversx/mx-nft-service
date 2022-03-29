@@ -24,23 +24,56 @@ export class AccountsStatsService {
     );
   }
 
-  async getStats(address: string): Promise<any> {
+  async getStats(address: string, isOwner: boolean): Promise<any> {
+    if (isOwner) {
+      return this.getStatsForOwner(address);
+    } else return this.getPublicStats(address);
+  }
+
+  private async getPublicStats(address: string): Promise<any> {
     try {
-      const cacheKey = this.getStatsCacheKey(address);
+      const cacheKey = this.getStatsCacheKey(`${address}`);
       const getAccountStats = () =>
-        this.accountsStatsRepository.getAccountStats(address);
+        this.accountsStatsRepository.getPublicAccountStats(address);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
         getAccountStats,
-        TimeConstants.oneWeek,
+        5 * TimeConstants.oneMinute,
       );
     } catch (err) {
-      this.logger.error('An error occurred while getting stats for account', {
-        path: 'AccountsStatsService.getStats',
-        address,
-        exception: err?.message,
-      });
+      this.logger.error(
+        'An error occurred while getting stats for public account',
+        {
+          path: 'AccountsStatsService.getPublicStats',
+          address,
+          exception: err?.message,
+        },
+      );
+      return Promise.resolve(AccountStatsEntity);
+    }
+  }
+
+  private async getStatsForOwner(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getStatsCacheKey(`owner_${address}`);
+      const getAccountStats = () =>
+        this.accountsStatsRepository.getOnwerAccountStats(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getAccountStats,
+        TimeConstants.oneDay,
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting stats for owner account',
+        {
+          path: 'AccountsStatsService.getStatsForOwner',
+          address,
+          exception: err?.message,
+        },
+      );
       return Promise.resolve(AccountStatsEntity);
     }
   }
@@ -157,9 +190,13 @@ export class AccountsStatsService {
   }
 
   public async invalidateStats(address: string) {
-    return await this.redisCacheService.del(
+    await this.redisCacheService.del(
       this.redisClient,
       this.getStatsCacheKey(address),
+    );
+    return await this.redisCacheService.del(
+      this.redisClient,
+      this.getStatsCacheKey(`owner_${address}`),
     );
   }
 }
