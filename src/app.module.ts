@@ -17,6 +17,7 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
+import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { TrendingModuleGraph } from './modules/trending/trending.module';
     OrdersModuleGraph,
     OwnersModuleGraph,
     AccountsStatsModuleGraph,
+    ReportNftsModuleGraph,
     AuctionsModuleDb,
     FeaturedModuleGraph,
     UsdAmountModuleGraph,
