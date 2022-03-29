@@ -18,12 +18,11 @@ export class ReportNftsService {
       );
       if (isReported) {
         return true;
-      } else {
-        await this.reportNftsRepo.addReport(
-          new ReportNftEntity({ identifier, address }),
-        );
-        return true;
       }
+      await this.reportNftsRepo.addReport(
+        new ReportNftEntity({ identifier, address }),
+      );
+      return true;
     } catch (err) {
       this.logger.error('An error occurred while adding Asset Like.', {
         path: 'ReportNftsService.addReport',
