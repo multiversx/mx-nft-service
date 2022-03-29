@@ -126,7 +126,6 @@ export class AuctionsGetterService {
   }
 
   public async getRunningAuctionsEndingBefore(endDate: number) {
-    console.log('din db');
     let auctions: AuctionWithBidsCount[] =
       await this.auctionServiceDb.getAuctionsEndingBefore(endDate);
     auctions = auctions?.map((item) => new AuctionWithBidsCount(item));

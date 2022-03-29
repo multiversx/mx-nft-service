@@ -6,7 +6,6 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
-// import { Logger } from '@nestjs/common';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';

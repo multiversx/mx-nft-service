@@ -185,7 +185,7 @@ export class CollectionsService {
       collectionsResponse.push(...mappedCollections);
 
       from = from + size;
-    } while (from < totalCount && from <= 99);
+    } while (from < totalCount && from <= 9975);
     const uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),
