@@ -386,6 +386,7 @@ type Metadata {
 
 type Mutation {
   addLike(input: AddLikeArgs!): Boolean!
+  addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -528,6 +529,10 @@ type Query {
 }
 
 input RemoveLikeArgs {
+  identifier: String!
+}
+
+input ReportNftInput {
   identifier: String!
 }
 
