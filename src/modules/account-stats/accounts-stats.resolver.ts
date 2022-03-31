@@ -19,7 +19,10 @@ export class AccountsStatsResolver {
     @Args({ name: 'filters', type: () => AccountStatsFilter })
     filters,
   ): Promise<AccountStats> {
-    const account = await this.accountsStatsService.getStats(filters?.address);
+    const account = await this.accountsStatsService.getStats(
+      filters?.address,
+      filters?.isOwner,
+    );
     return AccountStats.fromEntity(account[0], filters?.address);
   }
 

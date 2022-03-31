@@ -24,6 +24,7 @@ type AccountStats {
 
 input AccountStatsFilter {
   address: String!
+  isOwner: Boolean
 }
 
 input AddLikeArgs {
