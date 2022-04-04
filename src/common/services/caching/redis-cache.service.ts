@@ -260,6 +260,27 @@ export class RedisCacheService {
     return value;
   }
 
+  async getOrSetWithDifferentTtl(
+    client: Redis.Redis,
+    key: string,
+    createValueFunc: () => any,
+    region: string = null,
+  ): Promise<any> {
+    const cachedData = await this.get(client, key, region);
+    if (!isNil(cachedData)) {
+      return cachedData;
+    }
+    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+      key,
+      region,
+      createValueFunc,
+    );
+    const value = await internalCreateValueFunc();
+    await this.set(client, key, value, value.ttl, region);
+
+    return value;
+  }
+
   async setOrUpdate(
     client: Redis.Redis,
     key: string,

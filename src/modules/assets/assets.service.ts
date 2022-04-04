@@ -161,11 +161,10 @@ export class AssetsService {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.redisCacheService.getOrSet(
+      const asset = await this.redisCacheService.getOrSetWithDifferentTtl(
         this.redisClient,
         cacheKey,
         getAsset,
-        TimeConstants.oneDay,
       );
       return asset
         ? new CollectionType({ items: [asset.value], count: asset ? 1 : 0 })
@@ -181,9 +180,16 @@ export class AssetsService {
 
   async getMappedAssetByIdentifier(
     identifier: string,
-  ): Promise<{ key: string; value: Asset }> {
+  ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
-    return { key: identifier, value: Asset.fromNft(nft) };
+    let ttl = TimeConstants.oneDay;
+    if (nft?.media && !nft?.media[0].thumbnailUrl.includes('default'))
+      ttl = TimeConstants.oneMinute;
+    return {
+      key: identifier,
+      value: Asset.fromNft(nft),
+      ttl: ttl,
+    };
   }
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
