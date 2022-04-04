@@ -168,7 +168,7 @@ export class AssetsService {
         TimeConstants.oneDay,
       );
       return asset
-        ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
+        ? new CollectionType({ items: [asset.value], count: asset ? 1 : 0 })
         : null;
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
@@ -179,9 +179,11 @@ export class AssetsService {
     }
   }
 
-  async getMappedAssetByIdentifier(identifier: string): Promise<Asset> {
+  async getMappedAssetByIdentifier(
+    identifier: string,
+  ): Promise<{ key: string; value: Asset }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
-    return Asset.fromNft(nft);
+    return { key: identifier, value: Asset.fromNft(nft) };
   }
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
