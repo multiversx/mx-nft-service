@@ -20,7 +20,9 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
     returnValues: { key: string; value: any }[],
     assetsIdentifiers: { [key: string]: any[] },
   ) {
-    const redisValues = [];
+    let response: RedisValue[] = [];
+    const defaultNfts = [];
+    const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
         item.value = assetsIdentifiers[item.key]
@@ -28,15 +30,26 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
               CollectionAssetModel.fromNft(a),
             )
           : [];
-        redisValues.push(item);
+        if (this.hasDefaultThumbnail(item)) {
+          defaultNfts.push(item);
+        } else {
+          finalNfts.push(item);
+        }
       }
     }
 
-    return [
-      new RedisValue({
-        values: redisValues,
-        ttl: 30 * TimeConstants.oneSecond,
-      }),
+    response = [
+      ...response,
+      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
+      new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];
+    return response;
+  }
+
+  private hasDefaultThumbnail(item: { key: string; value: any }) {
+    return (
+      item.value &&
+      item.value.filter((i) => i.thumbnailUrl.includes('default')).length > 0
+    );
   }
 }

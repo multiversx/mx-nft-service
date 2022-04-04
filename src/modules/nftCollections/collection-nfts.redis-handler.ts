@@ -19,15 +19,17 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   }
   mapValues(
     returnValues: { key: string; value: any }[],
-    data: any,
+    assetsIdentifiers: { [key: string]: any[] },
   ): RedisValue[] {
     let response: RedisValue[] = [];
     const defaultNfts = [];
     const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = data[item.key]
-          ? data[item.key].map((a) => CollectionAssetModel.fromNft(a))
+        item.value = assetsIdentifiers[item.key]
+          ? assetsIdentifiers[item.key].map((a) =>
+              CollectionAssetModel.fromNft(a),
+            )
           : null;
         if (this.hasDefaultThumbnail(item)) {
           defaultNfts.push(item);
