@@ -1,20 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { RedisValue } from 'src/modules/common/redis-value.dto';
+import { TimeConstants } from 'src/utils/time-utils';
 import { Asset } from '../models';
 
 @Injectable()
-export class AssetsRedisHandler extends RedisDataloaderHandler<string> {
+export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
     super(redisCacheService, 'asset');
   }
 
   mapValues(
-    identifiers: string[],
+    returnValues: { key: string; value: any }[],
     assetsIdentifiers: { [key: string]: any[] },
   ) {
-    return identifiers.map((identifier) => {
-      return Asset.fromNft(assetsIdentifiers[identifier][0]);
-    });
+    const redisValues = [];
+    for (const item of returnValues) {
+      if (item.value === null) {
+        item.value = Asset.fromNft(assetsIdentifiers[item.key][0]);
+        redisValues.push(item);
+      }
+    }
+    return [
+      new RedisValue({
+        values: redisValues,
+        ttl: TimeConstants.oneDay,
+      }),
+    ];
   }
 }

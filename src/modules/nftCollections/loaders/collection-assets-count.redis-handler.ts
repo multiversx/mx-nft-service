@@ -1,31 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class CollectionAssetsCountRedisHandler extends RedisDataloaderHandler<string> {
+export class CollectionAssetsCountRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
     super(
       redisCacheService,
       'collectionAssetsCount',
-      TimeConstants.oneDay,
       cacheConfig.collectionsRedisClientName,
     );
   }
 
   mapValues(
-    collectionIdentifiers: string[],
+    returnValues: { key: string; value: any }[],
     assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return collectionIdentifiers.map((identifier) => {
-      return assetsIdentifiers[identifier]
-        ? {
-            key: identifier,
-            value: assetsIdentifiers[identifier][0]?.value,
-          }
-        : { key: identifier, value: 0 };
-    });
+  ): RedisValue[] {
+    const redisValues = [];
+    for (const item of returnValues) {
+      if (item.value === null) {
+        item.value = assetsIdentifiers[item.key]
+          ? assetsIdentifiers[item.key][0]?.value
+          : 0;
+        redisValues.push(item);
+      }
+    }
+
+    return [new RedisValue({ values: redisValues, ttl: TimeConstants.oneDay })];
   }
 }

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { RedisValueDataloaderHandler } from 'src/modules/common/redis-value-dataloader.handler';
 
 @Injectable()
-export class AssetLikesProviderRedisHandler extends RedisDataloaderHandler<string> {
+export class AssetLikesProviderRedisHandler extends RedisValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
     super(redisCacheService, 'assetLikesCount');
   }

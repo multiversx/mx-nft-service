@@ -54,7 +54,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
-    return Account.fromEntity(account, ownerAddress);
+    return Account.fromEntity(account?.value ?? null, ownerAddress);
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)

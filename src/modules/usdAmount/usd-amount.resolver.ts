@@ -15,6 +15,7 @@ export class UsdAmountResolver extends BaseResolver(Price) {
   async usdAmount(@Parent() price: Price) {
     const { timestamp, amount } = price;
     const priceUsd = await this.usdPriceLoader.load(timestamp);
+    const priceUsdRedisValue = priceUsd.value;
 
     return timestamp
       ? usdValue(
@@ -24,7 +25,7 @@ export class UsdAmountResolver extends BaseResolver(Price) {
             decimals: 18,
             showLastNonZeroDecimal: true,
           }).replace(',', ''),
-          priceUsd?.value,
+          priceUsdRedisValue?.value,
           2,
         )
       : null;
