@@ -17,7 +17,7 @@ export abstract class BaseProvider<T> {
 
   abstract getData(identifiers: T[]): Promise<any[]>;
 
-  async load(key: T): Promise<any> {
+  async load(key: T): Promise<{ key: T; value: any }> {
     return this.dataLoader.load(key);
   }
 
