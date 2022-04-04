@@ -33,24 +33,30 @@ export class AssetsSupplyRedisHandler extends RedisKeyValueDataloaderHandler<str
     ];
   }
 
-  public batchSupplyInfo = async (identifiers: string[], data: any) => {
-    const cacheKeys = this.getCacheKeys(identifiers);
-    let [redisKeys, values] = [cacheKeys, []];
-    const getDataFromRedis = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getDataFromRedis.includes(null)) {
-      values = identifiers.map((identifier) =>
-        data && data[identifier] ? data[identifier] : null,
-      );
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        redisKeys,
-        values,
-        5 * TimeConstants.oneSecond,
-      );
-      return values;
+  batchSupplyInfo = async (keys: string[], data: any) => {
+    const cacheKeys = this.getCacheKeys(keys);
+    const getDataFromRedis: { key: string; value: any }[] =
+      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+    const returnValues: { key: string; value: any }[] =
+      this.mapReturnValues<string>(keys, getDataFromRedis);
+    const getNotCachedKeys = returnValues
+      .filter((item) => item.value === null)
+      .map((value) => value.key);
+    if (getNotCachedKeys?.length > 0) {
+      const redisValues = this.mapValues(returnValues, data);
+
+      for (const val of redisValues) {
+        const cacheKeys = this.getCacheKeys(
+          val.values.map((value) => value.key),
+        );
+        await this.redisCacheService.batchSetCache(
+          this.redisClient,
+          cacheKeys,
+          val.values,
+          val.ttl,
+        );
+      }
+      return returnValues;
     }
     return getDataFromRedis;
   };

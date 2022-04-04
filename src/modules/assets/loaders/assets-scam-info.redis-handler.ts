@@ -31,25 +31,30 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
     ];
   }
 
-  public batchScamInfo = async (identifiers: string[], data: any) => {
-    const cacheKeys = this.getCacheKeys(identifiers);
-    let [redisKeys, values] = [cacheKeys, []];
-    const getDataFromRedis = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
-    if (getDataFromRedis.includes(null)) {
-      values = identifiers.map((identifier) => {
-        return ScamInfo.fromNftScamInfo(data[identifier][0].scamInfo);
-      });
+  batchScamInfo = async (keys: string[], data: any) => {
+    const cacheKeys = this.getCacheKeys(keys);
+    const getDataFromRedis: { key: string; value: any }[] =
+      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+    const returnValues: { key: string; value: any }[] =
+      this.mapReturnValues<string>(keys, getDataFromRedis);
+    const getNotCachedKeys = returnValues
+      .filter((item) => item.value === null)
+      .map((value) => value.key);
+    if (getNotCachedKeys?.length > 0) {
+      const redisValues = this.mapValues(returnValues, data);
 
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        redisKeys,
-        values,
-        5 * TimeConstants.oneMinute,
-      );
-      return values;
+      for (const val of redisValues) {
+        const cacheKeys = this.getCacheKeys(
+          val.values.map((value) => value.key),
+        );
+        await this.redisCacheService.batchSetCache(
+          this.redisClient,
+          cacheKeys,
+          val.values,
+          5 * TimeConstants.oneMinute,
+        );
+      }
+      return returnValues;
     }
     return getDataFromRedis;
   };

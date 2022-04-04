@@ -71,7 +71,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     return generateCacheKeyFromParams(this.cacheKeyName, key);
   }
 
-  private mapReturnValues<T>(
+  protected mapReturnValues<T>(
     keys: T[],
     getDataFromRedis: { key: T; value: any }[],
   ) {
