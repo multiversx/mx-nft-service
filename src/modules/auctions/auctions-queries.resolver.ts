@@ -99,37 +99,6 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     );
   }
 
-  @Query(() => AuctionResponse)
-  async trendingAuctions(
-    @Args({
-      name: 'startDate',
-      description: 'This should be a timestamp',
-      type: () => Int,
-    })
-    startDate,
-    @Args({
-      name: 'endDate',
-      description: 'This should be a timestamp',
-      type: () => Int,
-    })
-    endDate,
-
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
-  ) {
-    const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] = await this.auctionsService.getTrendingAuctions(
-      new TrendingQueryRequest({ limit, offset, startDate, endDate }),
-    );
-    return PageResponse.mapResponse<Auction>(
-      auctions,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
-  }
-
   @Query(() => String)
   async marketplaceCutPercentage() {
     return await this.nftAbiService.getCutPercentage();
