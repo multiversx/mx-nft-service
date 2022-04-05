@@ -27,12 +27,17 @@ export class AssetAuctionResolver extends BaseResolver(Asset) {
     const auctions = await this.auctionsProvider.load(
       `${identifier}_${offset}_${limit}`,
     );
+    const auctionsValue = auctions?.value;
     return PageResponse.mapResponse<Auction>(
-      auctions
-        ? auctions?.map((auction: AuctionEntity) => Auction.fromEntity(auction))
+      auctionsValue
+        ? auctionsValue?.map((auction: AuctionEntity) =>
+            Auction.fromEntity(auction),
+          )
         : [],
       pagination,
-      auctions && auctions.length > 0 ? auctions[0].totalCount : 0,
+      auctionsValue && auctionsValue.length > 0
+        ? auctionsValue[0].totalCount
+        : 0,
       offset,
       limit,
     );

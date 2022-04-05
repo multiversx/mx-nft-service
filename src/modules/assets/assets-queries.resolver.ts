@@ -71,7 +71,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   async viewsCount(@Parent() asset: Asset) {
     const { identifier } = asset;
     const assetviews = await this.assetsViewsProvider.load(identifier);
-    return assetviews && assetviews.length > 0 ? assetviews[0].viewsCount : 0;
+    return assetviews?.value ?? 0;
   }
 
   @ResolveField('supply', () => String)
@@ -81,7 +81,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return '1';
     }
     const assetSupply = await this.assetSupplyProvider.load(identifier);
-    return assetSupply ? assetSupply[0]?.supply : 0;
+    return assetSupply?.value ?? 0;
   }
 
   @ResolveField('isLiked', () => Boolean)
@@ -90,21 +90,21 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const assetLikes = await this.isAssetLikedProvider.load(
       `${identifier}_${byAddress}`,
     );
-    return assetLikes ? !!+assetLikes[0]?.liked : false;
+    return !!assetLikes?.value ?? false;
   }
 
   @ResolveField('totalRunningAuctions', () => String)
   async totalRunningAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
-    return assetAuctions ? assetAuctions[0]?.auctionsCount : 0;
+    return assetAuctions?.value ?? 0;
   }
 
   @ResolveField('hasAvailableAuctions', () => Boolean)
   async hasAvailableAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
-    return assetAuctions && assetAuctions[0]?.auctionsCount > 0 ? true : false;
+    return !!assetAuctions?.value ?? false;
   }
 
   @ResolveField('totalAvailableTokens', () => String)
@@ -113,14 +113,17 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const availableTokens = await this.assetAvailableTokensCountProvider.load(
       identifier,
     );
-    return availableTokens ? availableTokens[0]?.count : 0;
+    return availableTokens?.value ?? 0;
   }
 
   @ResolveField('scamInfo', () => String)
   async scamInfo(@Parent() asset: Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
-    return scamInfo && Object.keys(scamInfo).length !== 0 ? scamInfo : null;
+    const scamInfoValue = scamInfo.value;
+    return scamInfoValue && Object.keys(scamInfoValue).length !== 0
+      ? scamInfoValue
+      : null;
   }
 
   @ResolveField('lowestAuction', () => Auction)
@@ -130,9 +133,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return null;
     }
     const auctions = await this.lowestAuctionProvider.load(identifier);
-    return auctions && auctions.length > 0
-      ? Auction.fromEntity(auctions[0])
-      : null;
+    return auctions?.value ? Auction.fromEntity(auctions?.value) : null;
   }
 
   @ResolveField('creator', () => Account)
@@ -141,7 +142,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
     if (!creatorAddress) return null;
     const account = await this.accountsProvider.load(creatorAddress);
-    return Account.fromEntity(account, creatorAddress);
+    return Account.fromEntity(account?.value, creatorAddress);
   }
 
   @ResolveField(() => Account)
@@ -150,6 +151,6 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
-    return Account.fromEntity(account, ownerAddress);
+    return Account.fromEntity(account?.value, ownerAddress);
   }
 }

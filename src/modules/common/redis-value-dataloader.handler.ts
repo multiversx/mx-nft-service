@@ -6,7 +6,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export abstract class RedisDataloaderHandler<T> {
+export abstract class RedisValueDataloaderHandler<T> {
   protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
   private cacheKeyName: string;

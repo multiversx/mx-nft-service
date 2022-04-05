@@ -74,7 +74,7 @@ export class Auction {
   }
 
   static fromEntity(auction: AuctionEntity | AuctionWithBidsCount) {
-    return !auction
+    return !auction || Object.entries(auction).length === 0
       ? null
       : new Auction({
           id: auction.id,

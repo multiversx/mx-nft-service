@@ -1,20 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { OrderEntity } from 'src/db/orders/order.entity';
-import { RedisDataloaderHandler } from 'src/modules/common/redis-dataloader.handler';
+import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { RedisValue } from 'src/modules/common/redis-value.dto';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class OrdersRedisHandler extends RedisDataloaderHandler<number> {
+export class OrdersRedisHandler extends RedisKeyValueDataloaderHandler<number> {
   constructor(redisCacheService: RedisCacheService) {
     super(redisCacheService, 'auction_orders');
   }
 
   mapValues(
-    auctionIds: number[],
+    returnValues: { key: number; value: any }[],
     ordersAuctionsIds: { [key: string]: OrderEntity[] },
-  ) {
-    return auctionIds?.map((id) =>
-      ordersAuctionsIds[id] ? ordersAuctionsIds[id] : [],
-    );
+  ): RedisValue[] {
+    const redisValues = [];
+    for (const item of returnValues) {
+      if (item.value === null) {
+        item.value = ordersAuctionsIds[item.key];
+        redisValues.push(item);
+      }
+    }
+    return [
+      new RedisValue({ values: redisValues, ttl: TimeConstants.oneWeek }),
+    ];
   }
 }

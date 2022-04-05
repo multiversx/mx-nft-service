@@ -15,7 +15,7 @@ export class OwnersService {
       this.apiService.getOwnersForIdentifier(identifier, offset, limit),
       this.apiService.getOwnersForIdentifierCount(identifier),
     ]);
-    const assets = nfts.map((element) =>
+    const assets = nfts?.map((element) =>
       Owner.fromApiOwner(element, identifier),
     );
     return [assets, count];

@@ -1,10 +1,13 @@
 import { Injectable, Scope } from '@nestjs/common';
-import { RedisDataloaderHandler } from './redis-dataloader.handler';
+import { RedisKeyValueDataloaderHandler } from './redis-key-value-dataloader.handler';
+import { RedisValueDataloaderHandler } from './redis-value-dataloader.handler';
 
 @Injectable({ scope: Scope.REQUEST })
 export abstract class BaseProvider<T> {
   constructor(
-    private redisHandler: RedisDataloaderHandler<T>,
+    private redisHandler:
+      | RedisKeyValueDataloaderHandler<T>
+      | RedisValueDataloaderHandler<T>,
     private dataLoader: {
       load: (arg0: T) => any;
       clear: (arg0: T) => any;
@@ -14,7 +17,7 @@ export abstract class BaseProvider<T> {
 
   abstract getData(identifiers: T[]): Promise<any[]>;
 
-  async load(key: T): Promise<any> {
+  async load(key: T): Promise<{ key: T; value: any }> {
     return this.dataLoader.load(key);
   }
 

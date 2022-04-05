@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { ElrondApiService, RedisCacheService } from 'src/common';
+import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
+import { RedisValue } from '../common/redis-value.dto';
 import { BaseCollectionsAssetsRedisHandler } from './base-collection-assets.redis-handler';
 import { CollectionAssetModel } from './models/CollectionAsset.dto';
 
@@ -15,17 +17,40 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   ) {
     super(redisCacheService, 'collectionAssets');
   }
-  mapValues(returnValues: { key: string; value: any }[], data: any) {
-    const redisValues = [];
+  mapValues(
+    returnValues: { key: string; value: any }[],
+    assetsIdentifiers: { [key: string]: any[] },
+  ): RedisValue[] {
+    let response: RedisValue[] = [];
+    const defaultNfts = [];
+    const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = data[item.key]
-          ? data[item.key].map((a) => CollectionAssetModel.fromNft(a))
+        item.value = assetsIdentifiers[item.key]
+          ? assetsIdentifiers[item.key].map((a) =>
+              CollectionAssetModel.fromNft(a),
+            )
           : null;
-        redisValues.push(item);
+        if (this.hasDefaultThumbnail(item)) {
+          defaultNfts.push(item);
+        } else {
+          finalNfts.push(item);
+        }
       }
     }
-    return redisValues;
+    response = [
+      ...response,
+      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
+      new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
+    ];
+    return response;
+  }
+
+  private hasDefaultThumbnail(item: { key: string; value: any }) {
+    return (
+      item.value &&
+      item.value.filter((i) => i.thumbnailUrl.includes('default')).length > 0
+    );
   }
 
   async getData(keys: string[]) {

@@ -51,13 +51,15 @@ export class OrdersResolver extends BaseResolver(Order) {
 
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
-    return Account.fromEntity(account, ownerAddress);
+    return Account.fromEntity(account?.value ?? null, ownerAddress);
   }
 
   @ResolveField('auction', () => Auction)
   async auction(@Parent() order: Order) {
     const { auctionId } = order;
     const auctions = await this.auctionProvider.load(auctionId);
-    return auctions !== undefined ? Auction.fromEntity(auctions[0]) : null;
+    return auctions?.value !== undefined
+      ? Auction.fromEntity(auctions.value)
+      : null;
   }
 }

@@ -1,20 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { AuctionEntity } from 'src/db/auctions';
-import { RedisDataloaderHandler } from '../../common/redis-dataloader.handler';
+import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { RedisValue } from 'src/modules/common/redis-value.dto';
+import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class AuctionsForAssetRedisHandler extends RedisDataloaderHandler<string> {
+export class AuctionsForAssetRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'default_auctions', 30);
+    super(redisCacheService, 'default_auctions');
   }
 
   mapValues(
-    identifiers: string[],
+    returnValues: { key: string; value: any }[],
     auctionsIdentifiers: { [key: string]: AuctionEntity[] },
   ) {
-    return identifiers?.map((identifier) =>
-      auctionsIdentifiers[identifier] ? auctionsIdentifiers[identifier] : [],
-    );
+    const redisValues = [];
+    for (const item of returnValues) {
+      if (item.value === null) {
+        item.value = auctionsIdentifiers[item.key]
+          ? auctionsIdentifiers[item.key]
+          : [];
+        redisValues.push(item);
+      }
+    }
+
+    return [
+      new RedisValue({
+        values: redisValues,
+        ttl: 30 * TimeConstants.oneSecond,
+      }),
+    ];
   }
 }

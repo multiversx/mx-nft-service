@@ -41,6 +41,6 @@ export class OwnersResolver {
 
     if (!address) return null;
     const account = await this.accountsProvider.load(address);
-    return Account.fromEntity(account, address);
+    return Account.fromEntity(account?.value, address);
   }
 }

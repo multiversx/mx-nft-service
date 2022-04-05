@@ -164,7 +164,8 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   ) {
     const { identifier } = auction;
     if (this.hasToResolveAsset(fields)) {
-      return await this.assetsProvider.load(identifier);
+      const asset = await this.assetsProvider.load(identifier);
+      return asset?.value ?? null;
     }
 
     return new Asset({ identifier: identifier });
@@ -175,9 +176,9 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.lastOrderProvider.load(id);
-
-    return activeOrders?.length > 0
-      ? Price.fromEntity(activeOrders[activeOrders.length - 1])
+    const activeOrdersValue = activeOrders?.value;
+    return activeOrdersValue?.length > 0
+      ? Price.fromEntity(activeOrdersValue[activeOrdersValue.length - 1])
       : null;
   }
 
@@ -189,19 +190,21 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.lastOrderProvider.load(id);
-    if (activeOrders?.length <= 0) return null;
-    return await this.getAccount(
-      fields,
-      activeOrders[activeOrders.length - 1].ownerAddress,
-    );
+    const activeOrdersValue = activeOrders?.value;
+    return activeOrdersValue && activeOrdersValue?.length > 0
+      ? await this.getAccount(
+          fields,
+          activeOrdersValue[activeOrdersValue?.length - 1].ownerAddress,
+        )
+      : null;
   }
 
   @ResolveField('availableTokens', () => Int)
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
-      const result = await this.availableTokensProvider.load(id);
-      return result ? result[0]?.availableTokens : 0;
+      const availableTokens = await this.availableTokensProvider.load(id);
+      return availableTokens?.value ?? 0;
     }
     return nrAuctionedTokens;
   }
@@ -232,7 +235,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   private async getAccount(fields: string[], ownerAddress: any) {
     const account = this.hasToResolveAccount(fields)
       ? Account.fromEntity(
-          await this.accountsProvider.load(ownerAddress),
+          (await this.accountsProvider.load(ownerAddress)).value,
           ownerAddress,
         )
       : Account.fromEntity(null, ownerAddress);
