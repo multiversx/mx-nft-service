@@ -126,24 +126,6 @@ export class AuctionsServiceDb {
       .getMany();
   }
 
-  async getTrendingAuctions(
-    queryRequest: TrendingQueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
-      .innerJoin('orders', 'o', 'o.auctionId=a.id')
-      .where(
-        `a.status = 'Running' AND o.creationDate  
-        BETWEEN '${this.getSqlDate(queryRequest.startDate)}' 
-        AND '${this.getSqlDate(queryRequest.endDate)}'`,
-      )
-      .groupBy('a.id')
-      .orderBy('COUNT(a.Id)', 'DESC')
-      .offset(queryRequest.offset)
-      .limit(queryRequest.limit)
-      .getManyAndCount();
-  }
-
   async getClaimableAuctions(
     limit: number = 10,
     offset: number = 0,

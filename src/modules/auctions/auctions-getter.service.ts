@@ -80,25 +80,6 @@ export class AuctionsGetterService {
     }
   }
 
-  async getTrendingAuctions(
-    queryRequest: TrendingQueryRequest,
-  ): Promise<[Auction[], number]> {
-    try {
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        this.getAuctionsCacheKey(queryRequest),
-        () => this.getMappedTrendingAuctions(queryRequest),
-        TimeConstants.oneHour,
-      );
-    } catch (error) {
-      this.logger.error('An error occurred while get trending auctions', {
-        path: 'AuctionsService.getTrendingAuctions',
-        queryRequest,
-        exception: error,
-      });
-    }
-  }
-
   async getClaimableAuctions(
     limit: number = 10,
     offset: number = 0,
@@ -234,14 +215,6 @@ export class AuctionsGetterService {
         ),
       TimeConstants.oneHour,
     );
-  }
-
-  private async getMappedTrendingAuctions(queryRequest: TrendingQueryRequest) {
-    const [auctions, count] = await this.auctionServiceDb.getTrendingAuctions(
-      queryRequest,
-    );
-
-    return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
   private async getMappedClaimableAuctions(
