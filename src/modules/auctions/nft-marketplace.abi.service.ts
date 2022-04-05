@@ -1,11 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import {
-  CreateAuctionArgs,
-  AuctionAbi,
-  BidActionArgs,
-  BuySftActionArgs,
-} from './models';
+import { CreateAuctionArgs, AuctionAbi, BuySftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -231,16 +226,13 @@ export class NftMarketplaceAbiService {
 
   async getCutPercentage(): Promise<string> {
     try {
-      const cacheKey = this.getMarketplaceCutPercentageCacheKey();
-      const getAssetLiked = () => this.getCutPercentageMap();
-      const cutPercentage = await this.redisCacheService.getOrSet(
+      const cacheKey = generateCacheKeyFromParams('marketplaceCutPercentage');
+      return await this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAssetLiked,
+        () => this.getCutPercentageMap(),
         TimeConstants.oneWeek,
       );
-
-      return cutPercentage;
     } catch (err) {
       this.logger.error(
         'An error occurred while getting the marketplace cut percentage.',
@@ -252,6 +244,31 @@ export class NftMarketplaceAbiService {
     }
   }
 
+  async getMinimumBidDifference(): Promise<string> {
+    try {
+      const cacheKey = generateCacheKeyFromParams('minimumBidDifference');
+      const minimumBid = await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getMinimumPercentage(),
+        TimeConstants.oneWeek,
+      );
+
+      return minimumBid;
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting the minimum bid diference.',
+        {
+          path: 'NftMarketplaceAbiService.getMinimumBidDifference',
+          exception: err,
+        },
+      );
+    }
+  }
+  private async getMinimumPercentage(): Promise<string> {
+    return elrondConfig.minimumBidDifference;
+  }
+
   private async getCutPercentageMap(): Promise<string> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let getDataQuery = <Interaction>(
@@ -259,10 +276,6 @@ export class NftMarketplaceAbiService {
     );
     const response = await this.getFirstQueryResult(contract, getDataQuery);
     return response.firstValue.valueOf().toFixed();
-  }
-
-  private getMarketplaceCutPercentageCacheKey() {
-    return generateCacheKeyFromParams('marketplaceCutPercentage');
   }
 
   private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {
