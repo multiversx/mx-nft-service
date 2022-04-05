@@ -249,12 +249,11 @@ export class RedisCacheService {
     if (!isNil(cachedData)) {
       return cachedData;
     }
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+    const value = await this.buildInternalCreateValueFunc(
       key,
       region,
       createValueFunc,
     );
-    const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
 
     return value;
@@ -270,12 +269,11 @@ export class RedisCacheService {
     if (!isNil(cachedData)) {
       return cachedData;
     }
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+    const value = await this.buildInternalCreateValueFunc(
       key,
       region,
       createValueFunc,
     );
-    const value = await internalCreateValueFunc();
     await this.set(client, key, value, value.ttl, region);
 
     return value;
@@ -288,12 +286,11 @@ export class RedisCacheService {
     ttl: number = this.DEFAULT_TTL,
     region: string = null,
   ): Promise<any> {
-    const internalCreateValueFunc = this.buildInternalCreateValueFunc(
+    const value = await this.buildInternalCreateValueFunc(
       key,
       region,
       createValueFunc,
     );
-    const value = await internalCreateValueFunc();
     await this.set(client, key, value, ttl, region);
     return value;
   }
@@ -362,27 +359,25 @@ export class RedisCacheService {
     }
   }
 
-  private buildInternalCreateValueFunc(
+  private async buildInternalCreateValueFunc(
     key: string,
     region: string,
     createValueFunc: () => any,
-  ): () => Promise<any> {
-    return async () => {
-      try {
-        let data = createValueFunc();
-        if (data instanceof Promise) {
-          data = await data;
-        }
-        return data;
-      } catch (err) {
-        this.logger.error(`An error occurred while trying to load value.`, {
-          path: 'redis-cache.service.createValueFunc',
-          exception: err,
-          key,
-          region,
-        });
-        return null;
+  ): Promise<any> {
+    try {
+      let data = createValueFunc();
+      if (data instanceof Promise) {
+        data = await data;
       }
-    };
+      return data;
+    } catch (err) {
+      this.logger.error(`An error occurred while trying to load value.`, {
+        path: 'redis-cache.service.createValueFunc',
+        exception: err,
+        key,
+        region,
+      });
+      return null;
+    }
   }
 }
