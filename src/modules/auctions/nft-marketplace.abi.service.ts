@@ -291,7 +291,9 @@ export class NftMarketplaceAbiService {
       new TokenIdentifierValue(Buffer.from(args.paymentToken)),
       new OptionalValue(
         new U64Type(),
-        new U64Value(new BigNumber(args.paymentTokenNonce)),
+        new U64Value(
+          args.paymentTokenNonce ? new BigNumber(args.paymentTokenNonce) : 0,
+        ),
       ),
       new OptionalValue(
         new BooleanType(),
@@ -299,7 +301,7 @@ export class NftMarketplaceAbiService {
       ),
       new OptionalValue(
         new U64Type(),
-        new U64Value(args.startDate ? new BigNumber(args.startDate) : ''),
+        new U64Value(args.startDate ? new BigNumber(args.startDate) : 0),
       ),
       new OptionalValue(
         new BigUIntType(),
