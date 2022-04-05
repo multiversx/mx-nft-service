@@ -299,7 +299,7 @@ export class NftMarketplaceAbiService {
       ),
       new OptionalValue(
         new U64Type(),
-        new U64Value(new BigNumber(args.startDate)),
+        new U64Value(args.startDate ? new BigNumber(args.startDate) : ''),
       ),
       new OptionalValue(
         new BigUIntType(),
