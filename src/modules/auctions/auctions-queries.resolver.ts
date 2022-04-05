@@ -104,11 +104,6 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     return await this.nftAbiService.getCutPercentage();
   }
 
-  @Query(() => String)
-  async minimumBidDifference() {
-    return await this.nftAbiService.getMinimumBidDifference();
-  }
-
   @Query(() => AuctionResponse)
   @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(

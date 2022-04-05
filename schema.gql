@@ -155,6 +155,7 @@ type Auction {
   identifier: String!
   maxBid: Price!
   minBid: Price!
+  minBidDiff: Price!
   nonce: Int!
   nrAuctionedTokens: Int
   orders(pagination: ConnectionArgs): OrdersResponse
@@ -515,7 +516,6 @@ type Query {
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String!
-  minimumBidDifference: String!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!

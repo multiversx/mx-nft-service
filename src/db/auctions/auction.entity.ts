@@ -41,10 +41,14 @@ export class AuctionEntity extends BaseEntity {
   ownerAddress: string;
 
   @Column()
+  minBidDiff: string;
+
+  @Column()
   minBid: string;
 
   @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
   minBidDenominated: number;
+
   @Column()
   maxBid: string;
 
@@ -93,6 +97,7 @@ export class AuctionEntity extends BaseEntity {
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
+          minBidDiff: auction.min_bid_diff.valueOf().toString(),
           minBidDenominated: parseFloat(
             denominate({
               input: auction.min_bid.valueOf()?.toString(),
