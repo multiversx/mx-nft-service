@@ -321,10 +321,6 @@ export class NftMarketplaceAbiService {
           new BooleanType(),
           new BooleanValue(args.maxOneSftPerPayment),
         ),
-        new OptionalValue(
-          new U64Type(),
-          new U64Value(new BigNumber(args.paymentTokenNonce || 0)),
-        ),
       ];
     }
     return returnArgs;
