@@ -88,7 +88,7 @@ export class AssetsHistoryService {
         break;
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        if (res[index]._source.events.length < 2) {
+        if (res[index]._source.events.length < 3) {
           if (
             !Object.values(AuctionEventEnum).includes(
               res[index + 1]?._source.events[1]?.identifier,
