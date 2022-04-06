@@ -46,6 +46,9 @@ export class Auction {
   minBid: Price;
 
   @Field(() => Price)
+  minBidDiff: Price;
+
+  @Field(() => Price)
   maxBid: Price;
 
   @Field(() => Int)
@@ -91,6 +94,12 @@ export class Auction {
             token: 'EGLD',
             nonce: 0,
             amount: auction.minBid,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
+          }),
+          minBidDiff: new Price({
+            token: 'EGLD',
+            nonce: 0,
+            amount: auction.minBidDiff,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           maxBid: new Price({

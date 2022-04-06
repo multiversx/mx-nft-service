@@ -6,10 +6,7 @@ import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
-import {
-  QueryRequest,
-  TrendingQueryRequest,
-} from 'src/modules/common/filters/QueryRequest';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';

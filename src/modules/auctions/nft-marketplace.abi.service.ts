@@ -22,6 +22,8 @@ import {
   ChainID,
   NetworkConfig,
   BigUIntType,
+  OptionalType,
+  NullType,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
@@ -244,31 +246,6 @@ export class NftMarketplaceAbiService {
     }
   }
 
-  async getMinimumBidDifference(): Promise<string> {
-    try {
-      const cacheKey = generateCacheKeyFromParams('minimumBidDifference');
-      const minimumBid = await this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        () => this.getMinimumPercentage(),
-        TimeConstants.oneWeek,
-      );
-
-      return minimumBid;
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while getting the minimum bid diference.',
-        {
-          path: 'NftMarketplaceAbiService.getMinimumBidDifference',
-          exception: err,
-        },
-      );
-    }
-  }
-  private async getMinimumPercentage(): Promise<string> {
-    return elrondConfig.minimumBidDifference;
-  }
-
   private async getCutPercentageMap(): Promise<string> {
     const contract = await this.elrondProxyService.getAbiSmartContract();
     let getDataQuery = <Interaction>(
@@ -314,18 +291,21 @@ export class NftMarketplaceAbiService {
       new BigUIntValue(new BigNumber(args.maxBid || 0)),
       new U64Value(new BigNumber(args.deadline)),
       new TokenIdentifierValue(Buffer.from(args.paymentToken)),
+      new OptionalValue(
+        new BigUIntType(),
+        new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
+      ),
     ];
-
     if (args.startDate) {
       return [
         ...returnArgs,
         new OptionalValue(
-          new U64Type(),
-          new U64Value(new BigNumber(args.paymentTokenNonce)),
-        ),
-        new OptionalValue(
           new BooleanType(),
           new BooleanValue(args.maxOneSftPerPayment),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce)),
         ),
         new OptionalValue(
           new U64Type(),
@@ -337,10 +317,6 @@ export class NftMarketplaceAbiService {
     if (args.maxOneSftPerPayment) {
       return [
         ...returnArgs,
-        new OptionalValue(
-          new U64Type(),
-          new U64Value(new BigNumber(args.paymentTokenNonce || 0)),
-        ),
         new OptionalValue(
           new BooleanType(),
           new BooleanValue(args.maxOneSftPerPayment),

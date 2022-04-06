@@ -9,10 +9,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
-import {
-  QueryRequest,
-  TrendingQueryRequest,
-} from '../common/filters/QueryRequest';
+import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';

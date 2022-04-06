@@ -23,10 +23,7 @@ import {
   Grouping,
 } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
-import {
-  QueryRequest,
-  TrendingQueryRequest,
-} from '../common/filters/QueryRequest';
+import { QueryRequest } from '../common/filters/QueryRequest';
 import { User } from '../auth/user';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
@@ -102,11 +99,6 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @Query(() => String)
   async marketplaceCutPercentage() {
     return await this.nftAbiService.getCutPercentage();
-  }
-
-  @Query(() => String)
-  async minimumBidDifference() {
-    return await this.nftAbiService.getMinimumBidDifference();
   }
 
   @Query(() => AuctionResponse)

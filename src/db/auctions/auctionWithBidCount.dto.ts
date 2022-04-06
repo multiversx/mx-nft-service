@@ -17,6 +17,7 @@ export class AuctionWithBidsCount {
   paymentNonce: number;
   ownerAddress: string;
   minBid: string;
+  minBidDiff: string;
   minBidDenominated: number;
   maxBid: string;
   maxBidDenominated: number;
