@@ -301,10 +301,10 @@ export class NftMarketplaceAbiService {
         new U64Type(),
         new U64Value(new BigNumber(args.startDate || 0)),
       ),
-      new OptionalValue(
-        new BigUIntType(),
-        new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
-      ),
+      // new OptionalValue(
+      //   new BigUIntType(),
+      //   new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
+      // ),
     ];
 
     return returnArgs;
