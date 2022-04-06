@@ -222,7 +222,9 @@ export class AssetsHistoryService {
       action: action,
       address: address,
       senderAddress: sender,
-      transactionHash: res[index]._id,
+      transactionHash: res[index]._source.originalTxHash
+        ? res[index]._source.originalTxHash
+        : res[index]._id,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemCountString ? itemCountString.toString() : undefined,
       price: totalPrice

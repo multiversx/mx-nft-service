@@ -183,7 +183,7 @@ export class AssetsService {
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
     let ttl = TimeConstants.oneDay;
-    if (nft?.media && !nft?.media[0].thumbnailUrl.includes('default'))
+    if (nft?.media && nft?.media[0].thumbnailUrl.includes('default'))
       ttl = TimeConstants.oneMinute;
     return {
       key: identifier,
