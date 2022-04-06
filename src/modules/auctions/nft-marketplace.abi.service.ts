@@ -22,6 +22,8 @@ import {
   ChainID,
   NetworkConfig,
   BigUIntType,
+  OptionalType,
+  NullType,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
@@ -290,20 +292,41 @@ export class NftMarketplaceAbiService {
       new U64Value(new BigNumber(args.deadline)),
       new TokenIdentifierValue(Buffer.from(args.paymentToken)),
       new OptionalValue(
-        new U64Type(),
-        new U64Value(new BigNumber(args.paymentTokenNonce || 0)),
-      ),
-      new OptionalValue(
-        new BooleanType(),
-        new BooleanValue(args.maxOneSftPerPayment),
-      ),
-      new OptionalValue(new U64Type()),
-      new OptionalValue(
         new BigUIntType(),
         new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
       ),
     ];
+    if (args.startDate) {
+      return [
+        ...returnArgs,
+        new OptionalValue(
+          new BooleanType(),
+          new BooleanValue(args.maxOneSftPerPayment),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce)),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.startDate)),
+        ),
+      ];
+    }
 
+    if (args.maxOneSftPerPayment) {
+      return [
+        ...returnArgs,
+        new OptionalValue(
+          new BooleanType(),
+          new BooleanValue(args.maxOneSftPerPayment),
+        ),
+        new OptionalValue(
+          new U64Type(),
+          new U64Value(new BigNumber(args.paymentTokenNonce || 0)),
+        ),
+      ];
+    }
     return returnArgs;
   }
 
