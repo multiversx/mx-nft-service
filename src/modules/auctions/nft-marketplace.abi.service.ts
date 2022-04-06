@@ -297,10 +297,7 @@ export class NftMarketplaceAbiService {
         new BooleanType(),
         new BooleanValue(args.maxOneSftPerPayment),
       ),
-      new OptionalValue(
-        new U64Type(),
-        new U64Value(new BigNumber(args.startDate || 0)),
-      ),
+      new OptionalValue(new U64Type()),
       new OptionalValue(
         new BigUIntType(),
         new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
