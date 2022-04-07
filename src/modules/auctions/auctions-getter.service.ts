@@ -212,6 +212,7 @@ export class AuctionsGetterService {
         tagsFilter[0].values.every((tag) => a.tags.includes(tag)),
       );
     }
+    count = auctions.length;
     auctions = auctions?.slice(
       queryRequest.offset,
       queryRequest.offset + queryRequest.limit,
@@ -235,6 +236,7 @@ export class AuctionsGetterService {
       auctions = auctions.filter(
         (a) => a.endDate > DateUtils.getCurrentTimestamp(),
       );
+      count = auctions.length;
       auctions = auctions?.slice(
         queryRequest.offset,
         queryRequest.offset + queryRequest.limit,
