@@ -19,9 +19,26 @@ export class AccountsProvider extends BaseProvider<string> {
   }
 
   getData = async (keys: string[]): Promise<any[]> => {
+    if (process.env.ENABLE_BATCH_ACCOUNT_GET === 'true') {
+      return await this.getBatchAccountsQuery(keys);
+    }
+    return await this.getSingleAccountQuery(keys);
+  };
+
+  private async getBatchAccountsQuery(keys: string[]) {
     const accounts = await this.accountsService.getProfiles(keys);
     const accountsAddreses = accounts?.groupBy((a) => a.address);
 
     return accountsAddreses;
-  };
+  }
+
+  private async getSingleAccountQuery(keys: string[]): Promise<any[]> {
+    const uniqueAddresses = [...new Set(keys)];
+    const accountsPromises = uniqueAddresses.map((address) =>
+      this.accountsService.getProfile(address),
+    );
+
+    const accountResponse = await Promise.all(accountsPromises);
+    return accountResponse?.groupBy((item) => item.address);
+  }
 }
