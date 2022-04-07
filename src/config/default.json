@@ -4,7 +4,7 @@
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqf08ce20eq9hw8majtuvwc6g2hpxn6p8au00s6zjq5s",
     "issueNftCost": 50000000000000000,
-    "minimumBidDifference": 100000000000000000,
+    "minimumBidDifference": 10000000000000000,
     "version": 1,
     "proxyTimeout": 60000,
     "timeoutLimit": 30000,
