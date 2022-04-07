@@ -81,6 +81,9 @@ async function bootstrap() {
   );
   logger.log(`Cache warmer active: ${process.env.ENABLE_CACHE_WARMER}`);
   logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
+  logger.log(
+    `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
+  );
 }
 
 bootstrap();
