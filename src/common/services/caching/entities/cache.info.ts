@@ -18,4 +18,8 @@ export class CacheInfo {
     key: 'auctionsEndingInAMonth',
     ttl: TimeConstants.oneHour,
   };
+  static MarketplaceAuctions: CacheInfo = {
+    key: 'marketplaceAuctions',
+    ttl: TimeConstants.oneHour,
+  };
 }

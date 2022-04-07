@@ -10,7 +10,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class CacheWarmerService {
+export class CollectionsWarmerService {
   private redisClient: Redis.Redis;
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,

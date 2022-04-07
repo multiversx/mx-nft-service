@@ -54,7 +54,26 @@ export class AuctionsWarmerService {
         await this.invalidateKey(
           CacheInfo.AuctionsEndingInAMonth.key,
           tokens,
-          5 * TimeConstants.oneMinute,
+          3 * TimeConstants.oneMinute,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleMarketplaceAuctions() {
+    await Locker.lock(
+      'Marketplace Auctions invalidations',
+      async () => {
+        const tokens =
+          await this.auctionsGetterService.getMarketplaceAuctionsQuery(
+            DateUtils.getCurrentTimestamp(),
+          );
+        await this.invalidateKey(
+          CacheInfo.MarketplaceAuctions.key,
+          tokens,
+          3 * TimeConstants.oneMinute,
         );
       },
       true,

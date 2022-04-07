@@ -198,6 +198,20 @@ export class AuctionsServiceDb {
       .execute();
   }
 
+  async getAuctionsForMarketplace(endDate: number): Promise<any[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.*')
+      .addSelect(
+        'if(COUNT(`o`.`auctionId`)>0,MAX(o.priceAmountDenominated),a.minBidDenominated) as startBid',
+      )
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.startDate <= ${endDate}`)
+      .execute();
+  }
+
   async getAuction(id: number): Promise<AuctionEntity> {
     if (id || id === 0) {
       return await this.auctionsRepository.findOne({
