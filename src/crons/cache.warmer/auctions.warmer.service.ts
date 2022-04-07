@@ -61,6 +61,25 @@ export class AuctionsWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleMarketplaceAuctions() {
+    await Locker.lock(
+      'Marketplace Auctions invalidations',
+      async () => {
+        const tokens =
+          await this.auctionsGetterService.getMarketplaceAuctionsQuery(
+            DateUtils.getCurrentTimestamp(),
+          );
+        await this.invalidateKey(
+          CacheInfo.AuctionsEndingInAMonth.key,
+          tokens,
+          5 * TimeConstants.oneMinute,
+        );
+      },
+      true,
+    );
+  }
+
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
     await this.refreshCacheKey(key, ttl);
