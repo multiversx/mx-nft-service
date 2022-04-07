@@ -19,8 +19,9 @@ export class AccountsProvider extends BaseProvider<string> {
   }
 
   getData = async (keys: string[]): Promise<any[]> => {
-    if (process.env.ENABLE_BATCH_ACCOUNT_GET === 'true')
+    if (process.env.ENABLE_BATCH_ACCOUNT_GET === 'true') {
       return await this.getBatchAccountsQuery(keys);
+    }
     return await this.getSingleAccountQuery(keys);
   };
 
