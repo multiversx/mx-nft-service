@@ -54,7 +54,7 @@ export class AuctionsWarmerService {
         await this.invalidateKey(
           CacheInfo.AuctionsEndingInAMonth.key,
           tokens,
-          5 * TimeConstants.oneMinute,
+          3 * TimeConstants.oneMinute,
         );
       },
       true,
@@ -73,7 +73,7 @@ export class AuctionsWarmerService {
         await this.invalidateKey(
           CacheInfo.AuctionsEndingInAMonth.key,
           tokens,
-          5 * TimeConstants.oneMinute,
+          3 * TimeConstants.oneMinute,
         );
       },
       true,
