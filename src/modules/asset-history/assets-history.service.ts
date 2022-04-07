@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { ElrondElasticService } from 'src/common';
 import { elrondConfig } from 'src/config';
-import { nominateVal } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import {
   AssetActionEnum,
@@ -89,7 +88,7 @@ export class AssetsHistoryService {
         break;
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        if (res[index]._source.events.length < 2) {
+        if (res[index]._source.events.length < 3) {
           if (
             !Object.values(AuctionEventEnum).includes(
               res[index + 1]?._source.events[1]?.identifier,
@@ -222,7 +221,9 @@ export class AssetsHistoryService {
       action: action,
       address: address,
       senderAddress: sender,
-      transactionHash: res[index]._id,
+      transactionHash: res[index]._source.originalTxHash
+        ? res[index]._source.originalTxHash
+        : res[index]._id,
       actionDate: res[index]._source.timestamp || '',
       itemCount: itemCountString ? itemCountString.toString() : undefined,
       price: totalPrice

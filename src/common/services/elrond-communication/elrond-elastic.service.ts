@@ -25,7 +25,7 @@ export class ElrondElasticService {
   ): Promise<[HitResponse[], number, number]> {
     const url = `${this.url}/_search`;
     const body = {
-      size: size,
+      size: 2 * size,
       query: {
         bool: {
           must: [
