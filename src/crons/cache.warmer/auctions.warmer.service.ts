@@ -71,7 +71,7 @@ export class AuctionsWarmerService {
             DateUtils.getCurrentTimestamp(),
           );
         await this.invalidateKey(
-          CacheInfo.AuctionsEndingInAMonth.key,
+          CacheInfo.MarketplaceAuctions.key,
           tokens,
           3 * TimeConstants.oneMinute,
         );
