@@ -37,4 +37,26 @@ export class ElrondIdentityService {
       return;
     }
   }
+
+  async getProfile(address): Promise<AccountIdentity> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/users/${address}`;
+
+    try {
+      let response = await this.apiService.get(url);
+      return {
+        ...response.data,
+        address: address,
+      };
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${url}`,
+        {
+          path: 'ElrondIdentityService.getProfile',
+          address: address,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
 }
