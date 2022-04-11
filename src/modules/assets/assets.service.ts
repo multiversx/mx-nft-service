@@ -120,13 +120,13 @@ export class AssetsService {
 
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
-      let assetsWithScamInfo = response.items.filter((x) => x.scamInfo);
+      let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
       await this.assetScamLoader.batchScamInfo(
         assetsWithScamInfo?.map((a) => a.identifier),
         assetsWithScamInfo?.groupBy((asset) => asset.identifier),
       );
 
-      let assetsWithSupply = response.items.filter((x) => x.supply);
+      let assetsWithSupply = response.items?.filter((x) => x?.supply);
       await this.assetSupplyLoader.batchSupplyInfo(
         assetsWithSupply?.map((a) => a.identifier),
         assetsWithSupply?.groupBy((asset) => asset.identifier),
@@ -166,7 +166,7 @@ export class AssetsService {
         cacheKey,
         getAsset,
       );
-      return asset
+      return asset?.value
         ? new CollectionType({ items: [asset.value], count: asset ? 1 : 0 })
         : null;
     } catch (error) {
@@ -183,6 +183,9 @@ export class AssetsService {
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
     let ttl = TimeConstants.oneDay;
+    if (!nft) {
+      ttl = 3 * TimeConstants.oneSecond;
+    }
     if (nft?.media && nft?.media[0].thumbnailUrl.includes('default'))
       ttl = TimeConstants.oneMinute;
     return {
