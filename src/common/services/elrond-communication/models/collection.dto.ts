@@ -13,9 +13,24 @@ export interface CollectionApi {
   canBurn: boolean;
   canAddQuantity: boolean;
   roles: RolesApi[];
+  assets: CollectionAssetApi;
 }
 
 export interface RolesApi {
   address: string;
   roles: string[];
+}
+export interface CollectionAssetApi {
+  website: string;
+  description: string;
+  status: string;
+  pngUrl: string;
+  svgUrl: string;
+  social: CollectionAssetSocialApi;
+}
+
+export interface CollectionAssetSocialApi {
+  email: string;
+  blog: string;
+  twiter: string;
 }

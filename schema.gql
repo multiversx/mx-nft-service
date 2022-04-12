@@ -238,12 +238,18 @@ type Collection {
   collection: String
   collectionAsset(assetsCount: Int): CollectionAsset!
   creationDate: Float!
+  description: String
   name: String!
   owner: Account
   ownerAddress: String
+  pngUrl: String
   roles: [CollectionRole!]
+  social: CollectionSocial
+  status: String
+  svgUrl: String
   ticker: String!
   type: String
+  website: String
 }
 
 type CollectionAsset {
@@ -277,6 +283,12 @@ type CollectionResponse {
 type CollectionRole {
   address: String!
   roles: [String!]!
+}
+
+type CollectionSocial {
+  blog: String
+  email: String
+  twiter: String
 }
 
 input CollectionsFilter {

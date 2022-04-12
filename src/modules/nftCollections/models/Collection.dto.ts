@@ -3,6 +3,7 @@ import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
+import { CollectionSocial } from './CollectionSocial.dto';
 
 @ObjectType()
 export class Collection {
@@ -38,6 +39,18 @@ export class Collection {
   canAddQuantity: boolean;
   @Field(() => [CollectionRole], { nullable: true })
   roles: CollectionRole[];
+  @Field({ nullable: true })
+  website: string;
+  @Field({ nullable: true })
+  description: string;
+  @Field({ nullable: true })
+  status: string;
+  @Field({ nullable: true })
+  pngUrl: string;
+  @Field({ nullable: true })
+  svgUrl: string;
+  @Field(() => CollectionSocial, { nullable: true })
+  social: CollectionSocial;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -63,6 +76,11 @@ export class Collection {
           roles: collectionApi.roles?.map((role) =>
             CollectionRole.fromRoleApi(role),
           ),
+          description: collectionApi.assets?.description,
+          website: collectionApi.assets?.website,
+          pngUrl: collectionApi.assets?.pngUrl,
+          svgUrl: collectionApi.assets?.svgUrl,
+          social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
           collectionAsset: new CollectionAsset({
             collectionIdentifer: collectionApi.collection,
           }),
