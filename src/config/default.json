@@ -13,7 +13,8 @@
     "keepAliveFreeSocketTimeout": 30000,
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10,
-    "decimals": 18
+    "decimals": 18,
+    "egld": "XEGLD"
   },
   "caching": {
     "ordersRedisClientName": "orders",

@@ -233,7 +233,7 @@ export class AssetsHistoryService {
       price: totalPrice
         ? new Price({
             nonce: 0,
-            token: 'EGLD',
+            token: elrondConfig.egld,
             amount: totalPrice.toFixed(),
             timestamp: res[index]._source.timestamp,
           })

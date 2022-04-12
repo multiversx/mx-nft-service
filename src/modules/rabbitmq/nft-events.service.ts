@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { elrondConfig } from 'src/config';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
@@ -48,7 +49,7 @@ export class NftEventsService {
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
               auctionId: parseInt(topics.auctionId, 16),
-              priceToken: 'EGLD',
+              priceToken: elrondConfig.egld,
               priceAmount: topics.currentBid,
               priceNonce: 0,
               blockHash: hash,
@@ -88,7 +89,7 @@ export class NftEventsService {
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
               auctionId: parseInt(buySftTopics.auctionId, 16),
-              priceToken: 'EGLD',
+              priceToken: elrondConfig.egld,
               priceAmount: buySftTopics.bid,
               priceNonce: 0,
               blockHash: hash,
