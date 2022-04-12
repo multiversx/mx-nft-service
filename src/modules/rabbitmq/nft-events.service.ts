@@ -49,7 +49,7 @@ export class NftEventsService {
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
               auctionId: parseInt(topics.auctionId, 16),
-              priceToken: elrondConfig.egld,
+              priceToken: 'EGLD',
               priceAmount: topics.currentBid,
               priceNonce: 0,
               blockHash: hash,
@@ -89,7 +89,7 @@ export class NftEventsService {
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
               auctionId: parseInt(buySftTopics.auctionId, 16),
-              priceToken: elrondConfig.egld,
+              priceToken: 'EGLD',
               priceAmount: buySftTopics.bid,
               priceNonce: 0,
               blockHash: hash,
