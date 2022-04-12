@@ -282,6 +282,12 @@ type CollectionResponse {
 
 type CollectionRole {
   address: String!
+  canAddQuantity: Boolean
+  canAddUri: Boolean
+  canBurn: Boolean
+  canCreate: Boolean
+  canTransferRole: Boolean
+  canUpdateAttributes: Boolean
   roles: [String!]!
 }
 

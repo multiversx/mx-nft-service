@@ -18,6 +18,12 @@ export interface CollectionApi {
 
 export interface RolesApi {
   address: string;
+  canCreate: boolean;
+  canBurn: boolean;
+  canAddQuantity: boolean;
+  canUpdateAttributes: boolean;
+  canAddUri: boolean;
+  canTransferRole: boolean;
   roles: string[];
 }
 export interface CollectionAssetApi {

@@ -92,6 +92,18 @@ export class Collection {
 export class CollectionRole {
   @Field()
   address?: string;
+  @Field({ nullable: true })
+  canCreate: boolean;
+  @Field({ nullable: true })
+  canBurn: boolean;
+  @Field({ nullable: true })
+  canAddQuantity: boolean;
+  @Field({ nullable: true })
+  canUpdateAttributes: boolean;
+  @Field({ nullable: true })
+  canAddUri: boolean;
+  @Field({ nullable: true })
+  canTransferRole: boolean;
   @Field(() => [String])
   roles: string[];
 
@@ -104,6 +116,12 @@ export class CollectionRole {
       ? null
       : new CollectionRole({
           address: role.address,
+          canCreate: role.canCreate,
+          canBurn: role.canBurn,
+          canAddQuantity: role.canAddQuantity,
+          canAddUri: role.canAddUri,
+          canTransferRole: role.canTransferRole,
+          canUpdateAttributes: role.canUpdateAttributes,
           roles: role.roles,
         });
   }
