@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { elrondConfig } from 'src/config';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {

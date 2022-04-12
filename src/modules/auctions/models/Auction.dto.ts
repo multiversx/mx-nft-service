@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import {
   AuctionWithBidsCount,
@@ -96,19 +97,19 @@ export class Auction {
           endDate: auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
-            token: 'EGLD',
+            token: elrondConfig.egld,
             nonce: 0,
             amount: auction.minBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           minBidDiff: new Price({
-            token: 'EGLD',
+            token: elrondConfig.egld,
             nonce: 0,
             amount: auction.minBidDiff,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           maxBid: new Price({
-            token: 'EGLD',
+            token: elrondConfig.egld,
             nonce: 0,
             amount: auction.maxBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),

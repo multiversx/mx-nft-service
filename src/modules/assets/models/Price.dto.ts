@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { elrondConfig } from 'src/config';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 
@@ -22,7 +23,10 @@ export class Price {
   static fromEntity(entity: OrderEntity): Price {
     return entity
       ? new Price({
-          token: entity?.priceToken,
+          token:
+            entity?.priceToken === 'EGLD'
+              ? elrondConfig.egld
+              : entity?.priceToken,
           amount: entity?.priceAmount,
           nonce: entity?.priceNonce,
           timestamp: DateUtils.getTimestamp(entity.creationDate),

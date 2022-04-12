@@ -33,11 +33,11 @@ export class OrdersService {
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
-      await this.invalidateCache(createOrderArgs.auctionId);
       const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
         createOrderArgs.auctionId,
       );
 
+      console.log('hereee ', activeOrder);
       await this.invalidateCache(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
@@ -143,6 +143,7 @@ export class OrdersService {
     auctionId: number = 0,
     ownerAddress: string = '',
   ): Promise<void> {
+    console.log('invalidate cache for ', auctionId, ownerAddress);
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStats.invalidateStats(ownerAddress);

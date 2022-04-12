@@ -68,8 +68,8 @@ export class AssetsHistoryService {
         );
         if (
           res[index + 1] &&
-          hash(res[index]?._source?.events[1]) ===
-            hash(res[index + 1]?._source?.events[0])
+          hash({ ...res[index]?._source?.events[1], order: 0 }) ===
+            hash({ ...res[index + 1]?._source?.events[0], order: 0 })
         ) {
           index++;
         }
@@ -88,11 +88,15 @@ export class AssetsHistoryService {
         break;
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        if (res[index]._source.events.length < 3) {
+        if (
+          res[index]._source.events.length < 4 &&
+          !res[index]._source.events.find(
+            (e) =>
+              e.identifier === AuctionEventEnum.EndAuctionEvent ||
+              e.identifier === AuctionEventEnum.WithdrawEvent,
+          )
+        ) {
           if (
-            !Object.values(AuctionEventEnum).includes(
-              res[index + 1]?._source.events[1]?.identifier,
-            ) &&
             res[index]._source.address ===
               res[index]?._source.events[0].address &&
             res[index]._source.events[0].topics[3].base64ToBech32() !==
@@ -229,7 +233,7 @@ export class AssetsHistoryService {
       price: totalPrice
         ? new Price({
             nonce: 0,
-            token: 'EGLD',
+            token: elrondConfig.egld,
             amount: totalPrice.toFixed(),
             timestamp: res[index]._source.timestamp,
           })

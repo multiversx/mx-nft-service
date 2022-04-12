@@ -5,7 +5,8 @@
     "issueNftCost": 50000000000000000,
     "chainID": "1",
     "version": 1,
-    "metaChainShardId": 4294967295
+    "metaChainShardId": 4294967295,
+    "egld": "EGLD"
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

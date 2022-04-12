@@ -132,7 +132,9 @@ export class AuctionsGetterService {
     return [groupedAuctions, groupedAuctions?.length];
   }
 
-  public async getMarketplaceAuctionsQuery(startDate: number) {
+  public async getMarketplaceAuctionsQuery(
+    startDate: number,
+  ): Promise<[AuctionWithStartBid[], number]> {
     let auctions: AuctionWithStartBid[] =
       await this.auctionServiceDb.getAuctionsForMarketplace(startDate);
     auctions = auctions?.map((item) => new AuctionWithStartBid(item));
@@ -271,7 +273,7 @@ export class AuctionsGetterService {
   private async getMarketplaceAuctionsMap(): Promise<
     [AuctionWithStartBid[], number]
   > {
-    return await this.redisCacheService.getOrSet(
+    return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AuctionsEndingToday.key,
       () => this.getMarketplaceAuctionsQuery(DateUtils.getCurrentTimestamp()),
