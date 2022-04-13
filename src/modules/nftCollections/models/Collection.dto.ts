@@ -3,6 +3,7 @@ import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
+import { CollectionSocial } from './CollectionSocial.dto';
 
 @ObjectType()
 export class Collection {
@@ -38,6 +39,20 @@ export class Collection {
   canAddQuantity: boolean;
   @Field(() => [CollectionRole], { nullable: true })
   roles: CollectionRole[];
+  @Field({ nullable: true })
+  verified: boolean;
+  @Field({ nullable: true })
+  website: string;
+  @Field({ nullable: true })
+  description: string;
+  @Field({ nullable: true })
+  status: string;
+  @Field({ nullable: true })
+  pngUrl: string;
+  @Field({ nullable: true })
+  svgUrl: string;
+  @Field(() => CollectionSocial, { nullable: true })
+  social: CollectionSocial;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -63,6 +78,12 @@ export class Collection {
           roles: collectionApi.roles?.map((role) =>
             CollectionRole.fromRoleApi(role),
           ),
+          verified: !!collectionApi.assets ?? false,
+          description: collectionApi.assets?.description,
+          website: collectionApi.assets?.website,
+          pngUrl: collectionApi.assets?.pngUrl,
+          svgUrl: collectionApi.assets?.svgUrl,
+          social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
           collectionAsset: new CollectionAsset({
             collectionIdentifer: collectionApi.collection,
           }),
@@ -74,6 +95,18 @@ export class Collection {
 export class CollectionRole {
   @Field()
   address?: string;
+  @Field({ nullable: true })
+  canCreate: boolean;
+  @Field({ nullable: true })
+  canBurn: boolean;
+  @Field({ nullable: true })
+  canAddQuantity: boolean;
+  @Field({ nullable: true })
+  canUpdateAttributes: boolean;
+  @Field({ nullable: true })
+  canAddUri: boolean;
+  @Field({ nullable: true })
+  canTransferRole: boolean;
   @Field(() => [String])
   roles: string[];
 
@@ -86,6 +119,12 @@ export class CollectionRole {
       ? null
       : new CollectionRole({
           address: role.address,
+          canCreate: role.canCreate,
+          canBurn: role.canBurn,
+          canAddQuantity: role.canAddQuantity,
+          canAddUri: role.canAddUri,
+          canTransferRole: role.canTransferRole,
+          canUpdateAttributes: role.canUpdateAttributes,
           roles: role.roles,
         });
   }

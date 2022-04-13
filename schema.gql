@@ -64,6 +64,7 @@ type Asset {
   type: NftTypeEnum
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
+  verified: Boolean
   viewsCount: Int
 }
 
@@ -238,12 +239,19 @@ type Collection {
   collection: String
   collectionAsset(assetsCount: Int): CollectionAsset!
   creationDate: Float!
+  description: String
   name: String!
   owner: Account
   ownerAddress: String
+  pngUrl: String
   roles: [CollectionRole!]
+  social: CollectionSocial
+  status: String
+  svgUrl: String
   ticker: String!
   type: String
+  verified: Boolean
+  website: String
 }
 
 type CollectionAsset {
@@ -276,7 +284,19 @@ type CollectionResponse {
 
 type CollectionRole {
   address: String!
+  canAddQuantity: Boolean
+  canAddUri: Boolean
+  canBurn: Boolean
+  canCreate: Boolean
+  canTransferRole: Boolean
+  canUpdateAttributes: Boolean
   roles: [String!]!
+}
+
+type CollectionSocial {
+  blog: String
+  email: String
+  twiter: String
 }
 
 input CollectionsFilter {
