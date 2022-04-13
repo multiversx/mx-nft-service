@@ -40,6 +40,8 @@ export class Collection {
   @Field(() => [CollectionRole], { nullable: true })
   roles: CollectionRole[];
   @Field({ nullable: true })
+  verified: boolean;
+  @Field({ nullable: true })
   website: string;
   @Field({ nullable: true })
   description: string;
@@ -76,6 +78,7 @@ export class Collection {
           roles: collectionApi.roles?.map((role) =>
             CollectionRole.fromRoleApi(role),
           ),
+          verified: !!collectionApi.assets ?? false,
           description: collectionApi.assets?.description,
           website: collectionApi.assets?.website,
           pngUrl: collectionApi.assets?.pngUrl,

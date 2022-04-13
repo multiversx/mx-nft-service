@@ -80,6 +80,8 @@ export class Asset {
   scamInfo: ScamInfo;
   @Field(() => [Media], { nullable: true })
   media: Media[];
+  @Field({ nullable: true })
+  verified: boolean;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -107,6 +109,7 @@ export class Asset {
           isWhitelistedStorage: nft.isWhitelistedStorage,
           scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
           media: nft.media?.map((m) => Media.fromNftMedia(m)),
+          verified: !!nft.assets ?? false,
         })
       : null;
   }
