@@ -64,6 +64,7 @@ type Asset {
   type: NftTypeEnum
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
+  verified: Boolean
   viewsCount: Int
 }
 
@@ -249,6 +250,7 @@ type Collection {
   svgUrl: String
   ticker: String!
   type: String
+  verified: Boolean
   website: String
 }
 
