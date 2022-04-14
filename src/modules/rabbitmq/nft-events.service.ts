@@ -45,6 +45,9 @@ export class NftEventsService {
           const auction = await this.auctionsGetterService.getAuctionById(
             parseInt(topics.auctionId, 16),
           );
+          await this.auctionsGetterService.invalidateCache(
+            topics.currentWinner,
+          );
           const order = await this.ordersService.createOrder(
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
