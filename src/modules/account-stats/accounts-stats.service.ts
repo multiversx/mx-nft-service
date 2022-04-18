@@ -194,6 +194,10 @@ export class AccountsStatsService {
       this.redisClient,
       this.getStatsCacheKey(address),
     );
+    await this.redisCacheService.del(
+      this.redisClient,
+      this.getClaimableCacheKey(address),
+    );
     return await this.redisCacheService.del(
       this.redisClient,
       this.getStatsCacheKey(`owner_${address}`),

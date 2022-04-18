@@ -165,6 +165,13 @@ export class AuctionsGetterService {
     return await this.auctionServiceDb.getAvailableTokens(id);
   }
 
+  public async invalidateCache(address: string) {
+    await this.redisCacheService.delByPattern(
+      this.redisClient,
+      generateCacheKeyFromParams('claimable_auctions', address),
+    );
+  }
+
   private filtersForRunningAndEndDate(queryRequest: QueryRequest) {
     return (
       queryRequest?.filters?.filters?.length === 2 &&
