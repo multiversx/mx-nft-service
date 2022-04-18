@@ -78,7 +78,9 @@ export class MetricsCollector {
 
   static setAuctionEventsDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
-    MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
+    MetricsCollector.auctionsEventsDurationHistogram
+      .labels(action)
+      .observe(duration);
   }
 
   static setJobResult(
