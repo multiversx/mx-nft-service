@@ -106,6 +106,7 @@ export class NftEventsService {
           this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
+          console.log('Witdraw');
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
           this.auctionsService.updateAuction(
@@ -130,6 +131,7 @@ export class NftEventsService {
           );
           break;
         case AuctionEventEnum.AuctionTokenEvent:
+          console.log(AuctionEventEnum.AuctionTokenEvent);
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
           this.auctionsService.saveAuction(
