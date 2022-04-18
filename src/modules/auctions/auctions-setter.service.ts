@@ -57,6 +57,7 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
+      console.log('finallyyy ', AuctionEventEnum.AuctionTokenEvent);
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         AuctionEventEnum.AuctionTokenEvent,
@@ -96,6 +97,7 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
+      console.log('finallyyy ', auctionEvent);
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         auctionEvent,
