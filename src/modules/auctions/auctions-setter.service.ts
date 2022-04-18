@@ -9,6 +9,9 @@ import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { PerformanceProfiler } from '../metrics/performance.profiler';
+import { MetricsCollector } from '../metrics/metrics.collector';
+import { AuctionEventEnum } from '../assets/models';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -30,10 +33,14 @@ export class AuctionsSetterService {
     identifier: string,
     hash: string,
   ): Promise<Auction | any> {
+    let profiler = new PerformanceProfiler();
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.apiService.getNftByIdentifier(identifier);
+      const asset = await this.apiService.getNftByIdentifierForQuery(
+        identifier,
+        'fields=tags',
+      );
       const savedAuction = await this.auctionServiceDb.insertAuction(
         AuctionEntity.fromAuctionAbi(
           auctionId,
@@ -49,6 +56,12 @@ export class AuctionsSetterService {
         auctionId,
         exception: error,
       });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        AuctionEventEnum.AuctionTokenEvent,
+        profiler.duration,
+      );
     }
   }
 
@@ -70,9 +83,25 @@ export class AuctionsSetterService {
     id: number,
     status: AuctionStatusEnum,
     hash: string,
+    auctionEvent: string,
   ): Promise<Auction | any> {
-    await this.invalidateCache();
-    return await this.auctionServiceDb.updateAuction(id, status, hash);
+    let profiler = new PerformanceProfiler();
+    try {
+      await this.invalidateCache();
+      return await this.auctionServiceDb.updateAuction(id, status, hash);
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction', {
+        path: 'AuctionsService.updateAuction',
+        id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
