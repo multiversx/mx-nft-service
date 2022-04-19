@@ -22,7 +22,6 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private apiService: ElrondApiService,
     private auctionServiceDb: AuctionsServiceDb,
-    private lowestProvider: LowestAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -39,7 +38,6 @@ export class AuctionsSetterService {
     let profiler = new PerformanceProfiler();
     try {
       await this.invalidateCache();
-      await this.lowestProvider.clearKey(identifier);
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
       const asset = await this.apiService.getNftByIdentifierForQuery(
         identifier,
@@ -61,11 +59,6 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
-      console.log(
-        'finallyyy ',
-        AuctionEventEnum.AuctionTokenEvent,
-        DateUtils.getCurrentTimestamp(),
-      );
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         AuctionEventEnum.AuctionTokenEvent,
@@ -105,7 +98,6 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
-      console.log('finallyyy ', auctionEvent, DateUtils.getCurrentTimestamp());
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         auctionEvent,
@@ -120,7 +112,6 @@ export class AuctionsSetterService {
   }
 
   private async invalidateCache(): Promise<void> {
-    // this.lowestProvider.clearKey()
     return await this.redisCacheService.flushDb(this.redisClient);
   }
 }

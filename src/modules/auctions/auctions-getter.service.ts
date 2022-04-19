@@ -40,14 +40,13 @@ export class AuctionsGetterService {
       if (this.filtersForMarketplaceAuctions(queryRequest)) {
         return await this.getMarketplaceAuctions(queryRequest);
       }
-      return await this.getMappedAuctions(queryRequest);
-      // const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      // return this.redisCacheService.getOrSet(
-      //   this.redisClient,
-      //   cacheKey,
-      //   () => this.getMappedAuctions(queryRequest),
-      //   30 * TimeConstants.oneSecond,
-      // );
+      const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getMappedAuctions(queryRequest),
+        30 * TimeConstants.oneSecond,
+      );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',

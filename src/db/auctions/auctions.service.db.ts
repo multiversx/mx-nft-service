@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
+import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
@@ -25,6 +26,7 @@ import {
 export class AuctionsServiceDb {
   constructor(
     private auctionsLoader: AuctionsForAssetRedisHandler,
+    private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
@@ -323,14 +325,8 @@ export class AuctionsServiceDb {
   private async invalidateCache(identifier: string, address: string) {
     await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
+    await this.lowestAuctionLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
-  }
-
-  private getSqlDate(timestamp: number) {
-    return new Date(timestamp * 1000)
-      .toISOString()
-      .slice(0, 19)
-      .replace('T', ' ');
   }
 
   private addOrderBy(
