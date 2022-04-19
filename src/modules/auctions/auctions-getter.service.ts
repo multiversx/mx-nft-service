@@ -316,7 +316,9 @@ export class AuctionsGetterService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  private async getMappedAuctions(queryRequest: QueryRequest) {
+  private async getMappedAuctions(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
     let [auctions, count] = [[], 0];
 
     if (

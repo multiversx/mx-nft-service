@@ -4,6 +4,7 @@ export class MetricsCollector {
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
+  private static auctionsEventsDurationHistogram: Histogram<string>;
   private static jobsHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
@@ -39,6 +40,15 @@ export class MetricsCollector {
       });
     }
 
+    if (!MetricsCollector.auctionsEventsDurationHistogram) {
+      MetricsCollector.auctionsEventsDurationHistogram = new Histogram({
+        name: 'auction_events_duration',
+        help: 'Auction Events Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
+
     if (!MetricsCollector.jobsHistogram) {
       MetricsCollector.jobsHistogram = new Histogram({
         name: 'jobs',
@@ -65,6 +75,14 @@ export class MetricsCollector {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
   }
+
+  static setAuctionEventsDuration(action: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.auctionsEventsDurationHistogram
+      .labels(action)
+      .observe(duration);
+  }
+
   static setJobResult(
     job: string,
     result: 'success' | 'error',

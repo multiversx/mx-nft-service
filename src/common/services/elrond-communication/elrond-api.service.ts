@@ -117,6 +117,17 @@ export class ElrondApiService {
     );
   }
 
+  async getNftByIdentifierForQuery(
+    identifier: string,
+    query: string,
+  ): Promise<Nft> {
+    return await this.doGetGeneric(
+      this.getNftByIdentifier.name,
+      `nfts/${identifier}?${query}`,
+      (response) => response,
+    );
+  }
+
   async getOwnersForIdentifier(
     identifier: string,
     offset: number = 0,

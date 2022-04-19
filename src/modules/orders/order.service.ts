@@ -37,7 +37,6 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      console.log('hereee ', activeOrder);
       await this.invalidateCache(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,

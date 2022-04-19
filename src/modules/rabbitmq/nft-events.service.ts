@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { DateUtils } from 'src/utils/date-utils';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
@@ -66,6 +66,7 @@ export class NftEventsService {
               auction.id,
               AuctionStatusEnum.Claimable,
               hash,
+              AuctionStatusEnum.Claimable,
             );
           }
           break;
@@ -86,6 +87,7 @@ export class NftEventsService {
               parseInt(buySftTopics.auctionId, 16),
               AuctionStatusEnum.Ended,
               hash,
+              AuctionStatusEnum.Ended,
             );
           }
           this.ordersService.createOrderForSft(
@@ -111,6 +113,7 @@ export class NftEventsService {
             parseInt(topicsWithdraw.auctionId, 16),
             AuctionStatusEnum.Closed,
             hash,
+            AuctionEventEnum.WithdrawEvent,
           );
           break;
         case AuctionEventEnum.EndAuctionEvent:
@@ -120,6 +123,7 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             AuctionStatusEnum.Ended,
             hash,
+            AuctionEventEnum.EndAuctionEvent,
           );
           this.ordersService.updateOrder(
             parseInt(topicsEndAuction.auctionId, 16),
