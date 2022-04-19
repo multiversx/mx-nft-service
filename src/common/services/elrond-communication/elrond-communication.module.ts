@@ -8,6 +8,7 @@ import {
   ElrondStatsService,
 } from 'src/common';
 import { ApiService } from '../api.service';
+import { ElrondFeedService } from './elrond-feed.service';
 
 @Module({
   providers: [
@@ -18,6 +19,7 @@ import { ApiService } from '../api.service';
     ElrondElasticService,
     ElrondIdentityService,
     ElrondDataService,
+    ElrondFeedService,
   ],
   exports: [
     ApiService,
@@ -27,6 +29,7 @@ import { ApiService } from '../api.service';
     ElrondElasticService,
     ElrondIdentityService,
     ElrondDataService,
+    ElrondFeedService,
   ],
 })
 export class ElrondCommunicationModule {}

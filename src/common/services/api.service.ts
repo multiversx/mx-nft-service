@@ -34,8 +34,15 @@ export class ApiService {
     return this.keepaliveAgent;
   }
 
-  private getConfig(timeout: number | undefined): AxiosRequestConfig {
+  private getConfig(
+    timeout: number | undefined,
+    authorization: string,
+  ): AxiosRequestConfig {
     timeout = timeout || this.defaultTimeout;
+    const headers = {};
+    if (authorization) {
+      headers['authorization'] = authorization;
+    }
     return {
       timeout,
       httpAgent: this.getKeepAliveAgent(),
@@ -48,18 +55,20 @@ export class ApiService {
           }
         },
       ],
+      headers,
     };
   }
 
   async get(
     url: string,
     timeout?: number,
+    authorization?: string,
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
     timeout = timeout || this.defaultTimeout;
 
     try {
-      return await axios.get(url, this.getConfig(timeout));
+      return await axios.get(url, this.getConfig(timeout, authorization));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -86,7 +95,8 @@ export class ApiService {
   async post(
     url: string,
     data: any,
-    timeout: number | undefined = undefined,
+    timeout?: number,
+    authorization?: string,
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
     timeout = timeout || this.defaultTimeout;
@@ -94,7 +104,11 @@ export class ApiService {
     let profiler = new PerformanceProfiler();
 
     try {
-      return await axios.post(url, data, this.getConfig(timeout));
+      return await axios.post(
+        url,
+        data,
+        this.getConfig(timeout, authorization),
+      );
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {

@@ -9,6 +9,8 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 import { TimeConstants } from 'src/utils/time-utils';
+import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import { EventEnum } from 'src/common/services/elrond-communication/models/feed.dto';
 
 @Injectable()
 export class AssetsLikesService {
@@ -19,6 +21,7 @@ export class AssetsLikesService {
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private accountFeedService: ElrondFeedService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
@@ -49,7 +52,11 @@ export class AssetsLikesService {
     }
   }
 
-  async addLike(identifier: string, address: string): Promise<boolean> {
+  async addLike(
+    identifier: string,
+    address: string,
+    authorization?: string,
+  ): Promise<boolean> {
     try {
       const isLiked = await this.assetsLikesRepository.isAssetLiked(
         identifier,
@@ -61,6 +68,12 @@ export class AssetsLikesService {
         await this.incremenLikesCount(identifier);
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
+        await this.accountFeedService.subscribe(identifier, authorization);
+        await this.accountFeedService.addFeed(
+          identifier,
+          EventEnum.like,
+          authorization,
+        );
         return true;
       }
     } catch (err) {
@@ -74,13 +87,23 @@ export class AssetsLikesService {
     }
   }
 
-  async removeLike(identifier: string, address: string): Promise<boolean> {
+  async removeLike(
+    identifier: string,
+    address: string,
+    authorization?: string,
+  ): Promise<boolean> {
     try {
       const deleteResults = await this.assetsLikesRepository.removeLike(
         identifier,
         address,
       );
       if (deleteResults.affected > 0) {
+        await this.accountFeedService.unsubscribe(identifier, authorization);
+        await this.accountFeedService.addFeed(
+          identifier,
+          EventEnum.unlike,
+          authorization,
+        );
         await this.decrementLikesCount(identifier);
         await this.invalidateCache(identifier, address);
       }

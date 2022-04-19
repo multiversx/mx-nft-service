@@ -1,4 +1,4 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation, Context } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsService } from '.';
 import {
@@ -22,6 +22,7 @@ import {
   UpdateQuantityRequest,
   TransferNftRequest,
 } from './models/requests';
+import { AuthorizationHeader } from '../auth/authorization-header';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {
@@ -97,8 +98,13 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   addLike(
     @Args('input') input: AddLikeArgs,
     @User() user: any,
+    @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
-    return this.assetsLikesService.addLike(input.identifier, user.publicKey);
+    return this.assetsLikesService.addLike(
+      input.identifier,
+      user.publicKey,
+      authorizationHeader,
+    );
   }
 
   @Mutation(() => Boolean)
@@ -106,7 +112,12 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   removeLike(
     @Args('input') input: RemoveLikeArgs,
     @User() user: any,
+    @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
-    return this.assetsLikesService.removeLike(input.identifier, user.publicKey);
+    return this.assetsLikesService.removeLike(
+      input.identifier,
+      user.publicKey,
+      authorizationHeader,
+    );
   }
 }
