@@ -40,13 +40,14 @@ export class AuctionsGetterService {
       if (this.filtersForMarketplaceAuctions(queryRequest)) {
         return await this.getMarketplaceAuctions(queryRequest);
       }
-      const cacheKey = this.getAuctionsCacheKey(queryRequest);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        () => this.getMappedAuctions(queryRequest),
-        30 * TimeConstants.oneSecond,
-      );
+      return await this.getMappedAuctions(queryRequest);
+      // const cacheKey = this.getAuctionsCacheKey(queryRequest);
+      // return this.redisCacheService.getOrSet(
+      //   this.redisClient,
+      //   cacheKey,
+      //   () => this.getMappedAuctions(queryRequest),
+      //   30 * TimeConstants.oneSecond,
+      // );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getAuctions',
@@ -316,7 +317,9 @@ export class AuctionsGetterService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  private async getMappedAuctions(queryRequest: QueryRequest) {
+  private async getMappedAuctions(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
     let [auctions, count] = [[], 0];
 
     if (
