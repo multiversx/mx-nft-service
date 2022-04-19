@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DateUtils } from 'src/utils/date-utils';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
@@ -106,7 +107,7 @@ export class NftEventsService {
           this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
-          console.log('Witdraw');
+          console.log('Witdraw', DateUtils.getCurrentTimestamp());
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
           this.auctionsService.updateAuction(
@@ -131,7 +132,10 @@ export class NftEventsService {
           );
           break;
         case AuctionEventEnum.AuctionTokenEvent:
-          console.log(AuctionEventEnum.AuctionTokenEvent);
+          console.log(
+            AuctionEventEnum.AuctionTokenEvent,
+            DateUtils.getCurrentTimestamp(),
+          );
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
           this.auctionsService.saveAuction(

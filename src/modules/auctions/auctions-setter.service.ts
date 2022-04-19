@@ -12,6 +12,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -57,7 +58,11 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
-      console.log('finallyyy ', AuctionEventEnum.AuctionTokenEvent);
+      console.log(
+        'finallyyy ',
+        AuctionEventEnum.AuctionTokenEvent,
+        DateUtils.getCurrentTimestamp(),
+      );
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         AuctionEventEnum.AuctionTokenEvent,
@@ -97,7 +102,7 @@ export class AuctionsSetterService {
         exception: error,
       });
     } finally {
-      console.log('finallyyy ', auctionEvent);
+      console.log('finallyyy ', auctionEvent, DateUtils.getCurrentTimestamp());
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(
         auctionEvent,
