@@ -27,6 +27,7 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { AvailableTokensForAuctionRedisHandler } from './loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from '../orders/loaders/last-order.redis-handler';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
+import { LowestAuctionRedisHandler } from './loaders/lowest-auctions.redis-handler';
 
 @Module({
   providers: [
@@ -51,6 +52,7 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
     LastOrdersProvider,
     AccountsProvider,
     AccountsRedisHandler,
+    LowestAuctionRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,

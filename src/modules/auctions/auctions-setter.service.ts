@@ -13,6 +13,7 @@ import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
 import { DateUtils } from 'src/utils/date-utils';
+import { LowestAuctionRedisHandler } from './loaders/lowest-auctions.redis-handler';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -21,6 +22,7 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private apiService: ElrondApiService,
     private auctionServiceDb: AuctionsServiceDb,
+    private lowestProvider: LowestAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -37,6 +39,7 @@ export class AuctionsSetterService {
     let profiler = new PerformanceProfiler();
     try {
       await this.invalidateCache();
+      await this.lowestProvider.clearKey(identifier);
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
       const asset = await this.apiService.getNftByIdentifierForQuery(
         identifier,
@@ -117,6 +120,7 @@ export class AuctionsSetterService {
   }
 
   private async invalidateCache(): Promise<void> {
-    return this.redisCacheService.flushDb(this.redisClient);
+    // this.lowestProvider.clearKey()
+    return await this.redisCacheService.flushDb(this.redisClient);
   }
 }
