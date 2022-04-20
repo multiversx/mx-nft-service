@@ -32,11 +32,11 @@ export class ElrondFeedService {
     }
   }
 
-  async unsubscribe(identifier: string, token?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}api/v1/unsubscribe/nft:${identifier}`;
+  async unsubscribe(reference: string, token?: string): Promise<boolean> {
+    const url = `${process.env.ELROND_FEED}api/v1/unsubscribe/nft:${reference}`;
 
     try {
-      console.log(identifier, token);
+      console.log(reference, token);
       return true;
       const response = await this.apiService.post(url, '', undefined, token);
       return response.data;
@@ -45,7 +45,7 @@ export class ElrondFeedService {
         `An error occurred while calling the elrond feed api on url ${url}`,
         {
           path: 'ElrondFeedService.subscribe',
-          identifier,
+          reference,
           exception: error,
         },
       );
@@ -54,16 +54,17 @@ export class ElrondFeedService {
   }
 
   async addFeed(
-    identifier: string,
+    address: string,
     event: EventEnum,
+    reference: string,
     token?: string,
   ): Promise<Feed> {
     const url = `${process.env.ELROND_FEED}api/v1/feed`;
     let request: Feed = new Feed({
-      subscription: `nft:${identifier}`,
+      address: address,
       topic: TopicEnum.nft,
       event: event,
-      identifier: identifier,
+      reference: reference,
     });
     try {
       console.log(request, token);
@@ -80,7 +81,7 @@ export class ElrondFeedService {
         `An error occurred while calling the elrond feed api on url ${url}`,
         {
           path: 'ElrondFeedService.addFeed',
-          identifier,
+          reference: reference,
           exception: error,
         },
       );

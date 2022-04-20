@@ -1,7 +1,8 @@
 export class Feed {
+  address: string;
   topic: TopicEnum;
   event: EventEnum;
-  identifier: string;
+  reference: string;
   subscription: string;
   extraInfo: {
     name: string;

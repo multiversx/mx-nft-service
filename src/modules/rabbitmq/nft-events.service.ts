@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DateUtils } from 'src/utils/date-utils';
+import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import { EventEnum } from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
+  CollectionEventEnum,
   NftEventEnum,
 } from '../assets/models/AuctionEvent.enum';
 import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
@@ -20,6 +22,7 @@ import {
   EndAuctionEvent,
   WithdrawEvent,
 } from './entities/auction';
+import { IssueCollectionEvent } from './entities/auction/issue-collection.event';
 import { MintEvent } from './entities/auction/mint.event';
 import { TransferEvent } from './entities/auction/transfer.event';
 
@@ -34,6 +37,7 @@ export class NftEventsService {
     private collectionAssets: CollectionAssetsRedisHandler,
     private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
+    private accountFeedService: ElrondFeedService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -60,6 +64,11 @@ export class NftEventsService {
             }),
           );
 
+          await this.accountFeedService.addFeed(
+            topics.currentWinner,
+            EventEnum.bid,
+            topics.auctionId,
+          );
           this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
             this.auctionsService.updateAuction(
@@ -102,7 +111,11 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
-
+          await this.accountFeedService.addFeed(
+            buySftTopics.currentWinner,
+            EventEnum.buy,
+            buySftTopics.auctionId,
+          );
           this.availableTokens.clearKey(auctionSft.id);
           this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
@@ -129,6 +142,12 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
+
+          await this.accountFeedService.addFeed(
+            buySftTopics.currentWinner,
+            EventEnum.won,
+            topicsEndAuction.auctionId,
+          );
           break;
         case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
@@ -137,6 +156,11 @@ export class NftEventsService {
             parseInt(topicsAuctionToken.auctionId, 16),
             `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
             hash,
+          );
+          await this.accountFeedService.addFeed(
+            topicsAuctionToken.originalOwner,
+            EventEnum.startAuction,
+            topicsAuctionToken.auctionId,
           );
           break;
       }
@@ -151,7 +175,11 @@ export class NftEventsService {
           const createTopics = mintEvent.getTopics();
           this.collectionAssets.clearKey(createTopics.collection);
           this.collectionAssetsCount.clearKey(createTopics.collection);
-
+          await this.accountFeedService.addFeed(
+            mintEvent.getAddress(),
+            EventEnum.mintNft,
+            createTopics.collection,
+          );
           break;
 
         case NftEventEnum.ESDTNFTTransfer:
@@ -159,6 +187,18 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+          );
+
+          break;
+
+        case CollectionEventEnum.IssueNonFungible ||
+          CollectionEventEnum.IssueSemiFungible:
+          const collectionEvent = new IssueCollectionEvent(event);
+          const collectionTopics = collectionEvent.getTopics();
+          await this.accountFeedService.addFeed(
+            collectionEvent.getAddress(),
+            EventEnum.createCollection,
+            collectionTopics.collection,
           );
 
           break;
