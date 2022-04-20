@@ -105,14 +105,6 @@ export class AssetsLikesService {
       );
       if (deleteResults.affected > 0) {
         await this.accountFeedService.unsubscribe(identifier, authorization);
-        await this.accountFeedService.addFeed(
-          new Feed({
-            address: address,
-            event: EventEnum.unlike,
-            reference: identifier,
-          }),
-        );
-
         await this.decrementLikesCount(identifier);
         await this.invalidateCache(identifier, address);
       }
