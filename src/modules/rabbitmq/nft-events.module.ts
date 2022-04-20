@@ -10,11 +10,13 @@ import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/avail
 import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
 import { AssetsRedisHandler } from '../assets';
+import { ElrondCommunicationModule } from 'src/common';
 
 @Module({
   imports: [
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
+    forwardRef(() => ElrondCommunicationModule),
   ],
   providers: [
     NftEventsConsumer,
