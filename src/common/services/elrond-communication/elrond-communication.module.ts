@@ -7,7 +7,7 @@ import {
   ElrondDataService,
   ElrondStatsService,
 } from 'src/common';
-import { ApiService } from '../api.service';
+import { ApiService } from './api.service';
 import { ElrondFeedService } from './elrond-feed.service';
 
 @Module({

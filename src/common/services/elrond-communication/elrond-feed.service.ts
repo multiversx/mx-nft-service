@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { ApiService } from '../api.service';
-import { EventEnum, Feed, TopicEnum } from './models/feed.dto';
+import { ApiService } from './api.service';
+import { ApiSettings } from './models/api-settings';
+import { Feed } from './models/feed.dto';
 
 @Injectable()
 export class ElrondFeedService {
@@ -11,13 +12,17 @@ export class ElrondFeedService {
     private readonly apiService: ApiService,
   ) {}
 
-  async subscribe(identifier: string, token?: string): Promise<boolean> {
+  async subscribe(identifier: string, authKey?: string): Promise<boolean> {
     const url = `${process.env.ELROND_FEED}api/v1/subscribe/nft:${identifier}`;
 
     try {
-      console.log(identifier, token);
+      console.log(identifier, authKey);
       return true;
-      const response = await this.apiService.post(url, '', undefined, token);
+      const response = await this.apiService.post(
+        url,
+        '',
+        new ApiSettings({ authorization: authKey }),
+      );
       return response.data;
     } catch (error) {
       this.logger.error(
@@ -38,7 +43,10 @@ export class ElrondFeedService {
     try {
       console.log(reference, authKey);
       return true;
-      const response = await this.apiService.delete(url, undefined, authKey);
+      const response = await this.apiService.delete(
+        url,
+        new ApiSettings({ authorization: authKey }),
+      );
       return response.data;
     } catch (error) {
       this.logger.error(
@@ -59,7 +67,11 @@ export class ElrondFeedService {
     try {
       console.log(feed);
       return feed;
-      const response = await this.apiService.post(url, feed);
+      const response = await this.apiService.post(
+        url,
+        feed,
+        new ApiSettings({ apiKey: process.env.ELROND_FEED_API_KEY }),
+      );
       return response.data;
     } catch (error) {
       this.logger.error(
