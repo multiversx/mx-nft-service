@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
-import { EventEnum } from 'src/common/services/elrond-communication/models/feed.dto';
+import {
+  EventEnum,
+  Feed,
+} from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
@@ -65,9 +68,11 @@ export class NftEventsService {
           );
 
           await this.accountFeedService.addFeed(
-            topics.currentWinner,
-            EventEnum.bid,
-            topics.auctionId,
+            new Feed({
+              address: topics.currentWinner,
+              event: EventEnum.bid,
+              reference: topics.auctionId,
+            }),
           );
           this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
@@ -112,9 +117,11 @@ export class NftEventsService {
             }),
           );
           await this.accountFeedService.addFeed(
-            buySftTopics.currentWinner,
-            EventEnum.buy,
-            buySftTopics.auctionId,
+            new Feed({
+              address: buySftTopics.currentWinner,
+              event: EventEnum.buy,
+              reference: buySftTopics.auctionId,
+            }),
           );
           this.availableTokens.clearKey(auctionSft.id);
           this.availableTokensCount.clearKey(auctionSft.identifier);
@@ -144,10 +151,13 @@ export class NftEventsService {
           );
 
           await this.accountFeedService.addFeed(
-            buySftTopics.currentWinner,
-            EventEnum.won,
-            topicsEndAuction.auctionId,
+            new Feed({
+              address: buySftTopics.currentWinner,
+              event: EventEnum.won,
+              reference: topicsEndAuction.auctionId,
+            }),
           );
+
           break;
         case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
@@ -158,9 +168,11 @@ export class NftEventsService {
             hash,
           );
           await this.accountFeedService.addFeed(
-            topicsAuctionToken.originalOwner,
-            EventEnum.startAuction,
-            topicsAuctionToken.auctionId,
+            new Feed({
+              address: topicsAuctionToken.originalOwner,
+              event: EventEnum.startAuction,
+              reference: topicsAuctionToken.auctionId,
+            }),
           );
           break;
       }
@@ -176,10 +188,13 @@ export class NftEventsService {
           this.collectionAssets.clearKey(createTopics.collection);
           this.collectionAssetsCount.clearKey(createTopics.collection);
           await this.accountFeedService.addFeed(
-            mintEvent.getAddress(),
-            EventEnum.mintNft,
-            createTopics.collection,
+            new Feed({
+              address: mintEvent.getAddress(),
+              event: EventEnum.mintNft,
+              reference: createTopics.collection,
+            }),
           );
+
           break;
 
         case NftEventEnum.ESDTNFTTransfer:
@@ -196,9 +211,11 @@ export class NftEventsService {
           const collectionEvent = new IssueCollectionEvent(event);
           const collectionTopics = collectionEvent.getTopics();
           await this.accountFeedService.addFeed(
-            collectionEvent.getAddress(),
-            EventEnum.createCollection,
-            collectionTopics.collection,
+            new Feed({
+              address: collectionEvent.getAddress(),
+              event: EventEnum.createCollection,
+              reference: collectionTopics.collection,
+            }),
           );
 
           break;

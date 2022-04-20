@@ -139,6 +139,47 @@ export class ApiService {
     }
   }
 
+  async delete(
+    url: string,
+    timeout?: number,
+    authorization?: string,
+    errorHandler?: (error: any) => Promise<boolean>,
+  ): Promise<any> {
+    timeout = timeout || this.defaultTimeout;
+
+    let profiler = new PerformanceProfiler();
+
+    try {
+      return await axios.delete(url, this.getConfig(timeout, authorization));
+    } catch (error: any) {
+      let handled = false;
+      if (errorHandler) {
+        handled = await errorHandler(error);
+      }
+
+      if (!handled) {
+        let customError = {
+          method: 'DELETE',
+          url,
+          response: error.response?.data,
+          status: error.response?.status,
+          message: error.message,
+          name: error.name,
+        };
+
+        this.logger.error(customError);
+
+        throw customError;
+      }
+    } finally {
+      profiler.stop();
+      MetricsCollector.setExternalCall(
+        this.getHostname(url),
+        profiler.duration,
+      );
+    }
+  }
+
   private getHostname(url: string): string {
     return new URL(url).hostname;
   }

@@ -32,13 +32,13 @@ export class ElrondFeedService {
     }
   }
 
-  async unsubscribe(reference: string, token?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}api/v1/unsubscribe/nft:${reference}`;
+  async unsubscribe(reference: string, authKey?: string): Promise<boolean> {
+    const url = `${process.env.ELROND_FEED}api/v1/subscribe/nft:${reference}`;
 
     try {
-      console.log(reference, token);
+      console.log(reference, authKey);
       return true;
-      const response = await this.apiService.post(url, '', undefined, token);
+      const response = await this.apiService.delete(url, undefined, authKey);
       return response.data;
     } catch (error) {
       this.logger.error(
@@ -53,35 +53,20 @@ export class ElrondFeedService {
     }
   }
 
-  async addFeed(
-    address: string,
-    event: EventEnum,
-    reference: string,
-    token?: string,
-  ): Promise<Feed> {
+  async addFeed(feed: Feed): Promise<Feed> {
     const url = `${process.env.ELROND_FEED}api/v1/feed`;
-    let request: Feed = new Feed({
-      address: address,
-      topic: TopicEnum.nft,
-      event: event,
-      reference: reference,
-    });
+
     try {
-      console.log(request, token);
-      return request;
-      const response = await this.apiService.post(
-        url,
-        request,
-        undefined,
-        token,
-      );
+      console.log(feed);
+      return feed;
+      const response = await this.apiService.post(url, feed);
       return response.data;
     } catch (error) {
       this.logger.error(
         `An error occurred while calling the elrond feed api on url ${url}`,
         {
           path: 'ElrondFeedService.addFeed',
-          reference: reference,
+          feed: feed,
           exception: error,
         },
       );

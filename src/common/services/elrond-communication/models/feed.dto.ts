@@ -1,13 +1,10 @@
 export class Feed {
   address: string;
-  topic: TopicEnum;
+  topic: TopicEnum = TopicEnum.nft;
   event: EventEnum;
   reference: string;
   subscription: string;
-  extraInfo: {
-    name: string;
-    avatar: string;
-  };
+  extraInfo: { [key: string]: unknown };
   constructor(init?: Partial<Feed>) {
     Object.assign(this, init);
   }

@@ -10,7 +10,10 @@ import { cacheConfig } from 'src/config';
 import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 import { TimeConstants } from 'src/utils/time-utils';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
-import { EventEnum } from 'src/common/services/elrond-communication/models/feed.dto';
+import {
+  EventEnum,
+  Feed,
+} from 'src/common/services/elrond-communication/models/feed.dto';
 
 @Injectable()
 export class AssetsLikesService {
@@ -69,10 +72,13 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
+
         await this.accountFeedService.addFeed(
-          identifier,
-          EventEnum.like,
-          authorization,
+          new Feed({
+            address: address,
+            event: EventEnum.like,
+            reference: identifier,
+          }),
         );
         return true;
       }
@@ -100,10 +106,13 @@ export class AssetsLikesService {
       if (deleteResults.affected > 0) {
         await this.accountFeedService.unsubscribe(identifier, authorization);
         await this.accountFeedService.addFeed(
-          identifier,
-          EventEnum.unlike,
-          authorization,
+          new Feed({
+            address: address,
+            event: EventEnum.unlike,
+            reference: identifier,
+          }),
         );
+
         await this.decrementLikesCount(identifier);
         await this.invalidateCache(identifier, address);
       }
