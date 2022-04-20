@@ -192,6 +192,9 @@ export class NftEventsService {
               address: mintEvent.getAddress(),
               event: EventEnum.mintNft,
               reference: createTopics.collection,
+              extraInfo: {
+                identifier: `${createTopics.collection}-${createTopics.nonce}`,
+              },
             }),
           );
 

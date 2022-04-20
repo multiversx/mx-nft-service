@@ -13,7 +13,7 @@ export class ElrondFeedService {
   ) {}
 
   async subscribe(identifier: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}api/v1/subscribe/nft:${identifier}`;
+    const url = `${process.env.ELROND_FEED}v1/subscribe/nft:${identifier}`;
 
     try {
       console.log(identifier, authKey);
@@ -38,7 +38,7 @@ export class ElrondFeedService {
   }
 
   async unsubscribe(reference: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}api/v1/subscribe/nft:${reference}`;
+    const url = `${process.env.ELROND_FEED}v1/subscribe/nft:${reference}`;
 
     try {
       console.log(reference, authKey);
@@ -62,11 +62,9 @@ export class ElrondFeedService {
   }
 
   async addFeed(feed: Feed): Promise<Feed> {
-    const url = `${process.env.ELROND_FEED}api/v1/feed`;
+    const url = `${process.env.ELROND_FEED}v1/feed/item`;
 
     try {
-      console.log(feed);
-      return feed;
       const response = await this.apiService.post(
         url,
         feed,
