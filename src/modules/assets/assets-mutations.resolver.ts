@@ -1,4 +1,4 @@
-import { Resolver, Args, Mutation, Context } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsService } from '.';
 import {
