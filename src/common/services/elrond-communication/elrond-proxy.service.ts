@@ -47,6 +47,19 @@ export class ElrondProxyService {
     return contract;
   }
 
+  async getMinterAbiSmartContract(): Promise<SmartContract> {
+    let abiRegistry = await AbiRegistry.load({
+      files: ['./src/abis/nft-minter.abi.json'],
+    });
+    let abi = new SmartContractAbi(abiRegistry, ['NftMinter']);
+
+    let contract = new SmartContractProfiler({
+      address: new Address(elrondConfig.nftMinterAddress),
+      abi: abi,
+    });
+    return contract;
+  }
+
   async getCollections(address: string): Promise<string[]> {
     return await this.getService().doGetGeneric(
       `address/${address}/registered-nfts`,

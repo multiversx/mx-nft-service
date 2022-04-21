@@ -277,7 +277,7 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private getCreateAuctionArgs(args: CreateAuctionArgs): TypedValue[] {
+  private getCreateAuctionArgs(args: CreateAuctionRequest): TypedValue[] {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );

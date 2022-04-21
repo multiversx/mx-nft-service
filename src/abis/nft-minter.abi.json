@@ -1,0 +1,449 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.62.0-nightly",
+            "commitHash": "4ca19e09d302a4cbde14f9cb1bc109179dc824cd",
+            "commitDate": "2022-04-19",
+            "channel": "Nightly",
+            "short": "rustc 1.62.0-nightly (4ca19e09d 2022-04-19)"
+        },
+        "contractCrate": {
+            "name": "nft-minter",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "elrond-wasm",
+            "version": "0.30.0"
+        }
+    },
+    "name": "NftMinter",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "collections_category",
+                "type": "bytes"
+            },
+            {
+                "name": "royalties_claim_address",
+                "type": "Address"
+            },
+            {
+                "name": "mint_payments_claim_address",
+                "type": "Address"
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "getCollectionsCategory",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "getRegisteredCollections",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<bytes>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getRegisteredBrands",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<bytes>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getBrandInfo",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BrandInfo"
+                }
+            ]
+        },
+        {
+            "name": "getPriceForBrand",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "MintPrice"
+                }
+            ]
+        },
+        {
+            "name": "getTagsForBrand",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<bytes>"
+                }
+            ]
+        },
+        {
+            "name": "addUserToAdminList",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeUserFromAdminList",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "issueTokenForBrand",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
+            "inputs": [
+                {
+                    "name": "collection_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "media_type",
+                    "type": "bytes"
+                },
+                {
+                    "name": "royalties",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "max_nfts",
+                    "type": "u32"
+                },
+                {
+                    "name": "mint_start_timestamp",
+                    "type": "u64"
+                },
+                {
+                    "name": "mint_price_token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "mint_price_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "token_display_name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "token_ticker",
+                    "type": "bytes"
+                },
+                {
+                    "name": "tags",
+                    "type": "variadic<bytes>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setLocalRoles",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "buyRandomNft",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "opt_nfts_to_buy",
+                    "type": "optional<u32>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "giveawayNfts",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "dest_amount_pairs",
+                    "type": "variadic<multi<Address,u32>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getNftTokenIdForBrand",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "setRoyaltiesClaimAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setMintPaymentsClaimAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "claimRoyalties",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                },
+                {
+                    "type": "List<EsdtTokenPayment>"
+                }
+            ]
+        },
+        {
+            "name": "claimMintPayments",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                },
+                {
+                    "type": "List<EsdtTokenPayment>"
+                }
+            ]
+        },
+        {
+            "name": "getRoyaltiesClaimAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getMintPaymentsClaimAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getAccumulatedRoyalties",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<multi<TokenIdentifier,BigUint>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getAccumulatedMintPayments",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<multi<TokenIdentifier,BigUint>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "claimRoyaltiesFromMarketplace",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "marketplace_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "tokens",
+                    "type": "variadic<TokenIdentifier>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        }
+    ],
+    "hasCallback": true,
+    "types": {
+        "BrandInfo": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "collection_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "token_display_name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "media_type",
+                    "type": "bytes"
+                },
+                {
+                    "name": "royalties",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "EsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_type",
+                    "type": "EsdtTokenType"
+                },
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "EsdtTokenType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Fungible",
+                    "discriminant": 0
+                },
+                {
+                    "name": "NonFungible",
+                    "discriminant": 1
+                },
+                {
+                    "name": "SemiFungible",
+                    "discriminant": 2
+                },
+                {
+                    "name": "Meta",
+                    "discriminant": 3
+                },
+                {
+                    "name": "Invalid",
+                    "discriminant": 4
+                }
+            ]
+        },
+        "MintPrice": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "start_timestamp",
+                    "type": "u64"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        }
+    }
+}

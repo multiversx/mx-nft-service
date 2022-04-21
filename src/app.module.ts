@@ -18,6 +18,7 @@ import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats
 import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
 import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
+import { PresaleCollectionModuleGraph } from './modules/minter/presale-collections.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module'
     FeaturedModuleGraph,
     UsdAmountModuleGraph,
     TrendingModuleGraph,
+    PresaleCollectionModuleGraph,
     IpfsModule,
   ],
 })
