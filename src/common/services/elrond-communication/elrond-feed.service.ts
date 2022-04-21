@@ -4,6 +4,7 @@ import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { Feed } from './models/feed.dto';
+import { SubscriptionFeed } from './models/subscription-feed.dto';
 
 @Injectable()
 export class ElrondFeedService {
@@ -13,15 +14,18 @@ export class ElrondFeedService {
   ) {}
 
   async subscribe(identifier: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}v1/subscribe/nft:${identifier}`;
+    const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
     try {
-      console.log(identifier, authKey);
-      return true;
+      const request = new SubscriptionFeed({ referenceId: identifier });
+      console.log('subscribe', request);
       const response = await this.apiService.post(
         url,
-        '',
-        new ApiSettings({ authorization: authKey }),
+        request,
+        new ApiSettings({
+          apiKey: process.env.ELROND_FEED_API_KEY,
+          authorization: authKey,
+        }),
       );
       return response.data;
     } catch (error) {
@@ -38,14 +42,19 @@ export class ElrondFeedService {
   }
 
   async unsubscribe(reference: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}v1/subscribe/nft:${reference}`;
+    const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
     try {
-      console.log(reference, authKey);
-      return true;
+      const request = new SubscriptionFeed({ referenceId: reference });
+      console.log('unsubscribe', request);
+
       const response = await this.apiService.delete(
         url,
-        new ApiSettings({ authorization: authKey }),
+        new ApiSettings({
+          apiKey: process.env.ELROND_FEED_API_KEY,
+          authorization: authKey,
+        }),
+        request,
       );
       return response.data;
     } catch (error) {

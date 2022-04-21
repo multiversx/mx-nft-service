@@ -132,12 +132,13 @@ export class ApiService {
   async delete(
     url: string,
     settings: ApiSettings = new ApiSettings(),
+    data: any,
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
     let profiler = new PerformanceProfiler();
 
     try {
-      return await axios.delete(url, this.getConfig(settings));
+      return await axios.delete(url, { ...this.getConfig(settings), data });
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
