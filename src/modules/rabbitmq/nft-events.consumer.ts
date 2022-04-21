@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { elrondConfig } from 'src/config';
-import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
+import {
+  CollectionEventEnum,
+  NftEventEnum,
+} from '../assets/models/AuctionEvent.enum';
 import { NftEventsService } from './nft-events.service';
 import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
@@ -16,8 +19,10 @@ export class NftTransactionsConsumer {
   async consumeAuctionEvents(nftAuctionEvents: any) {
     await this.nftTransactionsService.handleNftMintEvents(
       nftAuctionEvents?.events?.filter(
-        (e: { identifier: NftEventEnum }) =>
+        (e: { identifier: NftEventEnum | CollectionEventEnum }) =>
           e.identifier === NftEventEnum.ESDTNFTCreate ||
+          e.identifier === CollectionEventEnum.IssueSemiFungible ||
+          e.identifier === CollectionEventEnum.IssueNonFungible ||
           e.identifier === NftEventEnum.ESDTNFTTransfer,
       ),
       nftAuctionEvents.hash,

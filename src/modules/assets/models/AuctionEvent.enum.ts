@@ -11,3 +11,8 @@ export enum NftEventEnum {
   ESDTNFTTransfer = 'ESDTNFTTransfer',
   ESDTNFTCreate = 'ESDTNFTCreate',
 }
+
+export enum CollectionEventEnum {
+  IssueSemiFungible = 'issueSemiFungible',
+  IssueNonFungible = 'issueNonFungible',
+}

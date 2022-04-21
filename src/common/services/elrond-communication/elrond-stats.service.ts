@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { ApiService } from '../api.service';
+import { ApiService } from './api.service';
 import { NftViewsCount } from './models/nft-views.dto';
 
 @Injectable()

@@ -6,6 +6,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { ApiSettings } from './models/api-settings';
 
 @Injectable()
 export class ApiService {
@@ -34,10 +35,16 @@ export class ApiService {
     return this.keepaliveAgent;
   }
 
-  private getConfig(timeout: number | undefined): AxiosRequestConfig {
-    timeout = timeout || this.defaultTimeout;
+  private getConfig(settings: ApiSettings): AxiosRequestConfig {
+    const headers = {};
+    if (settings.authorization) {
+      headers['authorization'] = settings.authorization;
+    }
+    if (settings.apiKey) {
+      headers['x-api-key'] = settings.apiKey;
+    }
     return {
-      timeout,
+      timeout: settings.timeout,
       httpAgent: this.getKeepAliveAgent(),
       transformResponse: [
         (data) => {
@@ -48,18 +55,17 @@ export class ApiService {
           }
         },
       ],
+      headers,
     };
   }
 
   async get(
     url: string,
-    timeout?: number,
+    settings: ApiSettings = new ApiSettings(),
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
-    timeout = timeout || this.defaultTimeout;
-
     try {
-      return await axios.get(url, this.getConfig(timeout));
+      return await axios.get(url, this.getConfig(settings));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -86,15 +92,13 @@ export class ApiService {
   async post(
     url: string,
     data: any,
-    timeout: number | undefined = undefined,
+    settings: ApiSettings = new ApiSettings(),
     errorHandler?: (error: any) => Promise<boolean>,
   ): Promise<any> {
-    timeout = timeout || this.defaultTimeout;
-
     let profiler = new PerformanceProfiler();
 
     try {
-      return await axios.post(url, data, this.getConfig(timeout));
+      return await axios.post(url, data, this.getConfig(settings));
     } catch (error: any) {
       let handled = false;
       if (errorHandler) {
@@ -106,6 +110,45 @@ export class ApiService {
           method: 'POST',
           url,
           body: data,
+          response: error.response?.data,
+          status: error.response?.status,
+          message: error.message,
+          name: error.name,
+        };
+
+        this.logger.error(customError);
+
+        throw customError;
+      }
+    } finally {
+      profiler.stop();
+      MetricsCollector.setExternalCall(
+        this.getHostname(url),
+        profiler.duration,
+      );
+    }
+  }
+
+  async delete(
+    url: string,
+    settings: ApiSettings = new ApiSettings(),
+    data: any,
+    errorHandler?: (error: any) => Promise<boolean>,
+  ): Promise<any> {
+    let profiler = new PerformanceProfiler();
+
+    try {
+      return await axios.delete(url, { ...this.getConfig(settings), data });
+    } catch (error: any) {
+      let handled = false;
+      if (errorHandler) {
+        handled = await errorHandler(error);
+      }
+
+      if (!handled) {
+        let customError = {
+          method: 'DELETE',
+          url,
           response: error.response?.data,
           status: error.response?.status,
           message: error.message,

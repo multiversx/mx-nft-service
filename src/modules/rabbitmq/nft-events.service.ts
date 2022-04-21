@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { DateUtils } from 'src/utils/date-utils';
+import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import {
+  EventEnum,
+  Feed,
+} from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
+  CollectionEventEnum,
   NftEventEnum,
 } from '../assets/models/AuctionEvent.enum';
 import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
@@ -20,6 +25,7 @@ import {
   EndAuctionEvent,
   WithdrawEvent,
 } from './entities/auction';
+import { IssueCollectionEvent } from './entities/auction/issue-collection.event';
 import { MintEvent } from './entities/auction/mint.event';
 import { TransferEvent } from './entities/auction/transfer.event';
 
@@ -34,6 +40,7 @@ export class NftEventsService {
     private collectionAssets: CollectionAssetsRedisHandler,
     private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
+    private accountFeedService: ElrondFeedService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -60,6 +67,13 @@ export class NftEventsService {
             }),
           );
 
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: topics.currentWinner,
+              event: EventEnum.bid,
+              reference: topics.auctionId,
+            }),
+          );
           this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
             this.auctionsService.updateAuction(
@@ -102,7 +116,13 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
-
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: buySftTopics.currentWinner,
+              event: EventEnum.buy,
+              reference: buySftTopics.auctionId,
+            }),
+          );
           this.availableTokens.clearKey(auctionSft.id);
           this.availableTokensCount.clearKey(auctionSft.identifier);
           break;
@@ -129,6 +149,15 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
+
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: buySftTopics.currentWinner,
+              event: EventEnum.won,
+              reference: topicsEndAuction.auctionId,
+            }),
+          );
+
           break;
         case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
@@ -137,6 +166,13 @@ export class NftEventsService {
             parseInt(topicsAuctionToken.auctionId, 16),
             `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
             hash,
+          );
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: topicsAuctionToken.originalOwner,
+              event: EventEnum.startAuction,
+              reference: topicsAuctionToken.auctionId,
+            }),
           );
           break;
       }
@@ -151,6 +187,16 @@ export class NftEventsService {
           const createTopics = mintEvent.getTopics();
           this.collectionAssets.clearKey(createTopics.collection);
           this.collectionAssetsCount.clearKey(createTopics.collection);
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: mintEvent.getAddress(),
+              event: EventEnum.mintNft,
+              reference: createTopics.collection,
+              extraInfo: {
+                identifier: `${createTopics.collection}-${createTopics.nonce}`,
+              },
+            }),
+          );
 
           break;
 
@@ -159,6 +205,20 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+          );
+
+          break;
+
+        case CollectionEventEnum.IssueNonFungible ||
+          CollectionEventEnum.IssueSemiFungible:
+          const collectionEvent = new IssueCollectionEvent(event);
+          const collectionTopics = collectionEvent.getTopics();
+          await this.accountFeedService.addFeed(
+            new Feed({
+              address: collectionEvent.getAddress(),
+              event: EventEnum.createCollection,
+              reference: collectionTopics.collection,
+            }),
           );
 
           break;

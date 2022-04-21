@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { HitResponse, SearchResponse } from './models/elastic-search';
-import { ApiService } from '../api.service';
+import { ApiService } from './api.service';
 
 export interface AddressTransactionCount {
   contractAddress: string;
