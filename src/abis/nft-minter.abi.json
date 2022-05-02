@@ -46,12 +46,12 @@
             ]
         },
         {
-            "name": "getRegisteredCollections",
+            "name": "getRegisterdCollectionHashes",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
                 {
-                    "type": "variadic<bytes>",
+                    "type": "variadic<array46<u8>>",
                     "multi_result": true
                 }
             ]
@@ -64,21 +64,6 @@
                 {
                     "type": "variadic<bytes>",
                     "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getBrandInfo",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "brand_id",
-                    "type": "bytes"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BrandInfo"
                 }
             ]
         },
@@ -144,8 +129,8 @@
             ],
             "inputs": [
                 {
-                    "name": "collection_id",
-                    "type": "bytes"
+                    "name": "collection_hash",
+                    "type": "array46<u8>"
                 },
                 {
                     "name": "brand_id",
@@ -236,6 +221,41 @@
                 }
             ],
             "outputs": []
+        },
+        {
+            "name": "getBrandInfo",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BrandInfo"
+                },
+                {
+                    "type": "MintPrice"
+                },
+                {
+                    "type": "u32"
+                },
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "getAllBrandsInfo",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<multi<bytes,BrandInfo,MintPrice,u32,u32>>",
+                    "multi_result": true
+                }
+            ]
         },
         {
             "name": "getNftTokenIdForBrand",
@@ -365,8 +385,8 @@
             "type": "struct",
             "fields": [
                 {
-                    "name": "collection_id",
-                    "type": "bytes"
+                    "name": "collection_hash",
+                    "type": "array46<u8>"
                 },
                 {
                     "name": "token_display_name",

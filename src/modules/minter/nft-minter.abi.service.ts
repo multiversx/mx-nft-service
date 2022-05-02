@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { BuyRandomNftActionArgs } from './models';
+import { BrandInfo, BuyRandomNftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -18,6 +18,7 @@ import {
   BigUIntType,
   VariadicValue,
   List,
+  Interaction,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from '../../config';
 import { ElrondProxyService } from 'src/common';
@@ -36,11 +37,39 @@ export class NftMinterAbiService {
     defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
   }
 
+  async getPresaleCollections(): Promise<BrandInfo[]> {
+    const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
+      return entry.toLowerCase().trim();
+    });
+    for (const minter of minters) {
+      const auction = await this.getPresaleCollectionsForAddress(minter);
+      console.log(auction);
+    }
+
+    return [];
+  }
+
+  private async getPresaleCollectionsForAddress(address: string) {
+    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
+      address,
+    );
+    let getDataQuery = <Interaction>contract.methods.getAllBrandsInfo();
+    let data = await contract.runQuery(
+      this.elrondProxyService.getService(),
+      getDataQuery.buildQuery(),
+    );
+    let result = getDataQuery.interpretQueryResponse(data);
+
+    return result?.firstValue?.valueOf();
+  }
+
   async issueToken(
     ownerAddress: string,
     request: IssuePresaleCollectionRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract();
+    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
+      request.minterAddress,
+    );
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
       value: Balance.fromString(elrondConfig.issueNftCost),
@@ -50,26 +79,28 @@ export class NftMinterAbiService {
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
   }
 
-  async setLocalRoles(
-    brandId: string,
-    ownerAddress: string,
-  ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract();
+  // async setLocalRoles(
+  //   brandId: string,
+  //   ownerAddress: string,
+  // ): Promise<TransactionNode> {
+  //   const contract = await this.elrondProxyService.getMinterAbiSmartContract();
 
-    const setLocalRoles = contract.call({
-      func: new ContractFunction('setLocalRoles'),
-      value: Balance.egld(0),
-      args: [BytesValue.fromUTF8(brandId)],
-      gasLimit: new GasLimit(gas.withdraw),
-    });
-    return setLocalRoles.toPlainObject(new Address(ownerAddress));
-  }
+  //   const setLocalRoles = contract.call({
+  //     func: new ContractFunction('setLocalRoles'),
+  //     value: Balance.egld(0),
+  //     args: [BytesValue.fromUTF8(brandId)],
+  //     gasLimit: new GasLimit(gas.withdraw),
+  //   });
+  //   return setLocalRoles.toPlainObject(new Address(ownerAddress));
+  // }
 
   async buyRandomNft(
     ownerAddress: string,
     request: BuyRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract();
+    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
+      request.minterAddress,
+    );
     let buyRandomNft = contract.call({
       func: new ContractFunction('buyRandomNft'),
       value: Balance.fromString(request.price),

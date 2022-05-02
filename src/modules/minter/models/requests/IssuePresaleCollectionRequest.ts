@@ -13,6 +13,8 @@ export class IssuePresaleCollectionRequest {
   collectionName: string;
   collectionTicker: string;
   tags: string[];
+  minterAddress: string;
+
   constructor(init?: Partial<IssuePresaleCollectionRequest>) {
     Object.assign(this, init);
   }
@@ -30,6 +32,7 @@ export class IssuePresaleCollectionRequest {
       collectionName: args.collectionName,
       collectionTicker: args.collectionTicker,
       tags: args.tags,
+      minterAddress: args.minterAddress,
     });
   }
 }

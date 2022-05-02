@@ -211,6 +211,7 @@ input BidActionArgs {
 
 input BuyRandomNftActionArgs {
   brandId: String!
+  minterAddress: String!
   price: String!
   quantity: String
 }
@@ -408,6 +409,7 @@ input IssuePresaleCollectionArgs {
   mintPriceAmount: String!
   mintPriceToken: String = "EGLD"
   mintStartTime: Float!
+  minterAddress: String!
   royalties: String!
   tags: [String!]!
 }

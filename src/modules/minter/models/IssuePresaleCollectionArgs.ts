@@ -8,6 +8,9 @@ export class IssuePresaleCollectionArgs {
   @Field({ description: 'This is the brand id used to identify a collection' })
   brandId: string;
 
+  @Field()
+  minterAddress: string;
+
   @Field(() => MediaTypeEnum)
   mediaTypes: MediaTypeEnum;
 
@@ -42,6 +45,8 @@ export class BuyRandomNftActionArgs {
   brandId: string;
   @Field(() => String)
   price: string;
+  @Field(() => String)
+  minterAddress: string;
   @Field(() => String, { nullable: true })
   quantity: string;
 }
