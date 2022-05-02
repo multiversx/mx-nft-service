@@ -17,8 +17,7 @@ export class ElrondFeedService {
     const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
     try {
-      const request = new SubscriptionFeed({ referenceId: identifier });
-      console.log('subscribe', request);
+      const request = new SubscriptionFeed({ reference: identifier });
       const response = await this.apiService.post(
         url,
         request,
@@ -45,8 +44,7 @@ export class ElrondFeedService {
     const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
     try {
-      const request = new SubscriptionFeed({ referenceId: reference });
-      console.log('unsubscribe', request);
+      const request = new SubscriptionFeed({ reference: reference });
 
       const response = await this.apiService.delete(
         url,
