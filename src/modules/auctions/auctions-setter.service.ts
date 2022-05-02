@@ -34,7 +34,7 @@ export class AuctionsSetterService {
     auctionId: number,
     identifier: string,
     hash: string,
-  ): Promise<Auction | any> {
+  ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
       await this.invalidateCache();

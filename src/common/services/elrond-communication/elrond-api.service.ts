@@ -217,6 +217,17 @@ export class ElrondApiService {
     );
   }
 
+  async getCollectionByIdentifierForQuery(
+    identifier: string = '',
+    query: string = '',
+  ): Promise<CollectionApi> {
+    return await this.doGetGeneric(
+      this.getCollectionForIdentifier.name,
+      `collections/${identifier}?${query}`,
+      (response) => response,
+    );
+  }
+
   async getCollectionForIdentifier(
     identifier: string = '',
   ): Promise<CollectionApi> {

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ElrondApiService } from 'src/common';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
 import {
   EventEnum,
@@ -8,7 +9,6 @@ import { AssetsRedisHandler } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
-  CollectionEventEnum,
   NftEventEnum,
 } from '../assets/models/AuctionEvent.enum';
 import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
@@ -25,7 +25,6 @@ import {
   EndAuctionEvent,
   WithdrawEvent,
 } from './entities/auction';
-import { IssueCollectionEvent } from './entities/auction/issue-collection.event';
 import { MintEvent } from './entities/auction/mint.event';
 import { TransferEvent } from './entities/auction/transfer.event';
 
@@ -41,6 +40,7 @@ export class NftEventsService {
     private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
     private accountFeedService: ElrondFeedService,
+    private elrondApi: ElrondApiService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -71,7 +71,13 @@ export class NftEventsService {
             new Feed({
               address: topics.currentWinner,
               event: EventEnum.bid,
-              reference: topics.auctionId,
+              reference: auction?.identifier,
+              extraInfo: {
+                orderId: order.id,
+                nftName: await this.getNftName(auction?.identifier),
+                price: topics.currentBid,
+                auctionId: topics.auctionId,
+              },
             }),
           );
           this.availableTokensCount.clearKey(auction.identifier);
@@ -87,9 +93,7 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const auctionSft = await this.auctionsGetterService.getAuctionById(
-            parseInt(buySftTopics.auctionId, 16),
-          );
+          const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
           const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
           );
@@ -104,7 +108,7 @@ export class NftEventsService {
               AuctionStatusEnum.Ended,
             );
           }
-          this.ordersService.createOrderForSft(
+          const orderSft = await this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
               auctionId: parseInt(buySftTopics.auctionId, 16),
@@ -120,11 +124,18 @@ export class NftEventsService {
             new Feed({
               address: buySftTopics.currentWinner,
               event: EventEnum.buy,
-              reference: buySftTopics.auctionId,
+              reference: identifier,
+              extraInfo: {
+                orderId: orderSft.id,
+                nftName: await this.getNftName(identifier),
+                price: buySftTopics.bid,
+                auctionId: buySftTopics.auctionId,
+                boughtTokens: buySftTopics.boughtTokens,
+              },
             }),
           );
-          this.availableTokens.clearKey(auctionSft.id);
-          this.availableTokensCount.clearKey(auctionSft.identifier);
+          this.availableTokens.clearKey(parseInt(buySftTopics.auctionId, 16));
+          this.availableTokensCount.clearKey(identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);
@@ -154,7 +165,12 @@ export class NftEventsService {
             new Feed({
               address: buySftTopics.currentWinner,
               event: EventEnum.won,
-              reference: topicsEndAuction.auctionId,
+              reference: `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`,
+              extraInfo: {
+                auctionId: topicsEndAuction.auctionId,
+                nftName: await this.getNftName(identifier),
+                price: topicsEndAuction.currentBid,
+              },
             }),
           );
 
@@ -162,16 +178,22 @@ export class NftEventsService {
         case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
-          this.auctionsService.saveAuction(
+          const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
+          const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
-            `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+            startAuctionIdentifier,
             hash,
           );
           await this.accountFeedService.addFeed(
             new Feed({
               address: topicsAuctionToken.originalOwner,
               event: EventEnum.startAuction,
-              reference: topicsAuctionToken.auctionId,
+              reference: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+              extraInfo: {
+                auctionId: topicsAuctionToken.auctionId,
+                nftName: await this.getNftName(identifier),
+                minBid: startAuction.minBid,
+              },
             }),
           );
           break;
@@ -185,15 +207,23 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
+          const identifier = `${createTopics.collection}-${createTopics.nonce}`;
           this.collectionAssets.clearKey(createTopics.collection);
           this.collectionAssetsCount.clearKey(createTopics.collection);
+          const collection =
+            await this.elrondApi.getCollectionByIdentifierForQuery(
+              createTopics.collection,
+              'fields=name',
+            );
           await this.accountFeedService.addFeed(
             new Feed({
               address: mintEvent.getAddress(),
               event: EventEnum.mintNft,
               reference: createTopics.collection,
               extraInfo: {
-                identifier: `${createTopics.collection}-${createTopics.nonce}`,
+                identifier: identifier,
+                nftName: await this.getNftName(identifier),
+                collectionName: collection.name,
               },
             }),
           );
@@ -208,21 +238,15 @@ export class NftEventsService {
           );
 
           break;
-
-        case CollectionEventEnum.IssueNonFungible ||
-          CollectionEventEnum.IssueSemiFungible:
-          const collectionEvent = new IssueCollectionEvent(event);
-          const collectionTopics = collectionEvent.getTopics();
-          await this.accountFeedService.addFeed(
-            new Feed({
-              address: collectionEvent.getAddress(),
-              event: EventEnum.createCollection,
-              reference: collectionTopics.collection,
-            }),
-          );
-
-          break;
       }
     }
+  }
+
+  private async getNftName(identifier: string) {
+    const nft = await this.elrondApi.getNftByIdentifierForQuery(
+      identifier,
+      'fields=name',
+    );
+    return nft?.name;
   }
 }
