@@ -209,13 +209,6 @@ input BidActionArgs {
   price: String!
 }
 
-input BuyRandomNftActionArgs {
-  brandId: String!
-  minterAddress: String!
-  price: String!
-  quantity: String
-}
-
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
@@ -398,44 +391,12 @@ input IssueCollectionArgs {
   tokenTicker: String!
 }
 
-input IssuePresaleCollectionArgs {
-  """This is the brand id used to identify a collection"""
-  brandId: String!
-  collectionIpfsHash: String!
-  collectionName: String!
-  collectionTicker: String!
-  maxNfts: Float!
-  mediaTypes: MediaTypeEnum!
-  mintPriceAmount: String!
-  mintPriceToken: String = "EGLD"
-  mintStartTime: Float!
-  minterAddress: String!
-  royalties: String!
-  tags: [String!]!
-}
-
 type Media {
   fileSize: String
   fileType: String
   originalUrl: String
   thumbnailUrl: String
   url: String
-}
-
-enum MediaTypeEnum {
-  aac
-  flac
-  gif
-  jpeg
-  jpg
-  m4a
-  mov
-  mov2
-  mp3
-  mp4
-  png
-  wav
-  webm
 }
 
 type Metadata {
@@ -458,13 +419,11 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
-  buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
-  issuePresaleCollection(input: IssuePresaleCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
