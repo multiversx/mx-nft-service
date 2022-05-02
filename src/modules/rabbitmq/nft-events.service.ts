@@ -71,7 +71,10 @@ export class NftEventsService {
             new Feed({
               address: topics.currentWinner,
               event: EventEnum.bid,
-              reference: topics.auctionId,
+              reference: auction?.identifier,
+              extraInfo: {
+                orderId: order.id,
+              },
             }),
           );
           this.availableTokensCount.clearKey(auction.identifier);
@@ -87,9 +90,7 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const auctionSft = await this.auctionsGetterService.getAuctionById(
-            parseInt(buySftTopics.auctionId, 16),
-          );
+          const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
           const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
           );
@@ -104,7 +105,7 @@ export class NftEventsService {
               AuctionStatusEnum.Ended,
             );
           }
-          this.ordersService.createOrderForSft(
+          const orderSft = await this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
               auctionId: parseInt(buySftTopics.auctionId, 16),
@@ -120,11 +121,14 @@ export class NftEventsService {
             new Feed({
               address: buySftTopics.currentWinner,
               event: EventEnum.buy,
-              reference: buySftTopics.auctionId,
+              reference: identifier,
+              extraInfo: {
+                orderId: orderSft.id,
+              },
             }),
           );
-          this.availableTokens.clearKey(auctionSft.id);
-          this.availableTokensCount.clearKey(auctionSft.identifier);
+          this.availableTokens.clearKey(parseInt(buySftTopics.auctionId, 16));
+          this.availableTokensCount.clearKey(identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);
@@ -154,7 +158,10 @@ export class NftEventsService {
             new Feed({
               address: buySftTopics.currentWinner,
               event: EventEnum.won,
-              reference: topicsEndAuction.auctionId,
+              reference: `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`,
+              extraInfo: {
+                auctionId: topicsEndAuction.auctionId,
+              },
             }),
           );
 
@@ -171,7 +178,10 @@ export class NftEventsService {
             new Feed({
               address: topicsAuctionToken.originalOwner,
               event: EventEnum.startAuction,
-              reference: topicsAuctionToken.auctionId,
+              reference: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+              extraInfo: {
+                auctionId: topicsAuctionToken.auctionId,
+              },
             }),
           );
           break;
