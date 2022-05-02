@@ -1,10 +1,10 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { BrandInfo } from '.';
 
 @ObjectType()
 export class PresaleCollection {
   @Field(() => ID)
-  collectionIpfhHash: number;
+  minterAddress!: string;
 
   @Field(() => String)
   collectionName: string;
@@ -14,6 +14,15 @@ export class PresaleCollection {
 
   @Field(() => String)
   collectionTicker: string;
+
+  @Field(() => String)
+  collectionHash: string;
+
+  @Field(() => Int)
+  totalNfts: number;
+
+  @Field(() => Int)
+  availableNfts: number;
 
   constructor(init?: Partial<PresaleCollection>) {
     Object.assign(this, init);

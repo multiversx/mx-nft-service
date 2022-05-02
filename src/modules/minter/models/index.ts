@@ -1,4 +1,4 @@
 export * from './PresaleCollection.dto';
-export * from './BrandInfoAbi';
+export * from './abi/MintPriceAbi';
 export * from './IssuePresaleCollectionArgs';
 export * from './PresaleCollectionsResponse';
