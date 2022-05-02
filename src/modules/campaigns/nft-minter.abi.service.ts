@@ -25,7 +25,7 @@ import { ElrondProxyService } from 'src/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { TransactionNode } from '../common/transaction';
-import { BuyRequest, IssuePresaleCollectionRequest } from './models/requests';
+import { BuyRequest, IssueCampaignRequest } from './models/requests';
 
 @Injectable()
 export class NftMinterAbiService {
@@ -37,19 +37,19 @@ export class NftMinterAbiService {
     defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
   }
 
-  async getPresaleCollections(): Promise<BrandInfo[]> {
+  async getCampaigns(): Promise<BrandInfo[]> {
     const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
       return entry.toLowerCase().trim();
     });
     for (const minter of minters) {
-      const auction = await this.getPresaleCollectionsForAddress(minter);
+      const auction = await this.getCampaignsForScAddress(minter);
       console.log(auction);
     }
 
     return [];
   }
 
-  private async getPresaleCollectionsForAddress(address: string) {
+  private async getCampaignsForScAddress(address: string) {
     const contract = await this.elrondProxyService.getMinterAbiSmartContract(
       address,
     );
@@ -65,7 +65,7 @@ export class NftMinterAbiService {
 
   async issueToken(
     ownerAddress: string,
-    request: IssuePresaleCollectionRequest,
+    request: IssueCampaignRequest,
   ): Promise<TransactionNode> {
     const contract = await this.elrondProxyService.getMinterAbiSmartContract(
       request.minterAddress,
@@ -73,7 +73,7 @@ export class NftMinterAbiService {
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
       value: Balance.fromString(elrondConfig.issueNftCost),
-      args: this.getIssueCollectionArgs(request),
+      args: this.getIssueCampaignArgs(request),
       gasLimit: new GasLimit(gas.issueToken),
     });
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
@@ -126,9 +126,7 @@ export class NftMinterAbiService {
     return returnArgs;
   }
 
-  private getIssueCollectionArgs(
-    request: IssuePresaleCollectionRequest,
-  ): TypedValue[] {
+  private getIssueCampaignArgs(request: IssueCampaignRequest): TypedValue[] {
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(request.collectionIpfsHash),
       BytesValue.fromUTF8(request.brandId),

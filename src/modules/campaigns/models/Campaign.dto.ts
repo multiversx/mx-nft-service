@@ -3,7 +3,7 @@ import { BrandInfo } from '.';
 import { MintPrice } from './MintPrice.dto';
 
 @ObjectType()
-export class PresaleCollection {
+export class Campaign {
   @Field(() => ID)
   campaignId!: string;
   @Field(() => String)
@@ -30,11 +30,11 @@ export class PresaleCollection {
   @Field(() => MintPrice)
   mintPrice: MintPrice;
 
-  constructor(init?: Partial<PresaleCollection>) {
+  constructor(init?: Partial<Campaign>) {
     Object.assign(this, init);
   }
 
   static fromEntity(auction: BrandInfo) {
-    return new PresaleCollection({});
+    return new Campaign({});
   }
 }

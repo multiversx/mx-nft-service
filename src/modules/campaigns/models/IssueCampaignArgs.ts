@@ -1,7 +1,7 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 
 @InputType()
-export class IssuePresaleCollectionArgs {
+export class IssueCampaignArgs {
   @Field()
   collectionIpfsHash: string;
 

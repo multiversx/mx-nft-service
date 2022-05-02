@@ -216,6 +216,36 @@ input BuySftActionArgs {
   quantity: String
 }
 
+type Campaign {
+  availableNfts: Int!
+  campaignId: ID!
+  collectionHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  mediaType: String!
+  mintPrice: MintPrice!
+  minterAddress: String!
+  totalNfts: Int!
+}
+
+type CampaignEdge {
+  cursor: String
+  node: Campaign
+}
+
+type CampaignPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type CampaignsResponse {
+  edges: [CampaignEdge!]
+  pageData: PageData
+  pageInfo: CampaignPageInfo
+}
+
 input ChildExpression {
   filters: [ChildFilter!]!
   operator: Operator!
@@ -525,36 +555,6 @@ type PageData {
   offset: Int!
 }
 
-type PresaleCollection {
-  availableNfts: Int!
-  campaignId: ID!
-  collectionHash: String!
-  collectionName: String!
-  collectionTicker: String!
-  mediaType: String!
-  mintPrice: MintPrice!
-  minterAddress: String!
-  totalNfts: Int!
-}
-
-type PresaleCollectionEdge {
-  cursor: String
-  node: PresaleCollection
-}
-
-type PresaleCollectionPageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
-type PresaleCollectionsResponse {
-  edges: [PresaleCollectionEdge!]
-  pageData: PageData
-  pageInfo: PresaleCollectionPageInfo
-}
-
 type Price {
   amount: String!
   nonce: Int!
@@ -569,6 +569,7 @@ type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
+  campaigns(pagination: ConnectionArgs): CampaignsResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
@@ -576,7 +577,6 @@ type Query {
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
-  presaleCollections(pagination: ConnectionArgs): PresaleCollectionsResponse!
   trendingAssets: [Asset!]!
 }
 

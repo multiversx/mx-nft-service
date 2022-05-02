@@ -1,7 +1,7 @@
 import { MediaMimeTypeEnum } from 'src/modules/assets/models/MediaTypes.enum';
-import { IssuePresaleCollectionArgs } from '../IssuePresaleCollectionArgs';
+import { IssueCampaignArgs as IssueCampaignArgs } from '../IssueCampaignArgs';
 
-export class IssuePresaleCollectionRequest {
+export class IssueCampaignRequest {
   collectionIpfsHash: string;
   brandId: string;
   mediaTypes: MediaMimeTypeEnum;
@@ -15,12 +15,12 @@ export class IssuePresaleCollectionRequest {
   tags: string[];
   minterAddress: string;
 
-  constructor(init?: Partial<IssuePresaleCollectionRequest>) {
+  constructor(init?: Partial<IssueCampaignRequest>) {
     Object.assign(this, init);
   }
 
-  static fromArgs(args: IssuePresaleCollectionArgs) {
-    return new IssuePresaleCollectionRequest({
+  static fromArgs(args: IssueCampaignArgs) {
+    return new IssueCampaignRequest({
       collectionIpfsHash: args.collectionIpfsHash,
       brandId: args.brandId,
       mediaTypes: MediaMimeTypeEnum[args.mediaTypes],

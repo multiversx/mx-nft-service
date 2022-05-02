@@ -1,29 +1,27 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import { PresaleCollection, PresaleCollectionsResponse } from './models';
+import { Campaign, CampaignsResponse } from './models';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { MintPrice } from './models/MintPrice.dto';
 
-@Resolver(() => PresaleCollection)
-export class PresaleCollectionsQueriesResolver extends BaseResolver(
-  PresaleCollection,
-) {
+@Resolver(() => Campaign)
+export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
   constructor(private nftMinterService: NftMinterAbiService) {
     super();
   }
 
-  @Query(() => PresaleCollectionsResponse)
-  async presaleCollections(
+  @Query(() => CampaignsResponse)
+  async campaigns(
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
 
-    return PageResponse.mapResponse<PresaleCollection>(
+    return PageResponse.mapResponse<Campaign>(
       [
-        new PresaleCollection({
+        new Campaign({
           minterAddress:
             'erd1qqqqqqqqqqqqqpgq4twhvyxe46vx0uwkf8p94kuftyy4ryyvu00sshevvh',
           availableNfts: 50,
@@ -38,7 +36,7 @@ export class PresaleCollectionsQueriesResolver extends BaseResolver(
             startTimestamp: 1650370782,
           }),
         }),
-        new PresaleCollection({
+        new Campaign({
           minterAddress:
             'erd1qqqqqqqqqqqqqpgq4twhvyxe46vx0uwkf8p94kuftyy4ryyvu00sshevvh',
           availableNfts: 50,
@@ -54,7 +52,7 @@ export class PresaleCollectionsQueriesResolver extends BaseResolver(
           }),
         }),
 
-        new PresaleCollection({
+        new Campaign({
           minterAddress:
             'erd1qqqqqqqqqqqqqpgqkyagn807xeh0zwytvhd3fugvq0kz4vq3u00sgt7yfp',
           availableNfts: 50,
