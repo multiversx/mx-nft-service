@@ -1,9 +1,12 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { BrandInfo } from '.';
+import { MintPrice } from './MintPrice.dto';
 
 @ObjectType()
 export class PresaleCollection {
   @Field(() => ID)
+  campaignId!: string;
+  @Field(() => String)
   minterAddress!: string;
 
   @Field(() => String)
@@ -23,6 +26,9 @@ export class PresaleCollection {
 
   @Field(() => Int)
   availableNfts: number;
+
+  @Field(() => MintPrice)
+  mintPrice: MintPrice;
 
   constructor(init?: Partial<PresaleCollection>) {
     Object.assign(this, init);

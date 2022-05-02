@@ -233,16 +233,7 @@
             ],
             "outputs": [
                 {
-                    "type": "BrandInfo"
-                },
-                {
-                    "type": "MintPrice"
-                },
-                {
-                    "type": "u32"
-                },
-                {
-                    "type": "u32"
+                    "type": "BrandInfoViewResultType"
                 }
             ]
         },
@@ -252,7 +243,7 @@
             "inputs": [],
             "outputs": [
                 {
-                    "type": "variadic<multi<bytes,BrandInfo,MintPrice,u32,u32>>",
+                    "type": "variadic<BrandInfoViewResultType>",
                     "multi_result": true
                 }
             ]
@@ -402,6 +393,48 @@
                 }
             ]
         },
+        "MintPrice": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "start_timestamp",
+                    "type": "u64"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "BrandInfoViewResultType": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "brand_id",
+                    "type": "bytes"
+                },
+                {
+                    "name": "brand_info",
+                    "type": "BrandInfo"
+                },
+                {
+                    "name": "mint_price",
+                    "type": "MintPrice"
+                },
+                {
+                    "name": "available_nfts",
+                    "type": "u32"
+                },
+                {
+                    "name": "total_nfts",
+                    "type": "u32"
+                }
+            ]
+        },
         "EsdtTokenPayment": {
             "type": "struct",
             "fields": [
@@ -445,23 +478,6 @@
                 {
                     "name": "Invalid",
                     "discriminant": 4
-                }
-            ]
-        },
-        "MintPrice": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "start_timestamp",
-                    "type": "u64"
-                },
-                {
-                    "name": "token_id",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "amount",
-                    "type": "BigUint"
                 }
             ]
         }

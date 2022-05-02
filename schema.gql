@@ -445,6 +445,13 @@ type Metadata {
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
 }
 
+type MintPrice {
+  amount: String!
+  nonce: Int!
+  startTimestamp: Int!
+  token: ID!
+}
+
 type Mutation {
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
@@ -560,10 +567,15 @@ type PageData {
 }
 
 type PresaleCollection {
-  collectionIpfhHash: ID!
+  availableNfts: Int!
+  campaignId: ID!
+  collectionHash: String!
   collectionName: String!
   collectionTicker: String!
   mediaType: String!
+  mintPrice: MintPrice!
+  minterAddress: String!
+  totalNfts: Int!
 }
 
 type PresaleCollectionEdge {
