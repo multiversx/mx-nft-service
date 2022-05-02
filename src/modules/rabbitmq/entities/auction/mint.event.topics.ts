@@ -1,4 +1,3 @@
-import { Address } from '@elrondnetwork/erdjs/out';
 import '../../../../utils/extentions';
 
 export class MintEventsTopics {

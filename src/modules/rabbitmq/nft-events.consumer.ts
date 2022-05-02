@@ -21,8 +21,6 @@ export class NftTransactionsConsumer {
       nftAuctionEvents?.events?.filter(
         (e: { identifier: NftEventEnum | CollectionEventEnum }) =>
           e.identifier === NftEventEnum.ESDTNFTCreate ||
-          e.identifier === CollectionEventEnum.IssueSemiFungible ||
-          e.identifier === CollectionEventEnum.IssueNonFungible ||
           e.identifier === NftEventEnum.ESDTNFTTransfer,
       ),
       nftAuctionEvents.hash,

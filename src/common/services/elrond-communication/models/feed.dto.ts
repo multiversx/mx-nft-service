@@ -12,10 +12,7 @@ export class Feed {
 
 export enum EventEnum {
   like = 'like',
-  unlike = 'unlike',
   follow = 'follow',
-  unfollow = 'unfollow',
-  createCollection = 'createCollection',
   mintNft = 'mintNft',
   startAuction = 'startAuction',
   bid = 'bid',
