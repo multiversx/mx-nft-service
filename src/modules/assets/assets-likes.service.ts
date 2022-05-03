@@ -3,7 +3,7 @@ import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
@@ -25,6 +25,7 @@ export class AssetsLikesService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,
+    private elrondApi: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
@@ -78,6 +79,9 @@ export class AssetsLikesService {
             address: address,
             event: EventEnum.like,
             reference: identifier,
+            extraInfo: {
+              nftName: await this.getNftName(identifier),
+            },
           }),
         );
         return true;
@@ -158,6 +162,14 @@ export class AssetsLikesService {
 
   private getAssetLikesCountCacheKey(identifier: string) {
     return generateCacheKeyFromParams('assetLikesCount', identifier);
+  }
+
+  private async getNftName(identifier: string) {
+    const nft = await this.elrondApi.getNftByIdentifierForQuery(
+      identifier,
+      'fields=name',
+    );
+    return nft?.name;
   }
 
   private async invalidateCache(

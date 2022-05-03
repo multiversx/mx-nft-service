@@ -76,7 +76,7 @@ export class NftEventsService {
                 orderId: order.id,
                 nftName: await this.getNftName(auction?.identifier),
                 price: topics.currentBid,
-                auctionId: topics.auctionId,
+                auctionId: parseInt(topics.auctionId, 16),
               },
             }),
           );
@@ -129,7 +129,7 @@ export class NftEventsService {
                 orderId: orderSft.id,
                 nftName: await this.getNftName(identifier),
                 price: buySftTopics.bid,
-                auctionId: buySftTopics.auctionId,
+                auctionId: parseInt(buySftTopics.auctionId, 16),
                 boughtTokens: buySftTopics.boughtTokens,
               },
             }),
@@ -167,7 +167,7 @@ export class NftEventsService {
               event: EventEnum.won,
               reference: `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`,
               extraInfo: {
-                auctionId: topicsEndAuction.auctionId,
+                auctionId: parseInt(topicsEndAuction.auctionId, 16),
                 nftName: await this.getNftName(identifier),
                 price: topicsEndAuction.currentBid,
               },
@@ -188,10 +188,10 @@ export class NftEventsService {
             new Feed({
               address: topicsAuctionToken.originalOwner,
               event: EventEnum.startAuction,
-              reference: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+              reference: startAuctionIdentifier,
               extraInfo: {
-                auctionId: topicsAuctionToken.auctionId,
-                nftName: await this.getNftName(identifier),
+                auctionId: parseInt(topicsAuctionToken.auctionId, 16),
+                nftName: await this.getNftName(startAuctionIdentifier),
                 minBid: startAuction.minBid,
               },
             }),
