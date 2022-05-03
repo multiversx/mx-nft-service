@@ -222,9 +222,12 @@ type Campaign {
   collectionHash: String!
   collectionName: String!
   collectionTicker: String!
+  endDate: Int!
   mediaType: String!
   mintPrice: MintPrice!
   minterAddress: String!
+  royalties: String!
+  startDate: Int!
   totalNfts: Int!
 }
 
@@ -438,8 +441,6 @@ type Metadata {
 
 type MintPrice {
   amount: String!
-  nonce: Int!
-  startTimestamp: Int!
   token: ID!
 }
 

@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { BrandInfo } from '.';
+import { CampaignEntity } from 'src/db/campaigns';
+
 import { MintPrice } from './MintPrice.dto';
 
 @ObjectType()
@@ -21,11 +22,20 @@ export class Campaign {
   @Field(() => String)
   collectionHash: string;
 
+  @Field(() => String)
+  royalties: string;
+
   @Field(() => Int)
   totalNfts: number;
 
   @Field(() => Int)
   availableNfts: number;
+
+  @Field(() => Int)
+  startDate: number;
+
+  @Field(() => Int)
+  endDate: number;
 
   @Field(() => MintPrice)
   mintPrice: MintPrice;
@@ -34,7 +44,25 @@ export class Campaign {
     Object.assign(this, init);
   }
 
-  static fromEntity(auction: BrandInfo) {
-    return new Campaign({});
+  static fromEntity(campaign: CampaignEntity) {
+    return campaign
+      ? new Campaign({
+          availableNfts: campaign.availableNfts,
+          totalNfts: campaign.totalNfts,
+          campaignId: campaign.campaignId,
+          collectionHash: campaign.collectionHash,
+          collectionName: campaign.collectionName,
+          collectionTicker: campaign.collectionTicker,
+          mediaType: campaign.mediaType,
+          mintPrice: new MintPrice({
+            amount: campaign.mintPrice,
+            token: campaign.mintToken,
+          }),
+          minterAddress: campaign.minterAddress,
+          startDate: campaign.startDate,
+          endDate: campaign.endDate,
+          royalties: campaign.royalties,
+        })
+      : null;
   }
 }

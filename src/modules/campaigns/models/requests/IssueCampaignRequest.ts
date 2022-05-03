@@ -1,13 +1,13 @@
-import { MediaMimeTypeEnum } from 'src/modules/assets/models/MediaTypes.enum';
 import { IssueCampaignArgs as IssueCampaignArgs } from '../IssueCampaignArgs';
 
 export class IssueCampaignRequest {
   collectionIpfsHash: string;
   brandId: string;
-  mediaTypes: MediaMimeTypeEnum;
+  mediaTypes: string;
   royalties: string;
   maxNfts: number;
   mintStartTime: number;
+  mintEndTime: number;
   mintPriceToken: string = 'EGLD';
   mintPriceAmount: string;
   collectionName: string;
@@ -23,12 +23,13 @@ export class IssueCampaignRequest {
     return new IssueCampaignRequest({
       collectionIpfsHash: args.collectionIpfsHash,
       brandId: args.brandId,
-      mediaTypes: MediaMimeTypeEnum[args.mediaTypes],
+      mediaTypes: args.mediaTypes,
       royalties: args.royalties,
       maxNfts: args.maxNfts,
       mintPriceAmount: args.mintPriceAmount,
       mintPriceToken: args.mintPriceToken,
       mintStartTime: args.mintStartTime,
+      mintEndTime: args.mintEndTime,
       collectionName: args.collectionName,
       collectionTicker: args.collectionTicker,
       tags: args.tags,

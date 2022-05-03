@@ -18,58 +18,12 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-
+    const col = await this.nftMinterService.getCampaigns();
+    console.log(col);
     return PageResponse.mapResponse<Campaign>(
-      [
-        new Campaign({
-          minterAddress:
-            'erd1qqqqqqqqqqqqqpgq4twhvyxe46vx0uwkf8p94kuftyy4ryyvu00sshevvh',
-          availableNfts: 50,
-          totalNfts: 50,
-          campaignId: 'MockCampaign',
-          collectionName: 'MINTERTEST',
-          collectionTicker: 'MINTER',
-          collectionHash: 'hash',
-          mintPrice: new MintPrice({
-            token: 'EGLD',
-            amount: '10000000000000000',
-            startTimestamp: 1650370782,
-          }),
-        }),
-        new Campaign({
-          minterAddress:
-            'erd1qqqqqqqqqqqqqpgq4twhvyxe46vx0uwkf8p94kuftyy4ryyvu00sshevvh',
-          availableNfts: 50,
-          totalNfts: 50,
-          campaignId: 'MockCampaign2',
-          collectionName: 'MINTERTEST2',
-          collectionTicker: 'MINTER2',
-          collectionHash: 'hash',
-          mintPrice: new MintPrice({
-            token: 'EGLD',
-            amount: '10000000000000000',
-            startTimestamp: 1650370782,
-          }),
-        }),
-
-        new Campaign({
-          minterAddress:
-            'erd1qqqqqqqqqqqqqpgqkyagn807xeh0zwytvhd3fugvq0kz4vq3u00sgt7yfp',
-          availableNfts: 50,
-          totalNfts: 50,
-          campaignId: 'MockCampaign2',
-          collectionName: 'MINTERTEST2',
-          collectionTicker: 'MINTER2',
-          collectionHash: 'hash',
-          mintPrice: new MintPrice({
-            token: 'EGLD',
-            amount: '10000000000000000',
-            startTimestamp: 1650370782,
-          }),
-        }),
-      ],
+      col,
       pagination,
-      3,
+      col?.length,
       offset,
       limit,
     );

@@ -1,8 +1,6 @@
-import { BigUIntValue, BytesValue } from '@elrondnetwork/erdjs';
+import { BigUIntValue, TokenIdentifierValue } from '@elrondnetwork/erdjs';
 
-export interface BrandInfo {
-  collection_hash: BytesValue;
-  token_display_name: BytesValue;
-  media_type: BytesValue;
-  royalties: BigUIntValue;
+export interface MintPrice {
+  token_id: TokenIdentifierValue;
+  amount: BigUIntValue;
 }

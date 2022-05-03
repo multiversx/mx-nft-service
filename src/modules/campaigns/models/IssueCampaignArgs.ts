@@ -24,6 +24,9 @@ export class IssueCampaignArgs {
   mintStartTime: number;
 
   @Field()
+  mintEndTime: number;
+
+  @Field()
   mintPriceToken: string = 'EGLD';
 
   @Field()

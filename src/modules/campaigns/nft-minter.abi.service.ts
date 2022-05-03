@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { BrandInfo, BuyRandomNftActionArgs } from './models';
+import { BuyRandomNftActionArgs, Campaign } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -26,27 +26,46 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
+import { nominateVal } from 'src/utils';
+import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
+import { CampaignEntity } from 'src/db/campaigns';
+import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 
 @Injectable()
 export class NftMinterAbiService {
   constructor(
     private elrondProxyService: ElrondProxyService,
+    private campaignsRepository: CampaignsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     let defaultNetworkConfig = NetworkConfig.getDefault();
     defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
   }
 
-  async getCampaigns(): Promise<BrandInfo[]> {
+  async getCampaigns(): Promise<Campaign[]> {
     const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
       return entry.toLowerCase().trim();
     });
+    let campaigns: CampaignEntity[] = [];
     for (const minter of minters) {
-      const auction = await this.getCampaignsForScAddress(minter);
-      console.log(auction);
+      const campaignsFromDb =
+        await this.campaignsRepository.getCampaignByMinterAddress(minter);
+      if (campaignsFromDb?.length > 0) {
+        campaigns = [...campaigns, ...campaignsFromDb];
+      } else {
+        const auction: BrandInfoViewResultType[] =
+          await this.getCampaignsForScAddress(minter);
+        const campaignsfromBlockchain = auction.map((c) =>
+          CampaignEntity.fromCampaignAbi(c, minter),
+        );
+        const savedCampaigns = await this.campaignsRepository.save(
+          campaignsfromBlockchain,
+        );
+        campaigns = [...campaigns, ...savedCampaigns];
+      }
     }
 
-    return [];
+    return campaigns.map((campaign) => Campaign.fromEntity(campaign));
   }
 
   private async getCampaignsForScAddress(address: string) {
@@ -59,8 +78,8 @@ export class NftMinterAbiService {
       getDataQuery.buildQuery(),
     );
     let result = getDataQuery.interpretQueryResponse(data);
-
-    return result?.firstValue?.valueOf();
+    const campaign: BrandInfoViewResultType[] = result?.firstValue?.valueOf();
+    return campaign;
   }
 
   async issueToken(
@@ -127,19 +146,23 @@ export class NftMinterAbiService {
   }
 
   private getIssueCampaignArgs(request: IssueCampaignRequest): TypedValue[] {
+    console.log(request, request.mediaTypes.split('/')[1]);
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(request.collectionIpfsHash),
       BytesValue.fromUTF8(request.brandId),
       BytesValue.fromUTF8(request.mediaTypes.split('/')[1]),
-      new BigUIntValue(new BigNumber(request.royalties)),
-      new U64Value(new BigNumber(request.maxNfts)),
-      new U64Value(new BigNumber(request.mintStartTime)),
+      BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
+      new U64Value(new BigNumber(request.maxNfts.toString())),
+      new U64Value(new BigNumber(request.mintStartTime.toString())),
+      new U64Value(new BigNumber(request.mintEndTime.toString())),
       new TokenIdentifierValue(Buffer.from(request.mintPriceToken)),
       new BigUIntValue(new BigNumber(request.mintPriceAmount)),
       BytesValue.fromUTF8(request.collectionName),
       BytesValue.fromUTF8(request.collectionTicker),
       VariadicValue.fromItems(
-        List.fromItems(request.tags.map((tag) => new U64Value(tag))),
+        List.fromItems(
+          request.tags.map((tag) => new BytesValue(Buffer.from(tag, 'hex'))),
+        ),
       ),
     ];
 
