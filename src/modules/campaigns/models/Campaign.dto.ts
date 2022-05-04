@@ -46,8 +46,6 @@ export class Campaign {
   static fromEntity(campaign: CampaignEntity) {
     return campaign
       ? new Campaign({
-          availableNfts: campaign.availableNfts,
-          totalNfts: campaign.totalNfts,
           campaignId: campaign.campaignId,
           collectionHash: campaign.collectionHash,
           collectionName: campaign.collectionName,
@@ -57,6 +55,15 @@ export class Campaign {
           startDate: campaign.startDate,
           endDate: campaign.endDate,
           royalties: campaign.royalties,
+          totalNfts: campaign.tiers
+            .map((t) => t.totalNfts)
+            .reduce((partialSum, a) => partialSum + a, 0),
+          availableNfts: campaign.tiers
+            .map((t) => t.availableNfts)
+            .reduce((partialSum, a) => partialSum + a, 0),
+          tiers: campaign.tiers.map((t) =>
+            Tier.fromEntity(t, campaign.campaignId),
+          ),
         })
       : null;
   }

@@ -20,22 +20,23 @@ export class Tier {
   @Field(() => MintPrice)
   mintPrice: MintPrice;
 
-  @Field(() => [TierDetail])
+  @Field(() => [TierDetail], { nullable: 'itemsAndList' })
   details: TierDetail[];
 
   constructor(init?: Partial<Tier>) {
     Object.assign(this, init);
   }
 
-  static fromEntity(tier: TierEntity) {
+  static fromEntity(tier: TierEntity, campaignId: string) {
     return tier
       ? new Tier({
+          tierName: tier.tierName,
           availableNfts: tier.availableNfts,
           totalNfts: tier.totalNfts,
-          campaignId: tier.campaign.campaignId,
+          campaignId: campaignId,
           mintPrice: new MintPrice({
             amount: tier.mintPrice,
-            token: tier.campaign.mintToken,
+            token: tier.mintToken,
           }),
         })
       : null;

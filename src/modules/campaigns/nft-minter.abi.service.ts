@@ -19,6 +19,7 @@ import {
   VariadicValue,
   List,
   Interaction,
+  CompositeValue,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from '../../config';
 import { ElrondProxyService } from 'src/common';
@@ -30,12 +31,14 @@ import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
 import { CampaignEntity } from 'src/db/campaigns';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
+import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 
 @Injectable()
 export class NftMinterAbiService {
   constructor(
     private elrondProxyService: ElrondProxyService,
     private campaignsRepository: CampaignsRepository,
+    private tierRepository: TiersRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     let defaultNetworkConfig = NetworkConfig.getDefault();
@@ -61,6 +64,16 @@ export class NftMinterAbiService {
         const savedCampaigns = await this.campaignsRepository.save(
           campaignsfromBlockchain,
         );
+        for (const campaign of campaignsfromBlockchain) {
+          const savedCampaign = await this.campaignsRepository.saveCampaign(
+            campaign,
+          );
+          const tiers = campaign.tiers.map((tier) => ({
+            ...tier,
+            campaignId: savedCampaign.id,
+          }));
+          await this.tierRepository.save(tiers);
+        }
         campaigns = [...campaigns, ...savedCampaigns];
       }
     }
@@ -134,22 +147,26 @@ export class NftMinterAbiService {
   }
 
   private getIssueCampaignArgs(request: IssueCampaignRequest): TypedValue[] {
-    console.log(request, request.mediaTypes.split('/')[1]);
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(request.collectionIpfsHash),
       BytesValue.fromUTF8(request.campaignId),
       BytesValue.fromUTF8(request.mediaTypes.split('/')[1]),
       BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
-      new U64Value(new BigNumber(request.maxNfts.toString())),
       new U64Value(new BigNumber(request.mintStartTime.toString())),
       new U64Value(new BigNumber(request.mintEndTime.toString())),
       new TokenIdentifierValue(Buffer.from(request.mintPriceToken)),
-      new BigUIntValue(new BigNumber(request.mintPriceAmount)),
       BytesValue.fromUTF8(request.collectionName),
       BytesValue.fromUTF8(request.collectionTicker),
+      List.fromItems(
+        request.tags.map((tag) => new BytesValue(Buffer.from(tag, 'hex'))),
+      ),
       VariadicValue.fromItems(
-        List.fromItems(
-          request.tags.map((tag) => new BytesValue(Buffer.from(tag, 'hex'))),
+        ...request.tiers.map((tier) =>
+          CompositeValue.fromItems(
+            BytesValue.fromUTF8(tier.tierName),
+            new U64Value(new BigNumber(tier.totalNfts.toString())),
+            new BigUIntValue(new BigNumber(tier.mintPriceAmount)),
+          ),
         ),
       ),
     ];

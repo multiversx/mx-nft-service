@@ -5,14 +5,13 @@ export class IssueCampaignRequest {
   campaignId: string;
   mediaTypes: string;
   royalties: string;
-  maxNfts: number;
   mintStartTime: number;
   mintEndTime: number;
   mintPriceToken: string = 'EGLD';
-  mintPriceAmount: string;
   collectionName: string;
   collectionTicker: string;
   tags: string[];
+  tiers: TierRequest[];
   minterAddress: string;
 
   constructor(init?: Partial<IssueCampaignRequest>) {
@@ -25,8 +24,6 @@ export class IssueCampaignRequest {
       campaignId: args.campaignId,
       mediaTypes: args.mediaTypes,
       royalties: args.royalties,
-      maxNfts: args.maxNfts,
-      mintPriceAmount: args.mintPriceAmount,
       mintPriceToken: args.mintPriceToken,
       mintStartTime: args.mintStartTime,
       mintEndTime: args.mintEndTime,
@@ -34,6 +31,24 @@ export class IssueCampaignRequest {
       collectionTicker: args.collectionTicker,
       tags: args.tags,
       minterAddress: args.minterAddress,
+      tiers: args.tiers.map(
+        (t) =>
+          new TierRequest({
+            totalNfts: t.totalNfts,
+            mintPriceAmount: t.mintPriceAmount,
+            tierName: t.tierName,
+          }),
+      ),
     });
+  }
+}
+
+export class TierRequest {
+  tierName: string;
+  totalNfts: number;
+  mintPriceAmount: string;
+
+  constructor(init?: Partial<TierRequest>) {
+    Object.assign(this, init);
   }
 }

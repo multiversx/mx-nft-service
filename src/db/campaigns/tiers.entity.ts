@@ -1,4 +1,4 @@
-import { BrandInfoViewResultType } from 'src/modules/campaigns/models/abi/BrandInfoViewAbi';
+import { TierInfoAbi } from 'src/modules/campaigns/models/abi/TierInfoAbi';
 import denominate from 'src/utils/formatters';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
@@ -12,6 +12,9 @@ export class TierEntity extends BaseEntity {
 
   @Column({ length: 20 })
   tierName: string;
+
+  @Column({ length: 20 })
+  mintToken: string;
 
   @Column()
   mintPrice: string;
@@ -37,21 +40,22 @@ export class TierEntity extends BaseEntity {
     Object.assign(this, init);
   }
 
-  static fromCampaignAbi(campaign: BrandInfoViewResultType, address: string) {
-    return campaign
+  static fromTierAbi(tier: TierInfoAbi) {
+    return tier
       ? new TierEntity({
-          mintPrice: campaign.mint_price.amount.valueOf().toString(),
+          tierName: tier.tier.valueOf().toString(),
+          mintToken: tier.mint_price.token_id.valueOf().toString(),
+          mintPrice: tier.mint_price.amount.valueOf().toString(),
           mintPriceDenominated: parseFloat(
             denominate({
-              input: campaign.mint_price.amount.valueOf()?.toString(),
+              input: tier.mint_price.amount.valueOf()?.toString(),
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
             }).replace(',', ''),
           ),
-
-          totalNfts: parseInt(campaign.total_nfts.valueOf().toString()),
-          availableNfts: parseInt(campaign.available_nfts.valueOf().toString()),
+          totalNfts: parseInt(tier.total_nfts.valueOf().toString()),
+          availableNfts: parseInt(tier.available_nfts.valueOf().toString()),
         })
       : null;
   }

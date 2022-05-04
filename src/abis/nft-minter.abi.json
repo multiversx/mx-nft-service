@@ -10,11 +10,11 @@
     "contractCrate": {
       "name": "nft-minter",
       "version": "0.0.0",
-      "git_version": "3c9deec"
+      "git_version": "ead0464"
     },
     "framework": {
       "name": "elrond-wasm",
-      "version": "0.31.0"
+      "version": "0.31.1"
     }
   },
   "name": "NftMinter",
@@ -95,11 +95,30 @@
       ]
     },
     {
-      "name": "getPriceForBrand",
+      "name": "getNftTokenIdForBrand",
       "mutability": "readonly",
       "inputs": [
         {
           "name": "brand_id",
+          "type": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "TokenIdentifier"
+        }
+      ]
+    },
+    {
+      "name": "getPriceForTier",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "tier",
           "type": "bytes"
         }
       ],
@@ -170,10 +189,6 @@
           "type": "BigUint"
         },
         {
-          "name": "total_nfts",
-          "type": "u32"
-        },
-        {
           "name": "mint_start_timestamp",
           "type": "u64"
         },
@@ -186,10 +201,6 @@
           "type": "TokenIdentifier"
         },
         {
-          "name": "mint_price_amount",
-          "type": "BigUint"
-        },
-        {
           "name": "token_display_name",
           "type": "bytes"
         },
@@ -199,7 +210,11 @@
         },
         {
           "name": "tags",
-          "type": "variadic<bytes>",
+          "type": "List<bytes>"
+        },
+        {
+          "name": "tier_name_nr_nfts_pairs",
+          "type": "variadic<multi<bytes,u32,BigUint>>",
           "multi_arg": true
         }
       ],
@@ -215,12 +230,20 @@
           "type": "bytes"
         },
         {
+          "name": "tier",
+          "type": "bytes"
+        },
+        {
           "name": "opt_nfts_to_buy",
           "type": "optional<u32>",
           "multi_arg": true
         }
       ],
-      "outputs": []
+      "outputs": [
+        {
+          "type": "List<EsdtTokenPayment>"
+        }
+      ]
     },
     {
       "name": "giveawayNfts",
@@ -228,6 +251,10 @@
       "inputs": [
         {
           "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "tier",
           "type": "bytes"
         },
         {
@@ -239,7 +266,7 @@
       "outputs": []
     },
     {
-      "name": "getBrandInfo",
+      "name": "getNftTiersForBrand",
       "mutability": "readonly",
       "inputs": [
         {
@@ -249,33 +276,27 @@
       ],
       "outputs": [
         {
-          "type": "BrandInfoViewResultType"
-        }
-      ]
-    },
-    {
-      "name": "getAllBrandsInfo",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "variadic<BrandInfoViewResultType>",
+          "type": "variadic<bytes>",
           "multi_result": true
         }
       ]
     },
     {
-      "name": "getNftTokenIdForBrand",
+      "name": "nftIdOffsetForTier",
       "mutability": "readonly",
       "inputs": [
         {
           "name": "brand_id",
           "type": "bytes"
+        },
+        {
+          "name": "tier",
+          "type": "bytes"
         }
       ],
       "outputs": [
         {
-          "type": "TokenIdentifier"
+          "type": "u32"
         }
       ]
     },
@@ -384,23 +405,36 @@
         }
       ],
       "outputs": []
+    },
+    {
+      "name": "getBrandInfo",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BrandInfoViewResultType"
+        }
+      ]
+    },
+    {
+      "name": "getAllBrandsInfo",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<BrandInfoViewResultType>",
+          "multi_result": true
+        }
+      ]
     }
   ],
   "hasCallback": true,
   "types": {
-    "MintPrice": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_id",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "amount",
-          "type": "BigUint"
-        }
-      ]
-    },
     "TimePeriod": {
       "type": "struct",
       "fields": [
@@ -439,6 +473,40 @@
         }
       ]
     },
+    "MintPrice": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "TierInfoEntry": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "tier",
+          "type": "bytes"
+        },
+        {
+          "name": "total_nfts",
+          "type": "u32"
+        },
+        {
+          "name": "available_nfts",
+          "type": "u32"
+        },
+        {
+          "name": "mint_price",
+          "type": "MintPrice"
+        }
+      ]
+    },
     "BrandInfoViewResultType": {
       "type": "struct",
       "fields": [
@@ -447,20 +515,16 @@
           "type": "bytes"
         },
         {
+          "name": "nft_token_id",
+          "type": "TokenIdentifier"
+        },
+        {
           "name": "brand_info",
           "type": "BrandInfo"
         },
         {
-          "name": "mint_price",
-          "type": "MintPrice"
-        },
-        {
-          "name": "available_nfts",
-          "type": "u32"
-        },
-        {
-          "name": "total_nfts",
-          "type": "u32"
+          "name": "tier_info_entries",
+          "type": "List<TierInfoEntry>"
         }
       ]
     },

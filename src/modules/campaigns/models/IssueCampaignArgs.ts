@@ -17,9 +17,6 @@ export class IssueCampaignArgs {
   @Field()
   royalties: string;
 
-  @Field()
-  maxNfts: number;
-
   @Field(() => Int)
   mintStartTime: number;
 
@@ -30,9 +27,6 @@ export class IssueCampaignArgs {
   mintPriceToken: string = 'EGLD';
 
   @Field()
-  mintPriceAmount: string;
-
-  @Field()
   collectionName: string;
 
   @Field()
@@ -40,6 +34,19 @@ export class IssueCampaignArgs {
 
   @Field(() => [String])
   tags: string[];
+
+  @Field(() => [TierArgs])
+  tiers: TierArgs[];
+}
+
+@InputType()
+export class TierArgs {
+  @Field(() => String)
+  tierName: string;
+  @Field(() => Int)
+  totalNfts: number;
+  @Field(() => String)
+  mintPriceAmount: string;
 }
 
 @InputType()

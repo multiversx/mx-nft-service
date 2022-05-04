@@ -428,15 +428,14 @@ input IssueCampaignArgs {
   collectionIpfsHash: String!
   collectionName: String!
   collectionTicker: String!
-  maxNfts: Float!
   mediaTypes: MediaTypeEnum!
   mintEndTime: Int!
-  mintPriceAmount: String!
   mintPriceToken: String = "EGLD"
   mintStartTime: Int!
   minterAddress: String!
   royalties: String!
   tags: [String!]!
+  tiers: [TierArgs!]!
 }
 
 input IssueCollectionArgs {
@@ -670,8 +669,14 @@ input StopNftCreateArgs {
 type Tier {
   availableNfts: Int!
   campaignId: ID!
-  details: [TierDetail!]!
+  details: [TierDetail]
   mintPrice: MintPrice!
+  tierName: String!
+  totalNfts: Int!
+}
+
+input TierArgs {
+  mintPriceAmount: String!
   tierName: String!
   totalNfts: Int!
 }

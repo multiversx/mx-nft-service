@@ -24,8 +24,8 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
       where: {
         minterAddress,
       },
+      relations: ['tiers'],
     });
-
     return campaigns;
   }
 

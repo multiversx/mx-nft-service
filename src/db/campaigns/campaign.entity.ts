@@ -25,20 +25,11 @@ export class CampaignEntity extends BaseEntity {
   @Index('minter_address')
   minterAddress: string;
 
-  @Column({ length: 20 })
-  mintToken: string;
-
   @Column()
   startDate: number;
 
   @Column()
   endDate: number;
-
-  @Column()
-  totalNfts: number;
-
-  @Column()
-  availableNfts: number;
 
   @Column({ length: 10 })
   royalties: string;
@@ -55,7 +46,6 @@ export class CampaignEntity extends BaseEntity {
     return campaign
       ? new CampaignEntity({
           campaignId: campaign?.brand_id?.valueOf().toString(),
-          mintToken: campaign.mint_price?.token_id.valueOf().toString(),
           collectionHash: campaign.brand_info.collection_hash
             .valueOf()
             .map((x) => String.fromCharCode(x))
@@ -63,7 +53,7 @@ export class CampaignEntity extends BaseEntity {
           collectionName: campaign.brand_info.token_display_name
             .valueOf()
             .toString(),
-          collectionTicker: '',
+          collectionTicker: campaign?.nft_token_id?.valueOf().toString(),
           mediaType: campaign.brand_info.media_type.valueOf().toString(),
           minterAddress: address,
           startDate: parseInt(
@@ -72,9 +62,10 @@ export class CampaignEntity extends BaseEntity {
           endDate: parseInt(
             campaign.brand_info.mint_period.end.valueOf().toString(),
           ),
-          totalNfts: parseInt(campaign.total_nfts.valueOf().toString()),
-          availableNfts: parseInt(campaign.available_nfts.valueOf().toString()),
           royalties: campaign.brand_info.royalties.valueOf().toString(),
+          tiers: campaign.tier_info_entries.map((t) =>
+            TierEntity.fromTierAbi(t),
+          ),
         })
       : null;
   }
