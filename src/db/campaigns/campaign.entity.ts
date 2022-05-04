@@ -1,7 +1,7 @@
 import { BrandInfoViewResultType } from 'src/modules/campaigns/models/abi/BrandInfoViewAbi';
-import denominate from 'src/utils/formatters';
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
+import { TierEntity } from './tiers.entity';
 
 @Entity('campaigns')
 @Unique('CampaignEntity_UQ', ['minterAddress', 'campaignId'])
@@ -29,12 +29,6 @@ export class CampaignEntity extends BaseEntity {
   mintToken: string;
 
   @Column()
-  mintPrice: string;
-
-  @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
-  mintPriceDenominated: number;
-
-  @Column()
   startDate: number;
 
   @Column()
@@ -49,19 +43,15 @@ export class CampaignEntity extends BaseEntity {
   @Column({ length: 10 })
   royalties: string;
 
+  @OneToMany(() => TierEntity, (tier) => tier.campaign)
+  tiers: TierEntity[];
+
   constructor(init?: Partial<CampaignEntity>) {
     super();
     Object.assign(this, init);
   }
 
   static fromCampaignAbi(campaign: BrandInfoViewResultType, address: string) {
-    console.log(
-      11111111,
-      campaign.brand_info.collection_hash
-        .valueOf()
-        .map((x) => String.fromCharCode(x))
-        .join(''),
-    );
     return campaign
       ? new CampaignEntity({
           campaignId: campaign?.brand_id?.valueOf().toString(),
@@ -76,16 +66,6 @@ export class CampaignEntity extends BaseEntity {
           collectionTicker: '',
           mediaType: campaign.brand_info.media_type.valueOf().toString(),
           minterAddress: address,
-          mintPrice: campaign.mint_price.amount.valueOf().toString(),
-          mintPriceDenominated: parseFloat(
-            denominate({
-              input: campaign.mint_price.amount.valueOf()?.toString(),
-              denomination: 18,
-              decimals: 2,
-              showLastNonZeroDecimal: true,
-            }).replace(',', ''),
-          ),
-
           startDate: parseInt(
             campaign.brand_info.mint_period.start.valueOf().toString(),
           ),

@@ -1,7 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { CampaignEntity } from 'src/db/campaigns';
-
-import { MintPrice } from './MintPrice.dto';
+import { Tier } from './Tier.dto';
 
 @ObjectType()
 export class Campaign {
@@ -37,8 +36,8 @@ export class Campaign {
   @Field(() => Int)
   endDate: number;
 
-  @Field(() => MintPrice)
-  mintPrice: MintPrice;
+  @Field(() => [Tier])
+  tiers: Tier[];
 
   constructor(init?: Partial<Campaign>) {
     Object.assign(this, init);
@@ -54,10 +53,6 @@ export class Campaign {
           collectionName: campaign.collectionName,
           collectionTicker: campaign.collectionTicker,
           mediaType: campaign.mediaType,
-          mintPrice: new MintPrice({
-            amount: campaign.mintPrice,
-            token: campaign.mintToken,
-          }),
           minterAddress: campaign.minterAddress,
           startDate: campaign.startDate,
           endDate: campaign.endDate,

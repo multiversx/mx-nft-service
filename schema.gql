@@ -209,6 +209,13 @@ input BidActionArgs {
   price: String!
 }
 
+input BuyRandomNftActionArgs {
+  brandId: String!
+  minterAddress: String!
+  price: String!
+  quantity: String
+}
+
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
@@ -224,10 +231,10 @@ type Campaign {
   collectionTicker: String!
   endDate: Int!
   mediaType: String!
-  mintPrice: MintPrice!
   minterAddress: String!
   royalties: String!
   startDate: Int!
+  tiers: [Tier!]!
   totalNfts: Int!
 }
 
@@ -415,6 +422,23 @@ input HistoryPagination {
   timestamp: Int
 }
 
+input IssueCampaignArgs {
+  """This is the brand id used to identify a collection"""
+  brandId: String!
+  collectionIpfsHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  maxNfts: Float!
+  mediaTypes: MediaTypeEnum!
+  mintEndTime: Float!
+  mintPriceAmount: String!
+  mintPriceToken: String = "EGLD"
+  mintStartTime: Float!
+  minterAddress: String!
+  royalties: String!
+  tags: [String!]!
+}
+
 input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -430,6 +454,22 @@ type Media {
   originalUrl: String
   thumbnailUrl: String
   url: String
+}
+
+enum MediaTypeEnum {
+  aac
+  flac
+  gif
+  jpeg
+  jpg
+  m4a
+  mov
+  mov2
+  mp3
+  mp4
+  png
+  wav
+  webm
 }
 
 type Metadata {
@@ -450,10 +490,12 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
+  issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -623,6 +665,20 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
+}
+
+type Tier {
+  availableNfts: Int!
+  campaignId: ID!
+  details: [TierDetail!]!
+  mintPrice: MintPrice!
+  tierName: String!
+  totalNfts: Int!
+}
+
+type TierDetail {
+  info: String!
+  tierDetailId: ID!
 }
 
 type TransactionNode {

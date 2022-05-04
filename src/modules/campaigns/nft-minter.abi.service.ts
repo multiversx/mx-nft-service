@@ -98,21 +98,6 @@ export class NftMinterAbiService {
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
   }
 
-  // async setLocalRoles(
-  //   brandId: string,
-  //   ownerAddress: string,
-  // ): Promise<TransactionNode> {
-  //   const contract = await this.elrondProxyService.getMinterAbiSmartContract();
-
-  //   const setLocalRoles = contract.call({
-  //     func: new ContractFunction('setLocalRoles'),
-  //     value: Balance.egld(0),
-  //     args: [BytesValue.fromUTF8(brandId)],
-  //     gasLimit: new GasLimit(gas.withdraw),
-  //   });
-  //   return setLocalRoles.toPlainObject(new Address(ownerAddress));
-  // }
-
   async buyRandomNft(
     ownerAddress: string,
     request: BuyRequest,
