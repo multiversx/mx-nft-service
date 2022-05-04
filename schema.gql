@@ -210,10 +210,11 @@ input BidActionArgs {
 }
 
 input BuyRandomNftActionArgs {
-  brandId: String!
+  campaignId: String!
   minterAddress: String!
   price: String!
   quantity: String
+  tier: String!
 }
 
 input BuySftActionArgs {
@@ -423,17 +424,16 @@ input HistoryPagination {
 }
 
 input IssueCampaignArgs {
-  """This is the brand id used to identify a collection"""
-  brandId: String!
+  campaignId: String!
   collectionIpfsHash: String!
   collectionName: String!
   collectionTicker: String!
   maxNfts: Float!
   mediaTypes: MediaTypeEnum!
-  mintEndTime: Float!
+  mintEndTime: Int!
   mintPriceAmount: String!
   mintPriceToken: String = "EGLD"
-  mintStartTime: Float!
+  mintStartTime: Int!
   minterAddress: String!
   royalties: String!
   tags: [String!]!

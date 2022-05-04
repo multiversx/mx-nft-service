@@ -2,7 +2,7 @@ import { IssueCampaignArgs as IssueCampaignArgs } from '../IssueCampaignArgs';
 
 export class IssueCampaignRequest {
   collectionIpfsHash: string;
-  brandId: string;
+  campaignId: string;
   mediaTypes: string;
   royalties: string;
   maxNfts: number;
@@ -22,7 +22,7 @@ export class IssueCampaignRequest {
   static fromArgs(args: IssueCampaignArgs) {
     return new IssueCampaignRequest({
       collectionIpfsHash: args.collectionIpfsHash,
-      brandId: args.brandId,
+      campaignId: args.campaignId,
       mediaTypes: args.mediaTypes,
       royalties: args.royalties,
       maxNfts: args.maxNfts,

@@ -1,12 +1,12 @@
-import { Field, InputType, registerEnumType } from '@nestjs/graphql';
+import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
 
 @InputType()
 export class IssueCampaignArgs {
   @Field()
   collectionIpfsHash: string;
 
-  @Field({ description: 'This is the brand id used to identify a collection' })
-  brandId: string;
+  @Field()
+  campaignId: string;
 
   @Field()
   minterAddress: string;
@@ -20,10 +20,10 @@ export class IssueCampaignArgs {
   @Field()
   maxNfts: number;
 
-  @Field()
+  @Field(() => Int)
   mintStartTime: number;
 
-  @Field()
+  @Field(() => Int)
   mintEndTime: number;
 
   @Field()
@@ -45,7 +45,9 @@ export class IssueCampaignArgs {
 @InputType()
 export class BuyRandomNftActionArgs {
   @Field(() => String)
-  brandId: string;
+  campaignId: string;
+  @Field(() => String)
+  tier: string;
   @Field(() => String)
   price: string;
   @Field(() => String)

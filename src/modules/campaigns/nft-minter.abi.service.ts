@@ -116,7 +116,10 @@ export class NftMinterAbiService {
   }
 
   private getBuyNftArguments(args: BuyRandomNftActionArgs): TypedValue[] {
-    let returnArgs: TypedValue[] = [BytesValue.fromUTF8(args.brandId)];
+    let returnArgs: TypedValue[] = [
+      BytesValue.fromUTF8(args.campaignId),
+      BytesValue.fromUTF8(args.tier),
+    ];
     if (args.quantity) {
       return [
         ...returnArgs,
@@ -134,7 +137,7 @@ export class NftMinterAbiService {
     console.log(request, request.mediaTypes.split('/')[1]);
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(request.collectionIpfsHash),
-      BytesValue.fromUTF8(request.brandId),
+      BytesValue.fromUTF8(request.campaignId),
       BytesValue.fromUTF8(request.mediaTypes.split('/')[1]),
       BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
       new U64Value(new BigNumber(request.maxNfts.toString())),

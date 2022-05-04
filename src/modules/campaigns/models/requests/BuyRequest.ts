@@ -1,7 +1,8 @@
 import { BuyRandomNftActionArgs } from '..';
 
 export class BuyRequest {
-  brandId: string;
+  campaignId: string;
+  tier: string;
   minterAddress: string;
   price: string;
   quantity: string;
@@ -11,7 +12,8 @@ export class BuyRequest {
 
   static fromArgs(buySftArgs: BuyRandomNftActionArgs) {
     return new BuyRequest({
-      brandId: buySftArgs.brandId,
+      campaignId: buySftArgs.campaignId,
+      tier: buySftArgs.tier,
       minterAddress: buySftArgs.minterAddress,
       price: buySftArgs.price,
       quantity: buySftArgs.quantity,
