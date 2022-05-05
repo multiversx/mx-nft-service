@@ -55,6 +55,7 @@ export class TierEntity extends BaseEntity {
           ),
           totalNfts: parseInt(tier.total_nfts.valueOf().toString()),
           availableNfts: parseInt(tier.available_nfts.valueOf().toString()),
+          description: 'This is a default description for tier',
         })
       : null;
   }

@@ -31,7 +31,7 @@ export class Campaign {
   @Field(() => String)
   royalties: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   description: string;
 
   @Field(() => Int)

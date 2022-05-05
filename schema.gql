@@ -230,7 +230,7 @@ type Campaign {
   collectionHash: String!
   collectionName: String!
   collectionTicker: String!
-  description: String!
+  description: String
   endDate: Int!
   mediaType: String!
   minterAddress: String!
@@ -678,7 +678,7 @@ input StopNftCreateArgs {
 type Tier {
   availableNfts: Int!
   campaignId: ID!
-  description: String!
+  description: String
   mintPrice: MintPrice!
   tierName: String!
   totalNfts: Int!

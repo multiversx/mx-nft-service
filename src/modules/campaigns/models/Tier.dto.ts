@@ -19,7 +19,7 @@ export class Tier {
   @Field(() => MintPrice)
   mintPrice: MintPrice;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   description: string;
 
   constructor(init?: Partial<Tier>) {

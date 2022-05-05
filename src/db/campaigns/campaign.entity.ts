@@ -75,6 +75,9 @@ export class CampaignEntity extends BaseEntity {
           tiers: campaign.tier_info_entries.map((t) =>
             TierEntity.fromTierAbi(t),
           ),
+          maxNftsPerTransaction: 3,
+          verified: 1,
+          description: 'This is a default description for a campaign',
         })
       : null;
   }
