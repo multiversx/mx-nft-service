@@ -62,12 +62,13 @@ export class CampaignsService {
     tier: string,
     nftsBought: string,
   ) {
+    console.log({ address, campaignId, tier, nftsBought });
     const campaign = await this.campaignsRepository.getCampaign(
       campaignId,
       address,
     );
     const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
-    tierEntity.availableNfts -= parseInt(nftsBought);
+    tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
     await this.tierRepository.save(tierEntity);
   }
 }
