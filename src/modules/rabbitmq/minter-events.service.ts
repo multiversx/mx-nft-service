@@ -19,7 +19,7 @@ export class MinterEventsService {
           await this.campaignService.saveCampaign(address);
           break;
 
-        case MinterEventEnum.nftBought:
+        case MinterEventEnum.buyRandomNft:
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
           await this.campaignService.updateTier(
