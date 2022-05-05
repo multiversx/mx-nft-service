@@ -28,46 +28,46 @@ export class CampaignsService {
         await this.campaignsRepository.getCampaignByMinterAddress(minter);
       if (campaignsFromDb?.length > 0) {
         campaigns = [...campaigns, ...campaignsFromDb];
-      } else {
-        const auction: BrandInfoViewResultType[] =
-          await this.nftMinterService.getCampaignsForScAddress(minter);
-        const campaignsfromBlockchain = auction.map((c) =>
-          CampaignEntity.fromCampaignAbi(c, minter),
-        );
-        const savedCampaigns = await this.campaignsRepository.save(
-          campaignsfromBlockchain,
-        );
-        for (const campaign of campaignsfromBlockchain) {
-          const savedCampaign = await this.campaignsRepository.saveCampaign(
-            campaign,
-          );
-          const tiers = campaign.tiers.map((tier) => ({
-            ...tier,
-            campaignId: savedCampaign.id,
-          }));
-          await this.tierRepository.save(tiers);
-        }
-        campaigns = [...campaigns, ...savedCampaigns];
       }
     }
 
     return campaigns.map((campaign) => Campaign.fromEntity(campaign));
   }
 
+  async saveCampaign(minterAddress: string): Promise<Campaign[]> {
+    const campaigns: BrandInfoViewResultType[] =
+      await this.nftMinterService.getCampaignsForScAddress(minterAddress);
+    const campaignsfromBlockchain = campaigns.map((c) =>
+      CampaignEntity.fromCampaignAbi(c, minterAddress),
+    );
+    let savedCampaigns = [];
+    for (const campaign of campaignsfromBlockchain) {
+      const savedCampaign = await this.campaignsRepository.saveCampaign(
+        campaign,
+      );
+      const tiers = campaign.tiers.map((tier) => ({
+        ...tier,
+        campaignId: savedCampaign.id,
+      }));
+      savedCampaigns = [...savedCampaigns, savedCampaign];
+      await this.tierRepository.save(tiers);
+    }
+
+    return savedCampaigns.map((campaign) => Campaign.fromEntity(campaign));
+  }
+
   public async updateTier(
     address: string,
     campaignId: string,
-    mintPrice: string,
+    tier: string,
+    nftsBought: string,
   ) {
     const campaign = await this.campaignsRepository.getCampaign(
       campaignId,
       address,
     );
-    const tierEntity = await this.tierRepository.getTier(
-      campaign.id,
-      mintPrice,
-    );
-    tierEntity.availableNfts--;
+    const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
+    tierEntity.availableNfts -= parseInt(nftsBought);
     await this.tierRepository.save(tierEntity);
   }
 }
