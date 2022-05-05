@@ -1,9 +1,8 @@
 import { TierInfoAbi } from 'src/modules/campaigns/models/abi/TierInfoAbi';
 import denominate from 'src/utils/formatters';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { CampaignEntity } from './campaign.entity';
-import { TierDetailEntity } from './tier-details.entity';
 
 @Entity('tiers')
 export class TierEntity extends BaseEntity {
@@ -28,8 +27,8 @@ export class TierEntity extends BaseEntity {
   @Column()
   availableNfts: number;
 
-  @OneToMany(() => TierDetailEntity, (details) => details.tier)
-  tierDetails: TierDetailEntity[];
+  @Column()
+  description: string;
 
   @ManyToOne(() => CampaignEntity, (campaign) => campaign.tiers)
   @JoinColumn({ name: 'campaignId', referencedColumnName: 'id' })

@@ -6,7 +6,6 @@ import { NftMinterAbiService } from './nft-minter.abi.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
-import { TierDetailsRepository } from 'src/db/campaigns/tier-details.repository';
 
 @Module({
   providers: [
@@ -18,7 +17,6 @@ import { TierDetailsRepository } from 'src/db/campaigns/tier-details.repository'
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([CampaignsRepository]),
     TypeOrmModule.forFeature([TiersRepository]),
-    TypeOrmModule.forFeature([TierDetailsRepository]),
   ],
   exports: [],
 })

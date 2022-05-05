@@ -230,13 +230,16 @@ type Campaign {
   collectionHash: String!
   collectionName: String!
   collectionTicker: String!
+  description: String!
   endDate: Int!
   mediaType: String!
   minterAddress: String!
   royalties: String!
   startDate: Int!
+  status: CampaignStatusEnum!
   tiers: [Tier!]!
   totalNfts: Int!
+  verified: Boolean!
 }
 
 type CampaignEdge {
@@ -249,6 +252,12 @@ type CampaignPageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+enum CampaignStatusEnum {
+  Ended
+  NotStarted
+  Running
 }
 
 type CampaignsResponse {
@@ -669,7 +678,7 @@ input StopNftCreateArgs {
 type Tier {
   availableNfts: Int!
   campaignId: ID!
-  details: [TierDetail]
+  description: String!
   mintPrice: MintPrice!
   tierName: String!
   totalNfts: Int!
@@ -679,11 +688,6 @@ input TierArgs {
   mintPriceAmount: String!
   tierName: String!
   totalNfts: Int!
-}
-
-type TierDetail {
-  info: String!
-  tierDetailId: ID!
 }
 
 type TransactionNode {

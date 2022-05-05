@@ -18,6 +18,12 @@ export class CampaignEntity extends BaseEntity {
   @Column({ length: 20 })
   collectionTicker: string;
 
+  @Column()
+  maxNftsPerTransaction: number;
+
+  @Column()
+  verified: number;
+
   @Column({ length: 10 })
   mediaType: string;
 
@@ -33,6 +39,9 @@ export class CampaignEntity extends BaseEntity {
 
   @Column({ length: 10 })
   royalties: string;
+
+  @Column()
+  description: string;
 
   @OneToMany(() => TierEntity, (tier) => tier.campaign)
   tiers: TierEntity[];

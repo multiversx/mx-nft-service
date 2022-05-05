@@ -21,7 +21,6 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
     // @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCampaignRequest.fromArgs(input);
-    return new TransactionNode();
     return await this.nftMinterService.issueToken(
       'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
       request,
@@ -29,16 +28,12 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async buyRandomNft(
     @Args('input') input: BuyRandomNftActionArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = BuyRequest.fromArgs(input);
-    return new TransactionNode();
-    return await this.nftMinterService.buyRandomNft(
-      'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-      request,
-    );
+    return await this.nftMinterService.buyRandomNft(user.publicKey, request);
   }
 }

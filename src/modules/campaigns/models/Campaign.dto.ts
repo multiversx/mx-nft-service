@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { CampaignEntity } from 'src/db/campaigns';
+import { CampaignStatusEnum } from './CampaignStatus.enum';
 import { Tier } from './Tier.dto';
 
 @ObjectType()
@@ -15,6 +16,12 @@ export class Campaign {
   @Field(() => String)
   mediaType: string;
 
+  @Field(() => Boolean)
+  verified: boolean;
+
+  @Field(() => CampaignStatusEnum)
+  status: CampaignStatusEnum;
+
   @Field(() => String)
   collectionTicker: string;
 
@@ -23,6 +30,9 @@ export class Campaign {
 
   @Field(() => String)
   royalties: string;
+
+  @Field(() => String)
+  description: string;
 
   @Field(() => Int)
   totalNfts: number;
@@ -55,6 +65,7 @@ export class Campaign {
           startDate: campaign.startDate,
           endDate: campaign.endDate,
           royalties: campaign.royalties,
+          description: campaign.description,
           totalNfts: campaign.tiers
             .map((t) => t.totalNfts)
             .reduce((partialSum, a) => partialSum + a, 0),

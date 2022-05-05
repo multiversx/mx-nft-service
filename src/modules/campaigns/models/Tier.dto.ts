@@ -1,7 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { TierEntity } from 'src/db/campaigns/tiers.entity';
 import { MintPrice } from './MintPrice.dto';
-import { TierDetail } from './TierDetails.dto';
 
 @ObjectType()
 export class Tier {
@@ -20,8 +19,8 @@ export class Tier {
   @Field(() => MintPrice)
   mintPrice: MintPrice;
 
-  @Field(() => [TierDetail], { nullable: 'itemsAndList' })
-  details: TierDetail[];
+  @Field(() => String)
+  description: string;
 
   constructor(init?: Partial<Tier>) {
     Object.assign(this, init);
