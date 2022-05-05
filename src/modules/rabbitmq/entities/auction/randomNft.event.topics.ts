@@ -6,11 +6,14 @@ export class RandomNftEventsTopics {
   private boughtNfts: string;
 
   constructor(rawTopics: string[]) {
-    this.campaignId = Buffer.from(rawTopics[1], 'base64').toString();
-    this.tier = Buffer.from(rawTopics[2], 'base64').toString('hex');
-    this.boughtNfts = Buffer.from(rawTopics[3], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.campaignId = Buffer.from(rawTopics[2], 'base64').toString();
+    this.tier = Buffer.from(rawTopics[3], 'base64').toString();
+    this.boughtNfts =
+      rawTopics.length >= 5
+        ? Buffer.from(rawTopics[4], 'base64')
+            .toString('hex')
+            .hexBigNumberToString()
+        : '1';
   }
 
   toPlainObject() {
