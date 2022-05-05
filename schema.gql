@@ -227,19 +227,24 @@ input BuySftActionArgs {
 type Campaign {
   availableNfts: Int!
   campaignId: ID!
-  collectionHash: String!
-  collectionName: String!
-  collectionTicker: String!
+  collection: CampaignCollection!
+  coverImage: String!
   description: String
   endDate: Int!
   mediaType: String!
   minterAddress: String!
-  royalties: String!
   startDate: Int!
   status: CampaignStatusEnum!
   tiers: [Tier!]!
   totalNfts: Int!
   verified: Boolean!
+}
+
+type CampaignCollection {
+  collectionHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  royalties: String!
 }
 
 type CampaignEdge {

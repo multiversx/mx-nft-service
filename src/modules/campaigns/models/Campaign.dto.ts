@@ -1,5 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { CampaignEntity } from 'src/db/campaigns';
+import { CampaignCollection } from './CampaignCollection';
 import { CampaignStatusEnum } from './CampaignStatus.enum';
 import { Tier } from './Tier.dto';
 
@@ -7,11 +8,9 @@ import { Tier } from './Tier.dto';
 export class Campaign {
   @Field(() => ID)
   campaignId!: string;
-  @Field(() => String)
-  minterAddress!: string;
 
   @Field(() => String)
-  collectionName: string;
+  minterAddress!: string;
 
   @Field(() => String)
   mediaType: string;
@@ -21,15 +20,6 @@ export class Campaign {
 
   @Field(() => CampaignStatusEnum)
   status: CampaignStatusEnum;
-
-  @Field(() => String)
-  collectionTicker: string;
-
-  @Field(() => String)
-  collectionHash: string;
-
-  @Field(() => String)
-  royalties: string;
 
   @Field(() => String, { nullable: true })
   description: string;
@@ -49,6 +39,9 @@ export class Campaign {
   @Field(() => [Tier])
   tiers: Tier[];
 
+  @Field(() => CampaignCollection)
+  collection: CampaignCollection;
+
   constructor(init?: Partial<Campaign>) {
     Object.assign(this, init);
   }
@@ -57,14 +50,12 @@ export class Campaign {
     return campaign
       ? new Campaign({
           campaignId: campaign.campaignId,
-          collectionHash: campaign.collectionHash,
-          collectionName: campaign.collectionName,
-          collectionTicker: campaign.collectionTicker,
+          collection: CampaignCollection.fromEntity(campaign),
+
           mediaType: campaign.mediaType,
           minterAddress: campaign.minterAddress,
           startDate: campaign.startDate,
           endDate: campaign.endDate,
-          royalties: campaign.royalties,
           description: campaign.description,
           totalNfts: campaign.tiers
             .map((t) => t.totalNfts)

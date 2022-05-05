@@ -39,4 +39,11 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
       return CampaignStatusEnum.Ended;
     return CampaignStatusEnum.Running;
   }
+
+  @ResolveField('coverImage', () => String)
+  async coverImage(@Parent() campaign: Campaign) {
+    const { collection } = campaign;
+
+    return `${process.env.PINATA_GATEWAY}/ipfs/${collection.collectionHash}/1.png`;
+  }
 }
