@@ -4,7 +4,7 @@ import { TierEntity } from './tiers.entity';
 @EntityRepository(TierEntity)
 @Unique('CampaignEntity_UQ', ['campaignId', 'tierName'])
 export class TiersRepository extends Repository<TierEntity> {
-  async getTier(campaignId: string, tierName: string): Promise<TierEntity> {
+  async getTier(campaignId: number, tierName: string): Promise<TierEntity> {
     const campaign = await this.findOne({
       where: {
         campaignId,
@@ -15,7 +15,7 @@ export class TiersRepository extends Repository<TierEntity> {
     return campaign;
   }
 
-  async getTiersForCampaign(campaignId: string): Promise<TierEntity[]> {
+  async getTiersForCampaign(campaignId: number): Promise<TierEntity[]> {
     const campaigns = await this.find({
       where: {
         campaignId,

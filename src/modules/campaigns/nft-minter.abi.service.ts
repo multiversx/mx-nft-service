@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { BuyRandomNftActionArgs, Campaign } from './models';
+import { BuyRandomNftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -29,59 +29,18 @@ import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { CampaignEntity } from 'src/db/campaigns';
-import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
-import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 
 @Injectable()
 export class NftMinterAbiService {
   constructor(
     private elrondProxyService: ElrondProxyService,
-    private campaignsRepository: CampaignsRepository,
-    private tierRepository: TiersRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     let defaultNetworkConfig = NetworkConfig.getDefault();
     defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
   }
 
-  async getCampaigns(): Promise<Campaign[]> {
-    const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
-      return entry.toLowerCase().trim();
-    });
-    let campaigns: CampaignEntity[] = [];
-    for (const minter of minters) {
-      const campaignsFromDb =
-        await this.campaignsRepository.getCampaignByMinterAddress(minter);
-      if (campaignsFromDb?.length > 0) {
-        campaigns = [...campaigns, ...campaignsFromDb];
-      } else {
-        const auction: BrandInfoViewResultType[] =
-          await this.getCampaignsForScAddress(minter);
-        const campaignsfromBlockchain = auction.map((c) =>
-          CampaignEntity.fromCampaignAbi(c, minter),
-        );
-        const savedCampaigns = await this.campaignsRepository.save(
-          campaignsfromBlockchain,
-        );
-        for (const campaign of campaignsfromBlockchain) {
-          const savedCampaign = await this.campaignsRepository.saveCampaign(
-            campaign,
-          );
-          const tiers = campaign.tiers.map((tier) => ({
-            ...tier,
-            campaignId: savedCampaign.id,
-          }));
-          await this.tierRepository.save(tiers);
-        }
-        campaigns = [...campaigns, ...savedCampaigns];
-      }
-    }
-
-    return campaigns.map((campaign) => Campaign.fromEntity(campaign));
-  }
-
-  private async getCampaignsForScAddress(address: string) {
+  public async getCampaignsForScAddress(address: string) {
     const contract = await this.elrondProxyService.getMinterAbiSmartContract(
       address,
     );

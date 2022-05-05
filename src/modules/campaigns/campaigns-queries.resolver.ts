@@ -1,13 +1,15 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Campaign, CampaignsResponse } from './models';
-import { NftMinterAbiService } from './nft-minter.abi.service';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
+import { CampaignStatusEnum } from './models/CampaignStatus.enum';
+import { DateUtils } from 'src/utils/date-utils';
+import { CampaignsService } from './campaigns.service';
 
 @Resolver(() => Campaign)
 export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
-  constructor(private nftMinterService: NftMinterAbiService) {
+  constructor(private campaignsService: CampaignsService) {
     super();
   }
 
@@ -17,7 +19,7 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const campaigns = await this.nftMinterService.getCampaigns();
+    const campaigns = await this.campaignsService.getCampaigns();
     return PageResponse.mapResponse<Campaign>(
       campaigns,
       pagination,
@@ -25,5 +27,16 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
       offset,
       limit,
     );
+  }
+
+  @ResolveField('status', () => CampaignStatusEnum)
+  async status(@Parent() campaign: Campaign) {
+    const { startDate, endDate, availableNfts } = campaign;
+    if (startDate > DateUtils.getCurrentTimestamp()) {
+      return CampaignStatusEnum.NotStarted;
+    }
+    if (endDate <= DateUtils.getCurrentTimestamp() || availableNfts <= 0)
+      return CampaignStatusEnum.Ended;
+    return CampaignStatusEnum.Running;
   }
 }

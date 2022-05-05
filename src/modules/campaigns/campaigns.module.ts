@@ -6,18 +6,20 @@ import { NftMinterAbiService } from './nft-minter.abi.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
+import { CampaignsService } from './campaigns.service';
 
 @Module({
   providers: [
     CampaignsMutationsResolver,
     CampaignsQueriesResolver,
     NftMinterAbiService,
+    CampaignsService,
   ],
   imports: [
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([CampaignsRepository]),
     TypeOrmModule.forFeature([TiersRepository]),
   ],
-  exports: [],
+  exports: [CampaignsService],
 })
 export class CampaignsModuleGraph {}

@@ -17,6 +17,18 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
     return campaign;
   }
 
+  async getCampaignByCollectionTicker(
+    collectionTicker: string,
+  ): Promise<CampaignEntity> {
+    const campaign = await this.findOne({
+      where: {
+        collectionTicker,
+      },
+    });
+
+    return campaign;
+  }
+
   async getCampaignByMinterAddress(
     minterAddress: string,
   ): Promise<CampaignEntity[]> {
