@@ -35,7 +35,6 @@ export class CampaignsService {
   }
 
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
-    console.log({ minterAddress });
     const campaigns: BrandInfoViewResultType[] =
       await this.nftMinterService.getCampaignsForScAddress(minterAddress);
     const campaignsfromBlockchain = campaigns.map((c) =>
@@ -43,11 +42,9 @@ export class CampaignsService {
     );
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
-      console.log({ campaign });
       const savedCampaign = await this.campaignsRepository.saveCampaign(
         campaign,
       );
-      console.log({ savedCampaign });
       const tiers = campaign.tiers.map((tier) => ({
         ...tier,
         campaignId: savedCampaign?.id,
@@ -65,7 +62,6 @@ export class CampaignsService {
     tier: string,
     nftsBought: string,
   ) {
-    console.log({ address, campaignId, tier, nftsBought });
     const campaign = await this.campaignsRepository.getCampaign(
       campaignId,
       address,
