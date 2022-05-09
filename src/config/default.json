@@ -3,7 +3,6 @@
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqf08ce20eq9hw8majtuvwc6g2hpxn6p8au00s6zjq5s",
-    "nftMinterAddress": "erd1qqqqqqqqqqqqqpgqdhv5r3qfklz02n47zzers8gq6htkgtanu00stdj8wq",
     "issueNftCost": 50000000000000000,
     "minimumBidDifference": 10000000000000000,
     "version": 1,

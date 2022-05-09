@@ -81,7 +81,8 @@ export class NftMarketplaceAbiService {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
     );
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let bid = contract.call({
       func: new ContractFunction('bid'),
       value: Balance.fromString(request.price),
@@ -99,7 +100,8 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
 
     let withdraw = contract.call({
       func: new ContractFunction('withdraw'),
@@ -114,7 +116,8 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
       value: Balance.egld(0),
@@ -129,7 +132,8 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
 
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
@@ -141,7 +145,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getAuctionQuery(auctionId: number): Promise<AuctionAbi> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
@@ -158,7 +163,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getAuctionStatus(auctionId: string): Promise<AuctionAbi> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getAuctionStatus([
         new U64Value(new BigNumber(auctionId)),
@@ -175,7 +181,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getOriginalOwner(auctionId: string): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getOriginalOwner([
         new U64Value(new BigNumber(auctionId)),
@@ -187,7 +194,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getDeadline(auctionId: string): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getDeadline([new U64Value(new BigNumber(auctionId))])
     );
@@ -196,7 +204,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getMinMaxBid(auctionId: string): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getMinMaxBid([new U64Value(new BigNumber(auctionId))])
     );
@@ -205,7 +214,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getCurrentWinningBid(auctionId: string): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getCurrentWinningBid([
         new U64Value(new BigNumber(auctionId)),
@@ -216,7 +226,8 @@ export class NftMarketplaceAbiService {
   }
 
   async getCurrentWinner(auctionId: string): Promise<TypedValue> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getCurrentWinner([
         new U64Value(new BigNumber(auctionId)),
@@ -247,7 +258,8 @@ export class NftMarketplaceAbiService {
   }
 
   private async getCutPercentageMap(): Promise<string> {
-    const contract = await this.elrondProxyService.getAbiSmartContract();
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
       contract.methods.getMarketplaceCutPercentage()
     );
