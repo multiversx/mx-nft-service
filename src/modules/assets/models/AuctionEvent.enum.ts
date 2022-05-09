@@ -14,6 +14,7 @@ export enum NftEventEnum {
 
 export enum MinterEventEnum {
   brandCreated = 'brandCreated',
+  callBack = 'callBack',
   buyRandomNft = 'buyRandomNft',
   nftGiveaway = 'nftGiveaway',
 }

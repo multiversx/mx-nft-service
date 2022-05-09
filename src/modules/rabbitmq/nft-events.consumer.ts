@@ -40,9 +40,9 @@ export class NftTransactionsConsumer {
       nftAuctionEvents.hash,
     );
 
-    await this.minterEventsService.handleNftMintEvents(
-      nftAuctionEvents?.events?.filter((e: { address: any }) =>
-        minters.includes(e.address),
+    await this.minterEventsService.handleNftMinterEvents(
+      nftAuctionEvents?.events?.filter(
+        (e: { address: any }) => minters.includes(e.address) === true,
       ),
       nftAuctionEvents.hash,
     );
