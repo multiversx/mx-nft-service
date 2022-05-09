@@ -18,11 +18,14 @@ export class MinterEventsService {
             const address = brandEvent.getAddress();
             await this.campaignService.saveCampaign(address);
           }
+          await this.campaignService.invalidateCache();
+
           break;
 
         case MinterEventEnum.buyRandomNft:
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
+          await this.campaignService.invalidateCache();
           await this.campaignService.updateTier(
             randomNftEvent.getAddress(),
             transferTopics.campaignId,

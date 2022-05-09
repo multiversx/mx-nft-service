@@ -22,4 +22,9 @@ export class CacheInfo {
     key: 'marketplaceAuctions',
     ttl: TimeConstants.oneHour,
   };
+
+  static Campaigns: CacheInfo = {
+    key: 'allCampaigns',
+    ttl: TimeConstants.oneHour,
+  };
 }

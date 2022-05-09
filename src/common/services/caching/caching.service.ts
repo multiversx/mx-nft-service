@@ -74,6 +74,11 @@ export class CachingService {
     return value;
   }
 
+  async deleteInCache(client: Redis.Redis, key: string): Promise<void> {
+    this.localCacheService.deleteCacheKey(key);
+    this.redisCacheService.del(client, key);
+  }
+
   pendingPromises: { [key: string]: Promise<any> } = {};
 
   private async executeWithPendingPromise<T>(

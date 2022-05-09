@@ -42,13 +42,8 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
     return campaigns;
   }
 
-  async getCampaigns(
-    limit: number = 10,
-    offset: number = 0,
-  ): Promise<[CampaignEntity[], number]> {
+  async getCampaigns(): Promise<[CampaignEntity[], number]> {
     const campaigns = await this.findAndCount({
-      skip: offset,
-      take: limit,
       relations: ['tiers'],
     });
     return campaigns;
