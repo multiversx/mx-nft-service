@@ -492,27 +492,6 @@
         }
       ]
     },
-    "EsdtTokenPayment": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_type",
-          "type": "EsdtTokenType"
-        },
-        {
-          "name": "token_identifier",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "token_nonce",
-          "type": "u64"
-        },
-        {
-          "name": "amount",
-          "type": "BigUint"
-        }
-      ]
-    },
     "EsdtTokenType": {
       "type": "enum",
       "variants": [
@@ -535,6 +514,27 @@
         {
           "name": "Invalid",
           "discriminant": 4
+        }
+      ]
+    },
+    "EsdtTokenPayment": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_type",
+          "type": "EsdtTokenType"
+        },
+        {
+          "name": "token_identifier",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
         }
       ]
     }
