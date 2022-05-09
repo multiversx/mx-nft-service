@@ -8,6 +8,8 @@ import { CampaignEntity } from 'src/db/campaigns';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { NftMinterAbiService } from './nft-minter.abi.service';
+import { CampaignsFilter } from '../common/filters/filtersTypes';
+import { CollectionType } from '../assets/models/Collection.type';
 
 @Injectable()
 export class CampaignsService {
@@ -18,20 +20,27 @@ export class CampaignsService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  async getCampaigns(): Promise<Campaign[]> {
-    const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
-      return entry.toLowerCase().trim();
-    });
-    let campaigns: CampaignEntity[] = [];
-    for (const minter of minters) {
-      const campaignsFromDb =
-        await this.campaignsRepository.getCampaignByMinterAddress(minter);
-      if (campaignsFromDb?.length > 0) {
-        campaigns = [...campaigns, ...campaignsFromDb];
-      }
+  async getCampaigns(
+    limit: number = 10,
+    offset: number = 0,
+    filters: CampaignsFilter,
+  ): Promise<CollectionType<Campaign>> {
+    if (filters?.campaignId) {
+      const campaigns = await this.campaignsRepository.getCampaignById(
+        filters.campaignId,
+      );
+      return new CollectionType({
+        count: campaigns ? campaigns.length : 0,
+        items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
+      });
     }
+    let [campaigns, count]: [CampaignEntity[], number] =
+      await this.campaignsRepository.getCampaigns(limit, offset);
 
-    return campaigns.map((campaign) => Campaign.fromEntity(campaign));
+    return new CollectionType({
+      count: count,
+      items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
+    });
   }
 
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {

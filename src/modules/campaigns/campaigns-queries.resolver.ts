@@ -6,6 +6,7 @@ import PageResponse from '../common/PageResponse';
 import { CampaignStatusEnum } from './models/CampaignStatus.enum';
 import { DateUtils } from 'src/utils/date-utils';
 import { CampaignsService } from './campaigns.service';
+import { CampaignsFilter } from '../common/filters/filtersTypes';
 
 @Resolver(() => Campaign)
 export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
@@ -15,15 +16,21 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
 
   @Query(() => CampaignsResponse)
   async campaigns(
+    @Args({ name: 'filters', type: () => CampaignsFilter, nullable: true })
+    filters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const campaigns = await this.campaignsService.getCampaigns();
+    const campaigns = await this.campaignsService.getCampaigns(
+      limit,
+      offset,
+      filters,
+    );
     return PageResponse.mapResponse<Campaign>(
-      campaigns,
+      campaigns.items,
       pagination,
-      campaigns.length,
+      campaigns.count,
       offset,
       limit,
     );

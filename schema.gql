@@ -266,6 +266,10 @@ enum CampaignStatusEnum {
   Running
 }
 
+input CampaignsFilter {
+  campaignId: String
+}
+
 type CampaignsResponse {
   edges: [CampaignEdge!]
   pageData: PageData
@@ -626,7 +630,7 @@ type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
-  campaigns(pagination: ConnectionArgs): CampaignsResponse!
+  campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!

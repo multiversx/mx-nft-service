@@ -38,6 +38,29 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
       },
       relations: ['tiers'],
     });
+
+    return campaigns;
+  }
+
+  async getCampaigns(
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<[CampaignEntity[], number]> {
+    const campaigns = await this.findAndCount({
+      skip: offset,
+      take: limit,
+      relations: ['tiers'],
+    });
+    return campaigns;
+  }
+
+  async getCampaignById(campaignId: string): Promise<CampaignEntity[]> {
+    const campaigns = await this.find({
+      where: {
+        campaignId,
+      },
+      relations: ['tiers'],
+    });
     return campaigns;
   }
 
