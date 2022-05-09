@@ -231,6 +231,7 @@ type Campaign {
   coverImage: String!
   description: String
   endDate: Int!
+  maxNftsPerTransaction: Int!
   mediaType: String!
   minterAddress: String!
   startDate: Int!
@@ -685,6 +686,7 @@ type Tier {
   campaignId: ID!
   description: String
   mintPrice: MintPrice!
+  status: TierStatusEnum!
   tierName: String!
   totalNfts: Int!
 }
@@ -693,6 +695,11 @@ input TierArgs {
   mintPriceAmount: String!
   tierName: String!
   totalNfts: Int!
+}
+
+enum TierStatusEnum {
+  Running
+  Sold
 }
 
 type TransactionNode {

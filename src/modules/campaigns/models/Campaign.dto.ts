@@ -31,6 +31,9 @@ export class Campaign {
   availableNfts: number;
 
   @Field(() => Int)
+  maxNftsPerTransaction: number;
+
+  @Field(() => Int)
   startDate: number;
 
   @Field(() => Int)
@@ -51,12 +54,12 @@ export class Campaign {
       ? new Campaign({
           campaignId: campaign.campaignId,
           collection: CampaignCollection.fromEntity(campaign),
-
           mediaType: campaign.mediaType,
           minterAddress: campaign.minterAddress,
           startDate: campaign.startDate,
           endDate: campaign.endDate,
           description: campaign.description,
+          maxNftsPerTransaction: campaign.maxNftsPerTransaction,
           totalNfts: campaign.tiers
             .map((t) => t.totalNfts)
             .reduce((partialSum, a) => partialSum + a, 0),

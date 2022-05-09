@@ -8,3 +8,11 @@ export enum CampaignStatusEnum {
 registerEnumType(CampaignStatusEnum, {
   name: 'CampaignStatusEnum',
 });
+
+export enum TierStatusEnum {
+  Running = 'Running',
+  Sold = 'Sold',
+}
+registerEnumType(TierStatusEnum, {
+  name: 'TierStatusEnum',
+});
