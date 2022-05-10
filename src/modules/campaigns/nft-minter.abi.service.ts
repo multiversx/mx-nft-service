@@ -4,22 +4,20 @@ import { BuyRandomNftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
-  Balance,
   BigUIntValue,
   BytesValue,
   ContractFunction,
-  GasLimit,
   OptionalValue,
   TokenIdentifierValue,
   TypedValue,
   U64Value,
-  ChainID,
-  NetworkConfig,
   BigUIntType,
   VariadicValue,
   List,
   Interaction,
   CompositeValue,
+  TokenPayment,
+  ResultsParser,
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from '../../config';
 import { ElrondProxyService } from 'src/common';
@@ -32,12 +30,12 @@ import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
 
 @Injectable()
 export class NftMinterAbiService {
+  private readonly parser: ResultsParser;
   constructor(
     private elrondProxyService: ElrondProxyService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
-    let defaultNetworkConfig = NetworkConfig.getDefault();
-    defaultNetworkConfig.ChainID = new ChainID(elrondConfig.chainID);
+    this.parser = new ResultsParser();
   }
 
   public async getCampaignsForScAddress(address: string) {
@@ -45,12 +43,9 @@ export class NftMinterAbiService {
       address,
     );
     let getDataQuery = <Interaction>contract.methods.getAllBrandsInfo();
-    let data = await contract.runQuery(
-      this.elrondProxyService.getService(),
-      getDataQuery.buildQuery(),
-    );
-    let result = getDataQuery.interpretQueryResponse(data);
-    const campaign: BrandInfoViewResultType[] = result?.firstValue?.valueOf();
+
+    const response = await this.getFirstQueryResult(getDataQuery);
+    const campaign: BrandInfoViewResultType[] = response?.firstValue?.valueOf();
     return campaign;
   }
 
@@ -63,9 +58,10 @@ export class NftMinterAbiService {
     );
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
-      value: Balance.fromString(elrondConfig.issueNftCost),
+      value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
       args: this.getIssueCampaignArgs(request),
-      gasLimit: new GasLimit(gas.issueToken),
+      gasLimit: gas.issueToken,
+      chainID: elrondConfig.chainID,
     });
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
   }
@@ -79,12 +75,24 @@ export class NftMinterAbiService {
     );
     let buyRandomNft = contract.call({
       func: new ContractFunction('buyRandomNft'),
-      value: Balance.fromString(request.price),
+      value: TokenPayment.egldFromBigInteger(request.price),
       args: this.getBuyNftArguments(request),
-      gasLimit: new GasLimit(gas.endAuction),
+      gasLimit: gas.endAuction,
+      chainID: elrondConfig.chainID,
     });
 
     return buyRandomNft.toPlainObject(new Address(ownerAddress));
+  }
+
+  private async getFirstQueryResult(interaction: Interaction) {
+    let queryResponse = await this.elrondProxyService
+      .getService()
+      .queryContract(interaction.buildQuery());
+    let result = this.parser.parseQueryResponse(
+      queryResponse,
+      interaction.getEndpoint(),
+    );
+    return result;
   }
 
   private getBuyNftArguments(args: BuyRandomNftActionArgs): TypedValue[] {
@@ -113,7 +121,7 @@ export class NftMinterAbiService {
       BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
       new U64Value(new BigNumber(request.mintStartTime.toString())),
       new U64Value(new BigNumber(request.mintEndTime.toString())),
-      new TokenIdentifierValue(Buffer.from(request.mintPriceToken)),
+      new TokenIdentifierValue(request.mintPriceToken),
       BytesValue.fromUTF8(request.collectionName),
       BytesValue.fromUTF8(request.collectionTicker),
       List.fromItems(

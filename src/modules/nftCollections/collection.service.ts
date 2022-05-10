@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import {
   Address,
   AddressValue,
-  Balance,
   BytesValue,
   ContractFunction,
-  GasLimit,
+  TokenPayment,
   TypedValue,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from 'src/config';
@@ -47,9 +46,10 @@ export class CollectionsService {
 
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction(request.collectionType),
-      value: Balance.fromString(elrondConfig.issueNftCost),
+      value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
       args: transactionArgs,
-      gasLimit: new GasLimit(gas.issueToken),
+      gasLimit: gas.issueToken,
+      chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject();
   }
@@ -58,9 +58,10 @@ export class CollectionsService {
     const smartContract = getSmartContract(request.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [BytesValue.fromUTF8(request.collection)],
-      gasLimit: new GasLimit(gas.stopNFTCreate),
+      gasLimit: gas.stopNFTCreate,
+      chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject();
   }
@@ -72,9 +73,10 @@ export class CollectionsService {
     let transactionArgs = this.getTransferCreateRoleArgs(request);
     const transaction = smartContract.call({
       func: new ContractFunction('transferNFTCreateRole'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: transactionArgs,
-      gasLimit: new GasLimit(gas.transferNFTCreateRole),
+      gasLimit: gas.transferNFTCreateRole,
+      chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject();
   }
@@ -83,9 +85,10 @@ export class CollectionsService {
     let transactionArgs = this.getSetRolesArgs(args);
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction('setSpecialRole'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: transactionArgs,
-      gasLimit: new GasLimit(gas.setRoles),
+      gasLimit: gas.setRoles,
+      chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject();
   }

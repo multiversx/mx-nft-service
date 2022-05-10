@@ -712,10 +712,9 @@ type TransactionNode {
   gasLimit: Float!
   gasPrice: Float!
   nonce: Int!
-  options: String
+  options: Float
   receiver: String!
   sender: String!
-  status: String
   value: String!
   version: Float!
 }

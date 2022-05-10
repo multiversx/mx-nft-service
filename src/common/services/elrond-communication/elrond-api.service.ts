@@ -1,4 +1,3 @@
-import { ApiProvider } from '@elrondnetwork/erdjs';
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Nft } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
@@ -9,10 +8,11 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
+import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 
 @Injectable()
 export class ElrondApiService {
-  private apiProvider: ApiProvider;
+  private apiProvider: ApiNetworkProvider;
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
@@ -25,28 +25,21 @@ export class ElrondApiService {
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
 
-    this.apiProvider = new ApiProvider(process.env.ELROND_API, {
+    this.apiProvider = new ApiNetworkProvider(process.env.ELROND_API, {
       timeout: elrondConfig.proxyTimeout,
       httpAgent: elrondConfig.keepAlive ? httpAgent : null,
       httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
     });
   }
 
-  getService(): ApiProvider {
+  getService(): ApiNetworkProvider {
     return this.apiProvider;
   }
 
-  async doGetGeneric(
-    name: string,
-    resourceUrl: string,
-    callback: (response: any) => any,
-  ): Promise<any> {
+  async doGetGeneric(name: string, resourceUrl: string): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      const response = await this.getService().doGetGeneric(
-        resourceUrl,
-        callback,
-      );
+      const response = await this.getService().doGetGeneric(resourceUrl);
       profiler.stop();
 
       MetricsCollector.setExternalCall(
@@ -82,7 +75,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getTokensForUser.name,
       `accounts/${address}/tokens`,
-      (response) => response,
     );
   }
 
@@ -93,7 +85,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifierAndAddress.name,
       `accounts/${address}/nfts/${identifier}`,
-      (response) => response,
     );
   }
 
@@ -105,7 +96,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
       `nfts?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
-      (response) => response,
     );
   }
 
@@ -113,7 +103,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}?withSupply=true`,
-      (response) => response,
     );
   }
 
@@ -124,7 +113,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}?${query}`,
-      (response) => response,
     );
   }
 
@@ -136,7 +124,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}/accounts?from=${offset}&size=${limit}`,
-      (response) => response,
     );
   }
 
@@ -144,7 +131,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
       `nfts/${identifier}/accounts/count`,
-      (response) => response,
     );
   }
 
@@ -152,7 +138,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftsForUser.name,
       `accounts/${address}/nfts${query}`,
-      (response) => response,
     );
   }
 
@@ -163,23 +148,17 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftsForUserCount.name,
       `accounts/${address}/nfts/count${query}`,
-      (response) => response,
     );
   }
 
   async getAllNfts(query: string = ''): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getAllNfts.name,
-      `nfts${query}`,
-      (response) => response,
-    );
+    return await this.doGetGeneric(this.getAllNfts.name, `nfts${query}`);
   }
 
   async getNftsCount(query: string = ''): Promise<any> {
     return await this.doGetGeneric(
       this.getNftsCount.name,
       `nfts/count${query}`,
-      (response) => response,
     );
   }
 
@@ -190,7 +169,6 @@ export class ElrondApiService {
     const totalCount = await this.doGetGeneric(
       this.getNftsCount.name,
       `nfts/count${query}`,
-      (response) => response,
     );
     return { key: collection, value: totalCount };
   }
@@ -202,7 +180,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
       `collections?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}`,
-      (response) => response,
     );
   }
 
@@ -213,7 +190,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionsForAddress.name,
       `accounts/${address}/collections${query}`,
-      (response) => response,
     );
   }
 
@@ -224,7 +200,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionForIdentifier.name,
       `collections/${identifier}?${query}`,
-      (response) => response,
     );
   }
 
@@ -234,7 +209,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionForIdentifier.name,
       `collections/${identifier}`,
-      (response) => response,
     );
   }
 
@@ -245,7 +219,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionForOwnerAndIdentifier.name,
       `accounts/${address}/collections/${identifier}`,
-      (response) => response,
     );
   }
 
@@ -256,7 +229,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionsForAddressCount.name,
       `accounts/${address}/collections/count${query}`,
-      (response) => response,
     );
   }
 
@@ -264,7 +236,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollections.name,
       `collections${query}`,
-      (response) => response,
     );
   }
 
@@ -272,7 +243,6 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionsCount.name,
       `collections/count${query}`,
-      (response) => response,
     );
   }
 }

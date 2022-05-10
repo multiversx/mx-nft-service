@@ -1,10 +1,9 @@
 import {
   Address,
   AddressValue,
-  Balance,
   BytesValue,
   ContractFunction,
-  GasLimit,
+  TokenPayment,
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { Inject, Injectable } from '@nestjs/common';
@@ -210,20 +209,16 @@ export class AssetsService {
     const contract = getSmartContract(request.updateQuantityRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction(request.functionName),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
         new U64Value(new BigNumber(request.quantity)),
       ],
-      gasLimit: new GasLimit(gas.addBurnQuantity),
-    });
-    let response = transaction.toPlainObject(new Address(ownerAddress));
-
-    return {
-      ...response,
+      gasLimit: gas.addBurnQuantity,
       chainID: elrondConfig.chainID,
-    };
+    });
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async createNft(
@@ -245,7 +240,7 @@ export class AssetsService {
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(request.collection),
         new U64Value(new BigNumber(request.quantity)),
@@ -255,7 +250,8 @@ export class AssetsService {
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
       ],
-      gasLimit: new GasLimit(gas.nftCreate),
+      gasLimit: gas.nftCreate,
+      chainID: elrondConfig.chainID,
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
 
@@ -276,14 +272,15 @@ export class AssetsService {
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
         new U64Value(new BigNumber(transferRequest.quantity)),
         new AddressValue(new Address(transferRequest.destinationAddress)),
       ],
-      gasLimit: new GasLimit(gas.nftTransfer),
+      gasLimit: gas.nftTransfer,
+      chainID: elrondConfig.chainID,
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
     response.gasLimit = Math.max(
