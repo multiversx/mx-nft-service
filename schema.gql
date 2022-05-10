@@ -209,11 +209,67 @@ input BidActionArgs {
   price: String!
 }
 
+input BuyRandomNftActionArgs {
+  campaignId: String!
+  minterAddress: String!
+  price: String!
+  quantity: String
+  tier: String!
+}
+
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
   price: String!
   quantity: String
+}
+
+type Campaign {
+  availableNfts: Int!
+  campaignId: ID!
+  collection: CampaignCollection!
+  coverImage: String!
+  description: String
+  endDate: Int!
+  maxNftsPerTransaction: Int!
+  mediaType: String!
+  minterAddress: String!
+  startDate: Int!
+  status: CampaignStatusEnum!
+  tiers: [Tier!]!
+  totalNfts: Int!
+  verified: Boolean!
+}
+
+type CampaignCollection {
+  collectionHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  royalties: String!
+}
+
+type CampaignEdge {
+  cursor: String
+  node: Campaign
+}
+
+type CampaignPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum CampaignStatusEnum {
+  Ended
+  NotStarted
+  Running
+}
+
+type CampaignsResponse {
+  edges: [CampaignEdge!]
+  pageData: PageData
+  pageInfo: CampaignPageInfo
 }
 
 input ChildExpression {
@@ -382,6 +438,21 @@ input HistoryPagination {
   timestamp: Int
 }
 
+input IssueCampaignArgs {
+  campaignId: String!
+  collectionIpfsHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  mediaTypes: MediaTypeEnum!
+  mintEndTime: Int!
+  mintPriceToken: String = "EGLD"
+  mintStartTime: Int!
+  minterAddress: String!
+  royalties: String!
+  tags: [String!]!
+  tiers: [TierArgs!]!
+}
+
 input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -399,11 +470,32 @@ type Media {
   url: String
 }
 
+enum MediaTypeEnum {
+  aac
+  flac
+  gif
+  jpeg
+  jpg
+  m4a
+  mov
+  mov2
+  mp3
+  mp4
+  png
+  wav
+  webm
+}
+
 type Metadata {
   description: String
   fileName: String @deprecated(reason: "This field will be removed in the next version")
   fileType: String @deprecated(reason: "This field will be removed in the next version")
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
+}
+
+type MintPrice {
+  amount: String!
+  token: ID!
 }
 
 type Mutation {
@@ -412,10 +504,12 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
+  issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -532,6 +626,7 @@ type Query {
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
+  campaigns(pagination: ConnectionArgs): CampaignsResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
@@ -584,6 +679,27 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
+}
+
+type Tier {
+  availableNfts: Int!
+  campaignId: ID!
+  description: String
+  mintPrice: MintPrice!
+  status: TierStatusEnum!
+  tierName: String!
+  totalNfts: Int!
+}
+
+input TierArgs {
+  mintPriceAmount: String!
+  tierName: String!
+  totalNfts: Int!
+}
+
+enum TierStatusEnum {
+  Running
+  Sold
 }
 
 type TransactionNode {

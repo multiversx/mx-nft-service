@@ -11,16 +11,20 @@ import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/col
 import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
 import { AssetsRedisHandler } from '../assets';
 import { ElrondCommunicationModule } from 'src/common';
+import { CampaignsModuleGraph } from '../campaigns/campaigns.module';
+import { MinterEventsService } from './minter-events.service';
 
 @Module({
   imports: [
     forwardRef(() => AuctionsModuleGraph),
+    forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
   ],
   providers: [
     NftEventsConsumer,
     NftEventsService,
+    MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
     AvailableTokensForAuctionRedisHandler,

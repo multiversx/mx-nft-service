@@ -34,7 +34,7 @@ export class ElrondProxyService {
     return this.proxy;
   }
 
-  async getAbiSmartContract(): Promise<SmartContract> {
+  async getMarketplaceAbiSmartContract(): Promise<SmartContract> {
     let abiRegistry = await AbiRegistry.load({
       files: ['./src/abis/esdt-nft-marketplace.abi.json'],
     });
@@ -42,6 +42,19 @@ export class ElrondProxyService {
 
     let contract = new SmartContractProfiler({
       address: new Address(elrondConfig.nftMarketplaceAddress),
+      abi: abi,
+    });
+    return contract;
+  }
+
+  async getMinterAbiSmartContract(address: string): Promise<SmartContract> {
+    let abiRegistry = await AbiRegistry.load({
+      files: ['./src/abis/nft-minter.abi.json'],
+    });
+    let abi = new SmartContractAbi(abiRegistry, ['NftMinter']);
+
+    let contract = new SmartContractProfiler({
+      address: new Address(address),
       abi: abi,
     });
     return contract;
