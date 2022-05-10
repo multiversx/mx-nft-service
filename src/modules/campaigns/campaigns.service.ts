@@ -35,7 +35,7 @@ export class CampaignsService {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllCollections.key,
-      async () => await this.getCampaignsFromDb(),
+      () => this.getCampaignsFromDb(),
       TimeConstants.oneHour,
     );
   }
@@ -51,7 +51,7 @@ export class CampaignsService {
         (c) => c.campaignId === filters.campaignId,
       );
       return new CollectionType({
-        count: campaigns ? campaigns.length : 0,
+        count: campaigns ? campaigns?.length : 0,
         items: campaigns,
       });
     }
