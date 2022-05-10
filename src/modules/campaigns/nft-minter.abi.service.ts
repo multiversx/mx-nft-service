@@ -42,7 +42,7 @@ export class NftMinterAbiService {
     const contract = await this.elrondProxyService.getMinterAbiSmartContract(
       address,
     );
-    let getDataQuery = <Interaction>contract.methods.getAllBrandsInfo();
+    let getDataQuery = <Interaction>contract.methodsExplicit.getAllBrandsInfo();
 
     const response = await this.getFirstQueryResult(getDataQuery);
     const campaign: BrandInfoViewResultType[] = response?.firstValue?.valueOf();

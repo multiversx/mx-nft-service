@@ -150,7 +150,7 @@ export class NftMarketplaceAbiService {
     const contract =
       await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
-      contract.methods.getFullAuctionData([
+      contract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
       ])
     );
@@ -185,7 +185,7 @@ export class NftMarketplaceAbiService {
     const contract =
       await this.elrondProxyService.getMarketplaceAbiSmartContract();
     let getDataQuery = <Interaction>(
-      contract.methods.getMarketplaceCutPercentage()
+      contract.methodsExplicit.getMarketplaceCutPercentage()
     );
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf().toFixed();
