@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.12.0",
-    "@elrondnetwork/erdjs": "10.2.3",
+    "@elrondnetwork/erdjs": "10.2.4",
     "@elrondnetwork/erdjs-network-providers": "^0.1.5",
     "@golevelup/nestjs-rabbitmq": "2.2.0",
     "@jenyus-org/nestjs-graphql-utils": "^1.6.4",
