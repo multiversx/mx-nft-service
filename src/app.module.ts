@@ -41,10 +41,6 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 
         return graphQLFormattedError;
       },
-      uploads: {
-        maxFileSize: 100000000,
-        maxFiles: 5,
-      },
     }),
     CommonModule,
     CollectionModuleGraph,
