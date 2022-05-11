@@ -19,7 +19,6 @@ export class LocalCacheService {
       value,
       expires,
     };
-    console.log('set local cache', value);
 
     return value;
   }

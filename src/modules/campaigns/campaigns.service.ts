@@ -66,13 +66,7 @@ export class CampaignsService {
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
     let [campaigns, count]: [CampaignEntity[], number] =
       await this.campaignsRepository.getCampaigns();
-    console.log(
-      'from db',
-      new CollectionType({
-        count: count,
-        items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
-      }),
-    );
+
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
