@@ -267,7 +267,8 @@ enum CampaignStatusEnum {
 }
 
 input CampaignsFilter {
-  campaignId: String
+  campaignId: String!
+  minterAddress: String!
 }
 
 type CampaignsResponse {

@@ -150,8 +150,11 @@ export class CollectionsFilter {
 
 @InputType()
 export class CampaignsFilter {
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   campaignId: string;
+
+  @Field(() => String)
+  minterAddress: string;
 }
 
 @InputType()

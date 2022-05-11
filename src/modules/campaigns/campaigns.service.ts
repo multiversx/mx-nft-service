@@ -48,7 +48,9 @@ export class CampaignsService {
     let allCampaigns = await this.getAllCampaigns();
     if (filters?.campaignId) {
       const campaigns = allCampaigns?.items?.filter(
-        (c) => c.campaignId === filters.campaignId,
+        (c) =>
+          c.campaignId === filters.campaignId &&
+          c.minterAddress === filters.minterAddress,
       );
       return new CollectionType({
         count: campaigns ? campaigns?.length : 0,
