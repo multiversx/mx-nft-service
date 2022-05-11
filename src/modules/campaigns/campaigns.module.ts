@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { CampaignsService } from './campaigns.service';
+import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { CampaignsService } from './campaigns.service';
     CampaignsService,
   ],
   imports: [
+    PubSubListenerModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([CampaignsRepository]),
     TypeOrmModule.forFeature([TiersRepository]),

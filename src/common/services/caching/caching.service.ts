@@ -38,6 +38,7 @@ export class CachingService {
       }
 
       const cached = await this.redisCacheService.get(client, key);
+
       if (cached !== undefined && cached !== null) {
         profiler.stop(`Remote Cache hit for key ${key}`);
 
@@ -72,6 +73,11 @@ export class CachingService {
     await this.localCacheService.setCacheValue<T>(key, value, ttl);
     await this.redisCacheService.set(client, key, value, ttl);
     return value;
+  }
+
+  async deleteInCache(client: Redis.Redis, key: string): Promise<void> {
+    this.localCacheService.deleteCacheKey(key);
+    this.redisCacheService.del(client, key);
   }
 
   pendingPromises: { [key: string]: Promise<any> } = {};

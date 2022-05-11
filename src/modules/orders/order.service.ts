@@ -142,7 +142,6 @@ export class OrdersService {
     auctionId: number = 0,
     ownerAddress: string = '',
   ): Promise<void> {
-    console.log('invalidate cache for ', auctionId, ownerAddress);
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStats.invalidateStats(ownerAddress);

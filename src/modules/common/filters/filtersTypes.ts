@@ -149,6 +149,12 @@ export class CollectionsFilter {
 }
 
 @InputType()
+export class CampaignsFilter {
+  @Field(() => String, { nullable: true })
+  campaignId: string;
+}
+
+@InputType()
 export class AssetHistoryFilter {
   @Field(() => String)
   identifier: string;
