@@ -34,7 +34,7 @@ export class CampaignsService {
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
-      CacheInfo.AllCollections.key,
+      CacheInfo.Campaigns.key,
       () => this.getCampaignsFromDb(),
       TimeConstants.oneHour,
     );
