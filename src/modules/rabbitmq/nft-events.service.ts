@@ -150,6 +150,7 @@ export class NftEventsService {
         case AuctionEventEnum.EndAuctionEvent:
           const endAuction = new EndAuctionEvent(event);
           const topicsEndAuction = endAuction.getTopics();
+          const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
           this.auctionsService.updateAuction(
             parseInt(topicsEndAuction.auctionId, 16),
             AuctionStatusEnum.Ended,
@@ -160,15 +161,14 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
-
           await this.accountFeedService.addFeed(
             new Feed({
-              address: buySftTopics.currentWinner,
+              address: topicsEndAuction.currentWinner,
               event: EventEnum.won,
-              reference: `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`,
+              reference: endAuctionIdentifier,
               extraInfo: {
                 auctionId: parseInt(topicsEndAuction.auctionId, 16),
-                nftName: await this.getNftName(identifier),
+                nftName: await this.getNftName(endAuctionIdentifier),
                 price: topicsEndAuction.currentBid,
               },
             }),
