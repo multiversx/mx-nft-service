@@ -35,7 +35,6 @@ export class LocalCacheService {
       return undefined;
     }
 
-    console.log('From local cache', { cacheValue });
     return cacheValue.value;
   }
 

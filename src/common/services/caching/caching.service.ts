@@ -39,7 +39,6 @@ export class CachingService {
 
       const cached = await this.redisCacheService.get(client, key);
 
-      console.log('From redis cache', { cached });
       if (cached !== undefined && cached !== null) {
         profiler.stop(`Remote Cache hit for key ${key}`);
 

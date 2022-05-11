@@ -28,9 +28,9 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
       filters,
     );
     return PageResponse.mapResponse<Campaign>(
-      campaigns.items,
+      campaigns?.items || [],
       pagination,
-      campaigns.count,
+      campaigns?.count || 0,
       offset,
       limit,
     );
