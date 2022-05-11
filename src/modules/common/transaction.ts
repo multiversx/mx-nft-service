@@ -14,13 +14,12 @@ export class TransactionNode {
   @Field()
   gasLimit: number;
   @Field()
-  data: string;
+  data?: string;
   @Field()
   chainID: string;
   @Field()
   version: number;
   @Field({ nullable: true })
-  options: string;
-  @Field({ nullable: true })
-  status: string;
+  options?: number;
+  signature?: string;
 }

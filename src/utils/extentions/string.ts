@@ -6,7 +6,6 @@ declare global {
     base64ToHex(): string;
     base64ToBech32(): string;
     hexToBech32(): string;
-    bech32ToHex(): string;
     hexBigNumberToString(): string;
     makeId(length: number): string;
     hexToNumber(): number;
@@ -19,9 +18,6 @@ String.prototype.base64ToHex = function () {
   return buffer.toString('hex');
 };
 
-String.prototype.bech32ToHex = function () {
-  return new Account(Address.fromBech32(this)).address.hex();
-};
 String.prototype.base64ToBech32 = function () {
   const address = this.base64ToHex();
   return address.hexToBech32();
