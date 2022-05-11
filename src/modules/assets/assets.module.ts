@@ -33,6 +33,8 @@ import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-ha
 import { AssetsMutationsResolver } from './assets-mutations.resolver';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
+import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
+import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-marketplace.redis-handler';
 
 @Module({
   providers: [
@@ -62,6 +64,8 @@ import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,
+    FeaturedMarketplaceProvider,
+    FeaturedMarketplaceRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,

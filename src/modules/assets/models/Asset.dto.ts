@@ -6,6 +6,7 @@ import { Nft } from 'src/common';
 import { ScamInfo } from './ScamInfo.dto';
 import { Media } from './Media.dto';
 import { Account } from 'src/modules/account-stats/models';
+import { FeaturedMarketplace } from './FeaturedMarketplace.dto';
 
 @ObjectType()
 export class Asset {
@@ -82,6 +83,8 @@ export class Asset {
   media: Media[];
   @Field({ nullable: true })
   verified: boolean;
+  @Field({ nullable: true })
+  featuredMarketplace: FeaturedMarketplace;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
