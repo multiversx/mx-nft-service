@@ -73,14 +73,15 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
-
+        const nftData = await this.getNftNameAndAssets(identifier);
         await this.accountFeedService.addFeed(
           new Feed({
             address: address,
             event: EventEnum.like,
             reference: identifier,
             extraInfo: {
-              nftName: await this.getNftName(identifier),
+              nftName: nftData?.name,
+              verified: nftData?.assets ? true : false,
             },
           }),
         );
@@ -164,12 +165,12 @@ export class AssetsLikesService {
     return generateCacheKeyFromParams('assetLikesCount', identifier);
   }
 
-  private async getNftName(identifier: string) {
+  private async getNftNameAndAssets(identifier: string) {
     const nft = await this.elrondApi.getNftByIdentifierForQuery(
       identifier,
-      'fields=name',
+      'fields=name,assets',
     );
-    return nft?.name;
+    return nft;
   }
 
   private async invalidateCache(
