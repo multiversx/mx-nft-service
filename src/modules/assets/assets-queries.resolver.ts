@@ -23,6 +23,10 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
+import { Address } from '@elrondnetwork/erdjs/out';
+import { elrondConfig } from 'src/config';
+import { FeaturedMarketplace } from './models/FeaturedMarketplace.dto';
+import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -37,6 +41,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
+    private marketplaceProvider: FeaturedMarketplaceProvider,
   ) {
     super();
   }
@@ -152,5 +157,21 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account?.value, ownerAddress);
+  }
+
+  @ResolveField(() => FeaturedMarketplace)
+  async featuredMarketplace(@Parent() asset: Asset) {
+    const { ownerAddress } = asset;
+
+    if (!ownerAddress) return null;
+    const address = new Address(ownerAddress);
+    if (
+      address.isContractAddress() &&
+      !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
+    ) {
+      const marketplace = await this.marketplaceProvider.load(ownerAddress);
+      return FeaturedMarketplace.fromEntity(marketplace?.value);
+    }
+    return null;
   }
 }

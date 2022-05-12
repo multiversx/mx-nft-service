@@ -41,6 +41,7 @@ type Asset {
   creationDate: Int
   creator: Account
   creatorAddress: String!
+  featuredMarketplace: FeaturedMarketplace
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
@@ -407,6 +408,11 @@ input CreateNftArgs {
   name: String!
   quantity: String = "1"
   royalties: String = "0"
+}
+
+type FeaturedMarketplace {
+  address: String!
+  url: String!
 }
 
 input Filter {
