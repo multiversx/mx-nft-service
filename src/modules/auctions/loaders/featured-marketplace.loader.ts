@@ -23,6 +23,7 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
       .createQueryBuilder('fm')
       .select('fm.address as address')
       .addSelect('fm.url as url')
+      .addSelect('fm.name as name')
       .where(`fm.address IN(${addresses.map((value) => `'${value}'`)})`, {
         identifiers: addresses,
       })
