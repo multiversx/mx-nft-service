@@ -412,6 +412,7 @@ input CreateNftArgs {
 
 type FeaturedMarketplace {
   address: String!
+  name: String!
   url: String!
 }
 

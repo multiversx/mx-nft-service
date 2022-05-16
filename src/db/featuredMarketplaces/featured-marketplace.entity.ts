@@ -7,6 +7,9 @@ export class FeaturedMarketplaceEntity extends BaseEntity {
   @Index('marketplace_address')
   address: string;
 
+  @Column({ length: 62 })
+  name: string;
+
   @Column()
   url: string;
 
