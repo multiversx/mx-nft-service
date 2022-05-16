@@ -6,6 +6,9 @@ export class FeaturedMarketplace {
   address: string;
 
   @Field(() => String)
+  name: string;
+
+  @Field(() => String)
   url: string;
 
   constructor(init?: Partial<FeaturedMarketplace>) {
@@ -16,6 +19,7 @@ export class FeaturedMarketplace {
     return entity
       ? new FeaturedMarketplace({
           address: entity.address,
+          name: entity.name,
           url: entity.url,
         })
       : null;
