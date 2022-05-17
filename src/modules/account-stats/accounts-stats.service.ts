@@ -102,7 +102,7 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(AccountStatsEntity);
+      return Promise.resolve(0);
     }
   }
 
