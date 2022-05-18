@@ -15,12 +15,12 @@ export class FeaturedMarketplace {
     Object.assign(this, init);
   }
 
-  static fromEntity(entity: FeaturedMarketplaceEntity) {
+  static fromEntity(entity: FeaturedMarketplaceEntity, identifier: string) {
     return entity
       ? new FeaturedMarketplace({
           address: entity.address,
           name: entity.name,
-          url: entity.url,
+          url: `${entity.url}${identifier}`,
         })
       : null;
   }

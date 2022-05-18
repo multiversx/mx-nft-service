@@ -161,7 +161,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
   @ResolveField(() => FeaturedMarketplace)
   async featuredMarketplace(@Parent() asset: Asset) {
-    const { ownerAddress } = asset;
+    const { ownerAddress, identifier } = asset;
 
     if (!ownerAddress) return null;
     const address = new Address(ownerAddress);
@@ -170,7 +170,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
-      return FeaturedMarketplace.fromEntity(marketplace?.value);
+      return FeaturedMarketplace.fromEntity(marketplace?.value, identifier);
     }
     return null;
   }
