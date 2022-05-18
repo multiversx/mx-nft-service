@@ -1,5 +1,5 @@
 export class Feed {
-  address: string;
+  actor: string;
   topic: TopicEnum = TopicEnum.nft;
   event: EventEnum;
   reference: string;
