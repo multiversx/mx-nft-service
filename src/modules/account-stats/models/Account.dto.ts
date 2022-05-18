@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { AccountIdentity } from 'src/common';
 import { SocialLink } from './SocialLink.dto';
 
@@ -14,6 +14,8 @@ export class Account {
   cover: string;
   @Field({ nullable: true })
   herotag: string;
+  @Field(() => Privacy, { nullable: true })
+  privacy: Privacy;
 
   @Field(() => [SocialLink], { nullable: true })
   socialLinks: SocialLink[];
@@ -30,6 +32,7 @@ export class Account {
           profile: account?.profile?.url,
           cover: account?.cover?.url,
           herotag: account?.herotag,
+          privacy: account.privacy,
           socialLinks: account?.socialLinks?.map(
             (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
           ),
@@ -37,3 +40,12 @@ export class Account {
       : new Account({ address: address });
   }
 }
+
+export enum Privacy {
+  public = 'public',
+  private = 'private',
+}
+
+registerEnumType(Privacy, {
+  name: 'Privacy',
+});

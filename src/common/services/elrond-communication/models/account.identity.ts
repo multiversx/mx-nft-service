@@ -6,6 +6,7 @@ export interface AccountIdentity {
   id: string;
   socialLinks: SocialLink[];
   address: string;
+  privacy: Privacy;
 }
 
 export interface SocialLink {
@@ -19,4 +20,9 @@ export interface Cover {
 
 export interface Profile {
   url: string;
+}
+
+export enum Privacy {
+  public = 'public',
+  private = 'private',
 }
