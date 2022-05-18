@@ -76,7 +76,7 @@ export class AssetsLikesService {
         const nftData = await this.getNftNameAndAssets(identifier);
         await this.accountFeedService.addFeed(
           new Feed({
-            address: address,
+            actor: address,
             event: EventEnum.like,
             reference: identifier,
             extraInfo: {

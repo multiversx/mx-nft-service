@@ -72,7 +72,7 @@ export class NftEventsService {
           );
           await this.accountFeedService.addFeed(
             new Feed({
-              address: topics.currentWinner,
+              actor: topics.currentWinner,
               event: EventEnum.bid,
               reference: auction?.identifier,
               extraInfo: {
@@ -127,7 +127,7 @@ export class NftEventsService {
           const buySftNftData = await this.getNftNameAndAssets(identifier);
           await this.accountFeedService.addFeed(
             new Feed({
-              address: buySftTopics.currentWinner,
+              actor: buySftTopics.currentWinner,
               event: EventEnum.buy,
               reference: identifier,
               extraInfo: {
@@ -172,7 +172,7 @@ export class NftEventsService {
           );
           await this.accountFeedService.addFeed(
             new Feed({
-              address: topicsEndAuction.currentWinner,
+              actor: topicsEndAuction.currentWinner,
               event: EventEnum.won,
               reference: endAuctionIdentifier,
               extraInfo: {
@@ -200,7 +200,7 @@ export class NftEventsService {
           );
           await this.accountFeedService.addFeed(
             new Feed({
-              address: topicsAuctionToken.originalOwner,
+              actor: topicsAuctionToken.originalOwner,
               event: EventEnum.startAuction,
               reference: startAuctionIdentifier,
               extraInfo: {
@@ -233,13 +233,13 @@ export class NftEventsService {
           const nftData = await this.getNftNameAndAssets(identifier);
           await this.accountFeedService.addFeed(
             new Feed({
-              address: mintEvent.getAddress(),
+              actor: mintEvent.getAddress(),
               event: EventEnum.mintNft,
               reference: createTopics.collection,
               extraInfo: {
                 identifier: identifier,
-                nftName: nftData.name,
-                verified: nftData.assets ? true : false,
+                nftName: nftData?.name,
+                verified: nftData?.assets ? true : false,
                 collectionName: collection.name,
               },
             }),
