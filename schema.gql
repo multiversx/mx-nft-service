@@ -7,6 +7,7 @@ type Account {
   cover: String
   description: String
   herotag: String
+  privacy: Privacy
   profile: String
   socialLinks: [SocialLink!]
 }
@@ -630,6 +631,11 @@ type Price {
   timestamp: Int!
   token: ID!
   usdAmount: String
+}
+
+enum Privacy {
+  private
+  public
 }
 
 type Query {
