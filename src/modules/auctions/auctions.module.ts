@@ -54,7 +54,7 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
   ],
   imports: [
     ElrondCommunicationModule,
-    AuctionsModuleDb,
+    forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleDb),
     forwardRef(() => AccountsStatsModuleGraph),

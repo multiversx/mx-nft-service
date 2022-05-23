@@ -51,7 +51,6 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
     OwnersModuleGraph,
     AccountsStatsModuleGraph,
     ReportNftsModuleGraph,
-    AuctionsModuleDb,
     FeaturedModuleGraph,
     UsdAmountModuleGraph,
     TrendingModuleGraph,

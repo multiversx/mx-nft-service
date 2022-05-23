@@ -7,15 +7,14 @@ import {
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ElrondApiService, RedisCacheService } from 'src/common';
+import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
+import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AccountStatsRepositoryMock } from 'src/db/account-stats/account-stats.repository-mock';
-import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
-import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
-import { AccountsStatsResolver } from '../accounts-stats.resolver';
 
-describe('AccountsStatsResolver', () => {
-  let service: AccountsStatsResolver;
+describe('AccountsStatsService', () => {
+  let service: AccountsStatsService;
   const ElrondApiServiceProvider = {
     provide: ElrondApiService,
     useClass: ElrondApiServiceMock,

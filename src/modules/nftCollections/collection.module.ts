@@ -1,5 +1,4 @@
-import { Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
+import { forwardRef, Module } from '@nestjs/common';
 import { CollectionsQueriesResolver } from './collection-queries.resolver';
 import { CollectionsService } from './collection.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
@@ -15,6 +14,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
+import { ElrondCommunicationModule } from 'src/common/services/elrond-communication/elrond-communication.module';
 
 @Module({
   providers: [
@@ -33,7 +33,10 @@ import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-
     CollectionsNftsRedisHandler,
     CollectionsNftsCountRedisHandler,
   ],
-  imports: [ElrondCommunicationModule, AssetsModuleGraph],
+  imports: [
+    forwardRef(() => ElrondCommunicationModule),
+    forwardRef(() => AssetsModuleGraph),
+  ],
   exports: [CollectionsService, LocalCacheService],
 })
 export class CollectionModuleGraph {}

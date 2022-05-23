@@ -19,8 +19,11 @@ module.exports = {
     master: db,
     slaves: dbSlaves,
   },
-  entities: ['dist/db/**/*.entity.js'],
-  migrations: ['dist/db/migrations/*.js'],
+  entities:
+    process.env.NODE_ENV === 'test'
+      ? ['src/db/**/*.entity.js']
+      : ['dist/src/db/**/*.entity.js'],
+  migrations: ['dist/src/db/migrations/*.js'],
   cli: {
     migrationsDir: 'src/db/migrations',
   },

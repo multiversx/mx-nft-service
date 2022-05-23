@@ -1,33 +1,36 @@
-import { response } from 'express';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
-import { EntityRepository, Repository } from 'typeorm';
-import { AuctionEntity } from '../auctions';
-import { AccountStatsEntity } from './account-stats.entity';
+import { EntityManager, EntityRepository } from 'typeorm';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { AccountStatsEntity } from './account-stats';
 import {
   getOwnerAccountStatsQuery,
   getPublicAccountStatsQuery,
 } from './stats.querries';
 
-@EntityRepository(AuctionEntity)
-export class AccountStatsRepository extends Repository<AuctionEntity> {
+@EntityRepository()
+export class AccountStatsRepository {
+  constructor(public readonly manager: EntityManager) {}
   async getPublicAccountStats(address: string): Promise<AccountStatsEntity> {
-    const response = await this.query(getPublicAccountStatsQuery(address));
-    console.log(response[0]);
+    const response = await this.manager.query(
+      getPublicAccountStatsQuery(address),
+    );
     return response;
   }
 
   async getOnwerAccountStats(address: string): Promise<AccountStatsEntity> {
-    const response = await this.query(getOwnerAccountStatsQuery(address));
+    const response = await this.manager.query(
+      getOwnerAccountStatsQuery(address),
+    );
     console.log(response);
     return response;
   }
 
   async getAccountClaimableCount(address: string): Promise<number> {
-    console.log('here');
-    return await this.createQueryBuilder('a')
+    return await this.manager
+      .createQueryBuilder<AuctionEntity>(AuctionEntity, 'a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND 
+        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND
       ((o.ownerAddress = '${address}' AND o.status='active'))`,
       )
       .groupBy('a.id')

@@ -6,7 +6,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { AccountStatsEntity } from 'src/db/account-stats/account-stats.entity';
+import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
 
@@ -24,13 +24,16 @@ export class AccountsStatsService {
     );
   }
 
-  async getStats(address: string, isOwner: boolean): Promise<any> {
+  async getStats(
+    address: string,
+    isOwner: boolean,
+  ): Promise<AccountStatsEntity> {
     if (isOwner) {
       return this.getStatsForOwner(address);
     } else return this.getPublicStats(address);
   }
 
-  private async getPublicStats(address: string): Promise<any> {
+  private async getPublicStats(address: string): Promise<AccountStatsEntity> {
     try {
       const cacheKey = this.getStatsCacheKey(`${address}`);
       const getAccountStats = () =>
@@ -50,11 +53,11 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(AccountStatsEntity);
+      return Promise.resolve(new AccountStatsEntity());
     }
   }
 
-  private async getStatsForOwner(address: string): Promise<any> {
+  private async getStatsForOwner(address: string): Promise<AccountStatsEntity> {
     try {
       const cacheKey = this.getStatsCacheKey(`owner_${address}`);
       const getAccountStats = () =>
@@ -74,7 +77,7 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(AccountStatsEntity);
+      return Promise.resolve(new AccountStatsEntity());
     }
   }
 
@@ -82,7 +85,7 @@ export class AccountsStatsService {
     return generateCacheKeyFromParams('account_stats', address);
   }
 
-  async getClaimableCount(address: string): Promise<any> {
+  async getClaimableCount(address: string): Promise<number> {
     try {
       const cacheKey = this.getClaimableCacheKey(address);
       const getAccountClaimableCount = () =>
@@ -110,7 +113,7 @@ export class AccountsStatsService {
     return generateCacheKeyFromParams('account_claimable_count', address);
   }
 
-  async getCollectedCount(address: string): Promise<any> {
+  async getCollectedCount(address: string): Promise<number> {
     try {
       const cacheKey = this.getCollectedCacheKey(address);
       const getAccountStats = () =>
@@ -127,7 +130,7 @@ export class AccountsStatsService {
         address,
         exception: err?.message,
       });
-      return Promise.resolve(AccountStatsEntity);
+      return Promise.resolve(0);
     }
   }
 
@@ -135,7 +138,7 @@ export class AccountsStatsService {
     return generateCacheKeyFromParams('account_collected', address);
   }
 
-  async getCollectionsCount(address: string): Promise<any> {
+  async getCollectionsCount(address: string): Promise<number> {
     try {
       const cacheKey = this.getCollectionsCacheKey(address);
       const getCollectionsCount = () =>
@@ -152,7 +155,7 @@ export class AccountsStatsService {
         address,
         exception: err?.message,
       });
-      return Promise.resolve(AccountStatsEntity);
+      return Promise.resolve(0);
     }
   }
 

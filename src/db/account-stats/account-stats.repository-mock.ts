@@ -1,6 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { AuctionEntity } from '../auctions';
-import { AccountStatsEntity } from './account-stats.entity';
+import { AccountStatsEntity } from './account-stats';
 
 @EntityRepository(AuctionEntity)
 export class AccountStatsRepositoryMock extends Repository<AuctionEntity> {
