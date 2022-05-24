@@ -12,6 +12,7 @@ import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
 import { LastOrdersProvider } from './loaders/last-order.loader';
 import { OrdersRedisHandler } from './loaders/orders.redis-handler';
 import { OrdersProvider } from './loaders/orders.loader';
+import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 
 @Module({
   providers: [
@@ -31,6 +32,7 @@ import { OrdersProvider } from './loaders/orders.loader';
     ElrondCommunicationModule,
     OrdersModuleDb,
     forwardRef(() => AccountsStatsModuleGraph),
+    forwardRef(() => AuctionsModuleDb),
   ],
   exports: [OrdersService],
 })

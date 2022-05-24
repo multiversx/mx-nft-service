@@ -12,8 +12,6 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
-import { DateUtils } from 'src/utils/date-utils';
-import { LowestAuctionRedisHandler } from './loaders/lowest-auctions.redis-handler';
 
 @Injectable()
 export class AuctionsSetterService {

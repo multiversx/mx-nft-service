@@ -5,5 +5,8 @@ export class AccountStatsFilter {
   @Field(() => String)
   address: string;
   @Field(() => Boolean, { nullable: true })
-  isOwner: string;
+  isOwner: boolean;
+  constructor(init?: Partial<AccountStatsFilter>) {
+    Object.assign(this, init);
+  }
 }
