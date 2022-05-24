@@ -19,7 +19,7 @@ export function getPublicAccountStatsQuery(address: string) {
             AND o.status ='Active'
       ) 
   
-SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalance, 0) AS biddingBalance, address
+SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalance, 0) AS biddingBalance, '${address}' as address
 FROM
   (
   SELECT * from auctionsStats a
@@ -49,7 +49,7 @@ export function getOwnerAccountStatsQuery(address: string) {
             AND o.status ='Active'
       ) 
   
-SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalance, 0) AS biddingBalance, address
+SELECT auctions, IF(orders, orders,0) AS orders, if(biddingBalance, biddingBalance, 0) AS biddingBalance, '${address}' as address
 FROM
   (
   SELECT * from auctionsStats a
