@@ -282,7 +282,7 @@ export class AuctionsGetterService {
   > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
-      CacheInfo.AuctionsEndingToday.key,
+      CacheInfo.MarketplaceAuctions.key,
       () => this.getMarketplaceAuctionsQuery(DateUtils.getCurrentTimestamp()),
       5 * TimeConstants.oneMinute,
     );
