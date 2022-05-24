@@ -16,7 +16,7 @@ export class FeaturedMarketplace {
   }
 
   static fromEntity(entity: FeaturedMarketplaceEntity, identifier: string) {
-    return entity
+    return entity && Object.keys(entity).length > 0
       ? new FeaturedMarketplace({
           address: entity.address,
           name: entity.name,
