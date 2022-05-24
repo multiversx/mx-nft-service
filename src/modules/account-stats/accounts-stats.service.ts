@@ -53,7 +53,7 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(new AccountStatsEntity());
+      return new AccountStatsEntity();
     }
   }
 
@@ -77,7 +77,7 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(new AccountStatsEntity());
+      return new AccountStatsEntity();
     }
   }
 
@@ -105,7 +105,7 @@ export class AccountsStatsService {
           exception: err?.message,
         },
       );
-      return Promise.resolve(0);
+      return 0;
     }
   }
 
@@ -130,7 +130,7 @@ export class AccountsStatsService {
         address,
         exception: err?.message,
       });
-      return Promise.resolve(0);
+      return 0;
     }
   }
 
@@ -155,7 +155,7 @@ export class AccountsStatsService {
         address,
         exception: err?.message,
       });
-      return Promise.resolve(0);
+      return 0;
     }
   }
 
@@ -184,7 +184,7 @@ export class AccountsStatsService {
         address,
         exception: err?.message,
       });
-      return Promise.resolve(AccountStatsEntity);
+      return new AccountStatsEntity();
     }
   }
 
