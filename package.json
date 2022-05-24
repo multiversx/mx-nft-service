@@ -20,10 +20,10 @@
     "test:cov": "jest --coverage",
     "clear_jest": "jest --clearCache",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "NODE_ENV=test jest --config ./test/jest-e2e.json --forceExit --maxWorkers=4",
-    "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
-    "generate-migration": "typeorm migration:generate -n",
-    "run-migrations": "typeorm migration:run",
+    "test:e2e": "NODE_ENV=test-e2e jest --config ./test/jest-e2e.json --forceExit --maxWorkers=4",
+    "typeorm": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js --config src/ormconfig.ts",
+    "generate-migration": "npm run typeorm migration:generate -n",
+    "run-migrations": "npm run typeorm migration:run",
     "revert-migrations": "typeorm migration:revert"
   },
   "dependencies": {

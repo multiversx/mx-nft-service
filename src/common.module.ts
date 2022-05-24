@@ -12,6 +12,7 @@ import * as Transport from 'winston-transport';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
 import { cacheConfig } from './config';
 import { CachingModule } from './common/services/caching/caching.module';
+import * as ormconfig from './ormconfig';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -87,9 +88,7 @@ if (!!process.env.LOG_FILE) {
       },
     ]),
 
-    TypeOrmModule.forRoot({
-      keepConnectionAlive: true,
-    }),
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     ElrondCommunicationModule,
   ],
   exports: [ElrondCommunicationModule, CachingModule],
