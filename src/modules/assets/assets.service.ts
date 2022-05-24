@@ -66,7 +66,10 @@ export class AssetsService {
         address,
         query + '&withMetadata=true&includeFlagged=true',
       ),
-      this.apiService.getNftsForUserCount(address, query),
+      this.apiService.getNftsForUserCount(
+        address,
+        query + '&withMetadata=true&includeFlagged=true',
+      ),
     ]);
     const assets = nfts?.map((element) => Asset.fromNft(element));
     return new CollectionType({ count, items: assets });
