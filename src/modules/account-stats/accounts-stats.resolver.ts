@@ -23,6 +23,7 @@ export class AccountsStatsResolver {
       filters?.address,
       filters?.isOwner,
     );
+    console.log(AccountStats.fromEntity(account, filters?.address));
     return AccountStats.fromEntity(account, filters?.address);
   }
 
