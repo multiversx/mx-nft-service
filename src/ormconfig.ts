@@ -22,7 +22,7 @@ const config: ConnectionOptions = {
     slaves: dbSlaves,
   },
   entities:
-    process.env.NODE_ENV === 'test'
+    process.env.NODE_ENV === 'test-e2e'
       ? ['src/db/**/*.entity.js']
       : ['dist/db/**/*.entity.js'],
   migrations: ['dist/db/migrations/*.js'],
