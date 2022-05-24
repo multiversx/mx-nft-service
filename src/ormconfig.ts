@@ -1,6 +1,9 @@
-const db = {
+import { ConnectionOptions } from 'typeorm';
+import { MysqlConnectionCredentialsOptions } from 'typeorm/driver/mysql/MysqlConnectionCredentialsOptions';
+
+const db: MysqlConnectionCredentialsOptions = {
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+  port: parseInt(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -10,11 +13,10 @@ const dbSlaves = process.env.DB_SLAVES
   ? JSON.parse(process.env.DB_SLAVES)
   : [db];
 
-module.exports = {
+const config: ConnectionOptions = {
   type: 'mysql',
   synchronize: false,
   dropSchema: false,
-  logging: process.env.DB_LOGGING,
   replication: {
     master: db,
     slaves: dbSlaves,
@@ -22,13 +24,14 @@ module.exports = {
   entities:
     process.env.NODE_ENV === 'test'
       ? ['src/db/**/*.entity.js']
-      : ['dist/src/db/**/*.entity.js'],
-  migrations: ['dist/src/db/migrations/*.js'],
+      : ['dist/db/**/*.entity.js'],
+  migrations: ['dist/db/migrations/*.js'],
   cli: {
     migrationsDir: 'src/db/migrations',
   },
   extra: {
     connectionLimit: process.env.DB_CONNECTION_LIMIT,
   },
-  keepConnectionAlive: true,
 };
+
+export = config;
