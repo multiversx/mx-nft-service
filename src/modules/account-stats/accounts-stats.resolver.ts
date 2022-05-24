@@ -23,8 +23,7 @@ export class AccountsStatsResolver {
       filters?.address,
       filters?.isOwner,
     );
-    console.log(AccountStats.fromEntity(account[0], filters?.address));
-    return AccountStats.fromEntity(account[0], filters?.address);
+    return AccountStats.fromEntity(account, filters?.address);
   }
 
   @ResolveField(() => Int)

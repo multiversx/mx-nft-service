@@ -11,11 +11,18 @@ import {
 export class AccountStatsRepository {
   constructor(public readonly manager: EntityManager) {}
   async getPublicAccountStats(address: string): Promise<AccountStatsEntity> {
-    return await this.manager.query(getPublicAccountStatsQuery(address));
+    const response = await this.manager.query(
+      getPublicAccountStatsQuery(address),
+    );
+
+    return response?.length > 0 ? response[0] : new AccountStatsEntity();
   }
 
   async getOnwerAccountStats(address: string): Promise<AccountStatsEntity> {
-    return await this.manager.query(getOwnerAccountStatsQuery(address));
+    const response = await this.manager.query(
+      getOwnerAccountStatsQuery(address),
+    );
+    return response?.length > 0 ? response[0] : new AccountStatsEntity();
   }
 
   async getAccountClaimableCount(address: string): Promise<number> {
