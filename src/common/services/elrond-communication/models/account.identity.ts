@@ -1,4 +1,4 @@
-export interface AccountIdentity {
+export class AccountIdentity {
   description: string;
   profile: Profile;
   cover: Cover;
@@ -7,6 +7,10 @@ export interface AccountIdentity {
   socialLinks: SocialLink[];
   address: string;
   privacy: Privacy;
+
+  constructor(init?: Partial<AccountIdentity>) {
+    Object.assign(this, init);
+  }
 }
 
 export interface SocialLink {
