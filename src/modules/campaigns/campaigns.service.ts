@@ -31,15 +31,6 @@ export class CampaignsService {
     );
   }
 
-  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    return await this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      TimeConstants.oneHour,
-    );
-  }
-
   async getCampaigns(
     limit: number = 10,
     offset: number = 0,
@@ -65,10 +56,19 @@ export class CampaignsService {
     });
   }
 
+  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.Campaigns.key,
+      () => this.getCampaignsFromDb(),
+      TimeConstants.oneMinute,
+    );
+  }
+
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
     let [campaigns, count]: [CampaignEntity[], number] =
       await this.campaignsRepository.getCampaigns();
-
+    console.log('get from db, ', count);
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),

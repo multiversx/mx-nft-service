@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
+import { CacheInfo } from './entities/cache.info';
 import { LocalCacheValue } from './entities/local.cache.value';
 
 @Injectable()
@@ -11,6 +12,9 @@ export class LocalCacheService {
   setCacheValue<T>(key: string, value: T, ttl: number): T {
     if (this.needsPrune()) {
       this.prune();
+    }
+    if (key === CacheInfo.Campaigns.key) {
+      console.log('get from local cache', value);
     }
 
     const expires = new Date().getTime() + ttl * 1000;

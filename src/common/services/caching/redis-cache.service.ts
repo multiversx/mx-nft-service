@@ -8,6 +8,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
 import { promisify } from 'util';
 import { Logger } from 'winston';
+import { CacheInfo } from './entities/cache.info';
 
 @Injectable()
 export class RedisCacheService {
@@ -54,6 +55,9 @@ export class RedisCacheService {
   ): Promise<void> {
     if (isNil(value)) {
       return;
+    }
+    if (key === CacheInfo.Campaigns.key) {
+      console.log('set redis', value);
     }
     const cacheKey = generateCacheKey(key, region);
 
