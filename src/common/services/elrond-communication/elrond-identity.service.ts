@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ApiService } from './api.service';
+import { Privacy } from './models';
 import { AccountIdentity } from './models/account.identity';
 
 @Injectable()
@@ -48,6 +49,12 @@ export class ElrondIdentityService {
         address: address,
       };
     } catch (error) {
+      if (error.status === HttpStatus.FORBIDDEN) {
+        return new AccountIdentity({
+          address: address,
+          privacy: Privacy.private,
+        });
+      }
       this.logger.error(
         `An error occurred while calling the elrond identity service on url ${url}`,
         {
