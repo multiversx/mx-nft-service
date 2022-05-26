@@ -124,6 +124,7 @@ export class NftMinterAbiService {
       new TokenIdentifierValue(request.mintPriceToken),
       BytesValue.fromUTF8(request.collectionName),
       BytesValue.fromUTF8(request.collectionTicker),
+      new U64Value(new BigNumber(request.whitelistEndTime.toString())),
       List.fromItems(
         request.tags.map((tag) => new BytesValue(Buffer.from(tag, 'hex'))),
       ),

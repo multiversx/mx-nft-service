@@ -464,6 +464,7 @@ input IssueCampaignArgs {
   royalties: String!
   tags: [String!]!
   tiers: [TierArgs!]!
+  whitelistEndTime: Int!
 }
 
 input IssueCollectionArgs {

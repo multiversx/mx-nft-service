@@ -37,6 +37,9 @@ export class CampaignEntity extends BaseEntity {
   @Column()
   endDate: number;
 
+  @Column()
+  whitelistExpireTimestamp: number;
+
   @Column({ length: 10 })
   royalties: string;
 

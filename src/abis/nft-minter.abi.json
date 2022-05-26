@@ -10,7 +10,7 @@
     "contractCrate": {
       "name": "nft-minter",
       "version": "0.0.0",
-      "git_version": "ead0464"
+      "git_version": "0ff3788"
     },
     "framework": {
       "name": "elrond-wasm",
@@ -144,6 +144,22 @@
       ]
     },
     {
+      "name": "getMintWhitelist",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
       "name": "addUserToAdminList",
       "onlyOwner": true,
       "mutability": "mutable",
@@ -209,6 +225,10 @@
           "type": "bytes"
         },
         {
+          "name": "whitelist_expire_timestamp",
+          "type": "u64"
+        },
+        {
           "name": "tags",
           "type": "List<bytes>"
         },
@@ -216,6 +236,53 @@
           "name": "tier_name_nr_nfts_pairs",
           "type": "variadic<multi<bytes,u32,BigUint>>",
           "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addToWhitelist",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "users",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeFromWhitelist",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "users",
+          "type": "variadic<Address>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setMintWhitelistExpireTimestamp",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "timestamp",
+          "type": "u64"
         }
       ],
       "outputs": []
@@ -470,6 +537,10 @@
         {
           "name": "mint_period",
           "type": "TimePeriod"
+        },
+        {
+          "name": "whitelist_expire_timestamp",
+          "type": "u64"
         }
       ]
     },

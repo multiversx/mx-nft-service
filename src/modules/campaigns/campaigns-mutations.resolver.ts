@@ -15,16 +15,13 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard)
   async issueCampaign(
     @Args('input') input: IssueCampaignArgs,
-    // @User() user: any,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCampaignRequest.fromArgs(input);
-    return await this.nftMinterService.issueToken(
-      'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-      request,
-    );
+    return await this.nftMinterService.issueToken(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)

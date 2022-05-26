@@ -1,4 +1,9 @@
-import { ArrayVec, BigUIntValue, BytesValue } from '@elrondnetwork/erdjs';
+import {
+  ArrayVec,
+  BigUIntValue,
+  BytesValue,
+  U64Value,
+} from '@elrondnetwork/erdjs';
 import { TimePeriod } from './MintPeriodAbi';
 
 export interface BrandInfo {
@@ -7,4 +12,5 @@ export interface BrandInfo {
   media_type: BytesValue;
   royalties: BigUIntValue;
   mint_period: TimePeriod;
+  whitelist_expire_timestamp: U64Value;
 }
