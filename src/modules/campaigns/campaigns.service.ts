@@ -61,7 +61,7 @@ export class CampaignsService {
       this.redisClient,
       CacheInfo.Campaigns.key,
       () => this.getCampaignsFromDb(),
-      TimeConstants.oneMinute,
+      TimeConstants.oneHour,
     );
   }
 
