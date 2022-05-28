@@ -1,17 +1,10 @@
 import { OwnerResponse, OwnersFilters, Owner } from './models';
-import {
-  Mutation,
-  Query,
-  Resolver,
-  Args,
-  ResolveField,
-  Parent,
-} from '@nestjs/graphql';
+import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { OwnersService } from './owners.service';
-import ConnectionArgs from '../ConnectionArgs';
-import PageResponse from '../PageResponse';
-import { AccountsProvider } from '../accounts/accounts.loader';
-import { Account } from '../accounts/models';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { Account } from '../account-stats/models';
+import ConnectionArgs from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Owner)
 export class OwnersResolver {
@@ -27,9 +20,6 @@ export class OwnersResolver {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<OwnerResponse> {
-    if (process.env.NODE_ENV === 'production') {
-      return new OwnerResponse();
-    }
     const { limit, offset } = pagination.pagingParams();
     const [owners, count] = await this.ownersService.getOwnersForIdentifier(
       filters?.identifier,
@@ -50,7 +40,7 @@ export class OwnersResolver {
     const { address } = owner;
 
     if (!address) return null;
-    const account = await this.accountsProvider.getAccountByAddress(address);
-    return Account.fromEntity(account, address);
+    const account = await this.accountsProvider.load(address);
+    return Account.fromEntity(account?.value, address);
   }
 }

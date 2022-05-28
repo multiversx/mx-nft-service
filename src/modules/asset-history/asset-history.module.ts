@@ -1,19 +1,18 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AssetsHistoryResolver, AssetsHistoryService } from '.';
-import { AccountsModuleGraph } from '../accounts/accounts.module';
-import { PriceServiceUSD } from '../Price.service.usd';
-import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { ElrondCommunicationModule } from 'src/common';
 import { AssetHistoryAccountResolver } from './asset-history-account-resolver';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
   providers: [
     AssetsHistoryService,
     AssetsHistoryResolver,
     AssetHistoryAccountResolver,
-    PriceServiceUSD,
-    RedisCacheService,
+    AccountsProvider,
+    AccountsRedisHandler,
   ],
-  imports: [ElrondCommunicationModule, forwardRef(() => AccountsModuleGraph)],
-  exports: [RedisCacheService],
+  imports: [forwardRef(() => ElrondCommunicationModule)],
 })
 export class AssetHistoryModuleGraph {}

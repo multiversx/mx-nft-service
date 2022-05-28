@@ -1,14 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
-import { CreateOrderArgs, Order } from './models';
-import { QueryRequest } from '../QueryRequest';
+import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
+import { AccountsStatsService } from '../account-stats/accounts-stats.service';
+import { QueryRequest } from '../common/filters/QueryRequest';
+import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
+import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
+import { TimeConstants } from 'src/utils/time-utils';
 const hash = require('object-hash');
 
 @Injectable()
@@ -16,6 +20,9 @@ export class OrdersService {
   private redisClient: Redis.Redis;
   constructor(
     private orderServiceDb: OrdersServiceDb,
+    private lastOrderRedisHandler: LastOrderRedisHandler,
+    private accountStats: AccountsStatsService,
+    private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -30,7 +37,10 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      await this.invalidateCache();
+      await this.invalidateCache(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -47,9 +57,37 @@ export class OrdersService {
     }
   }
 
+  async updateOrder(
+    auctionId: number,
+    status: OrderStatusEnum,
+  ): Promise<OrderEntity> {
+    try {
+      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
+        auctionId,
+      );
+
+      await this.invalidateCache(auctionId, activeOrder.ownerAddress);
+      const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
+        activeOrder,
+        status,
+      );
+
+      return orderEntity;
+    } catch (error) {
+      this.logger.error('An error occurred while updating order for auction', {
+        path: 'OrdersService.updateOrder',
+        auctionId,
+        exception: error,
+      });
+    }
+  }
+
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.invalidateCache();
+      await this.invalidateCache(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
       const orderEntity = await this.orderServiceDb.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
@@ -67,7 +105,7 @@ export class OrdersService {
     try {
       await this.invalidateCache();
 
-      return this.orderServiceDb.deleteOrdersByHash(hash);
+      return this.orderServiceDb.rollbackOrdersByHash(hash);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
@@ -84,7 +122,7 @@ export class OrdersService {
       this.redisClient,
       cacheKey,
       getOrders,
-      cacheConfig.ordersttl,
+      TimeConstants.oneDay,
     );
   }
 
@@ -100,7 +138,13 @@ export class OrdersService {
     return generateCacheKeyFromParams('orders', hash(request));
   }
 
-  private async invalidateCache(): Promise<void> {
+  private async invalidateCache(
+    auctionId: number = 0,
+    ownerAddress: string = '',
+  ): Promise<void> {
+    await this.lastOrderRedisHandler.clearKey(auctionId);
+    await this.auctionAvailableTokens.clearKey(auctionId);
+    await this.accountStats.invalidateStats(ownerAddress);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }

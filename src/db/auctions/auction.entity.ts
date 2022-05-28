@@ -3,9 +3,10 @@ import {
   AuctionStatusEnum,
   AuctionAbi,
 } from 'src/modules/auctions/models';
-import denominate, { nominateVal } from 'src/modules/formatters';
-import { Column, Entity, Index } from 'typeorm';
+import denominate, { nominateVal } from 'src/utils/formatters';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
+import { OrderEntity } from '../orders';
 
 @Entity('auctions')
 export class AuctionEntity extends BaseEntity {
@@ -36,13 +37,18 @@ export class AuctionEntity extends BaseEntity {
   paymentNonce: number;
 
   @Column({ length: 62 })
+  @Index('auction_owner')
   ownerAddress: string;
+
+  @Column()
+  minBidDiff: string;
 
   @Column()
   minBid: string;
 
   @Column('decimal', { precision: 36, scale: 18, default: 0.0 })
   minBidDenominated: number;
+
   @Column()
   maxBid: string;
 
@@ -60,6 +66,9 @@ export class AuctionEntity extends BaseEntity {
 
   @Column({ length: 64 })
   blockHash: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.auction)
+  orders: OrderEntity[];
 
   constructor(init?: Partial<AuctionEntity>) {
     super();
@@ -81,20 +90,21 @@ export class AuctionEntity extends BaseEntity {
             auction.nr_auctioned_tokens.valueOf().toString(),
           ),
           status: AuctionStatusEnum.Running,
-          type: AuctionTypeEnum[auction.auction_type.valueOf().toString()],
+          type: AuctionTypeEnum[auction.auction_type.valueOf().name],
           paymentToken: auction.payment_token.token_type.valueOf().toString(),
           paymentNonce: parseInt(
             auction.payment_token.nonce.valueOf().toString(),
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
+          minBidDiff: auction.min_bid_diff.valueOf().toString(),
           minBidDenominated: parseFloat(
             denominate({
               input: auction.min_bid.valueOf()?.toString(),
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
-            }),
+            }).replace(',', ''),
           ),
           maxBid: auction.max_bid?.valueOf()?.toString() || '0',
           maxBidDenominated: parseFloat(
@@ -103,7 +113,7 @@ export class AuctionEntity extends BaseEntity {
               denomination: 18,
               decimals: 2,
               showLastNonZeroDecimal: true,
-            }),
+            }).replace(',', ''),
           ),
           startDate: parseInt(auction.start_time.valueOf().toString()),
           endDate: parseInt(auction.deadline.valueOf().toString()),

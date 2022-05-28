@@ -1,38 +1,74 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { AssetsService, AssetsResolver, AssetsLikesService } from '.';
+import {
+  AssetsService,
+  AssetsQueriesResolver,
+  AssetsLikesService,
+  AssetAuctionsCountProvider,
+} from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssetsLikesRepository } from 'src/db/assets';
 import { S3Service } from '../s3/s3.service';
-import { AccountsModuleGraph } from '../accounts/accounts.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
-import { PriceServiceUSD } from '../Price.service.usd';
-import { AssetAuctionsCountProvider, AssetLikesProvider } from '.';
-import { ElrondCommunicationModule, RedisCacheService } from 'src/common';
+import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
-import { AssetAvailableTokensCountProvider } from './asset-available-tokens-count.loader';
-import { AssetsSupplyLoader } from './assets-supply.loader';
-import { AssetScamInfoProvider } from './assets-scam-info.loader';
-import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
+import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
+import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
+import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
+import { ContentValidation } from './content.validation.service';
+import { AssetAuctionResolver } from './asset-auction.resolver';
+import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loader';
+import { VerifyContentService } from './verify-content.service';
+import { AssetAvailableTokensCountRedisHandler } from './loaders/asset-available-tokens-count.redis-handler';
+import { IsAssetLikedRedisHandler } from './loaders/asset-is-liked.redis-handler';
+import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
+import { AssetLikesProviderRedisHandler } from './loaders/asset-likes-count.redis-handler';
+import { LowestAuctionRedisHandler } from '../auctions/loaders/lowest-auctions.redis-handler';
+import { AssetsSupplyRedisHandler } from './loaders/assets-supply.redis-handler';
+import { AssetScamInfoRedisHandler } from './loaders/assets-scam-info.redis-handler';
+import { AssetAuctionsCountRedisHandler } from './loaders/asset-auctions-count.redis-handler';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { AssetsMutationsResolver } from './assets-mutations.resolver';
+import { AssetsViewsLoader } from './loaders/assets-views.loader';
+import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
+import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
+import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-marketplace.redis-handler';
 
 @Module({
   providers: [
     AssetsService,
     AssetsLikesService,
+    VerifyContentService,
+    ContentValidation,
+    AssetLikesProviderRedisHandler,
     AssetLikesProvider,
+    AssetsViewsLoader,
+    AssetsViewsRedisHandler,
+    IsAssetLikedRedisHandler,
     IsAssetLikedProvider,
+    LowestAuctionRedisHandler,
+    LowestAuctionProvider,
+    AssetsSupplyRedisHandler,
     AssetsSupplyLoader,
+    AssetAuctionsCountRedisHandler,
     AssetAuctionsCountProvider,
+    AssetScamInfoRedisHandler,
     AssetScamInfoProvider,
+    AssetAvailableTokensCountRedisHandler,
     AssetAvailableTokensCountProvider,
-    AssetsResolver,
-    RedisCacheService,
+    AssetsQueriesResolver,
+    AssetsMutationsResolver,
+    AssetAuctionResolver,
     S3Service,
-    PriceServiceUSD,
+    AccountsProvider,
+    AccountsRedisHandler,
+    FeaturedMarketplaceProvider,
+    FeaturedMarketplaceRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
-    forwardRef(() => AccountsModuleGraph),
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
@@ -41,7 +77,6 @@ import { IsAssetLikedProvider } from './asset-is-liked.loader';
   exports: [
     AssetsService,
     AssetsLikesService,
-    RedisCacheService,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,

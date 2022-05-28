@@ -1,5 +1,4 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { FileUpload } from 'graphql-upload';
 
 @InputType()
 export class AttributeInput {
@@ -26,6 +25,4 @@ export class CreateNftArgs {
 
   @Field(() => AttributeInput)
   attributes: AttributeInput;
-
-  file: FileUpload;
 }

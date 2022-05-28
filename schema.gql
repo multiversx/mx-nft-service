@@ -4,38 +4,28 @@
 
 type Account {
   address: ID
-  assets: [Asset!]
-  auctions: [Auction!]
   cover: String
   description: String
-  followers(pagination: ConnectionArgs): FollowerResponse
-  following(pagination: ConnectionArgs): FollowerResponse
   herotag: String
-  orders: [Order!]
+  privacy: Privacy
   profile: String
   socialLinks: [SocialLink!]
 }
 
-type AccountEdge {
-  cursor: String
-  node: Account
+type AccountStats {
+  address: ID
+  auctions: String
+  biddingBalance: String
+  claimable: String
+  collected: String
+  collections: String
+  creations: String
+  orders: String
 }
 
-type AccountPageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
-type AccountResponse {
-  edges: [AccountEdge!]
-  pageData: PageData
-  pageInfo: AccountPageInfo
-}
-
-input AccountsFilter {
-  addresses: [String!]!
+input AccountStatsFilter {
+  address: String!
+  isOwner: Boolean
 }
 
 input AddLikeArgs {
@@ -44,12 +34,15 @@ input AddLikeArgs {
 
 type Asset {
   attributes: String!
-  auctions: [Auction!]
+
+  """This will return only the running query!"""
+  auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
   collection: ID!
   creationDate: Int
   creator: Account
   creatorAddress: String!
+  featuredMarketplace: FeaturedMarketplace
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
@@ -67,12 +60,14 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String
+  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String
+  url: String @deprecated(reason: "This field will be removed in the next version")
+  verified: Boolean
+  viewsCount: Int
 }
 
 enum AssetActionEnum {
@@ -163,14 +158,15 @@ type Auction {
   identifier: String!
   maxBid: Price!
   minBid: Price!
+  minBidDiff: Price!
   nonce: Int!
   nrAuctionedTokens: Int
-  orders: [Order!]
+  orders(pagination: ConnectionArgs): OrdersResponse
   owner: Account
   ownerAddress: String
   startDate: Int!
   status: AuctionStatusEnum
-  tags: String
+  tags: [String!]
   topBid: Price
   topBidder: Account
   type: AuctionTypeEnum
@@ -215,11 +211,84 @@ input BidActionArgs {
   price: String!
 }
 
+input BuyRandomNftActionArgs {
+  campaignId: String!
+  minterAddress: String!
+  price: String!
+  quantity: String
+  tier: String!
+}
+
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
   price: String!
   quantity: String
+}
+
+type Campaign {
+  availableNfts: Int!
+  campaignId: ID!
+  collection: CampaignCollection!
+  coverImage: String!
+  description: String
+  endDate: Int!
+  maxNftsPerTransaction: Int!
+  mediaType: String!
+  minterAddress: String!
+  startDate: Int!
+  status: CampaignStatusEnum!
+  tiers: [Tier!]!
+  totalNfts: Int!
+  verified: Boolean!
+}
+
+type CampaignCollection {
+  collectionHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  royalties: String!
+}
+
+type CampaignEdge {
+  cursor: String
+  node: Campaign
+}
+
+type CampaignPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum CampaignStatusEnum {
+  Ended
+  NotStarted
+  Running
+}
+
+input CampaignsFilter {
+  campaignId: String!
+  minterAddress: String!
+}
+
+type CampaignsResponse {
+  edges: [CampaignEdge!]
+  pageData: PageData
+  pageInfo: CampaignPageInfo
+}
+
+input ChildExpression {
+  filters: [ChildFilter!]!
+  operator: Operator!
+}
+
+input ChildFilter {
+  field: String!
+  op: Operation!
+  relationField: String
+  values: [String!]!
 }
 
 type Collection {
@@ -231,13 +300,21 @@ type Collection {
   canTransferRole: Boolean
   canWipe: Boolean
   collection: String
-  collectionAsset: CollectionAsset!
+  collectionAsset(assetsCount: Int): CollectionAsset!
   creationDate: Float!
+  description: String
   name: String!
   owner: Account
   ownerAddress: String
+  pngUrl: String
+  roles: [CollectionRole!]
+  social: CollectionSocial
+  status: String
+  svgUrl: String
   ticker: String!
   type: String
+  verified: Boolean
+  website: String
 }
 
 type CollectionAsset {
@@ -266,6 +343,23 @@ type CollectionResponse {
   edges: [CollectionEdge!]
   pageData: PageData
   pageInfo: CollectionPageInfo
+}
+
+type CollectionRole {
+  address: String!
+  canAddQuantity: Boolean
+  canAddUri: Boolean
+  canBurn: Boolean
+  canCreate: Boolean
+  canTransferRole: Boolean
+  canUpdateAttributes: Boolean
+  roles: [String!]!
+}
+
+type CollectionSocial {
+  blog: String
+  email: String
+  twiter: String
 }
 
 input CollectionsFilter {
@@ -317,6 +411,12 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+type FeaturedMarketplace {
+  address: String!
+  name: String!
+  url: String!
+}
+
 input Filter {
   field: String!
   op: Operation!
@@ -324,23 +424,9 @@ input Filter {
 }
 
 input FiltersExpression {
+  childExpressions: [ChildExpression!]
   filters: [Filter!]!
   operator: Operator!
-}
-
-input FollowEntityArgs {
-  addressToFollow: String!
-}
-
-type FollowerResponse {
-  edges: [FollowerResponseEdge!]
-  pageData: PageData
-  pageInfo: PageInfo
-}
-
-type FollowerResponseEdge {
-  cursor: String!
-  node: Account
 }
 
 enum GroupBy {
@@ -365,6 +451,21 @@ input HistoryPagination {
   timestamp: Int
 }
 
+input IssueCampaignArgs {
+  campaignId: String!
+  collectionIpfsHash: String!
+  collectionName: String!
+  collectionTicker: String!
+  mediaTypes: MediaTypeEnum!
+  mintEndTime: Int!
+  mintPriceToken: String = "EGLD"
+  mintStartTime: Int!
+  minterAddress: String!
+  royalties: String!
+  tags: [String!]!
+  tiers: [TierArgs!]!
+}
+
 input IssueCollectionArgs {
   canFreeze: Boolean = false
   canPause: Boolean = false
@@ -377,27 +478,51 @@ input IssueCollectionArgs {
 type Media {
   fileSize: String
   fileType: String
+  originalUrl: String
   thumbnailUrl: String
   url: String
 }
 
+enum MediaTypeEnum {
+  aac
+  flac
+  gif
+  jpeg
+  jpg
+  m4a
+  mov
+  mov2
+  mp3
+  mp4
+  png
+  wav
+  webm
+}
+
 type Metadata {
   description: String
-  fileName: String
-  fileType: String
-  fileUri: String
+  fileName: String @deprecated(reason: "This field will be removed in the next version")
+  fileType: String @deprecated(reason: "This field will be removed in the next version")
+  fileUri: String @deprecated(reason: "This field will be removed in the next version")
+}
+
+type MintPrice {
+  amount: String!
+  token: ID!
 }
 
 type Mutation {
   addLike(input: AddLikeArgs!): Boolean!
+  addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
-  follow(input: FollowEntityArgs!): Boolean!
+  issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -405,7 +530,7 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
-  unfollow(input: UnfollowEntityArgs!): Boolean!
+  verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
 
@@ -454,8 +579,9 @@ type OrderPageInfo {
 }
 
 enum OrderStatusEnum {
-  active
-  inactive
+  Active
+  Bought
+  Inactive
 }
 
 type OrdersResponse {
@@ -499,13 +625,6 @@ type PageData {
   offset: Int!
 }
 
-type PageInfo {
-  endCursor: String
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-}
-
 type Price {
   amount: String!
   nonce: Int!
@@ -514,28 +633,33 @@ type Price {
   usdAmount: String
 }
 
+enum Privacy {
+  private
+  public
+}
+
 type Query {
-  accounts(filters: AccountsFilter!, pagination: ConnectionArgs): AccountResponse!
+  accountStats(filters: AccountStatsFilter!): AccountStats!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
+  campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  marketplaceCutPercentage: String!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
-  trendingAuctions(
-    """This should be a timestamp"""
-    endDate: Int!
-    pagination: ConnectionArgs
-
-    """This should be a timestamp"""
-    startDate: Int!
-  ): AuctionResponse!
+  trendingAssets: [Asset!]!
 }
 
 input RemoveLikeArgs {
+  identifier: String!
+}
+
+input ReportNftInput {
   identifier: String!
 }
 
@@ -575,16 +699,36 @@ input StopNftCreateArgs {
   ownerAddress: String!
 }
 
+type Tier {
+  availableNfts: Int!
+  campaignId: ID!
+  description: String
+  mintPrice: MintPrice!
+  status: TierStatusEnum!
+  tierName: String!
+  totalNfts: Int!
+}
+
+input TierArgs {
+  mintPriceAmount: String!
+  tierName: String!
+  totalNfts: Int!
+}
+
+enum TierStatusEnum {
+  Running
+  Sold
+}
+
 type TransactionNode {
   chainID: String!
   data: String!
   gasLimit: Float!
   gasPrice: Float!
   nonce: Int!
-  options: String
+  options: Float
   receiver: String!
   sender: String!
-  status: String
   value: String!
   version: Float!
 }
@@ -599,10 +743,6 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
-}
-
-input UnfollowEntityArgs {
-  addressToUnfollow: String!
 }
 
 """The `Upload` scalar type represents a file upload."""

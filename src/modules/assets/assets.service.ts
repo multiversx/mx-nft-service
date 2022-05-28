@@ -1,10 +1,9 @@
 import {
   Address,
   AddressValue,
-  Balance,
   BytesValue,
   ContractFunction,
-  GasLimit,
+  TokenPayment,
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { Inject, Injectable } from '@nestjs/common';
@@ -16,28 +15,28 @@ import {
 import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import '../../utils/extentions';
-import { AssetsFilter } from '../filtersTypes';
-import { nominateStringVal, nominateVal } from '../formatters';
+import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';
 import { S3Service } from '../s3/s3.service';
-import { TransactionNode } from '../transaction';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
-import {
-  CreateNftArgs,
-  TransferNftArgs,
-  Asset,
-  HandleQuantityArgs,
-  CollectionType,
-} from './models';
+import { Asset, CollectionType } from './models';
 import BigNumber from 'bignumber.js';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { AssetScamInfoProvider } from './assets-scam-info.loader';
-import { AssetsSupplyLoader } from './assets-supply.loader';
+import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
+import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
+import { AssetsFilter } from '../common/filters/filtersTypes';
+import { TransactionNode } from '../common/transaction';
+import { TimeConstants } from 'src/utils/time-utils';
+import {
+  UpdateQuantityRequest,
+  CreateNftRequest,
+  TransferNftRequest,
+} from './models/requests';
 const hash = require('object-hash');
 
 @Injectable()
@@ -67,7 +66,10 @@ export class AssetsService {
         address,
         query + '&withMetadata=true&includeFlagged=true',
       ),
-      this.apiService.getNftsForUserCount(address, query),
+      this.apiService.getNftsForUserCount(
+        address,
+        query + '&withMetadata=true&includeFlagged=true',
+      ),
     ]);
     const assets = nfts?.map((element) => Asset.fromNft(element));
     return new CollectionType({ count, items: assets });
@@ -78,14 +80,7 @@ export class AssetsService {
     limit: number = 10,
     filters: AssetsFilter,
   ): Promise<CollectionType<Asset>> {
-    const apiQuery = new AssetsQuery()
-      .addCreator(filters?.creatorAddress)
-      .addTags(filters?.tags)
-      .addIdentifiers(filters?.identifiers)
-      .addCollection(filters?.collection)
-      .addType(filters?.type)
-      .addPageSize(offset, limit)
-      .build();
+    const apiQuery = this.getApiQuery(filters, offset, limit);
 
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
@@ -112,25 +107,42 @@ export class AssetsService {
     return response;
   }
 
+  private getApiQuery(filters: AssetsFilter, offset: number, limit: number) {
+    return new AssetsQuery()
+      .addCreator(filters?.creatorAddress)
+      .addTags(filters?.tags)
+      .addIdentifiers(filters?.identifiers)
+      .addCollection(filters?.collection)
+      .addType(filters?.type)
+      .withOwner()
+      .withSupply()
+      .addPageSize(offset, limit)
+      .build();
+  }
+
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
+      let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
       await this.assetScamLoader.batchScamInfo(
-        response.items?.map((a) => a.identifier),
-        response.items?.groupBy((asset) => asset.identifier),
+        assetsWithScamInfo?.map((a) => a.identifier),
+        assetsWithScamInfo?.groupBy((asset) => asset.identifier),
       );
+
+      let assetsWithSupply = response.items?.filter((x) => x?.supply);
       await this.assetSupplyLoader.batchSupplyInfo(
-        response.items?.map((a) => a.identifier),
-        response.items?.groupBy((asset) => asset.identifier),
+        assetsWithSupply?.map((a) => a.identifier),
+        assetsWithSupply?.groupBy((asset) => asset.identifier),
       );
     }
   }
 
   async getAssetsForCollection(
     filters: AssetsFilter,
+    limit: number = 4,
   ): Promise<[any[], string]> {
     const apiQuery = new AssetsQuery()
       .addCollection(filters?.collection)
-      .addPageSize(0, 4)
+      .addPageSize(0, limit)
       .build();
 
     return await this.getCollectionAssets(apiQuery);
@@ -151,14 +163,13 @@ export class AssetsService {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.redisCacheService.getOrSet(
+      const asset = await this.redisCacheService.getOrSetWithDifferentTtl(
         this.redisClient,
         cacheKey,
         getAsset,
-        1800,
       );
-      return asset
-        ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
+      return asset?.value
+        ? new CollectionType({ items: [asset.value], count: asset ? 1 : 0 })
         : null;
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
@@ -169,9 +180,21 @@ export class AssetsService {
     }
   }
 
-  async getMappedAssetByIdentifier(identifier: string): Promise<Asset> {
+  async getMappedAssetByIdentifier(
+    identifier: string,
+  ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
-    return Asset.fromNft(nft);
+    let ttl = TimeConstants.oneDay;
+    if (!nft) {
+      ttl = 3 * TimeConstants.oneSecond;
+    }
+    if (nft?.media && nft?.media[0].thumbnailUrl.includes('default'))
+      ttl = TimeConstants.oneMinute;
+    return {
+      key: identifier,
+      value: Asset.fromNft(nft),
+      ttl: ttl,
+    };
   }
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
@@ -179,102 +202,88 @@ export class AssetsService {
     return nfts?.map((nft) => Asset.fromNft(nft));
   }
 
-  async addQuantity(
+  async updateQuantity(
     ownerAddress: string,
-    args: HandleQuantityArgs,
+    request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
+      request.identifier,
     );
-    const contract = getSmartContract(args.addOrBurnRoleAddress);
+    const contract = getSmartContract(request.updateQuantityRoleAddress);
     const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTAddQuantity'),
-      value: Balance.egld(0),
+      func: new ContractFunction(request.functionName),
+      value: TokenPayment.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(args.quantity)),
+        new U64Value(new BigNumber(request.quantity)),
       ],
-      gasLimit: new GasLimit(gas.addQuantity),
+      gasLimit: gas.addBurnQuantity,
+      chainID: elrondConfig.chainID,
     });
-
-    return transaction.toPlainObject(new Address(ownerAddress));
-  }
-
-  async burnQuantity(
-    ownerAddress: string,
-    args: HandleQuantityArgs,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      args.identifier,
-    );
-    const contract = getSmartContract(args.addOrBurnRoleAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTBurn'),
-      value: Balance.egld(0),
-      args: [
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-        BytesValue.fromHex(nominateStringVal(args.quantity)),
-      ],
-      gasLimit: new GasLimit(gas.burnQuantity),
-    });
-
     return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async createNft(
     ownerAddress: string,
-    args: CreateNftArgs,
+    request: CreateNftRequest,
   ): Promise<TransactionNode> {
-    const fileData = await this.pinataService.uploadFile(args.file);
+    const file = await request.file;
+    const fileData = await this.pinataService.uploadFile(file);
     const fileMetadata = new FileContent({
-      description: args.attributes.description,
+      description: request.attributes.description,
     });
     const assetMetadata = await this.pinataService.uploadText(fileMetadata);
 
-    await this.s3Service.upload(args.file, fileData.hash);
+    await this.s3Service.upload(file, fileData.hash);
     await this.s3Service.uploadText(fileMetadata, assetMetadata.hash);
 
-    const attributes = `tags:${args.attributes.tags};metadata:${assetMetadata.hash}`;
+    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
 
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [
-        BytesValue.fromUTF8(args.collection),
-        new U64Value(new BigNumber(args.quantity)),
-        BytesValue.fromUTF8(args.name),
-        BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
+        BytesValue.fromUTF8(request.collection),
+        new U64Value(new BigNumber(request.quantity)),
+        BytesValue.fromUTF8(request.name),
+        BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
         BytesValue.fromUTF8(fileData.hash),
         BytesValue.fromUTF8(attributes),
         BytesValue.fromUTF8(fileData.url),
       ],
-      gasLimit: new GasLimit(gas.nftCreate),
+      gasLimit: gas.nftCreate,
+      chainID: elrondConfig.chainID,
     });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
 
-    return transaction.toPlainObject();
+    return {
+      ...response,
+      gasLimit: gas.nftCreate + response.data.length * 1_500,
+      chainID: elrondConfig.chainID,
+    };
   }
 
   async transferNft(
     ownerAddress: string,
-    transferNftArgs: TransferNftArgs,
+    transferRequest: TransferNftRequest,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      transferNftArgs.identifier,
+      transferRequest.identifier,
     );
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
-      value: Balance.egld(0),
+      value: TokenPayment.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(transferNftArgs.quantity)),
-        new AddressValue(new Address(transferNftArgs.destinationAddress)),
+        new U64Value(new BigNumber(transferRequest.quantity)),
+        new AddressValue(new Address(transferRequest.destinationAddress)),
       ],
-      gasLimit: new GasLimit(gas.nftTransfer),
+      gasLimit: gas.nftTransfer,
+      chainID: elrondConfig.chainID,
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
     response.gasLimit = Math.max(
@@ -291,7 +300,7 @@ export class AssetsService {
     query: string = '',
   ): Promise<[any[], string]> {
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(`${query}&fields=thumbnailUrl,identifier`),
+      this.apiService.getAllNfts(`${query}&fields=media,identifier`),
       this.apiService.getNftsCount(query),
     ]);
     return [nfts, count];
@@ -331,7 +340,7 @@ export class AssetsService {
         this.redisClient,
         cacheKey,
         getAssets,
-        30,
+        5 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {

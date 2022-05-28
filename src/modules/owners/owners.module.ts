@@ -1,18 +1,18 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { OwnersService } from './owners.service';
-import { FollowersModuleDb } from 'src/db/followers/followers.module.db';
-import { AssetsModuleGraph } from '../assets/assets.module';
 import { ElrondCommunicationModule } from 'src/common';
 import { OwnersResolver } from './owners.resolver';
-import { AccountsProvider } from '../accounts/accounts.loader';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
-  providers: [OwnersService, OwnersResolver, AccountsProvider],
-  imports: [
-    ElrondCommunicationModule,
-    forwardRef(() => AssetsModuleGraph),
-    FollowersModuleDb,
+  providers: [
+    OwnersService,
+    OwnersResolver,
+    AccountsRedisHandler,
+    AccountsProvider,
   ],
-  exports: [OwnersService, AccountsProvider],
+  imports: [ElrondCommunicationModule],
+  exports: [OwnersService, AccountsRedisHandler, AccountsProvider],
 })
 export class OwnersModuleGraph {}

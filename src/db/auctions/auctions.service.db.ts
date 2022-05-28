@@ -1,19 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AssetAuctionsCountProvider } from 'src/modules/assets/asset-auctions-count.loader';
-import { AuctionsForAssetProvider } from 'src/modules/auctions/asset-auctions.loader';
+import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
+import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
+import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
+import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
-import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { Sort, Sorting } from 'src/modules/filtersTypes';
+import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
+import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { DateUtils } from 'src/utils/date-utils';
-import { LessThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
-import { QueryRequest, TrendingQueryRequest } from '../../modules/QueryRequest';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
   getAuctionsOrderByNoBidsQuery,
+  getAvailableTokensbyAuctionId,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -22,9 +25,11 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private auctionsLoader: AuctionsForAssetProvider,
-    private assetsAuctionsCountLoader: AssetAuctionsCountProvider,
+    private auctionsLoader: AuctionsForAssetRedisHandler,
+    private lowestAuctionLoader: LowestAuctionRedisHandler,
+    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private ordersService: OrdersServiceDb,
+    private accountStats: AccountsStatsService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -94,10 +99,14 @@ export class AuctionsServiceDb {
         endDate,
         queryRequest.limit,
         queryRequest.offset,
+        queryRequest.filters?.filters?.find((x) => x.field === 'status')
+          ?.values,
       );
       const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
         identifier,
         endDate,
+        queryRequest.filters?.filters?.find((x) => x.field === 'status')
+          ?.values,
       );
       const [auctions, count] = await Promise.all([
         this.auctionsRepository.query(defaultAuctionsQuery),
@@ -116,24 +125,6 @@ export class AuctionsServiceDb {
       .getMany();
   }
 
-  async getTrendingAuctions(
-    queryRequest: TrendingQueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
-      .innerJoin('orders', 'o', 'o.auctionId=a.id')
-      .where(
-        `a.status = 'Running' AND o.creationDate  
-        BETWEEN '${this.getSqlDate(queryRequest.startDate)}' 
-        AND '${this.getSqlDate(queryRequest.endDate)}'`,
-      )
-      .groupBy('a.id')
-      .orderBy('COUNT(a.Id)', 'DESC')
-      .offset(queryRequest.offset)
-      .limit(queryRequest.limit)
-      .getManyAndCount();
-  }
-
   async getClaimableAuctions(
     limit: number = 10,
     offset: number = 0,
@@ -144,8 +135,7 @@ export class AuctionsServiceDb {
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
         `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND 
-        ((o.ownerAddress = '${address}' AND o.status='active')
-        OR (a.ownerAddress = '${address}'))`,
+        ((o.ownerAddress = '${address}' AND o.status='active'))`,
       )
       .groupBy('a.id')
       .orderBy('a.Id', 'DESC')
@@ -198,6 +188,32 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.*')
+      .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.endDate <= ${endDate}`)
+      .execute();
+  }
+
+  async getAuctionsForMarketplace(endDate: number): Promise<any[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.*')
+      .addSelect(
+        'if(COUNT(`o`.`auctionId`)>0,MAX(o.priceAmountDenominated),a.minBidDenominated) as startBid',
+      )
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.startDate <= ${endDate}`)
+      .execute();
+  }
+
   async getAuction(id: number): Promise<AuctionEntity> {
     if (id || id === 0) {
       return await this.auctionsRepository.findOne({
@@ -205,6 +221,12 @@ export class AuctionsServiceDb {
       });
     }
     return null;
+  }
+
+  async getAvailableTokens(id: number): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensbyAuctionId(id),
+    );
   }
 
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
@@ -216,11 +238,11 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    await this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier, auction.ownerAddress);
     return await this.auctionsRepository.save(auction);
   }
 
-  async deleteAuctionAndOrdersByHash(blockHash: string): Promise<any> {
+  async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
     const auctions = await this.getAuctionsForHash(blockHash);
     if (!auctions || auctions.length === 0) {
       return true;
@@ -284,7 +306,7 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.invalidateCache(auction.identifier);
+    await this.invalidateCache(auction.identifier, auction.ownerAddress);
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -295,21 +317,16 @@ export class AuctionsServiceDb {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     for (let auction of auctions) {
-      await this.invalidateCache(auction.identifier);
+      await this.invalidateCache(auction.identifier, auction.ownerAddress);
     }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private async invalidateCache(identifier: string) {
+  private async invalidateCache(identifier: string, address: string) {
+    await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
+    await this.lowestAuctionLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
-  }
-
-  private getSqlDate(timestamp: number) {
-    return new Date(timestamp * 1000)
-      .toISOString()
-      .slice(0, 19)
-      .replace('T', ' ');
   }
 
   private addOrderBy(
@@ -317,11 +334,16 @@ export class AuctionsServiceDb {
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
     alias: string = null,
   ) {
-    sorting?.forEach((sort) =>
-      queryBuilder.addOrderBy(
-        alias ? `${alias}.${sort.field}` : sort.field,
-        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
-      ),
-    );
+    if (sorting) {
+      sorting?.forEach((sort) =>
+        queryBuilder.addOrderBy(
+          alias ? `${alias}.${sort.field}` : sort.field,
+          Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+        ),
+      );
+      if (!sorting.find((sort) => sort.field === 'id')) {
+        queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+      }
+    }
   }
 }

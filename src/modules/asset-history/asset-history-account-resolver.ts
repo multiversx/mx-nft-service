@@ -1,8 +1,8 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
-import { BaseResolver } from '../base.resolver';
 import { AssetHistoryLog as AssetHistoryLog } from './models';
-import { Account } from '../accounts/models/Account.dto';
-import { AccountsProvider } from '../accounts/accounts.loader';
+import { Account } from '../account-stats/models/Account.dto';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { BaseResolver } from '../common/base.resolver';
 
 @Resolver(() => AssetHistoryLog)
 export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
@@ -15,8 +15,8 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
     const { address } = asset;
 
     if (!address) return null;
-    const account = await this.accountsProvider.getAccountByAddress(address);
-    return Account.fromEntity(account, address);
+    const account = await this.accountsProvider.load(address);
+    return Account.fromEntity(account?.value, address);
   }
 
   @ResolveField('senderAccount', () => Account, { nullable: true })
@@ -24,9 +24,7 @@ export class AssetHistoryAccountResolver extends BaseResolver(AssetHistoryLog) {
     const { senderAddress } = asset;
 
     if (!senderAddress) return null;
-    const account = await this.accountsProvider.getAccountByAddress(
-      senderAddress,
-    );
-    return Account.fromEntity(account, senderAddress);
+    const account = await this.accountsProvider.load(senderAddress);
+    return Account.fromEntity(account?.value, senderAddress);
   }
 }

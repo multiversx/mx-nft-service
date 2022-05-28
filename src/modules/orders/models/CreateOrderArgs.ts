@@ -1,11 +1,13 @@
 import { OrderEntity } from 'src/db/orders';
-import denominate from 'src/modules/formatters';
+import denominate from 'src/utils/formatters';
+import { OrderStatusEnum } from '.';
 
 export class CreateOrderArgs {
   ownerAddress: string;
   priceToken: string;
   priceAmount: string;
   boughtTokens: string;
+  status: OrderStatusEnum;
   blockHash: string;
   priceNonce: number;
   auctionId: number;
@@ -26,11 +28,12 @@ export class CreateOrderArgs {
           denomination: 18,
           decimals: 18,
           showLastNonZeroDecimal: true,
-        }),
+        }).replace(',', ''),
       ),
       priceNonce: args.priceNonce,
       boughtTokensNo: args.boughtTokens,
       blockHash: args.blockHash,
+      status: args.status,
     });
   }
 }

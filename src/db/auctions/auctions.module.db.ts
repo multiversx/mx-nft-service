@@ -1,19 +1,25 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RedisCacheService } from 'src/common';
-import { AssetAuctionsCountProvider } from 'src/modules/assets';
-import { AuctionsForAssetProvider } from 'src/modules/auctions';
 import { OrdersModuleDb } from '../orders/orders.module.db';
-import { AuctionEntity, AuctionsServiceDb } from '.';
+import { AuctionEntity } from '.';
+import { AuctionsServiceDb } from './auctions.service.db';
+import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-stats.module';
+import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
+import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
+import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AuctionEntity]), OrdersModuleDb],
+  imports: [
+    TypeOrmModule.forFeature([AuctionEntity]),
+    OrdersModuleDb,
+    AccountsStatsModuleGraph,
+  ],
   providers: [
     AuctionsServiceDb,
-    AuctionsForAssetProvider,
-    AssetAuctionsCountProvider,
-    RedisCacheService,
+    AuctionsForAssetRedisHandler,
+    AssetAuctionsCountRedisHandler,
+    LowestAuctionRedisHandler,
   ],
-  exports: [AuctionsServiceDb, AuctionsForAssetProvider, RedisCacheService],
+  exports: [AuctionsServiceDb, TypeOrmModule.forFeature([AuctionEntity])],
 })
 export class AuctionsModuleDb {}

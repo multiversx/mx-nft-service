@@ -2,8 +2,8 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
-import { AccessErrors } from 'src/models/errors/AccessErrorsEnum';
-import { UnauthorizedError } from 'src/models/errors/unauthorized-error';
+import { AccessErrors } from 'src/common/models/errors/AccessErrorsEnum';
+import { UnauthorizedError } from 'src/common/models/errors/unauthorized-error';
 
 @Injectable()
 export class GqlAuthGuard extends AuthGuard('jwt') {

@@ -45,9 +45,21 @@ export class AssetsQuery {
     return this;
   }
 
+  withSupply(): this {
+    if (this.query === '') this.query = `?withSupply=true`;
+    else this.query = `${this.query}&withSupply=true`;
+    return this;
+  }
+
+  withOwner(): this {
+    if (this.query === '') this.query = `?withOwner=true`;
+    else this.query = `${this.query}&withOwner=true`;
+    return this;
+  }
+
   build(): string {
     return this.query
-      ? this.query + '&hasUris=true&withOwner=true&withSupply=true'
-      : '?hasUris=true&withOwner=true&withSupply=true';
+      ? this.query + '&hasUris=true&isWhitelistedStorage=true&source=elastic'
+      : '?hasUris=true&isWhitelistedStorage=true&source=elastic';
   }
 }

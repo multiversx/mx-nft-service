@@ -11,3 +11,15 @@ export enum NftEventEnum {
   ESDTNFTTransfer = 'ESDTNFTTransfer',
   ESDTNFTCreate = 'ESDTNFTCreate',
 }
+
+export enum MinterEventEnum {
+  brandCreated = 'brandCreated',
+  callBack = 'callBack',
+  buyRandomNft = 'buyRandomNft',
+  nftGiveaway = 'nftGiveaway',
+}
+
+export enum CollectionEventEnum {
+  IssueSemiFungible = 'issueSemiFungible',
+  IssueNonFungible = 'issueNonFungible',
+}

@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import FilterQueryBuilder from 'src/modules/FilterQueryBuilder';
-import { Sort, Sorting } from 'src/modules/filtersTypes';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
-import { QueryRequest } from '../../modules/QueryRequest';
-import { ActiveOrdersProvider, OrderEntity, OrdersProvider } from '.';
+import { OrderEntity } from '.';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
+import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
+import { OrdersRedisHandler } from 'src/modules/orders/loaders/orders.redis-handler';
+import { LastOrderRedisHandler } from 'src/modules/orders/loaders/last-order.redis-handler';
 
 @Injectable()
 export class OrdersServiceDb {
   constructor(
-    private ordersLoader: OrdersProvider,
-    private activeOrdersLoades: ActiveOrdersProvider,
+    private ordersRedisHandler: OrdersRedisHandler,
+    private lastOrderRedisHandler: LastOrderRedisHandler,
     @InjectRepository(OrderEntity)
     private ordersRepository: Repository<OrderEntity>,
   ) {}
@@ -61,13 +63,12 @@ export class OrdersServiceDb {
 
   async saveOrder(order: OrderEntity) {
     this.clearCache(order.auctionId);
-    order.status = OrderStatusEnum.active;
     return await this.ordersRepository.save(order);
   }
 
   async updateOrder(order: OrderEntity) {
     this.clearCache(order.auctionId);
-    order.status = OrderStatusEnum.inactive;
+    order.status = OrderStatusEnum.Inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
   }
@@ -79,7 +80,7 @@ export class OrdersServiceDb {
     return await this.ordersRepository.save(order);
   }
 
-  async deleteOrdersByHash(blockHash: string) {
+  async rollbackOrdersByHash(blockHash: string) {
     const ordersByHash = await this.getOrdersByBlockHash(blockHash);
     if (!ordersByHash || ordersByHash.length === 0) {
       return true;
@@ -94,7 +95,7 @@ export class OrdersServiceDb {
         await this.ordersRepository.delete(orders[indexOf].id);
         await this.updateOrderWithStatus(
           orders[indexOf - 1],
-          OrderStatusEnum.active,
+          OrderStatusEnum.Active,
         );
       } else {
         await this.ordersRepository.delete(orders[indexOf].id);
@@ -111,8 +112,8 @@ export class OrdersServiceDb {
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
     auctionIds.forEach((auctionId) => {
-      this.ordersLoader.clearKey(auctionId);
-      this.activeOrdersLoades.clearKey(auctionId);
+      this.ordersRedisHandler.clearKeyByPattern(auctionId);
+      this.lastOrderRedisHandler.clearKey(auctionId);
     });
 
     return await this.ordersRepository
@@ -127,16 +128,21 @@ export class OrdersServiceDb {
     sorting: Sorting[],
     queryBuilder: SelectQueryBuilder<OrderEntity>,
   ) {
-    sorting?.forEach((sort) =>
-      queryBuilder.addOrderBy(
-        sort.field,
-        Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
-      ),
-    );
+    if (sorting) {
+      sorting?.forEach((sort) =>
+        queryBuilder.addOrderBy(
+          sort.field,
+          Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+        ),
+      );
+      if (!sorting.find((sort) => sort.field === 'id')) {
+        queryBuilder.addOrderBy('id', 'DESC');
+      }
+    }
   }
 
   private clearCache(auctionId: number) {
-    this.ordersLoader.clearKey(auctionId);
-    this.activeOrdersLoades.clearKey(auctionId);
+    this.ordersRedisHandler.clearKeyByPattern(auctionId);
+    this.lastOrderRedisHandler.clearKey(auctionId);
   }
 }

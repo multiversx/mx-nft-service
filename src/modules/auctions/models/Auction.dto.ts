@@ -1,8 +1,13 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import { Account } from 'src/modules/accounts/models';
+import {
+  AuctionWithBidsCount,
+  AuctionWithStartBid,
+} from 'src/db/auctions/auctionWithBidCount.dto';
+import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
-import { Order } from 'src/modules/orders/models';
+import { OrdersResponse } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';
 import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 
@@ -45,6 +50,9 @@ export class Auction {
   minBid: Price;
 
   @Field(() => Price)
+  minBidDiff: Price;
+
+  @Field(() => Price)
   maxBid: Price;
 
   @Field(() => Int)
@@ -56,8 +64,8 @@ export class Auction {
   @Field(() => Int)
   creationDate: number;
 
-  @Field({ nullable: true })
-  tags: string;
+  @Field(() => [String], { nullable: true })
+  tags: string[];
 
   @Field(() => Price, { nullable: true })
   topBid: Price;
@@ -65,16 +73,19 @@ export class Auction {
   @Field(() => Account, { nullable: true })
   topBidder: Account;
 
-  @Field(() => [Order], { nullable: true })
-  orders: Order[];
+  @Field(() => OrdersResponse, { nullable: true })
+  orders: OrdersResponse;
 
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
   }
 
-  static fromEntity(auction: AuctionEntity) {
-    return auction
-      ? new Auction({
+  static fromEntity(
+    auction: AuctionEntity | AuctionWithBidsCount | AuctionWithStartBid,
+  ) {
+    return !auction || Object.entries(auction).length === 0
+      ? null
+      : new Auction({
           id: auction.id,
           status: auction.status,
           type: auction.type,
@@ -86,20 +97,25 @@ export class Auction {
           endDate: auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
-            token: 'EGLD',
+            token: elrondConfig.egld,
             nonce: 0,
             amount: auction.minBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
+          minBidDiff: new Price({
+            token: elrondConfig.egld,
+            nonce: 0,
+            amount: auction.minBidDiff,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
+          }),
           maxBid: new Price({
-            token: 'EGLD',
+            token: elrondConfig.egld,
             nonce: 0,
             amount: auction.maxBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
-          tags: auction.tags,
+          tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
-        })
-      : null;
+        });
   }
 }

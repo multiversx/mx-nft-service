@@ -1,2 +1,2 @@
-export * from './featuredNft.entity';
-export * from './featuredNfts.repository';
+export * from './featured.entity';
+export * from './featured.repository';

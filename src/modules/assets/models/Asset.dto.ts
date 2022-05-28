@@ -1,11 +1,12 @@
 import { ID, ObjectType, Field, Int } from '@nestjs/graphql';
-import { Auction } from '../../auctions/models';
+import { Auction, AuctionResponse } from '../../auctions/models';
 import { NftTypeEnum } from './NftTypes.enum';
 import { Metadata } from './Metadata.dto';
 import { Nft } from 'src/common';
-import { Account } from 'src/modules/accounts/models';
 import { ScamInfo } from './ScamInfo.dto';
 import { Media } from './Media.dto';
+import { Account } from 'src/modules/account-stats/models';
+import { FeaturedMarketplace } from './FeaturedMarketplace.dto';
 
 @ObjectType()
 export class Asset {
@@ -49,26 +50,41 @@ export class Asset {
   creationDate!: number;
   @Field(() => [String])
   uris: string[];
-  @Field(() => String, { nullable: true })
-  url: string;
-  @Field(() => String, { nullable: true })
-  thumbnailUrl: string;
-  @Field(() => [Auction], { nullable: true })
-  auctions: Auction[];
+  @Field(() => AuctionResponse, {
+    nullable: true,
+    description: 'This will return only the running query!',
+  })
+  auctions: AuctionResponse;
   @Field(() => Auction, { nullable: true })
   lowestAuction: Auction;
   @Field(() => [String], { nullable: true })
   tags: string[];
   @Field(() => Int, { nullable: true })
   likesCount: number;
+  @Field(() => Int, { nullable: true })
+  viewsCount: number;
   @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
+  url: string;
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
+  thumbnailUrl: string;
   @Field(() => Metadata, { nullable: true })
   metadata: Metadata;
   @Field(() => ScamInfo, { nullable: true })
   scamInfo: ScamInfo;
   @Field(() => [Media], { nullable: true })
   media: Media[];
+  @Field({ nullable: true })
+  verified: boolean;
+  @Field({ nullable: true })
+  featuredMarketplace: FeaturedMarketplace;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -91,13 +107,12 @@ export class Asset {
           name: nft.name,
           royalties: nft.royalties ?? '',
           uris: nft.uris || [''],
-          url: nft.url || '',
-          thumbnailUrl: nft.thumbnailUrl || '',
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,
           scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
           media: nft.media?.map((m) => Media.fromNftMedia(m)),
+          verified: !!nft.assets ?? false,
         })
       : null;
   }

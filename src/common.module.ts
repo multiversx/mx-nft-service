@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,8 +10,9 @@ import { RedisModule } from 'nestjs-redis';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
-import { RedisCacheService } from './common/services/redis-cache.service';
 import { cacheConfig } from './config';
+import { CachingModule } from './common/services/caching/caching.module';
+import * as ormconfig from './ormconfig';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -37,6 +38,7 @@ if (!!process.env.LOG_FILE) {
 
 @Module({
   imports: [
+    forwardRef(() => CachingModule),
     ScheduleModule.forRoot(),
     ConfigModule,
     WinstonModule.forRoot({
@@ -50,41 +52,45 @@ if (!!process.env.LOG_FILE) {
         db: 0,
       },
       {
-        name: cacheConfig.auctionsRedisClientName,
+        clientName: cacheConfig.auctionsRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.auctionsDbName,
       },
       {
-        name: cacheConfig.ordersRedisClientName,
+        clientName: cacheConfig.ordersRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.ordersDbName,
       },
       {
-        name: cacheConfig.assetsRedisClientName,
+        clientName: cacheConfig.assetsRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.assetsDbName,
       },
       {
-        name: cacheConfig.followersRedisClientName,
+        clientName: cacheConfig.followersRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.followersDbName,
       },
+      {
+        clientName: cacheConfig.collectionsRedisClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.collectionsDbName,
+      },
     ]),
 
-    TypeOrmModule.forRoot({
-      keepConnectionAlive: true,
-    }),
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     ElrondCommunicationModule,
   ],
-  providers: [RedisCacheService],
-  exports: [ElrondCommunicationModule],
+  exports: [ElrondCommunicationModule, CachingModule],
 })
 export class CommonModule {}

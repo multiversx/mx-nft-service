@@ -1,21 +1,14 @@
 import { register, Histogram, collectDefaultMetrics } from 'prom-client';
 
 export class MetricsCollector {
-  private static fieldDurationHistogram: Histogram<string>;
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
+  private static redisDurationHistogram: Histogram<string>;
+  private static auctionsEventsDurationHistogram: Histogram<string>;
+  private static jobsHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
 
   static ensureIsInitialized() {
-    if (!MetricsCollector.fieldDurationHistogram) {
-      MetricsCollector.fieldDurationHistogram = new Histogram({
-        name: 'field_duration',
-        help: 'The time it takes to resolve a field',
-        labelNames: ['name', 'path'],
-        buckets: [],
-      });
-    }
-
     if (!MetricsCollector.queryDurationHistogram) {
       MetricsCollector.queryDurationHistogram = new Histogram({
         name: 'query_duration',
@@ -38,13 +31,32 @@ export class MetricsCollector {
       MetricsCollector.isDefaultMetricsRegistered = true;
       collectDefaultMetrics();
     }
-  }
+    if (!MetricsCollector.redisDurationHistogram) {
+      MetricsCollector.redisDurationHistogram = new Histogram({
+        name: 'redis_duration',
+        help: 'Redis Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
 
-  static setFieldDuration(name: string, path: string, duration: number) {
-    MetricsCollector.ensureIsInitialized();
-    MetricsCollector.fieldDurationHistogram
-      .labels(name, path)
-      .observe(duration);
+    if (!MetricsCollector.auctionsEventsDurationHistogram) {
+      MetricsCollector.auctionsEventsDurationHistogram = new Histogram({
+        name: 'auction_events_duration',
+        help: 'Auction Events Duration',
+        labelNames: ['action'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsCollector.jobsHistogram) {
+      MetricsCollector.jobsHistogram = new Histogram({
+        name: 'jobs',
+        help: 'Jobs',
+        labelNames: ['job_identifier', 'result'],
+        buckets: [],
+      });
+    }
   }
 
   static setQueryDuration(query: string, duration: number) {
@@ -52,11 +64,32 @@ export class MetricsCollector {
     MetricsCollector.queryDurationHistogram.labels(query).observe(duration);
   }
 
-  static setExternalCall(system: string, func: string, duration: number) {
+  static setExternalCall(system: string, duration: number, func: string = '') {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.externalCallsHistogram
       .labels(system, func)
       .observe(duration);
+  }
+
+  static setRedisDuration(action: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
+  }
+
+  static setAuctionEventsDuration(action: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.auctionsEventsDurationHistogram
+      .labels(action)
+      .observe(duration);
+  }
+
+  static setJobResult(
+    job: string,
+    result: 'success' | 'error',
+    duration: number,
+  ) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.jobsHistogram.labels(job, result).observe(duration);
   }
 
   static async getMetrics(): Promise<string> {

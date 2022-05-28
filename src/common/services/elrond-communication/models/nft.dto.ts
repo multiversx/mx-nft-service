@@ -1,3 +1,5 @@
+import { CollectionAssetApi } from './collection.dto';
+
 export interface Nft {
   collection: string;
   identifier: string;
@@ -28,16 +30,16 @@ export interface Nft {
   royalties: string;
   timestamp: number;
   uris: string[];
-  url: string;
-  thumbnailUrl: string;
   tags: string[];
   metadata: NftMetadata;
   media: NftMedia[];
   scamInfo: NftScamInfo;
+  assets: CollectionAssetApi;
 }
 
 export interface NftMedia {
   url: string;
+  originalUrl: string;
   thumbnailUrl: string;
   fileType: string;
   fileSize;
@@ -50,7 +52,4 @@ export interface NftScamInfo {
 
 export interface NftMetadata {
   description: string;
-  fileUri: string;
-  fileType: string;
-  fileName: string;
 }

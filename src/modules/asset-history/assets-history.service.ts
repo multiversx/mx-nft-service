@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import { ElrondElasticService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { DateUtils } from 'src/utils/date-utils';
 import {
   AssetActionEnum,
@@ -7,8 +9,8 @@ import {
   NftEventEnum,
   Price,
 } from '../assets/models';
-import { nominateVal } from '../formatters';
 import { AssetHistoryLog } from './models';
+import BigNumber from 'bignumber.js';
 const hash = require('object-hash');
 
 @Injectable()
@@ -66,8 +68,8 @@ export class AssetsHistoryService {
         );
         if (
           res[index + 1] &&
-          hash(res[index]?._source?.events[1]) ===
-            hash(res[index + 1]?._source?.events[0])
+          hash({ ...res[index]?._source?.events[1], order: 0 }) ===
+            hash({ ...res[index + 1]?._source?.events[0], order: 0 })
         ) {
           index++;
         }
@@ -86,12 +88,19 @@ export class AssetsHistoryService {
         break;
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        if (res[index]._source.events.length < 2) {
+        if (
+          res[index]._source.events.length < 4 &&
+          !res[index]._source.events.find(
+            (e) =>
+              e.identifier === AuctionEventEnum.EndAuctionEvent ||
+              e.identifier === AuctionEventEnum.WithdrawEvent,
+          )
+        ) {
           if (
-            !Object.values(AuctionEventEnum).includes(
-              res[index + 1]?._source.events[1]?.identifier,
-            ) &&
-            res[index]._source.address === res[index]?._source.events[0].address
+            res[index]._source.address ===
+              res[index]?._source.events[0].address &&
+            res[index]._source.events[0].topics[3].base64ToBech32() !==
+              elrondConfig.nftMarketplaceAddress
           ) {
             historyLog.push(
               this.addHistoryLog(
@@ -174,18 +183,16 @@ export class AssetsHistoryService {
         break;
       }
       case AuctionEventEnum.BuySftEvent: {
-        const count = Buffer.from(
-          nominateVal(parseInt('1')).toString(),
-          'hex',
-        ).toString('base64');
+        const [, , , , itemsCount, address, price] =
+          res[index]._source.events[1].topics;
         historyLog.push(
           this.addHistoryLog(
             res,
             index,
             AssetActionEnum.Bought,
-            res[index]._source.events[1].topics[5].base64ToBech32(),
-            count,
-            res[index]._source.events[1].topics[6],
+            address.base64ToBech32(),
+            itemsCount,
+            price,
           ),
         );
         break;
@@ -203,25 +210,31 @@ export class AssetsHistoryService {
     price = undefined,
     sender = undefined,
   ): AssetHistoryLog {
+    const minPrice = price
+      ? Buffer.from(price, 'base64').toString('hex').hexBigNumberToString()
+      : undefined;
+    const itemCountString = itemsCount
+      ? Buffer.from(itemsCount, 'base64').toString('hex').hexBigNumberToString()
+      : undefined;
+    const totalPrice =
+      minPrice && itemCountString
+        ? new BigNumber(minPrice).multipliedBy(itemCountString)
+        : undefined;
+
     return new AssetHistoryLog({
       action: action,
       address: address,
       senderAddress: sender,
-      transactionHash: res[index]._id,
+      transactionHash: res[index]._source.originalTxHash
+        ? res[index]._source.originalTxHash
+        : res[index]._id,
       actionDate: res[index]._source.timestamp || '',
-      itemCount: itemsCount
-        ? parseInt(
-            Buffer.from(itemsCount, 'base64').toString('hex'),
-            16,
-          ).toString()
-        : undefined,
-      price: price
+      itemCount: itemCountString ? itemCountString.toString() : undefined,
+      price: totalPrice
         ? new Price({
             nonce: 0,
-            token: 'EGLD',
-            amount: Buffer.from(price, 'base64')
-              .toString('hex')
-              .hexBigNumberToString(),
+            token: elrondConfig.egld,
+            amount: totalPrice.toFixed(),
             timestamp: res[index]._source.timestamp,
           })
         : undefined,

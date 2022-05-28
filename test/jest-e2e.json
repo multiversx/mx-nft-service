@@ -1,9 +1,11 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
-  "testEnvironment": "node",
+  "modulePaths": ["<rootDir>"],
+  "rootDir": "../",
   "testRegex": ".e2e-spec.ts$",
+  "testEnvironment": "node",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "coverageDirectory": "../coverage"
 }

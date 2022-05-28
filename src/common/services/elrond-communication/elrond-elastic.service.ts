@@ -2,9 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { HitResponse, SearchResponse } from './models/elastic-search';
-import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
-import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ApiService } from '../api.service';
+import { ApiService } from './api.service';
 
 export interface AddressTransactionCount {
   contractAddress: string;
@@ -25,12 +23,9 @@ export class ElrondElasticService {
     size: number,
     timestamp: number | string,
   ): Promise<[HitResponse[], number, number]> {
-    const profiler = new PerformanceProfiler(
-      `getNftHistory ${process.env.ELROND_ELASTICSEARCH + '/logs'}`,
-    );
     const url = `${this.url}/_search`;
     const body = {
-      size: size,
+      size: 2 * size,
       query: {
         bool: {
           must: [
@@ -83,12 +78,6 @@ export class ElrondElasticService {
     try {
       const response = await this.apiService.post(url, body);
       const data: SearchResponse = response?.data;
-      profiler.stop();
-      MetricsCollector.setExternalCall(
-        ElrondElasticService.name,
-        'getNftHistory',
-        profiler.duration,
-      );
       let responseMap: HitResponse[] = [];
       data?.hits?.hits.forEach((hit) => {
         for (const event of hit._source.events) {

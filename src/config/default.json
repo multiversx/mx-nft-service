@@ -2,8 +2,9 @@
   "elrond": {
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgq7epdy2nss28tr3966gr9pcxr0w5xvgjpu00s3xhh7y",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqemkfxdzk6wj78ymhay6nu0pdc8xsta3fu00syhxuwy",
     "issueNftCost": 50000000000000000,
+    "minimumBidDifference": 10000000000000000,
     "version": 1,
     "proxyTimeout": 60000,
     "timeoutLimit": 30000,
@@ -11,21 +12,21 @@
     "keepAliveTimeout": 50000,
     "keepAliveFreeSocketTimeout": 30000,
     "keepAliveMaxSockets": 100,
-    "keepAliveMaxFreeSockets": 10
+    "keepAliveMaxFreeSockets": 10,
+    "decimals": 18,
+    "egld": "XEGLD"
   },
   "caching": {
     "ordersRedisClientName": "orders",
     "ordersDbName": 2,
-    "ordersttl": 43200,
     "assetsRedisClientName": "assets",
     "assetsDbName": 3,
-    "assetsttl": 43200,
     "auctionsRedisClientName": "auctions",
     "auctionsDbName": 4,
-    "auctionsttl": 43200,
     "followersRedisClientName": "followers",
     "followersDbName": 5,
-    "followersttl": 70200
+    "collectionsRedisClientName": "collections",
+    "collectionsDbName": 6
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
@@ -35,7 +36,7 @@
   },
 
   "gas": {
-    "nftCreate": 60000000,
+    "nftCreate": 3000000,
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
@@ -46,7 +47,6 @@
     "setRoles": 60000000,
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
-    "burnQuantity": 10000000,
-    "addQuantity": 10000000
+    "addBurnQuantity": 200000
   }
 }

@@ -4,11 +4,20 @@ import { NftMetadata } from 'src/common';
 export class Metadata {
   @Field(() => String, { nullable: true })
   description: string;
-  @Field(() => String, { nullable: true })
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
   fileType: string;
-  @Field(() => String, { nullable: true })
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
   fileUri: string;
-  @Field(() => String, { nullable: true })
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
   fileName: string;
 
   constructor(init?: Partial<Metadata>) {
@@ -19,9 +28,6 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          fileName: metadata?.fileName,
-          fileType: metadata?.fileType,
-          fileUri: metadata?.fileUri,
         })
       : null;
   }

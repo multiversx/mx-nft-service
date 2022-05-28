@@ -1,5 +1,6 @@
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
+import { AuctionEntity } from '../auctions';
 import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
@@ -21,6 +22,7 @@ export class OrderEntity extends BaseEntity {
   status: OrderStatusEnum;
 
   @Column({ length: 62 })
+  @Index('order_owner')
   ownerAddress: string;
 
   @Column({ nullable: true, length: 62 })
@@ -32,6 +34,10 @@ export class OrderEntity extends BaseEntity {
 
   @Column({ length: 64 })
   blockHash: string;
+
+  @ManyToOne(() => AuctionEntity, (auction) => auction.orders)
+  @JoinColumn({ name: 'auctionId', referencedColumnName: 'id' })
+  auction: AuctionEntity;
 
   constructor(init?: Partial<OrderEntity>) {
     super();

@@ -1,27 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import '../../utils/extentions';
+import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import { AssetLikesProvider } from './asset-likes-count.loader';
-import { IsAssetLikedProvider } from './asset-is-liked.loader';
+import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
+import { TimeConstants } from 'src/utils/time-utils';
+import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import {
+  EventEnum,
+  Feed,
+} from 'src/common/services/elrond-communication/models/feed.dto';
 
 @Injectable()
 export class AssetsLikesService {
   private redisClient: Redis.Redis;
+  private readonly ttl = 6 * TimeConstants.oneHour;
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
-    private assetsLikeProvider: AssetLikesProvider,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private accountFeedService: ElrondFeedService,
+    private elrondApi: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
+      cacheConfig.followersRedisClientName,
     );
   }
 
@@ -38,7 +45,7 @@ export class AssetsLikesService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        cacheConfig.assetsttl,
+        this.ttl,
       );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
@@ -49,7 +56,11 @@ export class AssetsLikesService {
     }
   }
 
-  async addLike(identifier: string, address: string): Promise<boolean> {
+  async addLike(
+    identifier: string,
+    address: string,
+    authorization?: string,
+  ): Promise<boolean> {
     try {
       const isLiked = await this.assetsLikesRepository.isAssetLiked(
         identifier,
@@ -58,8 +69,22 @@ export class AssetsLikesService {
       if (isLiked) {
         return true;
       } else {
+        await this.incremenLikesCount(identifier);
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
+        await this.accountFeedService.subscribe(identifier, authorization);
+        const nftData = await this.getNftNameAndAssets(identifier);
+        await this.accountFeedService.addFeed(
+          new Feed({
+            actor: address,
+            event: EventEnum.like,
+            reference: identifier,
+            extraInfo: {
+              nftName: nftData?.name,
+              verified: nftData?.assets ? true : false,
+            },
+          }),
+        );
         return true;
       }
     } catch (err) {
@@ -73,11 +98,22 @@ export class AssetsLikesService {
     }
   }
 
-  async removeLike(identifier: string, address: string): Promise<any> {
+  async removeLike(
+    identifier: string,
+    address: string,
+    authorization?: string,
+  ): Promise<boolean> {
     try {
-      await this.assetsLikesRepository.removeLike(identifier, address);
-      await this.invalidateCache(identifier, address);
-      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
+      const deleteResults = await this.assetsLikesRepository.removeLike(
+        identifier,
+        address,
+      );
+      if (deleteResults.affected > 0) {
+        await this.accountFeedService.unsubscribe(identifier, authorization);
+        await this.decrementLikesCount(identifier);
+        await this.invalidateCache(identifier, address);
+      }
+      return true;
     } catch (err) {
       this.logger.error('An error occurred while removing Asset Like.', {
         path: 'AssetsService.removeLike',
@@ -85,19 +121,62 @@ export class AssetsLikesService {
         address,
         exception: err,
       });
-      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
+      return false;
     }
   }
 
-  private getAssetLikedByCacheKey(filters) {
-    return generateCacheKeyFromParams('assetLiked', filters);
+  async decrementLikesCount(identifier: string): Promise<number> {
+    // Make sure that Redis Key is generated from DB.
+    const followersCount = await this.loadLikesCount(identifier);
+    if (followersCount > 0) {
+      return await this.redisCacheService.decrement(
+        this.redisClient,
+        this.getAssetLikesCountCacheKey(identifier),
+        this.ttl,
+      );
+    }
+    return 0;
+  }
+
+  async incremenLikesCount(identifier: string): Promise<number> {
+    // Make sure that Redis Key is generated from DB.
+    const likes = await this.loadLikesCount(identifier);
+    return await this.redisCacheService.increment(
+      this.redisClient,
+      this.getAssetLikesCountCacheKey(identifier),
+      this.ttl,
+    );
+  }
+
+  async loadLikesCount(identifier: string) {
+    return await this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getAssetLikesCountCacheKey(identifier),
+      () => this.assetsLikesRepository.getAssetLikesCount(identifier),
+      this.ttl,
+    );
+  }
+
+  private getAssetLikedByCacheKey(address: string) {
+    return generateCacheKeyFromParams('assetLiked', address);
+  }
+
+  private getAssetLikesCountCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('assetLikesCount', identifier);
+  }
+
+  private async getNftNameAndAssets(identifier: string) {
+    const nft = await this.elrondApi.getNftByIdentifierForQuery(
+      identifier,
+      'fields=name,assets',
+    );
+    return nft;
   }
 
   private async invalidateCache(
     identifier: string,
     address: string,
   ): Promise<void> {
-    await this.assetsLikeProvider.clearKey(identifier);
     await this.isAssetLikedLikeProvider.clearKey(`${identifier}_${address}`);
     await this.invalidateAssetLikeCache(identifier, address);
     await this.invalidateAssetLikedByCount(address);
@@ -120,12 +199,17 @@ export class AssetsLikesService {
     return generateCacheKeyFromParams('isAssetLiked', identifier, address);
   }
 
-  private saveAssetLikeEntity(
+  private async saveAssetLikeEntity(
     identifier: string,
     address: string,
   ): Promise<any> {
-    const assetLikeEntity = this.buildAssetLikeEntity(identifier, address);
-    return this.assetsLikesRepository.addLike(assetLikeEntity);
+    try {
+      const assetLikeEntity = this.buildAssetLikeEntity(identifier, address);
+      return await this.assetsLikesRepository.addLike(assetLikeEntity);
+    } catch (error) {
+      await this.decrementLikesCount(identifier);
+      throw error;
+    }
   }
 
   private buildAssetLikeEntity(
