@@ -189,7 +189,7 @@ export class ElrondApiService {
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
       this.getCollectionsForAddress.name,
-      `accounts/${address}/collections${query}`,
+      `accounts/${address}/roles/collections${query}`,
     );
   }
 
@@ -228,7 +228,7 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getCollectionsForAddressCount.name,
-      `accounts/${address}/collections/count${query}`,
+      `accounts/${address}/roles/collections/count${query}`,
     );
   }
 
