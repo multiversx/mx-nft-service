@@ -55,10 +55,7 @@ export class CachingService {
     }
 
     console.log(1111111111111, localTtl, remoteTtl);
-    const value = await this.executeWithPendingPromise(
-      `caching:set:${key}`,
-      promise,
-    );
+    const value = await promise();
     profiler.stop(`Cache miss for key ${key}`, true);
     if (localTtl > 0) {
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
