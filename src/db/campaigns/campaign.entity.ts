@@ -74,6 +74,9 @@ export class CampaignEntity extends BaseEntity {
           endDate: parseInt(
             campaign.brand_info.mint_period.end.valueOf().toString(),
           ),
+          whitelistExpireTimestamp: parseInt(
+            campaign.brand_info.whitelist_expire_timestamp.valueOf().toString(),
+          ),
           royalties: campaign.brand_info.royalties.valueOf().toString(),
           tiers: campaign.tier_info_entries.map((t) =>
             TierEntity.fromTierAbi(t),

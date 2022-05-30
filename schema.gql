@@ -241,6 +241,9 @@ type Campaign {
   tiers: [Tier!]!
   totalNfts: Int!
   verified: Boolean!
+
+  """This is the timestamp when the whitelist period expires"""
+  whitelistExpire: Int!
 }
 
 type CampaignCollection {
