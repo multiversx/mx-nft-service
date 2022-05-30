@@ -29,7 +29,7 @@ export class CachingService {
       localTtl = remoteTtl / 2;
     }
 
-    const profiler = new PerformanceProfiler(`vmQuery:${key}`);
+    const profiler = new PerformanceProfiler();
 
     if (!forceRefresh) {
       const cachedValue = await this.localCacheService.getCacheValue<T>(key);
@@ -37,14 +37,14 @@ export class CachingService {
         if (key === CacheInfo.Campaigns.key) {
           console.log('get from local cache', cachedValue);
         }
-        profiler.stop(`Local Cache hit for key ${key}`);
+        profiler.stop(`Local Cache hit for key ${key}`, true);
         return cachedValue;
       }
 
       const cached = await this.redisCacheService.get(client, key);
 
       if (cached !== undefined && cached !== null) {
-        profiler.stop(`Remote Cache hit for key ${key}`);
+        profiler.stop(`Remote Cache hit for key ${key}`, true);
         if (key === CacheInfo.Campaigns.key) {
           console.log('get from redis', cached);
         }
@@ -54,12 +54,12 @@ export class CachingService {
       }
     }
 
-    console.log(1111111111111);
+    console.log(1111111111111, localTtl, remoteTtl);
     const value = await this.executeWithPendingPromise(
       `caching:set:${key}`,
       promise,
     );
-    profiler.stop(`Cache miss for key ${key}`);
+    profiler.stop(`Cache miss for key ${key}`, true);
     if (localTtl > 0) {
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
     }

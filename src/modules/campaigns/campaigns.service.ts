@@ -57,12 +57,13 @@ export class CampaignsService {
   }
 
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    return await this.cacheService.getOrSetCache(
+    const campaigns = await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.Campaigns.key,
       () => this.getCampaignsFromDb(),
       TimeConstants.oneHour,
     );
+    return campaigns;
   }
 
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {

@@ -14,7 +14,7 @@ export class LocalCacheService {
       this.prune();
     }
     if (key === CacheInfo.Campaigns.key) {
-      console.log('get from local cache', value);
+      console.log('set local cache', value);
     }
 
     const expires = new Date().getTime() + ttl * 1000;
