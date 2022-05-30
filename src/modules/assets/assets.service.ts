@@ -64,11 +64,11 @@ export class AssetsService {
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(
         address,
-        query + '&withMetadata=true&includeFlagged=true',
+        query + '&withMetadata=true&includeFlagged=true&source=elastic',
       ),
       this.apiService.getNftsForUserCount(
         address,
-        query + '&withMetadata=true&includeFlagged=true',
+        query + '&withMetadata=true&includeFlagged=true&source=elastic',
       ),
     ]);
     const assets = nfts?.map((element) => Asset.fromNft(element));
