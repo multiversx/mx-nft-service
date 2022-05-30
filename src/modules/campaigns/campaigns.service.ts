@@ -37,6 +37,7 @@ export class CampaignsService {
     filters: CampaignsFilter,
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
+
     if (filters?.campaignId) {
       const campaigns = allCampaigns?.items?.filter(
         (c) =>
@@ -48,12 +49,12 @@ export class CampaignsService {
         items: campaigns,
       });
     }
-    allCampaigns.items = allCampaigns?.items?.slice(offset, offset + limit);
-
-    return new CollectionType({
-      count: allCampaigns?.items?.length,
-      items: allCampaigns?.items,
+    const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
+    let returnResponse = new CollectionType({
+      count: campaigns?.length,
+      items: campaigns,
     });
+    return returnResponse;
   }
 
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {

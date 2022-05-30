@@ -22,6 +22,7 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
+    console.log({ limit, offset, pagination });
     const campaigns = await this.campaignsService.getCampaigns(
       limit,
       offset,
