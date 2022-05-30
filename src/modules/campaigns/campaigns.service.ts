@@ -31,21 +31,13 @@ export class CampaignsService {
     );
   }
 
-  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    return await this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      TimeConstants.oneHour,
-    );
-  }
-
   async getCampaigns(
     limit: number = 10,
     offset: number = 0,
     filters: CampaignsFilter,
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
+
     if (filters?.campaignId) {
       const campaigns = allCampaigns?.items?.filter(
         (c) =>
@@ -57,18 +49,27 @@ export class CampaignsService {
         items: campaigns,
       });
     }
-    allCampaigns.items = allCampaigns?.items?.slice(offset, offset + limit);
+    const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
 
     return new CollectionType({
-      count: allCampaigns?.items?.length,
-      items: allCampaigns?.items,
+      count: campaigns?.length,
+      items: campaigns,
     });
+  }
+
+  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
+    const campaigns = await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.Campaigns.key,
+      () => this.getCampaignsFromDb(),
+      TimeConstants.oneHour,
+    );
+    return campaigns;
   }
 
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
     let [campaigns, count]: [CampaignEntity[], number] =
       await this.campaignsRepository.getCampaigns();
-
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),

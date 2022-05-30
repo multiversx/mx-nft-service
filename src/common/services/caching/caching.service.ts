@@ -28,32 +28,30 @@ export class CachingService {
       localTtl = remoteTtl / 2;
     }
 
-    const profiler = new PerformanceProfiler(`vmQuery:${key}`);
+    const profiler = new PerformanceProfiler();
 
     if (!forceRefresh) {
       const cachedValue = await this.localCacheService.getCacheValue<T>(key);
       if (cachedValue !== undefined) {
-        profiler.stop(`Local Cache hit for key ${key}`);
+        profiler.stop(`Local Cache hit for key ${key}`, true);
         return cachedValue;
       }
 
       const cached = await this.redisCacheService.get(client, key);
 
       if (cached !== undefined && cached !== null) {
-        profiler.stop(`Remote Cache hit for key ${key}`);
+        profiler.stop(`Remote Cache hit for key ${key}`, true);
 
         // we only set ttl to half because we don't know what the real ttl of the item is and we want it to work good in most scenarios
         await this.localCacheService.setCacheValue<T>(key, cached, localTtl);
         return cached;
       }
     }
-
     const value = await this.executeWithPendingPromise(
       `caching:set:${key}`,
       promise,
     );
-    profiler.stop(`Cache miss for key ${key}`);
-
+    profiler.stop(`Cache miss for key ${key}`, true);
     if (localTtl > 0) {
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
     }
