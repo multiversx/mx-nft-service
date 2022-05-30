@@ -8,7 +8,6 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
 import { promisify } from 'util';
 import { Logger } from 'winston';
-import { CacheInfo } from './entities/cache.info';
 
 @Injectable()
 export class RedisCacheService {

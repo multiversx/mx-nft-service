@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { TimeConstants } from 'src/utils/time-utils';
-import { CacheInfo } from './entities/cache.info';
 import { LocalCacheService } from './local.cache.service';
 import { RedisCacheService } from './redis-cache.service';
 

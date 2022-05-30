@@ -50,11 +50,11 @@ export class CampaignsService {
       });
     }
     const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
-    let returnResponse = new CollectionType({
+
+    return new CollectionType({
       count: campaigns?.length,
       items: campaigns,
     });
-    return returnResponse;
   }
 
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
