@@ -365,6 +365,21 @@ type CollectionSocial {
   twiter: String
 }
 
+type CollectionStats {
+  activeAuctions: Int
+  auctionsEndedCount: Int
+  identifier: ID!
+  itemsCount: Int
+  maxPrice: String
+  minPrice: String
+  saleAvarage: String
+  volumeTraded: String
+}
+
+input CollectionStatsFilter {
+  identifier: String!
+}
+
 input CollectionsFilter {
   """Flag for can create or not on collection"""
   canCreate: Boolean
@@ -649,6 +664,7 @@ type Query {
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
+  collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
