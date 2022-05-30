@@ -34,9 +34,6 @@ export class CachingService {
     if (!forceRefresh) {
       const cachedValue = await this.localCacheService.getCacheValue<T>(key);
       if (cachedValue !== undefined) {
-        if (key === CacheInfo.Campaigns.key) {
-          console.log('get from local cache', cachedValue);
-        }
         profiler.stop(`Local Cache hit for key ${key}`, true);
         return cachedValue;
       }
@@ -45,28 +42,18 @@ export class CachingService {
 
       if (cached !== undefined && cached !== null) {
         profiler.stop(`Remote Cache hit for key ${key}`, true);
-        if (key === CacheInfo.Campaigns.key) {
-          console.log('get from redis', cached);
-        }
-        const localCacheValue = cached;
+
         // we only set ttl to half because we don't know what the real ttl of the item is and we want it to work good in most scenarios
-        await this.localCacheService.setCacheValue<T>(
-          key,
-          localCacheValue,
-          localTtl,
-        );
+        await this.localCacheService.setCacheValue<T>(key, cached, localTtl);
         return cached;
       }
     }
-
-    console.log(1111111111111, localTtl, remoteTtl);
     const value = await this.executeWithPendingPromise(
       `caching:set:${key}`,
       promise,
     );
     profiler.stop(`Cache miss for key ${key}`, true);
     if (localTtl > 0) {
-      const localCacheValue = value;
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
     }
 

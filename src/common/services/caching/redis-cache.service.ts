@@ -56,9 +56,6 @@ export class RedisCacheService {
     if (isNil(value)) {
       return;
     }
-    if (key === CacheInfo.Campaigns.key) {
-      console.log('set redis', value);
-    }
     const cacheKey = generateCacheKey(key, region);
 
     let profiler = new PerformanceProfiler();
