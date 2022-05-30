@@ -39,6 +39,11 @@ export class Campaign {
   @Field(() => Int)
   endDate: number;
 
+  @Field(() => Int, {
+    description: 'This is the timestamp when the whitelist period expires',
+  })
+  whitelistExpire: number;
+
   @Field(() => [Tier])
   tiers: Tier[];
 
@@ -58,6 +63,7 @@ export class Campaign {
           minterAddress: campaign.minterAddress,
           startDate: campaign.startDate,
           endDate: campaign.endDate,
+          whitelistExpire: campaign.whitelistExpireTimestamp,
           description: campaign.description,
           maxNftsPerTransaction: campaign.maxNftsPerTransaction,
           totalNfts: campaign.tiers

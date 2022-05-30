@@ -37,6 +37,9 @@ export class CampaignEntity extends BaseEntity {
   @Column()
   endDate: number;
 
+  @Column()
+  whitelistExpireTimestamp: number;
+
   @Column({ length: 10 })
   royalties: string;
 
@@ -70,6 +73,9 @@ export class CampaignEntity extends BaseEntity {
           ),
           endDate: parseInt(
             campaign.brand_info.mint_period.end.valueOf().toString(),
+          ),
+          whitelistExpireTimestamp: parseInt(
+            campaign.brand_info.whitelist_expire_timestamp.valueOf().toString(),
           ),
           royalties: campaign.brand_info.royalties.valueOf().toString(),
           tiers: campaign.tier_info_entries.map((t) =>

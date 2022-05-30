@@ -23,6 +23,9 @@ export class IssueCampaignArgs {
   @Field(() => Int)
   mintEndTime: number;
 
+  @Field(() => Int)
+  whitelistEndTime: number;
+
   @Field()
   mintPriceToken: string = 'EGLD';
 
