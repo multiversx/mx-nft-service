@@ -1,12 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
+import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 
 @Injectable()
-export class AccountsStatsServiceMock {
-  async getStats(address: string, isOwner: boolean): Promise<any> {
-    if (isOwner) {
-      return this.getStatsForOwner(address);
-    } else return this.getPublicStats(address);
+export class CollectionStatsServiceMock {
+  async getStats(identifier: string): Promise<any> {
+    new CollectionStatsEntity({
+      activeAuctions: 2,
+      auctionsEnded: 4,
+      maxPrice: '1111111111111',
+      minPrice: '1000000000000',
+      saleAverage: '11111111100',
+      volumeTraded: '211111111110',
+    });
   }
 
   private async getPublicStats(address: string): Promise<any> {

@@ -9,8 +9,8 @@ import * as Transport from 'winston-transport';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
-import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
-import { AccountStatsRepositoryMock } from 'src/db/account-stats/account-stats.repository-mock';
+import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
+import { CollectionStatsRepositoryMock } from 'src/db/collection-stats/collection-stats.repository-mock';
 
 describe('CollectionsStatsService', () => {
   let service: CollectionsStatsService;
@@ -19,9 +19,9 @@ describe('CollectionsStatsService', () => {
     useClass: ElrondApiServiceMock,
   };
 
-  const AccountStatsRepositoryProvider = {
-    provide: AccountStatsRepository,
-    useClass: AccountStatsRepositoryMock,
+  const CollectionStatsRepositoryProvider = {
+    provide: CollectionStatsRepository,
+    useClass: CollectionStatsRepositoryMock,
   };
 
   const RedisCacheServiceProvider = {
@@ -41,7 +41,7 @@ describe('CollectionsStatsService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         ElrondApiServiceProvider,
-        AccountStatsRepositoryProvider,
+        CollectionStatsRepositoryProvider,
         CollectionsStatsService,
         RedisCacheServiceProvider,
       ],
@@ -61,5 +61,13 @@ describe('CollectionsStatsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('getItemsCount', () => {
+    it('should return total nfts count', async () => {
+      const results = await service.getItemsCount('');
+
+      expect(results).toStrictEqual(4);
+    });
   });
 });
