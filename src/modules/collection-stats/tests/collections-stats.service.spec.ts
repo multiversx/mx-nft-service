@@ -11,6 +11,7 @@ import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.s
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 import { CollectionStatsRepositoryMock } from 'src/db/collection-stats/collection-stats.repository-mock';
+import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 
 describe('CollectionsStatsService', () => {
   let service: CollectionsStatsService;
@@ -68,6 +69,21 @@ describe('CollectionsStatsService', () => {
       const results = await service.getItemsCount('');
 
       expect(results).toStrictEqual(4);
+    });
+  });
+
+  describe('getStats', () => {
+    it('should return the collection stats', async () => {
+      const expected = new CollectionStatsEntity({
+        activeAuctions: 2,
+        auctionsEnded: 4,
+        maxPrice: '1111111111111',
+        minPrice: '1000000000000',
+        saleAverage: '11111111100',
+        volumeTraded: '211111111110',
+      });
+      const results = await service.getStats('test');
+      expect(results).toMatchObject(expected);
     });
   });
 });
