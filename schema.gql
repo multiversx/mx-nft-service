@@ -370,7 +370,6 @@ type CollectionStats {
   auctionsEnded: Int
   identifier: ID!
   items: Int
-  itemsCount: Int!
   maxPrice: String
   minPrice: String
   saleAverage: String

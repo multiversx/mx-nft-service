@@ -26,11 +26,11 @@ export class CollectionsStatsResolver {
   }
 
   @ResolveField(() => Int)
-  async itemsCount(@Parent() stats: CollectionStats) {
+  async items(@Parent() stats: CollectionStats) {
     const { identifier } = stats;
-    const claimableCount = await this.collectionsStatsService.getItemsCount(
+    const nftsCount = await this.collectionsStatsService.getItemsCount(
       identifier,
     );
-    return claimableCount.value || 0;
+    return nftsCount.value || 0;
   }
 }
