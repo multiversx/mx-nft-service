@@ -9,12 +9,14 @@ import { Logger } from 'winston';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
+import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
+import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 
 @Injectable()
 export class CollectionsStatsService {
   private redisClient: Redis.Redis;
   constructor(
-    private accountsStatsRepository: AccountStatsRepository,
+    private collectionStatsRepository: CollectionStatsRepository,
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -24,65 +26,32 @@ export class CollectionsStatsService {
     );
   }
 
-  async getStats(
-    address: string,
-    isOwner: boolean,
-  ): Promise<AccountStatsEntity> {
-    if (isOwner) {
-      return this.getStatsForOwner(address);
-    } else return this.getPublicStats(address);
-  }
-
-  private async getPublicStats(address: string): Promise<AccountStatsEntity> {
+  async getStats(identifier: string): Promise<CollectionStatsEntity> {
     try {
-      const cacheKey = this.getStatsCacheKey(`${address}`);
-      const getAccountStats = () =>
-        this.accountsStatsRepository.getPublicAccountStats(address);
+      const cacheKey = this.getStatsCacheKey(identifier);
+      const getCollectionStats = () =>
+        this.collectionStatsRepository.getStats(identifier);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAccountStats,
+        getCollectionStats,
         5 * TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error(
-        'An error occurred while getting stats for public account',
+        'An error occurred while getting stats for a collection',
         {
-          path: 'AccountsStatsService.getPublicStats',
-          address,
+          path: 'AccountsStatsService.getStats',
+          identifier,
           exception: err?.message,
         },
       );
-      return new AccountStatsEntity();
+      return new CollectionStatsEntity();
     }
   }
 
-  private async getStatsForOwner(address: string): Promise<AccountStatsEntity> {
-    try {
-      const cacheKey = this.getStatsCacheKey(`owner_${address}`);
-      const getAccountStats = () =>
-        this.accountsStatsRepository.getOnwerAccountStats(address);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAccountStats,
-        TimeConstants.oneHour,
-      );
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while getting stats for owner account',
-        {
-          path: 'AccountsStatsService.getStatsForOwner',
-          address,
-          exception: err?.message,
-        },
-      );
-      return new AccountStatsEntity();
-    }
-  }
-
-  private getStatsCacheKey(address: string) {
-    return generateCacheKeyFromParams('account_stats', address);
+  private getStatsCacheKey(identifier: string) {
+    return generateCacheKeyFromParams('collection_stats', identifier);
   }
 
   async getItemsCount(

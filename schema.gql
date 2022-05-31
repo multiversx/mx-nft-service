@@ -367,12 +367,13 @@ type CollectionSocial {
 
 type CollectionStats {
   activeAuctions: Int
-  auctionsEndedCount: Int
+  auctionsEnded: Int
   identifier: ID!
-  itemsCount: Int
+  items: Int
+  itemsCount: Int!
   maxPrice: String
   minPrice: String
-  saleAvarage: String
+  saleAverage: String
   volumeTraded: String
 }
 

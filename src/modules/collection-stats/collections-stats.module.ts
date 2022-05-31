@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { CollectionsStatsResolver } from './collections-stats.resolver';
 import { CollectionsStatsService } from './collections-stats.service';
-import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
+import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 
 @Module({
   providers: [
     CollectionsStatsService,
     CollectionsStatsResolver,
-    AccountStatsRepository,
+    CollectionStatsRepository,
   ],
   imports: [ElrondCommunicationModule],
   exports: [CollectionsStatsService],
