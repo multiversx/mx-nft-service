@@ -20,7 +20,7 @@ export class CollectionsStatsService {
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.collectionsRedisClientName,
     );
   }
 
@@ -85,111 +85,41 @@ export class CollectionsStatsService {
     return generateCacheKeyFromParams('account_stats', address);
   }
 
-  async getClaimableCount(address: string): Promise<number> {
+  async getItemsCount(
+    identifier: string,
+  ): Promise<{ key: string; value: number }> {
     try {
-      const cacheKey = this.getClaimableCacheKey(address);
-      const getAccountClaimableCount = () =>
-        this.accountsStatsRepository.getAccountClaimableCount(address);
+      const cacheKey = this.getCollectionNftsCacheKey(identifier);
+      const getAccountStats = () =>
+        this.apiService.getNftsCountForCollection(
+          this.getQueryForCollection(identifier),
+          identifier,
+        );
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getAccountClaimableCount,
-        5 * TimeConstants.oneSecond,
+        getAccountStats,
+        TimeConstants.oneDay,
       );
     } catch (err) {
       this.logger.error(
-        'An error occurred while getting claimable count for account',
+        'An error occurred while getting total nfts count for collection',
         {
-          path: 'AccountsStatsService.getClaimableCount',
-          address,
+          path: 'CollectionsStatsService.getItemsCount',
+          identifier,
           exception: err?.message,
         },
       );
-      return 0;
+      return { key: identifier, value: 0 };
     }
   }
 
-  private getClaimableCacheKey(address: string) {
-    return generateCacheKeyFromParams('account_claimable_count', address);
+  private getCollectionNftsCacheKey(key: string) {
+    return generateCacheKeyFromParams('collectionAssetsCount', key);
   }
 
-  async getCollectedCount(address: string): Promise<number> {
-    try {
-      const cacheKey = this.getCollectedCacheKey(address);
-      const getAccountStats = () =>
-        this.apiService.getNftsForUserCount(address);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAccountStats,
-        5 * TimeConstants.oneSecond,
-      );
-    } catch (err) {
-      this.logger.error('An error occurred while getting collected count', {
-        path: 'AccountsStatsService.getCollectedCount',
-        address,
-        exception: err?.message,
-      });
-      return 0;
-    }
-  }
-
-  private getCollectedCacheKey(address: string) {
-    return generateCacheKeyFromParams('account_collected', address);
-  }
-
-  async getCollectionsCount(address: string): Promise<number> {
-    try {
-      const cacheKey = this.getCollectionsCacheKey(address);
-      const getCollectionsCount = () =>
-        this.apiService.getCollectionsForAddressCount(address);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getCollectionsCount,
-        5 * TimeConstants.oneSecond,
-      );
-    } catch (err) {
-      this.logger.error('An error occurred while getting collections Count ', {
-        path: 'AccountsStatsService.getCollectionsCount',
-        address,
-        exception: err?.message,
-      });
-      return 0;
-    }
-  }
-
-  private getCollectionsCacheKey(address: string) {
-    return generateCacheKeyFromParams('account_collections', address);
-  }
-
-  async getCreationsCount(address: string): Promise<any> {
-    try {
-      const query = new AssetsQuery()
-        .addCreator(address)
-        .withSupply()
-        .withOwner()
-        .build();
-      const cacheKey = this.getCreationsCacheKey(address);
-      const getAccountStats = () => this.apiService.getNftsCount(query);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAccountStats,
-        5 * TimeConstants.oneSecond,
-      );
-    } catch (err) {
-      this.logger.error('An error occurred while getting creations count', {
-        path: 'AccountsStatsService.getCreationsCount',
-        address,
-        exception: err?.message,
-      });
-      return new AccountStatsEntity();
-    }
-  }
-
-  private getCreationsCacheKey(address: string) {
-    return generateCacheKeyFromParams('account_creations', address);
+  private getQueryForCollection(identifier: string): string {
+    return new AssetsQuery().addCollection(identifier).build();
   }
 
   public async invalidateStats(address: string) {
@@ -199,7 +129,7 @@ export class CollectionsStatsService {
     );
     await this.redisCacheService.del(
       this.redisClient,
-      this.getClaimableCacheKey(address),
+      this.getCollectionNftsCacheKey(address),
     );
     return await this.redisCacheService.del(
       this.redisClient,

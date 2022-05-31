@@ -1,4 +1,11 @@
-import { Query, Resolver, Args } from '@nestjs/graphql';
+import {
+  Query,
+  Resolver,
+  Args,
+  ResolveField,
+  Int,
+  Parent,
+} from '@nestjs/graphql';
 import { CollectionsStatsService } from './collections-stats.service';
 import { CollectionStats } from './models';
 import { CollectionStatsFilter } from './models/Collection-Stats.Filter';
@@ -15,12 +22,12 @@ export class CollectionsStatsResolver {
     return CollectionStats.fromEntity(filters?.identifier);
   }
 
-  // @ResolveField(() => Int)
-  // async claimable(@Parent() stats: AccountStats) {
-  //   const { address } = stats;
-  //   const claimableCount = await this.accountsStatsService.getClaimableCount(
-  //     address,
-  //   );
-  //   return claimableCount || 0;
-  // }
+  @ResolveField(() => Int)
+  async itemsCount(@Parent() stats: CollectionStats) {
+    const { identifier } = stats;
+    const claimableCount = await this.accountsStatsService.getItemsCount(
+      identifier,
+    );
+    return claimableCount.value || 0;
+  }
 }
