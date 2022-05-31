@@ -35,7 +35,9 @@ export class CollectionStats {
           minPrice: entity?.minPrice || '0',
           saleAverage: nominateAmount(
             entity.saleAverage ? entity.saleAverage : '0',
-          ),
+          )
+            .split('.')
+            .shift(),
           volumeTraded: nominateAmount(
             entity.volumeTraded ? entity.volumeTraded : '0',
           ),
