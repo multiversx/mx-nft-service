@@ -99,14 +99,6 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
   @Query(() => String)
   async marketplaceCutPercentage() {
-    const auctionData = await this.nftAbiService.getAuctionQuery(210);
-    const savedAuction = AuctionEntity.fromAuctionAbi(
-      212,
-      auctionData,
-      '',
-      'hash',
-    );
-    console.log(savedAuction, auctionData);
     return await this.nftAbiService.getCutPercentage();
   }
 

@@ -39,7 +39,7 @@ export class CollectionsStatsService {
       this.logger.error(
         'An error occurred while getting stats for a collection',
         {
-          path: 'AccountsStatsService.getStats',
+          path: 'CollectionsStatsService.getStats',
           identifier,
           exception: err?.message,
         },
@@ -89,18 +89,14 @@ export class CollectionsStatsService {
     return new AssetsQuery().addCollection(identifier).build();
   }
 
-  public async invalidateStats(address: string) {
+  public async invalidateStats(identifier: string) {
     await this.redisCacheService.del(
       this.redisClient,
-      this.getStatsCacheKey(address),
+      this.getStatsCacheKey(identifier),
     );
     await this.redisCacheService.del(
       this.redisClient,
-      this.getCollectionNftsCacheKey(address),
-    );
-    return await this.redisCacheService.del(
-      this.redisClient,
-      this.getStatsCacheKey(`owner_${address}`),
+      this.getCollectionNftsCacheKey(identifier),
     );
   }
 }
