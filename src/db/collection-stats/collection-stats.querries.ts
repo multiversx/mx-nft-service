@@ -20,7 +20,7 @@ export function getCollectionStats(identifier: string) {
     SELECT volumeTraded, saleAverage, maxPrice, auctionsEnded, activeAuctions, minPrice
     FROM (
     SELECT * from endedAuctions ea
-    LEFT JOIN activeAuctions aa on ea.endedIdentifier = aa.activeIdentifier
+    LEFT JOIN activeAuctions aa on aa.activeIdentifier = '${identifier}'
     ) temp
   `;
 }

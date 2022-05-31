@@ -1,6 +1,6 @@
 import { EntityManager, EntityRepository } from 'typeorm';
 import { CollectionStatsEntity } from './collection-stats';
-import { getCollectionStats } from './collectuion-stats.querries';
+import { getCollectionStats } from './collection-stats.querries';
 
 @EntityRepository()
 export class CollectionStatsRepository {
