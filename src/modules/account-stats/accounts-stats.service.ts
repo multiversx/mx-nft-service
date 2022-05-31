@@ -165,11 +165,7 @@ export class AccountsStatsService {
 
   async getCreationsCount(address: string): Promise<any> {
     try {
-      const query = new AssetsQuery()
-        .addCreator(address)
-        .withSupply()
-        .withOwner()
-        .build();
+      const query = new AssetsQuery().addCreator(address).build();
       const cacheKey = this.getCreationsCacheKey(address);
       const getAccountStats = () => this.apiService.getNftsCount(query);
       return this.redisCacheService.getOrSet(

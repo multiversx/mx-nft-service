@@ -60,6 +60,7 @@ export class AssetsService {
   async getAssetsForUser(
     address: string,
     query: string = '',
+    countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(
@@ -68,7 +69,7 @@ export class AssetsService {
       ),
       this.apiService.getNftsForUserCount(
         address,
-        query + '&withMetadata=true&includeFlagged=true&source=elastic',
+        countQuery + '&includeFlagged=true',
       ),
     ]);
     const assets = nfts?.map((element) => Asset.fromNft(element));
@@ -81,6 +82,7 @@ export class AssetsService {
     filters: AssetsFilter,
   ): Promise<CollectionType<Asset>> {
     const apiQuery = this.getApiQuery(filters, offset, limit);
+    const apiCountQuery = this.getApiQueryForCount(filters, offset, limit);
 
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
@@ -92,7 +94,11 @@ export class AssetsService {
       return response;
     }
     if (filters?.ownerAddress) {
-      const response = await this.getAssetsByOwnerAddress(filters, apiQuery);
+      const response = await this.getAssetsByOwnerAddress(
+        filters,
+        apiQuery,
+        apiCountQuery,
+      );
       await this.addToCache(response);
       return new CollectionType({
         count: response?.count,
@@ -102,7 +108,11 @@ export class AssetsService {
       });
     }
 
-    const response = await this.getAssetsWithoutOwner(filters, apiQuery);
+    const response = await this.getAssetsWithoutOwner(
+      filters,
+      apiQuery,
+      apiCountQuery,
+    );
     this.addToCache(response);
     return response;
   }
@@ -116,6 +126,21 @@ export class AssetsService {
       .addType(filters?.type)
       .withOwner()
       .withSupply()
+      .addPageSize(offset, limit)
+      .build();
+  }
+
+  private getApiQueryForCount(
+    filters: AssetsFilter,
+    offset: number,
+    limit: number,
+  ) {
+    return new AssetsQuery()
+      .addCreator(filters?.creatorAddress)
+      .addTags(filters?.tags)
+      .addIdentifiers(filters?.identifiers)
+      .addCollection(filters?.collection)
+      .addType(filters?.type)
       .addPageSize(offset, limit)
       .build();
   }
@@ -308,10 +333,11 @@ export class AssetsService {
 
   private async getAllAssets(
     query: string = '',
+    countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),
-      this.apiService.getNftsCount(query),
+      this.apiService.getNftsCount(countQuery),
     ]);
     if (!nfts || !count) {
       return null;
@@ -324,18 +350,22 @@ export class AssetsService {
   private async getAssetsWithoutOwner(
     filters: AssetsFilter,
     query: string = '',
+    countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       return await this.getAsset(filters?.identifier);
     } else {
-      return await this.getOrSetAssets(query);
+      return await this.getOrSetAssets(query, countQuery);
     }
   }
 
-  private async getOrSetAssets(query: string): Promise<CollectionType<Asset>> {
+  private async getOrSetAssets(
+    query: string,
+    countQuery: string = '',
+  ): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      const getAssets = () => this.getAllAssets(query);
+      const getAssets = () => this.getAllAssets(query, countQuery);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -354,6 +384,7 @@ export class AssetsService {
   private async getAssetsByOwnerAddress(
     filters: AssetsFilter,
     query: string = '',
+    countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       const asset = await this.getAssetByIdentifierAndAddress(
@@ -364,7 +395,11 @@ export class AssetsService {
         ? new CollectionType({ count: asset ? 1 : 0, items: [asset] })
         : null;
     } else {
-      return await this.getAssetsForUser(filters.ownerAddress, query);
+      return await this.getAssetsForUser(
+        filters.ownerAddress,
+        query,
+        countQuery,
+      );
     }
   }
 
