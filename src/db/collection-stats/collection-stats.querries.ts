@@ -10,12 +10,12 @@ export function getCollectionStats(identifier: string) {
     left join auctions a on o.auctionId = a.id 
     where a.collection  = '${identifier}' and o.status = 'Bought'),
 
-    activeAuctions AS (select  MIN(if(o.priceAmountDenominated, o.priceAmount , a.minBid)) as minPrice, 
-      COUNT(DISTINCT(a.id)) as activeAuctions,
-      a.collection as activeIdentifier
-    from orders o 
-    left join auctions a on o.auctionId = a.id 
-    where a.collection  = '${identifier}' and a.status = 'Running' ) 
+    activeAuctions AS (SELECT MIN(if(o.priceAmountDenominated, o.priceAmount , a.minBid)) as minPrice, 
+    COUNT(DISTINCT(a.id)) as activeAuctions,
+    a.collection as activeIdentifier
+    from auctions a
+    left join orders o on o.auctionId = a.id 
+    where a.collection  = '${identifier}' and a.status = 'Running') 
 
     SELECT volumeTraded, saleAverage, maxPrice, auctionsEnded, activeAuctions, minPrice
     FROM (
