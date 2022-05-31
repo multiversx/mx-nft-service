@@ -81,7 +81,9 @@ export class AssetsService {
     limit: number = 10,
     filters: AssetsFilter,
   ): Promise<CollectionType<Asset>> {
-    const apiQuery = this.getApiQuery(filters, offset, limit);
+    const apiQuery = filters?.ownerAddress
+      ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
+      : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
 
     if (filters?.likedByAddress) {
@@ -125,6 +127,22 @@ export class AssetsService {
       .addCollection(filters?.collection)
       .addType(filters?.type)
       .withOwner()
+      .withSupply()
+      .addPageSize(offset, limit)
+      .build();
+  }
+
+  private getApiQueryWithoutOwnerFlag(
+    filters: AssetsFilter,
+    offset: number,
+    limit: number,
+  ) {
+    return new AssetsQuery()
+      .addCreator(filters?.creatorAddress)
+      .addTags(filters?.tags)
+      .addIdentifiers(filters?.identifiers)
+      .addCollection(filters?.collection)
+      .addType(filters?.type)
       .withSupply()
       .addPageSize(offset, limit)
       .build();
