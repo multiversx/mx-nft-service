@@ -95,7 +95,7 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `nfts?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
+      `nfts?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
     );
   }
 
@@ -179,7 +179,7 @@ export class ElrondApiService {
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `collections?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}`,
+      `collections?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}`,
     );
   }
 
