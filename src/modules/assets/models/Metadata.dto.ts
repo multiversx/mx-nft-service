@@ -55,9 +55,10 @@ export class AttributeType {
           const element = pair[key];
           data.push(new KeyValueType({ key: key, value: element }));
         }
-        res.push(new AttributeType({ attribute: data }));
       }
+      res.push(new AttributeType({ attribute: data }));
     }
+
     return res;
   }
 }

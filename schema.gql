@@ -216,10 +216,21 @@ input BidActionArgs {
 }
 
 input BuyRandomNftActionArgs {
+  """The campaign id where the user wants to buy the nft/s"""
   campaignId: String!
+
+  """The smart contract address of the campaign"""
   minterAddress: String!
+
+  """
+  The total price the user needs to pay in order to buy the number of nfts selected
+  """
   price: String!
+
+  """The number of nfts the user wants to buy"""
   quantity: String
+
+  """The tier name on which the user wants to buy the nft"""
   tier: String!
 }
 
