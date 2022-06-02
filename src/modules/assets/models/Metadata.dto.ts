@@ -32,7 +32,9 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          attributes: AttributeType.fromMetadataAttributes(metadata.attributes),
+          attributes: metadata?.attributes
+            ? AttributeType.fromMetadataAttributes(metadata.attributes)
+            : null,
         })
       : null;
   }
