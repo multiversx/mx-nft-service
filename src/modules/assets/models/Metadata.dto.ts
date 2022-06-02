@@ -29,7 +29,6 @@ export class Metadata {
   }
 
   static fromNftMetadata(metadata: NftMetadata) {
-    console.log(metadata.attributes);
     return metadata
       ? new Metadata({
           description: metadata?.description,
