@@ -15,15 +15,16 @@ import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class CampaignsService {
   private redisClient: Redis.Redis;
   constructor(
+    @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
     private campaignsRepository: CampaignsRepository,
     private tierRepository: TiersRepository,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -111,6 +112,24 @@ export class CampaignsService {
     const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
     tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
     await this.tierRepository.save(tierEntity);
+  }
+
+  public async invalidateKey() {
+    await this.cacheService.setCache(
+      this.redisClient,
+      CacheInfo.Campaigns.key,
+      null,
+      TimeConstants.oneDay,
+    );
+    await this.refreshCacheKey(CacheInfo.Campaigns.key, TimeConstants.oneDay);
+  }
+
+  private async refreshCacheKey(key: string, ttl: number) {
+    this.clientProxy.emit('refreshCacheKey', {
+      key,
+      ttl,
+      redisClientName: cacheConfig.auctionsRedisClientName,
+    });
   }
 
   public async invalidateCache() {
