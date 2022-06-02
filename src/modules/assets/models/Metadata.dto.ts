@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { NftMetadata } from 'src/common';
+import { Rarity } from './Rarity';
 
 @ObjectType()
 export class Metadata {
@@ -8,6 +9,10 @@ export class Metadata {
 
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
+
+  @Field(() => Rarity, { nullable: true })
+  rarity: Rarity;
+
   @Field(() => String, {
     nullable: true,
     deprecationReason: 'This field will be removed in the next version',
@@ -32,7 +37,10 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          attributes: AttributeType.fromMetadataAttributes(metadata.attributes),
+          rarity: Rarity.fromNftRarity(metadata?.rarity),
+          attributes: metadata?.attributes
+            ? AttributeType.fromMetadataAttributes(metadata.attributes)
+            : null,
         })
       : null;
   }
@@ -62,6 +70,7 @@ export class AttributeType {
     return res;
   }
 }
+
 @ObjectType()
 export class KeyValueType {
   @Field()

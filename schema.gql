@@ -544,6 +544,7 @@ type Metadata {
   fileName: String @deprecated(reason: "This field will be removed in the next version")
   fileType: String @deprecated(reason: "This field will be removed in the next version")
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
+  rarity: Rarity
 }
 
 type MintPrice {
@@ -694,6 +695,14 @@ type Query {
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   trendingAssets: [Asset!]!
+}
+
+type Rarity {
+  avgRarity: Float!
+  rarityScore: Float!
+  rarityScoreNormed: Float!
+  statRarity: Float!
+  usedTraitsCount: Float!
 }
 
 input RemoveLikeArgs {
