@@ -81,11 +81,12 @@ export class NftMinterAbiService {
       gasLimit: gas.endAuction,
       chainID: elrondConfig.chainID,
     });
-    if (isNumber(request.quantity) && parseInt(request.quantity) > 1)
+    if (parseInt(request.quantity) > 1) {
       buyRandomNft.setGasLimit(
         buyRandomNft.getGasLimit().valueOf() +
-          (parseInt(request.quantity) - 1) * gas.createNft,
+          (parseInt(request.quantity) - 1) * gas.nftCreate,
       );
+    }
     return buyRandomNft.toPlainObject(new Address(ownerAddress));
   }
 
