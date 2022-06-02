@@ -19,6 +19,7 @@ import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
 import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
+import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
     OrdersModuleGraph,
     OwnersModuleGraph,
     AccountsStatsModuleGraph,
+    CollectionsStatsModuleGraph,
     ReportNftsModuleGraph,
     FeaturedModuleGraph,
     UsdAmountModuleGraph,
