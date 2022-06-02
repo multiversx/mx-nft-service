@@ -103,14 +103,14 @@ export class CampaignsService {
     address: string,
     campaignId: string,
     tier: string,
-    nftsBought: number,
+    nftsBought: string,
   ) {
     const campaign = await this.campaignsRepository.getCampaign(
       campaignId,
       address,
     );
     const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
-    tierEntity.availableNfts -= nftsBought ? nftsBought : 1;
+    tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
     return await this.tierRepository.save(tierEntity);
   }
 
