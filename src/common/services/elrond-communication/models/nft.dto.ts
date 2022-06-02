@@ -52,4 +52,5 @@ export interface NftScamInfo {
 
 export interface NftMetadata {
   description: string;
+  attributes: [{ [key: string]: string }];
 }
