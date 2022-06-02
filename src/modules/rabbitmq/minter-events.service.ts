@@ -10,8 +10,10 @@ export class MinterEventsService {
 
   public async handleNftMinterEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
+      console.log('for event', event);
       switch (event.identifier) {
         case MinterEventEnum.callBack:
+          console.log('callBack', event);
           const brandEvent = new BrandCreatedEvent(event);
           const topics = brandEvent.getTopics();
           if (topics.eventIdentifier === MinterEventEnum.brandCreated) {
@@ -23,6 +25,7 @@ export class MinterEventsService {
           break;
 
         case MinterEventEnum.buyRandomNft:
+          console.log('buy random', event);
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
           await this.campaignService.invalidateCache();
