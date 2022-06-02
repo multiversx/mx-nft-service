@@ -30,13 +30,18 @@ export class MinterEventsService {
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
 
-          console.log('data', randomNftEvent.getData());
+          console.log(
+            'data',
+            event.data,
+            parseInt(Buffer.from(event.data, 'base64').toString('hex', 16)),
+            randomNftEvent.getData(),
+          );
 
           const tier = await this.campaignService.updateTier(
             randomNftEvent.getAddress(),
             transferTopics.campaignId,
             transferTopics.tier,
-            randomNftEvent.getData(),
+            parseInt(Buffer.from(event.data, 'base64').toString('hex', 16)),
           );
           if (tier) {
             console.log('update tier');
