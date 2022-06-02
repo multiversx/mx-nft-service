@@ -54,15 +54,27 @@ export class TierArgs {
 
 @InputType()
 export class BuyRandomNftActionArgs {
-  @Field(() => String)
+  @Field(() => String, {
+    description: 'The campaign id where the user wants to buy the nft/s',
+  })
   campaignId: string;
-  @Field(() => String)
+  @Field(() => String, {
+    description: 'The tier name on which the user wants to buy the nft',
+  })
   tier: string;
-  @Field(() => String)
+  @Field(() => String, {
+    description:
+      'The total price the user needs to pay in order to buy the number of nfts selected',
+  })
   price: string;
-  @Field(() => String)
+  @Field(() => String, {
+    description: 'The smart contract address of the campaign',
+  })
   minterAddress: string;
-  @Field(() => String, { nullable: true })
+  @Field(() => String, {
+    nullable: true,
+    description: 'The number of nfts the user wants to buy',
+  })
   quantity: string;
 }
 
