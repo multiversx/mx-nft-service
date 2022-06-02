@@ -115,6 +115,7 @@ export class CampaignsService {
   }
 
   public async invalidateKey() {
+    console.log('invalidate key');
     await this.cacheService.setCache(
       this.redisClient,
       CacheInfo.Campaigns.key,
@@ -128,7 +129,7 @@ export class CampaignsService {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
-      redisClientName: cacheConfig.auctionsRedisClientName,
+      redisClientName: cacheConfig.followersRedisClientName,
     });
   }
 
