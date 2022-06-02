@@ -111,15 +111,15 @@ export class CampaignsService {
     );
     const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
     tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
-    await this.tierRepository.save(tierEntity);
+    return await this.tierRepository.save(tierEntity);
   }
 
   public async invalidateKey() {
-    console.log('invalidate key');
+    const campaigns = await this.getCampaignsFromDb();
     await this.cacheService.setCache(
       this.redisClient,
       CacheInfo.Campaigns.key,
-      null,
+      campaigns,
       TimeConstants.oneDay,
     );
     await this.refreshCacheKey(CacheInfo.Campaigns.key, TimeConstants.oneDay);
