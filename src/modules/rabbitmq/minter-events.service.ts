@@ -29,16 +29,20 @@ export class MinterEventsService {
           console.log('buy random', event);
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
+
+          console.log('data', randomNftEvent.getData());
+
           const tier = await this.campaignService.updateTier(
             randomNftEvent.getAddress(),
             transferTopics.campaignId,
             transferTopics.tier,
-            transferTopics.boughtNfts,
+            randomNftEvent.getData(),
           );
           if (tier) {
             console.log('update tier');
             await this.campaignService.invalidateKey();
           }
+
           break;
       }
     }
