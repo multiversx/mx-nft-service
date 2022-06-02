@@ -84,7 +84,7 @@ export class NftMinterAbiService {
     if (parseInt(request.quantity) > 1) {
       buyRandomNft.setGasLimit(
         buyRandomNft.getGasLimit().valueOf() +
-          (parseInt(request.quantity) - 1) * gas.nftCreate,
+          (parseInt(request.quantity) - 1) * gas.endAuction,
       );
     }
     return buyRandomNft.toPlainObject(new Address(ownerAddress));
