@@ -40,6 +40,6 @@ export class SearchService {
 
   async getTags(searchTerm: string): Promise<any> {
     const response = await this.apiService.getTagsBySearch(searchTerm);
-    return response?.tag;
+    return [response?.tag];
   }
 }

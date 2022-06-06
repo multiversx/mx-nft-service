@@ -23,4 +23,16 @@ export class ElrondApiServiceMock {
   async getNftsCount(query: string = ''): Promise<any> {
     return Promise.resolve(10);
   }
+
+  async getCollectionsBySearch(searchTerm: string = ''): Promise<any> {
+    return Promise.resolve([{ collection: searchTerm }]);
+  }
+
+  async getNftsBySearch(searchTerm: string = ''): Promise<any> {
+    return Promise.resolve([{ identifier: searchTerm }]);
+  }
+
+  async getTagsBySearch(searchTerm: string = ''): Promise<any> {
+    return Promise.resolve({ tag: searchTerm });
+  }
 }
