@@ -12,29 +12,36 @@ export class SearchResolver {
     @Args({ name: 'filters', type: () => SearchFilter })
     filters,
   ): Promise<SearchResponse> {
-    return new SearchResponse({ serchTerm: filters.searchTerm });
+    return new SearchResponse({ searchTerm: filters.searchTerm });
   }
 
   @ResolveField(() => [String])
   async collections(@Parent() stats: SearchResponse) {
-    const { serchTerm } = stats;
+    const { searchTerm } = stats;
     const collection = await this.accountsStatsService.getCollections(
-      serchTerm,
+      searchTerm,
     );
     return collection;
   }
 
   @ResolveField(() => [String])
   async accounts(@Parent() stats: SearchResponse) {
-    const { serchTerm } = stats;
-    const account = await this.accountsStatsService.getHerotags(serchTerm);
+    const { searchTerm } = stats;
+    const account = await this.accountsStatsService.getHerotags(searchTerm);
     return account;
   }
 
   @ResolveField(() => [String])
   async nfts(@Parent() stats: SearchResponse) {
-    const { serchTerm } = stats;
-    const nfts = await this.accountsStatsService.getNfts(serchTerm);
+    const { searchTerm } = stats;
+    const nfts = await this.accountsStatsService.getNfts(searchTerm);
     return nfts;
+  }
+
+  @ResolveField(() => [String])
+  async tags(@Parent() search: SearchResponse) {
+    const { searchTerm } = search;
+    const tags = await this.accountsStatsService.getTags(searchTerm);
+    return tags ? [tags] : [];
   }
 }

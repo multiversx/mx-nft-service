@@ -732,7 +732,8 @@ type SearchResponse {
   accounts: [String!]
   collections: [String!]
   nfts: [String!]
-  serchTerm: ID
+  searchTerm: ID
+  tags: [String!]
 }
 
 input SetNftRolesArgs {

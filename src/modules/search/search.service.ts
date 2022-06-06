@@ -38,8 +38,8 @@ export class SearchService {
     return response?.map((c) => c.identifier);
   }
 
-  async getNftsByTags(searchTerm: string): Promise<any> {
-    const response = await this.apiService.getNftsByTags(searchTerm);
-    return response?.map((c) => c.identifier);
+  async getTags(searchTerm: string): Promise<any> {
+    const response = await this.apiService.getTagsBySearch(searchTerm);
+    return response?.tag;
   }
 }

@@ -250,15 +250,15 @@ export class ElrondApiService {
 
   async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
-      this.getCollections.name,
+      this.getNftsBySearch.name,
       `nfts?search=${searchTerm}&fields=identifier`,
     );
   }
 
-  async getNftsByTags(searchTerm: string = ''): Promise<Nft[]> {
+  async getTagsBySearch(searchTerm: string = ''): Promise<any> {
     return await this.doGetGeneric(
-      this.getCollections.name,
-      `nft?tags=${searchTerm}&fields=identifier`,
+      this.getTagsBySearch.name,
+      `tags/${searchTerm}?fields=tag`,
     );
   }
 
