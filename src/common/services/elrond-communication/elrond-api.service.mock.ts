@@ -33,6 +33,6 @@ export class ElrondApiServiceMock {
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<any> {
-    return Promise.resolve({ tag: searchTerm });
+    return Promise.resolve([{ tag: searchTerm }]);
   }
 }

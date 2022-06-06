@@ -42,6 +42,6 @@ export class SearchResolver {
   async tags(@Parent() search: SearchResponse) {
     const { searchTerm } = search;
     const tags = await this.accountsStatsService.getTags(searchTerm);
-    return tags ? [tags] : [];
+    return tags;
   }
 }

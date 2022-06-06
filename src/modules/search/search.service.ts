@@ -28,18 +28,18 @@ export class SearchService {
     return response?.herotags;
   }
 
-  async getCollections(searchTerm: string): Promise<any> {
+  async getCollections(searchTerm: string): Promise<string[]> {
     const response = await this.apiService.getCollectionsBySearch(searchTerm);
     return response?.map((c) => c.collection);
   }
 
-  async getNfts(searchTerm: string): Promise<any> {
+  async getNfts(searchTerm: string): Promise<string[]> {
     const response = await this.apiService.getNftsBySearch(searchTerm);
     return response?.map((c) => c.identifier);
   }
 
-  async getTags(searchTerm: string): Promise<any> {
+  async getTags(searchTerm: string): Promise<string[]> {
     const response = await this.apiService.getTagsBySearch(searchTerm);
-    return [response?.tag];
+    return response?.map((c) => c.tag);
   }
 }
