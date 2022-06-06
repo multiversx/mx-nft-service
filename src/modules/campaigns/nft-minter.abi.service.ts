@@ -27,6 +27,7 @@ import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
+import { isNumber } from '@nestjs/common/utils/shared.utils';
 
 @Injectable()
 export class NftMinterAbiService {
@@ -80,7 +81,12 @@ export class NftMinterAbiService {
       gasLimit: gas.endAuction,
       chainID: elrondConfig.chainID,
     });
-
+    if (parseInt(request.quantity) > 1) {
+      buyRandomNft.setGasLimit(
+        buyRandomNft.getGasLimit().valueOf() +
+          (parseInt(request.quantity) - 1) * gas.endAuction,
+      );
+    }
     return buyRandomNft.toPlainObject(new Address(ownerAddress));
   }
 

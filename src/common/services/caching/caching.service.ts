@@ -101,7 +101,7 @@ export class CachingService {
   }
 
   async deleteInCacheLocal(key: string) {
-    await this.localCacheService.deleteCacheKey(key);
+    this.localCacheService.deleteCacheKey(key);
   }
 
   async refreshCacheLocal<T>(
