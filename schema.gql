@@ -694,6 +694,7 @@ type Query {
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
+  search(filters: SearchFilter!): SearchResponse!
   trendingAssets: [Asset!]!
 }
 
@@ -721,6 +722,18 @@ type ScamInfo {
 enum ScamInfoTypeEnum {
   potentialScam
   scam
+}
+
+input SearchFilter {
+  searchTerm: String!
+}
+
+type SearchResponse {
+  accounts: [String!]
+  collections: [String!]
+  nfts: [String!]
+  searchTerm: ID
+  tags: [String!]
 }
 
 input SetNftRolesArgs {

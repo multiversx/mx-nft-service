@@ -50,6 +50,11 @@ export interface NftScamInfo {
   info: string;
 }
 
+export interface NftTag {
+  tag: string;
+  count: string;
+}
+
 export interface NftMetadata {
   description: string;
   rarity: NftRarity;

@@ -66,4 +66,30 @@ export class ElrondIdentityService {
       return;
     }
   }
+
+  async getAcountsByHerotag(searchTerm: string): Promise<any> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/herotags/search?criteria=${searchTerm}`;
+
+    try {
+      let response = await this.apiService.get(url);
+
+      return response?.data;
+    } catch (error) {
+      if (error.status === HttpStatus.FORBIDDEN) {
+        return new AccountIdentity({
+          address: searchTerm,
+          privacy: Privacy.private,
+        });
+      }
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${url}`,
+        {
+          path: 'ElrondIdentityService.getAcountsByHerotag',
+          address: searchTerm,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
 }

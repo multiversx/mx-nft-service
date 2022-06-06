@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Nft } from './models/nft.dto';
+import { Nft, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
@@ -237,6 +237,31 @@ export class ElrondApiService {
       this.getCollections.name,
       `collections${query}`,
     );
+  }
+
+  async getCollectionsBySearch(
+    searchTerm: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `collections?search=${searchTerm}&fields=collection`,
+    );
+  }
+
+  async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getNftsBySearch.name,
+      `nfts?search=${searchTerm}&fields=identifier`,
+    );
+  }
+
+  async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
+    const response = await this.doGetGeneric(
+      this.getTagsBySearch.name,
+      `tags/${searchTerm}?fields=tag`,
+    );
+
+    return response ? [response] : [];
   }
 
   async getCollectionsCount(query: string = ''): Promise<number> {

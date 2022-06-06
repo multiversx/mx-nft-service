@@ -15,6 +15,7 @@ const dbSlaves = process.env.DB_SLAVES
 
 const config: ConnectionOptions = {
   type: 'mysql',
+  logging: true,
   synchronize: false,
   dropSchema: false,
   replication: {
