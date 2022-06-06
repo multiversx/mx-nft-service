@@ -6,7 +6,6 @@ import { CollectionModuleGraph } from './modules/nftCollections/collection.modul
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
-import { AuctionsModuleDb } from './db/auctions/auctions.module.db';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 import { AuthModule } from './modules/auth/auth.module';
@@ -20,6 +19,7 @@ import { TrendingModuleGraph } from './modules/trending/trending.module';
 import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
+import { SearchModuleGraph } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -58,6 +58,7 @@ import { CollectionsStatsModuleGraph } from './modules/collection-stats/collecti
     TrendingModuleGraph,
     CampaignsModuleGraph,
     IpfsModule,
+    SearchModuleGraph,
   ],
 })
 export class AppModule {}

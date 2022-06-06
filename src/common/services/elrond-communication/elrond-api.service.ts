@@ -239,6 +239,29 @@ export class ElrondApiService {
     );
   }
 
+  async getCollectionsBySearch(
+    searchTerm: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `collections?search=${searchTerm}&fields=collection`,
+    );
+  }
+
+  async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `nfts?search=${searchTerm}&fields=identifier`,
+    );
+  }
+
+  async getNftsByTags(searchTerm: string = ''): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `nft?tags=${searchTerm}&fields=identifier`,
+    );
+  }
+
   async getCollectionsCount(query: string = ''): Promise<number> {
     return await this.doGetGeneric(
       this.getCollectionsCount.name,
