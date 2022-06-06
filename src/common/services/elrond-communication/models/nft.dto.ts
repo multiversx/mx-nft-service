@@ -52,7 +52,7 @@ export interface NftScamInfo {
 
 export interface NftTag {
   tag: string;
-  count: string;
+  count: number;
 }
 
 export interface NftMetadata {
