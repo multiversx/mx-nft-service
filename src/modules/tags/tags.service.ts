@@ -9,10 +9,11 @@ export class TagsService {
   async getTags(
     offset: number = 0,
     limit: number = 10,
+    searchTerm: string = '',
   ): Promise<[Tag[], number]> {
     const [tagsApi, count] = await Promise.all([
-      this.apiService.getTags(offset, limit),
-      this.apiService.getTagsCount(),
+      this.apiService.getTags(offset, limit, searchTerm),
+      this.apiService.getTagsCount(searchTerm),
     ]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
     return [tags, count];

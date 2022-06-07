@@ -695,7 +695,7 @@ type Query {
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   search(filters: SearchFilter!): SearchResponse!
-  tags(pagination: ConnectionArgs): TagsResponse!
+  tags(filters: TagsFilter, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
 }
 
@@ -778,6 +778,10 @@ type TagPageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+input TagsFilter {
+  searchTerm: String!
 }
 
 type TagsResponse {
