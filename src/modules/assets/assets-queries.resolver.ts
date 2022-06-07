@@ -49,7 +49,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   @Query(() => AssetsResponse)
   async assets(
     @Args({ name: 'filters', type: () => AssetsFilter, nullable: true })
-    filters,
+    filters: AssetsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {

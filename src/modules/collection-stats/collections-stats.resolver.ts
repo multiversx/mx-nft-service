@@ -17,7 +17,7 @@ export class CollectionsStatsResolver {
   @Query(() => CollectionStats)
   async collectionStats(
     @Args({ name: 'filters', type: () => CollectionStatsFilter })
-    filters,
+    filters: CollectionStatsFilter,
   ): Promise<CollectionStats> {
     const collection = await this.collectionsStatsService.getStats(
       filters.identifier,
