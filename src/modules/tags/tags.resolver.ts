@@ -5,7 +5,6 @@ import { TagsResponse } from './models/TagsResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { TagsFilter } from './models/Tags.Filter';
-import { UsePipes, ValidationPipe } from '@nestjs/common';
 
 @Resolver(() => Tag)
 export class TagsResolver {
