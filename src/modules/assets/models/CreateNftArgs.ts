@@ -1,4 +1,9 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
+import { Matches } from 'class-validator';
+import {
+  COLLECTION_IDENTIFIER_ERROR,
+  COLLECTION_IDENTIFIER_RGX,
+} from 'src/utils/constants';
 
 @InputType()
 export class AttributeInput {
@@ -11,6 +16,9 @@ export class AttributeInput {
 
 @InputType()
 export class CreateNftArgs {
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+  })
   @Field(() => String)
   collection: string;
 
