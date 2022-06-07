@@ -4,6 +4,7 @@ import { TagsService } from './tags.service';
 import { TagsResponse } from './models/TagsResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
+import { TagsFilter } from './models/Tags.Filter';
 
 @Resolver(() => Tag)
 export class TagsResolver {
@@ -13,9 +14,15 @@ export class TagsResolver {
   async tags(
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
+    @Args('filters', { type: () => TagsFilter, nullable: true })
+    filters: TagsFilter,
   ): Promise<TagsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [tags, count] = await this.tagsService.getTags(offset, limit);
+    const [tags, count] = await this.tagsService.getTags(
+      offset,
+      limit,
+      filters.searchTerm,
+    );
 
     return PageResponse.mapResponse<Tag>(
       tags || [],

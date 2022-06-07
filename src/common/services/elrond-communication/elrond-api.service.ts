@@ -264,15 +264,24 @@ export class ElrondApiService {
     return response ? [response] : [];
   }
 
-  async getTags(from: number = 0, size: number = 10): Promise<NftTag[]> {
+  async getTags(
+    from: number = 0,
+    size: number = 10,
+    searchTerm: string = '',
+  ): Promise<NftTag[]> {
+    const query = searchTerm !== '' ? `?search=${searchTerm}&` : '?';
     return await this.doGetGeneric(
       this.getTags.name,
-      `tags?from=${from}&size=${size}`,
+      `tags${query}from=${from}&size=${size}`,
     );
   }
 
-  async getTagsCount(): Promise<number> {
-    return await this.doGetGeneric(this.getTagsCount.name, `tags/count`);
+  async getTagsCount(searchTerm: string = ''): Promise<number> {
+    const query = searchTerm !== '' ? `?search=${searchTerm}` : '';
+    return await this.doGetGeneric(
+      this.getTagsCount.name,
+      `tags/count${query}`,
+    );
   }
 
   async getCollectionsCount(query: string = ''): Promise<number> {
