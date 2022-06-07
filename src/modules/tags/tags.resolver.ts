@@ -5,6 +5,7 @@ import { TagsResponse } from './models/TagsResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { TagsFilter } from './models/Tags.Filter';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 
 @Resolver(() => Tag)
 export class TagsResolver {
@@ -12,10 +13,10 @@ export class TagsResolver {
 
   @Query(() => TagsResponse)
   async tags(
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
     @Args('filters', { type: () => TagsFilter, nullable: true })
     filters: TagsFilter,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<TagsResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [tags, count] = await this.tagsService.getTags(
