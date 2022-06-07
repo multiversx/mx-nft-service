@@ -12,10 +12,10 @@ export class TagsResolver {
 
   @Query(() => TagsResponse)
   async tags(
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
     @Args('filters', { type: () => TagsFilter, nullable: true })
     filters: TagsFilter,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<TagsResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [tags, count] = await this.tagsService.getTags(
