@@ -2,6 +2,7 @@ import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SearchResponse } from './models/Search-Response.dto';
 import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
+import { Address } from '@elrondnetwork/erdjs';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
@@ -18,6 +19,9 @@ export class SearchResolver {
   @ResolveField(() => [String])
   async collections(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
+    if (isValidAddress(searchTerm)) {
+      return [];
+    }
     const collection = await this.accountsStatsService.getCollections(
       searchTerm,
     );
@@ -27,6 +31,9 @@ export class SearchResolver {
   @ResolveField(() => [String])
   async accounts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
+    if (isValidAddress(searchTerm)) {
+      return [searchTerm];
+    }
     const account = await this.accountsStatsService.getHerotags(searchTerm);
     return account;
   }
@@ -34,6 +41,9 @@ export class SearchResolver {
   @ResolveField(() => [String])
   async nfts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
+    if (isValidAddress(searchTerm)) {
+      return [];
+    }
     const nfts = await this.accountsStatsService.getNfts(searchTerm);
     return nfts;
   }
@@ -41,7 +51,19 @@ export class SearchResolver {
   @ResolveField(() => [String])
   async tags(@Parent() search: SearchResponse) {
     const { searchTerm } = search;
+    if (isValidAddress(searchTerm)) {
+      return [];
+    }
     const tags = await this.accountsStatsService.getTags(searchTerm);
     return tags;
   }
 }
+
+export const isValidAddress = (address: string): boolean => {
+  try {
+    new Address(address);
+    return true;
+  } catch {
+    return false;
+  }
+};
