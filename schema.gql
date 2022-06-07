@@ -695,7 +695,7 @@ type Query {
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   search(filters: SearchFilter!): SearchResponse!
-  tags: [Tag!]!
+  tags(pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
 }
 
@@ -766,6 +766,24 @@ input StopNftCreateArgs {
 type Tag {
   count: Int
   tag: ID!
+}
+
+type TagEdge {
+  cursor: String
+  node: Tag
+}
+
+type TagPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type TagsResponse {
+  edges: [TagEdge!]
+  pageData: PageData
+  pageInfo: TagPageInfo
 }
 
 type Tier {

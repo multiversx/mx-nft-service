@@ -266,9 +266,13 @@ export class ElrondApiService {
 
   async getTags(from: number = 0, size: number = 10): Promise<NftTag[]> {
     return await this.doGetGeneric(
-      this.getTagsBySearch.name,
+      this.getTags.name,
       `tags?from=${from}&size=${size}`,
     );
+  }
+
+  async getTagsCount(): Promise<number> {
+    return await this.doGetGeneric(this.getTagsCount.name, `tags/count`);
   }
 
   async getCollectionsCount(query: string = ''): Promise<number> {
