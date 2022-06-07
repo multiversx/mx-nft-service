@@ -1,12 +1,12 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
 import {
-  addressErrorMessage,
-  addressRgx,
-  collectionIdentifierErrorMessage,
-  collectionIdentifierRgx,
-  nftIdentifierErrorMessage,
-  nftIdentifierRgx,
+  ADDRESS_ERROR,
+  ADDRESS_RGX,
+  COLLECTION_IDENTIFIER_ERROR,
+  COLLECTION_IDENTIFIER_RGX,
+  NFT_IDENTIFIER_ERROR,
+  NFT_IDENTIFIER_RGX,
 } from 'src/utils/constants';
 import { NftTypeEnum } from '../../assets/models/NftTypes.enum';
 
@@ -111,17 +111,17 @@ export class ChildExpression {
 @InputType()
 export class AssetsFilter {
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, { nullable: true })
   ownerAddress: string;
 
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, { nullable: true })
   creatorAddress: string;
 
   @IsOptional()
-  @Matches(RegExp(nftIdentifierRgx), { message: nftIdentifierErrorMessage })
+  @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
   @Field(() => String, { nullable: true })
   identifier: string;
 
@@ -129,8 +129,8 @@ export class AssetsFilter {
   identifiers: string[];
 
   @IsOptional()
-  @Matches(RegExp(collectionIdentifierRgx), {
-    message: collectionIdentifierErrorMessage,
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
   })
   @Field(() => String, { nullable: true })
   collection: string;
@@ -139,7 +139,7 @@ export class AssetsFilter {
   tags: [string];
 
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, { nullable: true })
   likedByAddress: string;
 
@@ -153,7 +153,7 @@ export class AssetsFilter {
 @InputType()
 export class CollectionsFilter {
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, {
     nullable: true,
     description: 'The owner of the collection',
@@ -161,7 +161,7 @@ export class CollectionsFilter {
   ownerAddress: string;
 
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, {
     nullable: true,
     description: 'The user that has create role',
@@ -175,8 +175,8 @@ export class CollectionsFilter {
   canCreate: boolean;
 
   @IsOptional()
-  @Matches(RegExp(collectionIdentifierRgx), {
-    message: collectionIdentifierErrorMessage,
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
   })
   @Field(() => String, {
     nullable: true,
@@ -194,13 +194,13 @@ export class CampaignsFilter {
 
   @Field(() => String)
   @IsOptional()
-  @Matches(RegExp(addressRgx), { message: addressErrorMessage })
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   minterAddress: string;
 }
 
 @InputType()
 export class AssetHistoryFilter {
   @Field(() => String)
-  @Matches(RegExp(nftIdentifierRgx), { message: nftIdentifierErrorMessage })
+  @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
   identifier: string;
 }
