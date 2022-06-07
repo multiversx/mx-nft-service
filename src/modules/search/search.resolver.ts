@@ -2,8 +2,8 @@ import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SearchResponse } from './models/Search-Response.dto';
 import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
-import { Address } from '@elrondnetwork/erdjs';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { isValidAddress } from 'src/utils/helpers';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
@@ -59,12 +59,3 @@ export class SearchResolver {
     return tags;
   }
 }
-
-export const isValidAddress = (address: string): boolean => {
-  try {
-    new Address(address);
-    return true;
-  } catch {
-    return false;
-  }
-};

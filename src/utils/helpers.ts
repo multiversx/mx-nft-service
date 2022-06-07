@@ -1,3 +1,5 @@
+import { Address } from '@elrondnetwork/erdjs';
+
 export function oneSecond(): number {
   return 1;
 }
@@ -34,3 +36,12 @@ export function usdValue(amount: string, usd: number, decimals?: number): any {
     minimumFractionDigits: decimals,
   });
 }
+
+export const isValidAddress = (address: string): boolean => {
+  try {
+    new Address(address);
+    return true;
+  } catch {
+    return false;
+  }
+};
