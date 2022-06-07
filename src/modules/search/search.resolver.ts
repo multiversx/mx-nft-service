@@ -3,15 +3,16 @@ import { SearchResponse } from './models/Search-Response.dto';
 import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
 import { Address } from '@elrondnetwork/erdjs';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
   constructor(private accountsStatsService: SearchService) {}
 
   @Query(() => SearchResponse)
+  @UsePipes(new ValidationPipe())
   async search(
-    @Args({ name: 'filters', type: () => SearchFilter })
-    filters,
+    @Args('filters', { type: () => SearchFilter }) filters: SearchFilter,
   ): Promise<SearchResponse> {
     return new SearchResponse({ searchTerm: filters.searchTerm });
   }
