@@ -27,7 +27,8 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async issueNftCollection(
-    @Args('input') input: IssueCollectionArgs,
+    @Args('input', { type: () => IssueCollectionArgs })
+    input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueNonFungible');
     return await this.collectionsService.issueToken(request);
@@ -36,7 +37,8 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async issueSftCollection(
-    @Args('input') input: IssueCollectionArgs,
+    @Args('input', { type: () => IssueCollectionArgs })
+    input: IssueCollectionArgs,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueSemiFungible');
     return await this.collectionsService.issueToken(request);
@@ -45,7 +47,7 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async setRoles(
-    @Args('input') input: SetNftRolesArgs,
+    @Args('input', { type: () => SetNftRolesArgs }) input: SetNftRolesArgs,
   ): Promise<TransactionNode> {
     const request = SetNftRolesRequest.fromArgs(input);
     return await this.collectionsService.setNftRoles(request);
@@ -54,7 +56,8 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async transferNftCreateRole(
-    @Args('input') input: TransferNftCreateRoleArgs,
+    @Args('input', { type: () => TransferNftCreateRoleArgs })
+    input: TransferNftCreateRoleArgs,
   ): Promise<TransactionNode> {
     const request = TransferNftCreateRoleRequest.fromArgs(input);
     return await this.collectionsService.transferNFTCreateRole(request);
@@ -63,7 +66,7 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async stopNftCreate(
-    @Args('input') input: StopNftCreateArgs,
+    @Args('input', { type: () => StopNftCreateArgs }) input: StopNftCreateArgs,
   ): Promise<TransactionNode> {
     const request = StopNftCreateRequest.fromArgs(input);
     return await this.collectionsService.stopNFTCreate(request);
