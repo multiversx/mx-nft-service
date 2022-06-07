@@ -60,8 +60,11 @@ describe('SearchService', () => {
     it('should return the top tags order by count', async () => {
       const results = await service.getTags();
       const expectedResult = [
-        new Tag({ tag: 'tag1', count: 12 }),
-        new Tag({ tag: 'tag2', count: 10 }),
+        [
+          new Tag({ tag: 'tag1', count: 12 }),
+          new Tag({ tag: 'tag2', count: 10 }),
+        ],
+        2,
       ];
       expect(results).toStrictEqual(expectedResult);
     });

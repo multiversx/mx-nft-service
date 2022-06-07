@@ -42,4 +42,7 @@ export class ElrondApiServiceMock {
       { tag: 'tag2', count: 10 },
     ]);
   }
+  async getTagsCount(): Promise<any> {
+    return Promise.resolve(2);
+  }
 }
