@@ -31,6 +31,9 @@ const config: ConnectionOptions = {
   },
   extra: {
     connectionLimit: process.env.DB_CONNECTION_LIMIT,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 };
 
