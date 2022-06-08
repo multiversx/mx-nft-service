@@ -5,6 +5,8 @@ import {
   ADDRESS_RGX,
   NFT_IDENTIFIER_ERROR,
   NFT_IDENTIFIER_RGX,
+  NUMERIC_ERROR,
+  NUMERIC_RGX,
 } from 'src/utils/constants';
 
 @InputType()
@@ -17,6 +19,7 @@ export class HandleQuantityArgs {
   @Field(() => String)
   identifier: string;
 
+  @Matches(RegExp(NUMERIC_RGX), { message: `Quantity ${NUMERIC_ERROR}` })
   @Field(() => String)
   quantity: string;
 }

@@ -1,6 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { Matches, MaxLength, MinLength } from 'class-validator';
-import { NFT_IDENTIFIER_ERROR, NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
 export class IssueCollectionArgs {

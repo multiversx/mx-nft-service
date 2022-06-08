@@ -7,7 +7,7 @@ export * from './Attributes.dto';
 export * from './Price.dto';
 export * from './Metadata.dto';
 export * from './AssetsResponse';
-export * from './remove-like.dto';
+export * from './RemoveLikeArgs';
 export * from './NftTypes.enum';
 export * from './AuctionEvent.enum';
 export * from './AssetAction.enum';
