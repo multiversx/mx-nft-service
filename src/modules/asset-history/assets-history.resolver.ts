@@ -20,7 +20,7 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
   @Query(() => AssetHistoryLogResponse)
   async assetHistory(
     @Args({ name: 'filters', type: () => AssetHistoryFilter })
-    filters,
+    filters: AssetHistoryFilter,
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
   ): Promise<AssetHistoryLogResponse> {

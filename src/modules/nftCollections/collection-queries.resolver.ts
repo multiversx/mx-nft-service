@@ -28,7 +28,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   @Query(() => CollectionResponse)
   async collections(
     @Args({ name: 'filters', type: () => CollectionsFilter, nullable: true })
-    filters,
+    filters: CollectionsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
