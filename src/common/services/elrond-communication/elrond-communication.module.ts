@@ -7,6 +7,7 @@ import { ElrondFeedService } from './elrond-feed.service';
 import { ElrondIdentityService } from './elrond-identity.service';
 import { ElrondProxyService } from './elrond-proxy.service';
 import { ElrondStatsService } from './elrond-stats.service';
+import { SlackReportService } from './slack-report.service';
 
 @Module({
   providers: [
@@ -18,6 +19,7 @@ import { ElrondStatsService } from './elrond-stats.service';
     ElrondIdentityService,
     ElrondDataService,
     ElrondFeedService,
+    SlackReportService,
   ],
   exports: [
     ApiService,
@@ -28,6 +30,7 @@ import { ElrondStatsService } from './elrond-stats.service';
     ElrondIdentityService,
     ElrondDataService,
     ElrondFeedService,
+    SlackReportService,
   ],
 })
 export class ElrondCommunicationModule {}

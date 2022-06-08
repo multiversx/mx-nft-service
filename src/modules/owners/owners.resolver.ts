@@ -15,8 +15,8 @@ export class OwnersResolver {
 
   @Query(() => OwnerResponse)
   async owners(
-    @Args({ name: 'filters', type: () => OwnersFilters })
-    filters,
+    @Args('filters', { type: () => OwnersFilters })
+    filters: OwnersFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<OwnerResponse> {
@@ -29,7 +29,7 @@ export class OwnersResolver {
     return PageResponse.mapResponse<Owner>(
       owners || [],
       pagination,
-      count,
+      count || 0,
       offset,
       limit,
     );

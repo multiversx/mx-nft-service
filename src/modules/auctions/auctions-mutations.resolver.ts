@@ -26,7 +26,7 @@ export class AuctionsMutationsResolver extends BaseResolver(Auction) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async createAuction(
-    @Args('input') input: CreateAuctionArgs,
+    @Args('input', { type: () => CreateAuctionArgs }) input: CreateAuctionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = CreateAuctionRequest.fromArgs(input);
@@ -45,7 +45,7 @@ export class AuctionsMutationsResolver extends BaseResolver(Auction) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async bid(
-    @Args('input') input: BidActionArgs,
+    @Args('input', { type: () => BidActionArgs }) input: BidActionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = BidRequest.fromArgs(input);
@@ -55,7 +55,7 @@ export class AuctionsMutationsResolver extends BaseResolver(Auction) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async buySft(
-    @Args('input') input: BuySftActionArgs,
+    @Args('input', { type: () => BuySftActionArgs }) input: BuySftActionArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = BuySftRequest.fromArgs(input);

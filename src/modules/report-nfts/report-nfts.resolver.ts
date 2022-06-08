@@ -16,7 +16,7 @@ export class ReportNftsResolver extends BaseResolver(ReportNft) {
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
   addReport(
-    @Args('input') input: ReportNftInput,
+    @Args('input', { type: () => ReportNftInput }) input: ReportNftInput,
     @User() user: any,
   ): Promise<boolean> {
     return this.reportNfts.addReport(input.identifier, user.publicKey);

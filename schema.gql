@@ -148,6 +148,10 @@ input AttributeInput {
   tags: [String!]!
 }
 
+type AttributeType {
+  attribute: [KeyValueType!]!
+}
+
 type Auction {
   asset: Asset
   availableTokens: Int
@@ -212,10 +216,21 @@ input BidActionArgs {
 }
 
 input BuyRandomNftActionArgs {
+  """The campaign id where the user wants to buy the nft/s"""
   campaignId: String!
+
+  """The smart contract address of the campaign"""
   minterAddress: String!
+
+  """
+  The total price the user needs to pay in order to buy the number of nfts selected
+  """
   price: String!
+
+  """The number of nfts the user wants to buy"""
   quantity: String
+
+  """The tier name on which the user wants to buy the nft"""
   tier: String!
 }
 
@@ -241,6 +256,9 @@ type Campaign {
   tiers: [Tier!]!
   totalNfts: Int!
   verified: Boolean!
+
+  """This is the timestamp when the whitelist period expires"""
+  whitelistExpire: Int!
 }
 
 type CampaignCollection {
@@ -362,6 +380,21 @@ type CollectionSocial {
   twiter: String
 }
 
+type CollectionStats {
+  activeAuctions: Int
+  auctionsEnded: Int
+  identifier: ID!
+  items: Int
+  maxPrice: String
+  minPrice: String
+  saleAverage: String
+  volumeTraded: String
+}
+
+input CollectionStatsFilter {
+  identifier: String!
+}
+
 input CollectionsFilter {
   """Flag for can create or not on collection"""
   canCreate: Boolean
@@ -464,6 +497,7 @@ input IssueCampaignArgs {
   royalties: String!
   tags: [String!]!
   tiers: [TierArgs!]!
+  whitelistEndTime: Int!
 }
 
 input IssueCollectionArgs {
@@ -473,6 +507,11 @@ input IssueCollectionArgs {
   canWipe: Boolean = false
   tokenName: String!
   tokenTicker: String!
+}
+
+type KeyValueType {
+  key: String!
+  value: String!
 }
 
 type Media {
@@ -500,10 +539,12 @@ enum MediaTypeEnum {
 }
 
 type Metadata {
+  attributes: [AttributeType!]
   description: String
   fileName: String @deprecated(reason: "This field will be removed in the next version")
   fileType: String @deprecated(reason: "This field will be removed in the next version")
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
+  rarity: Rarity
 }
 
 type MintPrice {
@@ -645,6 +686,7 @@ type Query {
   auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
+  collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
@@ -652,7 +694,17 @@ type Query {
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
+  search(filters: SearchFilter!): SearchResponse!
+  tags(filters: TagsFilter, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
+}
+
+type Rarity {
+  avgRarity: Float!
+  rarityScore: Float!
+  rarityScoreNormed: Float!
+  statRarity: Float!
+  usedTraitsCount: Float!
 }
 
 input RemoveLikeArgs {
@@ -671,6 +723,18 @@ type ScamInfo {
 enum ScamInfoTypeEnum {
   potentialScam
   scam
+}
+
+input SearchFilter {
+  searchTerm: String!
+}
+
+type SearchResponse {
+  accounts: [String!]
+  collections: [String!]
+  nfts: [String!]
+  searchTerm: ID
+  tags: [String!]
 }
 
 input SetNftRolesArgs {
@@ -697,6 +761,33 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
+}
+
+type Tag {
+  count: Int
+  tag: ID!
+}
+
+type TagEdge {
+  cursor: String
+  node: Tag
+}
+
+type TagPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+input TagsFilter {
+  searchTerm: String!
+}
+
+type TagsResponse {
+  edges: [TagEdge!]
+  pageData: PageData
+  pageInfo: TagPageInfo
 }
 
 type Tier {

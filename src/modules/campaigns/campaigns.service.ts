@@ -15,28 +15,20 @@ import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class CampaignsService {
   private redisClient: Redis.Redis;
   constructor(
+    @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
     private campaignsRepository: CampaignsRepository,
     private tierRepository: TiersRepository,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.followersRedisClientName,
-    );
-  }
-
-  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    return await this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      TimeConstants.oneHour,
     );
   }
 
@@ -46,6 +38,7 @@ export class CampaignsService {
     filters: CampaignsFilter,
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
+
     if (filters?.campaignId) {
       const campaigns = allCampaigns?.items?.filter(
         (c) =>
@@ -57,18 +50,27 @@ export class CampaignsService {
         items: campaigns,
       });
     }
-    allCampaigns.items = allCampaigns?.items?.slice(offset, offset + limit);
+    const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
 
     return new CollectionType({
-      count: allCampaigns?.items?.length,
-      items: allCampaigns?.items,
+      count: campaigns?.length,
+      items: campaigns,
     });
+  }
+
+  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
+    const campaigns = await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.Campaigns.key,
+      () => this.getCampaignsFromDb(),
+      TimeConstants.oneHour,
+    );
+    return campaigns;
   }
 
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
     let [campaigns, count]: [CampaignEntity[], number] =
       await this.campaignsRepository.getCampaigns();
-
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
@@ -109,7 +111,26 @@ export class CampaignsService {
     );
     const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
     tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
-    await this.tierRepository.save(tierEntity);
+    return await this.tierRepository.save(tierEntity);
+  }
+
+  public async invalidateKey() {
+    const campaigns = await this.getCampaignsFromDb();
+    await this.cacheService.setCache(
+      this.redisClient,
+      CacheInfo.Campaigns.key,
+      campaigns,
+      TimeConstants.oneDay,
+    );
+    await this.refreshCacheKey(CacheInfo.Campaigns.key, TimeConstants.oneDay);
+  }
+
+  private async refreshCacheKey(key: string, ttl: number) {
+    this.clientProxy.emit('refreshCacheKey', {
+      key,
+      ttl,
+      redisClientName: cacheConfig.followersRedisClientName,
+    });
   }
 
   public async invalidateCache() {

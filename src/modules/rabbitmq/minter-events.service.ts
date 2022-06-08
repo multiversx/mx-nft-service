@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TimeConstants } from 'src/utils/time-utils';
 import { MinterEventEnum } from '../assets/models/AuctionEvent.enum';
 import { CampaignsService } from '../campaigns/campaigns.service';
 import { BrandCreatedEvent } from './entities/auction/brandCreated.event';
@@ -18,20 +19,24 @@ export class MinterEventsService {
             const address = brandEvent.getAddress();
             await this.campaignService.saveCampaign(address);
           }
-          await this.campaignService.invalidateCache();
+          await this.campaignService.invalidateKey();
 
           break;
 
         case MinterEventEnum.buyRandomNft:
           const randomNftEvent = new RandomNftEvent(event);
           const transferTopics = randomNftEvent.getTopics();
-          await this.campaignService.invalidateCache();
-          await this.campaignService.updateTier(
+
+          const tier = await this.campaignService.updateTier(
             randomNftEvent.getAddress(),
             transferTopics.campaignId,
             transferTopics.tier,
-            transferTopics.boughtNfts,
+            randomNftEvent.getData(),
           );
+          if (tier) {
+            await this.campaignService.invalidateKey();
+          }
+
           break;
       }
     }

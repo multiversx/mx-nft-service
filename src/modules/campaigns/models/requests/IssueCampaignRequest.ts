@@ -7,6 +7,7 @@ export class IssueCampaignRequest {
   royalties: string;
   mintStartTime: number;
   mintEndTime: number;
+  whitelistEndTime: number;
   mintPriceToken: string = 'EGLD';
   collectionName: string;
   collectionTicker: string;
@@ -29,6 +30,7 @@ export class IssueCampaignRequest {
       mintEndTime: args.mintEndTime,
       collectionName: args.collectionName,
       collectionTicker: args.collectionTicker,
+      whitelistEndTime: args.whitelistEndTime,
       tags: args.tags,
       minterAddress: args.minterAddress,
       tiers: args.tiers.map(

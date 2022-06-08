@@ -17,7 +17,7 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
   @Query(() => CampaignsResponse)
   async campaigns(
     @Args({ name: 'filters', type: () => CampaignsFilter, nullable: true })
-    filters,
+    filters: CampaignsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {

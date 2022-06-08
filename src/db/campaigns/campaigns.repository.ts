@@ -43,19 +43,11 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
   }
 
   async getCampaigns(): Promise<[CampaignEntity[], number]> {
-    const campaigns = await this.findAndCount({
-      relations: ['tiers'],
-    });
-    return campaigns;
-  }
-
-  async getCampaignById(campaignId: string): Promise<CampaignEntity[]> {
-    const campaigns = await this.find({
-      where: {
-        campaignId,
-      },
-      relations: ['tiers'],
-    });
+    const campaigns = await this.createQueryBuilder('campaign')
+      .leftJoinAndSelect('campaign.tiers', 'tiers')
+      .orderBy('campaign.id', 'DESC')
+      .addOrderBy('tiers.mintPriceDenominated', 'ASC')
+      .getManyAndCount();
     return campaigns;
   }
 

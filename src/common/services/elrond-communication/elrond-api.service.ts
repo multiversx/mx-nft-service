@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Nft } from './models/nft.dto';
+import { Nft, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
@@ -95,14 +95,14 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `nfts?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
+      `nfts?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
     );
   }
 
   async getNftByIdentifier(identifier: string): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}?withSupply=true`,
+      `nfts/${identifier}`,
     );
   }
 
@@ -179,7 +179,7 @@ export class ElrondApiService {
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `collections?identifiers=${identifiers}&limit=${identifiers.length}&offset=${offset}`,
+      `collections?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}`,
     );
   }
 
@@ -189,7 +189,7 @@ export class ElrondApiService {
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
       this.getCollectionsForAddress.name,
-      `accounts/${address}/collections${query}`,
+      `accounts/${address}/roles/collections${query}`,
     );
   }
 
@@ -228,7 +228,7 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getCollectionsForAddressCount.name,
-      `accounts/${address}/collections/count${query}`,
+      `accounts/${address}/roles/collections/count${query}`,
     );
   }
 
@@ -236,6 +236,51 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollections.name,
       `collections${query}`,
+    );
+  }
+
+  async getCollectionsBySearch(
+    searchTerm: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollections.name,
+      `collections?search=${searchTerm}&fields=collection`,
+    );
+  }
+
+  async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getNftsBySearch.name,
+      `nfts?search=${searchTerm}&fields=identifier`,
+    );
+  }
+
+  async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
+    const response = await this.doGetGeneric(
+      this.getTagsBySearch.name,
+      `tags/${searchTerm}?fields=tag`,
+    );
+
+    return response ? [response] : [];
+  }
+
+  async getTags(
+    from: number = 0,
+    size: number = 10,
+    searchTerm: string = '',
+  ): Promise<NftTag[]> {
+    const query = searchTerm !== '' ? `?search=${searchTerm}&` : '?';
+    return await this.doGetGeneric(
+      this.getTags.name,
+      `tags${query}from=${from}&size=${size}`,
+    );
+  }
+
+  async getTagsCount(searchTerm: string = ''): Promise<number> {
+    const query = searchTerm !== '' ? `?search=${searchTerm}` : '';
+    return await this.doGetGeneric(
+      this.getTagsCount.name,
+      `tags/count${query}`,
     );
   }
 

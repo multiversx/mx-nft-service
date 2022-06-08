@@ -18,8 +18,8 @@ export class TrendingService {
       const nfts = await this.apiService.getNftsByIdentifiers(trendingNfts);
       return [nfts?.map((nft) => Asset.fromNft(nft)), trendingNfts.length];
     } catch (err) {
-      this.logger.error('An error occurred while loading featured nfts.', {
-        path: 'FeaturedNftsService.getFeaturedNfts',
+      this.logger.error('An error occurred while loading trending assets.', {
+        path: 'FeaturedNftsService.getTrendingAssets',
         exception: err,
       });
     }

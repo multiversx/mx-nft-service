@@ -25,4 +25,16 @@ export class ReportNftsRepository extends Repository<ReportNftEntity> {
       throw err;
     }
   }
+
+  async getReportCount(identifier: string): Promise<number> {
+    try {
+      return await this.count({
+        where: {
+          identifier,
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
+  }
 }

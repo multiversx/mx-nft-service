@@ -12,4 +12,13 @@ export class RandomNftEvent extends GenericEvent {
   getTopics() {
     return this.decodedTopics.toPlainObject();
   }
+
+  getData() {
+    return this.data !== ''
+      ? parseInt(
+          Buffer.from(this.data, 'base64').toString('hex'),
+          16,
+        ).toString()
+      : '1';
+  }
 }
