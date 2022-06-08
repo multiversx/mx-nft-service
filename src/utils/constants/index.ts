@@ -7,3 +7,5 @@ export const COLLECTION_IDENTIFIER_ERROR =
   'You should provide a valid collection identifier';
 export const ADDRESS_RGX = '^erd[a-z0-9]{59,59}$';
 export const ADDRESS_ERROR = 'You should provide a valid erd address';
+export const NUMERIC_RGX = '^[0-9]*$';
+export const NUMERIC_ERROR = 'should contain only numeric characters';

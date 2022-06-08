@@ -37,7 +37,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async createNft(
-    @Args('input') input: CreateNftArgs,
+    @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @User() user: any,
   ): Promise<TransactionNode> {
@@ -66,7 +66,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async addSftQuantity(
-    @Args('input') input: HandleQuantityArgs,
+    @Args('input', { type: () => HandleQuantityArgs })
+    input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTAddQuantity');
@@ -76,7 +77,8 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async burnQuantity(
-    @Args('input') input: HandleQuantityArgs,
+    @Args('input', { type: () => HandleQuantityArgs })
+    input: HandleQuantityArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
@@ -86,7 +88,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async transferNft(
-    @Args('input') input: TransferNftArgs,
+    @Args('input', { type: () => TransferNftArgs }) input: TransferNftArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = TransferNftRequest.fromArgs(input);
@@ -96,7 +98,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
   addLike(
-    @Args('input') input: AddLikeArgs,
+    @Args('input', { type: () => AddLikeArgs }) input: AddLikeArgs,
     @User() user: any,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
@@ -110,7 +112,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
   removeLike(
-    @Args('input') input: RemoveLikeArgs,
+    @Args('input', { type: () => RemoveLikeArgs }) input: RemoveLikeArgs,
     @User() user: any,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {

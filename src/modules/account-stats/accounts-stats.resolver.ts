@@ -17,7 +17,7 @@ export class AccountsStatsResolver {
   @Query(() => AccountStats)
   async accountStats(
     @Args({ name: 'filters', type: () => AccountStatsFilter })
-    filters,
+    filters: AccountStatsFilter,
   ): Promise<AccountStats> {
     const account = await this.accountsStatsService.getStats(
       filters?.address,
