@@ -14,80 +14,90 @@ export class ElrondFeedService {
   ) {}
 
   async subscribe(identifier: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}v1/subscriptions`;
+    if (process.env.ENABLE_FEED_EVENTS === 'true') {
+      const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
-    try {
-      const request = new SubscriptionFeed({ reference: identifier });
-      const response = await this.apiService.post(
-        url,
-        request,
-        new ApiSettings({
-          apiKey: process.env.ELROND_FEED_API_KEY,
-          authorization: authKey,
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the elrond feed api on url ${url}`,
-        {
-          path: 'ElrondFeedService.subscribe',
-          identifier,
-          exception: error,
-        },
-      );
-      return;
+      try {
+        const request = new SubscriptionFeed({ reference: identifier });
+        const response = await this.apiService.post(
+          url,
+          request,
+          new ApiSettings({
+            apiKey: process.env.ELROND_FEED_API_KEY,
+            authorization: authKey,
+          }),
+        );
+        return response.data;
+      } catch (error) {
+        this.logger.error(
+          `An error occurred while calling the elrond feed api on url ${url}`,
+          {
+            path: 'ElrondFeedService.subscribe',
+            identifier,
+            exception: error,
+          },
+        );
+        return;
+      }
     }
+    return;
   }
 
   async unsubscribe(reference: string, authKey?: string): Promise<boolean> {
-    const url = `${process.env.ELROND_FEED}v1/subscriptions`;
+    if (process.env.ENABLE_FEED_EVENTS === 'true') {
+      const url = `${process.env.ELROND_FEED}v1/subscriptions`;
 
-    try {
-      const request = new SubscriptionFeed({ reference: reference });
+      try {
+        const request = new SubscriptionFeed({ reference: reference });
 
-      const response = await this.apiService.delete(
-        url,
-        new ApiSettings({
-          apiKey: process.env.ELROND_FEED_API_KEY,
-          authorization: authKey,
-        }),
-        request,
-      );
-      return response.data;
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the elrond feed api on url ${url}`,
-        {
-          path: 'ElrondFeedService.subscribe',
-          reference,
-          exception: error,
-        },
-      );
-      return;
+        const response = await this.apiService.delete(
+          url,
+          new ApiSettings({
+            apiKey: process.env.ELROND_FEED_API_KEY,
+            authorization: authKey,
+          }),
+          request,
+        );
+        return response.data;
+      } catch (error) {
+        this.logger.error(
+          `An error occurred while calling the elrond feed api on url ${url}`,
+          {
+            path: 'ElrondFeedService.subscribe',
+            reference,
+            exception: error,
+          },
+        );
+        return;
+      }
     }
+    return;
   }
 
   async addFeed(feed: Feed): Promise<Feed> {
-    const url = `${process.env.ELROND_FEED}v1/feed/item`;
+    if (process.env.ENABLE_FEED_EVENTS === 'true') {
+      const url = `${process.env.ELROND_FEED}v1/feed/item`;
 
-    try {
-      const response = await this.apiService.post(
-        url,
-        feed,
-        new ApiSettings({ apiKey: process.env.ELROND_FEED_API_KEY }),
-      );
-      return response.data;
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the elrond feed api on url ${url}`,
-        {
-          path: 'ElrondFeedService.addFeed',
-          feed: feed,
-          exception: error,
-        },
-      );
-      return;
+      try {
+        const response = await this.apiService.post(
+          url,
+          feed,
+          new ApiSettings({ apiKey: process.env.ELROND_FEED_API_KEY }),
+        );
+        return response.data;
+      } catch (error) {
+        this.logger.error(
+          `An error occurred while calling the elrond feed api on url ${url}`,
+          {
+            path: 'ElrondFeedService.addFeed',
+            feed: feed,
+            exception: error,
+          },
+        );
+        return;
+      }
     }
+
+    return;
   }
 }
