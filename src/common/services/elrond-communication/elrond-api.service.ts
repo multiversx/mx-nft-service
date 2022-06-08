@@ -244,24 +244,22 @@ export class ElrondApiService {
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
       this.getCollections.name,
-      `collections?search=${searchTerm}&fields=collection`,
+      `collections?search=${encodeURIComponent(searchTerm)}&fields=collection`,
     );
   }
 
   async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsBySearch.name,
-      `nfts?search=${searchTerm}&fields=identifier`,
+      `nfts?search=${encodeURIComponent(searchTerm)}&fields=identifier`,
     );
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
-    const response = await this.doGetGeneric(
+    return await this.doGetGeneric(
       this.getTagsBySearch.name,
-      `tags/${searchTerm}?fields=tag`,
+      `tags?search=${encodeURIComponent(searchTerm)}&fields=tag`,
     );
-
-    return response ? [response] : [];
   }
 
   async getTags(
@@ -269,7 +267,8 @@ export class ElrondApiService {
     size: number = 10,
     searchTerm: string = '',
   ): Promise<NftTag[]> {
-    const query = searchTerm !== '' ? `?search=${searchTerm}&` : '?';
+    const query =
+      searchTerm !== '' ? `?search=${encodeURIComponent(searchTerm)}&` : '?';
     return await this.doGetGeneric(
       this.getTags.name,
       `tags${query}from=${from}&size=${size}`,
@@ -277,7 +276,8 @@ export class ElrondApiService {
   }
 
   async getTagsCount(searchTerm: string = ''): Promise<number> {
-    const query = searchTerm !== '' ? `?search=${searchTerm}` : '';
+    const query =
+      searchTerm !== '' ? `?search=${encodeURIComponent(searchTerm)}` : '';
     return await this.doGetGeneric(
       this.getTagsCount.name,
       `tags/count${query}`,
