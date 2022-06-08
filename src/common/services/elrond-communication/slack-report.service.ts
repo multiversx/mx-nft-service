@@ -13,13 +13,15 @@ export class SlackReportService {
 
   async sendReport(identifier: string, count: number): Promise<boolean> {
     const url = process.env.SLACK_API;
-
+    const marketplaceUrl = new URL(
+      `${process.env.ELROND_MARKETPLACE}\\nfts\\${identifier}`,
+    );
     try {
       const response = await this.apiService.post(
         url,
         {
           channel: process.env.REPORT_CHANNEL,
-          text: `reference: ${identifier}, report count: ${count}`,
+          text: `${marketplaceUrl.toString()}\nReport count: ${count}`,
         },
         new ApiSettings({
           authorization: `Bearer ${process.env.REPORT_BEARER}`,
