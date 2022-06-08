@@ -256,12 +256,10 @@ export class ElrondApiService {
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
-    const response = await this.doGetGeneric(
+    return await this.doGetGeneric(
       this.getTagsBySearch.name,
-      `tags/${searchTerm}?fields=tag`,
+      `tags?search=${searchTerm}&fields=tag`,
     );
-
-    return response ? [response] : [];
   }
 
   async getTags(
