@@ -1,5 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { OrderStatusEnum } from '../../modules/orders/models/order-status.enum';
+import { OrderStatusEnum } from '../../modules/orders/models/Order-status.enum';
 import { AuctionEntity } from '../auctions';
 import { BaseEntity } from '../base-entity';
 

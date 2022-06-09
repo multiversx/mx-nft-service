@@ -194,23 +194,24 @@ export class NftEventsService {
             startAuctionIdentifier,
             hash,
           );
-
-          const nftData = await this.getNftNameAndAssets(
-            startAuctionIdentifier,
-          );
-          await this.accountFeedService.addFeed(
-            new Feed({
-              actor: topicsAuctionToken.originalOwner,
-              event: EventEnum.startAuction,
-              reference: startAuctionIdentifier,
-              extraInfo: {
-                auctionId: parseInt(topicsAuctionToken.auctionId, 16),
-                nftName: nftData.name,
-                verified: nftData.assets ? true : false,
-                minBid: startAuction.minBid,
-              },
-            }),
-          );
+          if (startAuction) {
+            const nftData = await this.getNftNameAndAssets(
+              startAuctionIdentifier,
+            );
+            await this.accountFeedService.addFeed(
+              new Feed({
+                actor: topicsAuctionToken.originalOwner,
+                event: EventEnum.startAuction,
+                reference: startAuctionIdentifier,
+                extraInfo: {
+                  auctionId: parseInt(topicsAuctionToken.auctionId, 16),
+                  nftName: nftData.name,
+                  verified: nftData.assets ? true : false,
+                  minBid: startAuction.minBid,
+                },
+              }),
+            );
+          }
           break;
       }
     }

@@ -7,10 +7,12 @@ import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-sta
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
+import { TagsRepository } from './tags.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AuctionEntity]),
+    TypeOrmModule.forFeature([TagsRepository]),
     OrdersModuleDb,
     AccountsStatsModuleGraph,
   ],
@@ -20,6 +22,10 @@ import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-a
     AssetAuctionsCountRedisHandler,
     LowestAuctionRedisHandler,
   ],
-  exports: [AuctionsServiceDb, TypeOrmModule.forFeature([AuctionEntity])],
+  exports: [
+    AuctionsServiceDb,
+    TypeOrmModule.forFeature([TagsRepository]),
+    TypeOrmModule.forFeature([AuctionEntity]),
+  ],
 })
 export class AuctionsModuleDb {}

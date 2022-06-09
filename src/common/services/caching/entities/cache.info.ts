@@ -27,4 +27,9 @@ export class CacheInfo {
     key: 'allCampaigns',
     ttl: TimeConstants.oneHour,
   };
+
+  static AuctionTags: CacheInfo = {
+    key: 'auctionTags',
+    ttl: 5 * TimeConstants.oneMinute,
+  };
 }

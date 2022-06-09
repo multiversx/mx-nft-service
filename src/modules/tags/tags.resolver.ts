@@ -12,7 +12,7 @@ export class TagsResolver {
 
   @Query(() => TagsResponse)
   async tags(
-    @Args('filters', { type: () => TagsFilter, nullable: true })
+    @Args('filters', { type: () => TagsFilter })
     filters: TagsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
@@ -21,7 +21,7 @@ export class TagsResolver {
     const [tags, count] = await this.tagsService.getTags(
       offset,
       limit,
-      filters.searchTerm,
+      filters,
     );
 
     return PageResponse.mapResponse<Tag>(

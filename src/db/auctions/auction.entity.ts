@@ -7,6 +7,7 @@ import denominate, { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';
+import { TagEntity } from './tags.entity';
 
 @Entity('auctions')
 export class AuctionEntity extends BaseEntity {
@@ -69,6 +70,8 @@ export class AuctionEntity extends BaseEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.auction)
   orders: OrderEntity[];
+  @OneToMany(() => TagEntity, (tag) => tag.auction)
+  tagEntities: TagEntity[];
 
   constructor(init?: Partial<AuctionEntity>) {
     super();
