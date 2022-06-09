@@ -12,6 +12,8 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
+import { TagEntity } from 'src/db/auctions/tags.entity';
+import { TagsRepository } from 'src/db/auctions/tags.repository';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -20,6 +22,7 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private apiService: ElrondApiService,
     private auctionServiceDb: AuctionsServiceDb,
+    private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -41,15 +44,28 @@ export class AuctionsSetterService {
         identifier,
         'fields=tags',
       );
-      const savedAuction = await this.auctionServiceDb.insertAuction(
-        AuctionEntity.fromAuctionAbi(
-          auctionId,
-          auctionData,
-          asset?.tags?.toString(),
-          hash,
-        ),
-      );
-      return savedAuction;
+
+      if (auctionData) {
+        const savedAuction = await this.auctionServiceDb.insertAuction(
+          AuctionEntity.fromAuctionAbi(
+            auctionId,
+            auctionData,
+            asset?.tags?.toString(),
+            hash,
+          ),
+        );
+        let tags: TagEntity[] = [];
+        for (const tag of asset?.tags) {
+          tags = [
+            ...tags,
+            new TagEntity({ auctionId: savedAuction.id, tag: tag }),
+          ];
+        }
+
+        await this.tagsRepository.saveTags(tags);
+        return savedAuction;
+      }
+      return;
     } catch (error) {
       this.logger.error('An error occurred while savind an auction', error, {
         path: 'AuctionsService.saveAuction',
