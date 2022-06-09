@@ -26,18 +26,6 @@ export class TagsRepository extends Repository<TagEntity> {
     return count;
   }
 
-  async saveTier(tag: TagEntity): Promise<TagEntity> {
-    try {
-      return await this.save(tag);
-    } catch (err) {
-      // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
-        return null;
-      }
-      throw err;
-    }
-  }
-
   async saveTags(tags: TagEntity[]): Promise<TagEntity[]> {
     try {
       return await this.save(tags);
@@ -46,7 +34,6 @@ export class TagsRepository extends Repository<TagEntity> {
       if (err.errno === 1062) {
         return null;
       }
-      console.log(err);
       throw err;
     }
   }
