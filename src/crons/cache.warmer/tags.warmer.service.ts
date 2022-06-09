@@ -18,7 +18,7 @@ export class TagsWarmerService {
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
+      cacheConfig.followersRedisClientName,
     );
   }
 
@@ -49,7 +49,7 @@ export class TagsWarmerService {
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.collectionsRedisClientName,
+      redisClientName: cacheConfig.followersRedisClientName,
       key,
       ttl,
     });
