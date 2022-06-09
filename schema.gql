@@ -695,7 +695,7 @@ type Query {
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   search(filters: SearchFilter!): SearchResponse!
-  tags(filters: TagsFilter!): TagsResponse!
+  tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
 }
 

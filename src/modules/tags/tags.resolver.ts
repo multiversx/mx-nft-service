@@ -14,8 +14,9 @@ export class TagsResolver {
   async tags(
     @Args('filters', { type: () => TagsFilter })
     filters: TagsFilter,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
   ): Promise<TagsResponse> {
-    const pagination = new ConnectionArgs();
     const { limit, offset } = pagination.pagingParams();
     const [tags, count] = await this.tagsService.getTags(
       offset,
