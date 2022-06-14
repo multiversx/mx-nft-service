@@ -23,7 +23,8 @@ export default class WhereBuilder<Entity> {
   }
 
   private buildExpressionRec(fe: FiltersExpression): string {
-    const filters = map(fe.filters, (f) => this.buildFilter(f));
+    const availableFilters = fe.filters.filter((f) => f.values.length > 0);
+    const filters = map(availableFilters, (f) => this.buildFilter(f));
     const children = map(fe.childExpressions, (child) =>
       this.buildExpressionRec(child),
     );
