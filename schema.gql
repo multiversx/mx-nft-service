@@ -453,7 +453,7 @@ type FeaturedMarketplace {
 input Filter {
   field: String!
   op: Operation!
-  values: [String!]!
+  values: [String]
 }
 
 input FiltersExpression {
