@@ -67,12 +67,41 @@ export class AuctionsServiceDb {
     const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
+    const currentPriceSort = this.handleCurrentPriceFilter(
+      queryRequest,
+      queryBuilder,
+    );
+    queryBuilder.andWhere(`a.id IN(SELECT FIRST_VALUE(id) over (PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
     from (${getDefaultAuctionsQuery(endDate)})`);
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder);
+    if (currentPriceSort) {
+      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
+    } else {
+      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
+    }
     return await queryBuilder.getManyAndCount();
+  }
+
+  private handleCurrentPriceFilter(
+    queryRequest: QueryRequest,
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+  ) {
+    const currentPrice = queryRequest.filters.filters.find(
+      (f) => f.field === 'currentPrice',
+    );
+    const currentPriceSort = queryRequest.sorting.find(
+      (f) => f.field === 'currentPrice',
+    );
+    if (currentPrice || currentPriceSort) {
+      queryBuilder.leftJoin('orders', 'o', 'o.auctionId=a.id');
+    }
+    if (currentPrice) {
+      queryBuilder.andWhere(
+        `(a.minBidDenominated BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]} OR o.priceAmountDenominated BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}) `,
+      );
+    }
+    return currentPriceSort;
   }
 
   async getAuctionsForIdentifier(
@@ -345,5 +374,18 @@ export class AuctionsServiceDb {
         queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
       }
     }
+  }
+
+  private addCurrentPriceOrderBy(
+    sort: Sorting,
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+    alias: string = null,
+  ) {
+    queryBuilder.addOrderBy(
+      'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
+
+      Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+    ),
+      queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
   }
 }

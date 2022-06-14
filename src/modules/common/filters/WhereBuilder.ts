@@ -27,7 +27,8 @@ export default class WhereBuilder<Entity> {
       (f) =>
         f.values.length > 0 && f.values.every((element) => element !== null),
     );
-    const filters = map(availableFilters, (f) => this.buildFilter(f));
+    let filters = map(availableFilters, (f) => this.buildFilter(f));
+    filters = filters.filter((e) => e !== undefined);
     const children = map(fe.childExpressions, (child) =>
       this.buildExpressionRec(child),
     );
@@ -51,6 +52,9 @@ export default class WhereBuilder<Entity> {
           showLastNonZeroDecimal: true,
         }).replace(',', ''),
       );
+    }
+    if (filter.field === 'currentPrice') {
+      return;
     }
     const sqlParamName = this.queryBuilderName
       ? `${this.queryBuilderName}.${filterName}`
@@ -84,6 +88,17 @@ export default class WhereBuilder<Entity> {
   }
 
   private getTagsFilter(filter: Filter, paramName: string) {
+    let filterQuery = '';
+    filter.values.forEach((element) => {
+      filterQuery =
+        filterQuery === ''
+          ? `FIND_IN_SET('${element}', ${paramName}) `
+          : `${filterQuery} AND FIND_IN_SET('${element}', ${paramName}) `;
+    });
+    return filterQuery;
+  }
+
+  private getCurrentFilter(filter: Filter, paramName: string) {
     let filterQuery = '';
     filter.values.forEach((element) => {
       filterQuery =
