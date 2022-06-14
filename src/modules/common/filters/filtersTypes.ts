@@ -48,11 +48,11 @@ registerEnumType(Sort, {
 
 @InputType()
 export class Filter {
-  @Field(() => Operation, { nullable: true })
+  @Field(() => Operation)
   op: Operation;
-  @Field(() => [String], { nullable: true })
+  @Field(() => [String], { nullable: 'itemsAndList' })
   values: string[];
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   field: string;
 
   constructor(init?: Partial<Filter>) {
