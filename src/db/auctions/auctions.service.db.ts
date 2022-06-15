@@ -100,7 +100,7 @@ export class AuctionsServiceDb {
     }
     if (currentPrice) {
       queryBuilder.andWhere(
-        `(a.minBid BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]} OR o.priceAmount BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}) `,
+        `(if(o.priceAmount, o.priceAmount BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}, a.minBid BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]})) `,
       );
     }
     return currentPriceSort;
