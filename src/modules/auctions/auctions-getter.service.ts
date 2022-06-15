@@ -192,17 +192,18 @@ export class AuctionsGetterService {
 
   private filtersForMarketplaceAuctions(queryRequest: QueryRequest) {
     return (
-      (queryRequest?.filters?.filters?.length === 2 &&
+      ((queryRequest?.filters?.filters?.length === 2 &&
         queryRequest.filters.filters.filter(
           (item) => item.field === 'status' || item.field === 'startDate',
         ).length === 2) ||
-      (queryRequest?.filters?.filters?.length === 3 &&
-        queryRequest.filters.filters.filter(
-          (item) =>
-            item.field === 'status' ||
-            item.field === 'startDate' ||
-            item.field === 'tags',
-        ).length === 3)
+        (queryRequest?.filters?.filters?.length === 3 &&
+          queryRequest.filters.filters.filter(
+            (item) =>
+              item.field === 'status' ||
+              item.field === 'startDate' ||
+              item.field === 'tags',
+          ).length === 3)) &&
+      !queryRequest.customFilters
     );
   }
 
