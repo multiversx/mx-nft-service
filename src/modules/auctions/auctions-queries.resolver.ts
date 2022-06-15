@@ -29,6 +29,7 @@ import { User } from '../auth/user';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
+import { PriceRange } from './models/PriceRange.dto';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -119,6 +120,12 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @Query(() => String)
   async marketplaceCutPercentage() {
     return await this.nftAbiService.getCutPercentage();
+  }
+
+  @Query(() => PriceRange)
+  async priceRange() {
+    const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice();
+    return PriceRange.fromEntity(minBid, maxBid);
   }
 
   @Query(() => AuctionResponse)
