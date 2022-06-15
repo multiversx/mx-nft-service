@@ -25,7 +25,7 @@ export class AuctionCustomSort {
 }
 
 @InputType()
-export class AuctionCustomFilters {
+export class AuctionCustomFilter {
   @Field(() => Operation)
   op: Operation;
 

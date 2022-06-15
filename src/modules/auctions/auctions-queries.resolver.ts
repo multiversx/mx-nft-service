@@ -22,7 +22,7 @@ import {
   Sorting,
   Grouping,
 } from '../common/filters/filtersTypes';
-import { AuctionCustomFilters } from '../common/filters/AuctionCustomFilters';
+import { AuctionCustomFilter } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { User } from '../auth/user';
@@ -59,8 +59,8 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     groupBy,
     @Args({
       name: 'customFilters',
-      type: () => [AuctionCustomFilters],
-      nullable: true,
+      type: () => [AuctionCustomFilter],
+      nullable: 'itemsAndList',
     })
     customFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })

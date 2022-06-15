@@ -176,15 +176,15 @@ type Auction {
   type: AuctionTypeEnum
 }
 
-enum AuctionCustomFilterEnum {
-  CURRENTPRICE
-}
-
-input AuctionCustomFilters {
+input AuctionCustomFilter {
   field: AuctionCustomFilterEnum!
   op: Operation!
   sort: AuctionCustomSort!
   values: [String]
+}
+
+enum AuctionCustomFilterEnum {
+  CURRENTPRICE
 }
 
 input AuctionCustomSort {
@@ -704,7 +704,7 @@ type Query {
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(
-    customFilters: [AuctionCustomFilters!]
+    customFilters: [AuctionCustomFilter]
 
     """
     The fields that can be used for this filters values are the entity properties
