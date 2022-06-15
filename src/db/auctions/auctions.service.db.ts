@@ -5,9 +5,14 @@ import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
+import {
+  AuctionCustomEnum,
+  AuctionCustomSort,
+} from 'src/modules/common/filters/AuctionCustomFilters';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
@@ -34,11 +39,6 @@ export class AuctionsServiceDb {
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
 
-  async getAuctionsForOwner(ownerAddress: string): Promise<AuctionEntity[]> {
-    return await this.auctionsRepository.find({
-      where: [{ ownerAddress: ownerAddress }],
-    });
-  }
   async getAuctions(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
@@ -49,10 +49,17 @@ export class AuctionsServiceDb {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
+    const currentPriceSort = this.handleCurrentPriceFilter(
+      queryRequest,
+      queryBuilder,
+    );
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
-
+    if (currentPriceSort) {
+      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
+    } else {
+      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
+    }
     return await queryBuilder.getManyAndCount();
   }
 
@@ -67,12 +74,52 @@ export class AuctionsServiceDb {
     const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    queryBuilder.andWhere(`id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
-    from (${getDefaultAuctionsQuery(endDate)})`);
+    const currentPriceSort = this.handleCurrentPriceFilter(
+      queryRequest,
+      queryBuilder,
+    );
+    queryBuilder.andWhere(`a.id IN(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier  ORDER BY eD, IF(price, price, minBidDenominated) ASC )
+    FROM (${getDefaultAuctionsQuery(endDate)})`);
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder);
+    if (currentPriceSort) {
+      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
+    } else {
+      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
+    }
     return await queryBuilder.getManyAndCount();
+  }
+
+  private handleCurrentPriceFilter(
+    queryRequest: QueryRequest,
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+  ) {
+    const maxBidValue = '1000000000';
+    const currentPrice = queryRequest.customFilters?.find(
+      (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
+    );
+    const currentPriceSort = currentPrice?.sort;
+    if (currentPrice || currentPriceSort) {
+      queryBuilder.leftJoin(
+        'orders',
+        'o',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+      );
+    }
+    if (currentPrice) {
+      const minBid =
+        currentPrice.values?.length >= 1 && currentPrice.values[0]
+          ? currentPrice.values[0]
+          : 0;
+      const maxBid =
+        currentPrice.values?.length >= 2 && currentPrice.values[1]
+          ? currentPrice.values[1]
+          : nominateAmount(maxBidValue);
+      queryBuilder.andWhere(
+        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
+      );
+    }
+    return currentPriceSort;
   }
 
   async getAuctionsForIdentifier(
@@ -345,5 +392,18 @@ export class AuctionsServiceDb {
         queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
       }
     }
+  }
+
+  private addCurrentPriceOrderBy(
+    sort: AuctionCustomSort,
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+    alias: string = null,
+  ) {
+    queryBuilder.addOrderBy(
+      'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
+
+      Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
+    ),
+      queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
   }
 }
