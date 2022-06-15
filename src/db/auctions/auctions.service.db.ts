@@ -91,10 +91,10 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
   ) {
-    const currentPrice = queryRequest.customFilters.find(
+    const currentPrice = queryRequest.customFilters?.find(
       (f) => f.field === AuctionCustomFilterEnum.CURRENTPRICE,
     );
-    const currentPriceSort = currentPrice.sort;
+    const currentPriceSort = currentPrice?.sort;
     if (currentPrice || currentPriceSort) {
       queryBuilder.leftJoin('orders', 'o', 'o.auctionId=a.id');
     }

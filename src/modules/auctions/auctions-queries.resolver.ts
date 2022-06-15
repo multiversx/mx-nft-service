@@ -50,10 +50,16 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       type: () => FiltersExpression,
       nullable: true,
       description:
-        'The fields that can be used for this filters values are the entity properties',
+        'The values that can be used for this filters fields are the entity properties',
     })
     filters,
-    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
+    @Args({
+      name: 'sorting',
+      type: () => [Sorting],
+      nullable: true,
+      description:
+        'The values that can be used for this sorting fields are the entity properties',
+    })
     sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
     groupBy,

@@ -707,11 +707,15 @@ type Query {
     customFilters: [AuctionCustomFilter]
 
     """
-    The fields that can be used for this filters values are the entity properties
+    The values that can be used for this filters fields are the entity properties
     """
     filters: FiltersExpression
     grouping: Grouping
     pagination: ConnectionArgs
+
+    """
+    The values that can be used for this sorting fields are the entity properties
+    """
     sorting: [Sorting!]
   ): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
