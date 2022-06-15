@@ -5,6 +5,10 @@ import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
+import {
+  AuctionCustomFilterEnum,
+  AuctionCustomSort,
+} from 'src/modules/common/filters/AuctionCustomFilters';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
@@ -87,18 +91,16 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
   ) {
-    const currentPrice = queryRequest.filters.filters.find(
-      (f) => f.field === 'currentPrice',
+    const currentPrice = queryRequest.customFilters.find(
+      (f) => f.field === AuctionCustomFilterEnum.CURRENTPRICE,
     );
-    const currentPriceSort = queryRequest.sorting.find(
-      (f) => f.field === 'currentPrice',
-    );
+    const currentPriceSort = currentPrice.sort;
     if (currentPrice || currentPriceSort) {
       queryBuilder.leftJoin('orders', 'o', 'o.auctionId=a.id');
     }
     if (currentPrice) {
       queryBuilder.andWhere(
-        `(a.minBidDenominated BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]} OR o.priceAmountDenominated BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}) `,
+        `(a.minBid BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]} OR o.priceAmount BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}) `,
       );
     }
     return currentPriceSort;
@@ -377,7 +379,7 @@ export class AuctionsServiceDb {
   }
 
   private addCurrentPriceOrderBy(
-    sort: Sorting,
+    sort: AuctionCustomSort,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
     alias: string = null,
   ) {

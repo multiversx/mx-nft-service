@@ -22,6 +22,7 @@ import {
   Sorting,
   Grouping,
 } from '../common/filters/filtersTypes';
+import { AuctionCustomFilters } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { User } from '../auth/user';
@@ -44,12 +45,24 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
   @Query(() => AuctionResponse)
   async auctions(
-    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    @Args({
+      name: 'filters',
+      type: () => FiltersExpression,
+      nullable: true,
+      description:
+        'The fields that can be used for this filters values are the entity properties',
+    })
     filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
     sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
     groupBy,
+    @Args({
+      name: 'customFilters',
+      type: () => [AuctionCustomFilters],
+      nullable: true,
+    })
+    customFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -61,6 +74,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
         filters,
         sorting,
         groupByOption: groupBy,
+        customFilters,
       }),
     );
     return PageResponse.mapResponse<Auction>(

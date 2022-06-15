@@ -176,6 +176,26 @@ type Auction {
   type: AuctionTypeEnum
 }
 
+enum AuctionCustomFilterEnum {
+  CURRENTPRICE
+}
+
+input AuctionCustomFilters {
+  field: AuctionCustomFilterEnum!
+  op: Operation!
+  sort: AuctionCustomSort!
+  values: [String]
+}
+
+input AuctionCustomSort {
+  direction: Sort!
+  field: AuctionCustomSortEnum!
+}
+
+enum AuctionCustomSortEnum {
+  CURRENTPRICE
+}
+
 type AuctionEdge {
   cursor: String
   node: Auction
@@ -683,7 +703,17 @@ type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
-  auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  auctions(
+    customFilters: [AuctionCustomFilters!]
+
+    """
+    The fields that can be used for this filters values are the entity properties
+    """
+    filters: FiltersExpression
+    grouping: Grouping
+    pagination: ConnectionArgs
+    sorting: [Sorting!]
+  ): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
