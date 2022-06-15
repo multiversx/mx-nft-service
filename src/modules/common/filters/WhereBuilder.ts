@@ -27,7 +27,7 @@ export default class WhereBuilder<Entity> {
       (f) =>
         f.values.length > 0 && f.values.every((element) => element !== null),
     );
-    let filters = map(availableFilters, (f) => this.buildFilter(f));
+    const filters = map(availableFilters, (f) => this.buildFilter(f));
     const children = map(fe.childExpressions, (child) =>
       this.buildExpressionRec(child),
     );
