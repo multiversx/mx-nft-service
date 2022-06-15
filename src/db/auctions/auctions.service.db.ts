@@ -6,7 +6,7 @@ import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
-  AuctionCustomFilterEnum,
+  AuctionCustomEnum,
   AuctionCustomSort,
 } from 'src/modules/common/filters/AuctionCustomFilters';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
@@ -78,8 +78,8 @@ export class AuctionsServiceDb {
       queryRequest,
       queryBuilder,
     );
-    queryBuilder.andWhere(`a.id IN(SELECT FIRST_VALUE(id) over (PARTITION by identifier  order by eD, if(price, price, minBidDenominated) ASC )
-    from (${getDefaultAuctionsQuery(endDate)})`);
+    queryBuilder.andWhere(`a.id IN(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier  ORDER BY eD, IF(price, price, minBidDenominated) ASC )
+    FROM (${getDefaultAuctionsQuery(endDate)})`);
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     if (currentPriceSort) {
@@ -94,15 +94,16 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
   ) {
+    const maxBidValue = '1000000000';
     const currentPrice = queryRequest.customFilters?.find(
-      (f) => f.field === AuctionCustomFilterEnum.CURRENTPRICE,
+      (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
     );
     const currentPriceSort = currentPrice?.sort;
     if (currentPrice || currentPriceSort) {
       queryBuilder.leftJoin(
         'orders',
         'o',
-        'o.auctionId=a.id AND o.id =(SELECT MAX(id) from orders o2 where o2.auctionId = a.id)',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       );
     }
     if (currentPrice) {
@@ -113,7 +114,7 @@ export class AuctionsServiceDb {
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
-          : nominateAmount('1000000000');
+          : nominateAmount(maxBidValue);
       queryBuilder.andWhere(
         `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
       );

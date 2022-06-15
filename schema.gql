@@ -176,24 +176,20 @@ type Auction {
   type: AuctionTypeEnum
 }
 
+enum AuctionCustomEnum {
+  CURRENTPRICE
+}
+
 input AuctionCustomFilter {
-  field: AuctionCustomFilterEnum!
+  field: AuctionCustomEnum!
   op: Operation!
   sort: AuctionCustomSort!
   values: [String]
 }
 
-enum AuctionCustomFilterEnum {
-  CURRENTPRICE
-}
-
 input AuctionCustomSort {
   direction: Sort!
-  field: AuctionCustomSortEnum!
-}
-
-enum AuctionCustomSortEnum {
-  CURRENTPRICE
+  field: AuctionCustomEnum!
 }
 
 type AuctionEdge {

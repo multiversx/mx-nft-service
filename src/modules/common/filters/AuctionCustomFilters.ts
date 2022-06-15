@@ -1,25 +1,18 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { Operation, Filter, Sort } from './filtersTypes';
 
-export enum AuctionCustomFilterEnum {
-  CURRENTPRICE,
-}
-export enum AuctionCustomSortEnum {
+export enum AuctionCustomEnum {
   CURRENTPRICE,
 }
 
-registerEnumType(AuctionCustomSortEnum, {
-  name: 'AuctionCustomSortEnum',
-});
-
-registerEnumType(AuctionCustomFilterEnum, {
-  name: 'AuctionCustomFilterEnum',
+registerEnumType(AuctionCustomEnum, {
+  name: 'AuctionCustomEnum',
 });
 
 @InputType()
 export class AuctionCustomSort {
-  @Field(() => AuctionCustomSortEnum)
-  field: AuctionCustomSortEnum;
+  @Field(() => AuctionCustomEnum)
+  field: AuctionCustomEnum;
   @Field(() => Sort)
   direction: Sort;
 }
@@ -32,8 +25,8 @@ export class AuctionCustomFilter {
   @Field(() => [String], { nullable: 'itemsAndList' })
   values: string[];
 
-  @Field(() => AuctionCustomFilterEnum)
-  field: AuctionCustomFilterEnum;
+  @Field(() => AuctionCustomEnum)
+  field: AuctionCustomEnum;
 
   @Field(() => AuctionCustomSort)
   sort: AuctionCustomSort;
