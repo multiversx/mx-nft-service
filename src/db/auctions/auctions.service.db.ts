@@ -12,6 +12,7 @@ import {
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
@@ -38,11 +39,6 @@ export class AuctionsServiceDb {
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
 
-  async getAuctionsForOwner(ownerAddress: string): Promise<AuctionEntity[]> {
-    return await this.auctionsRepository.find({
-      where: [{ ownerAddress: ownerAddress }],
-    });
-  }
   async getAuctions(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
@@ -103,11 +99,23 @@ export class AuctionsServiceDb {
     );
     const currentPriceSort = currentPrice?.sort;
     if (currentPrice || currentPriceSort) {
-      queryBuilder.leftJoin('orders', 'o', 'o.auctionId=a.id');
+      queryBuilder.leftJoin(
+        'orders',
+        'o',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) from orders o2 where o2.auctionId = a.id)',
+      );
     }
     if (currentPrice) {
+      const minBid =
+        currentPrice.values?.length >= 1 && currentPrice.values[0]
+          ? currentPrice.values[0]
+          : 0;
+      const maxBid =
+        currentPrice.values?.length >= 2 && currentPrice.values[1]
+          ? currentPrice.values[1]
+          : nominateAmount('1000000000');
       queryBuilder.andWhere(
-        `(if(o.priceAmount, o.priceAmount BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]}, a.minBid BETWEEN ${currentPrice.values[0]} AND ${currentPrice.values[1]})) `,
+        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
       );
     }
     return currentPriceSort;

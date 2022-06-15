@@ -93,15 +93,4 @@ export default class WhereBuilder<Entity> {
     });
     return filterQuery;
   }
-
-  private getCurrentFilter(filter: Filter, paramName: string) {
-    let filterQuery = '';
-    filter.values.forEach((element) => {
-      filterQuery =
-        filterQuery === ''
-          ? `FIND_IN_SET('${element}', ${paramName}) `
-          : `${filterQuery} AND FIND_IN_SET('${element}', ${paramName}) `;
-    });
-    return filterQuery;
-  }
 }
