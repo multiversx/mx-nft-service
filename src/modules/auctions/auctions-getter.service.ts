@@ -40,10 +40,9 @@ export class AuctionsGetterService {
       if (this.filtersForMarketplaceAuctions(queryRequest)) {
         return await this.getMarketplaceAuctions(queryRequest);
       }
-      const cacheKey = this.getAuctionsCacheKey(queryRequest);
       return this.redisCacheService.getOrSet(
         this.redisClient,
-        cacheKey,
+        this.getAuctionsCacheKey(queryRequest),
         () => this.getMappedAuctions(queryRequest),
         30 * TimeConstants.oneSecond,
       );
@@ -64,10 +63,9 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      const cacheKey = this.getAuctionsCacheKey(queryRequest);
       return this.redisCacheService.getOrSet(
         this.redisClient,
-        cacheKey,
+        this.getAuctionsCacheKey(queryRequest),
         async () => this.getMappedAuctionsOrderBids(queryRequest),
         TimeConstants.oneHour,
       );
@@ -320,27 +318,40 @@ export class AuctionsGetterService {
   private async getMappedAuctions(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number]> {
-    let [auctions, count] = [[], 0];
-
-    if (
-      queryRequest?.filters?.filters?.some(
-        (f) => f.field === 'identifier' && f.op === Operation.EQ,
-      )
-    ) {
-      [auctions, count] = await this.auctionServiceDb.getAuctionsForIdentifier(
-        queryRequest,
-      );
-    } else {
-      if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
-        [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
-          queryRequest,
-        );
-      } else {
-        [auctions, count] = await this.auctionServiceDb.getAuctions(
-          queryRequest,
-        );
-      }
+    if (this.filtersByIdentifier(queryRequest)) {
+      return await this.getAuctionsForIdentifier(queryRequest);
     }
+    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
+      return await this.getAuctionsGroupByIdentifier(queryRequest);
+    }
+
+    const [auctions, count] = await this.auctionServiceDb.getAuctions(
+      queryRequest,
+    );
+
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
+  }
+
+  private filtersByIdentifier(queryRequest: QueryRequest) {
+    return queryRequest?.filters?.filters?.some(
+      (f) => f.field === 'identifier' && f.op === Operation.EQ,
+    );
+  }
+
+  private async getAuctionsForIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
+    const [auctions, count] =
+      await this.auctionServiceDb.getAuctionsForIdentifier(queryRequest);
+    return [auctions?.map((element) => Auction.fromEntity(element)), count];
+  }
+
+  private async getAuctionsGroupByIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number]> {
+    const [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
+      queryRequest,
+    );
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 

@@ -53,10 +53,17 @@ export class AuctionsServiceDb {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
+    const currentPriceSort = this.handleCurrentPriceFilter(
+      queryRequest,
+      queryBuilder,
+    );
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
-    this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
-
+    if (currentPriceSort) {
+      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
+    } else {
+      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
+    }
     return await queryBuilder.getManyAndCount();
   }
 
