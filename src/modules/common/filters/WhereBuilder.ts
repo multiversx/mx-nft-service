@@ -28,7 +28,6 @@ export default class WhereBuilder<Entity> {
         f.values.length > 0 && f.values.every((element) => element !== null),
     );
     let filters = map(availableFilters, (f) => this.buildFilter(f));
-    filters = filters.filter((e) => e !== undefined);
     const children = map(fe.childExpressions, (child) =>
       this.buildExpressionRec(child),
     );
@@ -52,9 +51,6 @@ export default class WhereBuilder<Entity> {
           showLastNonZeroDecimal: true,
         }).replace(',', ''),
       );
-    }
-    if (filter.field === 'currentPrice') {
-      return;
     }
     const sqlParamName = this.queryBuilderName
       ? `${this.queryBuilderName}.${filterName}`
