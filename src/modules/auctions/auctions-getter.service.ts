@@ -163,6 +163,22 @@ export class AuctionsGetterService {
     return await this.auctionServiceDb.getAvailableTokens(id);
   }
 
+  async getMinMaxPrice(): Promise<{ minBid: string; maxBid: string }> {
+    try {
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        generateCacheKeyFromParams('minMaxPrice'),
+        () => this.auctionServiceDb.getMinMax(),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while getting min max price', {
+        path: 'AuctionsService.getMinMaxPrice',
+        exception: error,
+      });
+    }
+  }
+
   public async invalidateCache(address: string) {
     await this.redisCacheService.delByPattern(
       this.redisClient,

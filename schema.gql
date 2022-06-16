@@ -690,6 +690,11 @@ type Price {
   usdAmount: String
 }
 
+type PriceRange {
+  maxBid: Price!
+  minBid: Price!
+}
+
 enum Privacy {
   private
   public
@@ -724,6 +729,7 @@ type Query {
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
+  priceRange: PriceRange!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!

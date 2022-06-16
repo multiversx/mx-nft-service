@@ -261,6 +261,22 @@ export class AuctionsServiceDb {
       .execute();
   }
 
+  async getMinMax(): Promise<{ minBid: string; maxBid: string }> {
+    const response = await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select(
+        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+      )
+      .leftJoin(
+        'orders',
+        'o',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+      )
+      .where({ status: AuctionStatusEnum.Running })
+      .execute();
+    return response[0];
+  }
+
   async getAuction(id: number): Promise<AuctionEntity> {
     if (id || id === 0) {
       return await this.auctionsRepository.findOne({
