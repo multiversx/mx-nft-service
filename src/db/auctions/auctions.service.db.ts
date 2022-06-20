@@ -39,6 +39,30 @@ export class AuctionsServiceDb {
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
 
+  async getAuctions(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    const currentPriceSort = this.handleCurrentPriceFilter(
+      queryRequest,
+      queryBuilder,
+    );
+    queryBuilder.offset(queryRequest.offset);
+    queryBuilder.limit(queryRequest.limit);
+    if (currentPriceSort) {
+      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
+    } else {
+      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
+    }
+    return await queryBuilder.getManyAndCount();
+  }
+
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number]> {
@@ -64,6 +88,38 @@ export class AuctionsServiceDb {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
     return await queryBuilder.getManyAndCount();
+  }
+
+  private handleCurrentPriceFilter(
+    queryRequest: QueryRequest,
+    queryBuilder: SelectQueryBuilder<AuctionEntity>,
+  ) {
+    const maxBidValue = '1000000000';
+    const currentPrice = queryRequest.customFilters?.find(
+      (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
+    );
+    const currentPriceSort = currentPrice?.sort;
+    if (currentPrice || currentPriceSort) {
+      queryBuilder.leftJoin(
+        'orders',
+        'o',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+      );
+    }
+    if (currentPrice) {
+      const minBid =
+        currentPrice.values?.length >= 1 && currentPrice.values[0]
+          ? currentPrice.values[0]
+          : 0;
+      const maxBid =
+        currentPrice.values?.length >= 2 && currentPrice.values[1]
+          ? currentPrice.values[1]
+          : nominateAmount(maxBidValue);
+      queryBuilder.andWhere(
+        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
+      );
+    }
+    return currentPriceSort;
   }
 
   async getAuctionsForIdentifier(
@@ -159,6 +215,26 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
+  async getAuctionsOrderByOrdersCount(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    queryBuilder
+      .leftJoin('orders', 'o', 'o.auctionId=a.id')
+      .groupBy('a.id')
+      .orderBy('COUNT(a.Id)', 'DESC')
+      .offset(queryRequest.offset)
+      .limit(queryRequest.limit);
+
+    return await queryBuilder.getManyAndCount();
+  }
+
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     return await this.auctionsRepository
       .createQueryBuilder('a')
@@ -236,62 +312,6 @@ export class AuctionsServiceDb {
     }
     await this.rollbackWithdrawAndEndAuction(auctions);
     await this.rollbackCreateAuction(auctions);
-  }
-
-  private handleCurrentPriceFilter(
-    queryRequest: QueryRequest,
-    queryBuilder: SelectQueryBuilder<AuctionEntity>,
-  ) {
-    const maxBidValue = '1000000000';
-    const currentPrice = queryRequest.customFilters?.find(
-      (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
-    );
-    const currentPriceSort = currentPrice?.sort;
-    if (currentPrice || currentPriceSort) {
-      queryBuilder.leftJoin(
-        'orders',
-        'o',
-        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
-      );
-    }
-    if (currentPrice) {
-      const minBid =
-        currentPrice.values?.length >= 1 && currentPrice.values[0]
-          ? currentPrice.values[0]
-          : 0;
-      const maxBid =
-        currentPrice.values?.length >= 2 && currentPrice.values[1]
-          ? currentPrice.values[1]
-          : nominateAmount(maxBidValue);
-      queryBuilder.andWhere(
-        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
-      );
-    }
-    return currentPriceSort;
-  }
-
-  private async getAuctions(
-    queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
-    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
-      queryRequest.filters,
-      'a',
-    );
-    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
-      filterQueryBuilder.build();
-    const currentPriceSort = this.handleCurrentPriceFilter(
-      queryRequest,
-      queryBuilder,
-    );
-    queryBuilder.offset(queryRequest.offset);
-    queryBuilder.limit(queryRequest.limit);
-    if (currentPriceSort) {
-      this.addCurrentPriceOrderBy(currentPriceSort, queryBuilder, 'a');
-    } else {
-      this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
-    }
-    return await queryBuilder.getManyAndCount();
   }
 
   private async getAuctionsForIdentifierSortByPrice(
