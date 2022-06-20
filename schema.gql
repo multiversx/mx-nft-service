@@ -326,6 +326,7 @@ input ChildFilter {
 }
 
 type Collection {
+  activeAuctions: Int!
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
