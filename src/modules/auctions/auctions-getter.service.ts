@@ -360,8 +360,7 @@ export class AuctionsGetterService {
   private async getMappedAuctionsOrderBids(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number]> {
-    let [auctions, count] = [[], 0];
-    [auctions, count] =
+    const [auctions, count] =
       await this.auctionServiceDb.getAuctionsOrderByOrdersCountGroupByIdentifier(
         queryRequest,
       );
