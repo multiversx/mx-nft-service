@@ -337,14 +337,9 @@ export class AuctionsGetterService {
     if (this.filtersByIdentifier(queryRequest)) {
       return await this.getAuctionsForIdentifier(queryRequest);
     }
-    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
-      return await this.getAuctionsGroupByIdentifier(queryRequest);
-    }
-
-    const [auctions, count] = await this.auctionServiceDb.getAuctions(
+    const [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
       queryRequest,
     );
-
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
@@ -362,28 +357,13 @@ export class AuctionsGetterService {
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
-  private async getAuctionsGroupByIdentifier(
-    queryRequest: QueryRequest,
-  ): Promise<[Auction[], number]> {
-    const [auctions, count] = await this.auctionServiceDb.getAuctionsGroupBy(
-      queryRequest,
-    );
-    return [auctions?.map((element) => Auction.fromEntity(element)), count];
-  }
-
   private async getMappedAuctionsOrderBids(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number]> {
-    let [auctions, count] = [[], 0];
-    if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
-      [auctions, count] =
-        await this.auctionServiceDb.getAuctionsOrderByOrdersCountGroupByIdentifier(
-          queryRequest,
-        );
-    } else {
-      [auctions, count] =
-        await this.auctionServiceDb.getAuctionsOrderByOrdersCount(queryRequest);
-    }
+    const [auctions, count] =
+      await this.auctionServiceDb.getAuctionsOrderByOrdersCountGroupByIdentifier(
+        queryRequest,
+      );
 
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
