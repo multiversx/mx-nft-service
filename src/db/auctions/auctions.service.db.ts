@@ -12,8 +12,10 @@ import {
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { AuctionsForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/collection-auctions.redis-handler';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
@@ -33,6 +35,7 @@ export class AuctionsServiceDb {
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
+    private auctionsForCollectionCountLoader: AuctionsForCollectionRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
     @InjectRepository(AuctionEntity)
@@ -366,10 +369,12 @@ export class AuctionsServiceDb {
   }
 
   private async invalidateCache(identifier: string, address: string) {
+    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
     await this.lowestAuctionLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
+    await this.auctionsForCollectionCountLoader.clearKey(collection);
   }
 
   private addOrderBy(
