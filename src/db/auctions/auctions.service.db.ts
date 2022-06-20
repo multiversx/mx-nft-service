@@ -159,26 +159,6 @@ export class AuctionsServiceDb {
     return await queryBuilder.getManyAndCount();
   }
 
-  async getAuctionsOrderByOrdersCount(
-    queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
-    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
-      queryRequest.filters,
-      'a',
-    );
-    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
-      filterQueryBuilder.build();
-    queryBuilder
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .groupBy('a.id')
-      .orderBy('COUNT(a.Id)', 'DESC')
-      .offset(queryRequest.offset)
-      .limit(queryRequest.limit);
-
-    return await queryBuilder.getManyAndCount();
-  }
-
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     return await this.auctionsRepository
       .createQueryBuilder('a')
