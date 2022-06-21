@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { ElrondApiService, NftTag } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { Tag } from './models';
@@ -28,16 +28,30 @@ export class TagsService {
     filters: TagsFilter,
   ): Promise<[Tag[], number]> {
     if (filters.tagType === TagTypeEnum.Nft) {
-      const [tagsApi, count] = await Promise.all([
-        this.apiService.getTags(offset, limit, filters.searchTerm),
-        this.apiService.getTagsCount(filters.searchTerm),
-      ]);
+      const [tagsApi, count] = await this.getNftTags(offset, limit, filters);
       const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
       return [tags, count];
     }
     const [tagsApi, count] = await this.getAuctionTags();
     const tags = tagsApi?.slice(offset, offset + limit);
     return [tags, count];
+  }
+
+  private async getNftTags(
+    offset: number,
+    limit: number,
+    filters: TagsFilter,
+  ): Promise<[NftTag[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      `${CacheInfo.NftTags.key}_${limit}_${offset}`,
+      async () =>
+        Promise.all([
+          this.apiService.getTags(offset, limit, filters.searchTerm),
+          this.apiService.getTagsCount(filters.searchTerm),
+        ]),
+      5 * TimeConstants.oneMinute,
+    );
   }
 
   private async getAuctionTags(): Promise<[Tag[], number]> {
