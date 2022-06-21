@@ -10,7 +10,9 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
   ): Promise<[FeaturedNftEntity[], number]> {
     const featuredNfts = await this.createQueryBuilder('featuredNfts')
       .innerJoin('auctions', 'a', 'featuredNfts.identifier=a.identifier')
-      .where(`a.status='${AuctionStatusEnum.Running}'`)
+      .where(`a.status= :status`, {
+        status: AuctionStatusEnum.Running,
+      })
       .skip(offset)
       .take(limit)
       .getManyAndCount();

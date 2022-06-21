@@ -9,7 +9,9 @@ export class TagsRepository extends Repository<TagEntity> {
     const tags: NftTag[] = await this.createQueryBuilder('t')
       .select('count(a.id) as count, t.tag')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
-      .where(`a.status='${AuctionStatusEnum.Running}'`)
+      .where(`a.status= :status`, {
+        status: AuctionStatusEnum.Running,
+      })
       .groupBy('t.tag')
       .orderBy('count', 'DESC')
       .limit(size)
@@ -21,7 +23,9 @@ export class TagsRepository extends Repository<TagEntity> {
     const { count } = await this.createQueryBuilder('t')
       .select('COUNT (DISTINCT(tag))', 'count')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
-      .where(`a.status='${AuctionStatusEnum.Running}'`)
+      .where(`a.status= :status`, {
+        status: AuctionStatusEnum.Running,
+      })
       .getRawOne();
     return count;
   }
