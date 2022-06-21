@@ -210,9 +210,11 @@ export class AuctionsServiceDb {
       filterQueryBuilder.build();
     queryBuilder
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .andWhere(
-        `a.id IN(SELECT FIRST_VALUE(id) over ( PARTITION by identifier ORDER BY COUNT(id) DESC) 
-    from (${getAuctionsOrderByNoBidsQuery()})`,
+      .innerJoin(
+        `(SELECT FIRST_VALUE(id) over ( PARTITION by identifier ORDER BY COUNT(id) DESC) AS id
+      FROM (${getAuctionsOrderByNoBidsQuery()})`,
+        't',
+        'a.id = t.id',
       )
       .groupBy('a.id')
       .orderBy('COUNT(a.Id)', 'DESC')
