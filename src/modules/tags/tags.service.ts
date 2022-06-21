@@ -27,25 +27,35 @@ export class TagsService {
     limit: number = 10,
     filters: TagsFilter,
   ): Promise<[Tag[], number]> {
-    let [tagsApi, count] = [[], 0];
     if (filters.tagType === TagTypeEnum.Nft) {
-      if (filters?.searchTerm) {
-        [tagsApi, count] = await Promise.all([
-          this.apiService.getTags(offset, limit, filters.searchTerm),
-          this.apiService.getTagsCount(filters.searchTerm),
-        ]);
-      } else {
-        [tagsApi, count] = await this.getNftTags(offset, limit, filters);
-      }
+      const [tagsApi, count] = await this.getNftTags(filters, offset, limit);
       const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
       return [tags, count];
     }
-    [tagsApi, count] = await this.getAuctionTags();
+    const [tagsApi, count] = await this.getAuctionTags();
     const tags = tagsApi?.slice(offset, offset + limit);
     return [tags, count];
   }
 
   private async getNftTags(
+    filters: TagsFilter,
+    offset: number,
+    limit: number,
+  ): Promise<[Tag[], number]> {
+    let [tagsApi, count] = [[], 0];
+    if (filters?.searchTerm) {
+      [tagsApi, count] = await Promise.all([
+        this.apiService.getTags(offset, limit, filters.searchTerm),
+        this.apiService.getTagsCount(filters.searchTerm),
+      ]);
+    } else {
+      [tagsApi, count] = await this.getCachedNftTags(offset, limit, filters);
+    }
+
+    return [tagsApi, count];
+  }
+
+  private async getCachedNftTags(
     offset: number,
     limit: number,
     filters: TagsFilter,
