@@ -27,12 +27,20 @@ export class TagsService {
     limit: number = 10,
     filters: TagsFilter,
   ): Promise<[Tag[], number]> {
+    let [tagsApi, count] = [[], 0];
     if (filters.tagType === TagTypeEnum.Nft) {
-      const [tagsApi, count] = await this.getNftTags(offset, limit, filters);
+      if (filters?.searchTerm) {
+        [tagsApi, count] = await Promise.all([
+          this.apiService.getTags(offset, limit, filters.searchTerm),
+          this.apiService.getTagsCount(filters.searchTerm),
+        ]);
+      } else {
+        [tagsApi, count] = await this.getNftTags(offset, limit, filters);
+      }
       const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
       return [tags, count];
     }
-    const [tagsApi, count] = await this.getAuctionTags();
+    [tagsApi, count] = await this.getAuctionTags();
     const tags = tagsApi?.slice(offset, offset + limit);
     return [tags, count];
   }
