@@ -32,4 +32,9 @@ export class CacheInfo {
     key: 'auctionTags',
     ttl: 5 * TimeConstants.oneMinute,
   };
+
+  static NftTags: CacheInfo = {
+    key: 'nftTags',
+    ttl: 5 * TimeConstants.oneMinute,
+  };
 }
