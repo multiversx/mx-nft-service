@@ -27,6 +27,7 @@ export class AssetsProvider extends BaseProvider<string> {
       '&withOwner=true',
     );
     const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
+
     this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
 
     return nftsGrouped;

@@ -20,7 +20,9 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
     const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = Asset.fromNft(assetsIdentifiers[item.key][0]);
+        item.value = assetsIdentifiers[item.key]
+          ? Asset.fromNft(assetsIdentifiers[item.key][0])
+          : null;
         if (this.hasDefaultThumbnail(item)) {
           defaultNfts.push(item);
         } else {
@@ -34,6 +36,7 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
       new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
       new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];
+    console.log({ response });
     return response;
   }
   private hasDefaultThumbnail(item: { key: string; value: any }) {
