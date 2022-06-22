@@ -428,6 +428,7 @@ export class AuctionsServiceDb {
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
     alias: string = null,
   ) {
+    queryBuilder.addGroupBy('o.priceAmountDenominated');
     queryBuilder.addOrderBy(
       'if(o.priceAmountDenominated, o.priceAmountDenominated, a.minBidDenominated)',
 
