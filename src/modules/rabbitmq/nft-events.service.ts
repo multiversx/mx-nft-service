@@ -85,7 +85,9 @@ export class NftEventsService {
             }),
           );
           this.availableTokensCount.clearKey(auction.identifier);
+          console.log(auction.maxBidDenominated, order.priceAmountDenominated);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
+            console.log('Buy now');
             this.auctionsService.updateAuction(
               auction.id,
               AuctionStatusEnum.Claimable,
