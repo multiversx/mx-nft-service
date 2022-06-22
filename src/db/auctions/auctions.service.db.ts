@@ -81,12 +81,14 @@ export class AuctionsServiceDb {
       queryRequest,
       queryBuilder,
     );
-    queryBuilder.innerJoin(
-      `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY eD, IF(price, price, minBidDenominated) ASC) AS id
+    queryBuilder
+      .innerJoin(
+        `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY eD, IF(price, price, minBidDenominated) ASC) AS id
     FROM (${getDefaultAuctionsQuery(endDate)})`,
-      't',
-      'a.id = t.id',
-    );
+        't',
+        'a.id = t.id',
+      )
+      .groupBy('a.id');
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     if (currentPriceSort) {
