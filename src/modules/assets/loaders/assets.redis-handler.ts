@@ -36,7 +36,6 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
       new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
       new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];
-    console.log({ response });
     return response;
   }
   private hasDefaultThumbnail(item: { key: string; value: any }) {
