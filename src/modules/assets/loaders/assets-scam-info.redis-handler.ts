@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { ScamInfo } from '../models/ScamInfo.dto';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
@@ -18,7 +17,9 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key][0].scamInfo;
+        item.value = assetsIdentifiers[item.key]
+          ? assetsIdentifiers[item.key][0]?.scamInfo
+          : { key: item.key };
         redisValues.push(item);
       }
     }
