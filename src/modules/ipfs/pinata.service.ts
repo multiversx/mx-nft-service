@@ -4,6 +4,7 @@ import { UploadToIpfsResult } from './ipfs.model';
 import { FileContent } from './file.content';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
 const axios = require('axios');
 
 const FormData = require('form-data');
@@ -40,7 +41,9 @@ export class PinataService {
           cacheKey: file,
         },
       );
-      return;
+      throw new PinataUploadError(
+        'An error has occoured while uploading in IPFS, please try again.',
+      );
     }
   }
 
@@ -63,7 +66,9 @@ export class PinataService {
           cacheKey: fileMetadata,
         },
       );
-      return;
+      throw new PinataUploadError(
+        'An error has occoured while uploading in IPFS, please try again.',
+      );
     }
   }
 
