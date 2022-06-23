@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
+import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
@@ -36,6 +37,7 @@ export class AuctionsServiceDb {
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private auctionsForCollectionCountLoader: AuctionsForCollectionRedisHandler,
+    private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
     @InjectRepository(AuctionEntity)
@@ -403,6 +405,7 @@ export class AuctionsServiceDb {
     await this.lowestAuctionLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
     await this.auctionsForCollectionCountLoader.clearKey(collection);
+    await this.availableTokensCountHandler.clearKey(identifier);
   }
 
   private addOrderBy(
