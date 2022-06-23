@@ -7,8 +7,6 @@ export class Rarity {
   rank: number;
   @Field()
   score: number;
-  @Field()
-  statRarity: number;
 
   constructor(init?: Partial<Rarity>) {
     Object.assign(this, init);
