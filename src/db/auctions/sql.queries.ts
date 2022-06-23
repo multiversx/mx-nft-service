@@ -156,7 +156,7 @@ SELECT SUM(countA) as count, identifier
 		AND a.type <> 'SftOnePerPayment'
     AND a.identifier in (${identifiers.map((value) => `'${value}'`)}) 
 	  GROUP by a.identifier)
-    UNION 
+    UNION ALL
     (SELECT max(temp.countA) as countA, temp.identifier
     FROM 
 		(SELECT (Sum(a.nrAuctionedTokens) - if (availableTokens.total, sum(availableTokens.total),0)) as countA, a.identifier
