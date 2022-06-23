@@ -62,9 +62,7 @@ export interface NftMetadata {
 }
 
 export interface NftRarity {
-  avgRarity: number;
-  statRarity: number;
+  rank: number;
+  score: number;
   rarityScore: number;
-  rarityScoreNormed: number;
-  usedTraitsCount: number;
 }

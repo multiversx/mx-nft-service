@@ -737,11 +737,9 @@ type Query {
 }
 
 type Rarity {
-  avgRarity: Float!
-  rarityScore: Float!
-  rarityScoreNormed: Float!
+  rank: Float!
+  score: Float!
   statRarity: Float!
-  usedTraitsCount: Float!
 }
 
 input RemoveLikeArgs {
