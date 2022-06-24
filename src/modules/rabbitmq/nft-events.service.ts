@@ -208,6 +208,7 @@ export class NftEventsService {
                   nftName: nftData.name,
                   verified: nftData.assets ? true : false,
                   minBid: startAuction.minBid,
+                  maxBid: startAuction.maxBid,
                 },
               }),
             );
