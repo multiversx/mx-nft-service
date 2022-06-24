@@ -260,7 +260,7 @@ export class NftEventsService {
         case NftEventEnum.MultiESDTNFTTransfer:
           console.log({ event });
           const multiTransferEvent = new TransferEvent(event);
-          const multiTransferTopics = transferEvent.getTopics();
+          const multiTransferTopics = multiTransferEvent.getTopics();
           this.assetsRedisHandler.clearKey(
             `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
           );
