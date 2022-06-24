@@ -44,7 +44,7 @@ export class AuctionsSetterService {
         identifier,
         'fields=tags',
       );
-
+      console.log({ asset, auctionData });
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
           AuctionEntity.fromAuctionAbi(
@@ -54,6 +54,8 @@ export class AuctionsSetterService {
             hash,
           ),
         );
+
+        console.log({ savedAuction });
         let tags: TagEntity[] = [];
         for (const tag of asset?.tags) {
           tags = [
