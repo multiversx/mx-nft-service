@@ -256,6 +256,16 @@ export class NftEventsService {
           );
 
           break;
+
+        case NftEventEnum.MultiESDTNFTTransfer:
+          console.log({ event });
+          const multiTransferEvent = new TransferEvent(event);
+          const multiTransferTopics = transferEvent.getTopics();
+          this.assetsRedisHandler.clearKey(
+            `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
+          );
+
+          break;
       }
     }
   }
