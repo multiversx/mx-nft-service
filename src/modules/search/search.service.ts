@@ -10,6 +10,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
+import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @Injectable()
 export class SearchService {
@@ -110,6 +111,13 @@ export class SearchService {
   }
 
   private async getMappedNfts(searchTerm: string) {
+    if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
+      const response = await this.apiService.getNftByIdentifierForQuery(
+        searchTerm,
+        '?fields=identifier',
+      );
+      return [response?.identifier];
+    }
     const response = await this.apiService.getNftsBySearch(searchTerm);
     return response?.map((c) => c.identifier);
   }

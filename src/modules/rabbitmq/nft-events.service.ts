@@ -208,6 +208,7 @@ export class NftEventsService {
                   nftName: nftData.name,
                   verified: nftData.assets ? true : false,
                   minBid: startAuction.minBid,
+                  maxBid: startAuction.maxBid,
                 },
               }),
             );
@@ -253,6 +254,15 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+          );
+
+          break;
+
+        case NftEventEnum.MultiESDTNFTTransfer:
+          const multiTransferEvent = new TransferEvent(event);
+          const multiTransferTopics = multiTransferEvent.getTopics();
+          this.assetsRedisHandler.clearKey(
+            `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
           );
 
           break;
