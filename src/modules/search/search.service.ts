@@ -11,10 +11,13 @@ import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
+import { SearchItemResponse } from './models/SearchItemResponse';
 
 @Injectable()
 export class SearchService {
   private redisClient: Redis.Redis;
+  private readonly searchSize: number = 5;
+  private fieldsRequested: string = 'identifier,name';
   constructor(
     private accountsService: ElrondIdentityService,
     private apiService: ElrondApiService,
@@ -48,9 +51,23 @@ export class SearchService {
     }
   }
 
-  private async getMappedHerotags(searchTerm: string) {
-    const response = await this.accountsService.getAcountsByHerotag(searchTerm);
-    return response?.herotags;
+  private async getMappedHerotags(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
+    const herotagsResponse = await this.accountsService.getAcountsByHerotag(
+      searchTerm,
+    );
+    const promises = herotagsResponse?.herotags.map((hero) =>
+      this.accountsService.getAddressByHerotag(hero),
+    );
+    const response = await Promise.all(promises);
+    return response?.map(
+      (r) =>
+        new SearchItemResponse({
+          identifier: r.address,
+          name: r.herotag,
+        }),
+    );
   }
 
   private getAccountsCacheKey(searchTerm: string) {
@@ -79,16 +96,23 @@ export class SearchService {
     }
   }
 
-  private async getMappedCollections(searchTerm: string) {
-    const response = await this.apiService.getCollectionsBySearch(searchTerm);
-    return response?.map((c) => c.collection);
+  private async getMappedCollections(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
+    const response = await this.apiService.getCollectionsBySearch(
+      searchTerm,
+      this.searchSize,
+    );
+    return response?.map(
+      (c) => new SearchItemResponse({ identifier: c.collection, name: c.name }),
+    );
   }
 
   private getCollectionCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_collection', searchTerm);
   }
 
-  async getNfts(searchTerm: string): Promise<string[]> {
+  async getNfts(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -110,23 +134,40 @@ export class SearchService {
     }
   }
 
-  private async getMappedNfts(searchTerm: string) {
+  private async getMappedNfts(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
     if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
       const response = await this.apiService.getNftByIdentifierForQuery(
         searchTerm,
-        '?fields=identifier',
+        `?fields=${this.fieldsRequested}`,
       );
-      return [response?.identifier];
+      return [
+        new SearchItemResponse({
+          identifier: response?.identifier,
+          name: response?.name,
+        }),
+      ];
     }
-    const response = await this.apiService.getNftsBySearch(searchTerm);
-    return response?.map((c) => c.identifier);
+    const response = await this.apiService.getNftsBySearch(
+      searchTerm,
+      this.searchSize,
+      this.fieldsRequested,
+    );
+    return response?.map(
+      (c) =>
+        new SearchItemResponse({
+          identifier: c?.identifier,
+          name: c?.name,
+        }),
+    );
   }
 
   private getNftsCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_nfts', searchTerm);
   }
 
-  async getTags(searchTerm: string): Promise<string[]> {
+  async getTags(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getTagsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -148,9 +189,11 @@ export class SearchService {
     }
   }
 
-  private async getMappedTags(searchTerm: string) {
+  private async getMappedTags(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
     const response = await this.apiService.getTagsBySearch(searchTerm);
-    return response?.map((c) => c.tag);
+    return response?.map((c) => new SearchItemResponse({ identifier: c.tag }));
   }
 
   private getTagsCacheKey(searchTerm: string) {

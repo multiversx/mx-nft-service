@@ -4,6 +4,7 @@ import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { isValidAddress } from 'src/utils/helpers';
+import { SearchItemResponse } from './models/SearchItemResponse';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
@@ -17,7 +18,7 @@ export class SearchResolver {
     return new SearchResponse({ searchTerm: filters.searchTerm });
   }
 
-  @ResolveField(() => [String])
+  @ResolveField(() => [SearchItemResponse])
   async collections(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
@@ -29,7 +30,7 @@ export class SearchResolver {
     return collection;
   }
 
-  @ResolveField(() => [String])
+  @ResolveField(() => [SearchItemResponse])
   async accounts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
@@ -39,7 +40,7 @@ export class SearchResolver {
     return account;
   }
 
-  @ResolveField(() => [String])
+  @ResolveField(() => [SearchItemResponse])
   async nfts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
@@ -49,7 +50,7 @@ export class SearchResolver {
     return nfts;
   }
 
-  @ResolveField(() => [String])
+  @ResolveField(() => [SearchItemResponse])
   async tags(@Parent() search: SearchResponse) {
     const { searchTerm } = search;
     if (isValidAddress(searchTerm)) {

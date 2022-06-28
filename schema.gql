@@ -763,12 +763,17 @@ input SearchFilter {
   searchTerm: String!
 }
 
+type SearchItemResponse {
+  identifier: String!
+  name: String
+}
+
 type SearchResponse {
-  accounts: [String!]
-  collections: [String!]
-  nfts: [String!]
+  accounts: [SearchItemResponse!]
+  collections: [SearchItemResponse!]
+  nfts: [SearchItemResponse!]
   searchTerm: ID
-  tags: [String!]
+  tags: [SearchItemResponse!]
 }
 
 input SetNftRolesArgs {
