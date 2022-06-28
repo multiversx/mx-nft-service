@@ -14,6 +14,7 @@ import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.s
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { SearchService } from '../search.service';
 import { ElrondIdentityServiceMock } from 'src/common/services/elrond-communication/elrond-identity.service.mock';
+import { SearchItemResponse } from '../models/SearchItemResponse';
 
 describe('SearchService', () => {
   let service: SearchService;
@@ -70,7 +71,9 @@ describe('SearchService', () => {
     it('should return the collections identifiers', async () => {
       const results = await service.getCollections('searchTerm');
 
-      expect(results).toStrictEqual(['searchTerm']);
+      expect(results).toStrictEqual([
+        new SearchItemResponse({ identifier: 'searchTerm', name: undefined }),
+      ]);
     });
   });
 
@@ -78,7 +81,9 @@ describe('SearchService', () => {
     it('should return the nfts identifiers', async () => {
       const results = await service.getNfts('searchTerm');
 
-      expect(results).toStrictEqual(['searchTerm']);
+      expect(results).toStrictEqual([
+        new SearchItemResponse({ identifier: 'searchTerm', name: undefined }),
+      ]);
     });
   });
 
@@ -86,7 +91,9 @@ describe('SearchService', () => {
     it('should return the herotags', async () => {
       const results = await service.getHerotags('searchTerm');
 
-      expect(results).toStrictEqual(['searchTerm']);
+      expect(results).toStrictEqual([
+        new SearchItemResponse({ identifier: 'address', name: undefined }),
+      ]);
     });
   });
 
@@ -94,7 +101,9 @@ describe('SearchService', () => {
     it('should return all the tags with that search term', async () => {
       const results = await service.getTags('searchTerm');
 
-      expect(results).toStrictEqual(['searchTerm']);
+      expect(results).toStrictEqual([
+        new SearchItemResponse({ identifier: 'searchTerm' }),
+      ]);
     });
   });
 });

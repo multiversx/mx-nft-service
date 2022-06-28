@@ -764,7 +764,7 @@ input SearchFilter {
 }
 
 type SearchItemResponse {
-  identifier: String
+  identifier: String!
   name: String
 }
 

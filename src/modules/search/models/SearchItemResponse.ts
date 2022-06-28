@@ -4,7 +4,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 export class SearchItemResponse {
   @Field(() => String, { nullable: true })
   name: string;
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   identifier: string;
 
   constructor(init?: Partial<SearchItemResponse>) {
