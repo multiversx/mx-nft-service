@@ -16,6 +16,8 @@ import { SearchItemResponse } from './models/SearchItemResponse';
 @Injectable()
 export class SearchService {
   private redisClient: Redis.Redis;
+  private readonly searchSize: number = 5;
+  private fieldsRequested: string = 'identifier,name';
   constructor(
     private accountsService: ElrondIdentityService,
     private apiService: ElrondApiService,
@@ -97,7 +99,10 @@ export class SearchService {
   private async getMappedCollections(
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
-    const response = await this.apiService.getCollectionsBySearch(searchTerm);
+    const response = await this.apiService.getCollectionsBySearch(
+      searchTerm,
+      this.searchSize,
+    );
     return response?.map(
       (c) => new SearchItemResponse({ identifier: c.collection, name: c.name }),
     );
@@ -135,7 +140,7 @@ export class SearchService {
     if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
       const response = await this.apiService.getNftByIdentifierForQuery(
         searchTerm,
-        '?fields=identifier,name',
+        `?fields=${this.fieldsRequested}`,
       );
       return [
         new SearchItemResponse({
@@ -144,7 +149,11 @@ export class SearchService {
         }),
       ];
     }
-    const response = await this.apiService.getNftsBySearch(searchTerm);
+    const response = await this.apiService.getNftsBySearch(
+      searchTerm,
+      this.searchSize,
+      this.fieldsRequested,
+    );
     return response?.map(
       (c) =>
         new SearchItemResponse({
