@@ -246,14 +246,16 @@ export class ElrondApiService {
       this.getCollections.name,
       `collections?search=${encodeURIComponent(
         searchTerm,
-      )}&size=5&fields=collection`,
+      )}&size=5&fields=collection,name`,
     );
   }
 
   async getNftsBySearch(searchTerm: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsBySearch.name,
-      `nfts?search=${encodeURIComponent(searchTerm)}&size=5&fields=identifier`,
+      `nfts?search=${encodeURIComponent(
+        searchTerm,
+      )}&size=5&fields=identifier,name`,
     );
   }
 
