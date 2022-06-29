@@ -44,4 +44,4 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
   ],
   exports: [NftEventsService],
 })
-export class NftTransactionsModule {}
+export class NftEventsModule {}
