@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { NftEventsService } from './nft-events.service';
-import { NftTransactionsConsumer as NftEventsConsumer } from './nft-events.consumer';
+import { NftEventsConsumer } from './nft-events.consumer';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { RevertEventsConsumer } from './revert-events.consumer';
@@ -13,6 +13,11 @@ import { AssetsRedisHandler } from '../assets';
 import { ElrondCommunicationModule } from 'src/common';
 import { CampaignsModuleGraph } from '../campaigns/campaigns.module';
 import { MinterEventsService } from './minter-events.service';
+import { ElasiticUpdatesConsumer } from './elastic-updates-events.consumer';
+import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
+import { VerifyContentService } from '../assets/verify-content.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 
 @Module({
   imports: [
@@ -20,6 +25,7 @@ import { MinterEventsService } from './minter-events.service';
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
+    TypeOrmModule.forFeature([NftsFlagsRepository]),
   ],
   providers: [
     NftEventsConsumer,
@@ -27,12 +33,15 @@ import { MinterEventsService } from './minter-events.service';
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
+    ElasiticUpdatesConsumer,
+    ElasticUpdatesEventsService,
     AvailableTokensForAuctionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
     AssetsRedisHandler,
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
+    VerifyContentService,
   ],
   exports: [NftEventsService],
 })
-export class NftTransactionsModule {}
+export class NftEventsModule {}

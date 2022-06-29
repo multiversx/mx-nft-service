@@ -3,6 +3,9 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
+import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { ElasticQuery } from '@elrondnetwork/nestjs-microservice-common';
 
 export interface AddressTransactionCount {
   contractAddress: string;
@@ -11,7 +14,7 @@ export interface AddressTransactionCount {
 
 @Injectable()
 export class ElrondElasticService {
-  private readonly url = process.env.ELROND_ELASTICSEARCH + '/logs';
+  private readonly url = process.env.ELROND_ELASTICSEARCH;
   constructor(
     private readonly apiService: ApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -23,7 +26,7 @@ export class ElrondElasticService {
     size: number,
     timestamp: number | string,
   ): Promise<[HitResponse[], number, number]> {
-    const url = `${this.url}/_search`;
+    const url = `${this.url}/logs/_search`;
     const body = {
       size: 2 * size,
       query: {
@@ -100,5 +103,114 @@ export class ElrondElasticService {
       });
       return [[], 0, 0];
     }
+  }
+
+  async setCustomValue<T>(
+    collection: string,
+    identifier: string,
+    attribute: string,
+    value: T,
+  ): Promise<void> {
+    const url = `${this.url}/${collection}/_update/${identifier}`;
+
+    const profiler = new PerformanceProfiler();
+    const fullAttribute = 'nft_' + attribute;
+
+    const payload = {
+      doc: {
+        [fullAttribute]: value,
+      },
+    };
+    await this.apiService.post(url, payload);
+
+    profiler.stop();
+    MetricsCollector.setElasticDuration(collection, profiler.duration);
+  }
+
+  async getCustomValue(
+    collection: string,
+    identifier: string,
+    attribute: string,
+  ): Promise<any> {
+    const url = `${this.url}/${collection}/_search?q=_id:${encodeURIComponent(
+      identifier,
+    )}`;
+    const profiler = new PerformanceProfiler();
+    const fullAttribute = 'nft_' + attribute;
+
+    const payload = {
+      _source: fullAttribute,
+    };
+
+    console.log(url, payload);
+    const result = await this.apiService.post(url, payload);
+
+    profiler.stop();
+    MetricsCollector.setElasticDuration(collection, profiler.duration);
+
+    const hits = result.data?.hits?.hits;
+    if (hits && hits.length > 0) {
+      const document = hits[0];
+
+      return document._source[fullAttribute];
+    }
+
+    return null;
+  }
+
+  async getScrollableList(
+    collection: string,
+    key: string,
+    elasticQuery: ElasticQuery,
+    action: (items: any[]) => Promise<void>,
+  ): Promise<void> {
+    const url = `${this.url}/${collection}/_search?scroll=10m`;
+
+    const profiler = new PerformanceProfiler();
+
+    const result = await this.apiService.post(url, elasticQuery.toJson());
+
+    profiler.stop();
+
+    MetricsCollector.setElasticDuration(collection, profiler.duration);
+
+    const documents = result.data.hits.hits;
+    const scrollId = result.data._scroll_id;
+
+    await action(
+      documents.map((document: any) => this.formatItem(document, key)),
+    );
+
+    while (true) {
+      const scrollProfiler = new PerformanceProfiler();
+
+      const scrollResult = await this.apiService.post(
+        `${this.url}/_search/scroll`,
+        {
+          scroll: '20m',
+          scroll_id: scrollId,
+        },
+      );
+
+      scrollProfiler.stop();
+      MetricsCollector.setElasticDuration(collection, profiler.duration);
+
+      const scrollDocuments = scrollResult.data.hits.hits;
+      if (scrollDocuments.length === 0) {
+        break;
+      }
+
+      await action(
+        scrollDocuments.map((document: any) => this.formatItem(document, key)),
+      );
+    }
+  }
+
+  private formatItem(document: any, key: string) {
+    const { _id, _source } = document;
+    const item: any = {};
+    item[key] = _id;
+
+    return { ...item, ..._source };
   }
 }
