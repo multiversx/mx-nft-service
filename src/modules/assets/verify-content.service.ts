@@ -7,8 +7,8 @@ import { InapropriateContentError } from 'src/common/models/errors/inapropriate-
 
 export class VerifyContentService {
   async checkContentSensitivityForUrl(
-    fileUrl: string = 'https://devnet-media.elrond.com/nfts/asset/QmedVQamcRNacgLjpqGLSkupyZigBn4yCdBGKMZWwKAP9D',
-    mimeType: string = 'video',
+    fileUrl: string,
+    mimeType: string,
   ): Promise<number> {
     const client = this.getClarifaiClient();
     const metadata = new grpc.Metadata();
@@ -66,9 +66,10 @@ export class VerifyContentService {
     if (mimetype.includes('image')) {
       return this.addImageInputUrl(request, url);
     }
-    if (mimetype.includes('video')) {
-      return this.addVideoInputForUrl(request, url);
-    }
+    // disabled for the moment
+    // if (mimetype.includes('video')) {
+    //   return this.addVideoInputForUrl(request, url);
+    // }
     return;
   }
 
@@ -144,7 +145,7 @@ export class VerifyContentService {
           return reject(customError);
         }
         if (mimeType.includes('image')) {
-          return resolve(this.processImagePredictionsForUrl(response, reject));
+          return resolve(this.processImagePredictionsForUrl(response));
         }
         if (mimeType.includes('video')) {
           return resolve(this.processVideoPredictionsUrl(response));
@@ -216,10 +217,9 @@ export class VerifyContentService {
 
   private processImagePredictionsForUrl(
     response: service.PostWorkflowResultsResponse,
-    reject: (reason?: any) => void,
   ) {
     const results = response.getResultsList()[0];
-    return this.processImageNsfwModelUrl(results.getOutputsList()[0], reject);
+    return this.processImageNsfwModelUrl(results.getOutputsList()[0]);
   }
 
   private processImageNsfwModel(
@@ -232,16 +232,14 @@ export class VerifyContentService {
     }
   }
 
-  private processImageNsfwModelUrl(
-    output: resources.Output,
-    reject: (reason?: any) => void,
-  ) {
+  private processImageNsfwModelUrl(output: resources.Output) {
     const concepts = output.getData().getConceptsList();
     for (const concept of concepts) {
       if (concept.getName() === 'nsfw') {
         return concept.getValue();
       }
     }
+    return 0;
   }
 
   private processImageLogoModel(
@@ -276,12 +274,13 @@ export class VerifyContentService {
     for (const frame of frames) {
       const concepts = frame.getData().getConceptsList();
       for (const concept of concepts) {
-        console.log(concept);
         if (concept.getName() === 'nsfw') {
           return concept.getValue();
         }
       }
     }
+
+    return 0;
   }
   private processNsfwVideoPredictions(
     output: resources.Output,

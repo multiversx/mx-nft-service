@@ -124,7 +124,6 @@ export class ElrondElasticService {
         [fullAttribute]: value,
       },
     };
-    console.log({ url, payload });
     await this.apiService.post(url, payload);
 
     profiler.stop();
@@ -150,7 +149,7 @@ export class ElrondElasticService {
     const result = await this.apiService.post(url, payload);
 
     profiler.stop();
-    // MetricsCollector.setElasticDuration(collection, profiler.duration);
+    MetricsCollector.setElasticDuration(collection, profiler.duration);
 
     const hits = result.data?.hits?.hits;
     if (hits && hits.length > 0) {
