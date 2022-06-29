@@ -23,7 +23,7 @@ export class ElasiticUpdatesConsumer {
     }
     await this.nftTransactionsService.handleNftMintEvents(
       mintEvents?.events?.filter(
-        (e: { identifier: NftEventEnum | CollectionEventEnum }) =>
+        (e: { identifier: NftEventEnum }) =>
           e.identifier === NftEventEnum.ESDTNFTCreate,
       ),
       mintEvents.hash,
