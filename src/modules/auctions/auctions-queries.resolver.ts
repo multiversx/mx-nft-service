@@ -110,18 +110,22 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] =
+    const [auctions, count, priceRange] =
       await this.auctionsService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
       );
-
-    return PageResponse.mapResponse<Auction>(
-      auctions,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+    return {
+      ...PageResponse.mapResponse<Auction>(
+        auctions,
+        pagination,
+        count,
+        offset,
+        limit,
+      ),
+      priceRange: priceRange
+        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
+        : null,
+    };
   }
 
   @Query(() => String)

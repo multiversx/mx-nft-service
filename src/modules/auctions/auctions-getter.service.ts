@@ -60,7 +60,7 @@ export class AuctionsGetterService {
 
   async getAuctionsOrderByNoBids(
     queryRequest: QueryRequest,
-  ): Promise<[Auction[], number]> {
+  ): Promise<[Auction[], number, PriceRange]> {
     try {
       if (this.filtersForRunningAndEndDate(queryRequest)) {
         return await this.getEndingAuctions(queryRequest);
@@ -112,8 +112,8 @@ export class AuctionsGetterService {
 
   public async getRunningAuctionsEndingBefore(
     endDate: number,
-  ): Promise<[AuctionWithBidsCount[], number]> {
-    let auctions: AuctionWithBidsCount[] =
+  ): Promise<[AuctionWithBidsCount[], number, PriceRange]> {
+    let [auctions, priceRange] =
       await this.auctionServiceDb.getAuctionsEndingBefore(endDate);
     auctions = auctions?.map((item) => new AuctionWithBidsCount(item));
 
@@ -130,7 +130,7 @@ export class AuctionsGetterService {
     }
 
     groupedAuctions = groupedAuctions?.sortedDescending((a) => a.ordersCount);
-    return [groupedAuctions, groupedAuctions?.length];
+    return [groupedAuctions, groupedAuctions?.length, priceRange];
   }
 
   public async getMarketplaceAuctionsQuery(
@@ -254,7 +254,7 @@ export class AuctionsGetterService {
 
   private async getEndingAuctions(
     queryRequest: QueryRequest,
-  ): Promise<[Auction[], number]> {
+  ): Promise<[Auction[], number, PriceRange]> {
     if (
       queryRequest.filters.filters.find(
         (f) =>
@@ -263,7 +263,7 @@ export class AuctionsGetterService {
           parseInt(f.values[0]) < DateUtils.getCurrentTimestampPlusMinute(10),
       )
     ) {
-      let [auctions, count] = await this.getAuctionsToday();
+      let [auctions, count, priceRange] = await this.getAuctionsToday();
       auctions = auctions.filter(
         (a) => a.endDate > DateUtils.getCurrentTimestamp(),
       );
@@ -273,9 +273,13 @@ export class AuctionsGetterService {
         queryRequest.offset + queryRequest.limit,
       );
 
-      return [auctions?.map((item) => Auction.fromEntity(item)), count];
+      return [
+        auctions?.map((item) => Auction.fromEntity(item)),
+        count,
+        priceRange,
+      ];
     }
-    let [auctions, count] = await this.getAuctionsEndingInAMonth();
+    let [auctions, count, priceRange] = await this.getAuctionsEndingInAMonth();
     auctions = auctions.filter(
       (a) => a.endDate > DateUtils.getCurrentTimestamp(),
     );
@@ -284,10 +288,16 @@ export class AuctionsGetterService {
       queryRequest.offset + queryRequest.limit,
     );
 
-    return [auctions?.map((item) => Auction.fromEntity(item)), count];
+    return [
+      auctions?.map((item) => Auction.fromEntity(item)),
+      count,
+      priceRange,
+    ];
   }
 
-  private async getAuctionsToday(): Promise<[AuctionWithBidsCount[], number]> {
+  private async getAuctionsToday(): Promise<
+    [AuctionWithBidsCount[], number, PriceRange]
+  > {
     return this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AuctionsEndingToday.key,
@@ -311,7 +321,7 @@ export class AuctionsGetterService {
   }
 
   private async getAuctionsEndingInAMonth(): Promise<
-    [AuctionWithBidsCount[], number]
+    [AuctionWithBidsCount[], number, PriceRange]
   > {
     return await this.redisCacheService.getOrSet(
       this.redisClient,

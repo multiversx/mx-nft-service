@@ -226,6 +226,7 @@ export class AuctionsServiceDb {
       filterQueryBuilder.build();
 
     const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
+    console.log(priceRange);
     queryBuilder
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .innerJoin(
@@ -264,7 +265,7 @@ export class AuctionsServiceDb {
   }
 
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    return await this.auctionsRepository
+    const auctions = await this.auctionsRepository
       .createQueryBuilder('a')
       .select('a.*')
       .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
@@ -273,6 +274,10 @@ export class AuctionsServiceDb {
       .where({ status: AuctionStatusEnum.Running })
       .andWhere(`a.endDate <= ${endDate}`)
       .execute();
+    const priceRange = await this.getMinMaxForQuery(
+      this.getDefaultQueryRequest(DateUtils.getCurrentTimestamp(), endDate),
+    );
+    return [auctions, priceRange];
   }
 
   async getAuctionsForMarketplace(
@@ -371,7 +376,23 @@ export class AuctionsServiceDb {
     await this.rollbackCreateAuction(auctions);
   }
 
-  private getDefaultQueryRequest(startDate: number): QueryRequest {
+  private getDefaultQueryRequest(
+    startDate: number,
+    endDate: number = null,
+  ): QueryRequest {
+    if (endDate) {
+      return new QueryRequest({
+        filters: {
+          childExpressions: undefined,
+          filters: [
+            { field: 'status', values: ['Running'], op: Operation.EQ },
+            { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
+            { field: 'endDate', values: [`${startDate}`], op: Operation.LE },
+          ],
+          operator: Operator.AND,
+        },
+      });
+    }
     return new QueryRequest({
       filters: {
         childExpressions: undefined,
