@@ -1,14 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import {
-  HitResponse,
-  SearchResponse,
-} from '../elrond-communication/models/elastic-search';
-import { ApiService } from '../elrond-communication/api.service';
+import { HitResponse, SearchResponse } from './models/elastic-search';
+import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery } from './entities/elastic.query';
+import { ElasticQuery } from '@elrondnetwork/nestjs-microservice-common';
 
 export interface AddressTransactionCount {
   contractAddress: string;

@@ -13,7 +13,6 @@ import { ElrondCommunicationModule } from './common/services/elrond-communicatio
 import { cacheConfig } from './config';
 import { CachingModule } from './common/services/caching/caching.module';
 import * as ormconfig from './ormconfig';
-import { ElasticModule } from './common/services/elastic/elastic.module';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -40,7 +39,6 @@ if (!!process.env.LOG_FILE) {
 @Module({
   imports: [
     forwardRef(() => CachingModule),
-    forwardRef(() => ElasticModule),
     ScheduleModule.forRoot(),
     ConfigModule,
     WinstonModule.forRoot({
@@ -93,6 +91,6 @@ if (!!process.env.LOG_FILE) {
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     ElrondCommunicationModule,
   ],
-  exports: [ElrondCommunicationModule, CachingModule, ElasticModule],
+  exports: [ElrondCommunicationModule, CachingModule],
 })
 export class CommonModule {}

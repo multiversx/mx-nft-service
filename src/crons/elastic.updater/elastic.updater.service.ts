@@ -1,14 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
-import { ElasticQuery } from 'src/common/services/elastic/entities/elastic.query';
-import { QueryType } from 'src/common/services/elastic/entities/query.type';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { BatchUtils } from 'src/utils/batch.utils';
 import { Locker } from 'src/utils/locker';
+import {
+  ElasticQuery,
+  QueryType,
+} from '@elrondnetwork/nestjs-microservice-common';
 import asyncPool from 'tiny-async-pool';
 
+// this is not done
 @Injectable()
 export class ElasticUpdaterService {
   private readonly logger: Logger;
