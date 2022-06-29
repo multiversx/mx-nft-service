@@ -1,3 +1,4 @@
+import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { EntityRepository, Repository } from 'typeorm';
 import { NftFlagsEntity } from './nft-flags.entity';
 
@@ -8,7 +9,7 @@ export class NftsFlagsRepository extends Repository<NftFlagsEntity> {
       return await this.save(flagEntity);
     } catch (err) {
       // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
         return null;
       }
       throw err;

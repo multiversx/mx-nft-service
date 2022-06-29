@@ -119,7 +119,6 @@ export class VerifyContentService {
     metadata: grpc.Metadata,
     mimeType: any,
   ): Promise<number> {
-    console.log(mimeType);
     return new Promise((resolve, reject) => {
       client.postWorkflowResults(request, metadata, (err, response) => {
         if (err) {
@@ -131,7 +130,8 @@ export class VerifyContentService {
           return reject(customError);
         }
 
-        if (response.getStatus().getCode() !== 10000) {
+        const SUCCESS_STATUS_CODE = 10000;
+        if (response.getStatus().getCode() !== SUCCESS_STATUS_CODE) {
           let customError = {
             method: 'VerifyContentService.checkContentSensitivity',
             status: response?.getStatus()?.getDetails(),
@@ -150,6 +150,7 @@ export class VerifyContentService {
         if (mimeType.includes('video')) {
           return resolve(this.processVideoPredictionsUrl(response));
         }
+        return 0;
       });
     });
   }

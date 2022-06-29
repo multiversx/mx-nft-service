@@ -26,7 +26,7 @@ export class ElasticUpdatesEventsService {
             identifier,
             'fields=media',
           );
-          if (nft?.media) {
+          if (nft?.media && nft.media.length > 0) {
             const value =
               await this.verifyContent.checkContentSensitivityForUrl(
                 nft?.media[0].url || nft?.media[0].originalUrl,
@@ -35,14 +35,14 @@ export class ElasticUpdatesEventsService {
             await this.nftFlags.addFlag(
               new NftFlagsEntity({
                 identifier: identifier,
-                nsfw: +value.toFixed(2),
+                nsfw: Number(value.toFixed(2)),
               }),
             );
             await this.elasticUpdater.setCustomValue(
               'tokens',
               identifier,
               'nsfw',
-              +value.toFixed(2),
+              Number(value.toFixed(2)),
             );
           }
           break;

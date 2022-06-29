@@ -3,15 +3,15 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftTypeEnum } from 'src/modules/assets/models';
-import { BatchUtils } from 'src/utils/batch.utils';
 import { Locker } from 'src/utils/locker';
 import {
+  BatchUtils,
   ElasticQuery,
   QueryType,
 } from '@elrondnetwork/nestjs-microservice-common';
 import asyncPool from 'tiny-async-pool';
 
-// this is not done
+// this is not finished
 @Injectable()
 export class ElasticUpdaterService {
   private readonly logger: Logger;
@@ -101,7 +101,7 @@ export class ElasticUpdaterService {
     nsfw: number,
   ): Promise<void> {
     try {
-      this.logger.log(`Setting nsfw for '${identifier}'`);
+      this.logger.log(`Setting nsfw for '${identifier}' with value ${nsfw}`);
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,

@@ -1,5 +1,6 @@
 import { NftTag } from 'src/common/services/elrond-communication/models';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { EntityRepository, Repository } from 'typeorm';
 import { TagEntity } from './tags.entity';
 
@@ -35,7 +36,7 @@ export class TagsRepository extends Repository<TagEntity> {
       return await this.save(tags);
     } catch (err) {
       // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
         return null;
       }
       throw err;

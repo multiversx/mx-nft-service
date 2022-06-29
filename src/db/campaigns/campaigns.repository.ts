@@ -1,3 +1,4 @@
+import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { EntityRepository, Repository } from 'typeorm';
 import { CampaignEntity } from './campaign.entity';
 
@@ -56,7 +57,7 @@ export class CampaignsRepository extends Repository<CampaignEntity> {
       return await this.save(campaign);
     } catch (err) {
       // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
         return null;
       }
       throw err;

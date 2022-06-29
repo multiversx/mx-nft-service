@@ -12,6 +12,9 @@ export class RevertEventsConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE_REVERT,
   })
   async consumeRevertEvents(nftAuctionEvents: any) {
+    if (!nftAuctionEvents.events) {
+      return;
+    }
     await this.nftTransactionsService.handleNftAuctionEnded(nftAuctionEvents);
   }
 }
