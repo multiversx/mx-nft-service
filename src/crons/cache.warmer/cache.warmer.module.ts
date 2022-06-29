@@ -6,7 +6,7 @@ import { CollectionsNftsRedisHandler } from 'src/modules/nftCollections/collecti
 import { CollectionsService } from 'src/modules/nftCollections/collection.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { AuctionsWarmerService } from './auctions.warmer.service';
-import { CollectionsWarmerService } from './collections.warmer.service';
+// import { CollectionsWarmerService } from './collections.warmer.service';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { CollectionsWarmerService } from './collections.warmer.service';
     CollectionsService,
     CollectionsNftsCountRedisHandler,
     CollectionsNftsRedisHandler,
-    CollectionsWarmerService,
+    // CollectionsWarmerService,
     AuctionsWarmerService,
   ],
   exports: [CommonModule],
