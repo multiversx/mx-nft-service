@@ -18,7 +18,6 @@ export class ElasiticUpdatesConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeMintEvents(mintEvents: any) {
-    console.log(mintEvents);
     await this.nftTransactionsService.handleNftMintEvents(
       mintEvents?.events?.filter(
         (e: { identifier: NftEventEnum | CollectionEventEnum }) =>

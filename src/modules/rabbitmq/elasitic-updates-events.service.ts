@@ -15,8 +15,8 @@ export class ElasticUpdatesEventsService {
   ) {}
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     for (let event of mintEvents) {
-      console.log(event);
       switch (event.identifier) {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
@@ -24,25 +24,27 @@ export class ElasticUpdatesEventsService {
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
           const nft = await this.elrondApi.getNftByIdentifierForQuery(
             identifier,
-            '?fields=media',
+            'fields=media',
           );
-          const value = await this.verifyContent.checkContentSensitivityForUrl(
-            nft.media[0].originalUrl,
-            nft.media[0].fileType,
-          );
-          await this.nftFlags.addFlag(
-            new NftFlagsEntity({
-              identifier: identifier,
-              nsfw: +value.toFixed(2),
-            }),
-          );
-          await this.elasticUpdater.setCustomValue(
-            'tokens',
-            identifier,
-            'nsfw',
-            +value.toFixed(2),
-          );
-
+          if (nft?.media) {
+            const value =
+              await this.verifyContent.checkContentSensitivityForUrl(
+                nft?.media[0].url || nft?.media[0].originalUrl,
+                nft?.media[0].fileType,
+              );
+            await this.nftFlags.addFlag(
+              new NftFlagsEntity({
+                identifier: identifier,
+                nsfw: +value.toFixed(2),
+              }),
+            );
+            await this.elasticUpdater.setCustomValue(
+              'tokens',
+              identifier,
+              'nsfw',
+              +value.toFixed(2),
+            );
+          }
           break;
       }
     }
