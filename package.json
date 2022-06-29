@@ -82,6 +82,7 @@
     "save": "^2.5.0",
     "swagger-ui-express": "^4.3.0",
     "typeorm": "^0.2.41",
+    "tiny-async-pool": "^1.2.0",
     "winston": "3.7.2"
   },
   "devDependencies": {
@@ -94,6 +95,7 @@
     "@types/node": "^14.14.36",
     "@types/passport-local": "^1.0.33",
     "@types/supertest": "^2.0.10",
+    "@types/tiny-async-pool": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
     "eslint": "^7.22.0",

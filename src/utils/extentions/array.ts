@@ -4,6 +4,10 @@ declare global {
     remove(element: T): number;
     sorted(predicate?: (element: T) => number): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
+    toRecord<TOUT>(
+      keyPredicate: (item: T) => string,
+      valuePredicate?: (item: T) => TOUT,
+    ): Record<string, TOUT>;
   }
 }
 
@@ -54,6 +58,19 @@ Array.prototype.sortedDescending = function <T>(
   sorted.reverse();
 
   return sorted;
+};
+
+Array.prototype.toRecord = function <TIN, TOUT>(
+  keyPredicate: (item: TIN) => string,
+  valuePredicate?: (item: TIN) => TOUT,
+): Record<string, TOUT> {
+  const result: Record<string, TOUT> = {};
+
+  for (const item of this) {
+    result[keyPredicate(item)] = valuePredicate ? valuePredicate(item) : item;
+  }
+
+  return result;
 };
 
 export {};

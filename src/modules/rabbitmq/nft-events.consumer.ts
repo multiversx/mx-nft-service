@@ -9,7 +9,7 @@ import { NftEventsService } from './nft-events.service';
 import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
 @Injectable()
-export class NftTransactionsConsumer {
+export class NftEventsConsumer {
   constructor(
     private readonly nftTransactionsService: NftEventsService,
     private readonly minterEventsService: MinterEventsService,

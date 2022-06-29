@@ -4,6 +4,7 @@ export class MetricsCollector {
   private static queryDurationHistogram: Histogram<string>;
   private static externalCallsHistogram: Histogram<string>;
   private static redisDurationHistogram: Histogram<string>;
+  private static elasticDurationHistogram: Histogram<string>;
   private static auctionsEventsDurationHistogram: Histogram<string>;
   private static jobsHistogram: Histogram<string>;
   private static isDefaultMetricsRegistered = false;
@@ -36,6 +37,15 @@ export class MetricsCollector {
         name: 'redis_duration',
         help: 'Redis Duration',
         labelNames: ['action'],
+        buckets: [],
+      });
+    }
+
+    if (!MetricsCollector.elasticDurationHistogram) {
+      MetricsCollector.elasticDurationHistogram = new Histogram({
+        name: 'elastic_duration',
+        help: 'Elastic Duration',
+        labelNames: ['type'],
         buckets: [],
       });
     }
@@ -74,6 +84,11 @@ export class MetricsCollector {
   static setRedisDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.redisDurationHistogram.labels(action).observe(duration);
+  }
+
+  static setElasticDuration(action: string, duration: number) {
+    MetricsCollector.ensureIsInitialized();
+    MetricsCollector.elasticDurationHistogram.labels(action).observe(duration);
   }
 
   static setAuctionEventsDuration(action: string, duration: number) {
