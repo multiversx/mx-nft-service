@@ -17,7 +17,6 @@ export class ElasticUpdatesEventsService {
     private elasticUpdater: ElrondElasticService,
     private nftFlags: NftsFlagsRepository,
     private readonly nftRarityService: NftRarityService,
-    private readonly nftRarityRepository: NftRarityRepository,
   ) {}
 
   public async handleNftMintEvents(
@@ -96,7 +95,7 @@ export class ElasticUpdatesEventsService {
     });
 
     const deletes: Promise<DeleteResult>[] = nftsToDelete.map((n) => {
-      return this.nftRarityRepository.delete(n);
+      return this.nftRarityService.deleteNftRarity(n);
     });
 
     await Promise.all(updates);

@@ -4,6 +4,7 @@ import { AssetsQuery } from 'src/modules/assets';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class NftRarityService {
@@ -22,7 +23,7 @@ export class NftRarityService {
 
     const rarities: NftRarityEntity[] =
       await this.nftRarityComputeService.computeJaccardDistancesRarities(
-        this.sortNftsByNonce(nfts),
+        this.sortAscNftsByNonce(nfts),
       );
 
     if (!rarities) return false;
@@ -30,11 +31,15 @@ export class NftRarityService {
     const bulkUpdates = this.buildRaritiesBulkUpdate(rarities);
 
     await Promise.all([
-      this.nftRarityRepository.save(rarities),
+      this.nftRarityRepository.saveOrUpdateBulk(rarities),
       this.elasticUpdater.bulkRequest('tokens', bulkUpdates),
     ]);
 
     return true;
+  }
+
+  async deleteNftRarity(identifier: string): Promise<DeleteResult> {
+    return await this.nftRarityRepository.delete({ identifier: identifier });
   }
 
   buildRaritiesBulkUpdate(rarities: NftRarityEntity[]): string {
@@ -65,7 +70,7 @@ export class NftRarityService {
         await this.apiService.getAllNfts(
           new AssetsQuery()
             .addCollection(collectionTicker)
-            .addPageSize(nfts.length, 10001)
+            .addPageSize(nfts.length, 5000)
             .build(),
         ),
       );
@@ -73,7 +78,7 @@ export class NftRarityService {
     return nfts;
   }
 
-  private sortNftsByNonce(nfts: Nft[]): Nft[] {
+  private sortAscNftsByNonce(nfts: Nft[]): Nft[] {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
