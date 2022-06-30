@@ -101,8 +101,7 @@ export class ElasticUpdaterService {
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,
-        'nsfw',
-        nsfw,
+        this.elasticService.buildUpdateBody('nft_nsfw', nsfw),
       );
     } catch (error) {
       this.logger.error(
