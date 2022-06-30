@@ -47,14 +47,16 @@ export class FlagNftService {
       );
       return true;
     } catch (error) {
-      this.logger.error(
-        'An error occurred while setting the nfsw for identifier',
-        {
-          path: 'FlagNftService.updateNftFlag',
-          identifier,
-          exception: error?.message,
-        },
-      );
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
+
       return false;
     }
   }
@@ -79,14 +81,15 @@ export class FlagNftService {
 
       return true;
     } catch (error) {
-      this.logger.error(
-        'An error occurred while setting the nfsw for identifier',
-        {
-          path: 'FlagNftService.updateNftNSFWByAdmin',
-          identifier,
-          exception: error?.message,
-        },
-      );
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
       return false;
     }
   }
@@ -111,13 +114,15 @@ export class FlagNftService {
     try {
       return await this.nftFlagsRepository.batchGetFlags(identifiers);
     } catch (error) {
-      this.logger.error(
-        'An error occurred while trying to get bulk nft flags',
-        {
-          path: 'FlagNftService.getNftFlagsForIdentifiers',
-          exception: error,
-        },
-      );
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
     }
   }
 }
