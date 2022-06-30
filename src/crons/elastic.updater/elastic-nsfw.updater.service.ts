@@ -8,9 +8,13 @@ import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/report-nfts/flag-nft.service';
 
-// this is not finished
+type NsfwType = {
+  identifier: string;
+  nsfw: number;
+};
+
 @Injectable()
-export class ElasticUpdaterService {
+export class ElasticNsfwUpdaterService {
   private readonly logger: Logger;
 
   constructor(
@@ -18,7 +22,39 @@ export class ElasticUpdaterService {
     private flagsService: NftsFlagsRepository,
     private flagsNftService: FlagNftService,
   ) {
-    this.logger = new Logger(ElasticUpdaterService.name);
+    this.logger = new Logger(ElasticNsfwUpdaterService.name);
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async handleValidateNsfw() {
+    await Locker.lock(
+      'Elastic updater: Update tokens nsfw from database',
+      async () => {
+        const query = ElasticQuery.create()
+          .withFields(['nft_nsfw'])
+          .withMustExistCondition('identifier')
+          .withMustMultiShouldCondition(
+            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+            (type) => QueryType.Match('type', type),
+          )
+          .withPagination({ from: 0, size: 10000 });
+
+        await this.elasticService.getScrollableList(
+          'tokens',
+          'identifier',
+          query,
+          async (items) => {
+            const nsfwItems = items.map((item) => ({
+              identifier: item.identifier,
+              nsfw: item.api_nsft,
+            }));
+
+            await this.validateNsfwValues(nsfwItems);
+          },
+        );
+      },
+      true,
+    );
   }
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -53,11 +89,7 @@ export class ElasticUpdaterService {
     );
   }
 
-  private async updateNsfwForTokens(
-    items: { identifier: string; nsfw: number }[],
-  ): Promise<void> {
-    // const indexedItems = items.toRecord((item) => item.identifier);
-
+  private async updateNsfwForTokens(items: NsfwType[]): Promise<void> {
     const databaseResult = await BatchUtils.batchGet(
       items,
       (item) => item.identifier,
@@ -67,7 +99,7 @@ export class ElasticUpdaterService {
         ),
       100,
     );
-    const itemsToUpdate: { identifier: string; nsfw: number }[] = [];
+    const itemsToUpdate: NsfwType[] = [];
     for (const item of items) {
       if (!databaseResult || !databaseResult[item.identifier]) {
         await this.flagsNftService.updateNftFlag(item.identifier);
@@ -84,36 +116,43 @@ export class ElasticUpdaterService {
       }
     }
 
-    // for (const identifier of Object.keys(databaseResult)) {
-    //   console.log(identifier);
-    //   const item: any = indexedItems[identifier];
-    //   if (!item) {
-    //     const nsfwValue = await this.flagsNftService.updateNftFlag(
-    //       item.identifier,
-    //     );
-    //   }
-
-    //   const currentFlag = databaseResult[identifier].nsfw;
-    //   const actualFlag = item.nsfw;
-    //   console.log(
-    //     actualFlag,
-    //     currentFlag,
-    //     parseFloat(currentFlag) !== parseFloat(actualFlag),
-    //   );
-
-    //   if (parseFloat(currentFlag) !== parseFloat(actualFlag)) {
-    //     itemsToUpdate.push({
-    //       identifier: identifier,
-    //       nsfw: currentFlag,
-    //     });
-    //   }
-    // }
-
     await asyncPool(
       5,
       itemsToUpdate,
       async (item) => await this.updateNsfwForToken(item.identifier, item.nsfw),
     );
+  }
+
+  private async validateNsfwValues(items: NsfwType[]): Promise<void> {
+    const indexedItems = items.toRecord((item) => item.identifier);
+    const databaseResult = await BatchUtils.batchGet(
+      items,
+      (item) => item.identifier,
+      async (elements) =>
+        await this.flagsService.batchGetFlags(
+          elements.map((x) => x.identifier),
+        ),
+      100,
+    );
+
+    const itemsToUpdate: NsfwType[] = [];
+    for (const identifier of Object.keys(databaseResult)) {
+      const item: any = indexedItems[identifier];
+      if (!item) {
+        continue;
+      }
+      const currentFlag = databaseResult[item.identifier].nsfw;
+      const actualFlag = item.nsfw;
+
+      if (parseFloat(currentFlag) !== parseFloat(actualFlag.toString())) {
+        itemsToUpdate.push({
+          identifier: item.identifier,
+          nsfw: currentFlag,
+        });
+      }
+    }
+
+    await this.bulkUpdate(itemsToUpdate);
   }
 
   private async updateNsfwForToken(
@@ -132,5 +171,32 @@ export class ElasticUpdaterService {
         `Unexpected error when updating nsfw for token with identifier '${identifier}'`,
       );
     }
+  }
+
+  private async bulkUpdate(items: NsfwType[]): Promise<void> {
+    try {
+      this.logger.log(`Updating NSFW flag`);
+      await this.elasticService.bulkRequest(
+        'tokens',
+        this.buildNsfwBulkUpdate(items),
+      );
+    } catch (error) {
+      this.logger.error(
+        `Unexpected error when updating nsfw with bulk request`,
+      );
+    }
+  }
+
+  buildNsfwBulkUpdate(items: { identifier: string; nsfw: number }[]): string {
+    let updates: string = '';
+    items.forEach((r) => {
+      updates += this.elasticService.buildBulkUpdateBody(
+        'tokens',
+        r.identifier,
+        'nft_nsfw',
+        r.nsfw,
+      );
+    });
+    return updates;
   }
 }

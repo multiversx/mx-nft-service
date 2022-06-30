@@ -9,7 +9,7 @@ import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
-import { ElasticUpdaterModule } from './crons/elastic.updater/elastic.updater.module';
+import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -58,7 +58,7 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
-    let processorApp = await NestFactory.create(ElasticUpdaterModule);
+    let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
     await processorApp.listen(6014);
   }
 

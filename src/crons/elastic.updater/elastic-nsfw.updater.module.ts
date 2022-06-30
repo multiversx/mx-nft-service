@@ -6,7 +6,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags';
 import { VerifyContentService } from 'src/modules/assets/verify-content.service';
 import { NftRarityModule } from 'src/modules/nft-rarity/nft-rarity.module';
 import { FlagNftService } from 'src/modules/report-nfts/flag-nft.service';
-import { ElasticUpdaterService } from './elastic.updater.service';
+import { ElasticNsfwUpdaterService } from './elastic-nsfw.updater.service';
 
 @Module({
   imports: [
@@ -15,6 +15,6 @@ import { ElasticUpdaterService } from './elastic.updater.service';
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     NftRarityModule,
   ],
-  providers: [ElasticUpdaterService, FlagNftService, VerifyContentService],
+  providers: [ElasticNsfwUpdaterService, FlagNftService, VerifyContentService],
 })
-export class ElasticUpdaterModule {}
+export class ElasticNsfwUpdaterModule {}
