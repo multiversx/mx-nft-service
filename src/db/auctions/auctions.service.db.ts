@@ -60,7 +60,6 @@ export class AuctionsServiceDb {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
     const currentPriceSort = this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
@@ -72,7 +71,10 @@ export class AuctionsServiceDb {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    const response = await queryBuilder.getManyAndCount();
+    const [response, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
     return [...response, priceRange];
   }
 
@@ -88,7 +90,6 @@ export class AuctionsServiceDb {
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
-    const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
     const currentPriceSort = this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
@@ -108,7 +109,11 @@ export class AuctionsServiceDb {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    return [...(await queryBuilder.getManyAndCount()), priceRange];
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   private handleCurrentPriceFilter(
@@ -146,46 +151,40 @@ export class AuctionsServiceDb {
   async getAuctionsForIdentifier(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
-    try {
-      const identifier = queryRequest.filters.filters.find(
-        (x) => x.field === 'identifier',
-      ).values[0];
-      if (
-        queryRequest?.sorting &&
-        queryRequest?.sorting.some((f) => f.field === 'topBidPrice')
-      ) {
-        return await this.getAuctionsForIdentifierSortByPrice(
-          queryRequest,
-          identifier,
-        );
-      } else if (queryRequest.sorting) {
-        return this.getAuctions(queryRequest);
-      }
-      const endDate = DateUtils.getCurrentTimestampPlus(12);
-      const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+    const identifier = queryRequest.filters.filters.find(
+      (x) => x.field === 'identifier',
+    ).values[0];
+    if (
+      queryRequest?.sorting &&
+      queryRequest?.sorting.some((f) => f.field === 'topBidPrice')
+    ) {
+      return await this.getAuctionsForIdentifierSortByPrice(
+        queryRequest,
         identifier,
-        endDate,
-        queryRequest.limit,
-        queryRequest.offset,
-        queryRequest.filters?.filters?.find((x) => x.field === 'status')
-          ?.values,
       );
-      const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
-        identifier,
-        endDate,
-        queryRequest.filters?.filters?.find((x) => x.field === 'status')
-          ?.values,
-      );
-      const [auctions, count] = await Promise.all([
-        this.auctionsRepository.query(defaultAuctionsQuery),
-        this.auctionsRepository.query(sqlAuctionsCount),
-      ]);
-
-      const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
-      return [auctions, count[0]?.Count, priceRange];
-    } catch (error) {
-      console.log(error);
+    } else if (queryRequest.sorting) {
+      return this.getAuctions(queryRequest);
     }
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
+    const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+      identifier,
+      endDate,
+      queryRequest.limit,
+      queryRequest.offset,
+      queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
+    );
+    const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
+      identifier,
+      endDate,
+      queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
+    );
+    const [auctions, count, priceRange] = await Promise.all([
+      this.auctionsRepository.query(defaultAuctionsQuery),
+      this.auctionsRepository.query(sqlAuctionsCount),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+
+    return [auctions, count[0]?.Count, priceRange];
   }
 
   async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
@@ -225,8 +224,6 @@ export class AuctionsServiceDb {
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
-    const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
-    console.log(priceRange);
     queryBuilder
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .innerJoin(
@@ -239,8 +236,11 @@ export class AuctionsServiceDb {
       .orderBy('COUNT(a.Id)', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
-
-    return [...(await queryBuilder.getManyAndCount()), priceRange];
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   async getAuctionsOrderByOrdersCount(
@@ -253,7 +253,6 @@ export class AuctionsServiceDb {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
     queryBuilder
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .groupBy('a.id')
@@ -261,11 +260,15 @@ export class AuctionsServiceDb {
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
 
-    return [...(await queryBuilder.getManyAndCount()), priceRange];
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    const auctions = await this.auctionsRepository
+    const getAuctions = this.auctionsRepository
       .createQueryBuilder('a')
       .select('a.*')
       .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
@@ -274,16 +277,17 @@ export class AuctionsServiceDb {
       .where({ status: AuctionStatusEnum.Running })
       .andWhere(`a.endDate <= ${endDate}`)
       .execute();
-    const priceRange = await this.getMinMaxForQuery(
+    const getPriceRange = this.getMinMaxForQuery(
       this.getDefaultQueryRequest(DateUtils.getCurrentTimestamp(), endDate),
     );
-    return [auctions, priceRange];
+
+    return await Promise.all([getAuctions, getPriceRange]);
   }
 
   async getAuctionsForMarketplace(
     startDate: number,
   ): Promise<[any[], PriceRange]> {
-    const auctions = await this.auctionsRepository
+    const getAuctions = await this.auctionsRepository
       .createQueryBuilder('a')
       .select('a.*')
       .addSelect(
@@ -294,10 +298,10 @@ export class AuctionsServiceDb {
       .where({ status: AuctionStatusEnum.Running })
       .andWhere(`a.startDate <= ${startDate}`)
       .execute();
-    const priceRange = await this.getMinMaxForQuery(
+    const getPriceRange = await this.getMinMaxForQuery(
       this.getDefaultQueryRequest(startDate),
     );
-    return [auctions, priceRange];
+    return await Promise.all([getAuctions, getPriceRange]);
   }
 
   async getMinMax(): Promise<PriceRange> {
@@ -409,7 +413,7 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
     identifier: string,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
-    const [auctions, count] = await Promise.all([
+    const [auctions, count, priceRange] = await Promise.all([
       this.auctionsRepository.query(
         getAuctionsForIdentifierSortByPrice(
           identifier,
@@ -420,9 +424,8 @@ export class AuctionsServiceDb {
       this.auctionsRepository.query(
         getAuctionsForIdentifierSortByPriceCount(identifier),
       ),
+      this.getMinMaxForQuery(queryRequest),
     ]);
-
-    const priceRange: PriceRange = await this.getMinMaxForQuery(queryRequest);
     return [auctions, count[0]?.Count, priceRange];
   }
 
