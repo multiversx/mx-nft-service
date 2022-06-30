@@ -17,7 +17,10 @@ export class ElasticUpdatesEventsService {
     private readonly nftRarityService: NftRarityService,
   ) {}
 
-  public async handleNftMintEvents(mintEvents: any[], hash: string) {
+  public async handleNftMintEvents(
+    mintEvents: any[],
+    hash: string,
+  ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     for (let event of mintEvents) {
       switch (event.identifier) {
@@ -55,7 +58,9 @@ export class ElasticUpdatesEventsService {
     }
   }
 
-  public async handleRaritiesForNftMintAndBurnEvents(mintEvents: any[]) {
+  public async handleRaritiesForNftMintAndBurnEvents(
+    mintEvents: any[],
+  ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
     let collectionsToUpdate: string[] = [];

@@ -3,7 +3,6 @@ import BigNumber from 'bignumber.js';
 import { Nft } from 'src/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
 
-
 @Injectable()
 export class NftRarityComputeService {
   async computeJaccardDistancesRarities(
@@ -11,7 +10,7 @@ export class NftRarityComputeService {
   ): Promise<NftRarityEntity[]> {
     const avg: BigNumber[] = this.computeAvg(nfts);
 
-    const scoreArray = this.computeJD(avg);
+    const scoreArray: BigNumber[] = this.computeJD(avg);
 
     let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
       return new BigNumber(a).comparedTo(b);
