@@ -143,7 +143,10 @@ export class ElasticNsfwUpdaterService {
       const currentFlag = databaseResult[item.identifier].nsfw;
       const actualFlag = item.nsfw;
 
-      if (parseFloat(currentFlag) !== parseFloat(actualFlag.toString())) {
+      if (
+        actualFlag === undefined ||
+        parseFloat(currentFlag) !== parseFloat(actualFlag)
+      ) {
         itemsToUpdate.push({
           identifier: item.identifier,
           nsfw: currentFlag,
@@ -174,11 +177,13 @@ export class ElasticNsfwUpdaterService {
 
   private async bulkUpdate(items: NsfwType[]): Promise<void> {
     try {
-      this.logger.log(`Updating NSFW flag`);
-      await this.elasticService.bulkRequest(
-        'tokens',
-        this.buildNsfwBulkUpdate(items),
-      );
+      if (items && items.length > 0) {
+        this.logger.log(`Updating NSFW flag`);
+        await this.elasticService.bulkRequest(
+          'tokens',
+          this.buildNsfwBulkUpdate(items),
+        );
+      }
     } catch (error) {
       this.logger.error(
         `Unexpected error when updating nsfw with bulk request`,
