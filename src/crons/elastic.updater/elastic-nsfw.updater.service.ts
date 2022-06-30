@@ -19,7 +19,6 @@ export class ElasticNsfwUpdaterService {
 
   constructor(
     private elasticService: ElrondElasticService,
-    private flagsService: NftsFlagsRepository,
     private flagsNftService: FlagNftService,
   ) {
     this.logger = new Logger(ElasticNsfwUpdaterService.name);
@@ -94,7 +93,7 @@ export class ElasticNsfwUpdaterService {
       items,
       (item) => item.identifier,
       async (elements) =>
-        await this.flagsService.batchGetFlags(
+        await this.flagsNftService.getNftFlagsForIdentifiers(
           elements.map((x) => x.identifier),
         ),
       100,
@@ -129,7 +128,7 @@ export class ElasticNsfwUpdaterService {
       items,
       (item) => item.identifier,
       async (elements) =>
-        await this.flagsService.batchGetFlags(
+        await this.flagsNftService.getNftFlagsForIdentifiers(
           elements.map((x) => x.identifier),
         ),
       100,

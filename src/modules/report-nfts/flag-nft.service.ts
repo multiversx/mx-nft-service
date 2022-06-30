@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import { Logger } from 'winston';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
@@ -9,7 +11,8 @@ export class FlagNftService {
     private elrondApi: ElrondApiService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
-    private nftFlags: NftsFlagsRepository,
+    private nftFlagsRepository: NftsFlagsRepository,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   public async updateNftFlag(identifier: string) {
@@ -23,7 +26,7 @@ export class FlagNftService {
           nft?.media[0].url || nft?.media[0].originalUrl,
           nft?.media[0].fileType,
         );
-        await this.nftFlags.addFlag(
+        await this.nftFlagsRepository.addFlag(
           new NftFlagsEntity({
             identifier: identifier,
             nsfw: Number(value.toFixed(2)),
@@ -41,6 +44,19 @@ export class FlagNftService {
       return true;
     } catch (error) {
       return false;
+    }
+  }
+  public async getNftFlagsForIdentifiers(identifiers: string[]) {
+    try {
+      return await this.nftFlagsRepository.batchGetFlags(identifiers);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to get bulk nft flags',
+        {
+          path: 'FlagNftService.getNftFlagsForIdentifiers',
+          exception: error,
+        },
+      );
     }
   }
 }
