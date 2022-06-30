@@ -30,7 +30,7 @@
     "@elastic/elasticsearch": "^7.12.0",
     "@elrondnetwork/erdjs": "10.2.4",
     "@elrondnetwork/erdjs-network-providers": "^0.1.5",
-    "@elrondnetwork/nestjs-microservice-common": "^0.1.10",
+    "@elrondnetwork/erdnest": "^0.1.8",
     "@golevelup/nestjs-rabbitmq": "2.2.0",
     "@jenyus-org/nestjs-graphql-utils": "^1.6.4",
     "@nestjs-query/query-graphql": "0.30.0",

@@ -28,7 +28,7 @@ export class AuctionCustomFilter {
   @Field(() => AuctionCustomEnum)
   field: AuctionCustomEnum;
 
-  @Field(() => AuctionCustomSort)
+  @Field(() => AuctionCustomSort, { nullable: true })
   sort: AuctionCustomSort;
 
   constructor(init?: Partial<Filter>) {
