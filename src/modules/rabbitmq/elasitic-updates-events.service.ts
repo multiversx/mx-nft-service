@@ -63,7 +63,7 @@ export class ElasticUpdatesEventsService {
   public async handleRaritiesForNftMintAndBurnEvents(
     mintEvents: any[],
   ): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     let collectionsToUpdate: string[] = [];
     let nftsToDelete: string[] = [];

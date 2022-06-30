@@ -18,15 +18,21 @@ export class NftRarityService {
   async updateRarities(collectionTicker: string): Promise<boolean> {
     const nfts: Nft[] = await this.getAllCollectionNfts(collectionTicker);
 
-    if (!nfts || nfts.find((nft) => nft.metadata?.attributes === null))
+    if (
+      nfts?.length === 0 ||
+      nfts?.find((nft) => (nft.metadata?.attributes === null) === undefined)
+    ) {
       return false;
+    }
 
     const rarities: NftRarityEntity[] =
       await this.nftRarityComputeService.computeJaccardDistancesRarities(
         this.sortAscNftsByNonce(nfts),
       );
 
-    if (!rarities) return false;
+    if (!rarities) {
+      return false;
+    }
 
     const bulkUpdates = this.buildRaritiesBulkUpdate(rarities);
 
