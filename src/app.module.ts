@@ -21,6 +21,7 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 import { SearchModuleGraph } from './modules/search/search.module';
 import { TagsModuleGraph } from './modules/tags/tags.module';
+import { NftRarityModule } from './modules/nft-rarity/nft-rarity.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { TagsModuleGraph } from './modules/tags/tags.module';
     IpfsModule,
     SearchModuleGraph,
     TagsModuleGraph,
+    NftRarityModule,
   ],
 })
 export class AppModule {}

@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CollectionEventEnum,
-  NftEventEnum,
-} from '../assets/models/AuctionEvent.enum';
+import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
 import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
 import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
@@ -21,12 +18,22 @@ export class ElasiticUpdatesConsumer {
     if (!mintEvents.events) {
       return;
     }
-    await this.nftTransactionsService.handleNftMintEvents(
-      mintEvents?.events?.filter(
-        (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTCreate,
+
+    await Promise.all([
+      this.nftTransactionsService.handleNftMintEvents(
+        mintEvents?.events?.filter(
+          (e: { identifier: NftEventEnum }) =>
+            e.identifier === NftEventEnum.ESDTNFTCreate,
+        ),
+        mintEvents.hash,
       ),
-      mintEvents.hash,
-    );
+      this.nftTransactionsService.handleRaritiesForNftMintAndBurnEvents(
+        mintEvents?.events?.filter(
+          (e: { identifier: NftEventEnum }) =>
+            e.identifier === NftEventEnum.ESDTNFTCreate ||
+            NftEventEnum.ESDTNFTBurn,
+        ),
+      ),
+    ]);
   }
 }

@@ -6,6 +6,7 @@ import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { ElasticQuery } from '@elrondnetwork/erdnest';
+import { ApiSettings } from './models/api-settings';
 
 export interface AddressTransactionCount {
   contractAddress: string;
@@ -108,23 +109,64 @@ export class ElrondElasticService {
   async setCustomValue<T>(
     collection: string,
     identifier: string,
-    attribute: string,
-    value: T,
+    body: any,
   ): Promise<void> {
     const url = `${this.url}/${collection}/_update/${identifier}`;
 
     const profiler = new PerformanceProfiler();
-    const fullAttribute = 'nft_' + attribute;
 
-    const payload = {
-      doc: {
-        [fullAttribute]: value,
-      },
-    };
-    await this.apiService.post(url, payload);
+    await this.apiService.post(url, body);
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
+  }
+
+  async bulkRequest<T>(collection: string, body: string): Promise<void> {
+    const url = `${this.url}/${collection}/_bulk`;
+
+    const profiler = new PerformanceProfiler();
+
+    await this.apiService.post(
+      url,
+      body,
+      new ApiSettings({
+        contentType: 'application/x-ndjson',
+      }),
+    );
+
+    profiler.stop();
+    MetricsCollector.setElasticDuration(collection, profiler.duration);
+  }
+
+  buildUpdateBody<T>(fieldName: string, fieldValue: any): any {
+    return {
+      doc: {
+        [fieldName]: fieldValue,
+      },
+    };
+  }
+
+  buildBulkUpdateBody<T>(
+    collection: string,
+    identifier: string,
+    fieldName: string,
+    fieldValue: any,
+  ): string {
+    return (
+      JSON.stringify({
+        update: {
+          _id: identifier,
+          _index: collection,
+        },
+      }) +
+      '\n' +
+      JSON.stringify({
+        doc: {
+          [fieldName]: fieldValue,
+        },
+      }) +
+      '\n'
+    );
   }
 
   async getCustomValue(
