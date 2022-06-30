@@ -29,12 +29,16 @@ export class ElasticUpdatesEventsService {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
+
+          console.log(createTopics);
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
           const nft = await this.elrondApi.getNftByIdentifierForQuery(
             identifier,
             'fields=media',
           );
-          if (nft?.media && nft.media.length > 0) {
+          console.log(identifier);
+
+          if (nft && nft.media && nft.media.length > 0) {
             const value =
               await this.verifyContent.checkContentSensitivityForUrl(
                 nft?.media[0].url || nft?.media[0].originalUrl,
