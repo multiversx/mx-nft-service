@@ -66,10 +66,9 @@ export class VerifyContentService {
     if (mimetype.includes('image')) {
       return this.addImageInputUrl(request, url);
     }
-    // disabled for the moment
-    // if (mimetype.includes('video')) {
-    //   return this.addVideoInputForUrl(request, url);
-    // }
+    if (mimetype.includes('video')) {
+      return this.addVideoInputForUrl(request, url);
+    }
     return;
   }
 
@@ -271,16 +270,19 @@ export class VerifyContentService {
   }
 
   private processNsfwVideoPredictionsUrl(output: resources.Output): number {
+    let nsfwValues: number[] = [];
     const frames = output.getData().getFramesList();
     for (const frame of frames) {
       const concepts = frame.getData().getConceptsList();
       for (const concept of concepts) {
         if (concept.getName() === 'nsfw') {
-          return concept.getValue();
+          nsfwValues.push(concept.getValue());
         }
       }
     }
-
+    if (nsfwValues?.length > 0) {
+      return Math.max(...nsfwValues);
+    }
     return 0;
   }
   private processNsfwVideoPredictions(
