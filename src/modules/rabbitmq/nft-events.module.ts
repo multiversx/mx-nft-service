@@ -14,13 +14,14 @@ import { ElrondCommunicationModule } from 'src/common';
 import { CampaignsModuleGraph } from '../campaigns/campaigns.module';
 import { MinterEventsService } from './minter-events.service';
 import { ElasiticUpdatesConsumer } from './elastic-updates-events.consumer';
-import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftRarityComputeService } from '../nft-rarity/nft-rarity.compute.service';
+import { FlagNftService } from '../report-nfts/flag-nft.service';
+import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { NftRarityComputeService } from '../nft-rarity/nft-rarity.compute.servic
     VerifyContentService,
     NftRarityService,
     NftRarityComputeService,
+    FlagNftService,
   ],
   exports: [NftEventsService],
 })

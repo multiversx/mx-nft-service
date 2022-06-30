@@ -6,6 +6,7 @@ import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
+import { FlagNftService } from 'src/modules/report-nfts/flag-nft.service';
 
 // this is not finished
 @Injectable()
@@ -15,6 +16,7 @@ export class ElasticUpdaterService {
   constructor(
     private elasticService: ElrondElasticService,
     private flagsService: NftsFlagsRepository,
+    private flagsNftService: FlagNftService,
   ) {
     this.logger = new Logger(ElasticUpdaterService.name);
   }
@@ -25,7 +27,7 @@ export class ElasticUpdaterService {
       'Elastic updater: Update tokens nsfw',
       async () => {
         const query = ElasticQuery.create()
-          .withFields(['nft_nsfw'])
+          .withMustNotExistCondition('nft_nsfw')
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -54,7 +56,7 @@ export class ElasticUpdaterService {
   private async updateNsfwForTokens(
     items: { identifier: string; nsfw: number }[],
   ): Promise<void> {
-    const indexedItems = items.toRecord((item) => item.identifier);
+    // const indexedItems = items.toRecord((item) => item.identifier);
 
     const databaseResult = await BatchUtils.batchGet(
       items,
@@ -65,25 +67,47 @@ export class ElasticUpdaterService {
         ),
       100,
     );
-
     const itemsToUpdate: { identifier: string; nsfw: number }[] = [];
+    for (const item of items) {
+      if (!databaseResult || !databaseResult[item.identifier]) {
+        await this.flagsNftService.updateNftFlag(item.identifier);
+      } else {
+        const currentFlag = databaseResult[item.identifier].nsfw;
+        const actualFlag = item.nsfw;
 
-    for (const identifier of Object.keys(databaseResult)) {
-      const item: any = indexedItems[identifier];
-      if (!item) {
-        continue;
-      }
-
-      const currentFlag = databaseResult[identifier];
-      const actualMedia = item.nsfw;
-
-      if (currentFlag !== actualMedia) {
-        itemsToUpdate.push({
-          identifier: identifier,
-          nsfw: currentFlag,
-        });
+        if (parseFloat(currentFlag) !== parseFloat(actualFlag.toString())) {
+          itemsToUpdate.push({
+            identifier: item.identifier,
+            nsfw: currentFlag,
+          });
+        }
       }
     }
+
+    // for (const identifier of Object.keys(databaseResult)) {
+    //   console.log(identifier);
+    //   const item: any = indexedItems[identifier];
+    //   if (!item) {
+    //     const nsfwValue = await this.flagsNftService.updateNftFlag(
+    //       item.identifier,
+    //     );
+    //   }
+
+    //   const currentFlag = databaseResult[identifier].nsfw;
+    //   const actualFlag = item.nsfw;
+    //   console.log(
+    //     actualFlag,
+    //     currentFlag,
+    //     parseFloat(currentFlag) !== parseFloat(actualFlag),
+    //   );
+
+    //   if (parseFloat(currentFlag) !== parseFloat(actualFlag)) {
+    //     itemsToUpdate.push({
+    //       identifier: identifier,
+    //       nsfw: currentFlag,
+    //     });
+    //   }
+    // }
 
     await asyncPool(
       5,

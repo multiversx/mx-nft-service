@@ -1,16 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ElrondCommunicationModule } from 'src/common';
+import { CommonModule } from 'src/common.module';
 import { NftsFlagsRepository } from 'src/db/nftFlags';
+import { VerifyContentService } from 'src/modules/assets/verify-content.service';
 import { NftRarityModule } from 'src/modules/nft-rarity/nft-rarity.module';
+import { FlagNftService } from 'src/modules/report-nfts/flag-nft.service';
 import { ElasticUpdaterService } from './elastic.updater.service';
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
+    CommonModule,
+    ElrondCommunicationModule,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     NftRarityModule,
   ],
-  providers: [ElasticUpdaterService],
+  providers: [ElasticUpdaterService, FlagNftService, VerifyContentService],
 })
 export class ElasticUpdaterModule {}

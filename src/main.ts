@@ -9,6 +9,7 @@ import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
+import { ElasticUpdaterModule } from './crons/elastic.updater/elastic.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -56,6 +57,11 @@ async function bootstrap() {
     await processorApp.listen(6012);
   }
 
+  if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticUpdaterModule);
+    await processorApp.listen(6014);
+  }
+
   const logger = new Logger('Bootstrapper');
 
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -84,6 +90,7 @@ async function bootstrap() {
   logger.log(
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
+  logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
 }
 
 bootstrap();
