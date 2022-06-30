@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
-import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
 import { DeleteResult } from 'typeorm';
 import { NftTypeEnum } from '../assets/models';

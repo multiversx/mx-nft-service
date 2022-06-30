@@ -14,6 +14,6 @@ import { NftRarityService } from './nft-rarity.service';
     CollectionModuleGraph,
   ],
   providers: [NftRarityResolver, NftRarityService, NftRarityComputeService],
-  exports: [],
+  exports: [NftRarityService],
 })
 export class NftRarityModule {}

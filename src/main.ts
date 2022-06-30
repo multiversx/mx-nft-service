@@ -9,6 +9,7 @@ import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
+import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -56,6 +57,11 @@ async function bootstrap() {
     await processorApp.listen(6012);
   }
 
+  if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
+    await processorApp.listen(6013);
+  }
+
   const logger = new Logger('Bootstrapper');
 
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -83,6 +89,9 @@ async function bootstrap() {
   logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
   logger.log(
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
+  );
+  logger.log(
+    `NFT Rarity cronjobs active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
   );
 }
 

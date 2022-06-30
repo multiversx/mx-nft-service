@@ -13,8 +13,8 @@ export class ElasticUpdaterService {
   private readonly logger: Logger;
 
   constructor(
-    private elasticService: ElrondElasticService,
-    private flagsService: NftsFlagsRepository,
+    private readonly elasticService: ElrondElasticService,
+    private readonly flagsService: NftsFlagsRepository,
   ) {
     this.logger = new Logger(ElasticUpdaterService.name);
   }
