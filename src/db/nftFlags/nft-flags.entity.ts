@@ -11,7 +11,7 @@ export class NftFlagsEntity {
   @Index()
   identifier: string;
 
-  @Column('decimal')
+  @Column('decimal', { precision: 6, scale: 2 })
   nsfw: float;
 
   constructor(init?: Partial<NftFlagsEntity>) {
