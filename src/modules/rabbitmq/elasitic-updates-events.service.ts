@@ -71,6 +71,7 @@ export class ElasticUpdatesEventsService {
     for (let event of mintEvents) {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
+      console.log(createTopics);
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
       console.log(identifier);
       const nft = await this.elrondApi.getNftByIdentifierForQuery(
@@ -79,14 +80,14 @@ export class ElasticUpdatesEventsService {
       );
 
       if (
-        nft?.type === NftTypeEnum.NonFungibleESDT ||
+        (nft && nft.type === NftTypeEnum.NonFungibleESDT) ||
         NftTypeEnum.SemiFungibleESDT
       ) {
         {
           collectionsToUpdate.push(nft.collection);
         }
 
-        if (event.identifier === NftEventEnum.ESDTNFTBurn)
+        if (nft && event.identifier === NftEventEnum.ESDTNFTBurn)
           nftsToDelete.push(nft.identifier);
       }
     }
