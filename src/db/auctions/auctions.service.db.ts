@@ -11,7 +11,12 @@ import {
   AuctionCustomSort,
 } from 'src/modules/common/filters/AuctionCustomFilters';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
-import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
+import {
+  Sorting,
+  Sort,
+  Operation,
+  Operator,
+} from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { AuctionsForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/collection-auctions.redis-handler';
 import { nominateAmount } from 'src/utils';
@@ -20,6 +25,7 @@ import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
+import { PriceRange } from './price-range';
 import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
@@ -46,7 +52,7 @@ export class AuctionsServiceDb {
 
   async getAuctions(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -65,12 +71,16 @@ export class AuctionsServiceDb {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    return await queryBuilder.getManyAndCount();
+    const [response, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...response, priceRange];
   }
 
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -79,6 +89,7 @@ export class AuctionsServiceDb {
     const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
+
     const currentPriceSort = this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
@@ -98,7 +109,11 @@ export class AuctionsServiceDb {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    return await queryBuilder.getManyAndCount();
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   private handleCurrentPriceFilter(
@@ -135,45 +150,41 @@ export class AuctionsServiceDb {
 
   async getAuctionsForIdentifier(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
-    try {
-      const identifier = queryRequest.filters.filters.find(
-        (x) => x.field === 'identifier',
-      ).values[0];
-      if (
-        queryRequest?.sorting &&
-        queryRequest?.sorting.some((f) => f.field === 'topBidPrice')
-      ) {
-        return await this.getAuctionsForIdentifierSortByPrice(
-          queryRequest,
-          identifier,
-        );
-      } else if (queryRequest.sorting) {
-        return this.getAuctions(queryRequest);
-      }
-      const endDate = DateUtils.getCurrentTimestampPlus(12);
-      const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    const identifier = queryRequest.filters.filters.find(
+      (x) => x.field === 'identifier',
+    ).values[0];
+    if (
+      queryRequest?.sorting &&
+      queryRequest?.sorting.some((f) => f.field === 'topBidPrice')
+    ) {
+      return await this.getAuctionsForIdentifierSortByPrice(
+        queryRequest,
         identifier,
-        endDate,
-        queryRequest.limit,
-        queryRequest.offset,
-        queryRequest.filters?.filters?.find((x) => x.field === 'status')
-          ?.values,
       );
-      const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
-        identifier,
-        endDate,
-        queryRequest.filters?.filters?.find((x) => x.field === 'status')
-          ?.values,
-      );
-      const [auctions, count] = await Promise.all([
-        this.auctionsRepository.query(defaultAuctionsQuery),
-        this.auctionsRepository.query(sqlAuctionsCount),
-      ]);
-      return [auctions, count[0]?.Count];
-    } catch (error) {
-      console.log(error);
+    } else if (queryRequest.sorting) {
+      return this.getAuctions(queryRequest);
     }
+    const endDate = DateUtils.getCurrentTimestampPlus(12);
+    const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+      identifier,
+      endDate,
+      queryRequest.limit,
+      queryRequest.offset,
+      queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
+    );
+    const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
+      identifier,
+      endDate,
+      queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
+    );
+    const [auctions, count, priceRange] = await Promise.all([
+      this.auctionsRepository.query(defaultAuctionsQuery),
+      this.auctionsRepository.query(sqlAuctionsCount),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+
+    return [auctions, count[0]?.Count, priceRange];
   }
 
   async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
@@ -204,7 +215,7 @@ export class AuctionsServiceDb {
 
   async getAuctionsOrderByOrdersCountGroupByIdentifier(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -212,6 +223,7 @@ export class AuctionsServiceDb {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
+
     queryBuilder
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .innerJoin(
@@ -224,13 +236,16 @@ export class AuctionsServiceDb {
       .orderBy('COUNT(a.Id)', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
-
-    return await queryBuilder.getManyAndCount();
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number]> {
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -245,11 +260,15 @@ export class AuctionsServiceDb {
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
 
-    return await queryBuilder.getManyAndCount();
+    const [auctions, priceRange] = await Promise.all([
+      queryBuilder.getManyAndCount(),
+      this.getMinMaxForQuery(queryRequest),
+    ]);
+    return [...auctions, priceRange];
   }
 
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    return await this.auctionsRepository
+    const getAuctions = this.auctionsRepository
       .createQueryBuilder('a')
       .select('a.*')
       .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
@@ -258,10 +277,17 @@ export class AuctionsServiceDb {
       .where({ status: AuctionStatusEnum.Running })
       .andWhere(`a.endDate <= ${endDate}`)
       .execute();
+    const getPriceRange = this.getMinMaxForQuery(
+      this.getDefaultQueryRequest(DateUtils.getCurrentTimestamp(), endDate),
+    );
+
+    return await Promise.all([getAuctions, getPriceRange]);
   }
 
-  async getAuctionsForMarketplace(endDate: number): Promise<any[]> {
-    return await this.auctionsRepository
+  async getAuctionsForMarketplace(
+    startDate: number,
+  ): Promise<[any[], PriceRange]> {
+    const getAuctions = await this.auctionsRepository
       .createQueryBuilder('a')
       .select('a.*')
       .addSelect(
@@ -270,11 +296,15 @@ export class AuctionsServiceDb {
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .groupBy('a.id')
       .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.startDate <= ${endDate}`)
+      .andWhere(`a.startDate <= ${startDate}`)
       .execute();
+    const getPriceRange = await this.getMinMaxForQuery(
+      this.getDefaultQueryRequest(startDate),
+    );
+    return await Promise.all([getAuctions, getPriceRange]);
   }
 
-  async getMinMax(): Promise<{ minBid: string; maxBid: string }> {
+  async getMinMax(): Promise<PriceRange> {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
@@ -286,6 +316,29 @@ export class AuctionsServiceDb {
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
       .where({ status: AuctionStatusEnum.Running })
+      .execute();
+    return response[0];
+  }
+
+  private async getMinMaxForQuery(
+    queryRequest: QueryRequest,
+  ): Promise<PriceRange> {
+    const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
+      this.auctionsRepository,
+      queryRequest.filters,
+      'a',
+    );
+    const queryBuilder: SelectQueryBuilder<AuctionEntity> =
+      filterQueryBuilder.build();
+    const response = await queryBuilder
+      .select(
+        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+      )
+      .leftJoin(
+        'orders',
+        'o',
+        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+      )
       .execute();
     return response[0];
   }
@@ -327,11 +380,40 @@ export class AuctionsServiceDb {
     await this.rollbackCreateAuction(auctions);
   }
 
+  private getDefaultQueryRequest(
+    startDate: number,
+    endDate: number = null,
+  ): QueryRequest {
+    if (endDate) {
+      return new QueryRequest({
+        filters: {
+          childExpressions: undefined,
+          filters: [
+            { field: 'status', values: ['Running'], op: Operation.EQ },
+            { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
+            { field: 'endDate', values: [`${startDate}`], op: Operation.LE },
+          ],
+          operator: Operator.AND,
+        },
+      });
+    }
+    return new QueryRequest({
+      filters: {
+        childExpressions: undefined,
+        filters: [
+          { field: 'status', values: ['Running'], op: Operation.EQ },
+          { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
+        ],
+        operator: Operator.AND,
+      },
+    });
+  }
+
   private async getAuctionsForIdentifierSortByPrice(
     queryRequest: QueryRequest,
     identifier: string,
-  ): Promise<[AuctionEntity[], number]> {
-    const [auctions, count] = await Promise.all([
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    const [auctions, count, priceRange] = await Promise.all([
       this.auctionsRepository.query(
         getAuctionsForIdentifierSortByPrice(
           identifier,
@@ -342,9 +424,9 @@ export class AuctionsServiceDb {
       this.auctionsRepository.query(
         getAuctionsForIdentifierSortByPriceCount(identifier),
       ),
+      this.getMinMaxForQuery(queryRequest),
     ]);
-
-    return [auctions, count[0]?.Count];
+    return [auctions, count[0]?.Count, priceRange];
   }
 
   private async rollbackCreateAuction(auctions: AuctionEntity[]) {

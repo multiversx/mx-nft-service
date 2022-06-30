@@ -208,6 +208,7 @@ type AuctionResponse {
   edges: [AuctionEdge!]
   pageData: PageData
   pageInfo: AuctionPageInfo
+  priceRange: PriceRange
 }
 
 enum AuctionStatusEnum {

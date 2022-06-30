@@ -142,7 +142,6 @@ export class ElrondElasticService {
       _source: fullAttribute,
     };
 
-    console.log(url, payload);
     const result = await this.apiService.post(url, payload);
 
     profiler.stop();
