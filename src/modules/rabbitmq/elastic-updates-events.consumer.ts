@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
-import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
+import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
 @Injectable()

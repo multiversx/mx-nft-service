@@ -63,10 +63,13 @@ export class NftRarityService {
     ]);
 
     if (
-      elasticChecksum.score.toString() !== dbChecksum.score.toString() &&
-      elasticChecksum.rank.toString() !== dbChecksum.rank.toString()
-    )
+      elasticChecksum.score.toString() !== dbChecksum.score.toString() ||
+      elasticChecksum.rank.toString() !== dbChecksum.rank.toString() ||
+      elasticChecksum.rank.isEqualTo(0) ||
+      elasticChecksum.score.isEqualTo(0)
+    ) {
       await this.updateRarities(collectionTicker);
+    }
 
     return true;
   }

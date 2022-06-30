@@ -14,7 +14,7 @@ import { ElrondCommunicationModule } from 'src/common';
 import { CampaignsModuleGraph } from '../campaigns/campaigns.module';
 import { MinterEventsService } from './minter-events.service';
 import { ElasiticUpdatesConsumer } from './elastic-updates-events.consumer';
-import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
+import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
