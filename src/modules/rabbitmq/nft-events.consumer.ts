@@ -21,6 +21,9 @@ export class NftTransactionsConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
+    if (!nftAuctionEvents.events) {
+      return;
+    }
     const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
       return entry.toLowerCase().trim();
     });
