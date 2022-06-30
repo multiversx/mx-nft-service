@@ -9,7 +9,7 @@ import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
 export class NftRarityService {
   constructor(
     private readonly apiService: ElrondApiService,
-    private elasticUpdater: ElrondElasticService,
+    private readonly elasticUpdater: ElrondElasticService,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly nftRarityComputeService: NftRarityComputeService,
   ) {}
@@ -30,7 +30,7 @@ export class NftRarityService {
     const bulkUpdates = this.buildRaritiesBulkUpdate(rarities);
 
     await Promise.all([
-      this.nftRarityRepository.saveOrUpdateBulk(rarities),
+      this.nftRarityRepository.save(rarities),
       this.elasticUpdater.bulkRequest('tokens', bulkUpdates),
     ]);
 
