@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { ElrondApiService, ElrondElasticService } from 'src/common';
+import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
 import { Logger } from 'winston';
 import { VerifyContentService } from '../assets/verify-content.service';
@@ -21,7 +21,7 @@ export class FlagNftService {
         identifier,
         'fields=media',
       );
-      if (nft && nft?.media && nft.media.length > 0) {
+      if (this.needsToCalculateNsfw(nft)) {
         const value = await this.verifyContent.checkContentSensitivityForUrl(
           nft?.media[0].url || nft?.media[0].originalUrl,
           nft?.media[0].fileType,
@@ -43,9 +43,23 @@ export class FlagNftService {
       }
       return true;
     } catch (error) {
+      this.logger.error(
+        `Unexpected error when updating nsfw for token with identifier '${identifier}'`,
+      );
       return false;
     }
   }
+  private needsToCalculateNsfw(nft: Nft) {
+    return (
+      nft?.media &&
+      nft?.media.length > 0 &&
+      !(
+        nft?.media[0].url.includes('default') &&
+        nft?.media[0].url.includes('default')
+      )
+    );
+  }
+
   public async getNftFlagsForIdentifiers(identifiers: string[]) {
     try {
       return await this.nftFlagsRepository.batchGetFlags(identifiers);
