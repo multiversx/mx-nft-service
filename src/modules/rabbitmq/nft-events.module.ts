@@ -18,6 +18,9 @@ import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
+import { NftRarityService } from '../nft-rarity/nft-rarity.service';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
+import { NftRarityComputeService } from '../nft-rarity/nft-rarity.compute.service';
 
 @Module({
   imports: [
@@ -26,6 +29,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
+    TypeOrmModule.forFeature([NftRarityRepository]),
   ],
   providers: [
     NftEventsConsumer,
@@ -41,6 +45,8 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
     VerifyContentService,
+    NftRarityService,
+    NftRarityComputeService,
   ],
   exports: [NftEventsService],
 })

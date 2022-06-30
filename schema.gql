@@ -736,6 +736,7 @@ type Query {
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
   trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
+  updateNftRarities(collectionTicker: String!): Boolean!
 }
 
 type Rarity {
