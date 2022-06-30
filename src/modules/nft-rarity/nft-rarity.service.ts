@@ -65,7 +65,7 @@ export class NftRarityService {
         await this.apiService.getAllNfts(
           new AssetsQuery()
             .addCollection(collectionTicker)
-            .addPageSize(nfts.length, 2500)
+            .addPageSize(nfts.length, 10001)
             .build(),
         ),
       );

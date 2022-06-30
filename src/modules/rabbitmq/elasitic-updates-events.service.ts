@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import { DeleteResult } from 'typeorm';
 import { NftTypeEnum } from '../assets/models';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
 import { VerifyContentService } from '../assets/verify-content.service';
@@ -15,6 +17,7 @@ export class ElasticUpdatesEventsService {
     private elasticUpdater: ElrondElasticService,
     private nftFlags: NftsFlagsRepository,
     private readonly nftRarityService: NftRarityService,
+    private readonly nftRarityRepository: NftRarityRepository,
   ) {}
 
   public async handleNftMintEvents(
@@ -64,6 +67,7 @@ export class ElasticUpdatesEventsService {
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
     let collectionsToUpdate: string[] = [];
+    let nftsToDelete: string[] = [];
 
     for (let event of mintEvents) {
       const mintEvent = new MintEvent(event);
@@ -77,8 +81,12 @@ export class ElasticUpdatesEventsService {
       if (
         nft.type === NftTypeEnum.NonFungibleESDT ||
         NftTypeEnum.SemiFungibleESDT
-      )
+      ) {
         collectionsToUpdate.push(nft.collection);
+
+        if (event.identifier === NftEventEnum.ESDTNFTBurn)
+          nftsToDelete.push(nft.identifier);
+      }
     }
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
@@ -87,6 +95,11 @@ export class ElasticUpdatesEventsService {
       return this.nftRarityService.updateRarities(c);
     });
 
+    const deletes: Promise<DeleteResult>[] = nftsToDelete.map((n) => {
+      return this.nftRarityRepository.delete(n);
+    });
+
     await Promise.all(updates);
+    await Promise.all(deletes);
   }
 }
