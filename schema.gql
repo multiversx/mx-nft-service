@@ -183,7 +183,7 @@ enum AuctionCustomEnum {
 input AuctionCustomFilter {
   field: AuctionCustomEnum!
   op: Operation!
-  sort: AuctionCustomSort!
+  sort: AuctionCustomSort
   values: [String]
 }
 

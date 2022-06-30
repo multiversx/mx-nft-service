@@ -4,11 +4,7 @@ import { ElrondElasticService } from 'src/common';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
-import {
-  BatchUtils,
-  ElasticQuery,
-  QueryType,
-} from '@elrondnetwork/nestjs-microservice-common';
+import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 
 // this is not finished
