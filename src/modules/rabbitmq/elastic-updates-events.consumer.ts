@@ -31,7 +31,7 @@ export class ElasiticUpdatesConsumer {
         mintEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
             e.identifier === NftEventEnum.ESDTNFTCreate ||
-            NftEventEnum.ESDTNFTBurn,
+            e.identifier === NftEventEnum.ESDTNFTBurn,
         ),
       ),
     ]);
