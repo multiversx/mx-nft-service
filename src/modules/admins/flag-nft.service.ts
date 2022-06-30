@@ -48,7 +48,44 @@ export class FlagNftService {
       return true;
     } catch (error) {
       this.logger.error(
-        `Unexpected error when updating nsfw for token with identifier '${identifier}'`,
+        'An error occurred while setting the nfsw for identifier',
+        {
+          path: 'FlagNftService.updateNftFlag',
+          identifier,
+          exception: error?.message,
+        },
+      );
+      return false;
+    }
+  }
+
+  public async updateNftNSFWByAdmin(identifier: string, value) {
+    try {
+      await this.nftFlagsRepository.update(
+        { identifier: identifier },
+        new NftFlagsEntity({
+          identifier: identifier,
+          nsfw: Number(value.toFixed(2)),
+        }),
+      );
+      await this.elasticUpdater.setCustomValue(
+        'tokens',
+        identifier,
+        this.elasticUpdater.buildUpdateBody(
+          'nft_nsfw',
+          Number(value.toFixed(2)),
+        ),
+      );
+
+      return true;
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while setting the nfsw for identifier',
+        {
+          path: 'FlagNftService.updateNftNSFWByAdmin',
+          identifier,
+          exception: error?.message,
+        },
       );
       return false;
     }

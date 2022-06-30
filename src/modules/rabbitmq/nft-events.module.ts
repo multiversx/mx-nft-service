@@ -20,7 +20,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftRarityComputeService } from '../nft-rarity/nft-rarity.compute.service';
-import { FlagNftService } from '../report-nfts/flag-nft.service';
+import { FlagNftService } from '../admins/flag-nft.service';
 import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CommonModule } from 'src/common.module';
 

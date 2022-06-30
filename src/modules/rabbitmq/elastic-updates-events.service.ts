@@ -4,7 +4,7 @@ import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
 import { NftTypeEnum } from '../assets/models/NftTypes.enum';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
-import { FlagNftService } from '../report-nfts/flag-nft.service';
+import { FlagNftService } from '../admins/flag-nft.service';
 import { MintEvent } from './entities/auction/mint.event';
 
 @Injectable()
