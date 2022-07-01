@@ -47,24 +47,24 @@ async function bootstrap() {
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
     rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(5673, '0.0.0.0');
+    await rabbitMq.listen(process.env.RABBIT_PORT, '0.0.0.0');
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
     let processorApp = await NestFactory.create(ClaimableAuctionsModule);
-    await processorApp.listen(6011);
+    await processorApp.listen(process.env.CLAIMABLE_PORT);
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
 
-    await processorApp.listen(6012);
+    await processorApp.listen(process.env.CACHE_PORT);
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
     processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(6014);
+    await processorApp.listen(process.env.NSFW_PORT);
   }
 
   const logger = new Logger('Bootstrapper');

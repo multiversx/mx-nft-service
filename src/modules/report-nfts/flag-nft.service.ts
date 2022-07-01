@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
+import {
+  ElrondApiService,
+  ElrondElasticService,
+  Nft,
+  NftMedia,
+} from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
 import { VerifyContentService } from '../assets/verify-content.service';
 
@@ -19,10 +24,11 @@ export class FlagNftService {
         identifier,
         'fields=media',
       );
-      if (this.needsToCalculateNsfw(nft)) {
+      const nftMedia = this.getNftMedia(nft);
+      if (nftMedia) {
         const value = await this.verifyContent.checkContentSensitivityForUrl(
-          nft?.media[0].url || nft?.media[0].originalUrl,
-          nft?.media[0].fileType,
+          nftMedia.url || nftMedia.originalUrl,
+          nftMedia.fileType,
         );
         await this.nftFlagsRepository.addFlag(
           new NftFlagsEntity({
@@ -47,14 +53,17 @@ export class FlagNftService {
       return false;
     }
   }
-  private needsToCalculateNsfw(nft: Nft): Boolean {
-    return (
+  private getNftMedia(nft: Nft): NftMedia {
+    if (
       nft?.media?.length > 0 &&
       !(
         nft?.media[0].url.includes('default') &&
         nft?.media[0].originalUrl.includes('default')
       )
-    );
+    ) {
+      return nft.media[0];
+    }
+    return undefined;
   }
 
   public async getNftFlagsForIdentifiers(identifiers: string[]) {
