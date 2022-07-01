@@ -24,9 +24,7 @@ export class FlagNftService {
         identifier,
         'fields=media',
       );
-      if (!nft?.media) {
-        return false;
-      }
+
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {
         return false;
@@ -58,18 +56,21 @@ export class FlagNftService {
       return false;
     }
   }
-  private getNftMedia(nft: Nft): NftMedia {
-    if (
-      nft?.media?.length > 0 &&
-      !(
-        nft?.media[0].url.includes('default') &&
-        nft?.media[0].originalUrl.includes('default')
-      )
-    ) {
-      return nft.media[0];
+
+  private getNftMedia(nft: Nft): NftMedia | undefined {
+    if (!nft.media || nft.media.length === 0) {
+      return undefined;
     }
 
-    return undefined;
+    const media = nft.media[0];
+    if (
+      media.url.includes('default') ||
+      media.originalUrl.includes('default')
+    ) {
+      return undefined;
+    }
+
+    return media;
   }
 
   public async getNftFlagsForIdentifiers(identifiers: string[]) {
