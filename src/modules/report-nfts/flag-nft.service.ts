@@ -24,27 +24,32 @@ export class FlagNftService {
         identifier,
         'fields=media',
       );
-      const nftMedia = this.getNftMedia(nft);
-      if (nftMedia) {
-        const value = await this.verifyContent.checkContentSensitivityForUrl(
-          nftMedia.url || nftMedia.originalUrl,
-          nftMedia.fileType,
-        );
-        await this.nftFlagsRepository.addFlag(
-          new NftFlagsEntity({
-            identifier: identifier,
-            nsfw: Number(value.toFixed(2)),
-          }),
-        );
-        await this.elasticUpdater.setCustomValue(
-          'tokens',
-          identifier,
-          this.elasticUpdater.buildUpdateBody(
-            'nft_nsfw',
-            Number(value.toFixed(2)),
-          ),
-        );
+      if (!nft?.media) {
+        return false;
       }
+      const nftMedia = this.getNftMedia(nft);
+      if (!nftMedia) {
+        return false;
+      }
+
+      const value = await this.verifyContent.checkContentSensitivityForUrl(
+        nftMedia.url ?? nftMedia.originalUrl,
+        nftMedia.fileType,
+      );
+      await this.nftFlagsRepository.addFlag(
+        new NftFlagsEntity({
+          identifier: identifier,
+          nsfw: Number(value.toFixed(2)),
+        }),
+      );
+      await this.elasticUpdater.setCustomValue(
+        'tokens',
+        identifier,
+        this.elasticUpdater.buildUpdateBody(
+          'nft_nsfw',
+          Number(value.toFixed(2)),
+        ),
+      );
       return true;
     } catch (error) {
       this.logger.error(
@@ -63,6 +68,7 @@ export class FlagNftService {
     ) {
       return nft.media[0];
     }
+
     return undefined;
   }
 
