@@ -48,9 +48,10 @@ export class ElasticRarityUpdaterService {
         true,
       );
     } catch (error) {
-      this.logger.error(
-        `handleUpdateTokenRarity() ERROR when scrolling through NFTs: ${error}`,
-      );
+      this.logger.error(`ERROR when scrolling through NFTs`, {
+        path: 'ElasticRarityUpdaterService.handleUpdateTokenRarity',
+        exception: error?.message,
+      });
     }
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
@@ -104,9 +105,10 @@ export class ElasticRarityUpdaterService {
         true,
       );
     } catch (error) {
-      this.logger.error(
-        `handleValidateTokenRarity() ERROR when scrolling through collections: ${error}`,
-      );
+      this.logger.error(`ERROR when scrolling through collections`, {
+        path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+        exception: error?.message,
+      });
     }
 
     if (collections.length === 0) {

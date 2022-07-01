@@ -71,8 +71,6 @@ export class NftRarityService {
       this.logger.error(`updateRarities(${collectionTicker}) ERROR: ${error}`);
     }
 
-    console;
-
     if (!rarities) {
       this.logger.error(
         `updateRarities(${collectionTicker}): no rarities were computed.`,
@@ -87,9 +85,11 @@ export class NftRarityService {
         this.setNftRarityFlags(rarities),
       ]);
     } catch (error) {
-      this.logger.error(
-        `updateRarities(${collectionTicker}) ERROR when updating DB || Elastic: ${error}`,
-      );
+      this.logger.error(`ERROR when updating DB || Elastic for collection`, {
+        path: 'AccountsStatsService.updateRarities',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
       return false;
     }
 
