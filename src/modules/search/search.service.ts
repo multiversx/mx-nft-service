@@ -77,7 +77,6 @@ export class SearchService {
     address: string,
   ): Promise<SearchItemResponse> {
     const herotagsResponse = await this.apiService.getAddressUsername(address);
-    console.log(herotagsResponse);
     return new SearchItemResponse({
       identifier: address,
       name: herotagsResponse ? herotagsResponse.username : undefined,
