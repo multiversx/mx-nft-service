@@ -57,27 +57,29 @@ export class ElasticRarityUpdaterService {
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
     if (collectionsToUpdate.length === 0) {
-      this.logger.debug('handleUpdateTokenRarity(): nothing to update');
+      this.logger.info('handleUpdateTokenRarity(): nothing to update');
       return;
     }
 
     await asyncPool(1, collectionsToUpdate, async (collection) => {
       try {
-        this.logger.debug(
+        this.logger.info(
           `handleUpdateTokenRarity(): updateRarities(${collection})`,
         );
         await this.nftRarityService.updateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
-        this.logger.error(
-          `handleUpdateTokenRarity() ERROR for ${collection}: ${error}`,
-        );
+        this.logger.error(`Update rarities error.`, {
+          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+          exception: error?.message,
+          collection: collection,
+        });
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     });
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleValidateTokenRarity() {
     let collections: string[] = [];
 
@@ -112,21 +114,23 @@ export class ElasticRarityUpdaterService {
     }
 
     if (collections.length === 0) {
-      this.logger.debug('handleValidateTokenRarity(): nothing to validate');
+      this.logger.info('handleValidateTokenRarity(): nothing to validate');
       return;
     }
 
     await asyncPool(1, collections, async (collection) => {
       try {
-        this.logger.debug(
+        this.logger.info(
           `handleValidateTokenRarity(): validateRarities(${collection})`,
         );
         await this.nftRarityService.validateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
-        this.logger.error(
-          `handleValidateTokenRarity() ERROR for ${collection}: ${error}`,
-        );
+        this.logger.error(`Validate rarities error.`, {
+          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+          exception: error?.message,
+          collection: collection,
+        });
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     });

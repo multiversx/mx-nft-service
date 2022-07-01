@@ -9,8 +9,8 @@ import { Logger } from 'winston';
 import { NftRarityChecksum } from './nft-rarity-checksum.model';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import BigNumber from 'bignumber.js';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { NftTypeEnum } from '../assets/models';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class NftRarityService {
@@ -32,7 +32,7 @@ export class NftRarityService {
     ]);
 
     if ((!raritiesFlag && skipIfNoRaritiesFlag) || nfts?.length === 0) {
-      this.logger.debug(
+      this.logger.info(
         `updateRarities(${collectionTicker}): ${
           nfts.length === 0
             ? 'No NFTs'
@@ -50,7 +50,7 @@ export class NftRarityService {
       nfts?.find((nft) => nft.metadata?.attributes === null) ||
       nfts?.find((nft) => nft.metadata?.attributes === undefined)
     ) {
-      this.logger.debug(
+      this.logger.info(
         `updateRarities(${collectionTicker}): collection has no attributes -> set rarities & nft_attributes flags to false & return false`,
       );
       await Promise.all([
@@ -68,7 +68,11 @@ export class NftRarityService {
           this.sortAscNftsByNonce(nfts),
         );
     } catch (error) {
-      this.logger.error(`updateRarities(${collectionTicker}) ERROR: ${error}`);
+      this.logger.error(`ERROR when updating DB || Elastic`, {
+        path: 'NftRarityService.updateRarities',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
     }
 
     if (!rarities) {
@@ -118,7 +122,7 @@ export class NftRarityService {
       )
     ) {
       if (elasticNfts[0]?.['nft_hasRarity'] === true) {
-        this.logger.debug(
+        this.logger.info(
           `validateRarities(${collectionTicker}): collection wrong checksum -> updateRarities`,
         );
       }
@@ -213,9 +217,11 @@ export class NftRarityService {
         updateBody,
       );
     } catch (error) {
-      this.logger.error(
-        `setCollectionRarityFlag(${collection}, ${hasRarities})`,
-      );
+      this.logger.error(`ERROR when updating DB || Elastic`, {
+        path: 'NftRarityService.setCollectionRarityFlag',
+        exception: error?.message,
+        collection: collection,
+      });
       throw error;
     }
   }
@@ -257,7 +263,11 @@ export class NftRarityService {
         },
       );
     } catch (error) {
-      this.logger.error(`itHasRarities(${collectionTicker})`);
+      this.logger.error(`ERROR when updating DB || Elastic`, {
+        path: 'NftRarityService.itHasRarities',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
       return false;
     }
 
@@ -275,7 +285,11 @@ export class NftRarityService {
           .build(),
       );
     } catch (error) {
-      this.logger.error(`getAllCollectionNftsFromAPI(${collectionTicker})`);
+      this.logger.error(`ERROR when updating DB || Elastic`, {
+        path: 'NftRarityService.getAllCollectionNftsFromAPI',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
       return [];
     }
   }
@@ -303,7 +317,11 @@ export class NftRarityService {
         },
       );
     } catch (error) {
-      this.logger.error(`getAllCollectionNftsFromElastic(${collectionTicker})`);
+      this.logger.error(`ERROR when updating DB || Elastic`, {
+        path: 'NftRarityService.getAllCollectionNftsFromElastic',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
       return [];
     }
 
