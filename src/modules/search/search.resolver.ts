@@ -34,7 +34,7 @@ export class SearchResolver {
   async accounts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
-      return [searchTerm];
+      return [await this.accountsStatsService.getHerotagForAddress(searchTerm)];
     }
     const account = await this.accountsStatsService.getHerotags(searchTerm);
     return account;

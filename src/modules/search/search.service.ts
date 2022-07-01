@@ -29,6 +29,28 @@ export class SearchService {
     );
   }
 
+  async getHerotagForAddress(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getAddressHerotagCacheKey(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getAddressHerotag(address),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting herotags for search term',
+        {
+          path: this.getHerotagForAddress.name,
+          address,
+          exception: err?.message,
+        },
+      );
+      return [];
+    }
+  }
+
   async getHerotags(searchTerm: string): Promise<any> {
     try {
       const cacheKey = this.getAccountsCacheKey(searchTerm);
@@ -49,6 +71,17 @@ export class SearchService {
       );
       return [];
     }
+  }
+
+  private async getAddressHerotag(
+    address: string,
+  ): Promise<SearchItemResponse> {
+    const herotagsResponse = await this.apiService.getAddressUsername(address);
+    console.log(herotagsResponse);
+    return new SearchItemResponse({
+      identifier: address,
+      name: herotagsResponse ? herotagsResponse.username : undefined,
+    });
   }
 
   private async getMappedHerotags(
@@ -72,6 +105,10 @@ export class SearchService {
 
   private getAccountsCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_account', searchTerm);
+  }
+
+  private getAddressHerotagCacheKey(address: string) {
+    return generateCacheKeyFromParams('address_herotag', address);
   }
 
   async getCollections(searchTerm: string): Promise<string[]> {
