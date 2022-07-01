@@ -37,16 +37,13 @@ export class FlagNftService {
       await this.nftFlagsRepository.addFlag(
         new NftFlagsEntity({
           identifier: identifier,
-          nsfw: Number(value.toFixed(2)),
+          nsfw: value.toRounded(2),
         }),
       );
       await this.elasticUpdater.setCustomValue(
         'tokens',
         identifier,
-        this.elasticUpdater.buildUpdateBody(
-          'nft_nsfw',
-          Number(value.toFixed(2)),
-        ),
+        this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
       );
       return true;
     } catch (error) {
