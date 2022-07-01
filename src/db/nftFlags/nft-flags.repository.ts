@@ -18,11 +18,11 @@ export class NftsFlagsRepository extends Repository<NftFlagsEntity> {
 
   async batchGetFlags(identifiers: string[]): Promise<Record<string, any>> {
     try {
-      return await this.find({
-        where: {
-          identifier: { in: identifiers },
-        },
-      });
+      const response = await this.createQueryBuilder()
+        .where(`identifier in (${identifiers.map((value) => `'${value}'`)})`)
+        .getMany();
+
+      return response.toRecord((r) => r.identifier);
     } catch (err) {
       throw err;
     }

@@ -74,6 +74,13 @@ export class ElrondApiService {
     }
   }
 
+  async getAddressUsername(address: string): Promise<{ username: string }> {
+    return await this.doGetGeneric(
+      this.getAddressUsername.name,
+      `accounts/${address}?fields=username`,
+    );
+  }
+
   async getTokensForUser(address: string): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getTokensForUser.name,

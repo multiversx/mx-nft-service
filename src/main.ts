@@ -9,11 +9,14 @@ import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
+import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
   const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
   app.useGlobalPipes(
@@ -44,17 +47,25 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    await rabbitMq.listen(5673, '0.0.0.0');
+    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen(process.env.RABBIT_PORT, '0.0.0.0');
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
     let processorApp = await NestFactory.create(ClaimableAuctionsModule);
-    await processorApp.listen(6011);
+    await processorApp.listen(process.env.CLAIMABLE_PORT);
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
-    await processorApp.listen(6012);
+
+    await processorApp.listen(process.env.CACHE_PORT);
+  }
+
+  if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
+    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    await processorApp.listen(process.env.NSFW_PORT);
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
@@ -90,9 +101,7 @@ async function bootstrap() {
   logger.log(
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
-  logger.log(
-    `NFT Rarity cronjobs active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
-  );
+  logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
 }
 
 bootstrap();

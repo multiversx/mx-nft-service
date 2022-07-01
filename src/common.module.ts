@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -91,6 +91,7 @@ if (!!process.env.LOG_FILE) {
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     ElrondCommunicationModule,
   ],
-  exports: [ElrondCommunicationModule, CachingModule],
+  exports: [ElrondCommunicationModule, CachingModule, Logger],
+  providers: [Logger],
 })
 export class CommonModule {}
