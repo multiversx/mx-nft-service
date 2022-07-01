@@ -122,7 +122,6 @@ export class NftRarityService {
           `validateRarities(${collectionTicker}): collection wrong checksum -> updateRarities`,
         );
       }
-      console.log('Wtf');
       await this.updateRarities(collectionTicker);
     }
 
