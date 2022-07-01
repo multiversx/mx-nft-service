@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
-import { ElasticUpdatesEventsService } from './elasitic-updates-events.service';
+import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
 @Injectable()
 export class ElasiticUpdatesConsumer {
   constructor(
-    private readonly nftTransactionsService: ElasticUpdatesEventsService,
+    private readonly elasticUpdateService: ElasticUpdatesEventsService,
   ) {}
 
   @CompetingRabbitConsumer({
@@ -20,14 +20,14 @@ export class ElasiticUpdatesConsumer {
     }
 
     await Promise.all([
-      this.nftTransactionsService.handleNftMintEvents(
+      this.elasticUpdateService.handleNftMintEvents(
         mintEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
             e.identifier === NftEventEnum.ESDTNFTCreate,
         ),
         mintEvents.hash,
       ),
-      this.nftTransactionsService.handleRaritiesForNftMintAndBurnEvents(
+      this.elasticUpdateService.handleRaritiesForNftMintAndBurnEvents(
         mintEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
             e.identifier === NftEventEnum.ESDTNFTCreate ||

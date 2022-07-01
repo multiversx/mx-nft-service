@@ -1,3 +1,4 @@
+import '../node_modules/@elrondnetwork/erdnest/lib/utils/extensions/number.extensions';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';

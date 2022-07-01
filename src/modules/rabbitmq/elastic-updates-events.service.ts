@@ -1,21 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService } from 'src/common';
-import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
-import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { DeleteResult } from 'typeorm';
-import { NftTypeEnum } from '../assets/models';
+import { ElrondApiService } from 'src/common';
+import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
-import { VerifyContentService } from '../assets/verify-content.service';
+import { NftTypeEnum } from '../assets/models/NftTypes.enum';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
+import { FlagNftService } from '../report-nfts/flag-nft.service';
 import { MintEvent } from './entities/auction/mint.event';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
   constructor(
-    private elrondApi: ElrondApiService,
-    private verifyContent: VerifyContentService,
-    private elasticUpdater: ElrondElasticService,
-    private nftFlags: NftsFlagsRepository,
+    private readonly nftFlagsService: FlagNftService,
+    private readonly elrondApi: ElrondApiService,
     private readonly nftRarityService: NftRarityService,
   ) {}
 
@@ -29,36 +25,8 @@ export class ElasticUpdatesEventsService {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
-
-          console.log(createTopics);
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          const nft = await this.elrondApi.getNftByIdentifierForQuery(
-            identifier,
-            'fields=media',
-          );
-          console.log(identifier);
-
-          if (nft && nft.media && nft.media.length > 0) {
-            const value =
-              await this.verifyContent.checkContentSensitivityForUrl(
-                nft?.media[0].url || nft?.media[0].originalUrl,
-                nft?.media[0].fileType,
-              );
-            await this.nftFlags.addFlag(
-              new NftFlagsEntity({
-                identifier: identifier,
-                nsfw: Number(value.toFixed(2)),
-              }),
-            );
-            await this.elasticUpdater.setCustomValue(
-              'tokens',
-              identifier,
-              this.elasticUpdater.buildUpdateBody(
-                'nft_nsfw',
-                Number(value.toFixed(2)),
-              ),
-            );
-          }
+          await this.nftFlagsService.updateNftFlag(identifier);
           break;
       }
     }
@@ -67,7 +35,7 @@ export class ElasticUpdatesEventsService {
   public async handleRaritiesForNftMintAndBurnEvents(
     mintEvents: any[],
   ): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     let collectionsToUpdate: string[] = [];
     let nftsToDelete: string[] = [];
