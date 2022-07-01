@@ -55,8 +55,6 @@ export class ElasticRarityUpdaterService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    collectionsToUpdate = collectionsToUpdate.slice(0, 1000);
-
     if (collectionsToUpdate.length === 0) {
       this.logger.debug('handleUpdateTokenRarity(): nothing to update');
       return;
@@ -110,8 +108,6 @@ export class ElasticRarityUpdaterService {
         `handleValidateTokenRarity() ERROR when scrolling through collections: ${error}`,
       );
     }
-
-    collections = collections.slice(0, 1000);
 
     if (collections.length === 0) {
       this.logger.debug('handleValidateTokenRarity(): nothing to validate');
