@@ -79,7 +79,7 @@ export class ElasticRarityUpdaterService {
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleValidateTokenRarity() {
     let collections: string[] = [];
 
