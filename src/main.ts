@@ -70,6 +70,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
+    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     await processorApp.listen(6013);
   }
 
@@ -102,6 +103,9 @@ async function bootstrap() {
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
+  logger.log(
+    `Rarity cron jobs are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
+  );
 }
 
 bootstrap();
