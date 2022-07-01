@@ -110,21 +110,40 @@ export class NftRarityService {
     ]);
 
     if (
-      elasticNfts.length === 0 ||
-      dbNfts.length === 0 ||
-      elasticChecksum.score.toString() !== dbChecksum.score.toString() ||
-      elasticChecksum.rank.toString() !== dbChecksum.rank.toString() ||
-      elasticChecksum.rank.isEqualTo(0) ||
-      elasticChecksum.score.isEqualTo(0)
+      !this.isIdenticalChecksum(
+        elasticNfts,
+        dbNfts,
+        elasticChecksum,
+        dbChecksum,
+      )
     ) {
       if (elasticNfts[0]?.['nft_hasRarity'] === true) {
         this.logger.debug(
           `validateRarities(${collectionTicker}): collection wrong checksum -> updateRarities`,
         );
       }
+      console.log('Wtf');
       await this.updateRarities(collectionTicker);
     }
 
+    return true;
+  }
+
+  isIdenticalChecksum(
+    elasticNfts: Nft[],
+    dbNfts: NftRarityEntity[],
+    checksumA: NftRarityChecksum,
+    checksumB: NftRarityChecksum,
+  ): boolean {
+    if (
+      elasticNfts.length === 0 ||
+      dbNfts.length === 0 ||
+      checksumA.score.toString() !== checksumB.score.toString() ||
+      checksumA.rank.toString() !== checksumB.rank.toString() ||
+      checksumA.rank.isEqualTo(0) ||
+      checksumA.score.isEqualTo(0)
+    )
+      return false;
     return true;
   }
 

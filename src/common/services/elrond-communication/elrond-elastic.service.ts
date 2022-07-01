@@ -135,7 +135,14 @@ export class ElrondElasticService {
         }),
       );
     } catch (error) {
-      this.logger.error(`bulkRequest(${collection}) ERROR: ${error}`);
+      this.logger.error({
+        method: 'POST',
+        url,
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      });
       throw error;
     }
 

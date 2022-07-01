@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
 import { Locker } from 'src/utils/locker';
@@ -6,17 +6,16 @@ import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import asyncPool from 'tiny-async-pool';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ElasticRarityUpdaterService {
-  private readonly logger: Logger;
-
   constructor(
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
-  ) {
-    this.logger = new Logger(ElasticRarityUpdaterService.name);
-  }
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   private static isValidating: boolean;
 
@@ -61,6 +60,8 @@ export class ElasticRarityUpdaterService {
     }
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
+
+    collectionsToUpdate = collectionsToUpdate.slice(0, 1000);
 
     if (collectionsToUpdate.length === 0) {
       this.logger.debug('handleUpdateTokenRarity(): nothing to update');
@@ -122,6 +123,8 @@ export class ElasticRarityUpdaterService {
         `handleValidateTokenRarity() ERROR when scrolling through collections: ${error}`,
       );
     }
+
+    collections = collections.slice(0, 1000);
 
     if (collections.length === 0) {
       this.logger.debug('handleValidateTokenRarity(): nothing to validate');
