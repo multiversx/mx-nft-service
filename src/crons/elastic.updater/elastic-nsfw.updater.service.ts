@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
-import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
-import { FlagNftService } from 'src/modules/report-nfts/flag-nft.service';
+import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 
 type NsfwType = {
   identifier: string;

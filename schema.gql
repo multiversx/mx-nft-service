@@ -480,6 +480,11 @@ input FiltersExpression {
   operator: Operator!
 }
 
+input FlagNftInput {
+  identifier: String!
+  nsfwFlag: Float!
+}
+
 enum GroupBy {
   IDENTIFIER
 }
@@ -581,6 +586,7 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
+  flagNft(input: FlagNftInput!): Boolean!
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!

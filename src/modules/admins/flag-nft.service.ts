@@ -47,9 +47,49 @@ export class FlagNftService {
       );
       return true;
     } catch (error) {
-      this.logger.error(
-        `Unexpected error when updating nsfw for token with identifier '${identifier}'`,
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
+
+      return false;
+    }
+  }
+
+  public async updateNftNSFWByAdmin(identifier: string, value) {
+    try {
+      await this.nftFlagsRepository.update(
+        { identifier: identifier },
+        new NftFlagsEntity({
+          identifier: identifier,
+          nsfw: Number(value.toFixed(2)),
+        }),
       );
+      await this.elasticUpdater.setCustomValue(
+        'tokens',
+        identifier,
+        this.elasticUpdater.buildUpdateBody(
+          'nft_nsfw',
+          Number(value.toFixed(2)),
+        ),
+      );
+
+      return true;
+    } catch (error) {
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
       return false;
     }
   }
@@ -74,13 +114,15 @@ export class FlagNftService {
     try {
       return await this.nftFlagsRepository.batchGetFlags(identifiers);
     } catch (error) {
-      this.logger.error(
-        'An error occurred while trying to get bulk nft flags',
-        {
-          path: 'FlagNftService.getNftFlagsForIdentifiers',
-          exception: error,
-        },
-      );
+      let customError = {
+        method: 'GET',
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+
+      this.logger.error(customError);
     }
   }
 }
