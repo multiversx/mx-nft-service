@@ -25,7 +25,7 @@ export class NftRarityService {
 
     if (
       nfts?.length === 0 ||
-      nfts?.find((nft) => (nft.metadata?.attributes === null) === undefined)
+      nfts?.find((nft) => nft.metadata?.attributes === null) === undefined
     ) {
       return false;
     }
