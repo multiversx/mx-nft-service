@@ -170,6 +170,11 @@ export class ElasticNsfwUpdaterService {
     } catch (error) {
       this.logger.error(
         `Unexpected error when updating nsfw for token with identifier '${identifier}'`,
+        {
+          identifier,
+          path: 'ElasticNsfwUpdaterService.updateNsfwForToken',
+          exception: error?.message,
+        },
       );
     }
   }
@@ -185,7 +190,11 @@ export class ElasticNsfwUpdaterService {
       }
     } catch (error) {
       this.logger.error(
-        `Unexpected error when updating nsfw with bulk request`,
+        'Unexpected error when updating nsfw with bulk request',
+        {
+          path: 'ElasticNsfwUpdaterService.updateNsfwForToken',
+          exception: error?.message,
+        },
       );
     }
   }

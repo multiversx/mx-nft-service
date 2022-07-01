@@ -47,15 +47,11 @@ export class FlagNftService {
       );
       return true;
     } catch (error) {
-      let customError = {
-        method: 'GET',
-        response: error.response?.data,
-        status: error.response?.status,
-        message: error.message,
-        name: error.name,
-      };
-
-      this.logger.error(customError);
+      this.logger.error('An error occurred while updating NSFW for nft', {
+        identifier,
+        path: 'FlagNftService.updateNftFlag',
+        exception: error?.message,
+      });
 
       return false;
     }
@@ -81,15 +77,12 @@ export class FlagNftService {
 
       return true;
     } catch (error) {
-      let customError = {
-        method: 'GET',
-        response: error.response?.data,
-        status: error.response?.status,
-        message: error.message,
-        name: error.name,
-      };
-
-      this.logger.error(customError);
+      this.logger.error('An error occurred while updating NSFW', {
+        identifier,
+        value,
+        path: 'FlagNftService.updateNftNSFWByAdmin',
+        exception: error?.message,
+      });
       return false;
     }
   }
@@ -114,15 +107,10 @@ export class FlagNftService {
     try {
       return await this.nftFlagsRepository.batchGetFlags(identifiers);
     } catch (error) {
-      let customError = {
-        method: 'GET',
-        response: error.response?.data,
-        status: error.response?.status,
-        message: error.message,
-        name: error.name,
-      };
-
-      this.logger.error(customError);
+      this.logger.error('An error occurred while getting the flags from db', {
+        path: 'FlagNftService.getNftFlagsForIdentifiers',
+        exception: error?.message,
+      });
     }
   }
 }

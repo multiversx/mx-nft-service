@@ -10,6 +10,7 @@ import { CommonModule } from 'src/common.module';
 @Module({
   providers: [AdminOperationsResolver, FlagNftService, VerifyContentService],
   imports: [
+    CommonModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     CommonModule,
