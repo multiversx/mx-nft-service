@@ -23,7 +23,7 @@ export class NftRarityComputeService {
       return new NftRarityEntity({
         collection: nft.collection,
         identifier: nft.identifier,
-        score: scoreArray[i].toNumber(),
+        score: new BigNumber(scoreArray[i].toFixed(3)).toNumber(),
         nonce: nft.nonce,
         rank: scoreArray.length - scoreIndex,
       });
@@ -36,9 +36,9 @@ export class NftRarityComputeService {
 
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < nfts.length; j++) {
-        if (i == j) continue;
+        if (i === j) continue;
 
-        if (z[i] == null) {
+        if (z[i] === undefined) {
           z[i] = [];
         }
 
@@ -56,10 +56,13 @@ export class NftRarityComputeService {
         }
       }
 
-      // ps: length-1 because there's always an empty cell in matrix, where i == j
-      avg[i] = z[i]
-        .reduce((a, b) => new BigNumber(a).plus(b), new BigNumber(0))
-        .dividedBy(z[i].length - 1);
+      // PS: length-1 because there's always an empty cell in matrix, where i == j
+      // the final rarities ranks are the same, but this way is more correct
+      if (z.length !== 0) {
+        avg[i] = z[i]
+          .reduce((a, b) => new BigNumber(a).plus(b), new BigNumber(0))
+          .dividedBy(z[i].length - 1);
+      } else avg[i] = new BigNumber(0);
     }
 
     return avg;
@@ -69,13 +72,24 @@ export class NftRarityComputeService {
     let jd: BigNumber[] = [];
     let avgMax: BigNumber = BigNumber.max(...avg);
     let avgMin: BigNumber = BigNumber.min(...avg);
+
     for (let i = 0; i < avg.length; i++) {
-      jd[i] = avg[i]
-        .minus(avgMin)
-        .dividedBy(avgMax.minus(avgMin))
-        .multipliedBy(100);
+      jd[i] = this.isUniqueByAvg(avg[i], avgMin, avgMax)
+        ? new BigNumber(100)
+        : avg[i]
+            .minus(avgMin)
+            .dividedBy(avgMax.minus(avgMin))
+            .multipliedBy(100);
     }
     return jd;
+  }
+
+  private isUniqueByAvg(
+    avg: BigNumber,
+    avgMin: BigNumber,
+    avgMax: BigNumber,
+  ): boolean {
+    return !avgMax.minus(avgMin).isFinite() || avg.isNaN() || avg.isZero();
   }
 
   private markScoreAsUsed(
