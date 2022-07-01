@@ -1,8 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { Logger } from 'winston';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
@@ -12,7 +10,7 @@ export class FlagNftService {
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
 
   public async updateNftFlag(identifier: string) {
@@ -49,13 +47,12 @@ export class FlagNftService {
       return false;
     }
   }
-  private needsToCalculateNsfw(nft: Nft) {
+  private needsToCalculateNsfw(nft: Nft): Boolean {
     return (
-      nft?.media &&
-      nft?.media.length > 0 &&
+      nft?.media?.length > 0 &&
       !(
         nft?.media[0].url.includes('default') &&
-        nft?.media[0].url.includes('default')
+        nft?.media[0].originalUrl.includes('default')
       )
     );
   }

@@ -10,10 +10,12 @@ import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
   const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
   app.useGlobalPipes(
@@ -44,6 +46,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
+    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     await rabbitMq.listen(5673, '0.0.0.0');
   }
 
@@ -54,11 +57,13 @@ async function bootstrap() {
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
+
     await processorApp.listen(6012);
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
+    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
     await processorApp.listen(6014);
   }
 
