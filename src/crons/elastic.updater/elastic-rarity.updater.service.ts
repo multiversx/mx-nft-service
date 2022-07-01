@@ -17,15 +17,9 @@ export class ElasticRarityUpdaterService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  private static isValidating: boolean;
-
   @Cron(CronExpression.EVERY_HOUR)
   async handleUpdateTokenRarity() {
     let collectionsToUpdate: string[] = [];
-
-    if (ElasticRarityUpdaterService.isValidating) {
-      return;
-    }
 
     try {
       await Locker.lock(
@@ -73,7 +67,6 @@ export class ElasticRarityUpdaterService {
         this.logger.debug(
           `handleUpdateTokenRarity(): updateRarities(${collection})`,
         );
-        if (ElasticRarityUpdaterService.isValidating) return;
         await this.nftRarityService.updateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
@@ -88,12 +81,6 @@ export class ElasticRarityUpdaterService {
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleValidateTokenRarity() {
     let collections: string[] = [];
-
-    if (ElasticRarityUpdaterService.isValidating) {
-      return;
-    } else {
-      ElasticRarityUpdaterService.isValidating = true;
-    }
 
     try {
       await Locker.lock(
@@ -128,7 +115,6 @@ export class ElasticRarityUpdaterService {
 
     if (collections.length === 0) {
       this.logger.debug('handleValidateTokenRarity(): nothing to validate');
-      ElasticRarityUpdaterService.isValidating = false;
       return;
     }
 
@@ -146,7 +132,5 @@ export class ElasticRarityUpdaterService {
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     });
-
-    ElasticRarityUpdaterService.isValidating = false;
   }
 }

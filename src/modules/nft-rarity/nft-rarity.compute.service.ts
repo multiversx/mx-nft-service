@@ -56,9 +56,9 @@ export class NftRarityComputeService {
         }
       }
 
-      // PS: length-1 because there's always an empty cell in matrix, where i == j
-      // the final rarities ranks are the same, but this way is more correct
       if (z.length !== 0) {
+        // PS: length-1 because there's always an empty cell in matrix, where i == j
+        // the final rarities ranks are the same, but this way is more correct
         avg[i] = z[i]
           .reduce((a, b) => new BigNumber(a).plus(b), new BigNumber(0))
           .dividedBy(z[i].length - 1);
