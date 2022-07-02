@@ -51,15 +51,18 @@ export class ElasticUpdatesEventsService {
         'fields=type,collection',
       );
 
+      if (!nft || Object.keys(nft).length === 0) {
+        return;
+      }
       if (
-        (nft && nft.type === NftTypeEnum.NonFungibleESDT) ||
+        nft.type === NftTypeEnum.NonFungibleESDT ||
         NftTypeEnum.SemiFungibleESDT
       ) {
         {
           collectionsToUpdate.push(nft.collection);
         }
 
-        if (nft && event.identifier === NftEventEnum.ESDTNFTBurn)
+        if (event.identifier === NftEventEnum.ESDTNFTBurn)
           nftsToDelete.push(nft.identifier);
       }
     }
