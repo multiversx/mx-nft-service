@@ -595,6 +595,8 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
+  updateNftRarities(collectionTicker: String!): Boolean!
+  validateNftRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
@@ -742,8 +744,6 @@ type Query {
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
   trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
-  updateNftRarities(collectionTicker: String!): Boolean!
-  validateNftRarities(collectionTicker: String!): Boolean!
 }
 
 type Rarity {

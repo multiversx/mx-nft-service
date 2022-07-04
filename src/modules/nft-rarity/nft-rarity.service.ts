@@ -91,7 +91,7 @@ export class NftRarityService {
           this.sortAscNftsByNonce(nfts),
         );
     } catch (error) {
-      this.logger.error(`ERROR when computing JD rarities`, {
+      this.logger.error(`Error when computing JD rarities`, {
         path: 'NftRarityService.updateRarities',
         exception: error?.message,
         collection: collectionTicker,
@@ -113,7 +113,7 @@ export class NftRarityService {
         this.setNftRarityFlags(rarities),
       ]);
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic for collection`, {
+      this.logger.error(`Error when updating DB || Elastic for collection`, {
         path: 'NftRarityService.updateRarities',
         exception: error?.message,
         collection: collectionTicker,
