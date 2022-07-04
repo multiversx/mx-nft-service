@@ -342,7 +342,7 @@ export class NftRarityService {
         },
       );
     } catch (error) {
-      this.logger.error(`ERror when getting all collection NFTs from Elastic`, {
+      this.logger.error(`Error when getting all collection NFTs from Elastic`, {
         path: 'NftRarityService.getAllCollectionNftsFromElastic',
         exception: error?.message,
         collection: collectionTicker,

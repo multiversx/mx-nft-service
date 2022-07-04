@@ -5,7 +5,6 @@ import { CommonModule } from 'src/common.module';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { CollectionModuleGraph } from 'src/modules/nftCollections/collection.module';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
-import { NftRarityResolver } from './nft-rarity.resolver';
 import { NftRarityService } from './nft-rarity.service';
 
 @Module({
@@ -15,7 +14,7 @@ import { NftRarityService } from './nft-rarity.service';
     ElrondCommunicationModule,
     CommonModule,
   ],
-  providers: [NftRarityResolver, NftRarityService, NftRarityComputeService],
+  providers: [NftRarityService, NftRarityComputeService],
   exports: [NftRarityService],
 })
 export class NftRarityModuleGraph {}

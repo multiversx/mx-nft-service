@@ -57,11 +57,6 @@ export class ElasticRarityUpdaterService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    if (collectionsToUpdate.length === 0) {
-      this.logger.info('handleUpdateTokenRarity(): nothing to update');
-      return;
-    }
-
     await asyncPool(1, collectionsToUpdate, async (collection) => {
       try {
         this.logger.info(
