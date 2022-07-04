@@ -126,13 +126,25 @@ export class ElrondElasticService {
 
     const profiler = new PerformanceProfiler();
 
-    await this.apiService.post(
-      url,
-      body,
-      new ApiSettings({
-        contentType: 'application/x-ndjson',
-      }),
-    );
+    try {
+      await this.apiService.post(
+        url,
+        body,
+        new ApiSettings({
+          contentType: 'application/x-ndjson',
+        }),
+      );
+    } catch (error) {
+      this.logger.error({
+        method: 'POST',
+        url,
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      });
+      throw error;
+    }
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
@@ -225,13 +237,25 @@ export class ElrondElasticService {
     while (true) {
       const scrollProfiler = new PerformanceProfiler();
 
-      const scrollResult = await this.apiService.post(
-        `${this.url}/_search/scroll`,
-        {
-          scroll: '20m',
-          scroll_id: scrollId,
-        },
-      );
+      let scrollResult: any = null;
+
+      let tries = 3;
+      while (tries > 0) {
+        try {
+          scrollResult = await this.apiService.post(
+            `${this.url}/_search/scroll`,
+            {
+              scroll: '20m',
+              scroll_id: scrollId,
+            },
+          );
+          break;
+        } catch (error) {
+          tries--;
+          if (tries === 0) throw error;
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      }
 
       scrollProfiler.stop();
       MetricsCollector.setElasticDuration(collection, profiler.duration);
@@ -245,6 +269,18 @@ export class ElrondElasticService {
         scrollDocuments.map((document: any) => this.formatItem(document, key)),
       );
     }
+
+    await this.clearScrollableList(scrollId);
+  }
+
+  async clearScrollableList(scrollId: string): Promise<void> {
+    await this.apiService.delete(
+      `${this.url}/_search/scroll`,
+      {},
+      {
+        scroll_id: scrollId,
+      },
+    );
   }
 
   private formatItem(document: any, key: string) {

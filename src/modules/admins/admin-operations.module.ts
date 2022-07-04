@@ -13,6 +13,7 @@ import { CommonModule } from 'src/common.module';
     CommonModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
+    CommonModule,
   ],
   exports: [FlagNftService],
 })

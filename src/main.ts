@@ -11,6 +11,7 @@ import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -67,6 +68,12 @@ async function bootstrap() {
     await processorApp.listen(process.env.NSFW_PORT);
   }
 
+  if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
+    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    await processorApp.listen(6013);
+  }
+
   const logger = new Logger('Bootstrapper');
 
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -96,6 +103,9 @@ async function bootstrap() {
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
+  logger.log(
+    `Rarity cron jobs are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
+  );
 }
 
 bootstrap();

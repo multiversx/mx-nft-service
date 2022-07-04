@@ -22,7 +22,7 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 import { SearchModuleGraph } from './modules/search/search.module';
 import { TagsModuleGraph } from './modules/tags/tags.module';
-import { NftRarityModule } from './modules/nft-rarity/nft-rarity.module';
+import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 
 @Module({
@@ -64,7 +64,7 @@ import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.mo
     IpfsModule,
     SearchModuleGraph,
     TagsModuleGraph,
-    NftRarityModule,
+    NftRarityModuleGraph,
     AdminOperationsModuleGraph,
   ],
 })

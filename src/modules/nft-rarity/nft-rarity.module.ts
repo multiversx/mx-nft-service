@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ElrondCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { CollectionModuleGraph } from 'src/modules/nftCollections/collection.module';
@@ -9,11 +10,12 @@ import { NftRarityService } from './nft-rarity.service';
 
 @Module({
   imports: [
-    CommonModule,
     TypeOrmModule.forFeature([NftRarityRepository]),
     CollectionModuleGraph,
+    ElrondCommunicationModule,
+    CommonModule,
   ],
   providers: [NftRarityResolver, NftRarityService, NftRarityComputeService],
-  exports: [],
+  exports: [NftRarityService],
 })
-export class NftRarityModule {}
+export class NftRarityModuleGraph {}

@@ -15,4 +15,13 @@ export class NftRarityResolver {
   ): Promise<boolean> {
     return await this.nftRarityService.updateRarities(collectionTicker);
   }
+
+  @Query(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async validateNftRarities(
+    @Args('collectionTicker')
+    collectionTicker: string,
+  ): Promise<boolean> {
+    return await this.nftRarityService.validateRarities(collectionTicker);
+  }
 }
