@@ -49,7 +49,7 @@ export class ElasticRarityUpdaterService {
         true,
       );
     } catch (error) {
-      this.logger.error(`ERROR when scrolling through NFTs`, {
+      this.logger.error(`Error when scrolling through NFTs`, {
         path: 'ElasticRarityUpdaterService.handleUpdateTokenRarity',
         exception: error?.message,
       });
@@ -70,7 +70,7 @@ export class ElasticRarityUpdaterService {
         await this.nftRarityService.updateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
-        this.logger.error(`Update rarities error.`, {
+        this.logger.error(`Error when updating collection raritiies`, {
           path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
           exception: error?.message,
           collection: collection,
@@ -108,15 +108,10 @@ export class ElasticRarityUpdaterService {
         true,
       );
     } catch (error) {
-      this.logger.error(`ERROR when scrolling through collections`, {
+      this.logger.error(`Error when scrolling through collections`, {
         path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
       });
-    }
-
-    if (collections.length === 0) {
-      this.logger.info('handleValidateTokenRarity(): nothing to validate');
-      return;
     }
 
     await asyncPool(1, collections, async (collection) => {
@@ -127,7 +122,7 @@ export class ElasticRarityUpdaterService {
         await this.nftRarityService.validateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
-        this.logger.error(`Validate rarities error.`, {
+        this.logger.error(`Error when validating collection rarities`, {
           path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
           exception: error?.message,
           collection: collection,

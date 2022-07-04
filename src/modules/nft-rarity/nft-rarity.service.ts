@@ -31,16 +31,32 @@ export class NftRarityService {
       this.getCollectionRarityFlag(collectionTicker),
     ]);
 
-    if (raritiesFlag && skipIfRaritiesFlag) {
+    if (raritiesFlag === undefined) {
+      this.logger.info(`Wrong collection ID`, {
+        path: 'NftRarityService.updateRarities',
+        collection: collectionTicker,
+      });
+      throw new Error('Wrong collection ID');
+    }
+
+    if (!raritiesFlag && skipIfRaritiesFlag) {
       this.logger.info(
-        `updateRarities(${collectionTicker}): ${'skipped because no rarities flag || rarities flag === false'}`,
+        `Update rarities process skipped because rarities flag === true & skipIfRaritiesFlag === true`,
+        {
+          path: 'NftRarityService.updateRarities',
+          collection: collectionTicker,
+        },
       );
-      return;
+      return false;
     }
 
     if (nfts?.length === 0) {
       this.logger.info(
-        `updateRarities(${collectionTicker}): No NFTs  -> set rarities & nft_attributes flags to false & return false`,
+        'No NFTs  -> set rarities & nft_attributes flags to false & return false',
+        {
+          path: 'NftRarityService.updateRarities',
+          collection: collectionTicker,
+        },
       );
       await Promise.all([
         this.setCollectionRarityFlag(collectionTicker, false),
@@ -54,7 +70,11 @@ export class NftRarityService {
       nfts?.find((nft) => nft.metadata?.attributes === undefined)
     ) {
       this.logger.info(
-        `updateRarities(${collectionTicker}): collection has no attributes -> set rarities & nft_attributes flags to false & return false`,
+        'Collection has no attributes -> set rarities & nft_attributes flags to false & return false',
+        {
+          path: 'NftRarityService.updateRarities',
+          collection: collectionTicker,
+        },
       );
       await Promise.all([
         this.setCollectionRarityFlag(collectionTicker, false),
@@ -71,7 +91,7 @@ export class NftRarityService {
           this.sortAscNftsByNonce(nfts),
         );
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic`, {
+      this.logger.error(`ERROR when computing JD rarities`, {
         path: 'NftRarityService.updateRarities',
         exception: error?.message,
         collection: collectionTicker,
@@ -79,9 +99,10 @@ export class NftRarityService {
     }
 
     if (!rarities) {
-      this.logger.error(
-        `updateRarities(${collectionTicker}): no rarities were computed.`,
-      );
+      this.logger.error(`No rarities were computed`, {
+        path: 'NftRarityService.updateRarities',
+        collection: collectionTicker,
+      });
       return false;
     }
 
@@ -93,7 +114,7 @@ export class NftRarityService {
       ]);
     } catch (error) {
       this.logger.error(`ERROR when updating DB || Elastic for collection`, {
-        path: 'AccountsStatsService.updateRarities',
+        path: 'NftRarityService.updateRarities',
         exception: error?.message,
         collection: collectionTicker,
       });
@@ -220,8 +241,8 @@ export class NftRarityService {
         updateBody,
       );
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic`, {
-        path: 'NftRarityService.setCollectionRarityFlag',
+      this.logger.error('Error when setting collection rarity flag', {
+        path: 'NftRarityService.updateRarities',
         exception: error?.message,
         collection: collection,
       });
@@ -241,7 +262,7 @@ export class NftRarityService {
   }
 
   async getCollectionRarityFlag(collectionTicker: string): Promise<boolean> {
-    let hasRarities = false;
+    let hasRarities: boolean;
 
     try {
       const query = ElasticQuery.create()
@@ -261,13 +282,14 @@ export class NftRarityService {
         'identifier',
         query,
         async (items) => {
-          hasRarities = items[0].rarities || false;
+          hasRarities =
+            items.length > 0 ? items[0].rarities || false : undefined;
           return;
         },
       );
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic`, {
-        path: 'NftRarityService.itHasRarities',
+      this.logger.error(`Error when getting collection rarity flag`, {
+        path: 'NftRarityService.getCollectionRarityFlag',
         exception: error?.message,
         collection: collectionTicker,
       });
@@ -288,7 +310,7 @@ export class NftRarityService {
           .build(),
       );
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic`, {
+      this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
         exception: error?.message,
         collection: collectionTicker,
@@ -320,7 +342,7 @@ export class NftRarityService {
         },
       );
     } catch (error) {
-      this.logger.error(`ERROR when updating DB || Elastic`, {
+      this.logger.error(`ERror when getting all collection NFTs from Elastic`, {
         path: 'NftRarityService.getAllCollectionNftsFromElastic',
         exception: error?.message,
         collection: collectionTicker,
