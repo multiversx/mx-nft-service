@@ -43,9 +43,7 @@ export class ElasticUpdatesEventsService {
     for (let event of mintEvents) {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
-      console.log(createTopics);
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-      console.log(identifier);
       const nft = await this.elrondApi.getNftByIdentifierForQuery(
         identifier,
         'fields=type,collection',
