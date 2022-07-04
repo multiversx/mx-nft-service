@@ -24,20 +24,23 @@ export class NftRarityService {
 
   async updateRarities(
     collectionTicker: string,
-    skipIfNoRaritiesFlag = false,
+    skipIfRaritiesFlag = false,
   ): Promise<boolean> {
     const [nfts, raritiesFlag] = await Promise.all([
       this.getAllCollectionNftsFromAPI(collectionTicker),
       this.getCollectionRarityFlag(collectionTicker),
     ]);
 
-    if ((!raritiesFlag && skipIfNoRaritiesFlag) || nfts?.length === 0) {
+    if (raritiesFlag && skipIfRaritiesFlag) {
       this.logger.info(
-        `updateRarities(${collectionTicker}): ${
-          nfts.length === 0
-            ? 'No NFTs'
-            : 'skipped because no rarities flag || rarities flag === false'
-        } -> set rarities & nft_attributes flags to false & return false`,
+        `updateRarities(${collectionTicker}): ${'skipped because no rarities flag || rarities flag === false'}`,
+      );
+      return;
+    }
+
+    if (nfts?.length === 0) {
+      this.logger.info(
+        `updateRarities(${collectionTicker}): No NFTs  -> set rarities & nft_attributes flags to false & return false`,
       );
       await Promise.all([
         this.setCollectionRarityFlag(collectionTicker, false),
