@@ -240,7 +240,7 @@ export class NftEventsService {
                 identifier: identifier,
                 nftName: nftData?.name,
                 verified: nftData?.assets ? true : false,
-                collectionName: collection.name,
+                collectionName: collection?.name,
               },
             }),
           );
