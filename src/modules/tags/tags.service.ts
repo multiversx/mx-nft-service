@@ -22,6 +22,7 @@ export class TagsService {
       cacheConfig.followersRedisClientName,
     );
   }
+
   async getTags(
     offset: number = 0,
     limit: number = 10,
@@ -32,7 +33,7 @@ export class TagsService {
       const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
       return [tags, count];
     }
-    const [tagsApi, count] = await this.getAuctionTags();
+    const [tagsApi, count] = await this.getAuctionTags(filters, offset, limit);
     const tags = tagsApi?.slice(offset, offset + limit);
     return [tags, count];
   }
@@ -72,19 +73,44 @@ export class TagsService {
     );
   }
 
-  private async getAuctionTags(): Promise<[Tag[], number]> {
-    return await this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.AuctionTags.key,
-      async () => await this.getAuctionTagsFromDb(),
-      5 * TimeConstants.oneMinute,
-    );
+  private async getAuctionTags(
+    filters: TagsFilter,
+    offset: number,
+    limit: number,
+  ): Promise<[Tag[], number]> {
+    if (filters?.searchTerm) {
+      return await this.getAuctionTagsWithSearch(filters, offset, limit);
+    } else {
+      return await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.AuctionTags.key,
+        async () => await this.getAuctionTagsFromDb(),
+        5 * TimeConstants.oneMinute,
+      );
+    }
   }
 
   async getAuctionTagsFromDb(limit: number = 100): Promise<[Tag[], number]> {
     const [tagsApi, count] = await Promise.all([
       this.tagsRepository.getTags(limit),
       this.tagsRepository.getTagsCount(),
+    ]);
+    const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
+    return [tags, count];
+  }
+
+  async getAuctionTagsWithSearch(
+    filters: TagsFilter,
+    offset: number,
+    limit: number,
+  ): Promise<[Tag[], number]> {
+    const [tagsApi, count] = await Promise.all([
+      this.tagsRepository.getTagsBySearchTerm(
+        filters.searchTerm,
+        offset,
+        limit,
+      ),
+      this.tagsRepository.getTagsBySearchTermCount(filters.searchTerm),
     ]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
     return [tags, count];

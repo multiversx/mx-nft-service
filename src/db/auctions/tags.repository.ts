@@ -20,6 +20,26 @@ export class TagsRepository extends Repository<TagEntity> {
     return tags;
   }
 
+  async getTagsBySearchTerm(
+    searchTerm: string,
+    page: number = 0,
+    size: number = 10,
+  ): Promise<NftTag[]> {
+    const tags: NftTag[] = await this.createQueryBuilder('t')
+      .select('count(a.id) as count, t.tag')
+      .innerJoin('auctions', 'a', 't.auctionId=a.id')
+      .where(`a.status= :status`, {
+        status: AuctionStatusEnum.Running,
+      })
+      .andWhere('t.tag LIKE :tag', { tag: `%${searchTerm}%` })
+      .groupBy('t.tag')
+      .orderBy('count', 'DESC')
+      .offset(page)
+      .limit(size)
+      .getRawMany();
+    return tags;
+  }
+
   async getTagsCount(): Promise<number> {
     const { count } = await this.createQueryBuilder('t')
       .select('COUNT (DISTINCT(tag))', 'count')
@@ -27,6 +47,18 @@ export class TagsRepository extends Repository<TagEntity> {
       .where(`a.status= :status`, {
         status: AuctionStatusEnum.Running,
       })
+      .getRawOne();
+    return count;
+  }
+
+  async getTagsBySearchTermCount(searchTerm: string): Promise<number> {
+    const { count } = await this.createQueryBuilder('t')
+      .select('COUNT(DISTINCT(tag))', 'count')
+      .innerJoin('auctions', 'a', 't.auctionId=a.id')
+      .where(`a.status= :status`, {
+        status: AuctionStatusEnum.Running,
+      })
+      .andWhere('t.tag LIKE :tag', { tag: `%${searchTerm}%` })
       .getRawOne();
     return count;
   }
