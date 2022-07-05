@@ -384,8 +384,18 @@ export class RedisCacheService {
     cacheKey: string,
     items: string[],
   ): Promise<void> {
-    if (items?.length > 0) {
-      await client.rpush(cacheKey, items);
+    let profiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await client.rpush(cacheKey, items);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to add item to redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('RPUSH', profiler.duration);
     }
   }
 
@@ -394,9 +404,19 @@ export class RedisCacheService {
     cacheKey: string,
   ): Promise<string[]> {
     let items: string[] = [];
-    let item: string;
-    while ((item = await client.lpop(cacheKey))) {
-      items.push(item);
+    let profiler = new PerformanceProfiler();
+    try {
+      let item: string;
+      while ((item = await client.lpop(cacheKey))) {
+        items.push(item);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to pop all item from redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('LPOP', profiler.duration);
     }
     return items;
   }
