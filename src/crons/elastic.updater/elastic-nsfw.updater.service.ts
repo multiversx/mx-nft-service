@@ -6,6 +6,7 @@ import { Locker } from 'src/utils/locker';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
+import { AssetsRedisHandler } from 'src/modules/assets';
 
 type NsfwType = {
   identifier: string;
@@ -14,14 +15,12 @@ type NsfwType = {
 
 @Injectable()
 export class ElasticNsfwUpdaterService {
-  private readonly logger: Logger;
-
   constructor(
     private elasticService: ElrondElasticService,
     private flagsNftService: FlagNftService,
-  ) {
-    this.logger = new Logger(ElasticNsfwUpdaterService.name);
-  }
+    private assetsRedisHandler: AssetsRedisHandler,
+    private readonly logger: Logger,
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleValidateNsfw() {
@@ -154,6 +153,9 @@ export class ElasticNsfwUpdaterService {
     }
 
     await this.bulkUpdate(itemsToUpdate);
+    await this.assetsRedisHandler.clearMultipleKeys(
+      itemsToUpdate.map((nft) => nft.identifier),
+    );
   }
 
   private async updateNsfwForToken(

@@ -6,6 +6,7 @@ import {
   NftMedia,
 } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import { AssetsRedisHandler } from '../assets';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class FlagNftService {
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
+    private assetsRedisHandler: AssetsRedisHandler,
     private readonly logger: Logger,
   ) {}
 
@@ -45,6 +47,7 @@ export class FlagNftService {
         identifier,
         this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
       );
+      this.assetsRedisHandler.clearKey(identifier);
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW for nft', {
@@ -74,6 +77,7 @@ export class FlagNftService {
         ),
       );
 
+      this.assetsRedisHandler.clearKey(identifier);
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW', {

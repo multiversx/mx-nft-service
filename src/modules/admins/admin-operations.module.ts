@@ -7,6 +7,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { CommonModule } from 'src/common.module';
 import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
+import { AssetsRedisHandler } from '../assets';
 
 @Module({
   providers: [
@@ -14,6 +15,7 @@ import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
     FlagNftService,
     VerifyContentService,
     NftRarityModuleGraph,
+    AssetsRedisHandler,
   ],
   imports: [
     CommonModule,

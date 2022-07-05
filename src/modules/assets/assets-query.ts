@@ -59,7 +59,7 @@ export class AssetsQuery {
 
   build(): string {
     return this.query
-      ? this.query + '&hasUris=true&isWhitelistedStorage=true'
-      : '?hasUris=true&isWhitelistedStorage=true';
+      ? this.query + '&hasUris=true&isWhitelistedStorage=true&isNsfw=false'
+      : '?hasUris=true&isWhitelistedStorage=true&isNsfw=false';
   }
 }

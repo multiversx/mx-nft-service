@@ -25,6 +25,13 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     await this.redisCacheService.del(this.redisClient, this.getCacheKey(key));
   }
 
+  async clearMultipleKeys(keys: T[]): Promise<any> {
+    await this.redisCacheService.delMultiple(
+      this.redisClient,
+      keys.map((key) => this.getCacheKey(key)),
+    );
+  }
+
   async clearKeyByPattern(key: T): Promise<any> {
     await this.redisCacheService.delByPattern(
       this.redisClient,
