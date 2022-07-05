@@ -14,7 +14,6 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
     returnValues: { key: string; value: any }[],
     assetsIdentifiers: { [key: string]: any[] },
   ) {
-    console.log(returnValues, assetsIdentifiers);
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
@@ -28,7 +27,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
     return [
       new RedisValue({
         values: redisValues,
-        ttl: 30 * TimeConstants.oneMinute,
+        ttl: TimeConstants.oneDay,
       }),
     ];
   }
@@ -53,7 +52,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
           this.redisClient,
           cacheKeys,
           val.values,
-          5 * TimeConstants.oneMinute,
+          30 * TimeConstants.oneMinute,
         );
       }
       return returnValues;
