@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
-import { AssetsQuery } from 'src/modules/assets';
+import { AssetsQuery, AssetsRedisHandler } from 'src/modules/assets';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
@@ -11,6 +11,7 @@ import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import BigNumber from 'bignumber.js';
 import { NftTypeEnum } from '../assets/models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 
 @Injectable()
 export class NftRarityService {
@@ -19,6 +20,7 @@ export class NftRarityService {
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly nftRarityComputeService: NftRarityComputeService,
+    private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -83,20 +85,10 @@ export class NftRarityService {
       return false;
     }
 
-    let rarities: NftRarityEntity[] = [];
-
-    try {
-      rarities =
-        await this.nftRarityComputeService.computeJaccardDistancesRarities(
-          this.sortAscNftsByNonce(nfts),
-        );
-    } catch (error) {
-      this.logger.error(`Error when computing JD rarities`, {
-        path: 'NftRarityService.updateRarities',
-        exception: error?.message,
-        collection: collectionTicker,
-      });
-    }
+    let rarities: NftRarityEntity[] = await this.computeRarities(
+      nfts,
+      collectionTicker,
+    );
 
     if (!rarities) {
       this.logger.error(`No rarities were computed`, {
@@ -112,6 +104,9 @@ export class NftRarityService {
         this.setCollectionRarityFlag(collectionTicker, true),
         this.setNftRarityFlags(rarities),
       ]);
+      await this.assetRarityRedisHandler.clearMultipleKeys(
+        rarities.map((r) => r.identifier),
+      );
     } catch (error) {
       this.logger.error(`Error when updating DB || Elastic for collection`, {
         path: 'NftRarityService.updateRarities',
@@ -122,6 +117,24 @@ export class NftRarityService {
     }
 
     return true;
+  }
+
+  private async computeRarities(nfts: Nft[], collectionTicker: string) {
+    let rarities: NftRarityEntity[] = [];
+
+    try {
+      rarities =
+        await this.nftRarityComputeService.computeJaccardDistancesRarities(
+          this.sortAscNftsByNonce(nfts),
+        );
+    } catch (error) {
+      this.logger.error(`Error when computing JD rarities`, {
+        path: 'NftRarityService.updateRarities',
+        exception: error?.message,
+        collection: collectionTicker,
+      });
+    }
+    return rarities;
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {

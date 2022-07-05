@@ -47,6 +47,7 @@ type Asset {
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
+  isNsfw: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
@@ -56,6 +57,7 @@ type Asset {
   nonce: Int!
   owner: Account
   ownerAddress: String
+  rarity: Rarity
   royalties: String!
   scamInfo: ScamInfo
   supply: String
@@ -567,7 +569,6 @@ type Metadata {
   fileName: String @deprecated(reason: "This field will be removed in the next version")
   fileType: String @deprecated(reason: "This field will be removed in the next version")
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
-  rarity: Rarity
 }
 
 type MintPrice {

@@ -35,6 +35,8 @@ import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { AssetsViewsRedisHandler } from './loaders/assets-views.redis-handler';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-marketplace.redis-handler';
+import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-handler';
+import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 
 @Module({
   providers: [
@@ -56,6 +58,8 @@ import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-ma
     AssetAuctionsCountProvider,
     AssetScamInfoRedisHandler,
     AssetScamInfoProvider,
+    AssetRarityInfoRedisHandler,
+    AssetRarityInfoProvider,
     AssetAvailableTokensCountRedisHandler,
     AssetAvailableTokensCountProvider,
     AssetsQueriesResolver,

@@ -23,6 +23,7 @@ import { NftRarityComputeService } from '../nft-rarity/nft-rarity.compute.servic
 import { FlagNftService } from '../admins/flag-nft.service';
 import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CommonModule } from 'src/common.module';
+import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { CommonModule } from 'src/common.module';
     AssetsRedisHandler,
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
+    AssetRarityInfoRedisHandler,
     VerifyContentService,
     NftRarityService,
     NftRarityComputeService,

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
 import { Locker } from 'src/utils/locker';
@@ -6,15 +6,13 @@ import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import asyncPool from 'tiny-async-pool';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 
 @Injectable()
 export class ElasticRarityUpdaterService {
   constructor(
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -59,7 +57,7 @@ export class ElasticRarityUpdaterService {
 
     await asyncPool(1, collectionsToUpdate, async (collection) => {
       try {
-        this.logger.info(
+        this.logger.log(
           `handleUpdateTokenRarity(): updateRarities(${collection})`,
         );
         await this.nftRarityService.updateRarities(collection);
@@ -111,7 +109,7 @@ export class ElasticRarityUpdaterService {
 
     await asyncPool(1, collections, async (collection) => {
       try {
-        this.logger.info(
+        this.logger.log(
           `handleValidateTokenRarity(): validateRarities(${collection})`,
         );
         await this.nftRarityService.validateRarities(collection);
