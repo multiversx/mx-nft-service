@@ -201,7 +201,9 @@ export class ElasticNsfwUpdaterService {
     }
   }
 
-  buildNsfwBulkUpdate(items: { identifier: string; nsfw: number }[]): string {
+  private buildNsfwBulkUpdate(
+    items: { identifier: string; nsfw: number }[],
+  ): string {
     let updates: string = '';
     items.forEach((r) => {
       updates += this.elasticService.buildBulkUpdateBody(
