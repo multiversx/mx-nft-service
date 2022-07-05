@@ -52,7 +52,6 @@ export class FlagNftService {
         path: 'FlagNftService.updateNftFlag',
         exception: error?.message,
       });
-
       return false;
     }
   }
@@ -83,6 +82,7 @@ export class FlagNftService {
         path: 'FlagNftService.updateNftNSFWByAdmin',
         exception: error?.message,
       });
+
       return false;
     }
   }
