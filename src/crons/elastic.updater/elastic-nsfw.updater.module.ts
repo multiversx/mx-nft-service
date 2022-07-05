@@ -7,5 +7,6 @@ import { ElasticNsfwUpdaterService } from './elastic-nsfw.updater.service';
 @Module({
   imports: [CommonModule, AdminOperationsModuleGraph],
   providers: [ElasticNsfwUpdaterService, AssetsRedisHandler],
+  exports: [ElasticNsfwUpdaterService],
 })
 export class ElasticNsfwUpdaterModule {}

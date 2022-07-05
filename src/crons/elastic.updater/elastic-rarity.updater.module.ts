@@ -6,5 +6,6 @@ import { ElasticRarityUpdaterService } from './elastic-rarity.updater.service';
 @Module({
   imports: [CommonModule, NftRarityModuleGraph],
   providers: [ElasticRarityUpdaterService],
+  exports: [ElasticRarityUpdaterService],
 })
 export class ElasticRarityUpdaterModule {}
