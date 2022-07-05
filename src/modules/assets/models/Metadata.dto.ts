@@ -10,9 +10,6 @@ export class Metadata {
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
 
-  @Field(() => Rarity, { nullable: true })
-  rarity: Rarity;
-
   @Field(() => String, {
     nullable: true,
     deprecationReason: 'This field will be removed in the next version',
@@ -37,7 +34,6 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          rarity: Rarity.fromNftRarity(metadata?.rarity),
           attributes: metadata?.attributes
             ? AttributeType.fromMetadataAttributes(metadata.attributes)
             : null,

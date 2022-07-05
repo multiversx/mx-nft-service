@@ -16,7 +16,7 @@ export class Rarity {
     return rarity
       ? new Rarity({
           rank: rarity?.rank,
-          score: rarity?.score ? rarity.score : rarity.rarityScore,
+          score: rarity?.score,
         })
       : null;
   }

@@ -37,6 +37,7 @@ import {
   CreateNftRequest,
   TransferNftRequest,
 } from './models/requests';
+import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 const hash = require('object-hash');
 
 @Injectable()
@@ -46,6 +47,7 @@ export class AssetsService {
     private apiService: ElrondApiService,
     private pinataService: PinataService,
     private assetScamLoader: AssetScamInfoProvider,
+    private assetRarityLoader: AssetRarityInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
     private s3Service: S3Service,
     private assetsLikedService: AssetsLikesService,
@@ -160,6 +162,11 @@ export class AssetsService {
 
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
+      let assetsWithRarity = response.items?.filter((x) => x?.rarity);
+      await this.assetRarityLoader.batchRarity(
+        assetsWithRarity?.map((a) => a.identifier),
+        assetsWithRarity?.groupBy((asset) => asset.identifier),
+      );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
       await this.assetScamLoader.batchScamInfo(
         assetsWithScamInfo?.map((a) => a.identifier),
