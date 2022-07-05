@@ -6,6 +6,7 @@ import { NftTypeEnum } from '../assets/models/NftTypes.enum';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { FlagNftService } from '../admins/flag-nft.service';
 import { MintEvent } from './entities/auction/mint.event';
+import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -13,6 +14,7 @@ export class ElasticUpdatesEventsService {
     private readonly nftFlagsService: FlagNftService,
     private readonly elrondApi: ElrondApiService,
     private readonly nftRarityService: NftRarityService,
+    private readonly rarityUpdater: ElasticRarityUpdaterService,
   ) {}
 
   public async handleNftMintEvents(
@@ -67,15 +69,13 @@ export class ElasticUpdatesEventsService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    const updates: Promise<boolean>[] = collectionsToUpdate.map((c) => {
-      return this.nftRarityService.updateRarities(c);
-    });
-
     const deletes: Promise<DeleteResult>[] = nftsToDelete.map((n) => {
       return this.nftRarityService.deleteNftRarity(n);
     });
 
-    await Promise.all(updates);
-    await Promise.all(deletes);
+    await Promise.all([
+      deletes,
+      this.rarityUpdater.addCollectionsToRarityQueue(collectionsToUpdate),
+    ]);
   }
 }

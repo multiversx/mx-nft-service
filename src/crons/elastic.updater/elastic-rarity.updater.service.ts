@@ -1,19 +1,81 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { ElrondElasticService } from 'src/common';
+import { ElrondElasticService, RedisCacheService } from 'src/common';
 import { Locker } from 'src/utils/locker';
 import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import asyncPool from 'tiny-async-pool';
+import * as Redis from 'ioredis';
+import { cacheConfig } from 'src/config';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class ElasticRarityUpdaterService {
+  private readonly redisClient: Redis.Redis;
+
   constructor(
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
     private readonly logger: Logger,
-  ) {}
+    private readonly redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.rarityQueueClientName,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async handleValidateTokenRarity() {
+    let collections: string[] = [];
+
+    try {
+      await Locker.lock(
+        'Elastic updater: Validate tokens rarity',
+        async () => {
+          const query = ElasticQuery.create()
+            .withMustNotExistCondition('nonce')
+            .withMustMultiShouldCondition(
+              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+              (type) => QueryType.Match('type', type),
+            )
+            .withPagination({ from: 0, size: 10000 });
+
+          await this.elasticService.getScrollableList(
+            'tokens',
+            'token',
+            query,
+            async (items) => {
+              collections = collections.concat(items.map((i) => i.token));
+            },
+          );
+        },
+        true,
+      );
+    } catch (error) {
+      this.logger.error(`Error when scrolling through collections`, {
+        path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+        exception: error?.message,
+      });
+    }
+
+    await asyncPool(1, collections, async (collection) => {
+      try {
+        this.logger.log(
+          `handleValidateTokenRarity(): validateRarities(${collection})`,
+        );
+        await this.nftRarityService.validateRarities(collection);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        this.logger.error(`Error when validating collection rarities`, {
+          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+          exception: error?.message,
+          collection: collection,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+      }
+    });
+  }
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleUpdateTokenRarity() {
@@ -73,55 +135,52 @@ export class ElasticRarityUpdaterService {
     });
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
-  async handleValidateTokenRarity() {
-    let collections: string[] = [];
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async handleUpdateTokenRarityQueue() {
+    let notUpdatedCollections: string[] = [];
+    let collectionsToUpdate: string[] =
+      await this.popAllCollectionsFromRarityQueue();
 
-    try {
-      await Locker.lock(
-        'Elastic updater: Validate tokens rarity',
-        async () => {
-          const query = ElasticQuery.create()
-            .withMustNotExistCondition('nonce')
-            .withMustMultiShouldCondition(
-              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-              (type) => QueryType.Match('type', type),
-            )
-            .withPagination({ from: 0, size: 10000 });
-
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              collections = collections.concat(items.map((i) => i.token));
-            },
-          );
-        },
-        true,
-      );
-    } catch (error) {
-      this.logger.error(`Error when scrolling through collections`, {
-        path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
-        exception: error?.message,
-      });
-    }
-
-    await asyncPool(1, collections, async (collection) => {
+    for (const collection of collectionsToUpdate) {
       try {
         this.logger.log(
-          `handleValidateTokenRarity(): validateRarities(${collection})`,
+          `handleUpdateTokenRarityQueue(): updateRarities(${collection})`,
         );
-        await this.nftRarityService.validateRarities(collection);
+        await this.nftRarityService.updateRarities(collection);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
-        this.logger.error(`Error when validating collection rarities`, {
-          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+        this.logger.error(`Error when handling rarity queue`, {
+          path: 'ElasticRarityUpdaterService.handleUpdateTokenRarityQueue',
           exception: error?.message,
           collection: collection,
         });
+        notUpdatedCollections.push(collection);
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
-    });
+    }
+
+    await this.addCollectionsToRarityQueue(notUpdatedCollections);
+  }
+
+  async addCollectionsToRarityQueue(
+    collectionTickers: string[],
+  ): Promise<void> {
+    if (collectionTickers?.length > 0) {
+      this.redisClient.rpush(this.getRarityQueueCacheKey(), collectionTickers);
+    }
+  }
+
+  async popAllCollectionsFromRarityQueue(): Promise<string[]> {
+    const cacheKey = this.getRarityQueueCacheKey();
+    let collections: string[] = [];
+    let c: string;
+    while ((c = await this.redisClient.lpop(cacheKey))) {
+      collections.push(c);
+    }
+    return [...new Set(collections)];
+  }
+
+  private getRarityQueueCacheKey() {
+    return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
   }
 }
