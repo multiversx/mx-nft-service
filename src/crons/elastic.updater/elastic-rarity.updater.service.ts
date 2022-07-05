@@ -135,31 +135,38 @@ export class ElasticRarityUpdaterService {
     });
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleUpdateTokenRarityQueue() {
-    let notUpdatedCollections: string[] = [];
-    let collectionsToUpdate: string[] =
-      await this.popAllCollectionsFromRarityQueue();
+    await Locker.lock(
+      'Elastic updater: Update rarities for all collections in the rarities queue',
+      async () => {
+        let notUpdatedCollections: string[] = [];
+        const collectionsToUpdate: string[] = [
+          ...new Set(await this.popAllCollectionsFromRarityQueue()),
+        ];
 
-    for (const collection of collectionsToUpdate) {
-      try {
-        this.logger.log(
-          `handleUpdateTokenRarityQueue(): updateRarities(${collection})`,
-        );
-        await this.nftRarityService.updateRarities(collection);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        this.logger.error(`Error when handling rarity queue`, {
-          path: 'ElasticRarityUpdaterService.handleUpdateTokenRarityQueue',
-          exception: error?.message,
-          collection: collection,
-        });
-        notUpdatedCollections.push(collection);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-      }
-    }
+        for (const c of collectionsToUpdate) {
+          try {
+            this.logger.log(
+              `handleUpdateTokenRarityQueue(): updateRarities(${c})`,
+            );
+            await this.nftRarityService.updateRarities(c);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          } catch (error) {
+            this.logger.error(`Error when handling rarity queue`, {
+              path: 'ElasticRarityUpdaterService.handleUpdateTokenRarityQueue',
+              exception: error?.message,
+              collection: c,
+            });
+            notUpdatedCollections.push(c);
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          }
+        }
 
-    await this.addCollectionsToRarityQueue(notUpdatedCollections);
+        await this.addCollectionsToRarityQueue(notUpdatedCollections);
+      },
+      true,
+    );
   }
 
   async addCollectionsToRarityQueue(
