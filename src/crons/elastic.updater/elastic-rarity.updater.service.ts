@@ -145,20 +145,20 @@ export class ElasticRarityUpdaterService {
           ...new Set(await this.popAllCollectionsFromRarityQueue()),
         ];
 
-        for (const c of collectionsToUpdate) {
+        for (const collection of collectionsToUpdate) {
           try {
             this.logger.log(
-              `handleUpdateTokenRarityQueue(): updateRarities(${c})`,
+              `handleUpdateTokenRarityQueue(): updateRarities(${collection})`,
             );
-            await this.nftRarityService.updateRarities(c);
+            await this.nftRarityService.updateRarities(collection);
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (error) {
             this.logger.error(`Error when handling rarity queue`, {
               path: 'ElasticRarityUpdaterService.handleUpdateTokenRarityQueue',
               exception: error?.message,
-              collection: c,
+              collection: collection,
             });
-            notUpdatedCollections.push(c);
+            notUpdatedCollections.push(collection);
             await new Promise((resolve) => setTimeout(resolve, 10000));
           }
         }
