@@ -379,6 +379,28 @@ export class RedisCacheService {
     }
   }
 
+  async addItemsToList(
+    client: Redis.Redis,
+    cacheKey: string,
+    items: string[],
+  ): Promise<void> {
+    if (items?.length > 0) {
+      await client.rpush(cacheKey, items);
+    }
+  }
+
+  async popAllItemsFromList(
+    client: Redis.Redis,
+    cacheKey: string,
+  ): Promise<string[]> {
+    let items: string[] = [];
+    let item: string;
+    while ((item = await client.lpop(cacheKey))) {
+      items.push(item);
+    }
+    return items;
+  }
+
   private async buildInternalCreateValueFunc(
     key: string,
     region: string,

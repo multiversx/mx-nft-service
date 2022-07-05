@@ -142,7 +142,12 @@ export class ElasticRarityUpdaterService {
       async () => {
         let notUpdatedCollections: string[] = [];
         const collectionsToUpdate: string[] = [
-          ...new Set(await this.popAllCollectionsFromRarityQueue()),
+          ...new Set(
+            await this.redisCacheService.popAllItemsFromList(
+              this.redisClient,
+              this.getRarityQueueCacheKey(),
+            ),
+          ),
         ];
 
         for (const collection of collectionsToUpdate) {
@@ -173,21 +178,12 @@ export class ElasticRarityUpdaterService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisClient.rpush(
+      await this.redisCacheService.addItemsToList(
+        this.redisClient,
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
     }
-  }
-
-  private async popAllCollectionsFromRarityQueue(): Promise<string[]> {
-    const cacheKey = this.getRarityQueueCacheKey();
-    let collections: string[] = [];
-    let c: string;
-    while ((c = await this.redisClient.lpop(cacheKey))) {
-      collections.push(c);
-    }
-    return [...new Set(collections)];
   }
 
   private getRarityQueueCacheKey() {
