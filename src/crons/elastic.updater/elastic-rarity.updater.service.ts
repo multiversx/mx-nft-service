@@ -135,7 +135,7 @@ export class ElasticRarityUpdaterService {
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleUpdateTokenRarityQueue() {
     await Locker.lock(
       'Elastic updater: Update rarities for all collections in the rarities queue',
