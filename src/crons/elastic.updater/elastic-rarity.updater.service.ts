@@ -166,11 +166,14 @@ export class ElasticRarityUpdaterService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      this.redisClient.rpush(this.getRarityQueueCacheKey(), collectionTickers);
+      await this.redisClient.rpush(
+        this.getRarityQueueCacheKey(),
+        collectionTickers,
+      );
     }
   }
 
-  async popAllCollectionsFromRarityQueue(): Promise<string[]> {
+  private async popAllCollectionsFromRarityQueue(): Promise<string[]> {
     const cacheKey = this.getRarityQueueCacheKey();
     let collections: string[] = [];
     let c: string;
