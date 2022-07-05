@@ -5,7 +5,6 @@ import {
   Nft,
   NftMedia,
 } from 'src/common';
-import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
 import { VerifyContentService } from '../assets/verify-content.service';
 
@@ -16,7 +15,6 @@ export class FlagNftService {
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
-    private slackReport: SlackReportService,
     private readonly logger: Logger,
   ) {}
 
@@ -54,7 +52,6 @@ export class FlagNftService {
         path: 'FlagNftService.updateNftFlag',
         exception: error?.message,
       });
-      await this.slackReport.sendNftNotFlaged(identifier);
       return false;
     }
   }
@@ -86,7 +83,6 @@ export class FlagNftService {
         exception: error?.message,
       });
 
-      await this.slackReport.sendNftNotFlaged(identifier);
       return false;
     }
   }

@@ -40,34 +40,4 @@ export class SlackReportService {
       return;
     }
   }
-
-  async sendNftNotFlaged(identifier: string): Promise<boolean> {
-    const url = process.env.SLACK_API;
-    const marketplaceUrl = new URL(
-      `${process.env.ELROND_MARKETPLACE}\\nfts\\${identifier}`,
-    );
-    try {
-      const response = await this.apiService.post(
-        url,
-        {
-          channel: process.env.REPORT_CHANNEL,
-          text: `${marketplaceUrl.toString()}\n Could not be marked with nsfw value`,
-        },
-        new ApiSettings({
-          authorization: `Bearer ${process.env.REPORT_BEARER}`,
-        }),
-      );
-      return response.data;
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the slack report service on url ${url}`,
-        {
-          path: 'SlackReportService.sendNftNotFlaged',
-          identifier,
-          exception: error,
-        },
-      );
-      return;
-    }
-  }
 }
