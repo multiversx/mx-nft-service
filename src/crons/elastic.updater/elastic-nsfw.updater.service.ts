@@ -28,7 +28,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw from database',
       async () => {
         const query = ElasticQuery.create()
-          .withFields(['nft_nsfw_score'])
+          .withFields(['nft_nsfw_rating'])
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -49,7 +49,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw_score,
+              nsfw: item.nft_nsfw_rating,
             }));
 
             await this.validateNsfwValues(nsfwItems);
@@ -66,7 +66,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw',
       async () => {
         const query = ElasticQuery.create()
-          .withMustNotExistCondition('nft_nsfw_score')
+          .withMustNotExistCondition('nft_nsfw_rating')
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -87,7 +87,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw_score,
+              nsfw: item.nft_nsfw_rating,
             }));
 
             await this.updateNsfwForTokens(nsfwItems);
@@ -179,7 +179,7 @@ export class ElasticNsfwUpdaterService {
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,
-        this.elasticService.buildUpdateBody<number>('nft_nsfw_score', nsfw),
+        this.elasticService.buildUpdateBody<number>('nft_nsfw_rating', nsfw),
       );
     } catch (error) {
       this.logger.error(
@@ -218,10 +218,10 @@ export class ElasticNsfwUpdaterService {
   ): string {
     let updates: string = '';
     items.forEach((r) => {
-      updates += this.elasticService.buildBulkUpdateBody(
+      updates += this.elasticService.buildBulkUpdateBody<number>(
         'tokens',
         r.identifier,
-        'nft_nsfw_score',
+        'nft_nsfw_rating',
         r.nsfw,
       );
     });

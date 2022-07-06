@@ -162,7 +162,7 @@ export class ElrondElasticService {
     collection: string,
     identifier: string,
     fieldName: string,
-    fieldValue: any,
+    fieldValue: T,
   ): string {
     return (
       JSON.stringify({
