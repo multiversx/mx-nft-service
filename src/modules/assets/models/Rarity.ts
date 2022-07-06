@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { NftRarity } from 'src/common';
+import { Nft, NftRarity } from 'src/common';
 
 @ObjectType()
 export class Rarity {
@@ -12,11 +12,11 @@ export class Rarity {
     Object.assign(this, init);
   }
 
-  static fromNftRarity(rarity: NftRarity) {
-    return rarity
+  static fromNftRarity(asset: Nft) {
+    return asset
       ? new Rarity({
-          rank: rarity?.rank,
-          score: rarity?.score,
+          rank: asset?.rank,
+          score: asset?.score,
         })
       : null;
   }

@@ -111,6 +111,7 @@ export class Asset {
           supply: nft.supply,
           name: nft.name,
           royalties: nft.royalties ?? '',
+          rarity: Rarity.fromNftRarity(nft),
           uris: nft.uris || [''],
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
