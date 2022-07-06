@@ -224,6 +224,7 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
+          console.log({ createTopics });
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
           this.collectionAssets.clearKey(createTopics.collection);
           this.collectionAssetsCount.clearKey(createTopics.collection);
