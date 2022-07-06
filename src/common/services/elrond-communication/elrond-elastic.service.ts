@@ -150,7 +150,7 @@ export class ElrondElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  buildUpdateBody<T>(fieldName: string, fieldValue: any): any {
+  buildUpdateBody<T>(fieldName: string, fieldValue: number): any {
     return {
       doc: {
         [fieldName]: fieldValue,
