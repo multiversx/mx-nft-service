@@ -36,17 +36,7 @@ export class FlagNftService {
         nftMedia.url ?? nftMedia.originalUrl,
         nftMedia.fileType,
       );
-      await this.nftFlagsRepository.addFlag(
-        new NftFlagsEntity({
-          identifier: identifier,
-          nsfw: value.toRounded(2),
-        }),
-      );
-      await this.elasticUpdater.setCustomValue(
-        'tokens',
-        identifier,
-        this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
-      );
+      await this.addNsfwFlag(identifier, value);
       this.assetsRedisHandler.clearKey(identifier);
       return true;
     } catch (error) {
@@ -57,6 +47,23 @@ export class FlagNftService {
       });
       return false;
     }
+  }
+
+  private async addNsfwFlag(identifier: string, value: number) {
+    this.logger.log(
+      `Setting nsfw for '${identifier}' with value ${value.toRounded(2)}`,
+    );
+    await this.nftFlagsRepository.addFlag(
+      new NftFlagsEntity({
+        identifier: identifier,
+        nsfw: value.toRounded(2),
+      }),
+    );
+    await this.elasticUpdater.setCustomValue(
+      'tokens',
+      identifier,
+      this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
+    );
   }
 
   public async updateNftNSFWByAdmin(identifier: string, value) {
