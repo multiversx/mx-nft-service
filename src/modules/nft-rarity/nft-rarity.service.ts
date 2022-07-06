@@ -34,11 +34,11 @@ export class NftRarityService {
     ]);
 
     if (raritiesFlag === undefined) {
-      this.logger.info(`Wrong collection ID`, {
+      this.logger.error(`Wrong collection ID`, {
         path: 'NftRarityService.updateRarities',
         collection: collectionTicker,
       });
-      throw new Error('Wrong collection ID');
+      return false;
     }
 
     if (!raritiesFlag && skipIfRaritiesFlag) {

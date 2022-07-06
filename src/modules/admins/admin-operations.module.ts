@@ -8,6 +8,7 @@ import { VerifyContentService } from '../assets/verify-content.service';
 import { CommonModule } from 'src/common.module';
 import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
 import { AssetsRedisHandler } from '../assets';
+import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { AssetsRedisHandler } from '../assets';
     VerifyContentService,
     NftRarityModuleGraph,
     AssetsRedisHandler,
+    ElasticRarityUpdaterService,
   ],
   imports: [
     CommonModule,

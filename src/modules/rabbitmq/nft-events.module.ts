@@ -24,10 +24,13 @@ import { FlagNftService } from '../admins/flag-nft.service';
 import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CommonModule } from 'src/common.module';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
+import { CachingModule } from 'src/common/services/caching/caching.module';
+import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
 
 @Module({
   imports: [
     forwardRef(() => CommonModule),
+    forwardRef(() => CachingModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
@@ -53,6 +56,7 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
     NftRarityService,
     NftRarityComputeService,
     FlagNftService,
+    ElasticRarityUpdaterService,
   ],
   exports: [NftEventsService],
 })

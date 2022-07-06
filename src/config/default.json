@@ -26,7 +26,9 @@
     "followersRedisClientName": "followers",
     "followersDbName": 5,
     "collectionsRedisClientName": "collections",
-    "collectionsDbName": 6
+    "collectionsDbName": 6,
+    "rarityQueueClientName": "rarityQueue",
+    "rarityQueueDbName": 7
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

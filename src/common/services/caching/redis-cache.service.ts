@@ -379,6 +379,48 @@ export class RedisCacheService {
     }
   }
 
+  async addItemsToList(
+    client: Redis.Redis,
+    cacheKey: string,
+    items: string[],
+  ): Promise<void> {
+    let profiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await client.rpush(cacheKey, items);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to add item to redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('RPUSH', profiler.duration);
+    }
+  }
+
+  async popAllItemsFromList(
+    client: Redis.Redis,
+    cacheKey: string,
+  ): Promise<string[]> {
+    let items: string[] = [];
+    let profiler = new PerformanceProfiler();
+    try {
+      let item: string;
+      while ((item = await client.lpop(cacheKey))) {
+        items.push(item);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to pop all item from redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('LPOP', profiler.duration);
+    }
+    return items;
+  }
+
   private async buildInternalCreateValueFunc(
     key: string,
     region: string,
