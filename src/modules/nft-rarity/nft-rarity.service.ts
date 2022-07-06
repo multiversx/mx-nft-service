@@ -60,7 +60,7 @@ export class NftRarityService {
           collection: collectionTicker,
         },
       );
-      await this.setCollectionRarityFlag(collectionTicker, false);
+      await this.setCollectionRarityFlagInElastic(collectionTicker, false);
       return false;
     }
 
@@ -93,8 +93,8 @@ export class NftRarityService {
         },
       );
       await Promise.all([
-        this.setCollectionRarityFlag(collectionTicker, false),
-        this.setNftRarityFlags(allNfts, false),
+        this.setCollectionRarityFlagInElastic(collectionTicker, false),
+        this.setNftRaritiesInElastic(allNfts, false),
       ]);
       return false;
     }
@@ -115,8 +115,8 @@ export class NftRarityService {
     try {
       await Promise.all([
         this.nftRarityRepository.saveOrUpdateBulk(rarities),
-        this.setCollectionRarityFlag(collectionTicker, true),
-        this.setNftRarityFlags(rarities),
+        this.setCollectionRarityFlagInElastic(collectionTicker, true),
+        this.setNftRaritiesInElastic(rarities),
       ]);
       await this.assetRarityRedisHandler.clearMultipleKeys(
         rarities.map((r) => r.identifier),
@@ -234,13 +234,13 @@ export class NftRarityService {
           'tokens',
           r.identifier,
           'nft_score',
-          r.score | r.nft_score,
+          r.score || r.nft_score || 0,
         );
         updates += this.elasticService.buildBulkUpdateBody(
           'tokens',
           r.identifier,
           'nft_rank',
-          r.rank | r.nft_rank,
+          r.rank || r.nft_rank,
         );
       }
       updates += this.elasticService.buildBulkUpdateBody(
@@ -253,7 +253,7 @@ export class NftRarityService {
     return updates;
   }
 
-  async setCollectionRarityFlag(
+  async setCollectionRarityFlagInElastic(
     collection: string,
     hasRarities: boolean,
   ): Promise<void> {
@@ -277,7 +277,7 @@ export class NftRarityService {
     }
   }
 
-  async setNftRarityFlags(
+  async setNftRaritiesInElastic(
     nfts: NftRarityEntity[] | Nft[],
     hasRarities: boolean = true,
   ): Promise<void> {
