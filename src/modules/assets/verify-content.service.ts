@@ -239,7 +239,7 @@ export class VerifyContentService {
         return concept.getValue();
       }
     }
-    return 0;
+    return 0.0;
   }
 
   private processImageLogoModel(
@@ -283,7 +283,7 @@ export class VerifyContentService {
     if (nsfwValues?.length > 0) {
       return Math.max(...nsfwValues);
     }
-    return 0;
+    return 0.0;
   }
   private processNsfwVideoPredictions(
     output: resources.Output,

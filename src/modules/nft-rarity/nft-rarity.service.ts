@@ -258,7 +258,7 @@ export class NftRarityService {
     hasRarities: boolean,
   ): Promise<void> {
     try {
-      const updateBody = this.elasticService.buildUpdateBody(
+      const updateBody = this.elasticService.buildUpdateBody<boolean>(
         'rarities',
         hasRarities,
       );

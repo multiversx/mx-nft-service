@@ -79,7 +79,10 @@ export class FlagNftService {
     await this.elasticUpdater.setCustomValue(
       'tokens',
       identifier,
-      this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
+      this.elasticUpdater.buildUpdateBody<number>(
+        'nft_nsfw',
+        value.toRounded(2),
+      ),
     );
   }
 
@@ -95,7 +98,7 @@ export class FlagNftService {
       await this.elasticUpdater.setCustomValue(
         'tokens',
         identifier,
-        this.elasticUpdater.buildUpdateBody(
+        this.elasticUpdater.buildUpdateBody<number>(
           'nft_nsfw',
           Number(value.toFixed(2)),
         ),
