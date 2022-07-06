@@ -31,7 +31,9 @@ export class FlagNftService {
       if (!nftMedia) {
         return false;
       }
-
+      this.logger.log(
+        `Setting nsfw for '${identifier}' with value url ${nftMedia.url} - ${nftMedia.originalUrl}`,
+      );
       const value = await this.verifyContent.checkContentSensitivityForUrl(
         nftMedia.url ?? nftMedia.originalUrl,
         nftMedia.fileType,
