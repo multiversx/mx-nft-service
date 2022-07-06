@@ -60,10 +60,7 @@ export class NftRarityService {
           collection: collectionTicker,
         },
       );
-      await Promise.all([
-        this.setCollectionRarityFlag(collectionTicker, false),
-        this.setNftRarityFlags(allNfts, false),
-      ]);
+      await this.setCollectionRarityFlag(collectionTicker, false);
       return false;
     }
 
@@ -97,7 +94,7 @@ export class NftRarityService {
       );
       await Promise.all([
         this.setCollectionRarityFlag(collectionTicker, false),
-        this.setNftRarityFlags(nfts, false),
+        this.setNftRarityFlags(allNfts, false),
       ]);
       return false;
     }
