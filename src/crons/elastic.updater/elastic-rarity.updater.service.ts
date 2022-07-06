@@ -141,14 +141,12 @@ export class ElasticRarityUpdaterService {
       'Elastic updater: Update rarities for all collections in the rarities queue',
       async () => {
         let notUpdatedCollections: string[] = [];
-        const collectionsToUpdate: string[] = [
-          ...new Set(
-            await this.redisCacheService.popAllItemsFromList(
-              this.redisClient,
-              this.getRarityQueueCacheKey(),
-            ),
-          ),
-        ];
+        const collectionsToUpdate: string[] =
+          await this.redisCacheService.popAllItemsFromList(
+            this.redisClient,
+            this.getRarityQueueCacheKey(),
+            true,
+          );
 
         for (const collection of collectionsToUpdate) {
           try {

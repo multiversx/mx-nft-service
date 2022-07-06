@@ -402,6 +402,7 @@ export class RedisCacheService {
   async popAllItemsFromList(
     client: Redis.Redis,
     cacheKey: string,
+    removeDuplicates: boolean = false,
   ): Promise<string[]> {
     let items: string[] = [];
     let profiler = new PerformanceProfiler();
@@ -418,7 +419,7 @@ export class RedisCacheService {
       profiler.stop();
       MetricsCollector.setRedisDuration('LPOP', profiler.duration);
     }
-    return items;
+    return removeDuplicates ? [...new Set(items)] : items;
   }
 
   private async buildInternalCreateValueFunc(

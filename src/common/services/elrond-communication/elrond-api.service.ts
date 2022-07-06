@@ -203,6 +203,16 @@ export class ElrondApiService {
     );
   }
 
+  async getAllCollectionNftsForQuery(
+    identifier: string = '',
+    query: string = '',
+  ): Promise<Nft[]> {
+    return await this.doGetGeneric(
+      this.getAllCollectionNftsForQuery.name,
+      `collections/${identifier}/nfts${query}`,
+    );
+  }
+
   async getCollectionByIdentifierForQuery(
     identifier: string = '',
     query: string = '',

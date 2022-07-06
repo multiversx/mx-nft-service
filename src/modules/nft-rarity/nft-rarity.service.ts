@@ -28,7 +28,7 @@ export class NftRarityService {
     collectionTicker: string,
     skipIfRaritiesFlag = false,
   ): Promise<boolean> {
-    const [nfts, raritiesFlag] = await Promise.all([
+    const [allNfts, raritiesFlag] = await Promise.all([
       this.getAllCollectionNftsFromAPI(collectionTicker),
       this.getCollectionRarityFlag(collectionTicker),
     ]);
@@ -52,9 +52,9 @@ export class NftRarityService {
       return false;
     }
 
-    if (nfts?.length === 0) {
+    if (allNfts?.length === 0) {
       this.logger.info(
-        'No NFTs  -> set rarities & nft_attributes flags to false & return false',
+        'No NFTs -> set rarities & nft_attributes flags to false & return false',
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
@@ -62,17 +62,34 @@ export class NftRarityService {
       );
       await Promise.all([
         this.setCollectionRarityFlag(collectionTicker, false),
-        this.setNftRarityFlags(nfts, false),
+        this.setNftRarityFlags(allNfts, false),
       ]);
       return false;
     }
 
-    if (
-      nfts?.find((nft) => nft.metadata?.attributes === null) ||
-      nfts?.find((nft) => nft.metadata?.attributes === undefined)
-    ) {
+    const nfts = this.filterNftsWithNoAttributes(allNfts);
+
+    if (allNfts.length !== nfts.length) {
+      const nftsWithoutAttributes = this.filterNftsWithAttributes(allNfts).map(
+        (nft) => {
+          return nft.identifier;
+        },
+      );
       this.logger.info(
-        'Collection has no attributes -> set rarities & nft_attributes flags to false & return false',
+        `The elrond api has not indexed attributes for ${
+          allNfts.length - nfts.length
+        } nft(s)`,
+        {
+          path: 'NftRarityService.updateRarities',
+          collection: collectionTicker,
+          nftsWithoutAttributes: nftsWithoutAttributes,
+        },
+      );
+    }
+
+    if (nfts?.length === 0) {
+      this.logger.info(
+        'Collection has no attributes or attributes were not indexed yet by the elrond api',
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
@@ -316,11 +333,9 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<Nft[]> {
     try {
-      return await this.apiService.getAllNfts(
-        new AssetsQuery()
-          .addCollection(collectionTicker)
-          .addPageSize(0, 10000)
-          .build(),
+      return await this.apiService.getAllCollectionNftsForQuery(
+        collectionTicker,
+        new AssetsQuery().addPageSize(0, 10000).build(),
       );
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
@@ -364,6 +379,14 @@ export class NftRarityService {
     }
 
     return nfts;
+  }
+
+  private filterNftsWithNoAttributes(nfts: Nft[]): Nft[] {
+    return nfts.filter((nft) => nft.metadata?.attributes !== undefined);
+  }
+
+  private filterNftsWithAttributes(nfts: Nft[]): Nft[] {
+    return nfts.filter((nft) => nft.metadata?.attributes === undefined);
   }
 
   private sortAscNftsByNonce(nfts: Nft[]): Nft[] {
