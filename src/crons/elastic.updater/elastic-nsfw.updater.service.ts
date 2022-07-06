@@ -244,7 +244,7 @@ export class ElasticNsfwUpdaterService {
       '\n' +
       JSON.stringify({
         doc: {
-          [fieldName]: fieldValue.toRounded(2),
+          [fieldName]: Number(fieldValue).toFixed(2),
         },
       }) +
       '\n'
