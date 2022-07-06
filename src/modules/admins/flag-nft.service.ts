@@ -31,15 +31,12 @@ export class FlagNftService {
       if (!nftMedia) {
         return false;
       }
-      this.logger.log(
-        `Setting nsfw for '${identifier}' with value url ${nftMedia.url} - ${nftMedia.originalUrl}`,
-      );
-      const value = await this.verifyContent.checkContentSensitivityForUrl(
-        nftMedia.url ?? nftMedia.originalUrl,
-        nftMedia.fileType,
-      );
-      await this.addNsfwFlag(identifier, value);
-      this.assetsRedisHandler.clearKey(identifier);
+
+      const value = await this.getNsfwValue(nftMedia);
+      if (value) {
+        await this.addNsfwFlag(identifier, value);
+        this.assetsRedisHandler.clearKey(identifier);
+      }
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW for nft', {
@@ -48,6 +45,24 @@ export class FlagNftService {
         exception: error?.message,
       });
       return false;
+    }
+  }
+
+  private async getNsfwValue(nftMedia: NftMedia) {
+    try {
+      return await this.verifyContent.checkContentSensitivityForUrl(
+        nftMedia.url ?? nftMedia.originalUrl,
+        nftMedia.fileType,
+      );
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calculating nsfw for url ${nftMedia.url} and type ${nftMedia.fileType}`,
+        {
+          path: 'FlagNftService.getNsfwValue',
+          exception: error?.message,
+        },
+      );
+      return undefined;
     }
   }
 
