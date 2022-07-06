@@ -64,10 +64,10 @@ export class NftRarityService {
       return false;
     }
 
-    const nfts = this.filterNftsWithNoAttributes(allNfts);
+    const nfts = this.filterNftsWithAttributes(allNfts);
 
     if (allNfts.length !== nfts.length) {
-      const nftsWithoutAttributes = this.filterNftsWithAttributes(allNfts).map(
+      const nftsWithNoAttributes = this.filterNftsWithNoAttributes(allNfts).map(
         (nft) => {
           return nft.identifier;
         },
@@ -79,7 +79,7 @@ export class NftRarityService {
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
-          nftsWithoutAttributes: nftsWithoutAttributes,
+          nftsWithNoAttributes: nftsWithNoAttributes,
         },
       );
     }
@@ -378,11 +378,11 @@ export class NftRarityService {
     return nfts;
   }
 
-  private filterNftsWithNoAttributes(nfts: Nft[]): Nft[] {
+  private filterNftsWithAttributes(nfts: Nft[]): Nft[] {
     return nfts.filter((nft) => nft.metadata?.attributes !== undefined);
   }
 
-  private filterNftsWithAttributes(nfts: Nft[]): Nft[] {
+  private filterNftsWithNoAttributes(nfts: Nft[]): Nft[] {
     return nfts.filter((nft) => nft.metadata?.attributes === undefined);
   }
 
