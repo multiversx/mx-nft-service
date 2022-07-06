@@ -49,7 +49,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.api_nsft,
+              nsfw: item.nft_nsfw,
             }));
 
             await this.validateNsfwValues(nsfwItems);
@@ -87,7 +87,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.api_nsft,
+              nsfw: item.nft_nsfw,
             }));
 
             await this.updateNsfwForTokens(nsfwItems);
