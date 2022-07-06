@@ -80,7 +80,7 @@ export class FlagNftService {
       'tokens',
       identifier,
       this.elasticUpdater.buildUpdateBody<number>(
-        'nft_nsfw',
+        'nft_nsfw_score',
         value.toRounded(2),
       ),
     );
@@ -99,7 +99,7 @@ export class FlagNftService {
         'tokens',
         identifier,
         this.elasticUpdater.buildUpdateBody<number>(
-          'nft_nsfw',
+          'nft_nsfw_score',
           Number(value.toFixed(2)),
         ),
       );

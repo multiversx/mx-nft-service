@@ -28,7 +28,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw from database',
       async () => {
         const query = ElasticQuery.create()
-          .withFields(['nft_nsfw'])
+          .withFields(['nft_nsfw_score'])
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -49,7 +49,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw,
+              nsfw: item.nft_nsfw_score,
             }));
 
             await this.validateNsfwValues(nsfwItems);
@@ -66,7 +66,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw',
       async () => {
         const query = ElasticQuery.create()
-          .withMustNotExistCondition('nft_nsfw')
+          .withMustNotExistCondition('nft_nsfw_score')
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -87,7 +87,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw,
+              nsfw: item.nft_nsfw_score,
             }));
 
             await this.updateNsfwForTokens(nsfwItems);
@@ -179,7 +179,7 @@ export class ElasticNsfwUpdaterService {
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,
-        this.elasticService.buildUpdateBody<number>('nft_nsfw', nsfw),
+        this.elasticService.buildUpdateBody<number>('nft_nsfw_score', nsfw),
       );
     } catch (error) {
       this.logger.error(
@@ -221,7 +221,7 @@ export class ElasticNsfwUpdaterService {
       updates += this.elasticService.buildBulkUpdateBody(
         'tokens',
         r.identifier,
-        'nft_nsfw',
+        'nft_nsfw_score',
         r.nsfw,
       );
     });
