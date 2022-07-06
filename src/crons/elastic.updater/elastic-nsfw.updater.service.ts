@@ -34,6 +34,12 @@ export class ElasticNsfwUpdaterService {
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
             (type) => QueryType.Match('type', type),
           )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+          )
           .withPagination({ from: 0, size: 10000 });
 
         await this.elasticService.getScrollableList(
@@ -65,6 +71,12 @@ export class ElasticNsfwUpdaterService {
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
             (type) => QueryType.Match('type', type),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
           )
           .withPagination({ from: 0, size: 10000 });
 

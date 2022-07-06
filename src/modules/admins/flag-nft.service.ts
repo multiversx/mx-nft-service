@@ -24,7 +24,7 @@ export class FlagNftService {
     try {
       const nft = await this.elrondApi.getNftByIdentifierForQuery(
         identifier,
-        'fields=media',
+        'fields=media,isWhitelistedStorage',
       );
 
       const nftMedia = this.getNftMedia(nft);
@@ -92,7 +92,11 @@ export class FlagNftService {
   }
 
   private getNftMedia(nft: Nft): NftMedia | undefined {
-    if (!nft.media || nft.media.length === 0) {
+    if (
+      !nft.media ||
+      nft.media.length === 0 ||
+      nft.isWhitelistedStorage === false
+    ) {
       return undefined;
     }
 
