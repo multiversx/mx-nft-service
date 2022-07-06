@@ -35,7 +35,8 @@ export interface Nft {
   metadata: NftMetadata;
   media: NftMedia[];
   scamInfo: NftScamInfo;
-  rarity: NftRarity;
+  rank: number;
+  score: number;
   assets: CollectionAssetApi;
 }
 

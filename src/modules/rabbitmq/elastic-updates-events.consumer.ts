@@ -10,7 +10,7 @@ export class ElasiticUpdatesConsumer {
   ) {}
 
   @CompetingRabbitConsumer({
-    queueName: process.env.RABBITMQ_QUEUE_ELASTIC,
+    queueName: 'nft-service-elastic',
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
