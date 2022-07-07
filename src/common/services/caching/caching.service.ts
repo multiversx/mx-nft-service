@@ -57,6 +57,7 @@ export class CachingService {
     }
 
     if (remoteTtl > 0) {
+      console.log({ key, value });
       await this.redisCacheService.set(client, key, value, remoteTtl);
     }
     return value;
