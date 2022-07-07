@@ -87,7 +87,7 @@ export class ElasticRarityUpdaterService {
         async () => {
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nft_hasRarity')
-            .withMustNotExistCondition('rarities')
+            .withMustNotExistCondition('nft_hasRarities')
             .withMustExistCondition('token')
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],

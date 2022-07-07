@@ -30,6 +30,5 @@ export class IsAssetLikedRedisHandler extends RedisKeyValueDataloaderHandler<str
         ttl: TimeConstants.oneWeek,
       }),
     ];
-    return;
   }
 }
