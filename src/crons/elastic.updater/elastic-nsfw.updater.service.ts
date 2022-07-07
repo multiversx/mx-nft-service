@@ -28,11 +28,17 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw from database',
       async () => {
         const query = ElasticQuery.create()
-          .withFields(['nft_nsfw'])
+          .withFields(['nft_nsfw_mark'])
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
             (type) => QueryType.Match('type', type),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
           )
           .withPagination({ from: 0, size: 10000 });
 
@@ -43,7 +49,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.api_nsft,
+              nsfw: item.nft_nsfw_mark,
             }));
 
             await this.validateNsfwValues(nsfwItems);
@@ -60,11 +66,17 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw',
       async () => {
         const query = ElasticQuery.create()
-          .withMustNotExistCondition('nft_nsfw')
+          .withMustNotExistCondition('nft_nsfw_mark')
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
             (type) => QueryType.Match('type', type),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+          )
+          .withMustCondition(
+            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
           )
           .withPagination({ from: 0, size: 10000 });
 
@@ -75,7 +87,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.api_nsft,
+              nsfw: item.nft_nsfw_mark,
             }));
 
             await this.updateNsfwForTokens(nsfwItems);
@@ -131,7 +143,6 @@ export class ElasticNsfwUpdaterService {
         ),
       100,
     );
-
     const itemsToUpdate: NsfwType[] = [];
     for (const identifier of Object.keys(databaseResult)) {
       const item: any = indexedItems[identifier];
@@ -167,7 +178,7 @@ export class ElasticNsfwUpdaterService {
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,
-        this.elasticService.buildUpdateBody('nft_nsfw', nsfw),
+        this.elasticService.buildUpdateBody<number>('nft_nsfw_mark', nsfw),
       );
     } catch (error) {
       this.logger.error(
@@ -206,13 +217,36 @@ export class ElasticNsfwUpdaterService {
   ): string {
     let updates: string = '';
     items.forEach((r) => {
-      updates += this.elasticService.buildBulkUpdateBody(
+      updates += this.buildBulkUpdateBody(
         'tokens',
         r.identifier,
-        'nft_nsfw',
-        r.nsfw,
+        'nft_nsfw_mark',
+        parseFloat(r.nsfw.toString()),
       );
     });
     return updates;
+  }
+
+  buildBulkUpdateBody(
+    collection: string,
+    identifier: string,
+    fieldName: string,
+    fieldValue: Number,
+  ): string {
+    return (
+      JSON.stringify({
+        update: {
+          _id: identifier,
+          _index: collection,
+        },
+      }) +
+      '\n' +
+      JSON.stringify({
+        doc: {
+          [fieldName]: fieldValue.toRounded(2),
+        },
+      }) +
+      '\n'
+    );
   }
 }

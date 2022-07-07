@@ -230,20 +230,20 @@ export class NftRarityService {
     let updates: string = '';
     nfts.forEach((r) => {
       if (hasRarities) {
-        updates += this.elasticService.buildBulkUpdateBody(
+        updates += this.elasticService.buildBulkUpdateBody<number>(
           'tokens',
           r.identifier,
           'nft_score',
           r.score || r.nft_score || 0,
         );
-        updates += this.elasticService.buildBulkUpdateBody(
+        updates += this.elasticService.buildBulkUpdateBody<number>(
           'tokens',
           r.identifier,
           'nft_rank',
           r.rank || r.nft_rank,
         );
       }
-      updates += this.elasticService.buildBulkUpdateBody(
+      updates += this.elasticService.buildBulkUpdateBody<boolean>(
         'tokens',
         r.identifier,
         'nft_hasRarity',
@@ -258,7 +258,7 @@ export class NftRarityService {
     hasRarities: boolean,
   ): Promise<void> {
     try {
-      const updateBody = this.elasticService.buildUpdateBody(
+      const updateBody = this.elasticService.buildUpdateBody<boolean>(
         'rarities',
         hasRarities,
       );

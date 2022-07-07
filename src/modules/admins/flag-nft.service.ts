@@ -24,7 +24,7 @@ export class FlagNftService {
     try {
       const nft = await this.elrondApi.getNftByIdentifierForQuery(
         identifier,
-        'fields=media',
+        'fields=media,isWhitelistedStorage',
       );
 
       const nftMedia = this.getNftMedia(nft);
@@ -32,22 +32,11 @@ export class FlagNftService {
         return false;
       }
 
-      const value = await this.verifyContent.checkContentSensitivityForUrl(
-        nftMedia.url ?? nftMedia.originalUrl,
-        nftMedia.fileType,
-      );
-      await this.nftFlagsRepository.addFlag(
-        new NftFlagsEntity({
-          identifier: identifier,
-          nsfw: value.toRounded(2),
-        }),
-      );
-      await this.elasticUpdater.setCustomValue(
-        'tokens',
-        identifier,
-        this.elasticUpdater.buildUpdateBody('nft_nsfw', value.toRounded(2)),
-      );
-      this.assetsRedisHandler.clearKey(identifier);
+      const value = await this.getNsfwValue(nftMedia);
+      if (value) {
+        await this.addNsfwFlag(identifier, value);
+        this.assetsRedisHandler.clearKey(identifier);
+      }
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW for nft', {
@@ -59,21 +48,60 @@ export class FlagNftService {
     }
   }
 
+  private async getNsfwValue(nftMedia: NftMedia) {
+    try {
+      return await this.verifyContent.checkContentSensitivityForUrl(
+        nftMedia.url ?? nftMedia.originalUrl,
+        nftMedia.fileType,
+      );
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calculating nsfw for url ${nftMedia.url} and type ${nftMedia.fileType}`,
+        {
+          path: 'FlagNftService.getNsfwValue',
+          exception: error?.message,
+        },
+      );
+      return undefined;
+    }
+  }
+
+  private async addNsfwFlag(identifier: string, value: number) {
+    let savedValue = value.toRounded(2);
+    if (savedValue === 0) {
+      savedValue += 0.01;
+    }
+    this.logger.log(
+      `Setting nsfw for '${identifier}' with value ${savedValue}`,
+    );
+    await this.nftFlagsRepository.addFlag(
+      new NftFlagsEntity({
+        identifier: identifier,
+        nsfw: savedValue,
+      }),
+    );
+    await this.elasticUpdater.setCustomValue(
+      'tokens',
+      identifier,
+      this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
+    );
+  }
+
   public async updateNftNSFWByAdmin(identifier: string, value) {
     try {
       await this.nftFlagsRepository.update(
         { identifier: identifier },
         new NftFlagsEntity({
           identifier: identifier,
-          nsfw: Number(value.toFixed(2)),
+          nsfw: value.toRounded(2),
         }),
       );
       await this.elasticUpdater.setCustomValue(
         'tokens',
         identifier,
-        this.elasticUpdater.buildUpdateBody(
-          'nft_nsfw',
-          Number(value.toFixed(2)),
+        this.elasticUpdater.buildUpdateBody<number>(
+          'nft_nsfw_mark',
+          value.toRounded(2),
         ),
       );
 
@@ -92,7 +120,11 @@ export class FlagNftService {
   }
 
   private getNftMedia(nft: Nft): NftMedia | undefined {
-    if (!nft.media || nft.media.length === 0) {
+    if (
+      !nft.media ||
+      nft.media.length === 0 ||
+      nft.isWhitelistedStorage === false
+    ) {
       return undefined;
     }
 
