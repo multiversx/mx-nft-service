@@ -194,18 +194,20 @@ export class RedisCacheService {
     keys: string[],
     region: string = null,
   ): Promise<void> {
-    const redisKeys = keys.map((key) => generateCacheKey(key, region));
-    try {
-      await client.del(redisKeys);
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while trying to delete multiple keys from redis cache.',
-        {
-          path: 'redis-cache.service.delMultiple',
-          exception: err?.toString(),
-          cacheKey: keys,
-        },
-      );
+    if (keys?.length > 0) {
+      const redisKeys = keys.map((key) => generateCacheKey(key, region));
+      try {
+        await client.del(redisKeys);
+      } catch (err) {
+        this.logger.error(
+          'An error occurred while trying to delete multiple keys from redis cache.',
+          {
+            path: 'redis-cache.service.delMultiple',
+            exception: err?.toString(),
+            cacheKey: keys,
+          },
+        );
+      }
     }
   }
 
