@@ -47,7 +47,10 @@ export class CachingService {
         return cached;
       }
     }
-    const value = await promise();
+    const value = await this.executeWithPendingPromise(
+      `caching:set:${key}`,
+      promise,
+    );
     profiler.stop(`Cache miss for key ${key}`, true);
 
     console.log({ key, value, localTtl, remoteTtl });
