@@ -66,9 +66,11 @@ export class VerifyContentService {
     if (mimetype.includes('image')) {
       return this.addImageInputUrl(request, url);
     }
-    if (mimetype.includes('video')) {
-      return this.addVideoInputForUrl(request, url);
-    }
+
+    // This will be disable for the moment
+    // if (mimetype.includes('video')) {
+    //   return this.addVideoInputForUrl(request, url);
+    // }
     return;
   }
 
@@ -105,9 +107,12 @@ export class VerifyContentService {
         if (file.mimetype.includes('image')) {
           resolve(this.processImagePredictions(response, reject));
         }
-        if (file.mimetype.includes('video')) {
-          resolve(this.processVideoPredictions(response, reject));
-        }
+
+        // This will be disable for the moment
+        // if (file.mimetype.includes('video')) {
+        //   resolve(this.processVideoPredictions(response, reject));
+        // }
+        return 0.01;
       });
     });
   }
