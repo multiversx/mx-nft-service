@@ -195,11 +195,11 @@ export class ElasticNsfwUpdaterService {
   private async bulkUpdate(items: NsfwType[]): Promise<void> {
     try {
       if (items && items.length > 0) {
-        this.logger.log(`Updating NSFW flag`, this.buildNsfwBulkUpdate(items));
-        // await this.elasticService.bulkRequest(
-        //   'tokens',
-        //   this.buildNsfwBulkUpdate(items),
-        // );
+        this.logger.log(`Updating NSFW flag`);
+        await this.elasticService.bulkRequest(
+          'tokens',
+          this.buildNsfwBulkUpdate(items),
+        );
       }
     } catch (error) {
       this.logger.error(
