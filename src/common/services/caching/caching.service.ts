@@ -68,6 +68,7 @@ export class CachingService {
     value: T,
     ttl: number = this.DEFAULT_TTL,
   ): Promise<T> {
+    console.log({ key });
     await this.localCacheService.setCacheValue<T>(key, value, ttl);
     await this.redisCacheService.set(client, key, value, ttl);
     return value;

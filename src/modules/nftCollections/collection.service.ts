@@ -169,6 +169,8 @@ export class CollectionsService {
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
       TimeConstants.oneHour,
+      15 * TimeConstants.oneMinute,
+      true,
     );
   }
 
