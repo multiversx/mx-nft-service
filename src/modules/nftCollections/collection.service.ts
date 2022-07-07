@@ -177,6 +177,7 @@ export class CollectionsService {
     let from = 0;
 
     const totalCount = await this.apiService.getCollectionsCount();
+    console.log({ totalCount });
     let collectionsResponse: Collection[] = [];
     do {
       let mappedCollections = await this.getMappedCollections(from, size);
