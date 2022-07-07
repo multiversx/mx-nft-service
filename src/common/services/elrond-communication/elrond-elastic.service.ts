@@ -181,6 +181,59 @@ export class ElrondElasticService {
     );
   }
 
+  buildPutMappingBody<T>(fieldName: string, filedType: string): string {
+    return JSON.stringify({
+      properties: {
+        [fieldName]: {
+          type: filedType,
+        },
+      },
+    });
+  }
+
+  buildPutMultipleMappingsBody<T>(
+    mappings: { key: string; value: any }[],
+  ): string {
+    let properties = {};
+    for (const mapping of mappings) {
+      properties[mapping.key] = {
+        type: mapping.value,
+      };
+    }
+    return JSON.stringify({
+      properties: properties,
+    });
+  }
+
+  async putMappings(collection: string, body: string): Promise<any> {
+    const url = `${this.url}/${collection}/_mapping`;
+
+    const profiler = new PerformanceProfiler();
+
+    try {
+      return await this.apiService.post(
+        url,
+        body,
+        new ApiSettings({
+          contentType: 'application/x-ndjson',
+        }),
+      );
+    } catch (error) {
+      this.logger.error({
+        method: 'POST',
+        url,
+        response: error.response?.data,
+        status: error.response?.status,
+        message: error.message,
+        name: error.name,
+      });
+      throw error;
+    } finally {
+      profiler.stop();
+      MetricsCollector.setElasticDuration(collection, profiler.duration);
+    }
+  }
+
   async getCustomValue(
     collection: string,
     identifier: string,
