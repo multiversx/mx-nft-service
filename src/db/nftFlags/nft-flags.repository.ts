@@ -21,8 +21,7 @@ export class NftsFlagsRepository extends Repository<NftFlagsEntity> {
       const response = await this.createQueryBuilder()
         .where(`identifier in (${identifiers.map((value) => `'${value}'`)})`)
         .getMany();
-
-      return response.toRecord((r) => r.identifier);
+      return response.toRecord<NftFlagsEntity[]>((r) => r.identifier);
     } catch (err) {
       throw err;
     }

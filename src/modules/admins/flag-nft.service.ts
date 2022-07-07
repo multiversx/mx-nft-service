@@ -67,22 +67,23 @@ export class FlagNftService {
   }
 
   private async addNsfwFlag(identifier: string, value: number) {
+    let savedValue = value.toRounded(2);
+    if (savedValue === 0) {
+      savedValue += 0.01;
+    }
     this.logger.log(
-      `Setting nsfw for '${identifier}' with value ${value.toRounded(2)}`,
+      `Setting nsfw for '${identifier}' with value ${savedValue}`,
     );
     await this.nftFlagsRepository.addFlag(
       new NftFlagsEntity({
         identifier: identifier,
-        nsfw: value.toRounded(2),
+        nsfw: savedValue,
       }),
     );
     await this.elasticUpdater.setCustomValue(
       'tokens',
       identifier,
-      this.elasticUpdater.buildUpdateBody<number>(
-        'nft_nsfw_value',
-        value.toRounded(2),
-      ),
+      this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
     );
   }
 
@@ -92,15 +93,15 @@ export class FlagNftService {
         { identifier: identifier },
         new NftFlagsEntity({
           identifier: identifier,
-          nsfw: Number(value.toFixed(2)),
+          nsfw: value.toRounded(2),
         }),
       );
       await this.elasticUpdater.setCustomValue(
         'tokens',
         identifier,
         this.elasticUpdater.buildUpdateBody<number>(
-          'nft_nsfw_value',
-          Number(value.toFixed(2)),
+          'nft_nsfw_mark',
+          value.toRounded(2),
         ),
       );
 

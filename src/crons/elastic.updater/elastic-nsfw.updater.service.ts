@@ -28,7 +28,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw from database',
       async () => {
         const query = ElasticQuery.create()
-          .withFields(['nft_nsfw_value'])
+          .withFields(['nft_nsfw_mark'])
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -49,7 +49,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw_value,
+              nsfw: item.nft_nsfw_mark,
             }));
 
             await this.validateNsfwValues(nsfwItems);
@@ -66,7 +66,7 @@ export class ElasticNsfwUpdaterService {
       'Elastic updater: Update tokens nsfw',
       async () => {
         const query = ElasticQuery.create()
-          .withMustNotExistCondition('nft_nsfw_value')
+          .withMustNotExistCondition('nft_nsfw_mark')
           .withMustExistCondition('identifier')
           .withMustMultiShouldCondition(
             [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
@@ -87,7 +87,7 @@ export class ElasticNsfwUpdaterService {
           async (items) => {
             const nsfwItems = items.map((item) => ({
               identifier: item.identifier,
-              nsfw: item.nft_nsfw_value,
+              nsfw: item.nft_nsfw_mark,
             }));
 
             await this.updateNsfwForTokens(nsfwItems);
@@ -108,6 +108,7 @@ export class ElasticNsfwUpdaterService {
         ),
       100,
     );
+    console.log(databaseResult);
     const itemsToUpdate: NsfwType[] = [];
     for (const item of items) {
       if (!databaseResult || !databaseResult[item.identifier]) {
@@ -143,7 +144,7 @@ export class ElasticNsfwUpdaterService {
         ),
       100,
     );
-
+    console.log(databaseResult);
     const itemsToUpdate: NsfwType[] = [];
     for (const identifier of Object.keys(databaseResult)) {
       const item: any = indexedItems[identifier];
@@ -179,7 +180,7 @@ export class ElasticNsfwUpdaterService {
       await this.elasticService.setCustomValue(
         'tokens',
         identifier,
-        this.elasticService.buildUpdateBody<number>('nft_nsfw_value', nsfw),
+        this.elasticService.buildUpdateBody<number>('nft_nsfw_mark', nsfw),
       );
     } catch (error) {
       this.logger.error(
@@ -196,11 +197,11 @@ export class ElasticNsfwUpdaterService {
   private async bulkUpdate(items: NsfwType[]): Promise<void> {
     try {
       if (items && items.length > 0) {
-        this.logger.log(`Updating NSFW flag`);
-        await this.elasticService.bulkRequest(
-          'tokens',
-          this.buildNsfwBulkUpdate(items),
-        );
+        this.logger.log(`Updating NSFW flag`, this.buildNsfwBulkUpdate(items));
+        // await this.elasticService.bulkRequest(
+        //   'tokens',
+        //   this.buildNsfwBulkUpdate(items),
+        // );
       }
     } catch (error) {
       this.logger.error(
@@ -221,8 +222,8 @@ export class ElasticNsfwUpdaterService {
       updates += this.buildBulkUpdateBody(
         'tokens',
         r.identifier,
-        'nft_nsfw_value',
-        r.nsfw,
+        'nft_nsfw_mark',
+        parseFloat(r.nsfw.toString()),
       );
     });
     return updates;
@@ -244,7 +245,7 @@ export class ElasticNsfwUpdaterService {
       '\n' +
       JSON.stringify({
         doc: {
-          [fieldName]: Number(fieldValue).toFixed(2),
+          [fieldName]: fieldValue.toRounded(2),
         },
       }) +
       '\n'

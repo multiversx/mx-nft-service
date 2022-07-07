@@ -1,4 +1,3 @@
-import { float } from 'aws-sdk/clients/lightsail';
 import { Column, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity('nft_flags')
@@ -12,7 +11,7 @@ export class NftFlagsEntity {
   identifier: string;
 
   @Column('decimal', { precision: 6, scale: 2 })
-  nsfw: float;
+  nsfw: number;
 
   constructor(init?: Partial<NftFlagsEntity>) {
     Object.assign(this, init);
