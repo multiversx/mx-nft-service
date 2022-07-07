@@ -108,7 +108,6 @@ export class ElasticNsfwUpdaterService {
         ),
       100,
     );
-    console.log(databaseResult);
     const itemsToUpdate: NsfwType[] = [];
     for (const item of items) {
       if (!databaseResult || !databaseResult[item.identifier]) {
@@ -144,7 +143,6 @@ export class ElasticNsfwUpdaterService {
         ),
       100,
     );
-    console.log(databaseResult);
     const itemsToUpdate: NsfwType[] = [];
     for (const identifier of Object.keys(databaseResult)) {
       const item: any = indexedItems[identifier];
