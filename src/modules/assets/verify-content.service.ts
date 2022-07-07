@@ -108,10 +108,9 @@ export class VerifyContentService {
           resolve(this.processImagePredictions(response, reject));
         }
 
-        // This will be disable for the moment
-        // if (file.mimetype.includes('video')) {
-        //   resolve(this.processVideoPredictions(response, reject));
-        // }
+        if (file.mimetype.includes('video')) {
+          resolve(this.processVideoPredictions(response, reject));
+        }
         return 0.01;
       });
     });
@@ -151,9 +150,11 @@ export class VerifyContentService {
         if (mimeType.includes('image')) {
           return resolve(this.processImagePredictionsForUrl(response));
         }
-        if (mimeType.includes('video')) {
-          return resolve(this.processVideoPredictionsUrl(response));
-        }
+
+        // This will be disable for the moment
+        // if (mimeType.includes('video')) {
+        //   return resolve(this.processVideoPredictionsUrl(response));
+        // }
         return 0.01;
       });
     });
