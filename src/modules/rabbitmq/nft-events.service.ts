@@ -273,7 +273,7 @@ export class NftEventsService {
   private async getNftNameAndAssets(identifier: string) {
     const nft = await this.elrondApi.getNftByIdentifierForQuery(
       identifier,
-      new AssetsQuery().addFields(['name', 'assets']).build(false),
+      'fields=name,assets',
     );
     return nft;
   }

@@ -48,7 +48,7 @@ export class ElasticUpdatesEventsService {
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
       const nft = await this.elrondApi.getNftByIdentifierForQuery(
         identifier,
-        '?fields=type,collection',
+        'fields=type,collection',
       );
 
       if (!nft || Object.keys(nft).length === 0) {
