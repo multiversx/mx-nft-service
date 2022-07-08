@@ -66,8 +66,6 @@ export class AssetsQuery {
     const defaultQuery = 'hasUris=true&isWhitelistedStorage=true&isNsfw=false';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
-    return this.query
-      ? `${this.query}&${defaultQuery}`
-      : `${this.query}?${defaultQuery}`;
+    return this.addQuery(defaultQuery).build(false);
   }
 }
