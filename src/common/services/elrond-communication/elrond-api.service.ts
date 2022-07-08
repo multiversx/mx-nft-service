@@ -106,7 +106,7 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `nfts?${new AssetsQuery()
+      `nfts${new AssetsQuery()
         .addIdentifiers(identifiers)
         .addPageSize(offset, identifiers.length)
         .addQuery(query)
