@@ -110,8 +110,9 @@ export class ElrondElasticService {
     collection: string,
     identifier: string,
     body: any,
+    urlParams: string = null,
   ): Promise<void> {
-    const url = `${this.url}/${collection}/_update/${identifier}`;
+    const url = `${this.url}/${collection}/_update/${identifier}${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
