@@ -13,7 +13,7 @@ export class NotificationEntity extends BaseEntity {
   @Index('notification_status')
   status: NotificationStatusEnum;
 
-  @Column({ length: 8 })
+  @Column({ length: 15 })
   type: NotificationTypeEnum;
 
   @Column({ nullable: true, length: 62 })

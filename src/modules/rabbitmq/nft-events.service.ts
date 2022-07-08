@@ -93,7 +93,7 @@ export class NftEventsService {
           );
           this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
-            this.addNotificaitions(auction, order);
+            this.addNotifications(auction, order);
             this.auctionsService.updateAuction(
               auction.id,
               AuctionStatusEnum.Claimable,
@@ -226,7 +226,7 @@ export class NftEventsService {
     }
   }
 
-  private addNotificaitions(auction: AuctionEntity, order: OrderEntity) {
+  private addNotifications(auction: AuctionEntity, order: OrderEntity) {
     this.notificationsService.saveNotifications([
       new NotificationEntity({
         auctionId: auction.id,

@@ -1,7 +1,7 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum NotificationTypeEnum {
-  Outbidded = 'Outbid',
+  Outbidded = 'Outbidded',
   Won = 'Won',
   Ended = 'Ended',
 }
