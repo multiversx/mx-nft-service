@@ -3,6 +3,14 @@ import { NftTypeEnum } from './models/NftTypes.enum';
 export class AssetsQuery {
   private query: string = '';
 
+  addQuery(query: string): this {
+    if (!query || query?.length === 0) return this;
+    if (query[0] === '&' || query[0] === '?') this.query += query;
+    else if (this.query.length === 0) this.query += '?' + query;
+    else this.query += '&' + query;
+    return this;
+  }
+
   addCreator(creator: string): this {
     if (!creator) return this;
     if (this.query === '') this.query = `?creator=${creator}`;
@@ -24,6 +32,13 @@ export class AssetsQuery {
     return this;
   }
 
+  addFields(fields: string[]): this {
+    if (!fields) return this;
+    if (this.query === '') this.query = `?fields=${fields}`;
+    else this.query = `${this.query}&fields=${fields}`;
+    return this;
+  }
+
   addCollection(collection: string): this {
     if (!collection) return this;
     if (this.query === '') this.query = `?collection=${collection}`;
@@ -35,6 +50,15 @@ export class AssetsQuery {
     if (!type) return this;
     if (this.query === '') this.query = `?type=${type}`;
     else this.query = `${this.query}&type=${type}`;
+    return this;
+  }
+
+  addSearchTerm(searchTerm: string): this {
+    if (!searchTerm) return this;
+    if (this.query === '')
+      this.query = `?searchTerm=${encodeURIComponent(searchTerm)}`;
+    else
+      this.query = `${this.query}&searchTerm=${encodeURIComponent(searchTerm)}`;
     return this;
   }
 
@@ -57,9 +81,12 @@ export class AssetsQuery {
     return this;
   }
 
-  build(): string {
+  build(addDefaultQuery: boolean = true): string {
+    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true&isNsfw=false';
+    if (this.query.includes(defaultQuery) || !addDefaultQuery)
+      return this.query;
     return this.query
-      ? this.query + '&hasUris=true&isWhitelistedStorage=true&isNsfw=false'
-      : '?hasUris=true&isWhitelistedStorage=true&isNsfw=false';
+      ? `${this.query}&${defaultQuery}`
+      : `${this.query}?${defaultQuery}`;
   }
 }

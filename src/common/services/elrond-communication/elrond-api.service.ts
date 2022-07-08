@@ -9,6 +9,7 @@ import { elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
+import { AssetsQuery } from 'src/modules/assets/assets-query';
 
 @Injectable()
 export class ElrondApiService {
@@ -94,7 +95,7 @@ export class ElrondApiService {
   ): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifierAndAddress.name,
-      `accounts/${address}/nfts/${identifier}?isNsfw=false`,
+      `accounts/${address}/nfts/${identifier}`,
     );
   }
 
@@ -105,7 +106,11 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `nfts?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}&hasUris=true&isWhitelistedStorage=true${query}&isNsfw=false`,
+      `nfts?${new AssetsQuery()
+        .addIdentifiers(identifiers)
+        .addPageSize(offset, identifiers.length)
+        .addQuery(query)
+        .build()}`,
     );
   }
 
@@ -122,7 +127,7 @@ export class ElrondApiService {
   ): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}${query}`,
+      `nfts/${identifier}${new AssetsQuery().addQuery(query).build()}`,
     );
   }
 
@@ -147,9 +152,7 @@ export class ElrondApiService {
   async getNftsForUser(address: string, query: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsForUser.name,
-      `accounts/${address}/nfts${query}` +
-        (query?.length > 0 ? '&' : '?') +
-        'isNsfw=false',
+      `accounts/${address}/nfts${new AssetsQuery().addQuery(query).build()}`,
     );
   }
 
@@ -159,23 +162,23 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getNftsForUserCount.name,
-      `accounts/${address}/nfts/count${query}` +
-        (query?.length > 0 ? '&' : '?') +
-        'isNsfw=false',
+      `accounts/${address}/nfts/count${new AssetsQuery()
+        .addQuery(query)
+        .build()}`,
     );
   }
 
   async getAllNfts(query: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getAllNfts.name,
-      `nfts${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
+      `nfts${new AssetsQuery().addQuery(query).build()}`,
     );
   }
 
   async getNftsCount(query: string = ''): Promise<any> {
     return await this.doGetGeneric(
       this.getNftsCount.name,
-      `nfts/count${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
+      `nfts/count${new AssetsQuery().addQuery(query).build()}`,
     );
   }
 
@@ -185,7 +188,7 @@ export class ElrondApiService {
   ): Promise<{ value: string; key: string }> {
     const totalCount = await this.doGetGeneric(
       this.getNftsCount.name,
-      `nfts/count${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
+      `nfts/count${new AssetsQuery().addQuery(query).build()}`,
     );
     return { key: collection, value: totalCount };
   }
@@ -195,7 +198,7 @@ export class ElrondApiService {
     offset: number = 0,
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
-      this.getNftsByIdentifiers.name,
+      this.getCollectionsByIdentifiers.name,
       `collections?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}`,
     );
   }
@@ -216,9 +219,9 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getAllCollectionNftsForQuery.name,
-      `collections/${identifier}/nfts${query}` +
-        (query?.length > 0 ? '&' : '?') +
-        'isNsfw=false',
+      `collections/${identifier}/nfts${new AssetsQuery()
+        .addQuery(query)
+        .build()}`,
     );
   }
 
@@ -288,9 +291,11 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsBySearch.name,
-      `nfts?search=${encodeURIComponent(
-        searchTerm,
-      )}&size=${size}&fields=${fields}&isNsfw=false`,
+      `nfts${new AssetsQuery()
+        .addSearchTerm(searchTerm)
+        .addPageSize(0, size)
+        .addQuery(`&fields=${fields}`)
+        .build()}`,
     );
   }
 

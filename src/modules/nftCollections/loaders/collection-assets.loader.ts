@@ -22,9 +22,11 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
   async getData(identifiers: string[]) {
     const getNftsPromises = identifiers.map((identifier) =>
       this.apiService.getAllNfts(
-        `${this.getQueryForCollection(
-          identifier,
-        )}&fields=media,identifier,collection`,
+        new AssetsQuery()
+          .addCollection(identifier)
+          .addPageSize(0, 4)
+          .addFields(['media', 'identifier', 'collection'])
+          .build(),
       ),
     );
 
@@ -38,12 +40,5 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
 
   private mapKeyArrayObject(nftsGroupByCollection: any[]) {
     return nftsGroupByCollection.reduce((o, t) => Object.assign(o, t));
-  }
-
-  private getQueryForCollection(identifier: string): string {
-    return new AssetsQuery()
-      .addCollection(identifier)
-      .addPageSize(0, 4)
-      .build();
   }
 }

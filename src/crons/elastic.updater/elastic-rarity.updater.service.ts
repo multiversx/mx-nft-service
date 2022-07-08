@@ -59,7 +59,7 @@ export class ElasticRarityUpdaterService {
       });
     }
 
-    await asyncPool(1, collections, async (collection) => {
+    for (const collection of collections) {
       try {
         this.logger.log(
           `handleValidateTokenRarity(): validateRarities(${collection})`,
@@ -74,7 +74,7 @@ export class ElasticRarityUpdaterService {
         });
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
-    });
+    }
   }
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -117,7 +117,7 @@ export class ElasticRarityUpdaterService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    await asyncPool(1, collectionsToUpdate, async (collection) => {
+    for (const collection of collectionsToUpdate) {
       try {
         this.logger.log(
           `handleUpdateTokenRarity(): updateRarities(${collection})`,
@@ -132,7 +132,7 @@ export class ElasticRarityUpdaterService {
         });
         await new Promise((resolve) => setTimeout(resolve, 10000));
       }
-    });
+    }
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
