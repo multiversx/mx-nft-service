@@ -112,7 +112,7 @@ export class ElrondApiService {
   async getNftByIdentifier(identifier: string): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}?isNsfw=false`,
+      `nfts/${identifier}`,
     );
   }
 
@@ -122,9 +122,7 @@ export class ElrondApiService {
   ): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}${query}` +
-        (query?.length > 0 ? '&' : '?') +
-        'isNsfw=false',
+      `nfts/${identifier}${query}`,
     );
   }
 
