@@ -179,6 +179,7 @@ export class ElasticNsfwUpdaterService {
         'tokens',
         identifier,
         this.elasticService.buildUpdateBody<number>('nft_nsfw_mark', nsfw),
+        '?retry_on_conflict=2',
       );
     } catch (error) {
       this.logger.error(

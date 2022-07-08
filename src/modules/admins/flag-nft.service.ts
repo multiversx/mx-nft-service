@@ -84,6 +84,7 @@ export class FlagNftService {
       'tokens',
       identifier,
       this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
+      '?retry_on_conflict=2',
     );
   }
 
@@ -103,6 +104,7 @@ export class FlagNftService {
           'nft_nsfw_mark',
           value.toRounded(2),
         ),
+        '?retry_on_conflict=2',
       );
 
       this.assetsRedisHandler.clearKey(identifier);
