@@ -353,7 +353,6 @@ export class NftRarityService {
           path: 'NftRarityService.setNftRaritiesInElastic',
           exception: error?.message,
         });
-        console.log(error);
       }
     }
   }
