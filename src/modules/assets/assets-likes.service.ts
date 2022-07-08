@@ -168,7 +168,7 @@ export class AssetsLikesService {
   private async getNftNameAndAssets(identifier: string) {
     const nft = await this.elrondApi.getNftByIdentifierForQuery(
       identifier,
-      'fields=name,assets',
+      '?fields=name,assets',
     );
     return nft;
   }

@@ -94,7 +94,7 @@ export class ElrondApiService {
   ): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifierAndAddress.name,
-      `accounts/${address}/nfts/${identifier}`,
+      `accounts/${address}/nfts/${identifier}?isNsfw=false`,
     );
   }
 
@@ -105,14 +105,14 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsByIdentifiers.name,
-      `nfts?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}&hasUris=true&isWhitelistedStorage=true${query}`,
+      `nfts?identifiers=${identifiers}&size=${identifiers.length}&from=${offset}&hasUris=true&isWhitelistedStorage=true${query}&isNsfw=false`,
     );
   }
 
   async getNftByIdentifier(identifier: string): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}`,
+      `nfts/${identifier}?isNsfw=false`,
     );
   }
 
@@ -122,7 +122,9 @@ export class ElrondApiService {
   ): Promise<Nft> {
     return await this.doGetGeneric(
       this.getNftByIdentifier.name,
-      `nfts/${identifier}?${query}`,
+      `nfts/${identifier}${query}` +
+        (query?.length > 0 ? '&' : '?') +
+        'isNsfw=false',
     );
   }
 
@@ -147,7 +149,9 @@ export class ElrondApiService {
   async getNftsForUser(address: string, query: string = ''): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getNftsForUser.name,
-      `accounts/${address}/nfts${query}`,
+      `accounts/${address}/nfts${query}` +
+        (query?.length > 0 ? '&' : '?') +
+        'isNsfw=false',
     );
   }
 
@@ -157,18 +161,23 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getNftsForUserCount.name,
-      `accounts/${address}/nfts/count${query}`,
+      `accounts/${address}/nfts/count${query}` +
+        (query?.length > 0 ? '&' : '?') +
+        'isNsfw=false',
     );
   }
 
   async getAllNfts(query: string = ''): Promise<Nft[]> {
-    return await this.doGetGeneric(this.getAllNfts.name, `nfts${query}`);
+    return await this.doGetGeneric(
+      this.getAllNfts.name,
+      `nfts${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
+    );
   }
 
   async getNftsCount(query: string = ''): Promise<any> {
     return await this.doGetGeneric(
       this.getNftsCount.name,
-      `nfts/count${query}`,
+      `nfts/count${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
     );
   }
 
@@ -178,7 +187,7 @@ export class ElrondApiService {
   ): Promise<{ value: string; key: string }> {
     const totalCount = await this.doGetGeneric(
       this.getNftsCount.name,
-      `nfts/count${query}`,
+      `nfts/count${query}` + (query?.length > 0 ? '&' : '?') + 'isNsfw=false',
     );
     return { key: collection, value: totalCount };
   }
@@ -209,7 +218,9 @@ export class ElrondApiService {
   ): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getAllCollectionNftsForQuery.name,
-      `collections/${identifier}/nfts${query}`,
+      `collections/${identifier}/nfts${query}` +
+        (query?.length > 0 ? '&' : '?') +
+        'isNsfw=false',
     );
   }
 
@@ -281,7 +292,7 @@ export class ElrondApiService {
       this.getNftsBySearch.name,
       `nfts?search=${encodeURIComponent(
         searchTerm,
-      )}&size=${size}&fields=${fields}`,
+      )}&size=${size}&fields=${fields}&isNsfw=false`,
     );
   }
 

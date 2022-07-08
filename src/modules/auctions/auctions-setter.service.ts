@@ -42,7 +42,7 @@ export class AuctionsSetterService {
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
       const asset = await this.apiService.getNftByIdentifierForQuery(
         identifier,
-        'fields=tags',
+        '?fields=tags',
       );
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
