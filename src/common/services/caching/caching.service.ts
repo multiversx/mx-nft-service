@@ -53,7 +53,6 @@ export class CachingService {
     );
     profiler.stop(`Cache miss for key ${key}`, true);
 
-    console.log({ key, value, localTtl, remoteTtl });
     if (localTtl > 0) {
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
     }
@@ -70,7 +69,6 @@ export class CachingService {
     value: T,
     ttl: number = this.DEFAULT_TTL,
   ): Promise<T> {
-    console.log({ key });
     await this.localCacheService.setCacheValue<T>(key, value, ttl);
     await this.redisCacheService.set(client, key, value, ttl);
     return value;
