@@ -62,7 +62,7 @@ export class FlagNftService {
           exception: error?.message,
         },
       );
-      return undefined;
+      return 0.01;
     }
   }
 
