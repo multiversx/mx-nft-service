@@ -607,6 +607,38 @@ enum NftTypeEnum {
   SemiFungibleESDT
 }
 
+type Notification {
+  auctionId: Int!
+  creationDate: Int
+  id: ID!
+  identifier: String!
+  type: NotificationTypeEnum!
+}
+
+type NotificationEdge {
+  cursor: String
+  node: Notification
+}
+
+type NotificationPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum NotificationTypeEnum {
+  Ended
+  Outbidded
+  Won
+}
+
+type NotificationsResponse {
+  edges: [NotificationEdge!]
+  pageData: PageData
+  pageInfo: NotificationPageInfo
+}
+
 enum Operation {
   BETWEEN
   EQ
@@ -738,6 +770,7 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
+  notifications(pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange: PriceRange!

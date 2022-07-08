@@ -13,6 +13,14 @@ import { QueryRequest } from '../common/filters/QueryRequest';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
+import {
+  NotificationEntity,
+  NotificationsServiceDb,
+} from 'src/db/notifications';
+import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
+import { NotificationStatusEnum } from '../notifications/models';
+import { AuctionsGetterService } from '../auctions';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 const hash = require('object-hash');
 
 @Injectable()
@@ -22,9 +30,11 @@ export class OrdersService {
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
     private accountStats: AccountsStatsService,
+    private auctionsService: AuctionsServiceDb,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private notificationsService: NotificationsServiceDb,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -45,6 +55,7 @@ export class OrdersService {
         CreateOrderArgs.toEntity(createOrderArgs),
       );
       if (orderEntity && activeOrder) {
+        await this.addNotification(createOrderArgs, activeOrder);
         await this.orderServiceDb.updateOrder(activeOrder);
       }
       return orderEntity;
@@ -55,6 +66,24 @@ export class OrdersService {
         exception: error,
       });
     }
+  }
+
+  private async addNotification(
+    createOrderArgs: CreateOrderArgs,
+    activeOrder: OrderEntity,
+  ) {
+    const auction = await this.auctionsService.getAuction(
+      createOrderArgs.auctionId,
+    );
+    await this.notificationsService.saveNotification(
+      new NotificationEntity({
+        auctionId: createOrderArgs.auctionId,
+        ownerAddress: activeOrder.ownerAddress,
+        type: NotificationTypeEnum.Outbidded,
+        status: NotificationStatusEnum.Active,
+        identifier: auction?.identifier,
+      }),
+    );
   }
 
   async updateOrder(

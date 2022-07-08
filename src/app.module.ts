@@ -24,6 +24,7 @@ import { SearchModuleGraph } from './modules/search/search.module';
 import { TagsModuleGraph } from './modules/tags/tags.module';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
+import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.mo
     TagsModuleGraph,
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
+    NotificationsModuleGraph,
   ],
 })
 export class AppModule {}
