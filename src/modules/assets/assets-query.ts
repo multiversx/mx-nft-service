@@ -3,6 +3,17 @@ import { NftTypeEnum } from './models/NftTypes.enum';
 export class AssetsQuery {
   private query: string = '';
 
+  private addParamToQuery(
+    paramName: string,
+    paramValue: string | string[] | number | boolean,
+  ): this {
+    if (!paramValue || !paramName) return this;
+    this.query += `${
+      this.query.length === 0 ? '?' : '&'
+    }${paramName}=${paramValue}`;
+    return this;
+  }
+
   addQuery(query: string): this {
     if (!query || query?.length === 0) return this;
     if (query[0] === '&' || query[0] === '?') this.query += query;
@@ -12,73 +23,43 @@ export class AssetsQuery {
   }
 
   addCreator(creator: string): this {
-    if (!creator) return this;
-    if (this.query === '') this.query = `?creator=${creator}`;
-    else this.query = `${this.query}&creator=${creator}`;
-    return this;
+    return this.addParamToQuery('creator', creator);
   }
 
   addTags(tags: string[]): this {
-    if (!tags) return this;
-    if (this.query === '') this.query = `?tags=${tags}`;
-    else this.query = `${this.query}&tags=${tags}`;
-    return this;
+    return this.addParamToQuery('tags', tags);
   }
 
   addIdentifiers(identifiers: string[]): this {
-    if (!identifiers) return this;
-    if (this.query === '') this.query = `?identifiers=${identifiers}`;
-    else this.query = `${this.query}&identifiers=${identifiers}`;
-    return this;
+    return this.addParamToQuery('identifiers', identifiers);
   }
 
   addFields(fields: string[]): this {
-    if (!fields) return this;
-    if (this.query === '') this.query = `?fields=${fields}`;
-    else this.query = `${this.query}&fields=${fields}`;
-    return this;
+    return this.addParamToQuery('fields', fields);
   }
 
   addCollection(collection: string): this {
-    if (!collection) return this;
-    if (this.query === '') this.query = `?collection=${collection}`;
-    else this.query = `${this.query}&collection=${collection}`;
-    return this;
+    return this.addParamToQuery('collection', collection);
   }
 
   addType(type: NftTypeEnum): this {
-    if (!type) return this;
-    if (this.query === '') this.query = `?type=${type}`;
-    else this.query = `${this.query}&type=${type}`;
-    return this;
+    return this.addParamToQuery('type', type);
   }
 
   addSearchTerm(searchTerm: string): this {
-    if (!searchTerm) return this;
-    if (this.query === '')
-      this.query = `?searchTerm=${encodeURIComponent(searchTerm)}`;
-    else
-      this.query = `${this.query}&searchTerm=${encodeURIComponent(searchTerm)}`;
-    return this;
+    return this.addParamToQuery('searchTerm', encodeURIComponent(searchTerm));
   }
 
   addPageSize(from: number, size: number): this {
-    if (!from && !size) return this;
-    if (this.query === '') this.query = `?from=${from}&size=${size}`;
-    else this.query = `${this.query}&from=${from}&size=${size}`;
-    return this;
+    return this.addParamToQuery('from', from).addParamToQuery('size', size);
   }
 
   withSupply(): this {
-    if (this.query === '') this.query = `?withSupply=true`;
-    else this.query = `${this.query}&withSupply=true`;
-    return this;
+    return this.addParamToQuery('withSupply', true);
   }
 
   withOwner(): this {
-    if (this.query === '') this.query = `?withOwner=true`;
-    else this.query = `${this.query}&withOwner=true`;
-    return this;
+    return this.addParamToQuery('withOwner', true);
   }
 
   build(addDefaultQuery: boolean = true): string {
