@@ -54,7 +54,6 @@ export class NotificationsService {
   async updateNotificationStatus(auctionIds: number[]) {
     try {
       if (auctionIds && auctionIds.length > 0) {
-        console.log(1);
         const notifications =
           await this.notificationServiceDb.getNotificationsByAuctionIds(
             auctionIds,
