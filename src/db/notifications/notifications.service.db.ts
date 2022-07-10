@@ -36,17 +36,14 @@ export class NotificationsServiceDb {
   }
 
   async saveNotification(notification: NotificationEntity) {
-    // this.clearCache(notification.ownerAddress);
     return await this.notificationsRepository.save(notification);
   }
 
   async saveNotifications(notifications: NotificationEntity[]) {
-    // this.clearCache(notification.ownerAddress);
     return await this.notificationsRepository.save(notifications);
   }
 
   async updateOrder(notification: NotificationEntity) {
-    // this.clearCache(notification.ownerAddress);
     notification.status = NotificationStatusEnum.Inactive;
     notification.modifiedDate = new Date(new Date().toUTCString());
     return await this.notificationsRepository.save(notification);
