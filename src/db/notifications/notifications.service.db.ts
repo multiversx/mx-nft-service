@@ -31,6 +31,7 @@ export class NotificationsServiceDb {
         address: address,
       })
       .limit(defaultSize)
+      .orderBy('id', 'DESC')
       .getManyAndCount();
   }
 
