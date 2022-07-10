@@ -155,6 +155,15 @@ export class OrdersService {
     );
   }
 
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    if (auctionIds?.length > 0) {
+      const orders = await this.orderServiceDb.getOrdersByAuctionIds(
+        auctionIds,
+      );
+      return orders;
+    }
+  }
+
   private async getMappedOrders(queryRequest: QueryRequest) {
     const [ordersEntities, count] = await this.orderServiceDb.getOrders(
       queryRequest,

@@ -24,6 +24,17 @@ export class NotificationsServiceDb {
       .getManyAndCount();
   }
 
+  async getNotificationsByAuctionIds(
+    auctionIds: number[],
+  ): Promise<NotificationEntity[]> {
+    return await this.notificationsRepository
+      .createQueryBuilder('n')
+      .where(`n.auctionId in (:...ids) and n.status='active'`, {
+        ids: auctionIds,
+      })
+      .getMany();
+  }
+
   async saveNotification(notification: NotificationEntity) {
     // this.clearCache(notification.ownerAddress);
     return await this.notificationsRepository.save(notification);
