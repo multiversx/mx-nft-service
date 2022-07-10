@@ -45,9 +45,10 @@ export class NotificationsService {
     const orders = await this.ordersService.getOrdersByAuctionIds(
       auctions?.map((a) => a.id),
     );
+
+    console.log('lenngth', auctions?.length);
     this.clearCache(auctions, orders);
     for (const auction of auctions) {
-      console.log(auction.id);
       this.addNotifications(auction, orders[auction.id]);
     }
   }
