@@ -46,6 +46,22 @@ export class NotificationsServiceDb {
       .getMany();
   }
 
+  async getNotificationByIdAndOwner(
+    auctionId: number,
+    ownerAddress: string,
+  ): Promise<NotificationEntity> {
+    return await this.notificationsRepository
+      .createQueryBuilder('n')
+      .where(
+        `n.auctionId =:id) and n.status='active' and n.ownerAddress=:ownerAddress`,
+        {
+          id: auctionId,
+          ownerAddress: ownerAddress,
+        },
+      )
+      .getOne();
+  }
+
   async saveNotification(notification: NotificationEntity) {
     this.invalidateCache(notification.ownerAddress);
     return await this.notificationsRepository.save(notification);
@@ -56,7 +72,8 @@ export class NotificationsServiceDb {
     return await this.notificationsRepository.save(notifications);
   }
 
-  async updateOrder(notification: NotificationEntity) {
+  async updateNotification(notification: NotificationEntity) {
+    this.invalidateCache(notification.ownerAddress);
     notification.status = NotificationStatusEnum.Inactive;
     notification.modifiedDate = new Date(new Date().toUTCString());
     return await this.notificationsRepository.save(notification);

@@ -55,7 +55,7 @@ export class OrdersService {
         CreateOrderArgs.toEntity(createOrderArgs),
       );
       if (orderEntity && activeOrder) {
-        await this.addNotification(createOrderArgs, activeOrder);
+        await this.handleNotifications(createOrderArgs, activeOrder);
         await this.orderServiceDb.updateOrder(activeOrder);
       }
       return orderEntity;
@@ -66,6 +66,19 @@ export class OrdersService {
         exception: error,
       });
     }
+  }
+
+  private async handleNotifications(
+    createOrderArgs: CreateOrderArgs,
+    activeOrder: OrderEntity,
+  ) {
+    const notifications =
+      await this.notificationsService.getNotificationByIdAndOwner(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
+    this.notificationsService.updateNotification(notifications);
+    await this.addNotification(createOrderArgs, activeOrder);
   }
 
   private async addNotification(
