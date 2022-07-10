@@ -172,6 +172,9 @@ export class NftEventsService {
             hash,
             AuctionEventEnum.EndAuctionEvent,
           );
+          this.notificationsService.updateNotificationStatus([
+            parseInt(topicsEndAuction.auctionId, 16),
+          ]);
           this.ordersService.updateOrder(
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
