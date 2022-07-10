@@ -47,6 +47,7 @@ export class NotificationsService {
     );
     this.clearCache(auctions, orders);
     for (const auction of auctions) {
+      console.log(auction.id);
       this.addNotifications(auction, orders[auction.id]);
     }
   }
