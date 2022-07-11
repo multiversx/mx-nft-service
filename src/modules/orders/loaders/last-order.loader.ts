@@ -19,7 +19,7 @@ export class LastOrdersProvider extends BaseProvider<number> {
   async getData(auctionIds: number[]) {
     const orders = await getRepository(OrderEntity)
       .createQueryBuilder('orders')
-      .orderBy('priceAmount', 'DESC')
+      .orderBy('priceAmountDenominated', 'DESC')
       .where(
         `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
         {
