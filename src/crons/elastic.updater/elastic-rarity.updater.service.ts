@@ -9,6 +9,7 @@ import asyncPool from 'tiny-async-pool';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { RarityUpdaterService } from './rarity.updater.service';
 
 @Injectable()
 export class ElasticRarityUpdaterService {
@@ -17,6 +18,7 @@ export class ElasticRarityUpdaterService {
   constructor(
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
+    private readonly rarityUpdaterService: RarityUpdaterService,
     private readonly logger: Logger,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -27,54 +29,7 @@ export class ElasticRarityUpdaterService {
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleValidateTokenRarity() {
-    let collections: string[] = [];
-
-    try {
-      await Locker.lock(
-        'Elastic updater: Validate tokens rarity',
-        async () => {
-          const query = ElasticQuery.create()
-            .withMustNotExistCondition('nonce')
-            .withMustMultiShouldCondition(
-              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-              (type) => QueryType.Match('type', type),
-            )
-            .withPagination({ from: 0, size: 10000 });
-
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              collections = collections.concat(items.map((i) => i.token));
-            },
-          );
-        },
-        true,
-      );
-    } catch (error) {
-      this.logger.error(`Error when scrolling through collections`, {
-        path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
-        exception: error?.message,
-      });
-    }
-
-    for (const collection of collections) {
-      try {
-        this.logger.log(
-          `handleValidateTokenRarity(): validateRarities(${collection})`,
-        );
-        await this.nftRarityService.validateRarities(collection);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        this.logger.error(`Error when validating collection rarities`, {
-          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
-          exception: error?.message,
-          collection: collection,
-        });
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-      }
-    }
+    await this.rarityUpdaterService.handleUpdateToken();
   }
 
   @Cron(CronExpression.EVERY_HOUR)

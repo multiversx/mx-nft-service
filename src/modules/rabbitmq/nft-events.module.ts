@@ -27,7 +27,7 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
-import { AssetsModuleGraph } from '../assets/assets.module';
+import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 
 @Module({
   imports: [
@@ -60,6 +60,7 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     NftRarityComputeService,
     FlagNftService,
     ElasticRarityUpdaterService,
+    RarityUpdaterService,
   ],
   exports: [NftEventsService],
 })

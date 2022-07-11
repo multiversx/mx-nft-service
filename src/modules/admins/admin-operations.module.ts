@@ -26,6 +26,6 @@ import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-r
     CommonModule,
     NftRarityModuleGraph,
   ],
-  exports: [FlagNftService],
+  exports: [FlagNftService, AssetsRedisHandler],
 })
 export class AdminOperationsModuleGraph {}
