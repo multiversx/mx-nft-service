@@ -104,14 +104,12 @@ export class ElrondApiService {
     offset: number = 0,
     query: string = 'withOwner=true&withSupply=true',
   ): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getNftsByIdentifiers.name,
-      `nfts${new AssetsQuery()
-        .addIdentifiers(identifiers)
-        .addPageSize(offset, identifiers.length)
-        .addQuery(query)
-        .build()}`,
-    );
+    query = `nfts${new AssetsQuery()
+      .addIdentifiers(identifiers)
+      .addPageSize(offset, identifiers.length)
+      .addQuery(query)
+      .build()}`;
+    return await this.doGetGeneric(this.getNftsByIdentifiers.name, query);
   }
 
   async getNftByIdentifier(identifier: string): Promise<Nft> {
@@ -125,10 +123,8 @@ export class ElrondApiService {
     identifier: string,
     query: string,
   ): Promise<Nft> {
-    return await this.doGetGeneric(
-      this.getNftByIdentifier.name,
-      `nfts/${identifier}${new AssetsQuery(query).build()}`,
-    );
+    const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
+    return await this.doGetGeneric(this.getNftByIdentifier.name, url);
   }
 
   async getOwnersForIdentifier(
@@ -150,27 +146,23 @@ export class ElrondApiService {
   }
 
   async getNftsForUser(address: string, query: string = ''): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getNftsForUser.name,
-      `accounts/${address}/nfts${new AssetsQuery(query).build()}`,
-    );
+    const url = `accounts/${address}/nfts${new AssetsQuery(query).build()}`;
+    return await this.doGetGeneric(this.getNftsForUser.name, url);
   }
 
   async getNftsForUserCount(
     address: string,
     query: string = '',
   ): Promise<number> {
-    return await this.doGetGeneric(
-      this.getNftsForUserCount.name,
-      `accounts/${address}/nfts/count${new AssetsQuery(query).build()}`,
-    );
+    const url = `accounts/${address}/nfts/count${new AssetsQuery(
+      query,
+    ).build()}`;
+    return await this.doGetGeneric(this.getNftsForUserCount.name, url);
   }
 
   async getAllNfts(query: string = ''): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getAllNfts.name,
-      `nfts${new AssetsQuery(query).build()}`,
-    );
+    const url = `nfts${new AssetsQuery(query).build()}`;
+    return await this.doGetGeneric(this.getAllNfts.name, url);
   }
 
   async getNftsCount(query: string = ''): Promise<any> {
@@ -184,10 +176,8 @@ export class ElrondApiService {
     query: string = '',
     collection,
   ): Promise<{ value: string; key: string }> {
-    const totalCount = await this.doGetGeneric(
-      this.getNftsCount.name,
-      `nfts/count${new AssetsQuery(query).build()}`,
-    );
+    const url = `nfts/count${new AssetsQuery(query).build()}`;
+    const totalCount = await this.doGetGeneric(this.getNftsCount.name, url);
     return { key: collection, value: totalCount };
   }
 
