@@ -24,7 +24,7 @@ export class AssetsProvider extends BaseProvider<string> {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
-      '&withOwner=true',
+      'withOwner=true',
     );
     const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
 

@@ -22,7 +22,7 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
-      '&withSupply=true&fields=identifier,supply',
+      'withSupply=true&fields=identifier,supply',
     );
     return nfts?.groupBy((asset) => asset.identifier);
   }

@@ -3,6 +3,11 @@ import { NftTypeEnum } from './models/NftTypes.enum';
 export class AssetsQuery {
   private query: string = '';
 
+  constructor(query: string = null) {
+    if (!query) return this;
+    return this.addQuery(query);
+  }
+
   private addParamToQuery(
     paramName: string,
     paramValue: string | string[] | number | boolean,
