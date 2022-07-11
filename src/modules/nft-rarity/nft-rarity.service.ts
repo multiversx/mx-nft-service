@@ -399,9 +399,10 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<Nft[]> {
     try {
+      const query = new AssetsQuery().addPageSize(0, 10000).build();
       return await this.apiService.getAllCollectionNftsForQuery(
         collectionTicker,
-        new AssetsQuery().addPageSize(0, 10000).build(),
+        query,
       );
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {

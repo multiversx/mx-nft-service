@@ -176,7 +176,7 @@ export class SearchService {
     if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
       const response = await this.apiService.getNftByIdentifierForQuery(
         searchTerm,
-        `?fields=${this.fieldsRequested}`,
+        `fields=${this.fieldsRequested}`,
       );
       return [
         new SearchItemResponse({
