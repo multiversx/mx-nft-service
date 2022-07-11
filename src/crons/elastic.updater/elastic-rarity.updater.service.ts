@@ -64,7 +64,13 @@ export class ElasticRarityUpdaterService {
         this.logger.log(
           `handleValidateTokenRarity(): validateRarities(${collection})`,
         );
-        await this.nftRarityService.validateRarities(collection);
+        await Locker.lock(
+          'collection',
+          async () => {
+            await this.nftRarityService.validateRarities(collection);
+          },
+          true,
+        );
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
@@ -122,7 +128,13 @@ export class ElasticRarityUpdaterService {
         this.logger.log(
           `handleUpdateTokenRarity(): updateRarities(${collection})`,
         );
-        await this.nftRarityService.updateRarities(collection);
+        await Locker.lock(
+          'collection',
+          async () => {
+            await this.nftRarityService.updateRarities(collection);
+          },
+          true,
+        );
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
@@ -153,7 +165,13 @@ export class ElasticRarityUpdaterService {
             this.logger.log(
               `handleUpdateTokenRarityQueue(): updateRarities(${collection})`,
             );
-            await this.nftRarityService.updateRarities(collection);
+            await Locker.lock(
+              'collection',
+              async () => {
+                await this.nftRarityService.updateRarities(collection);
+              },
+              true,
+            );
             await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (error) {
             this.logger.error(`Error when handling rarity queue`, {

@@ -7,6 +7,7 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
     nftRarities: NftRarityEntity[],
   ): Promise<NftRarityEntity[]> {
     await this.delete({ collection: nftRarities[0].collection });
+    await new Promise((resolve) => setTimeout(resolve, 100));
     return await this.save(nftRarities);
   }
 }
