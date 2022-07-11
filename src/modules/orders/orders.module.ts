@@ -14,6 +14,7 @@ import { OrdersRedisHandler } from './loaders/orders.redis-handler';
 import { OrdersProvider } from './loaders/orders.loader';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
+import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
   providers: [
@@ -35,6 +36,7 @@ import { NotificationsModuleDb } from 'src/db/notifications/notifications.module
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => NotificationsModuleDb),
+    forwardRef(() => AssetsModuleGraph),
   ],
   exports: [OrdersService],
 })

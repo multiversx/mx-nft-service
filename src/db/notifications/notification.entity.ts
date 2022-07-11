@@ -16,8 +16,11 @@ export class NotificationEntity extends BaseEntity {
   @Column({ length: 15 })
   type: NotificationTypeEnum;
 
-  @Column({ nullable: true, length: 62 })
+  @Column({ length: 25 })
   identifier: string;
+
+  @Column({ length: 62 })
+  name: string;
 
   @Column()
   @Index('auction_id')

@@ -19,8 +19,8 @@ import {
 } from 'src/db/notifications';
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
 import { NotificationStatusEnum } from '../notifications/models';
-import { AuctionsGetterService } from '../auctions';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { AssetsService } from '../assets';
 const hash = require('object-hash');
 
 @Injectable()
@@ -35,6 +35,7 @@ export class OrdersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private notificationsService: NotificationsServiceDb,
+    private assetsService: AssetsService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -88,6 +89,9 @@ export class OrdersService {
     const auction = await this.auctionsService.getAuction(
       createOrderArgs.auctionId,
     );
+
+    const asset = await this.assetsService.getAsset(auction?.identifier);
+    const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({
         auctionId: createOrderArgs.auctionId,
@@ -95,6 +99,7 @@ export class OrdersService {
         type: NotificationTypeEnum.Outbidded,
         status: NotificationStatusEnum.Active,
         identifier: auction?.identifier,
+        name: assetName,
       }),
     );
   }

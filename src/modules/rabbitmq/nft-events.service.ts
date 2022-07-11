@@ -8,7 +8,7 @@ import {
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetsRedisHandler } from '../assets';
+import { AssetsRedisHandler, AssetsService } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
@@ -47,6 +47,7 @@ export class NftEventsService {
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
+    private assetsService: AssetsService,
     private elrondApi: ElrondApiService,
   ) {}
 
@@ -230,7 +231,9 @@ export class NftEventsService {
     }
   }
 
-  private addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+    const asset = await this.assetsService.getAsset(auction.identifier);
+    const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
     this.notificationsService.saveNotifications([
       new NotificationEntity({
         auctionId: auction.id,
@@ -238,6 +241,7 @@ export class NftEventsService {
         ownerAddress: auction.ownerAddress,
         status: NotificationStatusEnum.Active,
         type: NotificationTypeEnum.Ended,
+        name: assetName,
       }),
       new NotificationEntity({
         auctionId: auction.id,
@@ -245,6 +249,7 @@ export class NftEventsService {
         ownerAddress: order.ownerAddress,
         status: NotificationStatusEnum.Active,
         type: NotificationTypeEnum.Won,
+        name: assetName,
       }),
     ]);
   }

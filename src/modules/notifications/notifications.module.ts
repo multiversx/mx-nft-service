@@ -5,6 +5,7 @@ import { ElrondCommunicationModule } from 'src/common';
 import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
 import { CommonModule } from 'src/common.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
+import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
   providers: [NotificationsService, NotificationsResolver],
@@ -13,6 +14,7 @@ import { OrdersModuleGraph } from '../orders/orders.module';
     CommonModule,
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => OrdersModuleGraph),
+    forwardRef(() => AssetsModuleGraph),
   ],
   exports: [NotificationsService],
 })

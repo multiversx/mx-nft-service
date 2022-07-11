@@ -14,6 +14,7 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
+import { AssetsService } from '../assets';
 
 @Injectable()
 export class NotificationsService {
@@ -22,6 +23,7 @@ export class NotificationsService {
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
+    private readonly assetsService: AssetsService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -46,7 +48,6 @@ export class NotificationsService {
       auctions?.map((a) => a.id),
     );
 
-    console.log('lenngth', auctions?.length);
     this.clearCache(auctions, orders);
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
@@ -99,8 +100,10 @@ export class NotificationsService {
     ];
   }
 
-  private addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
+      const asset = await this.assetsService.getAsset(auction.identifier);
+      const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
       if (order) {
         this.saveNotifications([
           new NotificationEntity({
@@ -109,6 +112,7 @@ export class NotificationsService {
             ownerAddress: auction.ownerAddress,
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
+            name: assetName,
           }),
           new NotificationEntity({
             auctionId: auction.id,
@@ -116,6 +120,7 @@ export class NotificationsService {
             ownerAddress: order[0].ownerAddress,
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Won,
+            name: assetName,
           }),
         ]);
       } else {
@@ -126,6 +131,7 @@ export class NotificationsService {
             ownerAddress: auction.ownerAddress,
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
+            name: assetName,
           }),
         ]);
       }
