@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -23,7 +23,7 @@ export class NotificationsService {
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
-    private readonly assetsService: AssetsService,
+    private readonly apiService: ElrondApiService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -102,8 +102,10 @@ export class NotificationsService {
 
   public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
-      const asset = await this.assetsService.getAsset(auction.identifier);
-      const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
+      const asset = await this.apiService.getNftByIdentifier(
+        auction.identifier,
+      );
+      const assetName = asset ? asset.name : '';
       if (order) {
         this.saveNotifications([
           new NotificationEntity({

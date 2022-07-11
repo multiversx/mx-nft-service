@@ -36,7 +36,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
-    forwardRef(() => AssetsModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     TypeOrmModule.forFeature([NftsFlagsRepository]),

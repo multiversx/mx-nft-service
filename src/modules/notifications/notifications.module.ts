@@ -14,7 +14,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     CommonModule,
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => OrdersModuleGraph),
-    forwardRef(() => AssetsModuleGraph),
   ],
   exports: [NotificationsService],
 })

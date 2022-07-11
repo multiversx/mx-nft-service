@@ -4,7 +4,7 @@ import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
@@ -35,7 +35,7 @@ export class OrdersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private notificationsService: NotificationsServiceDb,
-    private assetsService: AssetsService,
+    private apiService: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -89,9 +89,8 @@ export class OrdersService {
     const auction = await this.auctionsService.getAuction(
       createOrderArgs.auctionId,
     );
-
-    const asset = await this.assetsService.getAsset(auction?.identifier);
-    const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
+    const asset = await this.apiService.getNftByIdentifier(auction.identifier);
+    const assetName = asset ? asset.name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({
         auctionId: createOrderArgs.auctionId,

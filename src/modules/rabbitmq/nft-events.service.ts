@@ -47,7 +47,6 @@ export class NftEventsService {
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
-    private assetsService: AssetsService,
     private elrondApi: ElrondApiService,
   ) {}
 
@@ -232,8 +231,8 @@ export class NftEventsService {
   }
 
   private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
-    const asset = await this.assetsService.getAsset(auction.identifier);
-    const assetName = asset?.items?.length > 0 ? asset.items[0].name : '';
+    const asset = await this.elrondApi.getNftByIdentifier(auction.identifier);
+    const assetName = asset ? asset.name : '';
     this.notificationsService.saveNotifications([
       new NotificationEntity({
         auctionId: auction.id,

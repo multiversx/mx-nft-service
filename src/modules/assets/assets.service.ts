@@ -200,7 +200,7 @@ export class AssetsService {
     return Asset.fromNft(nft);
   }
 
-  public async getAsset(identifier): Promise<CollectionType<Asset>> {
+  private async getAsset(identifier): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
