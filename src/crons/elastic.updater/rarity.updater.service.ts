@@ -13,7 +13,7 @@ export class RarityUpdaterService {
     private readonly logger: Logger,
   ) {}
 
-  public async handleUpdateToken() {
+  public async handleValidateToken() {
     let collections: string[] = [];
 
     try {
@@ -41,7 +41,7 @@ export class RarityUpdaterService {
       );
     } catch (error) {
       this.logger.error(`Error when scrolling through collections`, {
-        path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+        path: 'RarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
       });
     }
@@ -55,7 +55,7 @@ export class RarityUpdaterService {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
-          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+          path: 'RarityUpdaterService.handleValidateTokenRarity',
           exception: error?.message,
           collection: collection,
         });

@@ -5,7 +5,6 @@ import { Locker } from 'src/utils/locker';
 import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
-import asyncPool from 'tiny-async-pool';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -29,7 +28,7 @@ export class ElasticRarityUpdaterService {
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async handleValidateTokenRarity() {
-    await this.rarityUpdaterService.handleUpdateToken();
+    await this.rarityUpdaterService.handleValidateToken();
   }
 
   @Cron(CronExpression.EVERY_HOUR)

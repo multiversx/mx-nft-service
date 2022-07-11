@@ -1,22 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
 import { NftTypeEnum } from '../assets/models/NftTypes.enum';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { FlagNftService } from '../admins/flag-nft.service';
 import { MintEvent } from './entities/auction/mint.event';
-import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
+import * as Redis from 'ioredis';
+import { cacheConfig } from 'src/config';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
+  private readonly redisClient: Redis.Redis;
   constructor(
     private readonly nftFlagsService: FlagNftService,
     private readonly elrondApi: ElrondApiService,
     private readonly nftRarityService: NftRarityService,
-    private readonly rarityUpdater: ElasticRarityUpdaterService,
-  ) {}
-
+    private readonly redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.rarityQueueClientName,
+    );
+  }
   public async handleNftMintEvents(
     mintEvents: any[],
     hash: string,
@@ -75,7 +81,23 @@ export class ElasticUpdatesEventsService {
 
     await Promise.all([
       deletes,
-      this.rarityUpdater.addCollectionsToRarityQueue(collectionsToUpdate),
+      this.addCollectionsToRarityQueue(collectionsToUpdate),
     ]);
+  }
+
+  async addCollectionsToRarityQueue(
+    collectionTickers: string[],
+  ): Promise<void> {
+    if (collectionTickers?.length > 0) {
+      await this.redisCacheService.addItemsToList(
+        this.redisClient,
+        this.getRarityQueueCacheKey(),
+        collectionTickers,
+      );
+    }
+  }
+
+  private getRarityQueueCacheKey() {
+    return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
   }
 }

@@ -25,7 +25,6 @@ import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 import { CommonModule } from 'src/common.module';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { CachingModule } from 'src/common/services/caching/caching.module';
-import { ElasticRarityUpdaterService } from 'src/crons/elastic.updater/elastic-rarity.updater.service';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 
@@ -59,7 +58,6 @@ import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.s
     NftRarityService,
     NftRarityComputeService,
     FlagNftService,
-    ElasticRarityUpdaterService,
     RarityUpdaterService,
   ],
   exports: [NftEventsService],
