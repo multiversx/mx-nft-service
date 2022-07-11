@@ -9,6 +9,9 @@ export class Notification {
   @Field(() => ID)
   id: number;
 
+  @Field(() => String)
+  name: string;
+
   @Field(() => Int)
   auctionId: number;
 
@@ -29,6 +32,7 @@ export class Notification {
     return notification
       ? new Notification({
           id: notification.id,
+          name: notification.name,
           type: notification.type,
           creationDate: DateUtils.getTimestamp(notification.creationDate),
           identifier: notification.identifier,
