@@ -53,7 +53,7 @@ export class NotificationsServiceDb {
     return await this.notificationsRepository
       .createQueryBuilder('n')
       .where(
-        `n.auctionId =:id) and n.status='active' and n.ownerAddress=:ownerAddress`,
+        `n.auctionId =:id and n.status='active' and n.ownerAddress=:ownerAddress`,
         {
           id: auctionId,
           ownerAddress: ownerAddress,
