@@ -20,7 +20,6 @@ export class AssetsQuery {
   }
 
   addQuery(query: string): this {
-    if (!query || query?.length === 0) return this;
     if (query[0] === '&' || query[0] === '?') this.query += query;
     else if (this.query.length === 0) this.query += '?' + query;
     else this.query += '&' + query;
