@@ -9,7 +9,9 @@ export enum AuctionEventEnum {
 export enum NftEventEnum {
   ESDTNFTAddQuantity = 'ESDTNFTAddQuantity',
   ESDTNFTTransfer = 'ESDTNFTTransfer',
+  MultiESDTNFTTransfer = 'MultiESDTNFTTransfer',
   ESDTNFTCreate = 'ESDTNFTCreate',
+  ESDTNFTBurn = 'ESDTNFTBurn',
 }
 
 export enum MinterEventEnum {

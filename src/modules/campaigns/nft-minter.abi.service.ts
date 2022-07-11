@@ -131,9 +131,7 @@ export class NftMinterAbiService {
       BytesValue.fromUTF8(request.collectionName),
       BytesValue.fromUTF8(request.collectionTicker),
       new U64Value(new BigNumber(request.whitelistEndTime.toString())),
-      List.fromItems(
-        request.tags.map((tag) => new BytesValue(Buffer.from(tag, 'hex'))),
-      ),
+      List.fromItems(request.tags?.map((tag) => BytesValue.fromUTF8(tag))),
       VariadicValue.fromItems(
         ...request.tiers.map((tier) =>
           CompositeValue.fromItems(

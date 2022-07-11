@@ -10,10 +10,14 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
+import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
+import { SearchItemResponse } from './models/SearchItemResponse';
 
 @Injectable()
 export class SearchService {
   private redisClient: Redis.Redis;
+  private readonly searchSize: number = 5;
+  private fieldsRequested: string = 'identifier,name';
   constructor(
     private accountsService: ElrondIdentityService,
     private apiService: ElrondApiService,
@@ -23,6 +27,28 @@ export class SearchService {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.followersRedisClientName,
     );
+  }
+
+  async getHerotagForAddress(address: string): Promise<any> {
+    try {
+      const cacheKey = this.getAddressHerotagCacheKey(address);
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getAddressHerotag(address),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting herotags for search term',
+        {
+          path: this.getHerotagForAddress.name,
+          address,
+          exception: err?.message,
+        },
+      );
+      return [];
+    }
   }
 
   async getHerotags(searchTerm: string): Promise<any> {
@@ -47,13 +73,41 @@ export class SearchService {
     }
   }
 
-  private async getMappedHerotags(searchTerm: string) {
-    const response = await this.accountsService.getAcountsByHerotag(searchTerm);
-    return response?.herotags;
+  private async getAddressHerotag(
+    address: string,
+  ): Promise<SearchItemResponse> {
+    const herotagsResponse = await this.apiService.getAddressUsername(address);
+    return new SearchItemResponse({
+      identifier: address,
+      name: herotagsResponse ? herotagsResponse.username : undefined,
+    });
+  }
+
+  private async getMappedHerotags(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
+    const herotagsResponse = await this.accountsService.getAcountsByHerotag(
+      searchTerm,
+    );
+    const promises = herotagsResponse?.herotags.map((hero) =>
+      this.accountsService.getAddressByHerotag(hero),
+    );
+    const response = await Promise.all(promises);
+    return response?.map(
+      (r) =>
+        new SearchItemResponse({
+          identifier: r.address,
+          name: r.herotag,
+        }),
+    );
   }
 
   private getAccountsCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_account', searchTerm);
+  }
+
+  private getAddressHerotagCacheKey(address: string) {
+    return generateCacheKeyFromParams('address_herotag', address);
   }
 
   async getCollections(searchTerm: string): Promise<string[]> {
@@ -78,16 +132,23 @@ export class SearchService {
     }
   }
 
-  private async getMappedCollections(searchTerm: string) {
-    const response = await this.apiService.getCollectionsBySearch(searchTerm);
-    return response?.map((c) => c.collection);
+  private async getMappedCollections(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
+    const response = await this.apiService.getCollectionsBySearch(
+      searchTerm,
+      this.searchSize,
+    );
+    return response?.map(
+      (c) => new SearchItemResponse({ identifier: c.collection, name: c.name }),
+    );
   }
 
   private getCollectionCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_collection', searchTerm);
   }
 
-  async getNfts(searchTerm: string): Promise<string[]> {
+  async getNfts(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -109,16 +170,40 @@ export class SearchService {
     }
   }
 
-  private async getMappedNfts(searchTerm: string) {
-    const response = await this.apiService.getNftsBySearch(searchTerm);
-    return response?.map((c) => c.identifier);
+  private async getMappedNfts(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
+    if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
+      const response = await this.apiService.getNftByIdentifierForQuery(
+        searchTerm,
+        `fields=${this.fieldsRequested}`,
+      );
+      return [
+        new SearchItemResponse({
+          identifier: response?.identifier,
+          name: response?.name,
+        }),
+      ];
+    }
+    const response = await this.apiService.getNftsBySearch(
+      searchTerm,
+      this.searchSize,
+      this.fieldsRequested,
+    );
+    return response?.map(
+      (c) =>
+        new SearchItemResponse({
+          identifier: c?.identifier,
+          name: c?.name,
+        }),
+    );
   }
 
   private getNftsCacheKey(searchTerm: string) {
     return generateCacheKeyFromParams('search_nfts', searchTerm);
   }
 
-  async getTags(searchTerm: string): Promise<string[]> {
+  async getTags(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getTagsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -140,9 +225,11 @@ export class SearchService {
     }
   }
 
-  private async getMappedTags(searchTerm: string) {
+  private async getMappedTags(
+    searchTerm: string,
+  ): Promise<SearchItemResponse[]> {
     const response = await this.apiService.getTagsBySearch(searchTerm);
-    return response?.map((c) => c.tag);
+    return response?.map((c) => new SearchItemResponse({ identifier: c.tag }));
   }
 
   private getTagsCacheKey(searchTerm: string) {

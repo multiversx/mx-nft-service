@@ -189,6 +189,28 @@ export class RedisCacheService {
     }
   }
 
+  async delMultiple(
+    client: Redis.Redis,
+    keys: string[],
+    region: string = null,
+  ): Promise<void> {
+    if (keys?.length > 0) {
+      const redisKeys = keys.map((key) => generateCacheKey(key, region));
+      try {
+        await client.del(redisKeys);
+      } catch (err) {
+        this.logger.error(
+          'An error occurred while trying to delete multiple keys from redis cache.',
+          {
+            path: 'redis-cache.service.delMultiple',
+            exception: err?.toString(),
+            cacheKey: keys,
+          },
+        );
+      }
+    }
+  }
+
   async delByPattern(
     client: Redis.Redis,
     key: string,
@@ -357,6 +379,49 @@ export class RedisCacheService {
       profiler.stop();
       MetricsCollector.setRedisDuration('DECR', profiler.duration);
     }
+  }
+
+  async addItemsToList(
+    client: Redis.Redis,
+    cacheKey: string,
+    items: string[],
+  ): Promise<void> {
+    let profiler = new PerformanceProfiler();
+    try {
+      if (items?.length > 0) {
+        await client.rpush(cacheKey, items);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to add item to redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('RPUSH', profiler.duration);
+    }
+  }
+
+  async popAllItemsFromList(
+    client: Redis.Redis,
+    cacheKey: string,
+    removeDuplicates: boolean = false,
+  ): Promise<string[]> {
+    let items: string[] = [];
+    let profiler = new PerformanceProfiler();
+    try {
+      let item: string;
+      while ((item = await client.lpop(cacheKey))) {
+        items.push(item);
+      }
+    } catch (err) {
+      this.logger.error(
+        `An error occurred while trying to pop all item from redis list ${cacheKey}. Exception: ${err?.toString()}.`,
+      );
+    } finally {
+      profiler.stop();
+      MetricsCollector.setRedisDuration('LPOP', profiler.duration);
+    }
+    return removeDuplicates ? [...new Set(items)] : items;
   }
 
   private async buildInternalCreateValueFunc(

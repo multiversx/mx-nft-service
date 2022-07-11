@@ -23,6 +23,7 @@ export function getDefaultAuctionsForIdentifierQuery(
     )}) AND a.identifier = '${identifier}' AND a.endDate > ${endDate})
     order by eD, if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
+
 export function getDefaultAuctionsForIdentifierQueryCount(
   identifier: string,
   endDate: number,
@@ -45,6 +46,14 @@ export function getDefaultAuctionsForIdentifierQueryCount(
       (value) => `'${value}'`,
     )}) AND a.identifier = '${identifier}' AND a.endDate> ${endDate})
     order by eD, if(price, price, minBidDenominated) ASC) as temp`;
+}
+
+export function getActiveAuctionsCountForCollection(collections: string[]) {
+  return `SELECT COUNT(1) as Count, a.collection FROM auctions a
+    WHERE a.status = 'Running' AND a.collection IN (${collections.map(
+      (value) => `'${value}'`,
+    )})
+   GROUP BY a.collection`;
 }
 
 export function getDefaultAuctionsQuery(endDate: number) {
@@ -147,7 +156,7 @@ SELECT SUM(countA) as count, identifier
 		AND a.type <> 'SftOnePerPayment'
     AND a.identifier in (${identifiers.map((value) => `'${value}'`)}) 
 	  GROUP by a.identifier)
-    UNION 
+    UNION ALL
     (SELECT max(temp.countA) as countA, temp.identifier
     FROM 
 		(SELECT (Sum(a.nrAuctionedTokens) - if (availableTokens.total, sum(availableTokens.total),0)) as countA, a.identifier

@@ -22,12 +22,14 @@ import {
   Sorting,
   Grouping,
 } from '../common/filters/filtersTypes';
+import { AuctionCustomFilter } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { User } from '../auth/user';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
+import { PriceRange } from './models/PriceRange.dto';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -44,32 +46,58 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
   @Query(() => AuctionResponse)
   async auctions(
-    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
+    @Args({
+      name: 'filters',
+      type: () => FiltersExpression,
+      nullable: true,
+      description:
+        'The values that can be used for this filters fields are the entity properties',
+    })
     filters,
-    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
+    @Args({
+      name: 'sorting',
+      type: () => [Sorting],
+      nullable: true,
+      description:
+        'The values that can be used for this sorting fields are the entity properties',
+    })
     sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
     groupBy,
+    @Args({
+      name: 'customFilters',
+      type: () => [AuctionCustomFilter],
+      nullable: 'itemsAndList',
+    })
+    customFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] = await this.auctionsService.getAuctions(
-      new QueryRequest({
-        limit,
+    const [auctions, count, priceRange] =
+      await this.auctionsService.getAuctions(
+        new QueryRequest({
+          limit,
+          offset,
+          filters,
+          sorting,
+          groupByOption: groupBy,
+          customFilters,
+        }),
+      );
+
+    return {
+      ...PageResponse.mapResponse<Auction>(
+        auctions,
+        pagination,
+        count,
         offset,
-        filters,
-        sorting,
-        groupByOption: groupBy,
-      }),
-    );
-    return PageResponse.mapResponse<Auction>(
-      auctions,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+        limit,
+      ),
+      priceRange: priceRange
+        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
+        : null,
+    };
   }
 
   @Query(() => AuctionResponse)
@@ -82,23 +110,33 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] =
+    const [auctions, count, priceRange] =
       await this.auctionsService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
       );
-
-    return PageResponse.mapResponse<Auction>(
-      auctions,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+    return {
+      ...PageResponse.mapResponse<Auction>(
+        auctions,
+        pagination,
+        count,
+        offset,
+        limit,
+      ),
+      priceRange: priceRange
+        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
+        : null,
+    };
   }
 
   @Query(() => String)
   async marketplaceCutPercentage() {
     return await this.nftAbiService.getCutPercentage();
+  }
+
+  @Query(() => PriceRange)
+  async priceRange() {
+    const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice();
+    return PriceRange.fromEntity(minBid, maxBid);
   }
 
   @Query(() => AuctionResponse)
@@ -144,7 +182,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
     return activeOrdersValue?.length > 0
-      ? Price.fromEntity(activeOrdersValue[activeOrdersValue.length - 1])
+      ? Price.fromEntity(activeOrdersValue[0])
       : null;
   }
 
@@ -158,10 +196,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
     return activeOrdersValue && activeOrdersValue?.length > 0
-      ? await this.getAccount(
-          fields,
-          activeOrdersValue[activeOrdersValue?.length - 1].ownerAddress,
-        )
+      ? await this.getAccount(fields, activeOrdersValue[0].ownerAddress)
       : null;
   }
 

@@ -7,6 +7,7 @@ import { ScamInfo } from './ScamInfo.dto';
 import { Media } from './Media.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { FeaturedMarketplace } from './FeaturedMarketplace.dto';
+import { Rarity } from './Rarity';
 
 @ObjectType()
 export class Asset {
@@ -84,7 +85,11 @@ export class Asset {
   @Field({ nullable: true })
   verified: boolean;
   @Field({ nullable: true })
+  isNsfw: boolean;
+  @Field({ nullable: true })
   featuredMarketplace: FeaturedMarketplace;
+  @Field(() => Rarity, { nullable: true })
+  rarity: Rarity;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -106,10 +111,12 @@ export class Asset {
           supply: nft.supply,
           name: nft.name,
           royalties: nft.royalties ?? '',
+          rarity: Rarity.fromNftRarity(nft),
           uris: nft.uris || [''],
           metadata: Metadata.fromNftMetadata(nft.metadata),
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,
+          isNsfw: nft.isNsfw,
           scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
           media: nft.media?.map((m) => Media.fromNftMedia(m)),
           verified: !!nft.assets ?? false,

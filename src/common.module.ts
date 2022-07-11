@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -86,11 +86,19 @@ if (!!process.env.LOG_FILE) {
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.collectionsDbName,
       },
+      {
+        clientName: cacheConfig.rarityQueueClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.rarityQueueDbName,
+      },
     ]),
 
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     ElrondCommunicationModule,
   ],
-  exports: [ElrondCommunicationModule, CachingModule],
+  exports: [ElrondCommunicationModule, CachingModule, Logger],
+  providers: [Logger],
 })
 export class CommonModule {}

@@ -1,8 +1,8 @@
+import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { EntityRepository, Repository, Unique } from 'typeorm';
 import { TierEntity } from './tiers.entity';
 
 @EntityRepository(TierEntity)
-@Unique('CampaignEntity_UQ', ['campaignId', 'tierName'])
 export class TiersRepository extends Repository<TierEntity> {
   async getTier(campaignId: number, tierName: string): Promise<TierEntity> {
     const campaign = await this.findOne({
@@ -30,7 +30,7 @@ export class TiersRepository extends Repository<TierEntity> {
       return await this.save(tier);
     } catch (err) {
       // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
         return null;
       }
       throw err;

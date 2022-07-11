@@ -47,18 +47,17 @@ export class AccountsStatsResolver {
   @ResolveField(() => Int)
   async collections(@Parent() stats: AccountStats) {
     const { address } = stats;
-    const collectedCount = await this.accountsStatsService.getCollectionsCount(
-      address,
-    );
-    return collectedCount || 0;
+    const collectionsCount =
+      await this.accountsStatsService.getCollectionsCount(address);
+    return collectionsCount || 0;
   }
 
   @ResolveField(() => Int)
   async creations(@Parent() stats: AccountStats) {
     const { address } = stats;
-    const collectedCount = await this.accountsStatsService.getCreationsCount(
+    const creationsCount = await this.accountsStatsService.getCreationsCount(
       address,
     );
-    return collectedCount || 0;
+    return creationsCount || 0;
   }
 }

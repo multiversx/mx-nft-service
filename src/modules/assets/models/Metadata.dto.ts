@@ -10,9 +10,6 @@ export class Metadata {
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
 
-  @Field(() => Rarity, { nullable: true })
-  rarity: Rarity;
-
   @Field(() => String, {
     nullable: true,
     deprecationReason: 'This field will be removed in the next version',
@@ -37,7 +34,6 @@ export class Metadata {
     return metadata
       ? new Metadata({
           description: metadata?.description,
-          rarity: Rarity.fromNftRarity(metadata?.rarity),
           attributes: metadata?.attributes
             ? AttributeType.fromMetadataAttributes(metadata.attributes)
             : null,
@@ -56,17 +52,20 @@ export class AttributeType {
 
   static fromMetadataAttributes(attributes: [{ [key: string]: string }]) {
     const res: AttributeType[] = [];
-    for (const pair of attributes) {
-      let data: KeyValueType[] = [];
-      for (const key in pair) {
-        if (Object.prototype.hasOwnProperty.call(pair, key)) {
-          const element = pair[key];
-          data.push(new KeyValueType({ key: key, value: element }));
+    if (Array.isArray(attributes)) {
+      for (const pair of attributes) {
+        if (pair === Object(pair)) {
+          let data: KeyValueType[] = [];
+          for (const key in pair) {
+            if (Object.prototype.hasOwnProperty.call(pair, key)) {
+              const element = pair[key];
+              data.push(new KeyValueType({ key: key, value: element }));
+            }
+          }
+          res.push(new AttributeType({ attribute: data }));
         }
       }
-      res.push(new AttributeType({ attribute: data }));
     }
-
     return res;
   }
 }

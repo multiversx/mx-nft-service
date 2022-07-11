@@ -47,6 +47,7 @@ type Asset {
   hash: String
   identifier: String!
   isLiked(byAddress: String!): Boolean
+  isNsfw: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
@@ -56,6 +57,7 @@ type Asset {
   nonce: Int!
   owner: Account
   ownerAddress: String
+  rarity: Rarity
   royalties: String!
   scamInfo: ScamInfo
   supply: String
@@ -176,6 +178,22 @@ type Auction {
   type: AuctionTypeEnum
 }
 
+enum AuctionCustomEnum {
+  CURRENTPRICE
+}
+
+input AuctionCustomFilter {
+  field: AuctionCustomEnum!
+  op: Operation!
+  sort: AuctionCustomSort
+  values: [String]
+}
+
+input AuctionCustomSort {
+  direction: Sort!
+  field: AuctionCustomEnum!
+}
+
 type AuctionEdge {
   cursor: String
   node: Auction
@@ -192,6 +210,7 @@ type AuctionResponse {
   edges: [AuctionEdge!]
   pageData: PageData
   pageInfo: AuctionPageInfo
+  priceRange: PriceRange
 }
 
 enum AuctionStatusEnum {
@@ -310,6 +329,7 @@ input ChildFilter {
 }
 
 type Collection {
+  activeAuctions: Int!
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -453,13 +473,18 @@ type FeaturedMarketplace {
 input Filter {
   field: String!
   op: Operation!
-  values: [String!]!
+  values: [String]
 }
 
 input FiltersExpression {
   childExpressions: [ChildExpression!]
   filters: [Filter!]!
   operator: Operator!
+}
+
+input FlagNftInput {
+  identifier: String!
+  nsfwFlag: Float!
 }
 
 enum GroupBy {
@@ -544,7 +569,6 @@ type Metadata {
   fileName: String @deprecated(reason: "This field will be removed in the next version")
   fileType: String @deprecated(reason: "This field will be removed in the next version")
   fileUri: String @deprecated(reason: "This field will be removed in the next version")
-  rarity: Rarity
 }
 
 type MintPrice {
@@ -563,6 +587,7 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
+  flagNft(input: FlagNftInput!): Boolean!
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
@@ -571,6 +596,8 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
+  updateNftRarities(collectionTicker: String!): Boolean!
+  validateNftRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
@@ -578,6 +605,38 @@ type Mutation {
 enum NftTypeEnum {
   NonFungibleESDT
   SemiFungibleESDT
+}
+
+type Notification {
+  auctionId: Int!
+  creationDate: Int
+  id: ID!
+  identifier: String!
+  type: NotificationTypeEnum!
+}
+
+type NotificationEdge {
+  cursor: String
+  node: Notification
+}
+
+type NotificationPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum NotificationTypeEnum {
+  Ended
+  Outbidded
+  Won
+}
+
+type NotificationsResponse {
+  edges: [NotificationEdge!]
+  pageData: PageData
+  pageInfo: NotificationPageInfo
 }
 
 enum Operation {
@@ -674,6 +733,11 @@ type Price {
   usdAmount: String
 }
 
+type PriceRange {
+  maxBid: Price!
+  minBid: Price!
+}
+
 enum Privacy {
   private
   public
@@ -683,7 +747,21 @@ type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
-  auctions(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs, sorting: [Sorting!]): AuctionResponse!
+  auctions(
+    customFilters: [AuctionCustomFilter]
+
+    """
+    The values that can be used for this filters fields are the entity properties
+    """
+    filters: FiltersExpression
+    grouping: Grouping
+    pagination: ConnectionArgs
+
+    """
+    The values that can be used for this sorting fields are the entity properties
+    """
+    sorting: [Sorting!]
+  ): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
@@ -692,19 +770,19 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
+  notifications(pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
+  priceRange: PriceRange!
   search(filters: SearchFilter!): SearchResponse!
-  tags(filters: TagsFilter, pagination: ConnectionArgs): TagsResponse!
+  tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
+  trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
 }
 
 type Rarity {
-  avgRarity: Float!
-  rarityScore: Float!
-  rarityScoreNormed: Float!
-  statRarity: Float!
-  usedTraitsCount: Float!
+  rank: Float
+  score: Float
 }
 
 input RemoveLikeArgs {
@@ -729,12 +807,17 @@ input SearchFilter {
   searchTerm: String!
 }
 
+type SearchItemResponse {
+  identifier: String!
+  name: String
+}
+
 type SearchResponse {
-  accounts: [String!]
-  collections: [String!]
-  nfts: [String!]
+  accounts: [SearchItemResponse!]
+  collections: [SearchItemResponse!]
+  nfts: [SearchItemResponse!]
   searchTerm: ID
-  tags: [String!]
+  tags: [SearchItemResponse!]
 }
 
 input SetNftRolesArgs {
@@ -780,8 +863,14 @@ type TagPageInfo {
   startCursor: String
 }
 
+enum TagTypeEnum {
+  Auction
+  Nft
+}
+
 input TagsFilter {
-  searchTerm: String!
+  searchTerm: String
+  tagType: TagTypeEnum = Nft
 }
 
 type TagsResponse {
@@ -834,6 +923,16 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
+}
+
+type TrendingCollection {
+  floarPrice: Price
+  identifier: ID!
+  imageUrl: String
+  name: String
+  percentage: String
+  verified: Boolean
+  volume: Price
 }
 
 """The `Upload` scalar type represents a file upload."""

@@ -4,7 +4,7 @@ import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { Logger } from 'winston';
 import { cacheConfig } from 'src/config';
@@ -13,6 +13,14 @@ import { QueryRequest } from '../common/filters/QueryRequest';
 import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
+import {
+  NotificationEntity,
+  NotificationsServiceDb,
+} from 'src/db/notifications';
+import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
+import { NotificationStatusEnum } from '../notifications/models';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { AssetsService } from '../assets';
 const hash = require('object-hash');
 
 @Injectable()
@@ -22,9 +30,12 @@ export class OrdersService {
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
     private accountStats: AccountsStatsService,
+    private auctionsService: AuctionsServiceDb,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private notificationsService: NotificationsServiceDb,
+    private apiService: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -45,6 +56,7 @@ export class OrdersService {
         CreateOrderArgs.toEntity(createOrderArgs),
       );
       if (orderEntity && activeOrder) {
+        await this.handleNotifications(createOrderArgs, activeOrder);
         await this.orderServiceDb.updateOrder(activeOrder);
       }
       return orderEntity;
@@ -55,6 +67,40 @@ export class OrdersService {
         exception: error,
       });
     }
+  }
+
+  private async handleNotifications(
+    createOrderArgs: CreateOrderArgs,
+    activeOrder: OrderEntity,
+  ) {
+    const notifications =
+      await this.notificationsService.getNotificationByIdAndOwner(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
+    this.notificationsService.updateNotification(notifications);
+    await this.addNotification(createOrderArgs, activeOrder);
+  }
+
+  private async addNotification(
+    createOrderArgs: CreateOrderArgs,
+    activeOrder: OrderEntity,
+  ) {
+    const auction = await this.auctionsService.getAuction(
+      createOrderArgs.auctionId,
+    );
+    const asset = await this.apiService.getNftByIdentifier(auction.identifier);
+    const assetName = asset ? asset.name : '';
+    await this.notificationsService.saveNotification(
+      new NotificationEntity({
+        auctionId: createOrderArgs.auctionId,
+        ownerAddress: activeOrder.ownerAddress,
+        type: NotificationTypeEnum.Outbidded,
+        status: NotificationStatusEnum.Active,
+        identifier: auction?.identifier,
+        name: assetName,
+      }),
+    );
   }
 
   async updateOrder(
@@ -124,6 +170,15 @@ export class OrdersService {
       getOrders,
       TimeConstants.oneDay,
     );
+  }
+
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    if (auctionIds?.length > 0) {
+      const orders = await this.orderServiceDb.getOrdersByAuctionIds(
+        auctionIds,
+      );
+      return orders;
+    }
   }
 
   private async getMappedOrders(queryRequest: QueryRequest) {

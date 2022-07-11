@@ -45,6 +45,17 @@ export class OrdersServiceDb {
       .getMany();
   }
 
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    const orders = await this.ordersRepository
+      .createQueryBuilder('orders')
+      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+        auctionIds: auctionIds,
+      })
+      .getMany();
+
+    return orders?.groupBy((asset) => asset.auctionId);
+  }
+
   async getOrders(
     queryRequest: QueryRequest,
   ): Promise<[OrderEntity[], number]> {

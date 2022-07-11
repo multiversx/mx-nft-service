@@ -1,3 +1,4 @@
+import '../node_modules/@elrondnetwork/erdnest/lib/utils/extensions/number.extensions';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -21,6 +22,9 @@ import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 import { SearchModuleGraph } from './modules/search/search.module';
 import { TagsModuleGraph } from './modules/tags/tags.module';
+import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
+import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
+import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -61,6 +65,9 @@ import { TagsModuleGraph } from './modules/tags/tags.module';
     IpfsModule,
     SearchModuleGraph,
     TagsModuleGraph,
+    NftRarityModuleGraph,
+    AdminOperationsModuleGraph,
+    NotificationsModuleGraph,
   ],
 })
 export class AppModule {}

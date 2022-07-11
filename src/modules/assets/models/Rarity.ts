@@ -1,31 +1,22 @@
-import { ObjectType, Field } from '@nestjs/graphql';
-import { NftRarity } from 'src/common';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Nft, NftRarity } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field()
-  avgRarity: number;
-  @Field()
-  statRarity: number;
-  @Field()
-  rarityScore: number;
-  @Field()
-  rarityScoreNormed: number;
-  @Field()
-  usedTraitsCount: number;
+  @Field({ nullable: true })
+  rank: number;
+  @Field({ nullable: true })
+  score: number;
 
   constructor(init?: Partial<Rarity>) {
     Object.assign(this, init);
   }
 
-  static fromNftRarity(rarity: NftRarity) {
-    return rarity
+  static fromNftRarity(asset: Nft) {
+    return asset
       ? new Rarity({
-          avgRarity: rarity?.avgRarity,
-          statRarity: rarity?.statRarity,
-          rarityScore: rarity?.rarityScore,
-          rarityScoreNormed: rarity?.rarityScoreNormed,
-          usedTraitsCount: rarity?.usedTraitsCount,
+          rank: asset?.rank,
+          score: asset?.score,
         })
       : null;
   }

@@ -29,7 +29,8 @@
   "dependencies": {
     "@elastic/elasticsearch": "^7.12.0",
     "@elrondnetwork/erdjs": "10.2.4",
-    "@elrondnetwork/erdjs-network-providers": "^0.1.5",
+    "@elrondnetwork/erdjs-network-providers": "0.1.6",
+    "@elrondnetwork/erdnest": "^0.1.8",
     "@golevelup/nestjs-rabbitmq": "2.2.0",
     "@jenyus-org/nestjs-graphql-utils": "^1.6.4",
     "@nestjs-query/query-graphql": "0.30.0",
@@ -81,6 +82,7 @@
     "rxjs": "^7.5.4",
     "save": "^2.5.0",
     "swagger-ui-express": "^4.3.0",
+    "tiny-async-pool": "^1.2.0",
     "typeorm": "^0.2.41",
     "winston": "3.7.2"
   },
@@ -94,6 +96,7 @@
     "@types/node": "^14.14.36",
     "@types/passport-local": "^1.0.33",
     "@types/supertest": "^2.0.10",
+    "@types/tiny-async-pool": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
     "eslint": "^7.22.0",

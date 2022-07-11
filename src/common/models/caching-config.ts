@@ -12,6 +12,8 @@ export class CachingConfig {
   followersRedisClientName: string;
   collectionsDbName: number;
   collectionsRedisClientName: string;
+  rarityQueueClientName: string;
+  rarityQueueDbName: number;
 
   // network config and network status
   networkConfig: number;

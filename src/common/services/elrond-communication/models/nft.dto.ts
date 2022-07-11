@@ -20,6 +20,7 @@ export interface Nft {
   canAddSpecialRoles: boolean;
   canTransferNFTCreateRole: boolean;
   isWhitelistedStorage: boolean;
+  isNsfw: boolean;
   wiped: string;
   attributes: string;
   balance: string;
@@ -34,6 +35,8 @@ export interface Nft {
   metadata: NftMetadata;
   media: NftMedia[];
   scamInfo: NftScamInfo;
+  rank: number;
+  score: number;
   assets: CollectionAssetApi;
 }
 
@@ -57,14 +60,10 @@ export interface NftTag {
 
 export interface NftMetadata {
   description: string;
-  rarity: NftRarity;
   attributes: [{ [key: string]: string }];
 }
 
 export interface NftRarity {
-  avgRarity: number;
-  statRarity: number;
-  rarityScore: number;
-  rarityScoreNormed: number;
-  usedTraitsCount: number;
+  rank: number;
+  score: number;
 }

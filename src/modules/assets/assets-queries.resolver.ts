@@ -27,6 +27,8 @@ import { Address } from '@elrondnetwork/erdjs/out';
 import { elrondConfig } from 'src/config';
 import { FeaturedMarketplace } from './models/FeaturedMarketplace.dto';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
+import { Rarity } from './models/Rarity';
+import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -41,6 +43,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
     private assetScamProvider: AssetScamInfoProvider,
+    private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
   ) {
     super();
@@ -128,6 +131,16 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const scamInfoValue = scamInfo.value;
     return scamInfoValue && Object.keys(scamInfoValue).length !== 0
       ? scamInfoValue
+      : null;
+  }
+
+  @ResolveField('rarity', () => Rarity)
+  async rarity(@Parent() asset: Asset) {
+    const { identifier } = asset;
+    const rarity = await this.assetRarityProvider.load(identifier);
+    const rarityValue = rarity?.value;
+    return rarityValue && Object.keys(rarityValue).length !== 0
+      ? rarityValue
       : null;
   }
 

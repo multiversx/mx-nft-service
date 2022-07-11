@@ -10,6 +10,11 @@ import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.s
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { TagsService } from '../tags.service';
 import { Tag } from '../models';
+import { TagsFilter } from '../models/Tags.Filter';
+import { TagsRepository } from 'src/db/auctions/tags.repository';
+import { TagsRepositoryMock } from 'src/db/auctions/tags.repository.mock';
+import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingServiceMock } from 'src/common/services/caching/caching.service.mock';
 
 describe('SearchService', () => {
   let service: TagsService;
@@ -21,6 +26,15 @@ describe('SearchService', () => {
   const RedisCacheServiceProvider = {
     provide: RedisCacheService,
     useClass: RedisCacheServiceMock,
+  };
+  const CachingServiceProvider = {
+    provide: CachingService,
+    useClass: CachingServiceMock,
+  };
+
+  const TagsRepositoryProvider = {
+    provide: TagsRepository,
+    useClass: TagsRepositoryMock,
   };
 
   const logTransports: Transport[] = [
@@ -35,8 +49,10 @@ describe('SearchService', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         ElrondApiServiceProvider,
+        CachingServiceProvider,
         TagsService,
         RedisCacheServiceProvider,
+        TagsRepositoryProvider,
       ],
       imports: [
         WinstonModule.forRoot({
@@ -58,7 +74,7 @@ describe('SearchService', () => {
 
   describe('getTags', () => {
     it('should return the top tags order by count', async () => {
-      const results = await service.getTags();
+      const results = await service.getTags(10, 10, new TagsFilter());
       const expectedResult = [
         [
           new Tag({ tag: 'tag1', count: 12 }),

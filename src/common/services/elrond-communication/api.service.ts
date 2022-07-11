@@ -43,6 +43,9 @@ export class ApiService {
     if (settings.apiKey) {
       headers['x-api-key'] = settings.apiKey;
     }
+    if (settings.contentType) {
+      headers['Content-Type'] = settings.contentType;
+    }
     return {
       timeout: settings.timeout,
       httpAgent: this.getKeepAliveAgent(),

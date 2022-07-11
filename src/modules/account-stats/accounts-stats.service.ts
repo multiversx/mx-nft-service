@@ -115,9 +115,10 @@ export class AccountsStatsService {
 
   async getCollectedCount(address: string): Promise<number> {
     try {
+      const query = new AssetsQuery().build();
       const cacheKey = this.getCollectedCacheKey(address);
       const getAccountStats = () =>
-        this.apiService.getNftsForUserCount(address);
+        this.apiService.getNftsForUserCount(address, query);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -142,7 +143,10 @@ export class AccountsStatsService {
     try {
       const cacheKey = this.getCollectionsCacheKey(address);
       const getCollectionsCount = () =>
-        this.apiService.getCollectionsForAddressCount(address);
+        this.apiService.getCollectionsForAddressCount(
+          address,
+          '?type=SemiFungibleESDT,NonFungibleESDT',
+        );
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,

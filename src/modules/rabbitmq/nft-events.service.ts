@@ -5,7 +5,10 @@ import {
   EventEnum,
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
-import { AssetsRedisHandler } from '../assets';
+import { AuctionEntity } from 'src/db/auctions';
+import { NotificationEntity } from 'src/db/notifications';
+import { OrderEntity } from 'src/db/orders';
+import { AssetsRedisHandler, AssetsService } from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
@@ -16,6 +19,9 @@ import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/avail
 import { AuctionStatusEnum } from '../auctions/models';
 import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
+import { NotificationStatusEnum } from '../notifications/models';
+import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
 import { OrdersService } from '../orders/order.service';
 import {
@@ -39,6 +45,7 @@ export class NftEventsService {
     private collectionAssets: CollectionAssetsRedisHandler,
     private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
+    private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
   ) {}
@@ -86,6 +93,8 @@ export class NftEventsService {
           );
           this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
+            this.notificationsService.updateNotificationStatus([auction?.id]);
+            this.addNotifications(auction, order);
             this.auctionsService.updateAuction(
               auction.id,
               AuctionStatusEnum.Claimable,
@@ -163,6 +172,9 @@ export class NftEventsService {
             hash,
             AuctionEventEnum.EndAuctionEvent,
           );
+          this.notificationsService.updateNotificationStatus([
+            parseInt(topicsEndAuction.auctionId, 16),
+          ]);
           this.ordersService.updateOrder(
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
@@ -194,26 +206,51 @@ export class NftEventsService {
             startAuctionIdentifier,
             hash,
           );
-
-          const nftData = await this.getNftNameAndAssets(
-            startAuctionIdentifier,
-          );
-          await this.accountFeedService.addFeed(
-            new Feed({
-              actor: topicsAuctionToken.originalOwner,
-              event: EventEnum.startAuction,
-              reference: startAuctionIdentifier,
-              extraInfo: {
-                auctionId: parseInt(topicsAuctionToken.auctionId, 16),
-                nftName: nftData.name,
-                verified: nftData.assets ? true : false,
-                minBid: startAuction.minBid,
-              },
-            }),
-          );
+          if (startAuction) {
+            const nftData = await this.getNftNameAndAssets(
+              startAuctionIdentifier,
+            );
+            await this.accountFeedService.addFeed(
+              new Feed({
+                actor: topicsAuctionToken.originalOwner,
+                event: EventEnum.startAuction,
+                reference: startAuctionIdentifier,
+                extraInfo: {
+                  auctionId: parseInt(topicsAuctionToken.auctionId, 16),
+                  nftName: nftData.name,
+                  verified: nftData.assets ? true : false,
+                  minBid: startAuction.minBid,
+                  maxBid: startAuction.maxBid,
+                },
+              }),
+            );
+          }
           break;
       }
     }
+  }
+
+  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+    const asset = await this.elrondApi.getNftByIdentifier(auction.identifier);
+    const assetName = asset ? asset.name : '';
+    this.notificationsService.saveNotifications([
+      new NotificationEntity({
+        auctionId: auction.id,
+        identifier: auction.identifier,
+        ownerAddress: auction.ownerAddress,
+        status: NotificationStatusEnum.Active,
+        type: NotificationTypeEnum.Ended,
+        name: assetName,
+      }),
+      new NotificationEntity({
+        auctionId: auction.id,
+        identifier: auction.identifier,
+        ownerAddress: order.ownerAddress,
+        status: NotificationStatusEnum.Active,
+        type: NotificationTypeEnum.Won,
+        name: assetName,
+      }),
+    ]);
   }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
@@ -252,6 +289,15 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+          );
+
+          break;
+
+        case NftEventEnum.MultiESDTNFTTransfer:
+          const multiTransferEvent = new TransferEvent(event);
+          const multiTransferTopics = multiTransferEvent.getTopics();
+          this.assetsRedisHandler.clearKey(
+            `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
           );
 
           break;

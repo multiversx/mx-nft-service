@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersModuleDb } from '../orders/orders.module.db';
 import { AuctionEntity } from '.';
@@ -7,11 +7,15 @@ import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-sta
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
+import { TagsRepository } from './tags.repository';
+import { AuctionsForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/collection-auctions.redis-handler';
+import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AuctionEntity]),
-    OrdersModuleDb,
+    TypeOrmModule.forFeature([TagsRepository]),
+    forwardRef(() => OrdersModuleDb),
     AccountsStatsModuleGraph,
   ],
   providers: [
@@ -19,7 +23,13 @@ import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-a
     AuctionsForAssetRedisHandler,
     AssetAuctionsCountRedisHandler,
     LowestAuctionRedisHandler,
+    AuctionsForCollectionRedisHandler,
+    AssetAvailableTokensCountRedisHandler,
   ],
-  exports: [AuctionsServiceDb, TypeOrmModule.forFeature([AuctionEntity])],
+  exports: [
+    AuctionsServiceDb,
+    TypeOrmModule.forFeature([TagsRepository]),
+    TypeOrmModule.forFeature([AuctionEntity]),
+  ],
 })
 export class AuctionsModuleDb {}

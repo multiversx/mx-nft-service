@@ -1,3 +1,4 @@
+import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { DeleteResult, EntityRepository, Repository } from 'typeorm';
 import { AssetLikeEntity } from './assets-likes.entity';
 
@@ -42,7 +43,7 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
       return await this.save(assetLikeEntity);
     } catch (err) {
       // If like already exists, we ignore the error.
-      if (err.errno === 1062) {
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
         return null;
       }
       throw err;

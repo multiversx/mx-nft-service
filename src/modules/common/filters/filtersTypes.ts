@@ -50,7 +50,7 @@ registerEnumType(Sort, {
 export class Filter {
   @Field(() => Operation)
   op: Operation;
-  @Field(() => [String])
+  @Field(() => [String], { nullable: 'itemsAndList' })
   values: string[];
   @Field(() => String)
   field: string;

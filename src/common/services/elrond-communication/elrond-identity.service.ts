@@ -92,4 +92,33 @@ export class ElrondIdentityService {
       return;
     }
   }
+
+  async getAddressByHerotag(herotag: string): Promise<any> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/herotags/${herotag}/address`;
+
+    try {
+      let response = await this.apiService.get(url);
+
+      return {
+        ...response.data,
+        herotag: herotag,
+      };
+    } catch (error) {
+      if (error.status === HttpStatus.FORBIDDEN) {
+        return new AccountIdentity({
+          herotag: herotag,
+          privacy: Privacy.private,
+        });
+      }
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${url}`,
+        {
+          path: 'ElrondIdentityService.getAddressByHerotag',
+          herotag: herotag,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
 }
