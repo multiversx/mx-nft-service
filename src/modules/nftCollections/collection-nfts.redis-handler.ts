@@ -54,15 +54,14 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   }
 
   async getData(keys: string[]) {
-    let getNftsPromises = keys.map((collection) =>
-      this.apiService.getAllNfts(
-        new AssetsQuery()
-          .addCollection(collection)
-          .addPageSize(0, 4)
-          .addFields(['media', 'identifier', 'collection'])
-          .build(),
-      ),
-    );
+    let getNftsPromises = keys.map((collection) => {
+      const query = new AssetsQuery()
+        .addCollection(collection)
+        .addPageSize(0, 4)
+        .addFields(['media', 'identifier', 'collection'])
+        .build();
+      return this.apiService.getAllNfts(query);
+    });
 
     let nftsResponse = await Promise.all(getNftsPromises);
     let nftsGroupByCollection: { [key: string]: any[] } = {};

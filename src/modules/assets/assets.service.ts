@@ -344,10 +344,9 @@ export class AssetsService {
   private async getCollectionAssets(
     query: string = '',
   ): Promise<[any[], string]> {
+    query = new AssetsQuery(query).addFields(['media', 'identifier']).build();
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(
-        new AssetsQuery(query).addFields(['media', 'identifier']).build(),
-      ),
+      this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(query),
     ]);
     return [nfts, count];
@@ -357,8 +356,10 @@ export class AssetsService {
     query: string = '',
     countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
+    query = new AssetsQuery(query).build();
+    countQuery = new AssetsQuery(countQuery).build();
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(new AssetsQuery(query).build()),
+      this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(countQuery),
     ]);
     if (!nfts || !count) {

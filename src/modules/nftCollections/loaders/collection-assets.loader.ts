@@ -20,15 +20,14 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const getNftsPromises = identifiers.map((identifier) =>
-      this.apiService.getAllNfts(
-        new AssetsQuery()
-          .addCollection(identifier)
-          .addPageSize(0, 4)
-          .addFields(['media', 'identifier', 'collection'])
-          .build(),
-      ),
-    );
+    const getNftsPromises = identifiers.map((identifier) => {
+      const query = new AssetsQuery()
+        .addCollection(identifier)
+        .addPageSize(0, 4)
+        .addFields(['media', 'identifier', 'collection'])
+        .build();
+      return this.apiService.getAllNfts(query);
+    });
 
     const getNftsResponse = await Promise.all(getNftsPromises);
 
