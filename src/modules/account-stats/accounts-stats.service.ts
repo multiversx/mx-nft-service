@@ -142,7 +142,10 @@ export class AccountsStatsService {
     try {
       const cacheKey = this.getCollectionsCacheKey(address);
       const getCollectionsCount = () =>
-        this.apiService.getCollectionsForAddressCount(address);
+        this.apiService.getCollectionsForAddressCount(
+          address,
+          '?type=SemiFungibleESDT,NonFungibleESDT',
+        );
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
