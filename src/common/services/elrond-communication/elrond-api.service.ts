@@ -205,10 +205,10 @@ export class ElrondApiService {
     identifier: string = '',
     query: string = '',
   ): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getAllCollectionNftsForQuery.name,
-      `collections/${identifier}/nfts${new AssetsQuery(query).build()}`,
-    );
+    const url = `collections/${identifier}/nfts${new AssetsQuery(
+      query,
+    ).build()}`;
+    return await this.doGetGeneric(this.getAllCollectionNftsForQuery.name, url);
   }
 
   async getCollectionByIdentifierForQuery(
@@ -275,14 +275,12 @@ export class ElrondApiService {
     size: number = 5,
     fields: string = 'identifier,name',
   ): Promise<Nft[]> {
-    return await this.doGetGeneric(
-      this.getNftsBySearch.name,
-      `nfts${new AssetsQuery()
-        .addSearchTerm(searchTerm)
-        .addPageSize(0, size)
-        .addQuery(`&fields=${fields}`)
-        .build()}`,
-    );
+    const url = `nfts${new AssetsQuery()
+      .addSearchTerm(searchTerm)
+      .addPageSize(0, size)
+      .addQuery(`&fields=${fields}`)
+      .build()}`;
+    return await this.doGetGeneric(this.getNftsBySearch.name, url);
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
