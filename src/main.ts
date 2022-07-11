@@ -64,13 +64,13 @@ async function bootstrap() {
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
-    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
     await processorApp.listen(process.env.NSFW_PORT);
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
-    processorApp.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
     await processorApp.listen(6013);
   }
 
