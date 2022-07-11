@@ -60,7 +60,7 @@ export class ElasticNsfwUpdaterService {
     );
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleUpdateTokenNsfw() {
     await Locker.lock(
       'Elastic updater: Update tokens nsfw',
