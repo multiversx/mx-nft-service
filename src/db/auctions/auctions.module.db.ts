@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersModuleDb } from '../orders/orders.module.db';
 import { AuctionEntity } from '.';
@@ -15,7 +15,7 @@ import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loader
   imports: [
     TypeOrmModule.forFeature([AuctionEntity]),
     TypeOrmModule.forFeature([TagsRepository]),
-    OrdersModuleDb,
+    forwardRef(() => OrdersModuleDb),
     AccountsStatsModuleGraph,
   ],
   providers: [

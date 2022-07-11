@@ -182,7 +182,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
     return activeOrdersValue?.length > 0
-      ? Price.fromEntity(activeOrdersValue[activeOrdersValue.length - 1])
+      ? Price.fromEntity(activeOrdersValue[0])
       : null;
   }
 
@@ -196,10 +196,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
     return activeOrdersValue && activeOrdersValue?.length > 0
-      ? await this.getAccount(
-          fields,
-          activeOrdersValue[activeOrdersValue?.length - 1].ownerAddress,
-        )
+      ? await this.getAccount(fields, activeOrdersValue[0].ownerAddress)
       : null;
   }
 
