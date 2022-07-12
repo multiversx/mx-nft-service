@@ -64,8 +64,12 @@ export class AssetsService {
     query: string = '',
     countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
-    query = new AssetsQuery('includeFlagged=true&source=elastic').build();
-    countQuery = new AssetsQuery('includeFlagged=true').build();
+    query = new AssetsQuery(query)
+      .addQuery('includeFlagged=true&source=elastic')
+      .build();
+    countQuery = new AssetsQuery(countQuery)
+      .addQuery('includeFlagged=true')
+      .build();
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, countQuery),
