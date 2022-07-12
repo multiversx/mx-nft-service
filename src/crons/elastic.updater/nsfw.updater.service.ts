@@ -101,7 +101,10 @@ export class NsfwUpdaterService {
         const currentFlag = databaseResult[item.identifier].nsfw;
         const actualFlag = item.nsfw;
 
-        if (parseFloat(currentFlag) !== parseFloat(actualFlag.toString())) {
+        if (
+          actualFlag === undefined ||
+          parseFloat(currentFlag) !== parseFloat(actualFlag.toString())
+        ) {
           itemsToUpdate.push({
             identifier: item.identifier,
             nsfw: currentFlag,
