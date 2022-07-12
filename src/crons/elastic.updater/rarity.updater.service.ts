@@ -95,7 +95,7 @@ export class RarityUpdaterService {
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
-            .withPagination({ from: 0, size: 5 });
+            .withPagination({ from: 0, size: 10000 });
 
           await this.elasticService.getScrollableList(
             'tokens',
