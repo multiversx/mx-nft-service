@@ -8,7 +8,7 @@ import { AssetsRedisHandler } from 'src/modules/assets';
 
 type NsfwType = {
   identifier: string;
-  nsfw: number;
+  nsfw: any;
 };
 
 @Injectable()
@@ -103,7 +103,7 @@ export class NsfwUpdaterService {
 
         if (
           actualFlag === undefined ||
-          parseFloat(currentFlag) !== parseFloat(actualFlag.toString())
+          parseFloat(currentFlag) !== parseFloat(actualFlag)
         ) {
           itemsToUpdate.push({
             identifier: item.identifier,
