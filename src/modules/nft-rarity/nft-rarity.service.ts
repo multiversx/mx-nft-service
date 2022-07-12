@@ -67,11 +67,6 @@ export class NftRarityService {
     const nfts = this.filterNftsWithAttributes(allNfts);
 
     if (allNfts.length !== nfts.length) {
-      const nftsWithNoAttributes = this.filterNftsWithNoAttributes(allNfts).map(
-        (nft) => {
-          return nft.identifier;
-        },
-      );
       this.logger.info(
         `The elrond api has not indexed attributes for ${
           allNfts.length - nfts.length
@@ -79,7 +74,6 @@ export class NftRarityService {
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
-          nftsWithNoAttributes: nftsWithNoAttributes,
         },
       );
     }
@@ -450,10 +444,6 @@ export class NftRarityService {
 
   private filterNftsWithAttributes(nfts: Nft[]): Nft[] {
     return nfts.filter((nft) => nft.metadata?.attributes !== undefined);
-  }
-
-  private filterNftsWithNoAttributes(nfts: Nft[]): Nft[] {
-    return nfts.filter((nft) => nft.metadata?.attributes === undefined);
   }
 
   private sortAscNftsByNonce(nfts: Nft[]): Nft[] {

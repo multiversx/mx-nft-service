@@ -123,6 +123,7 @@ export class FlagNftService {
 
   private getNftMedia(nft: Nft): NftMedia | undefined {
     if (
+      !nft ||
       !nft.media ||
       nft.media.length === 0 ||
       nft.isWhitelistedStorage === false
