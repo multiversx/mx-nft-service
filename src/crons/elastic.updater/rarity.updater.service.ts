@@ -28,6 +28,8 @@ export class RarityUpdaterService {
       await Locker.lock(
         'handleValidateToken: Validate tokens rarity',
         async () => {
+          let collectionsToValidate: string[] = [];
+
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
             .withMustMultiShouldCondition(
@@ -41,9 +43,16 @@ export class RarityUpdaterService {
             'token',
             query,
             async (items) => {
-              await this.validateTokenRarities(items.map((i) => i.token));
+              const collections = [...new Set(items.map((i) => i.token))];
+              collectionsToValidate = collectionsToValidate.concat(
+                collections.filter(
+                  (c) => collectionsToValidate.indexOf(c) === -1,
+                ),
+              );
             },
           );
+
+          await this.validateTokenRarities(collectionsToValidate);
         },
         true,
       );
@@ -62,12 +71,13 @@ export class RarityUpdaterService {
           `handleValidateTokenRarity(): validateRarities(${collection})`,
         );
         await Locker.lock(
-          collection,
+          `Update/Validate rarities for ${collection}`,
           async () => {
             await this.nftRarityService.validateRarities(collection);
           },
           true,
         );
+        this.forceClearGC();
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
@@ -85,7 +95,7 @@ export class RarityUpdaterService {
       await Locker.lock(
         'handleUpdateTokenRarities: Update tokens rarity',
         async () => {
-          let updatedCollections: string[] = [];
+          let collectionsToUpdate: string[] = [];
 
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nft_hasRarity')
@@ -103,23 +113,15 @@ export class RarityUpdaterService {
             query,
             async (items) => {
               const collections = [...new Set(items.map((i) => i.token))];
-              const collectionsToUpdate = collections.filter(
-                (c) => updatedCollections.indexOf(c) === -1,
-              );
-
-              const notUpdatedCollections = await this.updateTokenRarities(
-                collectionsToUpdate,
-              );
-
-              const successfullyUpdatedCollections = collectionsToUpdate.filter(
-                (c) => notUpdatedCollections.indexOf(c) === -1,
-              );
-
-              updatedCollections = updatedCollections.concat(
-                successfullyUpdatedCollections,
+              collectionsToUpdate = collectionsToUpdate.concat(
+                collections.filter(
+                  (c) => collectionsToUpdate.indexOf(c) === -1,
+                ),
               );
             },
           );
+
+          await this.updateTokenRarities(collectionsToUpdate);
         },
         true,
       );
@@ -136,12 +138,13 @@ export class RarityUpdaterService {
     for (const collection of collections) {
       try {
         await Locker.lock(
-          collection,
+          `Update/Validate rarities for ${collection}`,
           async () => {
             await this.nftRarityService.updateRarities(collection);
           },
           true,
         );
+        this.forceClearGC();
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
@@ -191,5 +194,11 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+  }
+
+  private forceClearGC() {
+    if (global.gc) {
+      global.gc();
+    }
   }
 }
