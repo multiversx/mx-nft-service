@@ -70,7 +70,7 @@ export class NftRarityService {
       this.logger.info(
         `The elrond api has not indexed attributes for ${
           allNfts.length - nfts.length
-        } nft(s)`,
+        }/${allNfts.length} nft(s)`,
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
@@ -314,7 +314,6 @@ export class NftRarityService {
         exception: error?.message,
         collection: collection,
       });
-      throw error;
     }
   }
 
@@ -324,11 +323,11 @@ export class NftRarityService {
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
-        for (let i = 0; i < nfts.length; i += 2000) {
+        for (let i = 0; i < nfts.length; i += 500) {
           await this.elasticService.bulkRequest(
             'tokens',
             this.buildNftRaritiesBulkUpdate(
-              nfts.slice(i, i + 2000),
+              nfts.slice(i, i + 500),
               hasRarities,
             ),
             '?timeout=5m',
