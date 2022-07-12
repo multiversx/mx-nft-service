@@ -80,10 +80,10 @@ export class RarityUpdaterService {
     }
   }
 
-  async handleSetTokenRarities() {
+  async handleUpdateTokenRarities() {
     try {
       await Locker.lock(
-        'handleSetTokenRarities: Update tokens rarity',
+        'handleUpdateTokenRarities: Update tokens rarity',
         async () => {
           let updatedCollections: string[] = [];
 
