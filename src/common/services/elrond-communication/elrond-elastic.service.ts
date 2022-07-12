@@ -122,8 +122,12 @@ export class ElrondElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  async bulkRequest<T>(collection: string, body: string): Promise<void> {
-    const url = `${this.url}/${collection}/_bulk`;
+  async bulkRequest<T>(
+    collection: string,
+    body: string,
+    urlParams: string = '',
+  ): Promise<void> {
+    const url = `${this.url}/${collection}/_bulk${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
@@ -206,8 +210,12 @@ export class ElrondElasticService {
     });
   }
 
-  async putMappings(collection: string, body: string): Promise<any> {
-    const url = `${this.url}/${collection}/_mapping`;
+  async putMappings(
+    collection: string,
+    body: string,
+    urlParams: string = '',
+  ): Promise<any> {
+    const url = `${this.url}/${collection}/_mapping${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
