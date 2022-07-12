@@ -11,9 +11,9 @@ export class ElasticRarityUpdaterService {
     await this.rarityUpdaterService.handleValidateToken();
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleUpdateTokenRarity() {
-    await this.rarityUpdaterService.handleUpdateTokenRarities();
+    await this.rarityUpdaterService.handleUpdateTokenRarities(250);
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)

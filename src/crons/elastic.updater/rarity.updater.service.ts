@@ -90,7 +90,7 @@ export class RarityUpdaterService {
     }
   }
 
-  async handleUpdateTokenRarities() {
+  async handleUpdateTokenRarities(maxCollectionsToUpdate: number = null) {
     try {
       await Locker.lock(
         'handleUpdateTokenRarities: Update tokens rarity',
@@ -120,6 +120,13 @@ export class RarityUpdaterService {
               );
             },
           );
+
+          if (maxCollectionsToUpdate) {
+            collectionsToUpdate = collectionsToUpdate.slice(
+              0,
+              maxCollectionsToUpdate,
+            );
+          }
 
           await this.updateTokenRarities(collectionsToUpdate);
         },
