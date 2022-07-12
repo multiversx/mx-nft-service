@@ -77,6 +77,7 @@ export class RarityUpdaterService {
           },
           true,
         );
+        this.forceClearGC();
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
@@ -143,6 +144,7 @@ export class RarityUpdaterService {
           },
           true,
         );
+        this.forceClearGC();
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
@@ -192,5 +194,11 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+  }
+
+  private forceClearGC() {
+    if (global.gc) {
+      global.gc();
+    }
   }
 }
