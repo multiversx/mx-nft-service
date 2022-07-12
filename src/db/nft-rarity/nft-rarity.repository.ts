@@ -8,7 +8,10 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       .insert()
       .into('nft_rarities')
       .values(nftRarities)
-      .orUpdate({ conflict_target: ['identifier'], overwrite: ['identifier'] })
+      .orUpdate({
+        conflict_target: ['rank', 'score', 'nonce'],
+        overwrite: ['rank', 'score', 'nonce'],
+      })
       .execute();
   }
 }
