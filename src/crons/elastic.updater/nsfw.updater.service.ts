@@ -1,12 +1,10 @@
-import { ElasticQuery, QueryType, BatchUtils } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { ElrondElasticService } from 'src/common';
+import { NftTypeEnum } from 'src/modules/assets/models';
+import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetsRedisHandler } from 'src/modules/assets';
-import { NftTypeEnum } from 'src/modules/assets/models';
-import { Locker } from 'src/utils/locker';
-import asyncPool from 'tiny-async-pool';
 
 type NsfwType = {
   identifier: string;
@@ -14,7 +12,7 @@ type NsfwType = {
 };
 
 @Injectable()
-export class ElasticNsfwUpdaterService {
+export class NsfwUpdaterService {
   constructor(
     private elasticService: ElrondElasticService,
     private flagsNftService: FlagNftService,
@@ -22,79 +20,65 @@ export class ElasticNsfwUpdaterService {
     private readonly logger: Logger,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)
-  async handleValidateNsfw() {
-    await Locker.lock(
-      'Elastic updater: Update tokens nsfw from database',
-      async () => {
-        const query = ElasticQuery.create()
-          .withFields(['nft_nsfw_mark'])
-          .withMustExistCondition('identifier')
-          .withMustMultiShouldCondition(
-            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-            (type) => QueryType.Match('type', type),
-          )
-          .withMustCondition(
-            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-          )
-          .withMustCondition(
-            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-          )
-          .withPagination({ from: 0, size: 10000 });
+  public async validateNsfwFlags() {
+    const query = ElasticQuery.create()
+      .withFields(['nft_nsfw_mark'])
+      .withMustExistCondition('identifier')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+      )
+      .withPagination({ from: 0, size: 10000 });
 
-        await this.elasticService.getScrollableList(
-          'tokens',
-          'identifier',
-          query,
-          async (items) => {
-            const nsfwItems = items.map((item) => ({
-              identifier: item.identifier,
-              nsfw: item.nft_nsfw_mark,
-            }));
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'identifier',
+      query,
+      async (items) => {
+        const nsfwItems = items.map((item) => ({
+          identifier: item.identifier,
+          nsfw: item.nft_nsfw_mark,
+        }));
 
-            await this.validateNsfwValues(nsfwItems);
-          },
-        );
+        await this.validateNsfwValues(nsfwItems);
       },
-      true,
     );
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  async handleUpdateTokenNsfw() {
-    await Locker.lock(
-      'Elastic updater: Update tokens nsfw',
-      async () => {
-        const query = ElasticQuery.create()
-          .withMustNotExistCondition('nft_nsfw_mark')
-          .withMustExistCondition('identifier')
-          .withMustMultiShouldCondition(
-            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-            (type) => QueryType.Match('type', type),
-          )
-          .withMustCondition(
-            QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-          )
-          .withMustCondition(
-            QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-          )
-          .withPagination({ from: 0, size: 10000 });
+  public async updateNsfwWhereNone() {
+    const query = ElasticQuery.create()
+      .withMustNotExistCondition('nft_nsfw_mark')
+      .withMustExistCondition('identifier')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+      )
+      .withPagination({ from: 0, size: 10000 });
 
-        await this.elasticService.getScrollableList(
-          'tokens',
-          'identifier',
-          query,
-          async (items) => {
-            const nsfwItems = items.map((item) => ({
-              identifier: item.identifier,
-              nsfw: item.nft_nsfw_mark,
-            }));
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'identifier',
+      query,
+      async (items) => {
+        const nsfwItems = items.map((item) => ({
+          identifier: item.identifier,
+          nsfw: item.nft_nsfw_mark,
+        }));
 
-            await this.updateNsfwForTokens(nsfwItems);
-          },
-        );
+        await this.updateNsfwForTokens(nsfwItems);
       },
-      true,
     );
   }
 
