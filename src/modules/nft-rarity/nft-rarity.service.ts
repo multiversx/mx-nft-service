@@ -325,20 +325,6 @@ export class NftRarityService {
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
-        await this.elasticService.putMappings(
-          'tokens',
-          this.elasticService.buildPutMultipleMappingsBody([
-            {
-              key: 'nft_rarity_score',
-              value: 'float',
-            },
-            {
-              key: 'nft_rarity_rank',
-              value: 'float',
-            },
-          ]),
-          '?master_timeout=3m&timeout=5m',
-        );
         for (let i = 0; i < nfts.length; i += 2000) {
           await this.elasticService.bulkRequest(
             'tokens',
