@@ -323,16 +323,11 @@ export class NftRarityService {
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
-        for (let i = 0; i < nfts.length; i += 500) {
-          await this.elasticService.bulkRequest(
-            'tokens',
-            this.buildNftRaritiesBulkUpdate(
-              nfts.slice(i, i + 500),
-              hasRarities,
-            ),
-            '?timeout=5m',
-          );
-        }
+        await this.elasticService.bulkRequest(
+          'tokens',
+          this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
+          '?timeout=5m',
+        );
       } catch (error) {
         this.logger.error('Error when mapping / bulk updating Elastic', {
           path: 'NftRarityService.setNftRaritiesInElastic',
