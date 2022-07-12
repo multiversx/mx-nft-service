@@ -612,6 +612,7 @@ type Notification {
   creationDate: Int
   id: ID!
   identifier: String!
+  name: String!
   type: NotificationTypeEnum!
 }
 
