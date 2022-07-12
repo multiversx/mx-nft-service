@@ -17,6 +17,7 @@ import {
   TransferNftCreateRoleRequest,
   StopNftCreateRequest,
 } from './models/requests';
+import { User } from '../auth/user';
 
 @Resolver(() => Collection)
 export class CollectionsMutationsResolver extends BaseResolver(Collection) {
@@ -29,9 +30,10 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   async issueNftCollection(
     @Args('input', { type: () => IssueCollectionArgs })
     input: IssueCollectionArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueNonFungible');
-    return await this.collectionsService.issueToken(request);
+    return await this.collectionsService.issueToken(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -39,18 +41,20 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   async issueSftCollection(
     @Args('input', { type: () => IssueCollectionArgs })
     input: IssueCollectionArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueSemiFungible');
-    return await this.collectionsService.issueToken(request);
+    return await this.collectionsService.issueToken(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async setRoles(
     @Args('input', { type: () => SetNftRolesArgs }) input: SetNftRolesArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = SetNftRolesRequest.fromArgs(input);
-    return await this.collectionsService.setNftRoles(request);
+    return await this.collectionsService.setNftRoles(user.publicKey, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -58,17 +62,22 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
   async transferNftCreateRole(
     @Args('input', { type: () => TransferNftCreateRoleArgs })
     input: TransferNftCreateRoleArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = TransferNftCreateRoleRequest.fromArgs(input);
-    return await this.collectionsService.transferNFTCreateRole(request);
+    return await this.collectionsService.transferNFTCreateRole(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async stopNftCreate(
     @Args('input', { type: () => StopNftCreateArgs }) input: StopNftCreateArgs,
+    @User() user: any,
   ): Promise<TransactionNode> {
     const request = StopNftCreateRequest.fromArgs(input);
-    return await this.collectionsService.stopNFTCreate(request);
+    return await this.collectionsService.stopNFTCreate(user.publicKey, request);
   }
 }

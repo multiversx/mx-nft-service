@@ -41,7 +41,7 @@ export class CollectionsService {
     );
   }
 
-  async issueToken(request: IssueCollectionRequest) {
+  async issueToken(ownerAddress: string, request: IssueCollectionRequest) {
     let transactionArgs = this.getIssueTokenArguments(request);
 
     const transaction = this.esdtSmartContract.call({
@@ -51,10 +51,13 @@ export class CollectionsService {
       gasLimit: gas.issueToken,
       chainID: elrondConfig.chainID,
     });
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
-  async stopNFTCreate(request: StopNftCreateRequest): Promise<TransactionNode> {
+  async stopNFTCreate(
+    ownerAddress: string,
+    request: StopNftCreateRequest,
+  ): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
@@ -63,10 +66,11 @@ export class CollectionsService {
       gasLimit: gas.stopNFTCreate,
       chainID: elrondConfig.chainID,
     });
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async transferNFTCreateRole(
+    ownerAddress: string,
     request: TransferNftCreateRoleRequest,
   ): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
@@ -78,10 +82,13 @@ export class CollectionsService {
       gasLimit: gas.transferNFTCreateRole,
       chainID: elrondConfig.chainID,
     });
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
-  async setNftRoles(args: SetNftRolesRequest): Promise<TransactionNode> {
+  async setNftRoles(
+    ownerAddress: string,
+    args: SetNftRolesRequest,
+  ): Promise<TransactionNode> {
     let transactionArgs = this.getSetRolesArgs(args);
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction('setSpecialRole'),
@@ -90,7 +97,7 @@ export class CollectionsService {
       gasLimit: gas.setRoles,
       chainID: elrondConfig.chainID,
     });
-    return transaction.toPlainObject();
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
   async getCollections(
