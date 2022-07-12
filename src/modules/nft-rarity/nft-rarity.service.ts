@@ -338,10 +338,15 @@ export class NftRarityService {
             },
           ]),
         );
-        await this.elasticService.bulkRequest(
-          'tokens',
-          this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
-        );
+        for (let i = 0; i < nfts.length; i += 2000) {
+          await this.elasticService.bulkRequest(
+            'tokens',
+            this.buildNftRaritiesBulkUpdate(
+              nfts.slice(i, i + 2000),
+              hasRarities,
+            ),
+          );
+        }
       } catch (error) {
         this.logger.error('Error when mapping / bulk updating Elastic', {
           path: 'NftRarityService.setNftRaritiesInElastic',
