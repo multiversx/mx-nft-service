@@ -33,7 +33,7 @@ export class RarityUpdaterService {
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
             .withMustMultiShouldCondition(
-              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
             .withPagination({ from: 0, size: 10000 });
@@ -78,7 +78,6 @@ export class RarityUpdaterService {
           true,
         );
         this.forceClearGC();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
           path: 'RarityUpdaterService.handleValidateTokenRarity',
@@ -152,7 +151,6 @@ export class RarityUpdaterService {
           true,
         );
         this.forceClearGC();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
           path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',

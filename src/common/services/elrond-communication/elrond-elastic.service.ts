@@ -148,7 +148,6 @@ export class ElrondElasticService {
         message: error.message,
         name: error.name,
       });
-      throw error;
     }
 
     profiler.stop();

@@ -182,7 +182,6 @@ export class NftRarityService {
             collection: collectionTicker,
           },
         );
-        throw error;
       }
     }
 
