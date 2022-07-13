@@ -59,7 +59,7 @@ export class RarityUpdaterService {
           const lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
 
-          let query: ElasticQuery = ElasticQuery.create()
+          const query: ElasticQuery = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
             .withMustExistCondition('nft_hasRarities')
             .withMustMultiShouldCondition(
