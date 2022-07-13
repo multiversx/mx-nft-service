@@ -77,7 +77,6 @@ export class RarityUpdaterService {
           },
           true,
         );
-        this.forceClearGC();
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
           path: 'RarityUpdaterService.handleValidateTokenRarity',
@@ -154,7 +153,6 @@ export class RarityUpdaterService {
           },
           true,
         );
-        this.forceClearGC();
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
           path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
@@ -202,11 +200,5 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
-  }
-
-  private forceClearGC() {
-    if (global.gc) {
-      global.gc();
-    }
   }
 }
