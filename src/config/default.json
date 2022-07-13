@@ -23,8 +23,8 @@
     "assetsDbName": 3,
     "auctionsRedisClientName": "auctions",
     "auctionsDbName": 4,
-    "followersRedisClientName": "followers",
-    "followersDbName": 5,
+    "persistentRedisClientName": "persistent",
+    "persistentDbName": 5,
     "collectionsRedisClientName": "collections",
     "collectionsDbName": 6,
     "rarityQueueClientName": "rarityQueue",
@@ -36,7 +36,6 @@
     "protocol": "https",
     "cdnUrl": "https://ipfs.io/ipfs/"
   },
-
   "gas": {
     "nftCreate": 3000000,
     "nftTransfer": 1000000,
@@ -50,5 +49,11 @@
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
     "addBurnQuantity": 200000
+  },
+  "cronJobs": {
+    "rarity": {
+      "collectionsToValidatePer5m": 50,
+      "colectionsToUpdatePer30s": 30
+    }
   }
 }
