@@ -127,7 +127,7 @@ export class ElrondElasticService {
     updates: string[],
     urlParams: string = '',
   ): Promise<void> {
-    const batchSize = 50;
+    const batchSize = 100;
 
     const url = `${this.url}/${collection}/_bulk${urlParams}`;
 
