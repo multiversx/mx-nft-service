@@ -94,7 +94,7 @@ export class RarityUpdaterService {
           await this.validateTokenRarities(collectionsToValidate);
 
           await this.setLastValidatedCollectionIndex(
-            lastIndex + maxCollectionsToValidate,
+            lastIndex + collectionsToValidate.length,
           );
         },
         true,
