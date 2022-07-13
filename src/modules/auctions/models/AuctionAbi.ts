@@ -8,16 +8,10 @@ import {
 import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 
 export interface AuctionAbi {
-  auctioned_token: {
-    token_type: TokenIdentifierValue;
-    nonce: U64Value;
-  };
-  nr_auctioned_tokens: BigUIntValue;
-  payment_token: {
-    token_type: TokenIdentifierValue;
-    nonce: U64Value;
-  };
-  auction_type: any;
+  auctioned_tokens: EsdtTokenPayment;
+  payment_token: TokenIdentifierValue;
+  payment_nonce: U64Value;
+  auction_type: AuctionTypeEnum;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
   min_bid_diff: BigUIntValue;
@@ -29,4 +23,10 @@ export interface AuctionAbi {
   current_winner: AddressValue;
   marketplace_cut_percentage: BigUIntValue;
   creator_royalties_percentage: BigUIntValue;
+}
+
+export interface EsdtTokenPayment {
+  token_identifier: TokenIdentifierValue;
+  token_nonce: U64Value;
+  amount: BigUIntValue;
 }
