@@ -85,8 +85,6 @@ export class ApiService {
           name: error.name,
         };
 
-        this.logger.error(customError);
-
         throw customError;
       }
     }
