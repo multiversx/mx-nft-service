@@ -7,7 +7,7 @@ import { RarityUpdaterService } from './rarity.updater.service';
 export class ElasticRarityUpdaterService {
   constructor(private readonly rarityUpdaterService: RarityUpdaterService) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleValidateTokenRaritiesCronJob() {
     await this.rarityUpdaterService.handleValidateTokenRarities(
       cronJobs.rarity.collectionsToValidatePer5m,
