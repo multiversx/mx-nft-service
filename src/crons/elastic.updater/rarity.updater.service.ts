@@ -77,10 +77,8 @@ export class RarityUpdaterService {
             query,
             async (items) => {
               collections = collections.concat(items.map((i) => i.token));
-              if (collections.length >= lastIndex + maxCollectionsToValidate) {
-                return false;
-              }
             },
+            lastIndex + maxCollectionsToValidate,
           );
 
           const collectionsToValidate = collections.slice(
