@@ -306,7 +306,7 @@ export class NftRarityService {
         'tokens',
         collection,
         updateBody,
-        '?retry_on_conflict=2&timeout=5m',
+        '?retry_on_conflict=2',
       );
     } catch (error) {
       this.logger.error('Error when setting collection rarity flag', {
@@ -327,7 +327,6 @@ export class NftRarityService {
           await this.elasticService.bulkRequest(
             'tokens',
             this.buildNftRaritiesBulkUpdate(nfts.slice(i, i + 50), hasRarities),
-            '?timeout=5m',
           );
         }
       } catch (error) {
