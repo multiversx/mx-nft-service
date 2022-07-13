@@ -95,7 +95,6 @@ export class NsfwUpdaterService {
     const itemsToUpdate: NsfwType[] = [];
     for (const item of items) {
       if (!databaseResult || !databaseResult[item.identifier]) {
-        await new Promise((resolve) => setTimeout(resolve, 300));
         await this.flagsNftService.updateNftFlag(item.identifier);
       } else {
         const currentFlag = databaseResult[item.identifier].nsfw;
