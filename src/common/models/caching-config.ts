@@ -8,8 +8,8 @@ export class CachingConfig {
   assetsDbName: number;
   ordersRedisClientName: string;
   ordersDbName: number;
-  followersDbName: number;
-  followersRedisClientName: string;
+  persistentDbName: number;
+  persistentRedisClientName: string;
   collectionsDbName: number;
   collectionsRedisClientName: string;
   rarityQueueClientName: string;
