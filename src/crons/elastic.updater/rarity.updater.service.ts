@@ -84,7 +84,6 @@ export class RarityUpdaterService {
           exception: error?.message,
           collection: collection,
         });
-        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     }
   }
@@ -163,7 +162,6 @@ export class RarityUpdaterService {
           collection: collection,
         });
         notUpdatedCollections.push(collection);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     }
     return notUpdatedCollections;
