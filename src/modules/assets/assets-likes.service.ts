@@ -28,7 +28,7 @@ export class AssetsLikesService {
     private elrondApi: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.persistentRedisClientName,
     );
   }
 

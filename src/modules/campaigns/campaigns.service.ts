@@ -28,7 +28,7 @@ export class CampaignsService {
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.persistentRedisClientName,
     );
   }
 
@@ -129,7 +129,7 @@ export class CampaignsService {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
-      redisClientName: cacheConfig.followersRedisClientName,
+      redisClientName: cacheConfig.persistentRedisClientName,
     });
   }
 
