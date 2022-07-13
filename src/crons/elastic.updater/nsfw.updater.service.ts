@@ -203,20 +203,22 @@ export class NsfwUpdaterService {
 
   private buildNsfwBulkUpdate(
     items: { identifier: string; nsfw: number }[],
-  ): string {
-    let updates: string = '';
+  ): string[] {
+    let updates: string[] = [];
     items.forEach((r) => {
-      updates += this.buildBulkUpdateBody(
-        'tokens',
-        r.identifier,
-        'nft_nsfw_mark',
-        parseFloat(r.nsfw.toString()),
+      updates.push(
+        this.buildBulkUpdate(
+          'tokens',
+          r.identifier,
+          'nft_nsfw_mark',
+          parseFloat(r.nsfw.toString()),
+        ),
       );
     });
     return updates;
   }
 
-  buildBulkUpdateBody(
+  buildBulkUpdate(
     collection: string,
     identifier: string,
     fieldName: string,

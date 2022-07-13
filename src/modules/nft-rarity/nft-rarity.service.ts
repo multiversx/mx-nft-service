@@ -266,28 +266,34 @@ export class NftRarityService {
   buildNftRaritiesBulkUpdate(
     nfts: NftRarityEntity[] | Nft[],
     hasRarities: boolean = true,
-  ): string {
-    let updates: string = '';
+  ): string[] {
+    let updates: string[] = [];
     nfts.forEach((r) => {
       if (hasRarities) {
-        updates += this.elasticService.buildBulkUpdateBody<number>(
-          'tokens',
-          r.identifier,
-          'nft_rarity_score',
-          r.score || r.nft_rarity_score || 0,
+        updates.push(
+          this.elasticService.buildBulkUpdate<number>(
+            'tokens',
+            r.identifier,
+            'nft_rarity_score',
+            r.score || r.nft_rarity_score || 0,
+          ),
         );
-        updates += this.elasticService.buildBulkUpdateBody<number>(
-          'tokens',
-          r.identifier,
-          'nft_rarity_rank',
-          r.rank || r.nft_rarity_rank,
+        updates.push(
+          this.elasticService.buildBulkUpdate<number>(
+            'tokens',
+            r.identifier,
+            'nft_rarity_rank',
+            r.rank || r.nft_rarity_rank,
+          ),
         );
       }
-      updates += this.elasticService.buildBulkUpdateBody<boolean>(
-        'tokens',
-        r.identifier,
-        'nft_hasRarity',
-        hasRarities,
+      updates.push(
+        this.elasticService.buildBulkUpdate<boolean>(
+          'tokens',
+          r.identifier,
+          'nft_hasRarity',
+          hasRarities,
+        ),
       );
     });
     return updates;
@@ -323,12 +329,10 @@ export class NftRarityService {
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
-        for (let i = 0; i < nfts.length; i += 50) {
-          await this.elasticService.bulkRequest(
-            'tokens',
-            this.buildNftRaritiesBulkUpdate(nfts.slice(i, i + 50), hasRarities),
-          );
-        }
+        await this.elasticService.bulkRequest(
+          'tokens',
+          this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
+        );
       } catch (error) {
         this.logger.error('Error when mapping / bulk updating Elastic', {
           path: 'NftRarityService.setNftRaritiesInElastic',
@@ -361,7 +365,7 @@ export class NftRarityService {
         async (items) => {
           hasRarities =
             items.length > 0 ? items[0].rarities || false : undefined;
-          return;
+          return undefined;
         },
       );
     } catch (error) {
@@ -415,6 +419,7 @@ export class NftRarityService {
         query,
         async (items) => {
           nfts = nfts.concat(items);
+          return undefined;
         },
       );
     } catch (error) {
