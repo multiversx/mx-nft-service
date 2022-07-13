@@ -33,7 +33,7 @@ export class RarityUpdaterService {
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
             .withMustMultiShouldCondition(
-            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
             .withPagination({ from: 0, size: 10000 });
@@ -95,6 +95,7 @@ export class RarityUpdaterService {
         'handleUpdateTokenRarities: Update tokens rarity',
         async () => {
           let collectionsToUpdate: string[] = [];
+          let stop = false;
 
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nft_hasRarity')
@@ -117,7 +118,11 @@ export class RarityUpdaterService {
                   (c) => collectionsToUpdate.indexOf(c) === -1,
                 ),
               );
+              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+                stop = true;
+              }
             },
+            stop,
           );
 
           if (maxCollectionsToUpdate) {

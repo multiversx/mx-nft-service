@@ -277,6 +277,7 @@ export class ElrondElasticService {
     key: string,
     elasticQuery: ElasticQuery,
     action: (items: any[]) => Promise<void>,
+    stop: boolean = false,
   ): Promise<void> {
     const url = `${this.url}/${collection}/_search?scroll=10m`;
 
@@ -295,7 +296,7 @@ export class ElrondElasticService {
       documents.map((document: any) => this.formatItem(document, key)),
     );
 
-    while (true) {
+    while (true && !stop) {
       const scrollProfiler = new PerformanceProfiler();
 
       let scrollResult: any = null;
