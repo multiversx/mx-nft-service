@@ -77,25 +77,23 @@ export class RarityUpdaterService {
           },
           true,
         );
-        this.forceClearGC();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when validating collection rarities`, {
           path: 'RarityUpdaterService.handleValidateTokenRarity',
           exception: error?.message,
           collection: collection,
         });
-        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     }
   }
 
-  async handleUpdateTokenRarities() {
+  async handleUpdateTokenRarities(maxCollectionsToUpdate: number = null) {
     try {
       await Locker.lock(
         'handleUpdateTokenRarities: Update tokens rarity',
         async () => {
           let collectionsToUpdate: string[] = [];
+          let stop = false;
 
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nft_hasRarity')
@@ -118,8 +116,19 @@ export class RarityUpdaterService {
                   (c) => collectionsToUpdate.indexOf(c) === -1,
                 ),
               );
+              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+                stop = true;
+              }
             },
+            stop,
           );
+
+          if (maxCollectionsToUpdate) {
+            collectionsToUpdate = collectionsToUpdate.slice(
+              0,
+              maxCollectionsToUpdate,
+            );
+          }
 
           await this.updateTokenRarities(collectionsToUpdate);
         },
@@ -144,8 +153,6 @@ export class RarityUpdaterService {
           },
           true,
         );
-        this.forceClearGC();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         this.logger.error(`Error when updating collection raritiies`, {
           path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
@@ -153,7 +160,6 @@ export class RarityUpdaterService {
           collection: collection,
         });
         notUpdatedCollections.push(collection);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     }
     return notUpdatedCollections;
@@ -194,11 +200,5 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
-  }
-
-  private forceClearGC() {
-    if (global.gc) {
-      global.gc();
-    }
   }
 }

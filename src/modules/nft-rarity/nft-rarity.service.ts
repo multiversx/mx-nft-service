@@ -70,7 +70,7 @@ export class NftRarityService {
       this.logger.info(
         `The elrond api has not indexed attributes for ${
           allNfts.length - nfts.length
-        } nft(s)`,
+        }/${allNfts.length} nft(s)`,
         {
           path: 'NftRarityService.updateRarities',
           collection: collectionTicker,
@@ -182,7 +182,6 @@ export class NftRarityService {
             collection: collectionTicker,
           },
         );
-        throw error;
       }
     }
 
@@ -315,7 +314,6 @@ export class NftRarityService {
         exception: error?.message,
         collection: collection,
       });
-      throw error;
     }
   }
 
@@ -325,26 +323,10 @@ export class NftRarityService {
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
-        await this.elasticService.putMappings(
-          'tokens',
-          this.elasticService.buildPutMultipleMappingsBody([
-            {
-              key: 'nft_rarity_score',
-              value: 'float',
-            },
-            {
-              key: 'nft_rarity_rank',
-              value: 'float',
-            },
-          ]),
-        );
-        for (let i = 0; i < nfts.length; i += 2000) {
+        for (let i = 0; i < nfts.length; i += 50) {
           await this.elasticService.bulkRequest(
             'tokens',
-            this.buildNftRaritiesBulkUpdate(
-              nfts.slice(i, i + 2000),
-              hasRarities,
-            ),
+            this.buildNftRaritiesBulkUpdate(nfts.slice(i, i + 50), hasRarities),
           );
         }
       } catch (error) {

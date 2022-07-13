@@ -122,8 +122,12 @@ export class ElrondElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  async bulkRequest<T>(collection: string, body: string): Promise<void> {
-    const url = `${this.url}/${collection}/_bulk`;
+  async bulkRequest<T>(
+    collection: string,
+    body: string,
+    urlParams: string = '',
+  ): Promise<void> {
+    const url = `${this.url}/${collection}/_bulk${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
@@ -144,7 +148,6 @@ export class ElrondElasticService {
         message: error.message,
         name: error.name,
       });
-      throw error;
     }
 
     profiler.stop();
@@ -206,8 +209,12 @@ export class ElrondElasticService {
     });
   }
 
-  async putMappings(collection: string, body: string): Promise<any> {
-    const url = `${this.url}/${collection}/_mapping`;
+  async putMappings(
+    collection: string,
+    body: string,
+    urlParams: string = '',
+  ): Promise<any> {
+    const url = `${this.url}/${collection}/_mapping${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
@@ -270,6 +277,7 @@ export class ElrondElasticService {
     key: string,
     elasticQuery: ElasticQuery,
     action: (items: any[]) => Promise<void>,
+    stop: boolean = false,
   ): Promise<void> {
     const url = `${this.url}/${collection}/_search?scroll=10m`;
 
@@ -288,7 +296,7 @@ export class ElrondElasticService {
       documents.map((document: any) => this.formatItem(document, key)),
     );
 
-    while (true) {
+    while (true && !stop) {
       const scrollProfiler = new PerformanceProfiler();
 
       let scrollResult: any = null;
