@@ -11,7 +11,7 @@ export interface AuctionAbi {
   auctioned_tokens: EsdtTokenPayment;
   payment_token: TokenIdentifierValue;
   payment_nonce: U64Value;
-  auction_type: AuctionTypeEnum;
+  auction_type: any;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
   min_bid_diff: BigUIntValue;
