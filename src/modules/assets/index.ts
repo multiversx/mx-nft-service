@@ -1,4 +1,5 @@
-export * from './assets.service';
+export * from './assets-setter.service';
+export * from './assets-getter.service';
 export * from './assets-queries.resolver';
 export * from './assets-mutations.resolver';
 export * from './loaders/assets.redis-handler';

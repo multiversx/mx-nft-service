@@ -8,7 +8,11 @@ import {
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetsRedisHandler, AssetsService } from '../assets';
+import {
+  AssetsGetterService,
+  AssetsRedisHandler,
+  AssetsSetterService,
+} from '../assets';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
@@ -48,6 +52,7 @@ export class NftEventsService {
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
+    private assetsService: AssetsGetterService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -74,9 +79,7 @@ export class NftEventsService {
             }),
           );
 
-          const bidNftData = await this.getNftNameAndAssets(
-            auction?.identifier,
-          );
+          const bidNftData = await this.getAsset(auction?.identifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: topics.currentWinner,
@@ -85,7 +88,7 @@ export class NftEventsService {
               extraInfo: {
                 orderId: order.id,
                 nftName: bidNftData?.name,
-                verified: bidNftData?.assets ? true : false,
+                verified: bidNftData?.verified ? true : false,
                 price: topics.currentBid,
                 auctionId: parseInt(topics.auctionId, 16),
               },
@@ -133,7 +136,7 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
-          const buySftNftData = await this.getNftNameAndAssets(identifier);
+          const buySftNftData = await this.getAsset(identifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: buySftTopics.currentWinner,
@@ -142,7 +145,7 @@ export class NftEventsService {
               extraInfo: {
                 orderId: orderSft.id,
                 nftName: buySftNftData?.name,
-                verified: buySftNftData?.assets ? true : false,
+                verified: buySftNftData?.verified ? true : false,
                 price: buySftTopics.bid,
                 auctionId: parseInt(buySftTopics.auctionId, 16),
                 boughtTokens: buySftTopics.boughtTokens,
@@ -179,9 +182,7 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
-          const endAuctionNftData = await this.getNftNameAndAssets(
-            endAuctionIdentifier,
-          );
+          const endAuctionNftData = await this.getAsset(endAuctionIdentifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: topicsEndAuction.currentWinner,
@@ -190,7 +191,7 @@ export class NftEventsService {
               extraInfo: {
                 auctionId: parseInt(topicsEndAuction.auctionId, 16),
                 nftName: endAuctionNftData?.name,
-                verified: endAuctionNftData?.assets ? true : false,
+                verified: endAuctionNftData?.verified,
                 price: topicsEndAuction.currentBid,
               },
             }),
@@ -207,9 +208,7 @@ export class NftEventsService {
             hash,
           );
           if (startAuction) {
-            const nftData = await this.getNftNameAndAssets(
-              startAuctionIdentifier,
-            );
+            const nftData = await this.getAsset(startAuctionIdentifier);
             await this.accountFeedService.addFeed(
               new Feed({
                 actor: topicsAuctionToken.originalOwner,
@@ -217,8 +216,8 @@ export class NftEventsService {
                 reference: startAuctionIdentifier,
                 extraInfo: {
                   auctionId: parseInt(topicsAuctionToken.auctionId, 16),
-                  nftName: nftData.name,
-                  verified: nftData.assets ? true : false,
+                  nftName: nftData?.name,
+                  verified: nftData?.verified ? true : false,
                   minBid: startAuction.minBid,
                   maxBid: startAuction.maxBid,
                 },
@@ -267,7 +266,7 @@ export class NftEventsService {
               createTopics.collection,
               'fields=name',
             );
-          const nftData = await this.getNftNameAndAssets(identifier);
+          const nftData = await this.getAsset(identifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: mintEvent.getAddress(),
@@ -276,7 +275,7 @@ export class NftEventsService {
               extraInfo: {
                 identifier: identifier,
                 nftName: nftData?.name,
-                verified: nftData?.assets ? true : false,
+                verified: nftData?.verified ? true : false,
                 collectionName: collection?.name,
               },
             }),
@@ -305,11 +304,9 @@ export class NftEventsService {
     }
   }
 
-  private async getNftNameAndAssets(identifier: string) {
-    const nft = await this.elrondApi.getNftByIdentifierForQuery(
-      identifier,
-      'fields=name,assets',
-    );
-    return nft;
+  private async getAsset(identifier: string) {
+    const { items } = await this.assetsService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 }

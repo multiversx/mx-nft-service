@@ -7,7 +7,6 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import { AssetsService } from '.';
 import { Asset, AssetsResponse, NftTypeEnum } from './models';
 import { Auction } from '../auctions/models';
 import { Account } from '../account-stats/models/Account.dto';
@@ -29,11 +28,12 @@ import { FeaturedMarketplace } from './models/FeaturedMarketplace.dto';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
+import { AssetsGetterService } from './assets-getter.service';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
   constructor(
-    private assetsService: AssetsService,
+    private assetsService: AssetsGetterService,
     private accountsProvider: AccountsProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private assetsViewsProvider: AssetsViewsLoader,

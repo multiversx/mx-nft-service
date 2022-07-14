@@ -7,20 +7,21 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
+import { AssetsGetterService } from '../assets';
 
 @Injectable()
 export class AuctionsSetterService {
   private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
-    private apiService: ElrondApiService,
+    private assetsGetterService: AssetsGetterService,
     private auctionServiceDb: AuctionsServiceDb,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -40,10 +41,7 @@ export class AuctionsSetterService {
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.apiService.getNftByIdentifierForQuery(
-        identifier,
-        'fields=tags',
-      );
+      const asset = await this.getAsset(identifier);
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
           AuctionEntity.fromAuctionAbi(
@@ -125,6 +123,12 @@ export class AuctionsSetterService {
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
     await this.invalidateCache();
     return await this.auctionServiceDb.updateAuctions(auctions);
+  }
+
+  private async getAsset(identifier: string) {
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 
   private async invalidateCache(): Promise<void> {

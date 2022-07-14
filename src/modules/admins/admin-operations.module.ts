@@ -8,6 +8,7 @@ import { VerifyContentService } from '../assets/verify-content.service';
 import { CommonModule } from 'src/common.module';
 import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
 import { AssetsRedisHandler } from '../assets';
+import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
   providers: [
@@ -20,6 +21,7 @@ import { AssetsRedisHandler } from '../assets';
   imports: [
     CommonModule,
     ElrondCommunicationModule,
+    AssetsModuleGraph,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     CommonModule,
     NftRarityModuleGraph,

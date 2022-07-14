@@ -14,7 +14,7 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
-import { AssetsService } from '../assets';
+import { AssetsGetterService } from '../assets';
 
 @Injectable()
 export class NotificationsService {
@@ -23,7 +23,7 @@ export class NotificationsService {
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
-    private readonly apiService: ElrondApiService,
+    private readonly assetsGetterService: AssetsGetterService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -102,9 +102,7 @@ export class NotificationsService {
 
   public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
-      const asset = await this.apiService.getNftByIdentifier(
-        auction.identifier,
-      );
+      const asset = await this.getAsset(auction.identifier);
       const assetName = asset ? asset.name : '';
       if (order) {
         this.saveNotifications([
@@ -148,6 +146,12 @@ export class NotificationsService {
         },
       );
     }
+  }
+
+  private async getAsset(identifier: string) {
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 
   private clearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {

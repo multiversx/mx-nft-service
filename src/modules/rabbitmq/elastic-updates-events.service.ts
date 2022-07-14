@@ -9,13 +9,14 @@ import { MintEvent } from './entities/auction/mint.event';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { AssetsGetterService } from '../assets';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
   private readonly redisClient: Redis.Redis;
   constructor(
     private readonly nftFlagsService: FlagNftService,
-    private readonly elrondApi: ElrondApiService,
+    private readonly assetsGetterService: AssetsGetterService,
     private readonly nftRarityService: NftRarityService,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -52,10 +53,7 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-      const nft = await this.elrondApi.getNftByIdentifierForQuery(
-        identifier,
-        'fields=type,collection',
-      );
+      const nft = await this.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
         return;
@@ -95,6 +93,12 @@ export class ElasticUpdatesEventsService {
         collectionTickers,
       );
     }
+  }
+
+  private async getAsset(identifier: string) {
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 
   private getRarityQueueCacheKey() {

@@ -1,18 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ElrondApiService,
-  ElrondElasticService,
-  Nft,
-  NftMedia,
-} from 'src/common';
+import { ElrondElasticService, NftMedia } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { AssetsRedisHandler } from '../assets';
+import { AssetsGetterService, AssetsRedisHandler } from '../assets';
+import { Asset } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
 export class FlagNftService {
   constructor(
-    private elrondApi: ElrondApiService,
+    private assetsGetterService: AssetsGetterService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
@@ -22,10 +18,7 @@ export class FlagNftService {
 
   public async updateNftFlag(identifier: string) {
     try {
-      const nft = await this.elrondApi.getNftByIdentifierForQuery(
-        identifier,
-        'fields=media,isWhitelistedStorage',
-      );
+      const nft = await this.getNft(identifier);
 
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {
@@ -46,6 +39,12 @@ export class FlagNftService {
       });
       return false;
     }
+  }
+
+  private async getNft(identifier: string) {
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 
   private async getNsfwValue(nftMedia: NftMedia) {
@@ -121,7 +120,7 @@ export class FlagNftService {
     }
   }
 
-  private getNftMedia(nft: Nft): NftMedia | undefined {
+  private getNftMedia(nft: Asset): NftMedia | undefined {
     if (
       !nft ||
       !nft.media ||

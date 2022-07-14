@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
-  AssetsService,
+  AssetsSetterService,
+  AssetsGetterService,
   AssetsQueriesResolver,
   AssetsLikesService,
   AssetAuctionsCountProvider,
@@ -40,7 +41,8 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 
 @Module({
   providers: [
-    AssetsService,
+    AssetsSetterService,
+    AssetsGetterService,
     AssetsLikesService,
     VerifyContentService,
     ContentValidation,
@@ -79,7 +81,8 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
   exports: [
-    AssetsService,
+    AssetsSetterService,
+    AssetsGetterService,
     AssetsLikesService,
     S3Service,
     AssetLikesProvider,

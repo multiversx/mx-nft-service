@@ -20,7 +20,7 @@ import {
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
 import { NotificationStatusEnum } from '../notifications/models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
-import { AssetsService } from '../assets';
+import { AssetsGetterService } from '../assets';
 const hash = require('object-hash');
 
 @Injectable()
@@ -35,7 +35,7 @@ export class OrdersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private notificationsService: NotificationsServiceDb,
-    private apiService: ElrondApiService,
+    private assetsGetterService: AssetsGetterService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -89,7 +89,7 @@ export class OrdersService {
     const auction = await this.auctionsService.getAuction(
       createOrderArgs.auctionId,
     );
-    const asset = await this.apiService.getNftByIdentifier(auction.identifier);
+    const asset = await this.getAsset(auction.identifier);
     const assetName = asset ? asset.name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({
@@ -191,6 +191,12 @@ export class OrdersService {
 
   private getAuctionsCacheKey(request: QueryRequest) {
     return generateCacheKeyFromParams('orders', hash(request));
+  }
+
+  private async getAsset(identifier: string) {
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
+    return undefined;
   }
 
   private async invalidateCache(

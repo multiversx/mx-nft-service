@@ -1,4 +1,4 @@
-import { forwardRef, Logger, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { NftEventsService } from './nft-events.service';
 import { NftEventsConsumer } from './nft-events.consumer';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
@@ -27,6 +27,7 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
+import { AssetsModuleGraph } from '../assets/assets.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.s
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
+    forwardRef(() => AssetsModuleGraph),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
   ],

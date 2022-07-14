@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
@@ -14,6 +14,7 @@ import {
   EventEnum,
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
+import { AssetsGetterService } from './assets-getter.service';
 
 @Injectable()
 export class AssetsLikesService {
@@ -22,10 +23,11 @@ export class AssetsLikesService {
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
+    @Inject(forwardRef(() => AssetsGetterService))
+    private assetsGetterService: AssetsGetterService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,
-    private elrondApi: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -81,7 +83,7 @@ export class AssetsLikesService {
             reference: identifier,
             extraInfo: {
               nftName: nftData?.name,
-              verified: nftData?.assets ? true : false,
+              verified: nftData?.verified,
             },
           }),
         );
@@ -166,11 +168,8 @@ export class AssetsLikesService {
   }
 
   private async getNftNameAndAssets(identifier: string) {
-    const nft = await this.elrondApi.getNftByIdentifierForQuery(
-      identifier,
-      'fields=name,assets',
-    );
-    return nft;
+    const { items } = await this.assetsGetterService.getAsset(identifier);
+    if (items?.length > 0) return items[0];
   }
 
   private async invalidateCache(

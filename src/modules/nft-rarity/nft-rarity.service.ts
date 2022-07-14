@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
-import { AssetsQuery, AssetsRedisHandler } from 'src/modules/assets';
+import { AssetsQuery } from 'src/modules/assets';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
