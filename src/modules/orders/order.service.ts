@@ -35,7 +35,7 @@ export class OrdersService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private notificationsService: NotificationsServiceDb,
-    private assetsGetterService: AssetByIdentifierService,
+    private assetByIdentifierService: AssetByIdentifierService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -89,7 +89,9 @@ export class OrdersService {
     const auction = await this.auctionsService.getAuction(
       createOrderArgs.auctionId,
     );
-    const asset = await this.assetsGetterService.getAsset(auction.identifier);
+    const asset = await this.assetByIdentifierService.getAsset(
+      auction.identifier,
+    );
     const assetName = asset ? asset.name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({

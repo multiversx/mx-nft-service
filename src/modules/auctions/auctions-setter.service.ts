@@ -21,7 +21,7 @@ export class AuctionsSetterService {
   private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
-    private assetsGetterService: AssetByIdentifierService,
+    private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -41,7 +41,7 @@ export class AuctionsSetterService {
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.assetsGetterService.getAsset(identifier);
+      const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
           AuctionEntity.fromAuctionAbi(

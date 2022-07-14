@@ -23,7 +23,7 @@ export class NotificationsService {
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
-    private readonly assetsGetterService: AssetByIdentifierService,
+    private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -102,7 +102,9 @@ export class NotificationsService {
 
   public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
-      const asset = await this.assetsGetterService.getAsset(auction.identifier);
+      const asset = await this.assetByIdentifierService.getAsset(
+        auction.identifier,
+      );
       const assetName = asset ? asset.name : '';
       if (order) {
         this.saveNotifications([

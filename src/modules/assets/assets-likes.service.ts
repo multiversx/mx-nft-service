@@ -1,8 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -23,8 +21,8 @@ export class AssetsLikesService {
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
-    private assetsGetterService: AssetByIdentifierService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private assetByIdentifierService: AssetByIdentifierService,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,
   ) {
@@ -74,7 +72,9 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
-        const nftData = await this.assetsGetterService.getAsset(identifier);
+        const nftData = await this.assetByIdentifierService.getAsset(
+          identifier,
+        );
         await this.accountFeedService.addFeed(
           new Feed({
             actor: address,

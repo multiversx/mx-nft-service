@@ -8,7 +8,7 @@ import { VerifyContentService } from '../assets/verify-content.service';
 @Injectable()
 export class FlagNftService {
   constructor(
-    private assetsGetterService: AssetByIdentifierService,
+    private assetByIdentifierService: AssetByIdentifierService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
@@ -18,7 +18,7 @@ export class FlagNftService {
 
   public async updateNftFlag(identifier: string) {
     try {
-      const nft = await this.assetsGetterService.getAsset(identifier);
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {

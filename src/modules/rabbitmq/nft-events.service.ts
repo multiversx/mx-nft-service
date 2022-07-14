@@ -49,7 +49,7 @@ export class NftEventsService {
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
-    private assetsGetterService: AssetByIdentifierService,
+    private assetByIdentifierService: AssetByIdentifierService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -76,7 +76,7 @@ export class NftEventsService {
             }),
           );
 
-          const bidNftData = await this.assetsGetterService.getAsset(
+          const bidNftData = await this.assetByIdentifierService.getAsset(
             auction.identifier,
           );
           await this.accountFeedService.addFeed(
@@ -135,7 +135,7 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
-          const buySftNftData = await this.assetsGetterService.getAsset(
+          const buySftNftData = await this.assetByIdentifierService.getAsset(
             identifier,
           );
           await this.accountFeedService.addFeed(
@@ -183,9 +183,8 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
-          const endAuctionNftData = await this.assetsGetterService.getAsset(
-            endAuctionIdentifier,
-          );
+          const endAuctionNftData =
+            await this.assetByIdentifierService.getAsset(endAuctionIdentifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: topicsEndAuction.currentWinner,
@@ -211,7 +210,7 @@ export class NftEventsService {
             hash,
           );
           if (startAuction) {
-            const nftData = await this.assetsGetterService.getAsset(
+            const nftData = await this.assetByIdentifierService.getAsset(
               startAuctionIdentifier,
             );
             await this.accountFeedService.addFeed(
@@ -271,7 +270,9 @@ export class NftEventsService {
               createTopics.collection,
               'fields=name',
             );
-          const nftData = await this.assetsGetterService.getAsset(identifier);
+          const nftData = await this.assetByIdentifierService.getAsset(
+            identifier,
+          );
           await this.accountFeedService.addFeed(
             new Feed({
               actor: mintEvent.getAddress(),
