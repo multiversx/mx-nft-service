@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { orderBy } from 'lodash';
 import {
   Address,
   AddressValue,
@@ -196,15 +197,17 @@ export class CollectionsService {
 
       from = from + size;
     } while (from < totalCount && from <= 9975);
-    const uniqueCollections = [
+    let uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),
       ).values(),
     ];
-    return [
-      uniqueCollections?.sortedDescending((c) => +c.verified),
-      uniqueCollections?.length,
-    ];
+    uniqueCollections = orderBy(
+      uniqueCollections,
+      ['verified', 'creationDate'],
+      ['desc', 'desc'],
+    );
+    return [uniqueCollections, uniqueCollections?.length];
   }
 
   private async getMappedCollections(page: number, size: number) {
