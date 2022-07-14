@@ -26,7 +26,7 @@ import { CollectionsNftsRedisHandler } from './collections-nfts.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import {
-  CollectionsEnum,
+  CollectionsSortEnum,
   CollectionsFilter,
   CollectionsSort,
 } from './models/CollectionFilters';
@@ -170,7 +170,7 @@ export class CollectionsService {
       );
       count = 1;
     }
-    if (sort?.field === CollectionsEnum.VERIFIED) {
+    if (sort?.field === CollectionsSortEnum.VERIFIED) {
       collections = collections
         .sortedDescending((c) => +c.verified)
         ?.slice(offset, offset + limit);

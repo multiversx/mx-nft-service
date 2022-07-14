@@ -8,19 +8,19 @@ import {
   COLLECTION_IDENTIFIER_ERROR,
 } from 'src/utils/constants';
 
-export enum CollectionsEnum {
+export enum CollectionsSortEnum {
   VERIFIED,
   TIMESTAMP,
 }
 
-registerEnumType(CollectionsEnum, {
-  name: 'CollectionsEnum',
+registerEnumType(CollectionsSortEnum, {
+  name: 'CollectionsSortEnum',
 });
 
 @InputType()
 export class CollectionsSort {
-  @Field(() => CollectionsEnum)
-  field: CollectionsEnum = CollectionsEnum.VERIFIED;
+  @Field(() => CollectionsSortEnum)
+  field: CollectionsSortEnum = CollectionsSortEnum.VERIFIED;
 }
 
 @InputType()

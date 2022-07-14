@@ -415,11 +415,6 @@ input CollectionStatsFilter {
   identifier: String!
 }
 
-enum CollectionsEnum {
-  TIMESTAMP
-  VERIFIED
-}
-
 input CollectionsFilter {
   """Flag for can create or not on collection"""
   canCreate: Boolean
@@ -436,7 +431,12 @@ input CollectionsFilter {
 }
 
 input CollectionsSort {
-  field: CollectionsEnum = VERIFIED
+  field: CollectionsSortEnum = VERIFIED
+}
+
+enum CollectionsSortEnum {
+  TIMESTAMP
+  VERIFIED
 }
 
 input ConnectionArgs {
