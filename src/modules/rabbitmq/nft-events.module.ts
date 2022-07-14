@@ -27,18 +27,17 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
-import { AssetsModuleGraph } from '../assets/assets.module';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Module({
   imports: [
-    forwardRef(() => CommonModule),
+    CommonModule,
     forwardRef(() => CachingModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
-    forwardRef(() => AssetsModuleGraph),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
   ],
@@ -52,7 +51,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     ElasticUpdatesEventsService,
     AvailableTokensForAuctionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
-    AssetsRedisHandler,
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
     AssetRarityInfoRedisHandler,
@@ -61,6 +59,8 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     NftRarityComputeService,
     FlagNftService,
     RarityUpdaterService,
+    AssetByIdentifierService,
+    AssetsRedisHandler,
   ],
   exports: [NftEventsService],
 })

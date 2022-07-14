@@ -12,6 +12,7 @@ import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
+import { AssetByIdentifierService } from './asset-by-identifier.service';
 const hash = require('object-hash');
 
 @Injectable()
@@ -19,6 +20,7 @@ export class AssetsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetRarityLoader: AssetRarityInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
@@ -116,42 +118,6 @@ export class AssetsGetterService {
     return Asset.fromNft(nft);
   }
 
-  public async getAsset(identifier: string): Promise<Asset> {
-    try {
-      const cacheKey = this.getAssetsCacheKey(identifier);
-      const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.redisCacheService.getOrSetWithDifferentTtl(
-        this.redisClient,
-        cacheKey,
-        getAsset,
-      );
-      return asset?.value ? asset?.value : null;
-    } catch (error) {
-      this.logger.error('An error occurred while get asset by identifier', {
-        path: 'AssetsService.getAsset',
-        identifier,
-        exception: error,
-      });
-    }
-  }
-
-  async getMappedAssetByIdentifier(
-    identifier: string,
-  ): Promise<{ key: string; value: Asset; ttl: number }> {
-    const nft = await this.apiService.getNftByIdentifier(identifier);
-    let ttl = TimeConstants.oneDay;
-    if (!nft) {
-      ttl = 3 * TimeConstants.oneSecond;
-    }
-    if (nft?.media && nft?.media[0].thumbnailUrl.includes('default'))
-      ttl = TimeConstants.oneMinute;
-    return {
-      key: identifier,
-      value: Asset.fromNft(nft),
-      ttl: ttl,
-    };
-  }
-
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {
     const nfts = await this.apiService.getNftsByIdentifiers(identifiers);
     return nfts?.map((nft) => Asset.fromNft(nft));
@@ -192,7 +158,9 @@ export class AssetsGetterService {
     countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
-      const asset = await this.getAsset(filters?.identifier);
+      const asset = await this.assetByIdentifierService.getAsset(
+        filters?.identifier,
+      );
       return asset
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
         : null;

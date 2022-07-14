@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -14,7 +14,7 @@ import {
   EventEnum,
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
-import { AssetsGetterService } from './assets-getter.service';
+import { AssetByIdentifierService } from './asset-by-identifier.service';
 
 @Injectable()
 export class AssetsLikesService {
@@ -23,8 +23,7 @@ export class AssetsLikesService {
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
-    @Inject(forwardRef(() => AssetsGetterService))
-    private assetsGetterService: AssetsGetterService,
+    private assetsGetterService: AssetByIdentifierService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,

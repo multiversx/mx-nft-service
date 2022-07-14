@@ -8,7 +8,8 @@ import {
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetsGetterService, AssetsRedisHandler } from '../assets';
+import { AssetsRedisHandler } from '../assets';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
 import {
   AuctionEventEnum,
@@ -48,7 +49,7 @@ export class NftEventsService {
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
-    private assetsGetterService: AssetsGetterService,
+    private assetsGetterService: AssetByIdentifierService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {

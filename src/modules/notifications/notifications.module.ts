@@ -5,17 +5,20 @@ import { ElrondCommunicationModule } from 'src/common';
 import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
 import { CommonModule } from 'src/common.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
-import { AssetsModuleGraph } from '../assets/assets.module';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Module({
-  providers: [NotificationsService, NotificationsResolver],
+  providers: [
+    NotificationsService,
+    NotificationsResolver,
+    AssetByIdentifierService,
+  ],
   imports: [
     ElrondCommunicationModule,
     CommonModule,
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => OrdersModuleGraph),
-    forwardRef(() => AssetsModuleGraph),
   ],
-  exports: [NotificationsService],
+  exports: [NotificationsService, AssetByIdentifierService],
 })
 export class NotificationsModuleGraph {}

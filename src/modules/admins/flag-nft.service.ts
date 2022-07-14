@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, NftMedia } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { AssetsGetterService, AssetsRedisHandler } from '../assets';
+import { AssetsRedisHandler, AssetByIdentifierService } from '../assets';
 import { Asset } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
 export class FlagNftService {
   constructor(
-    private assetsGetterService: AssetsGetterService,
+    private assetsGetterService: AssetByIdentifierService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,

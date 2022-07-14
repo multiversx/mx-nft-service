@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -14,7 +14,7 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
-import { AssetsGetterService } from '../assets';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Injectable()
 export class NotificationsService {
@@ -23,7 +23,7 @@ export class NotificationsService {
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
-    private readonly assetsGetterService: AssetsGetterService,
+    private readonly assetsGetterService: AssetByIdentifierService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(

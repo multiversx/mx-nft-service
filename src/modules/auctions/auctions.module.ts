@@ -11,7 +11,6 @@ import { AuctionsQueriesResolver } from './auctions-queries.resolver';
 import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
-import { OrdersService } from '../orders/order.service';
 import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';

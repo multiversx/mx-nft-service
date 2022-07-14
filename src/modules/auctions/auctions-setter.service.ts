@@ -14,14 +14,14 @@ import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
-import { AssetsGetterService } from '../assets';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Injectable()
 export class AuctionsSetterService {
   private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
-    private assetsGetterService: AssetsGetterService,
+    private assetsGetterService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,

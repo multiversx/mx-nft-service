@@ -5,6 +5,8 @@ import {
   AssetsQueriesResolver,
   AssetsLikesService,
   AssetAuctionsCountProvider,
+  AssetsRedisHandler,
+  AssetsProvider,
 } from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -39,11 +41,13 @@ import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-ma
 import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-handler';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { CommonModule } from 'src/common.module';
+import { AssetByIdentifierService } from './asset-by-identifier.service';
 
 @Module({
   providers: [
     AssetsTransactionService,
     AssetsGetterService,
+    AssetByIdentifierService,
     AssetsLikesService,
     VerifyContentService,
     ContentValidation,
@@ -71,6 +75,8 @@ import { CommonModule } from 'src/common.module';
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,
+    AssetsRedisHandler,
+    AssetsProvider,
     FeaturedMarketplaceProvider,
     FeaturedMarketplaceRedisHandler,
   ],
@@ -84,12 +90,14 @@ import { CommonModule } from 'src/common.module';
   ],
   exports: [
     AssetsTransactionService,
+    AssetByIdentifierService,
     AssetsGetterService,
     AssetsLikesService,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,
     AssetScamInfoProvider,
+    AssetsRedisHandler,
   ],
 })
 export class AssetsModuleGraph {}
