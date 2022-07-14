@@ -18,7 +18,7 @@ export class FlagNftService {
 
   public async updateNftFlag(identifier: string) {
     try {
-      const nft = await this.getNft(identifier);
+      const nft = await this.assetsGetterService.getAsset(identifier);
 
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {
@@ -39,11 +39,6 @@ export class FlagNftService {
       });
       return false;
     }
-  }
-
-  private async getNft(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private async getNsfwValue(nftMedia: NftMedia) {

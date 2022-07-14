@@ -75,7 +75,7 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
-        const nftData = await this.getNftNameAndAssets(identifier);
+        const nftData = await this.assetsGetterService.getAsset(identifier);
         await this.accountFeedService.addFeed(
           new Feed({
             actor: address,
@@ -165,11 +165,6 @@ export class AssetsLikesService {
 
   private getAssetLikesCountCacheKey(identifier: string) {
     return generateCacheKeyFromParams('assetLikesCount', identifier);
-  }
-
-  private async getNftNameAndAssets(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private async invalidateCache(

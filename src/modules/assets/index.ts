@@ -1,4 +1,4 @@
-export * from './assets-setter.service';
+export * from './assets-transaction.service';
 export * from './assets-getter.service';
 export * from './assets-queries.resolver';
 export * from './assets-mutations.resolver';

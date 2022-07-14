@@ -53,7 +53,7 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-      const nft = await this.getAsset(identifier);
+      const nft = await this.assetsGetterService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
         return;
@@ -93,11 +93,6 @@ export class ElasticUpdatesEventsService {
         collectionTickers,
       );
     }
-  }
-
-  private async getAsset(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private getRarityQueueCacheKey() {

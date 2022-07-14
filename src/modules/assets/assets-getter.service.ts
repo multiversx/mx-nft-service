@@ -116,9 +116,7 @@ export class AssetsGetterService {
     return Asset.fromNft(nft);
   }
 
-  public async getAsset(
-    identifier: string,
-  ): Promise<{ key: string; value: Asset; ttl: number }> {
+  public async getAsset(identifier: string): Promise<Asset> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
@@ -127,7 +125,7 @@ export class AssetsGetterService {
         cacheKey,
         getAsset,
       );
-      return asset;
+      return asset?.value ? asset?.value : null;
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
         path: 'AssetsService.getAsset',
@@ -195,8 +193,8 @@ export class AssetsGetterService {
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       const asset = await this.getAsset(filters?.identifier);
-      return asset?.value
-        ? new CollectionType({ items: [asset.value], count: asset ? 1 : 0 })
+      return asset
+        ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
         : null;
     } else {
       return await this.getOrSetAssets(query, countQuery);

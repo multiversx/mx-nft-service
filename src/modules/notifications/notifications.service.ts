@@ -102,7 +102,7 @@ export class NotificationsService {
 
   public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
-      const asset = await this.getAsset(auction.identifier);
+      const asset = await this.assetsGetterService.getAsset(auction.identifier);
       const assetName = asset ? asset.name : '';
       if (order) {
         this.saveNotifications([
@@ -146,11 +146,6 @@ export class NotificationsService {
         },
       );
     }
-  }
-
-  private async getAsset(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private clearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {

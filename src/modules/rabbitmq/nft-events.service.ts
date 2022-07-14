@@ -75,7 +75,9 @@ export class NftEventsService {
             }),
           );
 
-          const bidNftData = await this.getAsset(auction?.identifier);
+          const bidNftData = await this.assetsGetterService.getAsset(
+            auction.identifier,
+          );
           await this.accountFeedService.addFeed(
             new Feed({
               actor: topics.currentWinner,
@@ -132,7 +134,9 @@ export class NftEventsService {
               boughtTokens: buySftTopics.boughtTokens,
             }),
           );
-          const buySftNftData = await this.getAsset(identifier);
+          const buySftNftData = await this.assetsGetterService.getAsset(
+            identifier,
+          );
           await this.accountFeedService.addFeed(
             new Feed({
               actor: buySftTopics.currentWinner,
@@ -178,7 +182,9 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
             OrderStatusEnum.Bought,
           );
-          const endAuctionNftData = await this.getAsset(endAuctionIdentifier);
+          const endAuctionNftData = await this.assetsGetterService.getAsset(
+            endAuctionIdentifier,
+          );
           await this.accountFeedService.addFeed(
             new Feed({
               actor: topicsEndAuction.currentWinner,
@@ -204,7 +210,9 @@ export class NftEventsService {
             hash,
           );
           if (startAuction) {
-            const nftData = await this.getAsset(startAuctionIdentifier);
+            const nftData = await this.assetsGetterService.getAsset(
+              startAuctionIdentifier,
+            );
             await this.accountFeedService.addFeed(
               new Feed({
                 actor: topicsAuctionToken.originalOwner,
@@ -262,7 +270,7 @@ export class NftEventsService {
               createTopics.collection,
               'fields=name',
             );
-          const nftData = await this.getAsset(identifier);
+          const nftData = await this.assetsGetterService.getAsset(identifier);
           await this.accountFeedService.addFeed(
             new Feed({
               actor: mintEvent.getAddress(),
@@ -298,10 +306,5 @@ export class NftEventsService {
           break;
       }
     }
-  }
-
-  private async getAsset(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 }

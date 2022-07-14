@@ -24,7 +24,7 @@ import {
 } from './models/requests';
 
 @Injectable()
-export class AssetsSetterService {
+export class AssetsTransactionService {
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
@@ -88,7 +88,8 @@ export class AssetsSetterService {
 
     return {
       ...response,
-      gasLimit: gas.nftCreate + response.data.length * 1_500,
+      gasLimit:
+        gas.nftCreate + response.data.length * elrondConfig.pricePerByte,
       chainID: elrondConfig.chainID,
     };
   }
@@ -115,7 +116,8 @@ export class AssetsSetterService {
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
     response.gasLimit = Math.max(
-      750_000 + response.data.length * 1_500,
+      elrondConfig.transferMinCost +
+        response.data.length * elrondConfig.pricePerByte,
       gas.nftTransfer,
     );
     return {

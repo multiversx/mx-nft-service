@@ -1,6 +1,6 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import { AssetsSetterService } from '.';
+import { AssetsTransactionService } from '.';
 import {
   Asset,
   CreateNftArgs,
@@ -27,7 +27,7 @@ import { AuthorizationHeader } from '../auth/authorization-header';
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {
   constructor(
-    private assetsSetterService: AssetsSetterService,
+    private assetsTransactionService: AssetsTransactionService,
     private assetsLikesService: AssetsLikesService,
     private contentValidation: ContentValidation,
   ) {
@@ -42,7 +42,10 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = CreateNftRequest.fromArgs(input, file);
-    return await this.assetsSetterService.createNft(user.publicKey, request);
+    return await this.assetsTransactionService.createNft(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => Boolean)
@@ -71,7 +74,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTAddQuantity');
-    return await this.assetsSetterService.updateQuantity(
+    return await this.assetsTransactionService.updateQuantity(
       user.publicKey,
       request,
     );
@@ -85,7 +88,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
-    return await this.assetsSetterService.updateQuantity(
+    return await this.assetsTransactionService.updateQuantity(
       user.publicKey,
       request,
     );
@@ -98,7 +101,10 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = TransferNftRequest.fromArgs(input);
-    return await this.assetsSetterService.transferNft(user.publicKey, request);
+    return await this.assetsTransactionService.transferNft(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => Boolean)

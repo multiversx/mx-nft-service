@@ -89,7 +89,7 @@ export class OrdersService {
     const auction = await this.auctionsService.getAuction(
       createOrderArgs.auctionId,
     );
-    const asset = await this.getAsset(auction.identifier);
+    const asset = await this.assetsGetterService.getAsset(auction.identifier);
     const assetName = asset ? asset.name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({
@@ -191,11 +191,6 @@ export class OrdersService {
 
   private getAuctionsCacheKey(request: QueryRequest) {
     return generateCacheKeyFromParams('orders', hash(request));
-  }
-
-  private async getAsset(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private async invalidateCache(

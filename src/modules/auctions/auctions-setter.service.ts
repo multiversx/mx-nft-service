@@ -41,7 +41,7 @@ export class AuctionsSetterService {
     try {
       await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
-      const asset = await this.getAsset(identifier);
+      const asset = await this.assetsGetterService.getAsset(identifier);
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
           AuctionEntity.fromAuctionAbi(
@@ -123,11 +123,6 @@ export class AuctionsSetterService {
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
     await this.invalidateCache();
     return await this.auctionServiceDb.updateAuctions(auctions);
-  }
-
-  private async getAsset(identifier: string) {
-    const asset = await this.assetsGetterService.getAsset(identifier);
-    return asset?.value ? asset?.value : null;
   }
 
   private async invalidateCache(): Promise<void> {

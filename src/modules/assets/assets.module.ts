@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
-  AssetsSetterService,
+  AssetsTransactionService,
   AssetsGetterService,
   AssetsQueriesResolver,
   AssetsLikesService,
@@ -42,7 +42,7 @@ import { CommonModule } from 'src/common.module';
 
 @Module({
   providers: [
-    AssetsSetterService,
+    AssetsTransactionService,
     AssetsGetterService,
     AssetsLikesService,
     VerifyContentService,
@@ -83,7 +83,7 @@ import { CommonModule } from 'src/common.module';
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
   exports: [
-    AssetsSetterService,
+    AssetsTransactionService,
     AssetsGetterService,
     AssetsLikesService,
     S3Service,

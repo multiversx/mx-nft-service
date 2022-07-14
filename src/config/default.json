@@ -4,6 +4,8 @@
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqemkfxdzk6wj78ymhay6nu0pdc8xsta3fu00syhxuwy",
     "issueNftCost": 50000000000000000,
+    "pricePerByte": 1500,
+    "transferMinCost": 750000,
     "minimumBidDifference": 10000000000000000,
     "version": 1,
     "proxyTimeout": 60000,
