@@ -14,4 +14,12 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       })
       .execute();
   }
+
+  async getCollectionIds(): Promise<string[]> {
+    const res = await this.createQueryBuilder()
+      .select('collection')
+      .distinct(true)
+      .execute();
+    return res.map((nft) => nft.collection);
+  }
 }

@@ -13,7 +13,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
-    redisClientName = cacheConfig.followersRedisClientName,
+    redisClientName = cacheConfig.persistentRedisClientName,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;

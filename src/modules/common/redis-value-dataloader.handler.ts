@@ -14,7 +14,7 @@ export abstract class RedisValueDataloaderHandler<T> {
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
     private ttl: number = TimeConstants.oneWeek,
-    redisClientName = cacheConfig.followersRedisClientName,
+    redisClientName = cacheConfig.persistentRedisClientName,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;

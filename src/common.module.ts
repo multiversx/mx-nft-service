@@ -73,11 +73,11 @@ if (!!process.env.LOG_FILE) {
         db: cacheConfig.assetsDbName,
       },
       {
-        clientName: cacheConfig.followersRedisClientName,
+        clientName: cacheConfig.persistentRedisClientName,
         host: process.env.REDIS_URL,
         port: parseInt(process.env.REDIS_PORT),
         password: process.env.REDIS_PASSWORD,
-        db: cacheConfig.followersDbName,
+        db: cacheConfig.persistentDbName,
       },
       {
         clientName: cacheConfig.collectionsRedisClientName,

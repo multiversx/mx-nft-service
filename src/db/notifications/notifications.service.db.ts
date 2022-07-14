@@ -17,7 +17,7 @@ export class NotificationsServiceDb {
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.persistentRedisClientName,
     );
   }
 
