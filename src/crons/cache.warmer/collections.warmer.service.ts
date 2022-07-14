@@ -2,12 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CollectionsService } from 'src/modules/nftCollections/collection.service';
 import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
+import { CollectionsService } from 'src/modules/nftCollections/collections.service';
 
 @Injectable()
 export class CollectionsWarmerService {

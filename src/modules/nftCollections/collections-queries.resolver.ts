@@ -8,14 +8,14 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Collection, CollectionAsset } from './models';
-import { CollectionsService } from './collection.service';
+import { CollectionsService } from './collections.service';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import { CollectionsFilter } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { AuctionsForCollectionProvider } from './loaders/collection-auctions.loader';
+import { CollectionsFilter, CollectionsSort } from './models/CollectionFilters';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -31,6 +31,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   async collections(
     @Args({ name: 'filters', type: () => CollectionsFilter, nullable: true })
     filters: CollectionsFilter,
+    @Args({
+      name: 'sort',
+      type: () => CollectionsSort,
+      nullable: true,
+      description: 'This sort is descending and will apply only to full list',
+    })
+    sort: CollectionsSort,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
@@ -39,6 +46,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
       offset,
       limit,
       filters,
+      sort,
     );
 
     return PageResponse.mapResponse<Collection>(

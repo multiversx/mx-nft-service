@@ -10,11 +10,10 @@ import {
 import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { Collection, CollectionAsset } from './models';
-import { CollectionQuery } from './collection-query';
+import { CollectionQuery } from './collections-query';
 import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
 import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
-import { CollectionsFilter } from '../common/filters/filtersTypes';
 import {
   IssueCollectionRequest,
   StopNftCreateRequest,
@@ -22,10 +21,15 @@ import {
   SetNftRolesRequest,
 } from './models/requests';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
-import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
+import { CollectionsNftsCountRedisHandler } from './collections-nfts-count.redis-handler';
+import { CollectionsNftsRedisHandler } from './collections-nfts.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
+import {
+  CollectionsSortEnum,
+  CollectionsFilter,
+  CollectionsSort,
+} from './models/CollectionFilters';
 
 @Injectable()
 export class CollectionsService {
@@ -104,6 +108,7 @@ export class CollectionsService {
     offset: number = 0,
     limit: number = 10,
     filters: CollectionsFilter,
+    sort: CollectionsSort,
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
       .addCreator(filters?.creatorAddress)
@@ -125,7 +130,7 @@ export class CollectionsService {
       }
       return await this.getAllCollections(filters, apiQuery);
     }
-    return await this.getFilteredCollections(offset, limit, filters);
+    return await this.getFilteredCollections(offset, limit, filters, sort);
   }
 
   private async getAllCollections(
@@ -155,6 +160,7 @@ export class CollectionsService {
     offset: number = 0,
     limit: number = 10,
     filters: CollectionsFilter,
+    sort: CollectionsSort,
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getFullCollections();
 
@@ -164,8 +170,13 @@ export class CollectionsService {
       );
       count = 1;
     }
-
-    collections = collections?.slice(offset, offset + limit);
+    if (sort?.field === CollectionsSortEnum.VERIFIED) {
+      collections = collections
+        .sortedDescending((c) => +c.verified)
+        ?.slice(offset, offset + limit);
+    } else {
+      collections = collections?.slice(offset, offset + limit);
+    }
 
     return [collections, count];
   }
@@ -201,10 +212,7 @@ export class CollectionsService {
         collectionsResponse.map((item) => [item.collection, item]),
       ).values(),
     ];
-    return [
-      uniqueCollections?.sortedDescending((c) => +c.verified),
-      uniqueCollections?.length,
-    ];
+    return [uniqueCollections, uniqueCollections?.length];
   }
 
   private async getMappedCollections(page: number, size: number) {
