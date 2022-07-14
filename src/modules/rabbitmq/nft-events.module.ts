@@ -1,4 +1,4 @@
-import { forwardRef, Logger, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { NftEventsService } from './nft-events.service';
 import { NftEventsConsumer } from './nft-events.consumer';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
@@ -27,10 +27,11 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Module({
   imports: [
-    forwardRef(() => CommonModule),
+    CommonModule,
     forwardRef(() => CachingModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
@@ -50,7 +51,6 @@ import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.s
     ElasticUpdatesEventsService,
     AvailableTokensForAuctionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
-    AssetsRedisHandler,
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
     AssetRarityInfoRedisHandler,
@@ -59,6 +59,8 @@ import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.s
     NftRarityComputeService,
     FlagNftService,
     RarityUpdaterService,
+    AssetByIdentifierService,
+    AssetsRedisHandler,
   ],
   exports: [NftEventsService],
 })

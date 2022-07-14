@@ -1,9 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
@@ -14,6 +12,7 @@ import {
   EventEnum,
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
+import { AssetByIdentifierService } from './asset-by-identifier.service';
 
 @Injectable()
 export class AssetsLikesService {
@@ -22,10 +21,10 @@ export class AssetsLikesService {
   constructor(
     private assetsLikesRepository: AssetsLikesRepository,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private assetByIdentifierService: AssetByIdentifierService,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,
-    private elrondApi: ElrondApiService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -73,7 +72,9 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateCache(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
-        const nftData = await this.getNftNameAndAssets(identifier);
+        const nftData = await this.assetByIdentifierService.getAsset(
+          identifier,
+        );
         await this.accountFeedService.addFeed(
           new Feed({
             actor: address,
@@ -81,7 +82,7 @@ export class AssetsLikesService {
             reference: identifier,
             extraInfo: {
               nftName: nftData?.name,
-              verified: nftData?.assets ? true : false,
+              verified: nftData?.verified ? true : false,
             },
           }),
         );
@@ -163,14 +164,6 @@ export class AssetsLikesService {
 
   private getAssetLikesCountCacheKey(identifier: string) {
     return generateCacheKeyFromParams('assetLikesCount', identifier);
-  }
-
-  private async getNftNameAndAssets(identifier: string) {
-    const nft = await this.elrondApi.getNftByIdentifierForQuery(
-      identifier,
-      'fields=name,assets',
-    );
-    return nft;
   }
 
   private async invalidateCache(
