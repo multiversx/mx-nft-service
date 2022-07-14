@@ -415,6 +415,11 @@ input CollectionStatsFilter {
   identifier: String!
 }
 
+enum CollectionsEnum {
+  TIMESTAMP
+  VERIFIED
+}
+
 input CollectionsFilter {
   """Flag for can create or not on collection"""
   canCreate: Boolean
@@ -428,6 +433,10 @@ input CollectionsFilter {
   """The owner of the collection"""
   ownerAddress: String
   type: NftTypeEnum
+}
+
+input CollectionsSort {
+  field: CollectionsEnum = VERIFIED
 }
 
 input ConnectionArgs {
@@ -766,7 +775,13 @@ type Query {
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
-  collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  collections(
+    filters: CollectionsFilter
+    pagination: ConnectionArgs
+
+    """This sort is descending and will apply only to full list"""
+    sort: CollectionsSort
+  ): CollectionResponse!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String!
