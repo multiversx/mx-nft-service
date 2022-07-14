@@ -42,9 +42,8 @@ export class FlagNftService {
   }
 
   private async getNft(identifier: string) {
-    const { items } = await this.assetsGetterService.getAsset(identifier);
-    if (items?.length > 0) return items[0];
-    return undefined;
+    const asset = await this.assetsGetterService.getAsset(identifier);
+    return asset?.value ? asset?.value : null;
   }
 
   private async getNsfwValue(nftMedia: NftMedia) {

@@ -168,8 +168,8 @@ export class AssetsLikesService {
   }
 
   private async getNftNameAndAssets(identifier: string) {
-    const { items } = await this.assetsGetterService.getAsset(identifier);
-    if (items?.length > 0) return items[0];
+    const asset = await this.assetsGetterService.getAsset(identifier);
+    return asset?.value ? asset?.value : null;
   }
 
   private async invalidateCache(
