@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extentions';
@@ -12,8 +12,6 @@ import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 const hash = require('object-hash');
 
 @Injectable()
@@ -25,7 +23,7 @@ export class AssetsGetterService {
     private assetRarityLoader: AssetRarityInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
     private assetsLikedService: AssetsLikesService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(

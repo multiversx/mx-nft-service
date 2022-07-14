@@ -187,7 +187,7 @@ export class NftEventsService {
               extraInfo: {
                 auctionId: parseInt(topicsEndAuction.auctionId, 16),
                 nftName: endAuctionNftData?.name,
-                verified: endAuctionNftData?.verified,
+                verified: endAuctionNftData?.verified ? true : false,
                 price: topicsEndAuction.currentBid,
               },
             }),

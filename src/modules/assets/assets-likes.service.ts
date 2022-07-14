@@ -83,7 +83,7 @@ export class AssetsLikesService {
             reference: identifier,
             extraInfo: {
               nftName: nftData?.name,
-              verified: nftData?.verified,
+              verified: nftData?.verified ? true : false,
             },
           }),
         );

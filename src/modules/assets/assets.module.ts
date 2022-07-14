@@ -38,6 +38,7 @@ import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-market
 import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-marketplace.redis-handler';
 import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-handler';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
+import { CommonModule } from 'src/common.module';
 
 @Module({
   providers: [
@@ -75,6 +76,7 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
   ],
   imports: [
     ElrondCommunicationModule,
+    CommonModule,
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
