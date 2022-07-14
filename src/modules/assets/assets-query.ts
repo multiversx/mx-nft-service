@@ -67,7 +67,7 @@ export class AssetsQuery {
   }
 
   build(addDefaultQuery: boolean = true): string {
-    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
+    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true&isNsfw=false';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
     return this.addQuery(defaultQuery).build(false);
