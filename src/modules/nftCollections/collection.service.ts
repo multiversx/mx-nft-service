@@ -201,7 +201,10 @@ export class CollectionsService {
         collectionsResponse.map((item) => [item.collection, item]),
       ).values(),
     ];
-    return [uniqueCollections, uniqueCollections.length];
+    return [
+      uniqueCollections?.sortedDescending((c) => +c.verified),
+      uniqueCollections?.length,
+    ];
   }
 
   private async getMappedCollections(page: number, size: number) {
