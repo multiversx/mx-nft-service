@@ -36,7 +36,7 @@ export class RarityUpdaterService {
       await Locker.lock(
         `handleReindexTokenRarities`,
         async () => {
-          const collections = await this.nftRarityRepository.getCollections();
+          const collections = await this.nftRarityRepository.getCollectionIds();
           for (const collection of collections) {
             await this.nftRarityService.validateRarities(collection);
           }

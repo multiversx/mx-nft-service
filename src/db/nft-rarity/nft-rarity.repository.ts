@@ -15,7 +15,7 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       .execute();
   }
 
-  async getCollections(): Promise<string[]> {
+  async getCollectionIds(): Promise<string[]> {
     const res = await this.createQueryBuilder()
       .select('collection')
       .distinct(true)
