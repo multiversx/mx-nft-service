@@ -14,6 +14,8 @@ import { AssetsQuery } from 'src/modules/assets/assets-query';
 @Injectable()
 export class ElrondApiService {
   private apiProvider: ApiNetworkProvider;
+  private privateApiProvider: ApiNetworkProvider;
+
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
@@ -34,16 +36,36 @@ export class ElrondApiService {
         origin: 'NftService',
       },
     });
+    this.privateApiProvider = new ApiNetworkProvider(
+      process.env.ELROND_PRIVATE_API,
+      {
+        timeout: elrondConfig.proxyTimeout,
+        httpAgent: elrondConfig.keepAlive ? httpAgent : null,
+        httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
+        headers: {
+          origin: 'NftService',
+        },
+      },
+    );
   }
 
   getService(): ApiNetworkProvider {
     return this.apiProvider;
   }
 
-  async doGetGeneric(name: string, resourceUrl: string): Promise<any> {
+  getPrivateSerive(): ApiNetworkProvider {
+    return this.privateApiProvider;
+  }
+
+  async doGetGeneric(
+    name: string,
+    resourceUrl: string,
+    privateApi: boolean = false,
+  ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      const response = await this.getService().doGetGeneric(resourceUrl);
+      const service = privateApi ? this.getPrivateSerive() : this.getService();
+      const response = await service.doGetGeneric(resourceUrl);
       profiler.stop();
 
       MetricsCollector.setExternalCall(
@@ -59,6 +81,47 @@ export class ElrondApiService {
       }
       let customError = {
         method: 'GET',
+        resourceUrl,
+        response: error.inner?.response?.data,
+        status: error.inner?.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+      this.logger.error(
+        `An error occurred while calling the elrond api service on url ${resourceUrl}`,
+        {
+          path: `ElrondApiService.${name}`,
+          error: customError,
+        },
+      );
+    }
+  }
+
+  async doPostGeneric(
+    name: string,
+    resourceUrl: string,
+    payload: any,
+    privateApi: boolean = false,
+  ): Promise<any> {
+    try {
+      const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
+      const service = privateApi ? this.getPrivateSerive() : this.getService();
+      const response = await service.doPostGeneric(resourceUrl, payload);
+      profiler.stop();
+
+      MetricsCollector.setExternalCall(
+        ElrondApiService.name,
+        profiler.duration,
+        name,
+      );
+
+      return response;
+    } catch (error) {
+      if (error.inner?.response?.status === HttpStatus.NOT_FOUND) {
+        return;
+      }
+      let customError = {
+        method: 'POST',
         resourceUrl,
         response: error.inner?.response?.data,
         status: error.inner?.response?.status,
@@ -314,6 +377,32 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionsCount.name,
       `collections/count${query}`,
+    );
+  }
+
+  async processCollectionNfts(collection: string): Promise<any> {
+    const privateApi = true;
+    return await this.doPostGeneric(
+      'processNfts',
+      'nfts/process',
+      {
+        collection: collection,
+        forceRefreshMetadata: true,
+      },
+      privateApi,
+    );
+  }
+
+  async processNft(identifier: string): Promise<any> {
+    const privateApi = true;
+    return await this.doPostGeneric(
+      'processNfts',
+      'nfts/process',
+      {
+        identifier: identifier,
+        forceRefreshMetadata: true,
+      },
+      privateApi,
     );
   }
 }
