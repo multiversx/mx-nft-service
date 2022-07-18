@@ -372,16 +372,16 @@ export class NftRarityService {
         )
         .withMustCondition(
           QueryType.Match('token', collectionTicker, QueryOperator.AND),
-        )
-        .withPagination({ from: 0, size: 10000 });
+        );
 
       await this.elasticService.getScrollableList(
         'tokens',
         'identifier',
         query,
         async (items) => {
+          console.log(items.length);
           hasRarities =
-            items.length > 0 ? items[0].rarities || false : undefined;
+            items.length === 1 ? items[0].nft_hasRarities || false : undefined;
           return undefined;
         },
       );
@@ -458,7 +458,7 @@ export class NftRarityService {
   }
 
   private async reprocessNftsMetadataAndSetFlags(
-    nftsWithoutAttributes: Nft[] = null,
+    nftsWithoutAttributes: Nft[],
     nftsWithAttributesCount: number = null,
   ): Promise<Nft[]> {
     let successfullyProcessedNFTs: Nft[] = [];
