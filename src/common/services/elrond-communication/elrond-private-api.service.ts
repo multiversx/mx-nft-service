@@ -36,7 +36,7 @@ export class ElrondPrivateApiService {
     );
   }
 
-  getPrivateSerive(): ApiNetworkProvider {
+  getPrivateService(): ApiNetworkProvider {
     return this.privateApiProvider;
   }
 
@@ -48,7 +48,7 @@ export class ElrondPrivateApiService {
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      const service = this.getPrivateSerive();
+      const service = this.getPrivateService();
       const response = await service.doPostGeneric(resourceUrl, payload);
       profiler.stop();
 
