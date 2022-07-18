@@ -272,10 +272,10 @@ export class AssetsGetterService {
 
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
-      let assetsWithRarity = response.items?.filter((x) => x?.rarity);
+      const assetsRarity = this.getAssetsWithRarity(response);
       await this.assetRarityLoader.batchRarity(
-        assetsWithRarity?.map((a) => a.identifier),
-        assetsWithRarity?.groupBy((asset) => asset.identifier),
+        assetsRarity?.map((a) => a.identifier),
+        assetsRarity?.groupBy((asset) => asset.identifier),
       );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
       await this.assetScamLoader.batchScamInfo(
@@ -291,8 +291,16 @@ export class AssetsGetterService {
     }
   }
 
-  private getAssetsCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('asset', identifier);
+  private getAssetsWithRarity(response: CollectionType<Asset>) {
+    let assetsWithRarity = response.items?.filter((x) => x?.rarity);
+    let assetsRarity = assetsWithRarity.map((a) => {
+      return {
+        identifier: a.identifier,
+        rank: a.rarity.rank,
+        score: a.rarity.score,
+      };
+    });
+    return assetsRarity;
   }
 
   private getAssetsQueryCacheKey(request: any) {
