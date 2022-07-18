@@ -13,6 +13,7 @@ import { NftTypeEnum } from '../assets/models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
+import { forceClearGC } from 'src/utils/helpers';
 
 @Injectable()
 export class NftRarityService {
@@ -202,7 +203,7 @@ export class NftRarityService {
         collection: collectionTicker,
       });
     } finally {
-      this.forceClearGC();
+      forceClearGC();
     }
     return rarities;
   }
@@ -525,11 +526,5 @@ export class NftRarityService {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
-  }
-
-  private forceClearGC() {
-    if (global.gc) {
-      global.gc();
-    }
   }
 }

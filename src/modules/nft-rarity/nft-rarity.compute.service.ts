@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { Nft } from 'src/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
+import { forceClearGC } from 'src/utils/helpers';
 
 @Injectable()
 export class NftRarityComputeService {
@@ -10,11 +11,15 @@ export class NftRarityComputeService {
   ): Promise<NftRarityEntity[]> {
     const avg: BigNumber[] = this.computeAvg(nfts);
 
+    forceClearGC();
+
     const scoreArray: BigNumber[] = this.computeJD(avg);
 
     let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
       return new BigNumber(a).comparedTo(b);
     });
+
+    forceClearGC();
 
     return nfts.map((nft, i) => {
       const scoreIndex = scoreArray_asc.indexOf(scoreArray[i]);
