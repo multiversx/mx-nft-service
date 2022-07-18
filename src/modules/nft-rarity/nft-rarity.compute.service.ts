@@ -9,11 +9,13 @@ export class NftRarityComputeService {
   async computeJaccardDistancesRarities(
     nfts: Nft[],
   ): Promise<NftRarityEntity[]> {
+    forceClearGC();
+
     const avg: BigNumber[] = this.computeAvg(nfts);
 
     forceClearGC();
 
-    const scoreArray: BigNumber[] = this.computeJD(avg);
+    const scoreArray: BigNumber[] = this.computeJaccardScore(avg);
 
     let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
       return new BigNumber(a).comparedTo(b);
@@ -36,57 +38,59 @@ export class NftRarityComputeService {
   }
 
   private computeAvg(nfts: Nft[]): BigNumber[] {
-    let z: BigNumber[][] = [];
+    let jd: BigNumber[][] = [];
     let avg: BigNumber[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < nfts.length; j++) {
         if (i === j) continue;
 
-        if (z[i] === undefined) {
-          z[i] = [];
+        if (jd[i] === undefined) {
+          jd[i] = [];
         }
 
-        if (z[i][j] == null || z[j][i] == null) {
+        if (jd[i][j] === undefined) {
           const commonTraitsCnt = this.getCommonTraitsCnt(
             nfts[i].metadata.attributes,
             nfts[j].metadata.attributes,
           );
-          const uniqueTraitsCnt = this.getUniqueTraitsCnt(
-            nfts[i].metadata.attributes,
-            nfts[j].metadata.attributes,
-          );
 
-          z[i][j] = new BigNumber(commonTraitsCnt).dividedBy(uniqueTraitsCnt);
+          jd[i][j] = new BigNumber(1).minus(
+            new BigNumber(commonTraitsCnt).dividedBy(
+              nfts[i].metadata.attributes.length +
+                nfts[j].metadata.attributes.length -
+                commonTraitsCnt,
+            ),
+          );
         }
       }
 
-      if (z.length !== 0) {
+      if (jd.length !== 0) {
         // PS: length-1 because there's always an empty cell in matrix, where i == j
         // the final rarities ranks are the same, but this way is more correct
-        avg[i] = z[i]
+        avg[i] = jd[i]
           .reduce((a, b) => new BigNumber(a).plus(b), new BigNumber(0))
-          .dividedBy(z[i].length - 1);
+          .dividedBy(jd[i].length - 1);
       } else avg[i] = new BigNumber(0);
     }
 
     return avg;
   }
 
-  private computeJD(avg: BigNumber[]): BigNumber[] {
-    let jd: BigNumber[] = [];
-    let avgMax: BigNumber = BigNumber.max(...avg);
-    let avgMin: BigNumber = BigNumber.min(...avg);
+  private computeJaccardScore(avg: BigNumber[]): BigNumber[] {
+    let scores: BigNumber[] = [];
+    const avgMax: BigNumber = BigNumber.max(...avg);
+    const avgMin: BigNumber = BigNumber.min(...avg);
 
     for (let i = 0; i < avg.length; i++) {
-      jd[i] = this.isUniqueByAvg(avg[i], avgMin, avgMax)
+      scores[i] = this.isUniqueByAvg(avg[i], avgMin, avgMax)
         ? new BigNumber(100)
         : avg[i]
             .minus(avgMin)
             .dividedBy(avgMax.minus(avgMin))
             .multipliedBy(100);
     }
-    return jd;
+    return scores;
   }
 
   private isUniqueByAvg(
@@ -120,20 +124,5 @@ export class NftRarityComputeService {
     return arr1.filter((e) => {
       return arr2.includes(e);
     }).length;
-  }
-
-  private getUniqueTraitsCnt(
-    obj1: [{ [key: string]: string }],
-    obj2: [{ [key: string]: string }],
-  ): number {
-    let arr1: string[] = [];
-    let arr2: string[] = [];
-    for (const [key, value] of Object.entries(obj1)) {
-      arr1.push(JSON.stringify(value));
-    }
-    for (const [key, value] of Object.entries(obj2)) {
-      arr2.push(JSON.stringify(value));
-    }
-    return [...new Set(arr1.concat(arr2))].length;
   }
 }
