@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, RedisCacheService } from 'src/common';
 import { Locker } from 'src/utils/locker';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import * as Redis from 'ioredis';
@@ -9,7 +9,6 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
-import { NftRarityEntity } from 'src/db/nft-rarity';
 
 @Injectable()
 export class RarityUpdaterService {
@@ -52,16 +51,20 @@ export class RarityUpdaterService {
   }
 
   async handleValidateTokenRarities(maxCollectionsToValidate: number) {
+    let lastIndex: number;
     try {
       await Locker.lock(
         'handleValidateTokenRarities',
         async () => {
-          const lastIndex = await this.getLastValidatedCollectionIndex();
+          lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
 
           const query: ElasticQuery = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
             .withMustExistCondition('nft_hasRarities')
+            .withMustCondition(
+              QueryType.Match('nft_hasRarities', true, QueryOperator.AND),
+            )
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
@@ -86,7 +89,7 @@ export class RarityUpdaterService {
             lastIndex + maxCollectionsToValidate,
           );
 
-          if (collectionsToValidate.length === 0) {
+          if (collectionsToValidate.length < maxCollectionsToValidate) {
             await this.setLastValidatedCollectionIndex(0);
             return;
           }
@@ -103,6 +106,7 @@ export class RarityUpdaterService {
       this.logger.error(`Error when scrolling through collections`, {
         path: 'RarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
+        lastIndex: lastIndex
       });
     }
   }
@@ -138,9 +142,14 @@ export class RarityUpdaterService {
           let collectionsToUpdate: string[] = [];
 
           const query = ElasticQuery.create()
-            .withMustNotExistCondition('nft_hasRarity')
-            .withMustNotExistCondition('nft_hasRarities')
-            .withMustExistCondition('token')
+            .withMustExistCondition('nonce')
+            .withMustNotCondition(QueryType.Exists('nft_hasRarity'))
+            .withMustCondition(
+              QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+            )
+            .withMustCondition(
+              QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+            )
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
