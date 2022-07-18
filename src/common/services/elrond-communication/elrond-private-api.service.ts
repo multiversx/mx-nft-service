@@ -72,7 +72,7 @@ export class ElrondPrivateApiService {
         name: error.name,
       };
       this.logger.error(
-        `An error occurred while calling the elrond api service on url ${resourceUrl}`,
+        `An error occurred while calling the elrond private-api service on url ${resourceUrl}`,
         {
           path: `ElrondApiService.${name}`,
           error: customError,

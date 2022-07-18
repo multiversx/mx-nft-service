@@ -47,8 +47,7 @@ export class ElrondApiService {
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      const service = this.getService();
-      const response = await service.doGetGeneric(resourceUrl);
+      const response = await this.getService().doGetGeneric(resourceUrl);
       profiler.stop();
 
       MetricsCollector.setExternalCall(
@@ -87,8 +86,7 @@ export class ElrondApiService {
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      const service = this.getService();
-      const response = await service.doPostGeneric(resourceUrl, payload);
+      const response = await this.getService().doPostGeneric(resourceUrl, payload);
       profiler.stop();
 
       MetricsCollector.setExternalCall(
