@@ -102,7 +102,7 @@ export class NftRarityService {
         collectionTicker,
       );
 
-      let reason: string =
+      const reason: string =
         nftsFromElastic.length === 0
           ? 'No NFTs'
           : 'Not valid NFT (bad metadata storage or/and URIs)';
@@ -201,6 +201,8 @@ export class NftRarityService {
         exception: error?.message,
         collection: collectionTicker,
       });
+    } finally {
+      this.forceClearGC();
     }
     return rarities;
   }
@@ -329,7 +331,7 @@ export class NftRarityService {
         'tokens',
         collection,
         updateBody,
-        '?retry_on_conflict=2',
+        '?retry_on_conflict=2&timeout=1m',
       );
     } catch (error) {
       this.logger.error('Error when setting collection rarity flag', {
@@ -349,6 +351,7 @@ export class NftRarityService {
         await this.elasticService.bulkRequest(
           'tokens',
           this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
+          '?timeout=1m',
         );
       } catch (error) {
         this.logger.error('Error when mapping / bulk updating Elastic', {
@@ -522,5 +525,11 @@ export class NftRarityService {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
+  }
+
+  private forceClearGC() {
+    if (global.gc) {
+      global.gc();
+    }
   }
 }
