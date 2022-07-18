@@ -44,7 +44,6 @@ export class ElrondPrivateApiService {
     name: string,
     resourceUrl: string,
     payload: any,
-    privateApi: boolean = false,
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
@@ -82,28 +81,16 @@ export class ElrondPrivateApiService {
   }
 
   async processCollectionNfts(collection: string): Promise<any> {
-    const privateApi = true;
-    return await this.doPostGeneric(
-      'processNfts',
-      'nfts/process',
-      {
-        collection: collection,
-        forceRefreshMetadata: true,
-      },
-      privateApi,
-    );
+    return await this.doPostGeneric('processNfts', 'nfts/process', {
+      collection: collection,
+      forceRefreshMetadata: true,
+    });
   }
 
   async processNft(identifier: string): Promise<any> {
-    const privateApi = true;
-    return await this.doPostGeneric(
-      'processNfts',
-      'nfts/process',
-      {
-        identifier: identifier,
-        forceRefreshMetadata: true,
-      },
-      privateApi,
-    );
+    return await this.doPostGeneric('processNfts', 'nfts/process', {
+      identifier: identifier,
+      forceRefreshMetadata: true,
+    });
   }
 }

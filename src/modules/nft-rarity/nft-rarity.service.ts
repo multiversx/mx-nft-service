@@ -149,7 +149,7 @@ export class NftRarityService {
       );
     }
 
-    let rarities: NftRarityEntity[] = await this.computeRarities(
+    const rarities: NftRarityEntity[] = await this.computeRarities(
       nftsWithAttributes,
       collectionTicker,
     );
