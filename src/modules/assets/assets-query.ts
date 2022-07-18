@@ -51,7 +51,7 @@ export class AssetsQuery {
   }
 
   addSearchTerm(searchTerm: string): this {
-    return this.addParamToQuery('searchTerm', encodeURIComponent(searchTerm));
+    return this.addParamToQuery('search', encodeURIComponent(searchTerm));
   }
 
   addPageSize(from: number, size: number): this {
