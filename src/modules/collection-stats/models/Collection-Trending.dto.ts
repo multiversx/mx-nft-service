@@ -10,7 +10,7 @@ export class TrendingCollection {
   @Field({ nullable: true })
   name: string;
   @Field(() => Price, { nullable: true })
-  floarPrice: Price;
+  floorPrice: Price;
   @Field(() => Price, { nullable: true })
   volume: Price;
   @Field({ nullable: true })
