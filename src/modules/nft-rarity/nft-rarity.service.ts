@@ -12,11 +12,13 @@ import BigNumber from 'bignumber.js';
 import { NftTypeEnum } from '../assets/models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
+import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 
 @Injectable()
 export class NftRarityService {
   constructor(
     private readonly apiService: ElrondApiService,
+    private readonly privateApiService: ElrondPrivateApiService,
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly nftRarityComputeService: NftRarityComputeService,
@@ -379,7 +381,6 @@ export class NftRarityService {
         'identifier',
         query,
         async (items) => {
-          console.log(items.length);
           hasRarities =
             items.length === 1 ? items[0].nft_hasRarities || false : undefined;
           return undefined;
@@ -473,7 +474,7 @@ export class NftRarityService {
       };
 
       for (const nft of nftsWithoutAttributes) {
-        await this.apiService.processNft(nft.identifier);
+        await this.privateApiService.processNft(nft.identifier);
         const processedNft = await this.apiService.getNftByIdentifier(
           nft.identifier,
         );
