@@ -111,11 +111,16 @@ export class ElrondElasticService {
     body: any,
     urlParams: string = null,
   ): Promise<void> {
-    const url = `${this.url}/${collection}/_update/${identifier}${urlParams}`;
+    const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();
-
-    await this.apiService.post(url, body);
+    const promises = uris.map((uri) =>
+      this.apiService.post(
+        `${uri}/${collection}/_update/${identifier}${urlParams}`,
+        body,
+      ),
+    );
+    await Promise.all(promises);
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
@@ -157,69 +162,6 @@ export class ElrondElasticService {
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
-  }
-
-  private buildBulkUpdateBody(updates: string[]): string {
-    let body = '';
-    for (let i = 0; i < updates.length; i++) {
-      body += updates[i];
-    }
-    return body;
-  }
-
-  buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
-    return {
-      doc: {
-        [fieldName]: fieldValue,
-      },
-    };
-  }
-
-  buildBulkUpdate<T>(
-    collection: string,
-    identifier: string,
-    fieldName: string,
-    fieldValue: T,
-  ): string {
-    return (
-      JSON.stringify({
-        update: {
-          _id: identifier,
-          _index: collection,
-        },
-      }) +
-      '\n' +
-      JSON.stringify({
-        doc: {
-          [fieldName]: fieldValue,
-        },
-      }) +
-      '\n'
-    );
-  }
-
-  buildPutMappingBody<T>(fieldName: string, filedType: string): string {
-    return JSON.stringify({
-      properties: {
-        [fieldName]: {
-          type: filedType,
-        },
-      },
-    });
-  }
-
-  buildPutMultipleMappingsBody<T>(
-    mappings: { key: string; value: any }[],
-  ): string {
-    let properties = {};
-    for (const mapping of mappings) {
-      properties[mapping.key] = {
-        type: mapping.value,
-      };
-    }
-    return JSON.stringify({
-      properties: properties,
-    });
   }
 
   async putMappings(
@@ -362,6 +304,69 @@ export class ElrondElasticService {
         scroll_id: scrollId,
       },
     );
+  }
+
+  buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
+    return {
+      doc: {
+        [fieldName]: fieldValue,
+      },
+    };
+  }
+
+  buildBulkUpdate<T>(
+    collection: string,
+    identifier: string,
+    fieldName: string,
+    fieldValue: T,
+  ): string {
+    return (
+      JSON.stringify({
+        update: {
+          _id: identifier,
+          _index: collection,
+        },
+      }) +
+      '\n' +
+      JSON.stringify({
+        doc: {
+          [fieldName]: fieldValue,
+        },
+      }) +
+      '\n'
+    );
+  }
+
+  buildPutMappingBody<T>(fieldName: string, filedType: string): string {
+    return JSON.stringify({
+      properties: {
+        [fieldName]: {
+          type: filedType,
+        },
+      },
+    });
+  }
+
+  buildPutMultipleMappingsBody<T>(
+    mappings: { key: string; value: any }[],
+  ): string {
+    let properties = {};
+    for (const mapping of mappings) {
+      properties[mapping.key] = {
+        type: mapping.value,
+      };
+    }
+    return JSON.stringify({
+      properties: properties,
+    });
+  }
+
+  private buildBulkUpdateBody(updates: string[]): string {
+    let body = '';
+    for (let i = 0; i < updates.length; i++) {
+      body += updates[i];
+    }
+    return body;
   }
 
   private formatItem(document: any, key: string) {
