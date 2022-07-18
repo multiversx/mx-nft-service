@@ -48,7 +48,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'YOURSELF',
         identifier: 'YOURSELF-3df278',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           timestamp: DateUtils.getCurrentTimestamp(),
           token: elrondConfig.egld,
@@ -62,7 +62,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'EVIDENCE',
         identifier: 'EVIDENCE-2a8a14',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           token: elrondConfig.egld,
           timestamp: DateUtils.getCurrentTimestamp(),
@@ -76,7 +76,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'COL1',
         identifier: 'COL1-32b368',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           timestamp: DateUtils.getCurrentTimestamp(),
           token: elrondConfig.egld,
@@ -90,7 +90,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'YOURSELF',
         identifier: 'YOURSELF-3df278',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           token: elrondConfig.egld,
           timestamp: DateUtils.getCurrentTimestamp(),
@@ -104,7 +104,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'COL1',
         identifier: 'COL1-32b368',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           token: elrondConfig.egld,
           timestamp: DateUtils.getCurrentTimestamp(),
@@ -118,7 +118,7 @@ export class CollectionsStatsResolver {
       new TrendingCollection({
         name: 'COL1',
         identifier: 'COL1-32b368',
-        floarPrice: new Price({
+        floorPrice: new Price({
           amount: '10000000000000000',
           token: elrondConfig.egld,
           nonce: 0,
