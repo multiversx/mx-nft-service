@@ -7,7 +7,6 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { ApiSettings } from './models/api-settings';
-
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -143,6 +142,7 @@ export class ElrondElasticService {
             contentType: 'application/x-ndjson',
           }),
         );
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
     } catch (error) {
       this.logger.error({
