@@ -927,7 +927,7 @@ input TransferNftCreateRoleArgs {
 }
 
 type TrendingCollection {
-  floarPrice: Price
+  floorPrice: Price
   identifier: ID!
   imageUrl: String
   name: String
