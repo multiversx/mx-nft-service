@@ -51,11 +51,12 @@ export class RarityUpdaterService {
   }
 
   async handleValidateTokenRarities(maxCollectionsToValidate: number) {
+    let lastIndex: number;
     try {
       await Locker.lock(
         'handleValidateTokenRarities',
         async () => {
-          const lastIndex = await this.getLastValidatedCollectionIndex();
+          lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
 
           const query: ElasticQuery = ElasticQuery.create()
@@ -105,6 +106,7 @@ export class RarityUpdaterService {
       this.logger.error(`Error when scrolling through collections`, {
         path: 'RarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
+        lastIndex: lastIndex
       });
     }
   }
