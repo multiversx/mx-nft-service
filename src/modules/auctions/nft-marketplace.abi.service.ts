@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { AuctionAbi, BuySftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
@@ -12,7 +12,6 @@ import {
   ContractFunction,
   Interaction,
   OptionalValue,
-  SmartContract,
   TokenIdentifierValue,
   TypedValue,
   U64Type,
@@ -29,8 +28,6 @@ import {
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -46,7 +43,7 @@ export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
   constructor(
     private elrondProxyService: ElrondProxyService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
