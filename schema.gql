@@ -445,6 +445,7 @@ input ConnectionArgs {
 }
 
 type ContractInfo {
+  address: ID!
   isPaused: Boolean!
   marketplaceCutPercentage: String!
 }

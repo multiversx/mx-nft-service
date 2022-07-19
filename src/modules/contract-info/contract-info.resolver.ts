@@ -1,4 +1,5 @@
 import { Query, Resolver, ResolveField } from '@nestjs/graphql';
+import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from '../auctions';
 import { ContractInfo } from './models/Contract-Info.dto';
 
@@ -8,7 +9,7 @@ export class ContractInfoResolver {
 
   @Query(() => ContractInfo)
   async contractInfo(): Promise<ContractInfo> {
-    return new ContractInfo();
+    return new ContractInfo({ address: elrondConfig.nftMarketplaceAddress });
   }
 
   @ResolveField(() => String)
