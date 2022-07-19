@@ -11,17 +11,15 @@ export class NftRarityComputeService {
   ): Promise<NftRarityEntity[]> {
     forceClearGC();
 
-    const avg: BigNumber[] = this.computeAvg(this.computeJd(nfts));
+    const scoreArray: BigNumber[] = this.computeScore(
+      this.computeAvg(this.computeJd(nfts)),
+    );
 
     forceClearGC();
-
-    const scoreArray: BigNumber[] = this.computeScore(avg);
 
     let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
       return new BigNumber(a).comparedTo(b);
     });
-
-    forceClearGC();
 
     return nfts.map((nft, i) => {
       const scoreIndex = scoreArray_asc.indexOf(scoreArray[i]);
@@ -30,7 +28,7 @@ export class NftRarityComputeService {
       return new NftRarityEntity({
         collection: nft.collection,
         identifier: nft.identifier,
-        score: new BigNumber(scoreArray[i].toFixed(3)).toNumber(),
+        score: new BigNumber((scoreArray[i] || 100).toFixed(3)).toNumber(),
         nonce: nft.nonce,
         rank: scoreArray.length - scoreIndex,
       });
@@ -100,7 +98,12 @@ export class NftRarityComputeService {
     avgMin: BigNumber,
     avgMax: BigNumber,
   ): boolean {
-    return !avgMax.minus(avgMin).isFinite() || avg.isNaN() || avg.isZero();
+    return (
+      !avgMax.minus(avgMin).isFinite() ||
+      avgMax.minus(avgMin).isZero() ||
+      avg.isNaN() ||
+      avg.isZero()
+    );
   }
 
   private markScoreAsUsed(
