@@ -55,7 +55,7 @@
   "cronJobs": {
     "rarity": {
       "collectionsToValidateEvery5m": 30,
-      "colectionsToUpdateEvery30s": 15
+      "colectionsToUpdateEvery30s": 5
     }
   }
 }
