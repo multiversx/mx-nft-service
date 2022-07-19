@@ -42,9 +42,7 @@ export class NftRarityComputeService {
     let avg: BigNumber[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
-      for (let j = 0; j < nfts.length; j++) {
-        if (i === j) continue;
-
+      for (let j = 0; j < i; j++) {
         if (jd[i] === undefined) {
           jd[i] = [];
         }
