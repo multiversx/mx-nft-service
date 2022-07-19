@@ -6,6 +6,7 @@ import { forceClearGC } from 'src/utils/helpers';
 
 @Injectable()
 export class NftRarityComputeService {
+  /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
   async computeJaccardDistancesRarities(
     nfts: Nft[],
   ): Promise<NftRarityEntity[]> {
