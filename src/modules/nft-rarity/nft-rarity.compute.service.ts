@@ -15,7 +15,7 @@ export class NftRarityComputeService {
 
     forceClearGC();
 
-    const scoreArray: BigNumber[] = this.computeJaccardScore(avg);
+    const scoreArray: BigNumber[] = this.computeScore(avg);
 
     let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
       return new BigNumber(a).comparedTo(b);
@@ -77,7 +77,7 @@ export class NftRarityComputeService {
     return avg;
   }
 
-  private computeJaccardScore(avg: BigNumber[]): BigNumber[] {
+  private computeScore(avg: BigNumber[]): BigNumber[] {
     let scores: BigNumber[] = [];
     const avgMax: BigNumber = BigNumber.max(...avg);
     const avgMin: BigNumber = BigNumber.min(...avg);
