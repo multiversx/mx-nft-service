@@ -11,7 +11,7 @@ export class NftRarityComputeService {
   ): Promise<NftRarityEntity[]> {
     forceClearGC();
 
-    const avg: BigNumber[] = this.computeAvg(nfts);
+    const avg: BigNumber[] = this.computeAvg(this.computeJd(nfts));
 
     forceClearGC();
 
@@ -37,10 +37,8 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeAvg(nfts: Nft[]): BigNumber[] {
+  private computeJd(nfts: Nft[]): BigNumber[][] {
     let jd: BigNumber[][] = [];
-    let avg: BigNumber[] = [];
-
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < i; j++) {
         if (jd[i] === undefined) {
@@ -58,21 +56,26 @@ export class NftRarityComputeService {
             nfts[j].metadata.attributes.length -
             commonTraitsCnt;
 
-          jd[i][j] = new BigNumber(1).minus(
-            new BigNumber(commonTraitsCnt).dividedBy(uniqueTraitsCnt),
-          );
+          const ji = new BigNumber(commonTraitsCnt).dividedBy(uniqueTraitsCnt);
+
+          jd[i][j] = new BigNumber(1).minus(ji);
         }
       }
-
-      if (jd.length !== 0) {
-        // PS: length-1 because there's always an empty cell in matrix, where i == j
-        // the final rarities ranks are the same, but this way is more correct
-        avg[i] = jd[i]
-          .reduce((a, b) => new BigNumber(a).plus(b), new BigNumber(0))
-          .dividedBy(jd[i].length - 1);
-      } else avg[i] = new BigNumber(0);
     }
+    return jd;
+  }
 
+  private computeAvg(jd: BigNumber[][]): BigNumber[] {
+    let avg: BigNumber[] = [];
+    for (let i = 0; i < jd.length; i++) {
+      avg[i] = new BigNumber(0);
+      for (let j = 0; j < jd.length; j++) {
+        if (i === j) continue;
+        avg[i] = avg[i].plus((i > j ? jd[i]?.[j] : jd[j]?.[i]) || 0);
+      }
+      const realLength = jd.length - 1;
+      if (avg[i].isGreaterThan(0)) avg[i] = avg[i].dividedBy(realLength);
+    }
     return avg;
   }
 
