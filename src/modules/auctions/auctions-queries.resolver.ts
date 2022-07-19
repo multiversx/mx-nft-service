@@ -128,7 +128,9 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     };
   }
 
-  @Query(() => String)
+  @Query(() => String, {
+    deprecationReason: 'This will be removed in the next version',
+  })
   async marketplaceCutPercentage() {
     return await this.nftAbiService.getCutPercentage();
   }
