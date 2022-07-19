@@ -204,7 +204,6 @@ export class NftMarketplaceAbiService {
       contract.methodsExplicit.getMarketplaceCutPercentage()
     );
     const response = await this.getFirstQueryResult(getDataQuery);
-    console.log(response);
     return response.firstValue.valueOf().toFixed();
   }
 
