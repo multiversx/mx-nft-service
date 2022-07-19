@@ -22,7 +22,7 @@ export class AssetRarityInfoProvider extends BaseProvider<string> {
     const nftRarities = await getRepository(NftRarityEntity)
       .createQueryBuilder()
       .select('identifier, score, `rank`')
-      .where(`identifier IN(${identifiers.map((value) => `'${value}'`)})`, {
+      .where(`identifier IN(:identifiers)`, {
         identifiers: identifiers,
       })
       .execute();
