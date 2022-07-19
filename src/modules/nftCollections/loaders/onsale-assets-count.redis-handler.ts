@@ -6,9 +6,9 @@ import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class AuctionsForCollectionRedisHandler extends RedisKeyValueDataloaderHandler<string> {
+export class OnSaleAssetsCountForCollectionRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'collection_active_auctions');
+    super(redisCacheService, 'on_sale_assets_count');
   }
 
   mapValues(

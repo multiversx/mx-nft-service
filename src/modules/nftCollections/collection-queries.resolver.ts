@@ -15,14 +15,14 @@ import { Account } from '../account-stats/models';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
-import { AuctionsForCollectionProvider } from './loaders/collection-auctions.loader';
+import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
     private accountsProvider: AccountsProvider,
-    private activeAuctionsProvider: AuctionsForCollectionProvider,
+    private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
     super();
   }
@@ -59,13 +59,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     return Account.fromEntity(account?.value ?? null, ownerAddress);
   }
 
-  @ResolveField('activeAuctions', () => Int)
-  async activeAuctions(@Parent() node: Collection) {
+  @ResolveField('onSaleAssetsCount', () => Int)
+  async onSaleAssetsCount(@Parent() node: Collection) {
     const { collection } = node;
 
     if (!collection) return 0;
-    const activeAuctions = await this.activeAuctionsProvider.load(collection);
-    return activeAuctions?.value?.Count ?? 0;
+    const onSaleCount = await this.onSaleAssetsCountProvider.load(collection);
+    return onSaleCount?.value?.Count ?? 0;
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)

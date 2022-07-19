@@ -329,7 +329,6 @@ input ChildFilter {
 }
 
 type Collection {
-  activeAuctions: Int!
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -339,9 +338,10 @@ type Collection {
   canWipe: Boolean
   collection: String
   collectionAsset(assetsCount: Int): CollectionAsset!
-  creationDate: Float!
+  creationDate: Int!
   description: String
   name: String!
+  onSaleAssetsCount: Int!
   owner: Account
   ownerAddress: String
   pngUrl: String

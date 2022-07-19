@@ -15,8 +15,8 @@ import { LocalCacheService } from 'src/common/services/caching/local.cache.servi
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { ElrondCommunicationModule } from 'src/common/services/elrond-communication/elrond-communication.module';
-import { AuctionsForCollectionProvider } from './loaders/collection-auctions.loader';
-import { AuctionsForCollectionRedisHandler } from './loaders/collection-auctions.redis-handler';
+import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
+import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
 
 @Module({
   providers: [
@@ -30,8 +30,8 @@ import { AuctionsForCollectionRedisHandler } from './loaders/collection-auctions
     CollectionsMutationsResolver,
     AccountsRedisHandler,
     AccountsProvider,
-    AuctionsForCollectionProvider,
-    AuctionsForCollectionRedisHandler,
+    OnSaleAssetsCountForCollectionProvider,
+    OnSaleAssetsCountForCollectionRedisHandler,
     CachingService,
     LocalCacheService,
     CollectionsNftsRedisHandler,
