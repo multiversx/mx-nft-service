@@ -55,12 +55,13 @@ export class NftRarityComputeService {
             nfts[j].metadata.attributes,
           );
 
+          const uniqueTraitsCnt =
+            nfts[i].metadata.attributes.length +
+            nfts[j].metadata.attributes.length -
+            commonTraitsCnt;
+
           jd[i][j] = new BigNumber(1).minus(
-            new BigNumber(commonTraitsCnt).dividedBy(
-              nfts[i].metadata.attributes.length +
-                nfts[j].metadata.attributes.length -
-                commonTraitsCnt,
-            ),
+            new BigNumber(commonTraitsCnt).dividedBy(uniqueTraitsCnt),
           );
         }
       }
