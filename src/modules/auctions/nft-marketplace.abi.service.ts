@@ -181,6 +181,25 @@ export class NftMarketplaceAbiService {
     }
   }
 
+  async getIsPaused(): Promise<boolean> {
+    try {
+      return await this.redisCacheService.getOrSet(
+        this.redisClient,
+        generateCacheKeyFromParams('isPaused'),
+        () => this.getIsPausedAbi(),
+        TimeConstants.oneWeek,
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting the is Paused value.',
+        {
+          path: 'NftMarketplaceAbiService.getIsPaused',
+          exception: err,
+        },
+      );
+    }
+  }
+
   private async getCutPercentageMap(): Promise<string> {
     const contract =
       await this.elrondProxyService.getMarketplaceAbiSmartContract();
@@ -188,7 +207,16 @@ export class NftMarketplaceAbiService {
       contract.methodsExplicit.getMarketplaceCutPercentage()
     );
     const response = await this.getFirstQueryResult(getDataQuery);
+    console.log(response);
     return response.firstValue.valueOf().toFixed();
+  }
+
+  private async getIsPausedAbi(): Promise<boolean> {
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
+    const response = await this.getFirstQueryResult(getDataQuery);
+    return response.firstValue.valueOf();
   }
 
   private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {

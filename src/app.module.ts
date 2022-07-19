@@ -25,6 +25,7 @@ import { TagsModuleGraph } from './modules/tags/tags.module';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
+import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { NotificationsModuleGraph } from './modules/notifications/notifications.
     CampaignsModuleGraph,
     IpfsModule,
     SearchModuleGraph,
+    ContractInfoModuleGraph,
     TagsModuleGraph,
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
