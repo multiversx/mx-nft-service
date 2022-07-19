@@ -1,4 +1,4 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
@@ -21,7 +21,7 @@ export class Collection {
   collectionAsset: CollectionAsset;
   @Field()
   name: string;
-  @Field()
+  @Field(() => Int)
   creationDate: number;
   @Field({ nullable: true })
   canTransferRole: boolean;
@@ -53,6 +53,8 @@ export class Collection {
   svgUrl: string;
   @Field(() => CollectionSocial, { nullable: true })
   social: CollectionSocial;
+  @Field(() => Int)
+  onSaleAssetsCount: number;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);

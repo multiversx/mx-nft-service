@@ -18,7 +18,7 @@ import {
   Operator,
 } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
-import { AuctionsForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/collection-auctions.redis-handler';
+import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -42,7 +42,7 @@ export class AuctionsServiceDb {
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
-    private auctionsForCollectionCountLoader: AuctionsForCollectionRedisHandler,
+    private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
@@ -486,7 +486,7 @@ export class AuctionsServiceDb {
     await this.auctionsLoader.clearKey(identifier);
     await this.lowestAuctionLoader.clearKey(identifier);
     await this.assetsAuctionsCountLoader.clearKey(identifier);
-    await this.auctionsForCollectionCountLoader.clearKey(collection);
+    await this.onSaleAssetsCount.clearKey(collection);
     await this.availableTokensCountHandler.clearKey(identifier);
   }
 
