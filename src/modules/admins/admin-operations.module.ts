@@ -22,7 +22,6 @@ import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
     CommonModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
-    CommonModule,
     NftRarityModuleGraph,
   ],
   exports: [FlagNftService],
