@@ -13,6 +13,7 @@ import { NftTypeEnum } from '../assets/models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
+import { forceClearGC } from 'src/utils/helpers';
 
 @Injectable()
 export class NftRarityService {
@@ -102,7 +103,7 @@ export class NftRarityService {
         collectionTicker,
       );
 
-      let reason: string =
+      const reason: string =
         nftsFromElastic.length === 0
           ? 'No NFTs'
           : 'Not valid NFT (bad metadata storage or/and URIs)';
@@ -149,7 +150,7 @@ export class NftRarityService {
       );
     }
 
-    let rarities: NftRarityEntity[] = await this.computeRarities(
+    const rarities: NftRarityEntity[] = await this.computeRarities(
       nftsWithAttributes,
       collectionTicker,
     );
@@ -201,6 +202,8 @@ export class NftRarityService {
         exception: error?.message,
         collection: collectionTicker,
       });
+    } finally {
+      forceClearGC();
     }
     return rarities;
   }
@@ -329,7 +332,7 @@ export class NftRarityService {
         'tokens',
         collection,
         updateBody,
-        '?retry_on_conflict=2',
+        '?retry_on_conflict=2&timeout=1m',
       );
     } catch (error) {
       this.logger.error('Error when setting collection rarity flag', {
@@ -349,6 +352,7 @@ export class NftRarityService {
         await this.elasticService.bulkRequest(
           'tokens',
           this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
+          '?timeout=1m',
         );
       } catch (error) {
         this.logger.error('Error when mapping / bulk updating Elastic', {
