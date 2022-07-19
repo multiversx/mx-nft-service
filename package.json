@@ -73,7 +73,7 @@
     "nest-winston": "^1.6.2",
     "nestjs-redis": "https://github.com/ElrondNetwork/nestjs-redis#master",
     "object-hash": "^2.2.0",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "prom-client": "^13.1.0",
