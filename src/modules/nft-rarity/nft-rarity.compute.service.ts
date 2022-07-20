@@ -51,7 +51,7 @@ export class NftRarityComputeService {
         }
 
         if (jaccardDistances[i][j] === undefined) {
-          const commonTraitsCnt = this.getCommonTraitsCnt(
+          const commonTraitsCnt = this.getCommonTraitsCount(
             nfts[i].metadata.attributes,
             nfts[j].metadata.attributes,
           );
@@ -125,7 +125,7 @@ export class NftRarityComputeService {
     return scoreArray;
   }
 
-  private getCommonTraitsCnt(
+  private getCommonTraitsCount(
     obj1: [{ [key: string]: string }],
     obj2: [{ [key: string]: string }],
   ): number {
