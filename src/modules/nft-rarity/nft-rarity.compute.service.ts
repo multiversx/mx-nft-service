@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { NftRarityEntity } from 'src/db/nft-rarity';
-import { NftMinimalModel } from './nft-rarity.model';
+import { NftRarityData } from './nft-rarity-data.model';
 
 @Injectable()
 export class NftRarityComputeService {
   /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
   async computeJaccardDistancesRarities(
     collection: string,
-    nfts: NftMinimalModel[],
+    nfts: NftRarityData[],
   ): Promise<NftRarityEntity[]> {
     if (nfts.length === 1) {
       return [
@@ -44,7 +44,7 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeJd(nfts: NftMinimalModel[]): number[][] {
+  private computeJd(nfts: NftRarityData[]): number[][] {
     let jd: number[][] = [];
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < i; j++) {

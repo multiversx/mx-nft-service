@@ -12,7 +12,7 @@ import { NftTypeEnum } from '../assets/models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
-import { NftMinimalModel } from './nft-rarity.model';
+import { NftRarityData } from './nft-rarity-data.model';
 
 @Injectable()
 export class NftRarityService {
@@ -189,7 +189,7 @@ export class NftRarityService {
   }
 
   private async computeRarities(
-    nfts: NftMinimalModel[],
+    nfts: NftRarityData[],
     collectionTicker: string,
   ) {
     let rarities: NftRarityEntity[] = [];
@@ -246,7 +246,7 @@ export class NftRarityService {
   }
 
   private isIdenticalChecksum(
-    elasticNfts: NftMinimalModel[],
+    elasticNfts: NftRarityData[],
     dbNfts: NftRarityEntity[],
     checksumA: NftRarityChecksum,
     checksumB: NftRarityChecksum,
@@ -265,7 +265,7 @@ export class NftRarityService {
   }
 
   private async getNftRarityChecksum(
-    nfts: NftMinimalModel[] | NftRarityEntity[],
+    nfts: NftRarityData[] | NftRarityEntity[],
   ): Promise<NftRarityChecksum> {
     let checksum = new NftRarityChecksum({
       score: 0,
@@ -281,7 +281,7 @@ export class NftRarityService {
   }
 
   private buildNftRaritiesBulkUpdate(
-    nfts: NftRarityEntity[] | NftMinimalModel[],
+    nfts: NftRarityEntity[] | NftRarityData[],
     hasRarities: boolean = true,
   ): string[] {
     let updates: string[] = [];
@@ -341,7 +341,7 @@ export class NftRarityService {
   }
 
   private async setNftRaritiesInElastic(
-    nfts: NftRarityEntity[] | NftMinimalModel[],
+    nfts: NftRarityEntity[] | NftRarityData[],
     hasRarities: boolean = true,
   ): Promise<void> {
     if (nfts.length > 0) {
@@ -401,7 +401,7 @@ export class NftRarityService {
 
   private async getAllCollectionNftsFromAPI(
     collectionTicker: string,
-  ): Promise<NftMinimalModel[]> {
+  ): Promise<NftRarityData[]> {
     try {
       const query = new AssetsQuery().addPageSize(0, 10000).build();
       const res = await this.apiService.getAllCollectionNftsForQuery(
@@ -409,7 +409,7 @@ export class NftRarityService {
         query,
       );
       return res.map((nft) => {
-        return NftMinimalModel.fromNft(nft);
+        return NftRarityData.fromNft(nft);
       });
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
@@ -423,8 +423,8 @@ export class NftRarityService {
 
   private async getAllCollectionNftsFromElastic(
     collectionTicker: string,
-  ): Promise<NftMinimalModel[]> {
-    let nfts: NftMinimalModel[] = [];
+  ): Promise<NftRarityData[]> {
+    let nfts: NftRarityData[] = [];
 
     try {
       const query = ElasticQuery.create()
@@ -448,7 +448,7 @@ export class NftRarityService {
         async (items) => {
           nfts = nfts.concat(
             items.map((nft) => {
-              return NftMinimalModel.fromNft(nft);
+              return NftRarityData.fromNft(nft);
             }),
           );
           return undefined;
@@ -468,10 +468,10 @@ export class NftRarityService {
 
   private async reprocessNftsMetadataAndSetFlags(
     collectionTicker: string,
-    nftsWithoutAttributes: NftMinimalModel[],
+    nftsWithoutAttributes: NftRarityData[],
     nftsWithAttributesCount: number = null,
-  ): Promise<NftMinimalModel[]> {
-    let successfullyProcessedNFTs: NftMinimalModel[] = [];
+  ): Promise<NftRarityData[]> {
+    let successfullyProcessedNFTs: NftRarityData[] = [];
 
     try {
       let customInfo = {
@@ -515,13 +515,13 @@ export class NftRarityService {
     return successfullyProcessedNFTs;
   }
 
-  private filterNftsWithAttributes(nfts: NftMinimalModel[]): NftMinimalModel[] {
+  private filterNftsWithAttributes(nfts: NftRarityData[]): NftRarityData[] {
     return nfts.filter((nft) => nft.metadata?.attributes !== undefined);
   }
 
   private filterNftsWithoutAttributes(
-    nfts: NftMinimalModel[],
-  ): NftMinimalModel[] {
+    nfts: NftRarityData[],
+  ): NftRarityData[] {
     return nfts.filter(
       (nft) =>
         nft.metadata?.attributes === undefined ||
@@ -529,7 +529,7 @@ export class NftRarityService {
     );
   }
 
-  private sortAscNftsByNonce(nfts: NftMinimalModel[]): NftMinimalModel[] {
+  private sortAscNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
