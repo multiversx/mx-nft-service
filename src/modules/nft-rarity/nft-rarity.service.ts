@@ -273,7 +273,7 @@ export class NftRarityService {
     });
 
     nfts.map((r) => {
-      checksum.score += r.score || r.nft_rarity_score || 0;
+      checksum.score += parseFloat(r.score || r.nft_rarity_score || 0);
       checksum.rank += r.rank || r.nft_rarity_rank || 0;
     });
 
@@ -519,9 +519,7 @@ export class NftRarityService {
     return nfts.filter((nft) => nft.metadata?.attributes !== undefined);
   }
 
-  private filterNftsWithoutAttributes(
-    nfts: NftRarityData[],
-  ): NftRarityData[] {
+  private filterNftsWithoutAttributes(nfts: NftRarityData[]): NftRarityData[] {
     return nfts.filter(
       (nft) =>
         nft.metadata?.attributes === undefined ||
