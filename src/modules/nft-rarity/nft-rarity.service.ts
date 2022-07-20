@@ -1,15 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { AssetsQuery } from 'src/modules/assets';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
 import { DeleteResult } from 'typeorm';
-import { Logger } from 'winston';
 import { NftRarityChecksum } from './nft-rarity-checksum.model';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from '../assets/models';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 import { NftRarityData } from './nft-rarity-data.model';
@@ -23,8 +21,10 @@ export class NftRarityService {
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
+    private readonly logger: Logger,
+  ) {
+    this.setElasticRarityMappings();
+  }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
     const [elasticNfts, dbNfts] = await Promise.all([
@@ -87,7 +87,7 @@ export class NftRarityService {
     }
 
     if (!raritiesFlag && skipIfRaritiesFlag) {
-      this.logger.info(
+      this.logger.log(
         `Update rarities process skipped because rarities flag === true & skipIfRaritiesFlag === true`,
         {
           path: 'NftRarityService.updateRarities',
@@ -106,7 +106,7 @@ export class NftRarityService {
         nftsFromElastic.length === 0
           ? 'No NFTs'
           : 'Not valid NFT (bad metadata storage or/and URIs)';
-      this.logger.info(
+      this.logger.log(
         `${reason} -> set nft_hasRaries & nft_hasRarity flags to false & return false`,
         {
           path: 'NftRarityService.updateRarities',
@@ -124,7 +124,7 @@ export class NftRarityService {
     let nftsWithAttributes = this.filterNftsWithAttributes(allNfts);
 
     if (nftsWithAttributes?.length === 0) {
-      this.logger.info(
+      this.logger.log(
         'Collection has no attributes or attributes were not indexed yet by the elrond api',
         {
           path: 'NftRarityService.updateRarities',
@@ -228,7 +228,7 @@ export class NftRarityService {
       dbChecksum.score > elasticChecksum.score ||
       dbChecksum.rank > elasticChecksum.rank
     ) {
-      this.logger.info(
+      this.logger.log(
         `Collection rarity wrong checksum -> migrate rarities from DB -> Elastic`,
         customInfo,
       );
@@ -237,7 +237,7 @@ export class NftRarityService {
         this.setNftRaritiesInElastic(dbNfts),
       ]);
     } else {
-      this.logger.info(
+      this.logger.log(
         `Collection rarity wrong checksum -> recalculate rarities using updateRarities`,
         customInfo,
       );
@@ -352,7 +352,7 @@ export class NftRarityService {
           '?timeout=1m',
         );
       } catch (error) {
-        this.logger.error('Error when mapping / bulk updating Elastic', {
+        this.logger.error('Error when bulk updating Elastic', {
           path: 'NftRarityService.setNftRaritiesInElastic',
           exception: error?.message,
         });
@@ -497,7 +497,7 @@ export class NftRarityService {
         await this.setNftRaritiesInElastic(unsuccessfullyProcessedNfts, false);
       }
 
-      this.logger.info(`Tried to reprocess NFT attributes`, customInfo);
+      this.logger.log(`Tried to reprocess NFT attributes`, customInfo);
     } catch (error) {
       this.logger.error(`Error when trying to reprocess collection metadata`, {
         path: 'NftRarityService.reprocessNftsMetadataAndSetFlags',
@@ -525,5 +525,21 @@ export class NftRarityService {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
+  }
+
+  async setElasticRarityMappings() {
+    await this.elasticService.putMappings(
+      'tokens',
+      this.elasticService.buildPutMultipleMappingsBody([
+        {
+          key: 'nft_rarity_score',
+          value: 'float',
+        },
+        {
+          key: 'nft_rarity_rank',
+          value: 'float',
+        },
+      ]),
+    );
   }
 }
