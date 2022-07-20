@@ -527,19 +527,28 @@ export class NftRarityService {
     });
   }
 
-  async setElasticRarityMappings() {
-    await this.elasticService.putMappings(
-      'tokens',
-      this.elasticService.buildPutMultipleMappingsBody([
+  async setElasticRarityMappings(): Promise<void> {
+    try {
+      await this.elasticService.putMappings(
+        'tokens',
+        this.elasticService.buildPutMultipleMappingsBody([
+          {
+            key: 'nft_rarity_score',
+            value: 'float',
+          },
+          {
+            key: 'nft_rarity_rank',
+            value: 'float',
+          },
+        ]),
+      );
+    } catch (error) {
+      this.logger.error(
+        'Error when trying to map Elastic types for rarity variables',
         {
-          key: 'nft_rarity_score',
-          value: 'float',
+          path: 'NftRarityService.setElasticRarityMappings',
         },
-        {
-          key: 'nft_rarity_rank',
-          value: 'float',
-        },
-      ]),
-    );
+      );
+    }
   }
 }
