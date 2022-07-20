@@ -22,13 +22,11 @@ export class NftRarityComputeService {
       ];
     }
 
-    const scoreArray: number[] = this.computeScore(
-      this.computeAvg(this.computeJd(nfts)),
-    );
+    const jd: number[][] = this.computeJd(nfts);
+    const avg: number[] = this.computeAvg(jd);
+    const scoreArray: number[] = this.computeScore(avg);
 
-    let scoreArray_asc: number[] = [...scoreArray].sort(function (a, b) {
-      return a - b;
-    });
+    let scoreArray_asc: number[] = scoreArray.sort((a, b) => a - b);
 
     return nfts.map((nft, i) => {
       const scoreIndex = scoreArray_asc.indexOf(scoreArray[i]);

@@ -408,9 +408,7 @@ export class NftRarityService {
         collectionTicker,
         query,
       );
-      return res.map((nft) => {
-        return NftRarityData.fromNft(nft);
-      });
+      return res.map((nft) => NftRarityData.fromNft(nft));
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
@@ -446,11 +444,7 @@ export class NftRarityService {
         'identifier',
         query,
         async (items) => {
-          nfts = nfts.concat(
-            items.map((nft) => {
-              return NftRarityData.fromNft(nft);
-            }),
-          );
+          nfts = nfts.concat(items.map((nft) => NftRarityData.fromNft(nft)));
           return undefined;
         },
       );
