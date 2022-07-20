@@ -71,7 +71,7 @@ export class RarityUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: Math.min(10000, maxCollectionsToValidate),
+              size: 50,
             });
 
           await this.elasticService.getScrollableList(
@@ -106,7 +106,7 @@ export class RarityUpdaterService {
       this.logger.error(`Error when scrolling through collections`, {
         path: 'RarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
-        lastIndex: lastIndex
+        lastIndex: lastIndex,
       });
     }
   }
@@ -156,7 +156,7 @@ export class RarityUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 500,
+              size: 100,
             });
 
           await this.elasticService.getScrollableList(

@@ -1,25 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
-import { Nft } from 'src/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
-import { forceClearGC } from 'src/utils/helpers';
+import { NftMinimalModel } from './nft-rarity.model';
 
 @Injectable()
 export class NftRarityComputeService {
   /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
   async computeJaccardDistancesRarities(
-    nfts: Nft[],
+    collection: string,
+    nfts: NftMinimalModel[],
   ): Promise<NftRarityEntity[]> {
-    forceClearGC();
+    if (nfts.length === 1) {
+      return [
+        new NftRarityEntity({
+          collection: collection,
+          identifier: nfts[0].identifier,
+          score: 100,
+          nonce: nfts[0].nonce,
+          rank: 1,
+        }),
+      ];
+    }
 
-    const scoreArray: BigNumber[] = this.computeScore(
+    const scoreArray: number[] = this.computeScore(
       this.computeAvg(this.computeJd(nfts)),
     );
 
-    forceClearGC();
-
-    let scoreArray_asc: BigNumber[] = [...scoreArray].sort(function (a, b) {
-      return new BigNumber(a).comparedTo(b);
+    let scoreArray_asc: number[] = [...scoreArray].sort(function (a, b) {
+      return a - b;
     });
 
     return nfts.map((nft, i) => {
@@ -27,17 +35,17 @@ export class NftRarityComputeService {
       scoreArray_asc = this.markScoreAsUsed(scoreArray_asc, scoreIndex);
 
       return new NftRarityEntity({
-        collection: nft.collection,
+        collection: collection,
         identifier: nft.identifier,
-        score: new BigNumber((scoreArray[i] || 100).toFixed(3)).toNumber(),
+        score: parseFloat(scoreArray[i].toFixed(3)),
         nonce: nft.nonce,
         rank: scoreArray.length - scoreIndex,
       });
     });
   }
 
-  private computeJd(nfts: Nft[]): BigNumber[][] {
-    let jd: BigNumber[][] = [];
+  private computeJd(nfts: NftMinimalModel[]): number[][] {
+    let jd: number[][] = [];
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < i; j++) {
         if (jd[i] === undefined) {
@@ -55,63 +63,64 @@ export class NftRarityComputeService {
             nfts[j].metadata.attributes.length -
             commonTraitsCnt;
 
-          const ji = new BigNumber(commonTraitsCnt).dividedBy(uniqueTraitsCnt);
+          const ji: BigNumber = new BigNumber(commonTraitsCnt).dividedBy(
+            uniqueTraitsCnt,
+          );
 
-          jd[i][j] = new BigNumber(1).minus(ji);
+          jd[i][j] = parseFloat(new BigNumber(1).minus(ji).toFixed(15));
         }
       }
     }
     return jd;
   }
 
-  private computeAvg(jd: BigNumber[][]): BigNumber[] {
-    let avg: BigNumber[] = [];
+  private computeAvg(jd: number[][]): number[] {
+    let avg: number[] = [];
     for (let i = 0; i < jd.length; i++) {
-      avg[i] = new BigNumber(0);
+      avg[i] = 0;
       for (let j = 0; j < jd.length; j++) {
         if (i === j) continue;
-        avg[i] = avg[i].plus((i > j ? jd[i]?.[j] : jd[j]?.[i]) || 0);
+        avg[i] += (i > j ? jd[i]?.[j] : jd[j]?.[i]) || 0;
       }
       const realLength = jd.length - 1;
-      if (avg[i].isGreaterThan(0)) avg[i] = avg[i].dividedBy(realLength);
+      if (avg[i] > 0)
+        avg[i] = parseFloat(
+          new BigNumber(avg[i]).dividedBy(realLength).toFixed(15),
+        );
     }
     return avg;
   }
 
-  private computeScore(avg: BigNumber[]): BigNumber[] {
-    let scores: BigNumber[] = [];
-    const avgMax: BigNumber = BigNumber.max(...avg);
-    const avgMin: BigNumber = BigNumber.min(...avg);
+  private computeScore(avg: number[]): number[] {
+    let scores: number[] = [];
+    const avgMax: number = Math.max(...avg);
+    const avgMin: number = Math.min(...avg);
 
     for (let i = 0; i < avg.length; i++) {
       scores[i] = this.isUniqueByAvg(avg[i], avgMin, avgMax)
-        ? new BigNumber(100)
-        : avg[i]
-            .minus(avgMin)
-            .dividedBy(avgMax.minus(avgMin))
-            .multipliedBy(100);
+        ? 100
+        : parseFloat(
+            new BigNumber(avg[i])
+              .minus(avgMin)
+              .dividedBy(new BigNumber(avgMax).minus(avgMin))
+              .multipliedBy(100)
+              .toFixed(15),
+          );
     }
     return scores;
   }
 
-  private isUniqueByAvg(
-    avg: BigNumber,
-    avgMin: BigNumber,
-    avgMax: BigNumber,
-  ): boolean {
+  private isUniqueByAvg(avg: number, avgMin: number, avgMax: number): boolean {
     return (
-      !avgMax.minus(avgMin).isFinite() ||
-      avgMax.minus(avgMin).isZero() ||
-      avg.isNaN() ||
-      avg.isZero()
+      !isFinite(avgMax - avgMin) ||
+      avgMax - avgMin === 0 ||
+      isNaN(avg) ||
+      avg === 0
     );
   }
 
-  private markScoreAsUsed(
-    scoreArray: BigNumber[],
-    scoreIndex: number,
-  ): BigNumber[] {
-    scoreArray[scoreIndex] = new BigNumber(-1);
+  private markScoreAsUsed(scoreArray: number[], scoreIndex: number): number[] {
+    scoreArray[scoreIndex] = -1;
     return scoreArray;
   }
 

@@ -45,9 +45,3 @@ export const isValidAddress = (address: string): boolean => {
     return false;
   }
 };
-
-export function forceClearGC() {
-  if (global.gc) {
-    global.gc();
-  }
-}
