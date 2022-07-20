@@ -113,6 +113,8 @@ export class ElrondElasticService {
   ): Promise<void> {
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
+    console.log('setCustomValue', { uris });
+
     const profiler = new PerformanceProfiler();
     const promises = uris.map((uri) =>
       this.apiService.post(
@@ -133,6 +135,7 @@ export class ElrondElasticService {
   ): Promise<void> {
     const batchSize = 100;
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
+    console.log('bulkRequest', { uris });
 
     const profiler = new PerformanceProfiler();
 
@@ -173,22 +176,25 @@ export class ElrondElasticService {
     body: string,
     urlParams: string = '',
   ): Promise<any> {
-    const url = `${this.url}/${collection}/_mapping${urlParams}`;
-
     const profiler = new PerformanceProfiler();
-
     try {
-      return await this.apiService.post(
-        url,
-        body,
-        new ApiSettings({
-          contentType: 'application/x-ndjson',
-        }),
+      const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
+      console.log('putMappings', { uris });
+
+      const promises = uris.map((uri) =>
+        this.apiService.post(
+          `${uri}/${collection}/_mapping${urlParams}`,
+          body,
+          new ApiSettings({
+            contentType: 'application/x-ndjson',
+          }),
+        ),
       );
+      await Promise.all(promises);
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url,
+        url: `${collection}/_mapping${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,
