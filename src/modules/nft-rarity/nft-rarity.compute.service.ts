@@ -22,8 +22,8 @@ export class NftRarityComputeService {
       ];
     }
 
-    const jd: number[][] = this.computeJd(nfts);
-    const avg: number[] = this.computeAvg(jd);
+    const jaccardDistances: number[][] = this.computeJd(nfts);
+    const avg: number[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
     let scoreArrayAsc: number[] = scoreArray.sort((a, b) => a - b);
