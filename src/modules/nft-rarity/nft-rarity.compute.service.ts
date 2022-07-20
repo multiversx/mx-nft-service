@@ -51,19 +51,19 @@ export class NftRarityComputeService {
         }
 
         if (jaccardDistances[i][j] === undefined) {
-          const commonTraitsCnt = this.getCommonTraitsCount(
+          const commonTraitsCount = this.getCommonTraitsCount(
             nfts[i].metadata.attributes,
             nfts[j].metadata.attributes,
           );
 
-          const uniqueTraitsCnt =
+          const uniqueTraitsCount =
             nfts[i].metadata.attributes.length +
             nfts[j].metadata.attributes.length -
-            commonTraitsCnt;
+            commonTraitsCount;
 
           const jaccardIndex: BigNumber = new BigNumber(
-            commonTraitsCnt,
-          ).dividedBy(uniqueTraitsCnt);
+            commonTraitsCount,
+          ).dividedBy(uniqueTraitsCount);
 
           jaccardDistances[i][j] = parseFloat(
             new BigNumber(1).minus(jaccardIndex).toFixed(15),
