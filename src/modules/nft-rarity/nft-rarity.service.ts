@@ -530,26 +530,18 @@ export class NftRarityService {
   }
 
   async setElasticRarityMappings() {
-    try {
-      await this.elasticService.putMappings(
-        'tokens',
-        this.elasticService.buildPutMultipleMappingsBody([
-          {
-            key: 'nft_rarity_score',
-            value: 'float',
-          },
-          {
-            key: 'nft_rarity_rank',
-            value: 'float',
-          },
-        ]),
-        '?master_timeout=1m&timeout=1m',
-      );
-    } catch (error) {
-      this.logger.error(`Error when trying to map Elastic rarity variables`, {
-        path: 'NftRarityService.setElasticRarityMappings',
-        exception: error?.message,
-      });
-    }
+    await this.elasticService.putMappings(
+      'tokens',
+      this.elasticService.buildPutMultipleMappingsBody([
+        {
+          key: 'nft_rarity_score',
+          value: 'float',
+        },
+        {
+          key: 'nft_rarity_rank',
+          value: 'float',
+        },
+      ]),
+    );
   }
 }
