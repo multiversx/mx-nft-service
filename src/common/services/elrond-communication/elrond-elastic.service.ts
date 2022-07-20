@@ -132,27 +132,31 @@ export class ElrondElasticService {
     urlParams: string = '',
   ): Promise<void> {
     const batchSize = 100;
-
-    const url = `${this.url}/${collection}/_bulk${urlParams}`;
+    const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();
 
     try {
       for (let i = 0; i < updates.length; i += batchSize) {
         const body = this.buildBulkUpdateBody(updates.slice(i, i + batchSize));
-        await this.apiService.post(
-          url,
-          body,
-          new ApiSettings({
-            contentType: 'application/x-ndjson',
-          }),
+
+        const promises = uris.map((url) =>
+          this.apiService.post(
+            `${url}/${collection}/_bulk${urlParams}`,
+            body,
+            new ApiSettings({
+              contentType: 'application/x-ndjson',
+            }),
+          ),
         );
+
+        await Promise.all(promises);
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url,
+        url: `${collection}/_bulk${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,
