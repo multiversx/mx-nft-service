@@ -24,7 +24,9 @@ export class NftRarityService {
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
+  ) {
+    this.setElasticRarityMappings();
+  }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
     const [elasticNfts, dbNfts] = await Promise.all([
@@ -352,7 +354,7 @@ export class NftRarityService {
           '?timeout=1m',
         );
       } catch (error) {
-        this.logger.error('Error when mapping / bulk updating Elastic', {
+        this.logger.error('Error when bulk updating Elastic', {
           path: 'NftRarityService.setNftRaritiesInElastic',
           exception: error?.message,
         });
@@ -525,5 +527,29 @@ export class NftRarityService {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
+  }
+
+  async setElasticRarityMappings() {
+    try {
+      await this.elasticService.putMappings(
+        'tokens',
+        this.elasticService.buildPutMultipleMappingsBody([
+          {
+            key: 'nft_rarity_score',
+            value: 'float',
+          },
+          {
+            key: 'nft_rarity_rank',
+            value: 'float',
+          },
+        ]),
+        '?master_timeout=1m&timeout=1m',
+      );
+    } catch (error) {
+      this.logger.error(`Error when trying to map Elastic rarity variables`, {
+        path: 'NftRarityService.setElasticRarityMappings',
+        exception: error?.message,
+      });
+    }
   }
 }
