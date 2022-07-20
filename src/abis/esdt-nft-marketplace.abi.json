@@ -1,19 +1,20 @@
 {
   "buildInfo": {
     "rustc": {
-      "version": "1.57.0-nightly",
-      "commitHash": "41dfaaa3c66759395835b3af59b22f4f22175dc8",
-      "commitDate": "2021-10-10",
+      "version": "1.62.0-nightly",
+      "commitHash": "4ca19e09d302a4cbde14f9cb1bc109179dc824cd",
+      "commitDate": "2022-04-19",
       "channel": "Nightly",
-      "short": "rustc 1.57.0-nightly (41dfaaa3c 2021-10-10)"
+      "short": "rustc 1.62.0-nightly (4ca19e09d 2022-04-19)"
     },
     "contractCrate": {
       "name": "esdt-nft-marketplace",
-      "version": "0.0.0"
+      "version": "0.0.0",
+      "git_version": "e54d8c5"
     },
     "framework": {
       "name": "elrond-wasm",
-      "version": "0.29.3"
+      "version": "0.33.1"
     }
   },
   "name": "EsdtNftMarketplace",
@@ -58,7 +59,7 @@
         },
         {
           "name": "accepted_payment_token",
-          "type": "TokenIdentifier"
+          "type": "EgldOrEsdtTokenIdentifier"
         },
         {
           "name": "opt_min_bid_diff",
@@ -88,6 +89,63 @@
       ]
     },
     {
+      "name": "endAuction",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdraw",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getFullAuctionData",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Auction"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidAuctionId",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getMarketplaceCutPercentage",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
       "name": "bid",
       "mutability": "mutable",
       "payableInTokens": ["*"],
@@ -102,17 +160,6 @@
         },
         {
           "name": "nft_nonce",
-          "type": "u64"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "endAuction",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "auction_id",
           "type": "u64"
         }
       ],
@@ -144,17 +191,6 @@
       "outputs": []
     },
     {
-      "name": "withdraw",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": []
-    },
-    {
       "name": "claimTokens",
       "mutability": "mutable",
       "inputs": [
@@ -164,7 +200,7 @@
         },
         {
           "name": "token_nonce_pairs",
-          "type": "variadic<multi<TokenIdentifier,u64>>",
+          "type": "variadic<multi<EgldOrEsdtTokenIdentifier,u64>>",
           "multi_arg": true
         }
       ],
@@ -178,26 +214,6 @@
       ]
     },
     {
-      "name": "getMarketplaceCutPercentage",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "name": "getLastValidAuctionId",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "getClaimableAmount",
       "mutability": "readonly",
       "inputs": [
@@ -207,7 +223,7 @@
         },
         {
           "name": "token_id",
-          "type": "TokenIdentifier"
+          "type": "EgldOrEsdtTokenIdentifier"
         },
         {
           "name": "token_nonce",
@@ -221,14 +237,9 @@
       ]
     },
     {
-      "name": "doesAuctionExist",
+      "name": "isPaused",
       "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
+      "inputs": [],
       "outputs": [
         {
           "type": "bool"
@@ -236,211 +247,29 @@
       ]
     },
     {
-      "name": "getAuctionedToken",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<multi<TokenIdentifier,u64,BigUint>>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getAuctionType",
+      "name": "pause",
+      "onlyOwner": true,
       "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "AuctionType"
-        }
-      ]
+      "inputs": [],
+      "outputs": []
     },
     {
-      "name": "getPaymentTokenForAuction",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<multi<TokenIdentifier,u64>>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getMinMaxBid",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<multi<BigUint,BigUint>>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getStartTime",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<u64>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getDeadline",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<u64>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getOriginalOwner",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<Address>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getCurrentWinningBid",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<BigUint>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getCurrentWinner",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<Address>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
-      "name": "getFullAuctionData",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "optional<Auction>",
-          "multi_result": true
-        }
-      ]
+      "name": "unpause",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
     }
   ],
+  "events": [],
   "hasCallback": false,
   "types": {
-    "AuctionType": {
-      "type": "enum",
-      "variants": [
-        {
-          "name": "None",
-          "discriminant": 0
-        },
-        {
-          "name": "Nft",
-          "discriminant": 1
-        },
-        {
-          "name": "SftAll",
-          "discriminant": 2
-        },
-        {
-          "name": "SftOnePerPayment",
-          "discriminant": 3
-        }
-      ]
-    },
-    "EsdtToken": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_type",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "nonce",
-          "type": "u64"
-        }
-      ]
-    },
     "Auction": {
       "type": "struct",
       "fields": [
         {
-          "name": "auctioned_token",
-          "type": "EsdtToken"
-        },
-        {
-          "name": "nr_auctioned_tokens",
-          "type": "BigUint"
+          "name": "auctioned_tokens",
+          "type": "EsdtTokenPayment"
         },
         {
           "name": "auction_type",
@@ -448,7 +277,11 @@
         },
         {
           "name": "payment_token",
-          "type": "EsdtToken"
+          "type": "EgldOrEsdtTokenIdentifier"
+        },
+        {
+          "name": "payment_nonce",
+          "type": "u64"
         },
         {
           "name": "min_bid",
@@ -492,38 +325,30 @@
         }
       ]
     },
-    "EsdtTokenType": {
+    "AuctionType": {
       "type": "enum",
       "variants": [
         {
-          "name": "Fungible",
+          "name": "None",
           "discriminant": 0
         },
         {
-          "name": "NonFungible",
+          "name": "Nft",
           "discriminant": 1
         },
         {
-          "name": "SemiFungible",
+          "name": "SftAll",
           "discriminant": 2
         },
         {
-          "name": "Meta",
+          "name": "SftOnePerPayment",
           "discriminant": 3
-        },
-        {
-          "name": "Invalid",
-          "discriminant": 4
         }
       ]
     },
     "EsdtTokenPayment": {
       "type": "struct",
       "fields": [
-        {
-          "name": "token_type",
-          "type": "EsdtTokenType"
-        },
         {
           "name": "token_identifier",
           "type": "TokenIdentifier"

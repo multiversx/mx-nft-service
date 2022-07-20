@@ -22,6 +22,10 @@ import { NftRarityService } from './nft-rarity.service';
     AssetRarityInfoRedisHandler,
     RarityUpdaterService,
   ],
-  exports: [NftRarityService, RarityUpdaterService],
+  exports: [
+    NftRarityService,
+    RarityUpdaterService,
+    TypeOrmModule.forFeature([NftRarityRepository]),
+  ],
 })
 export class NftRarityModuleGraph {}

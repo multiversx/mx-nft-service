@@ -1,4 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { count } from 'console';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 
@@ -6,7 +7,7 @@ import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.s
 export class ReindexController {
   constructor(
     private nsfwRService: NsfwUpdaterService,
-    private rarityService: RarityUpdaterService,
+    private rarityUpdaterService: RarityUpdaterService,
   ) {}
 
   @Get('/trigger-nsfw-reindex')
@@ -16,6 +17,6 @@ export class ReindexController {
 
   @Get('/trigger-rarity-reindex')
   async triggerRarityReindex(): Promise<void> {
-    await this.rarityService.handleValidateToken();
+    await this.rarityUpdaterService.handleReindexTokenRarities();
   }
 }

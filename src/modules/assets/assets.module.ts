@@ -1,9 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
 import {
-  AssetsService,
+  AssetsTransactionService,
+  AssetsGetterService,
   AssetsQueriesResolver,
   AssetsLikesService,
   AssetAuctionsCountProvider,
+  AssetsRedisHandler,
+  AssetsProvider,
 } from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -37,10 +40,14 @@ import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-market
 import { FeaturedMarketplaceRedisHandler } from '../auctions/loaders/featured-marketplace.redis-handler';
 import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-handler';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
+import { CommonModule } from 'src/common.module';
+import { AssetByIdentifierService } from './asset-by-identifier.service';
 
 @Module({
   providers: [
-    AssetsService,
+    AssetsTransactionService,
+    AssetsGetterService,
+    AssetByIdentifierService,
     AssetsLikesService,
     VerifyContentService,
     ContentValidation,
@@ -68,23 +75,29 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,
+    AssetsRedisHandler,
+    AssetsProvider,
     FeaturedMarketplaceProvider,
     FeaturedMarketplaceRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
+    CommonModule,
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
   ],
   exports: [
-    AssetsService,
+    AssetsTransactionService,
+    AssetByIdentifierService,
+    AssetsGetterService,
     AssetsLikesService,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,
     AssetScamInfoProvider,
+    AssetsRedisHandler,
   ],
 })
 export class AssetsModuleGraph {}

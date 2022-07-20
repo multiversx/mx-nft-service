@@ -4,6 +4,8 @@
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqemkfxdzk6wj78ymhay6nu0pdc8xsta3fu00syhxuwy",
     "issueNftCost": 50000000000000000,
+    "pricePerByte": 1500,
+    "transferMinCost": 750000,
     "minimumBidDifference": 10000000000000000,
     "version": 1,
     "proxyTimeout": 60000,
@@ -23,8 +25,8 @@
     "assetsDbName": 3,
     "auctionsRedisClientName": "auctions",
     "auctionsDbName": 4,
-    "followersRedisClientName": "followers",
-    "followersDbName": 5,
+    "persistentRedisClientName": "persistent",
+    "persistentDbName": 5,
     "collectionsRedisClientName": "collections",
     "collectionsDbName": 6,
     "rarityQueueClientName": "rarityQueue",
@@ -36,7 +38,6 @@
     "protocol": "https",
     "cdnUrl": "https://ipfs.io/ipfs/"
   },
-
   "gas": {
     "nftCreate": 3000000,
     "nftTransfer": 1000000,
@@ -50,5 +51,11 @@
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
     "addBurnQuantity": 200000
+  },
+  "cronJobs": {
+    "rarity": {
+      "collectionsToValidateEvery5m": 30,
+      "colectionsToUpdateEvery30s": 5
+    }
   }
 }

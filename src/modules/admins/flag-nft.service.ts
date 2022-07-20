@@ -1,18 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ElrondApiService,
-  ElrondElasticService,
-  Nft,
-  NftMedia,
-} from 'src/common';
+import { ElrondElasticService, NftMedia } from 'src/common';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { AssetsRedisHandler } from '../assets';
+import { AssetsRedisHandler, AssetByIdentifierService } from '../assets';
+import { Asset } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
 
 @Injectable()
 export class FlagNftService {
   constructor(
-    private elrondApi: ElrondApiService,
+    private assetByIdentifierService: AssetByIdentifierService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
@@ -22,10 +18,7 @@ export class FlagNftService {
 
   public async updateNftFlag(identifier: string) {
     try {
-      const nft = await this.elrondApi.getNftByIdentifierForQuery(
-        identifier,
-        'fields=media,isWhitelistedStorage',
-      );
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {
@@ -121,7 +114,7 @@ export class FlagNftService {
     }
   }
 
-  private getNftMedia(nft: Nft): NftMedia | undefined {
+  private getNftMedia(nft: Asset): NftMedia | undefined {
     if (
       !nft ||
       !nft.media ||

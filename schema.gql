@@ -329,7 +329,6 @@ input ChildFilter {
 }
 
 type Collection {
-  activeAuctions: Int!
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -339,9 +338,10 @@ type Collection {
   canWipe: Boolean
   collection: String
   collectionAsset(assetsCount: Int): CollectionAsset!
-  creationDate: Float!
+  creationDate: Int!
   description: String
   name: String!
+  onSaleAssetsCount: Int!
   owner: Account
   ownerAddress: String
   pngUrl: String
@@ -442,6 +442,12 @@ input ConnectionArgs {
 
   """Paginate last"""
   last: Int
+}
+
+type ContractInfo {
+  address: ID!
+  isPaused: Boolean!
+  marketplaceCutPercentage: String!
 }
 
 input CreateAuctionArgs {
@@ -767,9 +773,10 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  contractInfo: ContractInfo!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  marketplaceCutPercentage: String!
+  marketplaceCutPercentage: String! @deprecated(reason: "This will be removed in the next version")
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   notifications(pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
@@ -927,7 +934,7 @@ input TransferNftCreateRoleArgs {
 }
 
 type TrendingCollection {
-  floarPrice: Price
+  floorPrice: Price
   identifier: ID!
   imageUrl: String
   name: String

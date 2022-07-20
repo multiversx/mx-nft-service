@@ -48,8 +48,8 @@ export function getDefaultAuctionsForIdentifierQueryCount(
     order by eD, if(price, price, minBidDenominated) ASC) as temp`;
 }
 
-export function getActiveAuctionsCountForCollection(collections: string[]) {
-  return `SELECT COUNT(1) as Count, a.collection FROM auctions a
+export function getOnSaleAssetsCountForCollection(collections: string[]) {
+  return `SELECT COUNT(DISTINCT a.identifier) as Count, a.collection FROM auctions a
     WHERE a.status = 'Running' AND a.collection IN (${collections.map(
       (value) => `'${value}'`,
     )})

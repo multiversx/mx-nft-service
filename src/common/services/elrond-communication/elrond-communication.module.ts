@@ -5,6 +5,7 @@ import { ElrondDataService } from './elrond-data.service';
 import { ElrondElasticService } from './elrond-elastic.service';
 import { ElrondFeedService } from './elrond-feed.service';
 import { ElrondIdentityService } from './elrond-identity.service';
+import { ElrondPrivateApiService } from './elrond-private-api.service';
 import { ElrondProxyService } from './elrond-proxy.service';
 import { ElrondStatsService } from './elrond-stats.service';
 import { SlackReportService } from './slack-report.service';
@@ -14,6 +15,7 @@ import { SlackReportService } from './slack-report.service';
     ApiService,
     ElrondProxyService,
     ElrondApiService,
+    ElrondPrivateApiService,
     ElrondStatsService,
     ElrondElasticService,
     ElrondIdentityService,
@@ -27,6 +29,7 @@ import { SlackReportService } from './slack-report.service';
     ElrondStatsService,
     ElrondElasticService,
     ElrondApiService,
+    ElrondPrivateApiService,
     ElrondIdentityService,
     ElrondDataService,
     ElrondFeedService,

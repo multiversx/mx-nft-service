@@ -14,6 +14,7 @@ import { AssetsQuery } from 'src/modules/assets/assets-query';
 @Injectable()
 export class ElrondApiService {
   private apiProvider: ApiNetworkProvider;
+
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
@@ -59,6 +60,48 @@ export class ElrondApiService {
       }
       let customError = {
         method: 'GET',
+        resourceUrl,
+        response: error.inner?.response?.data,
+        status: error.inner?.response?.status,
+        message: error.message,
+        name: error.name,
+      };
+      this.logger.error(
+        `An error occurred while calling the elrond api service on url ${resourceUrl}`,
+        {
+          path: `ElrondApiService.${name}`,
+          error: customError,
+        },
+      );
+    }
+  }
+
+  async doPostGeneric(
+    name: string,
+    resourceUrl: string,
+    payload: any,
+  ): Promise<any> {
+    try {
+      const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
+      const response = await this.getService().doPostGeneric(
+        resourceUrl,
+        payload,
+      );
+      profiler.stop();
+
+      MetricsCollector.setExternalCall(
+        ElrondApiService.name,
+        profiler.duration,
+        name,
+      );
+
+      return response;
+    } catch (error) {
+      if (error.inner?.response?.status === HttpStatus.NOT_FOUND) {
+        return;
+      }
+      let customError = {
+        method: 'POST',
         resourceUrl,
         response: error.inner?.response?.data,
         status: error.inner?.response?.status,

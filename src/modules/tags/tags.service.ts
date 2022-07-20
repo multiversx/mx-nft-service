@@ -19,7 +19,7 @@ export class TagsService {
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
-      cacheConfig.followersRedisClientName,
+      cacheConfig.persistentRedisClientName,
     );
   }
 

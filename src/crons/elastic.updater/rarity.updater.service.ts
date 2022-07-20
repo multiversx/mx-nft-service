@@ -1,58 +1,104 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, RedisCacheService } from 'src/common';
 import { Locker } from 'src/utils/locker';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TimeConstants } from 'src/utils/time-utils';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 
 @Injectable()
 export class RarityUpdaterService {
-  private readonly redisClient: Redis.Redis;
+  private readonly rarityQueueRedisClient: Redis.Redis;
+  private readonly persistentRedisClient: Redis.Redis;
 
   constructor(
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
-    private readonly logger: Logger,
     private readonly redisCacheService: RedisCacheService,
+    private readonly nftRarityRepository: NftRarityRepository,
+    private readonly logger: Logger,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
+    this.rarityQueueRedisClient = this.redisCacheService.getClient(
       cacheConfig.rarityQueueClientName,
+    );
+    this.persistentRedisClient = this.redisCacheService.getClient(
+      cacheConfig.persistentRedisClientName,
     );
   }
 
-  async handleValidateToken() {
+  async handleReindexTokenRarities() {
     try {
       await Locker.lock(
-        'handleValidateToken: Validate tokens rarity',
+        `handleReindexTokenRarities`,
         async () => {
-          let collectionsToValidate: string[] = [];
+          const collections = await this.nftRarityRepository.getCollectionIds();
+          for (const collection of collections) {
+            await this.nftRarityService.validateRarities(collection);
+          }
+        },
+        true,
+      );
+    } catch (error) {
+      this.logger.error(`Error when reindexing collection rarities`, {
+        path: 'RarityUpdaterService.handleReindexTokenRarities',
+        exception: error?.message,
+      });
+    }
+  }
 
-          const query = ElasticQuery.create()
+  async handleValidateTokenRarities(maxCollectionsToValidate: number) {
+    let lastIndex: number;
+    try {
+      await Locker.lock(
+        'handleValidateTokenRarities',
+        async () => {
+          lastIndex = await this.getLastValidatedCollectionIndex();
+          let collections: string[] = [];
+
+          const query: ElasticQuery = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
+            .withMustExistCondition('nft_hasRarities')
+            .withMustCondition(
+              QueryType.Match('nft_hasRarities', true, QueryOperator.AND),
+            )
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
-            .withPagination({ from: 0, size: 10000 });
+            .withPagination({
+              from: 0,
+              size: Math.min(10000, maxCollectionsToValidate),
+            });
 
           await this.elasticService.getScrollableList(
             'tokens',
             'token',
             query,
             async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
-              collectionsToValidate = collectionsToValidate.concat(
-                collections.filter(
-                  (c) => collectionsToValidate.indexOf(c) === -1,
-                ),
-              );
+              collections = collections.concat(items.map((i) => i.token));
             },
+            lastIndex + maxCollectionsToValidate,
           );
 
+          const collectionsToValidate = collections.slice(
+            lastIndex,
+            lastIndex + maxCollectionsToValidate,
+          );
+
+          if (collectionsToValidate.length < maxCollectionsToValidate) {
+            await this.setLastValidatedCollectionIndex(0);
+            return;
+          }
+
           await this.validateTokenRarities(collectionsToValidate);
+
+          await this.setLastValidatedCollectionIndex(
+            lastIndex + collectionsToValidate.length,
+          );
         },
         true,
       );
@@ -60,6 +106,7 @@ export class RarityUpdaterService {
       this.logger.error(`Error when scrolling through collections`, {
         path: 'RarityUpdaterService.handleValidateTokenRarity',
         exception: error?.message,
+        lastIndex: lastIndex
       });
     }
   }
@@ -87,23 +134,30 @@ export class RarityUpdaterService {
     }
   }
 
-  async handleUpdateTokenRarities(maxCollectionsToUpdate: number = null) {
+  async handleUpdateTokenRarities(maxCollectionsToUpdate: number) {
     try {
       await Locker.lock(
-        'handleUpdateTokenRarities: Update tokens rarity',
+        'handleUpdateTokenRarities',
         async () => {
           let collectionsToUpdate: string[] = [];
-          let stop = false;
 
           const query = ElasticQuery.create()
-            .withMustNotExistCondition('nft_hasRarity')
-            .withMustNotExistCondition('nft_hasRarities')
-            .withMustExistCondition('token')
+            .withMustExistCondition('nonce')
+            .withMustNotCondition(QueryType.Exists('nft_hasRarity'))
+            .withMustCondition(
+              QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+            )
+            .withMustCondition(
+              QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+            )
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
-            .withPagination({ from: 0, size: 10000 });
+            .withPagination({
+              from: 0,
+              size: 500,
+            });
 
           await this.elasticService.getScrollableList(
             'tokens',
@@ -117,18 +171,15 @@ export class RarityUpdaterService {
                 ),
               );
               if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
-                stop = true;
+                return false;
               }
             },
-            stop,
           );
 
-          if (maxCollectionsToUpdate) {
-            collectionsToUpdate = collectionsToUpdate.slice(
-              0,
-              maxCollectionsToUpdate,
-            );
-          }
+          collectionsToUpdate = collectionsToUpdate.slice(
+            0,
+            maxCollectionsToUpdate,
+          );
 
           await this.updateTokenRarities(collectionsToUpdate);
         },
@@ -136,7 +187,7 @@ export class RarityUpdaterService {
       );
     } catch (error) {
       this.logger.error(`Error when scrolling through NFTs`, {
-        path: 'ElasticRarityUpdaterService.handleUpdateTokenRarity',
+        path: 'RarityUpdaterService.handleUpdateTokenRarity',
         exception: error?.message,
       });
     }
@@ -154,8 +205,8 @@ export class RarityUpdaterService {
           true,
         );
       } catch (error) {
-        this.logger.error(`Error when updating collection raritiies`, {
-          path: 'ElasticRarityUpdaterService.handleValidateTokenRarity',
+        this.logger.error(`Error when updating collection rarities`, {
+          path: 'RarityUpdaterService.handleValidateTokenRarity',
           exception: error?.message,
           collection: collection,
         });
@@ -171,7 +222,7 @@ export class RarityUpdaterService {
       async () => {
         const collectionsToUpdate: string[] =
           await this.redisCacheService.popAllItemsFromList(
-            this.redisClient,
+            this.rarityQueueRedisClient,
             this.getRarityQueueCacheKey(),
             true,
           );
@@ -191,7 +242,7 @@ export class RarityUpdaterService {
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.addItemsToList(
-        this.redisClient,
+        this.rarityQueueRedisClient,
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -200,5 +251,28 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+  }
+
+  private getRarityValidatorCounterCacheKey() {
+    return generateCacheKeyFromParams('rarityValidatorCounter');
+  }
+
+  private async getLastValidatedCollectionIndex(): Promise<number> {
+    return (
+      Number.parseInt(
+        await this.persistentRedisClient.get(
+          this.getRarityValidatorCounterCacheKey(),
+        ),
+      ) || 0
+    );
+  }
+
+  private async setLastValidatedCollectionIndex(index: number): Promise<void> {
+    await this.persistentRedisClient.set(
+      this.getRarityValidatorCounterCacheKey(),
+      index.toString(),
+      'EX',
+      90 * TimeConstants.oneMinute,
+    );
   }
 }

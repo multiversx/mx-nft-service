@@ -11,7 +11,6 @@ import { AuctionsQueriesResolver } from './auctions-queries.resolver';
 import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
-import { OrdersService } from '../orders/order.service';
 import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
@@ -27,6 +26,7 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { AvailableTokensForAuctionRedisHandler } from './loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from '../orders/loaders/last-order.redis-handler';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
+import { CommonModule } from 'src/common.module';
 
 @Module({
   providers: [
@@ -53,6 +53,7 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
   ],
   imports: [
     ElrondCommunicationModule,
+    CommonModule,
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleDb),

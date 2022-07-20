@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { RedisCacheService } from 'src/common';
 import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
 import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
 import { NftTypeEnum } from '../assets/models/NftTypes.enum';
@@ -9,13 +9,14 @@ import { MintEvent } from './entities/auction/mint.event';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
   private readonly redisClient: Redis.Redis;
   constructor(
     private readonly nftFlagsService: FlagNftService,
-    private readonly elrondApi: ElrondApiService,
+    private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly nftRarityService: NftRarityService,
     private readonly redisCacheService: RedisCacheService,
   ) {
@@ -52,10 +53,7 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-      const nft = await this.elrondApi.getNftByIdentifierForQuery(
-        identifier,
-        'fields=type,collection',
-      );
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
         return;

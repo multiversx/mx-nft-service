@@ -7,23 +7,23 @@ import { NftsFlagsRepository } from 'src/db/nftFlags';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { CommonModule } from 'src/common.module';
 import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
-import { AssetsRedisHandler } from '../assets';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
 
 @Module({
   providers: [
     AdminOperationsResolver,
     FlagNftService,
     VerifyContentService,
-    NftRarityModuleGraph,
     AssetsRedisHandler,
+    AssetByIdentifierService,
   ],
   imports: [
     CommonModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([NftsFlagsRepository]),
-    CommonModule,
     NftRarityModuleGraph,
   ],
-  exports: [FlagNftService, AssetsRedisHandler],
+  exports: [FlagNftService],
 })
 export class AdminOperationsModuleGraph {}

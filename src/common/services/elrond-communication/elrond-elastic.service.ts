@@ -7,7 +7,6 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { ApiSettings } from './models/api-settings';
-
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -124,21 +123,27 @@ export class ElrondElasticService {
 
   async bulkRequest<T>(
     collection: string,
-    body: string,
+    updates: string[],
     urlParams: string = '',
   ): Promise<void> {
+    const batchSize = 100;
+
     const url = `${this.url}/${collection}/_bulk${urlParams}`;
 
     const profiler = new PerformanceProfiler();
 
     try {
-      await this.apiService.post(
-        url,
-        body,
-        new ApiSettings({
-          contentType: 'application/x-ndjson',
-        }),
-      );
+      for (let i = 0; i < updates.length; i += batchSize) {
+        const body = this.buildBulkUpdateBody(updates.slice(i, i + batchSize));
+        await this.apiService.post(
+          url,
+          body,
+          new ApiSettings({
+            contentType: 'application/x-ndjson',
+          }),
+        );
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
     } catch (error) {
       this.logger.error({
         method: 'POST',
@@ -154,6 +159,14 @@ export class ElrondElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
+  private buildBulkUpdateBody(updates: string[]): string {
+    let body = '';
+    for (let i = 0; i < updates.length; i++) {
+      body += updates[i];
+    }
+    return body;
+  }
+
   buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
     return {
       doc: {
@@ -162,7 +175,7 @@ export class ElrondElasticService {
     };
   }
 
-  buildBulkUpdateBody<T>(
+  buildBulkUpdate<T>(
     collection: string,
     identifier: string,
     fieldName: string,
@@ -276,8 +289,8 @@ export class ElrondElasticService {
     collection: string,
     key: string,
     elasticQuery: ElasticQuery,
-    action: (items: any[]) => Promise<void>,
-    stop: boolean = false,
+    action: (items: any[]) => Promise<boolean | any>,
+    maxItems: number = null,
   ): Promise<void> {
     const url = `${this.url}/${collection}/_search?scroll=10m`;
 
@@ -291,12 +304,13 @@ export class ElrondElasticService {
 
     const documents = result.data.hits.hits;
     const scrollId = result.data._scroll_id;
+    let totalResults: number = 0;
 
-    await action(
+    let actionResult = await action(
       documents.map((document: any) => this.formatItem(document, key)),
     );
 
-    while (true && !stop) {
+    while (true && actionResult !== false) {
       const scrollProfiler = new PerformanceProfiler();
 
       let scrollResult: any = null;
@@ -327,7 +341,12 @@ export class ElrondElasticService {
         break;
       }
 
-      await action(
+      totalResults += scrollDocuments.length;
+      if (maxItems && totalResults >= maxItems) {
+        break;
+      }
+
+      actionResult = await action(
         scrollDocuments.map((document: any) => this.formatItem(document, key)),
       );
     }
