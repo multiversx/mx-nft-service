@@ -1,7 +1,5 @@
-import { ObjectType } from '@nestjs/graphql';
 import { Nft, NftMetadata } from 'src/common';
 
-@ObjectType()
 export class NftRarityData {
   identifier: string;
   nonce: number;
