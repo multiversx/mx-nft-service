@@ -18,22 +18,23 @@ export class ElasiticUpdatesConsumer {
     if (!mintEvents.events) {
       return;
     }
-
-    await Promise.all([
-      this.elasticUpdateService.handleNftMintEvents(
-        mintEvents?.events?.filter(
-          (e: { identifier: NftEventEnum }) =>
-            e.identifier === NftEventEnum.ESDTNFTCreate,
+    if (process.env.ENABLE_ELASTIC_UPDATES === 'true') {
+      await Promise.all([
+        this.elasticUpdateService.handleNftMintEvents(
+          mintEvents?.events?.filter(
+            (e: { identifier: NftEventEnum }) =>
+              e.identifier === NftEventEnum.ESDTNFTCreate,
+          ),
+          mintEvents.hash,
         ),
-        mintEvents.hash,
-      ),
-      this.elasticUpdateService.handleRaritiesForNftMintAndBurnEvents(
-        mintEvents?.events?.filter(
-          (e: { identifier: NftEventEnum }) =>
-            e.identifier === NftEventEnum.ESDTNFTCreate ||
-            e.identifier === NftEventEnum.ESDTNFTBurn,
+        this.elasticUpdateService.handleRaritiesForNftMintAndBurnEvents(
+          mintEvents?.events?.filter(
+            (e: { identifier: NftEventEnum }) =>
+              e.identifier === NftEventEnum.ESDTNFTCreate ||
+              e.identifier === NftEventEnum.ESDTNFTBurn,
+          ),
         ),
-      ),
-    ]);
+      ]);
+    }
   }
 }
