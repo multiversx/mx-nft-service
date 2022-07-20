@@ -26,11 +26,11 @@ export class NftRarityComputeService {
     const avg: number[] = this.computeAvg(jd);
     const scoreArray: number[] = this.computeScore(avg);
 
-    let scoreArray_asc: number[] = scoreArray.sort((a, b) => a - b);
+    let scoreArrayAsc: number[] = scoreArray.sort((a, b) => a - b);
 
     return nfts.map((nft, i) => {
-      const scoreIndex = scoreArray_asc.indexOf(scoreArray[i]);
-      scoreArray_asc = this.markScoreAsUsed(scoreArray_asc, scoreIndex);
+      const scoreIndex = scoreArrayAsc.indexOf(scoreArray[i]);
+      scoreArrayAsc = this.markScoreAsUsed(scoreArrayAsc, scoreIndex);
 
       return new NftRarityEntity({
         collection: collection,
