@@ -43,14 +43,14 @@ export class NftRarityComputeService {
   }
 
   private computeJd(nfts: NftRarityData[]): number[][] {
-    let jd: number[][] = [];
+    let jaccardDistances: number[][] = [];
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < i; j++) {
-        if (jd[i] === undefined) {
-          jd[i] = [];
+        if (jaccardDistances[i] === undefined) {
+          jaccardDistances[i] = [];
         }
 
-        if (jd[i][j] === undefined) {
+        if (jaccardDistances[i][j] === undefined) {
           const commonTraitsCnt = this.getCommonTraitsCnt(
             nfts[i].metadata.attributes,
             nfts[j].metadata.attributes,
@@ -61,26 +61,29 @@ export class NftRarityComputeService {
             nfts[j].metadata.attributes.length -
             commonTraitsCnt;
 
-          const ji: BigNumber = new BigNumber(commonTraitsCnt).dividedBy(
-            uniqueTraitsCnt,
-          );
+          const jaccardIndex: BigNumber = new BigNumber(
+            commonTraitsCnt,
+          ).dividedBy(uniqueTraitsCnt);
 
-          jd[i][j] = parseFloat(new BigNumber(1).minus(ji).toFixed(15));
+          jaccardDistances[i][j] = parseFloat(
+            new BigNumber(1).minus(jaccardIndex).toFixed(15),
+          );
         }
       }
     }
-    return jd;
+    return jaccardDistances;
   }
 
-  private computeAvg(jd: number[][]): number[] {
+  private computeAvg(jaccardDistances: number[][]): number[] {
     let avg: number[] = [];
-    for (let i = 0; i < jd.length; i++) {
+    for (let i = 0; i < jaccardDistances.length; i++) {
       avg[i] = 0;
-      for (let j = 0; j < jd.length; j++) {
+      for (let j = 0; j < jaccardDistances.length; j++) {
         if (i === j) continue;
-        avg[i] += (i > j ? jd[i]?.[j] : jd[j]?.[i]) || 0;
+        avg[i] +=
+          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
       }
-      const realLength = jd.length - 1;
+      const realLength = jaccardDistances.length - 1;
       if (avg[i] > 0)
         avg[i] = parseFloat(
           new BigNumber(avg[i]).dividedBy(realLength).toFixed(15),
