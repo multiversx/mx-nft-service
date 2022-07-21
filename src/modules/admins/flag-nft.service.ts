@@ -1,9 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BatchUtils,
+  ElasticQuery,
+  QueryOperator,
+  QueryType,
+} from '@elrondnetwork/erdnest';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, NftMedia } from 'src/common';
+import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
 import { AssetsRedisHandler, AssetByIdentifierService } from '../assets';
-import { Asset } from '../assets/models';
+import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
+type NsfwType = {
+  identifier: string;
+  nsfw: any;
+};
 
 @Injectable()
 export class FlagNftService {
@@ -12,6 +23,8 @@ export class FlagNftService {
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
     private nftFlagsRepository: NftsFlagsRepository,
+    @Inject(forwardRef(() => NsfwUpdaterService))
+    private nsfwUpdateService: NsfwUpdaterService,
     private assetsRedisHandler: AssetsRedisHandler,
     private readonly logger: Logger,
   ) {}
@@ -79,6 +92,67 @@ export class FlagNftService {
       this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
       '?retry_on_conflict=2',
     );
+  }
+
+  public async updateCollectionNftsNSFWByAdmin(
+    identifier: string,
+    value: number,
+  ) {
+    const query = ElasticQuery.create()
+      .withMustExistCondition('identifier')
+      .withMustCondition(
+        QueryType.Match('token', identifier, QueryOperator.AND),
+      )
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+      )
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+      )
+      .withPagination({ from: 0, size: 10000 });
+    console.log(JSON.stringify(query));
+    await this.elasticUpdater.getScrollableList(
+      'tokens',
+      'identifier',
+      query,
+      async (items) => {
+        const nsfwItems = items.map((item) => ({
+          identifier: item.identifier,
+          nsfw: item.nft_nsfw_mark,
+        }));
+
+        await this.updateCollectionNfts(nsfwItems, value);
+      },
+    );
+    return true;
+  }
+
+  private async updateCollectionNfts(
+    items: NsfwType[],
+    value: number,
+  ): Promise<void> {
+    const size = 100;
+    for (let i = 0; i < items.length; i += size) {
+      let itemsToUpdate = items.slice(i, i + size);
+      await this.nftFlagsRepository.upsertEntities(
+        itemsToUpdate.map(
+          (nft) =>
+            new NftFlagsEntity({ identifier: nft.identifier, nsfw: value }),
+        ),
+      );
+      await this.nsfwUpdateService.bulkUpdate(
+        itemsToUpdate.map((i) => {
+          return { identifier: i.identifier, nsfw: value };
+        }),
+      );
+      await this.assetsRedisHandler.clearMultipleKeys(
+        itemsToUpdate.map((nft) => nft.identifier),
+      );
+    }
   }
 
   public async updateNftNSFWByAdmin(identifier: string, value) {

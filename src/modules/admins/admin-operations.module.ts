@@ -9,6 +9,7 @@ import { CommonModule } from 'src/common.module';
 import { NftRarityModuleGraph } from '../nft-rarity/nft-rarity.module';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
+import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
     VerifyContentService,
     AssetsRedisHandler,
     AssetByIdentifierService,
+    NsfwUpdaterService,
   ],
   imports: [
     CommonModule,
