@@ -38,7 +38,7 @@ export class FlagNftService {
         return false;
       }
 
-      const value = await this.getNsfwValue(nftMedia);
+      const value = await this.getNsfwValue(nftMedia, identifier);
       if (value) {
         await this.addNsfwFlag(identifier, value);
         this.assetsRedisHandler.clearKey(identifier);
@@ -54,7 +54,67 @@ export class FlagNftService {
     }
   }
 
-  private async getNsfwValue(nftMedia: NftMedia) {
+  public async updateCollectionNftsNSFWByAdmin(
+    collection: string,
+    value: number,
+  ) {
+    try {
+      console.log({ collection });
+      const query = ElasticQuery.create()
+        .withMustExistCondition('identifier')
+        .withMustCondition(
+          QueryType.Match('token', collection, QueryOperator.AND),
+        )
+        .withMustMultiShouldCondition(
+          [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+          (type) => QueryType.Match('type', type),
+        )
+        .withMustCondition(
+          QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+        )
+        .withMustCondition(
+          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+        )
+        .withPagination({ from: 0, size: 10000 });
+      await this.elasticUpdater.getScrollableList(
+        'tokens',
+        'identifier',
+        query,
+        async (items) => {
+          const nsfwItems = items.map((item) => ({
+            identifier: item.identifier,
+            nsfw: item.nft_nsfw_mark,
+          }));
+
+          await this.updateCollectionNfts(nsfwItems, value);
+        },
+      );
+      return true;
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while updating NSFW for collection',
+        {
+          identifier: collection,
+          path: 'FlagNftService.updateCollectionNftsNSFWByAdmin',
+          exception: error?.message,
+        },
+      );
+      return false;
+    }
+  }
+
+  public async getNftFlagsForIdentifiers(identifiers: string[]) {
+    try {
+      return await this.nftFlagsRepository.batchGetFlags(identifiers);
+    } catch (error) {
+      this.logger.error('An error occurred while getting the flags from db', {
+        path: 'FlagNftService.getNftFlagsForIdentifiers',
+        exception: error?.message,
+      });
+    }
+  }
+
+  private async getNsfwValue(nftMedia: NftMedia, identifier: string) {
     try {
       return await this.verifyContent.checkContentSensitivityForUrl(
         nftMedia.url ?? nftMedia.originalUrl,
@@ -65,6 +125,7 @@ export class FlagNftService {
         `An error occurred while calculating nsfw for url ${nftMedia.url} and type ${nftMedia.fileType}`,
         {
           path: 'FlagNftService.getNsfwValue',
+          identifier,
           exception: error?.message,
         },
       );
@@ -92,43 +153,6 @@ export class FlagNftService {
       this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
       '?retry_on_conflict=2',
     );
-  }
-
-  public async updateCollectionNftsNSFWByAdmin(
-    identifier: string,
-    value: number,
-  ) {
-    const query = ElasticQuery.create()
-      .withMustExistCondition('identifier')
-      .withMustCondition(
-        QueryType.Match('token', identifier, QueryOperator.AND),
-      )
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withMustCondition(
-        QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-      )
-      .withMustCondition(
-        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-      )
-      .withPagination({ from: 0, size: 10000 });
-    console.log(JSON.stringify(query));
-    await this.elasticUpdater.getScrollableList(
-      'tokens',
-      'identifier',
-      query,
-      async (items) => {
-        const nsfwItems = items.map((item) => ({
-          identifier: item.identifier,
-          nsfw: item.nft_nsfw_mark,
-        }));
-
-        await this.updateCollectionNfts(nsfwItems, value);
-      },
-    );
-    return true;
   }
 
   private async updateCollectionNfts(
@@ -207,16 +231,5 @@ export class FlagNftService {
     }
 
     return media;
-  }
-
-  public async getNftFlagsForIdentifiers(identifiers: string[]) {
-    try {
-      return await this.nftFlagsRepository.batchGetFlags(identifiers);
-    } catch (error) {
-      this.logger.error('An error occurred while getting the flags from db', {
-        path: 'FlagNftService.getNftFlagsForIdentifiers',
-        exception: error?.message,
-      });
-    }
   }
 }
