@@ -28,6 +28,7 @@ import { CachingModule } from 'src/common/services/caching/caching.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
     RarityUpdaterService,
     AssetByIdentifierService,
     AssetsRedisHandler,
+    NsfwUpdaterService,
   ],
   exports: [NftEventsService],
 })

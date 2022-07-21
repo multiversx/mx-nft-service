@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
@@ -15,6 +15,7 @@ type NsfwType = {
 export class NsfwUpdaterService {
   constructor(
     private elasticService: ElrondElasticService,
+    @Inject(forwardRef(() => FlagNftService))
     private flagsNftService: FlagNftService,
     private assetsRedisHandler: AssetsRedisHandler,
     private readonly logger: Logger,
@@ -181,7 +182,7 @@ export class NsfwUpdaterService {
     }
   }
 
-  private async bulkUpdate(items: NsfwType[]): Promise<void> {
+  public async bulkUpdate(items: NsfwType[]): Promise<void> {
     try {
       if (items && items.length > 0) {
         this.logger.log(`Updating NSFW flag`);
