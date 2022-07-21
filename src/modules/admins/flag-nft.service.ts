@@ -59,7 +59,6 @@ export class FlagNftService {
     value: number,
   ) {
     try {
-      console.log({ collection });
       const query = ElasticQuery.create()
         .withMustExistCondition('identifier')
         .withMustCondition(
