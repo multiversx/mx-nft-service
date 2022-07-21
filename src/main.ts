@@ -106,6 +106,9 @@ async function bootstrap() {
   logger.log(
     `Rarity cron jobs are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
   );
+  logger.log(
+    `Elastic updates are active: ${process.env.ENABLE_ELASTIC_UPDATES}`,
+  );
 }
 
 bootstrap();
