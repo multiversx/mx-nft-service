@@ -23,6 +23,8 @@ export class NftRarityComputeService {
       ];
     }
 
+    nfts = this.computeNftsAttributeMaps(nfts);
+
     const jaccardDistances: number[][] = await this.computeJd(nfts);
     const avg: number[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
@@ -43,7 +45,47 @@ export class NftRarityComputeService {
     });
   }
 
-  //private computeJd(nfts: NftRarityData[]): number[][] {
+  private computeNftsAttributeMaps(nfts: NftRarityData[]): NftRarityData[] {
+    let traitTypeIndexes: number[] = [];
+    let attributeIndexes: number[][] = [];
+
+    for (let nft of nfts) {
+      nft.attributesMap = [];
+
+      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
+        const traitType = value.trait_type;
+        const traitValue = value.value;
+
+        let traitIndex: number = null;
+        let attributeIndex: number = null;
+
+        if (traitTypeIndexes[traitType] === undefined) {
+          traitIndex = Object.entries(traitTypeIndexes).length;
+          traitTypeIndexes[traitType] = traitIndex;
+        } else {
+          traitIndex = traitTypeIndexes[traitType];
+        }
+
+        if (attributeIndexes?.[traitIndex] === undefined) {
+          attributeIndexes[traitIndex] = [];
+        }
+
+        if (attributeIndexes[traitIndex][traitValue] === undefined) {
+          attributeIndex = Object.entries(attributeIndexes[traitIndex]).length;
+          attributeIndexes[traitIndex][traitValue] = attributeIndex;
+        } else {
+          attributeIndex = attributeIndexes[traitIndex][traitValue];
+        }
+
+        nft.attributesMap[traitIndex] = attributeIndex;
+      }
+      nft.attributesCount = nft.metadata.attributes.length;
+      nft.metadata = null;
+    }
+
+    return nfts;
+  }
+
   private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
     const profiler = new PerformanceProfiler();
 
@@ -68,15 +110,13 @@ export class NftRarityComputeService {
     const profiler = new PerformanceProfiler();
     let jaccardDistances: number[] = [];
     for (let j = 0; j < i; j++) {
-      const commonTraitsCount = this.getCommonTraitsCount(
-        nfts[i].metadata.attributes,
-        nfts[j].metadata.attributes,
+      const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
+        nfts[i].attributesMap,
+        nfts[j].attributesMap,
       );
 
       const uniqueTraitsCount =
-        nfts[i].metadata.attributes.length +
-        nfts[j].metadata.attributes.length -
-        commonTraitsCount;
+        nfts[i].attributesCount + nfts[j].attributesCount - commonTraitsCount;
 
       const jaccardIndex: BigNumber = new BigNumber(
         commonTraitsCount,
@@ -154,20 +194,14 @@ export class NftRarityComputeService {
     return scoreArray;
   }
 
-  private getCommonTraitsCount(
-    obj1: [{ [key: string]: string }],
-    obj2: [{ [key: string]: string }],
+  private getCommonTraitsCountFromAttributeMaps(
+    map1: number[],
+    map2: number[],
   ): number {
-    let arr1: string[] = [];
-    let arr2: string[] = [];
-    for (const [key, value] of Object.entries(obj1)) {
-      arr1.push(JSON.stringify(value));
+    let count = 0;
+    for (let i = 0; i < map1.length; i++) {
+      if (map1[i] === map2[i]) count++;
     }
-    for (const [key, value] of Object.entries(obj2)) {
-      arr2.push(JSON.stringify(value));
-    }
-    return arr1.filter((e) => {
-      return arr2.includes(e);
-    }).length;
+    return count;
   }
 }
