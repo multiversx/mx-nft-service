@@ -11,6 +11,7 @@ import { NftTypeEnum } from '../assets/models';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 import { NftRarityData } from './nft-rarity-data.model';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 
 @Injectable()
 export class NftRarityService {
@@ -23,7 +24,7 @@ export class NftRarityService {
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
   ) {
-    this.setElasticRarityMappings();
+    //this.setElasticRarityMappings();
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
@@ -163,6 +164,8 @@ export class NftRarityService {
       return false;
     }
 
+    const profiler = new PerformanceProfiler();
+
     try {
       await Promise.all([
         this.nftRarityRepository.saveOrUpdateBulk(rarities),
@@ -180,6 +183,9 @@ export class NftRarityService {
       });
       return false;
     }
+
+    profiler.stop();
+    console.log(`update DB, Elastic, etc duration ${profiler.duration}`);
 
     return true;
   }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { NftRarityEntity } from 'src/db/nft-rarity';
 import { NftRarityData } from './nft-rarity-data.model';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 
 @Injectable()
 export class NftRarityComputeService {
@@ -22,7 +23,7 @@ export class NftRarityComputeService {
       ];
     }
 
-    const jaccardDistances: number[][] = this.computeJd(nfts);
+    const jaccardDistances: number[][] = await this.computeJd(nfts);
     const avg: number[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
@@ -42,39 +43,57 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeJd(nfts: NftRarityData[]): number[][] {
+  //private computeJd(nfts: NftRarityData[]): number[][] {
+  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
+    const profiler = new PerformanceProfiler();
+
     let jaccardDistances: number[][] = [];
+    let jaccardPromises: Promise<number[]>[] = [];
     for (let i = 0; i < nfts.length; i++) {
-      for (let j = 0; j < i; j++) {
-        if (jaccardDistances[i] === undefined) {
-          jaccardDistances[i] = [];
-        }
-
-        if (jaccardDistances[i][j] === undefined) {
-          const commonTraitsCount = this.getCommonTraitsCount(
-            nfts[i].metadata.attributes,
-            nfts[j].metadata.attributes,
-          );
-
-          const uniqueTraitsCount =
-            nfts[i].metadata.attributes.length +
-            nfts[j].metadata.attributes.length -
-            commonTraitsCount;
-
-          const jaccardIndex: BigNumber = new BigNumber(
-            commonTraitsCount,
-          ).dividedBy(uniqueTraitsCount);
-
-          jaccardDistances[i][j] = parseFloat(
-            new BigNumber(1).minus(jaccardIndex).toFixed(15),
-          );
-        }
-      }
+      jaccardDistances[i] = await this.computePartialJd(i, nfts);
     }
+
+    await Promise.all(jaccardPromises);
+
+    profiler.stop();
+    console.log(`computeJd duration ${profiler.duration}`);
+
+    return jaccardDistances;
+  }
+
+  private async computePartialJd(
+    i: number,
+    nfts: NftRarityData[],
+  ): Promise<number[]> {
+    const profiler = new PerformanceProfiler();
+    let jaccardDistances: number[] = [];
+    for (let j = 0; j < i; j++) {
+      const commonTraitsCount = this.getCommonTraitsCount(
+        nfts[i].metadata.attributes,
+        nfts[j].metadata.attributes,
+      );
+
+      const uniqueTraitsCount =
+        nfts[i].metadata.attributes.length +
+        nfts[j].metadata.attributes.length -
+        commonTraitsCount;
+
+      const jaccardIndex: BigNumber = new BigNumber(
+        commonTraitsCount,
+      ).dividedBy(uniqueTraitsCount);
+
+      jaccardDistances[j] = parseFloat(
+        new BigNumber(1).minus(jaccardIndex).toFixed(15),
+      );
+    }
+    profiler.stop();
+    //if (i > 1000) console.log(`computePartialJd duration ${profiler.duration}`);
     return jaccardDistances;
   }
 
   private computeAvg(jaccardDistances: number[][]): number[] {
+    const profiler = new PerformanceProfiler();
+
     let avg: number[] = [];
     for (let i = 0; i < jaccardDistances.length; i++) {
       avg[i] = 0;
@@ -89,10 +108,16 @@ export class NftRarityComputeService {
           new BigNumber(avg[i]).dividedBy(realLength).toFixed(15),
         );
     }
+
+    profiler.stop();
+    console.log(`computeAvg duration ${profiler.duration}`);
+
     return avg;
   }
 
   private computeScore(avg: number[]): number[] {
+    const profiler = new PerformanceProfiler();
+
     let scores: number[] = [];
     const avgMax: number = Math.max(...avg);
     const avgMin: number = Math.min(...avg);
@@ -108,6 +133,10 @@ export class NftRarityComputeService {
               .toFixed(15),
           );
     }
+
+    profiler.stop();
+    console.log(`computeScore duration ${profiler.duration}`);
+
     return scores;
   }
 
