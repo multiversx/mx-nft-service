@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import BigNumber from 'bignumber.js';
 import { NftRarityEntity } from 'src/db/nft-rarity';
 import { NftRarityData } from './nft-rarity-data.model';
-import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 
 @Injectable()
 export class NftRarityComputeService {
+  private readonly precisionDecimals: number = 15;
+  private readonly precisionCoefficient: bigint = BigInt(
+    Math.pow(10, this.precisionDecimals),
+  );
+
+  constructor() {}
+
   /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
   async computeJaccardDistancesRarities(
     collection: string,
@@ -25,8 +30,8 @@ export class NftRarityComputeService {
 
     nfts = this.computeNftsAttributeMaps(nfts);
 
-    const jaccardDistances: number[][] = await this.computeJd(nfts);
-    const avg: number[] = this.computeAvg(jaccardDistances);
+    const jaccardDistances: bigint[][] = await this.computeJd(nfts);
+    const avg: bigint[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
     let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
@@ -45,60 +50,12 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeNftsAttributeMaps(nfts: NftRarityData[]): NftRarityData[] {
-    let traitTypeIndexes: number[] = [];
-    let attributeIndexes: number[][] = [];
+  private async computeJd(nfts: NftRarityData[]): Promise<bigint[][]> {
+    let jaccardDistances: bigint[][] = [];
 
-    for (let nft of nfts) {
-      nft.attributesMap = [];
-
-      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-        const traitType = value.trait_type;
-        const traitValue = value.value;
-
-        let traitIndex: number = null;
-        let attributeIndex: number = null;
-
-        if (traitTypeIndexes[traitType] === undefined) {
-          traitIndex = Object.entries(traitTypeIndexes).length;
-          traitTypeIndexes[traitType] = traitIndex;
-        } else {
-          traitIndex = traitTypeIndexes[traitType];
-        }
-
-        if (attributeIndexes?.[traitIndex] === undefined) {
-          attributeIndexes[traitIndex] = [];
-        }
-
-        if (attributeIndexes[traitIndex][traitValue] === undefined) {
-          attributeIndex = Object.entries(attributeIndexes[traitIndex]).length;
-          attributeIndexes[traitIndex][traitValue] = attributeIndex;
-        } else {
-          attributeIndex = attributeIndexes[traitIndex][traitValue];
-        }
-
-        nft.attributesMap[traitIndex] = attributeIndex;
-      }
-      nft.attributesCount = nft.metadata.attributes.length;
-      nft.metadata = null;
-    }
-
-    return nfts;
-  }
-
-  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
-    const profiler = new PerformanceProfiler();
-
-    let jaccardDistances: number[][] = [];
-    let jaccardPromises: Promise<number[]>[] = [];
     for (let i = 0; i < nfts.length; i++) {
       jaccardDistances[i] = await this.computePartialJd(i, nfts);
     }
-
-    await Promise.all(jaccardPromises);
-
-    profiler.stop();
-    console.log(`computeJd duration ${profiler.duration}`);
 
     return jaccardDistances;
   }
@@ -106,9 +63,9 @@ export class NftRarityComputeService {
   private async computePartialJd(
     i: number,
     nfts: NftRarityData[],
-  ): Promise<number[]> {
-    const profiler = new PerformanceProfiler();
-    let jaccardDistances: number[] = [];
+  ): Promise<bigint[]> {
+    let jaccardDistances: bigint[] = [];
+
     for (let j = 0; j < i; j++) {
       const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
         nfts[i].attributesMap,
@@ -118,74 +75,60 @@ export class NftRarityComputeService {
       const uniqueTraitsCount =
         nfts[i].attributesCount + nfts[j].attributesCount - commonTraitsCount;
 
-      const jaccardIndex: BigNumber = new BigNumber(
-        commonTraitsCount,
-      ).dividedBy(uniqueTraitsCount);
+      const jaccardIndex: bigint =
+        (this.precisionCoefficient * BigInt(commonTraitsCount)) /
+        BigInt(uniqueTraitsCount);
 
-      jaccardDistances[j] = parseFloat(
-        new BigNumber(1).minus(jaccardIndex).toFixed(15),
-      );
+      jaccardDistances[j] =
+        this.precisionCoefficient * BigInt(10) - jaccardIndex;
     }
-    profiler.stop();
-    //if (i > 1000) console.log(`computePartialJd duration ${profiler.duration}`);
+
     return jaccardDistances;
   }
 
-  private computeAvg(jaccardDistances: number[][]): number[] {
-    const profiler = new PerformanceProfiler();
-
-    let avg: number[] = [];
+  private computeAvg(jaccardDistances: bigint[][]): bigint[] {
+    let avg: bigint[] = [];
     for (let i = 0; i < jaccardDistances.length; i++) {
-      avg[i] = 0;
+      avg[i] = BigInt(0);
       for (let j = 0; j < jaccardDistances.length; j++) {
         if (i === j) continue;
         avg[i] +=
-          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
+          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) ||
+          BigInt(0);
       }
       const realLength = jaccardDistances.length - 1;
-      if (avg[i] > 0)
-        avg[i] = parseFloat(
-          new BigNumber(avg[i]).dividedBy(realLength).toFixed(15),
-        );
+      if (avg[i] > 0) avg[i] /= BigInt(realLength);
     }
-
-    profiler.stop();
-    console.log(`computeAvg duration ${profiler.duration}`);
 
     return avg;
   }
 
-  private computeScore(avg: number[]): number[] {
-    const profiler = new PerformanceProfiler();
-
+  private computeScore(avg: bigint[]): number[] {
     let scores: number[] = [];
-    const avgMax: number = Math.max(...avg);
-    const avgMin: number = Math.min(...avg);
+    const avgMax: bigint = this.getMaxFromBigIntArray(avg);
+    const avgMin: bigint = this.getMinFromBigIntArray(avg, avgMax);
+    const avgDiff: bigint = avgMax - avgMin;
 
     for (let i = 0; i < avg.length; i++) {
-      scores[i] = this.isUniqueByAvg(avg[i], avgMin, avgMax)
+      scores[i] = this.isUniqueByAvg(avg[i], avgDiff)
         ? 100
-        : parseFloat(
-            new BigNumber(avg[i])
-              .minus(avgMin)
-              .dividedBy(new BigNumber(avgMax).minus(avgMin))
-              .multipliedBy(100)
-              .toFixed(15),
-          );
+        : Number(
+            ((avg[i] - avgMin) *
+              BigInt(Math.pow(10, 2 + this.precisionDecimals))) /
+              avgDiff,
+          ) / Math.pow(10, this.precisionDecimals);
     }
-
-    profiler.stop();
-    console.log(`computeScore duration ${profiler.duration}`);
 
     return scores;
   }
 
-  private isUniqueByAvg(avg: number, avgMin: number, avgMax: number): boolean {
+  private isUniqueByAvg(avg: bigint, avgDiff: bigint): boolean {
     return (
-      !isFinite(avgMax - avgMin) ||
-      avgMax - avgMin === 0 ||
-      isNaN(avg) ||
-      avg === 0
+      avg === undefined ||
+      avg === null ||
+      Number(avg) === 0 ||
+      Number(avgDiff) === 0 ||
+      !isFinite(Number(avgDiff))
     );
   }
 
@@ -203,5 +146,83 @@ export class NftRarityComputeService {
       if (map1[i] === map2[i]) count++;
     }
     return count;
+  }
+
+  private computeNftsAttributeMaps(nfts: NftRarityData[]): NftRarityData[] {
+    let traitTypeIndexes: number[] = [];
+    let attributeIndexes: number[][] = [];
+
+    for (let nft of nfts) {
+      nft.attributesMap = [];
+
+      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
+        const traitType = value.trait_type;
+        const traitValue = value.value;
+
+        let traitIndex: number = null;
+        let attributeIndex: number = null;
+
+        traitIndex = this.getOrSetTraitIndex(traitTypeIndexes, traitType);
+
+        attributeIndex = this.getOrSetAttributeIndex(
+          attributeIndexes,
+          traitIndex,
+          traitValue,
+        );
+
+        nft.attributesMap[traitIndex] = attributeIndex;
+      }
+
+      nft.attributesCount = nft.metadata.attributes.length;
+
+      nft.metadata = null;
+    }
+
+    return nfts;
+  }
+
+  private getOrSetTraitIndex(
+    traitTypeIndexes: number[],
+    traitType: string,
+  ): number {
+    if (traitTypeIndexes[traitType] === undefined) {
+      traitTypeIndexes[traitType] = Object.entries(traitTypeIndexes).length;
+    }
+
+    return traitTypeIndexes[traitType];
+  }
+
+  private getOrSetAttributeIndex(
+    attributeIndexes: number[][],
+    traitIndex: number,
+    traitValue: string,
+  ): number {
+    if (attributeIndexes?.[traitIndex] === undefined) {
+      attributeIndexes[traitIndex] = [];
+    }
+
+    if (attributeIndexes[traitIndex][traitValue] === undefined) {
+      attributeIndexes[traitIndex][traitValue] = Object.entries(
+        attributeIndexes[traitIndex],
+      ).length;
+    }
+
+    return attributeIndexes[traitIndex][traitValue];
+  }
+
+  private getMaxFromBigIntArray(array: bigint[]): bigint {
+    let max: bigint = BigInt(0);
+    for (const value of array) {
+      if (value > max) max = value;
+    }
+    return max;
+  }
+
+  private getMinFromBigIntArray(array: bigint[], max: bigint = null): bigint {
+    let min: bigint = max || this.getMaxFromBigIntArray(array);
+    for (const value of array) {
+      if (value < min) min = value;
+    }
+    return min;
   }
 }
