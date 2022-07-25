@@ -4,10 +4,7 @@ import { NftRarityData } from './nft-rarity-data.model';
 
 @Injectable()
 export class NftRarityComputeService {
-  private readonly precisionDecimals: number = 15;
-  private readonly precisionCoefficient: bigint = BigInt(
-    Math.pow(10, this.precisionDecimals),
-  );
+  private readonly precisionCoefficient: bigint = BigInt(Math.pow(10, 15));
 
   constructor() {}
 
@@ -43,7 +40,7 @@ export class NftRarityComputeService {
       return new NftRarityEntity({
         collection: collection,
         identifier: nft.identifier,
-        score: parseFloat(scoreArray[i].toFixed(3)),
+        score: scoreArray[i], //parseFloat(scoreArray[i].toFixed(3)),
         nonce: nft.nonce,
         rank: scoreArray.length - scoreIndex,
       });
@@ -113,10 +110,9 @@ export class NftRarityComputeService {
       scores[i] = this.isUniqueByAvg(avg[i], avgDiff)
         ? 100
         : Number(
-            ((avg[i] - avgMin) *
-              BigInt(Math.pow(10, 2 + this.precisionDecimals))) /
+            ((avg[i] - avgMin) * BigInt(100) * this.precisionCoefficient) /
               avgDiff,
-          ) / Math.pow(10, this.precisionDecimals);
+          ) / Number(this.precisionCoefficient);
     }
 
     return scores;
