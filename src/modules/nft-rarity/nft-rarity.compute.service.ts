@@ -4,7 +4,10 @@ import { NftRarityData } from './nft-rarity-data.model';
 
 @Injectable()
 export class NftRarityComputeService {
-  private readonly precisionCoefficient: bigint = BigInt(Math.pow(10, 15));
+  private readonly precision: number = 15;
+  private readonly precisionCoefficient: bigint = BigInt(
+    Math.pow(10, this.precision),
+  );
 
   constructor() {}
 
@@ -27,7 +30,7 @@ export class NftRarityComputeService {
 
     nfts = this.computeNftsAttributeMaps(nfts);
 
-    const jaccardDistances: bigint[][] = await this.computeJd(nfts);
+    const jaccardDistances: number[][] = await this.computeJd(nfts);
     const avg: bigint[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
@@ -40,15 +43,15 @@ export class NftRarityComputeService {
       return new NftRarityEntity({
         collection: collection,
         identifier: nft.identifier,
-        score: scoreArray[i], //parseFloat(scoreArray[i].toFixed(3)),
+        score: parseFloat(scoreArray[i].toFixed(3)),
         nonce: nft.nonce,
         rank: scoreArray.length - scoreIndex,
       });
     });
   }
 
-  private async computeJd(nfts: NftRarityData[]): Promise<bigint[][]> {
-    let jaccardDistances: bigint[][] = [];
+  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
+    let jaccardDistances: number[][] = [];
 
     for (let i = 0; i < nfts.length; i++) {
       jaccardDistances[i] = await this.computePartialJd(i, nfts);
@@ -60,8 +63,8 @@ export class NftRarityComputeService {
   private async computePartialJd(
     i: number,
     nfts: NftRarityData[],
-  ): Promise<bigint[]> {
-    let jaccardDistances: bigint[] = [];
+  ): Promise<number[]> {
+    let jaccardDistances: number[] = [];
 
     for (let j = 0; j < i; j++) {
       const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
@@ -77,21 +80,25 @@ export class NftRarityComputeService {
         BigInt(uniqueTraitsCount);
 
       jaccardDistances[j] =
-        this.precisionCoefficient * BigInt(10) - jaccardIndex;
+        Number(this.precisionCoefficient * BigInt(10) - jaccardIndex) /
+        Number(this.precisionCoefficient);
     }
 
     return jaccardDistances;
   }
 
-  private computeAvg(jaccardDistances: bigint[][]): bigint[] {
+  private computeAvg(jaccardDistances: number[][]): bigint[] {
     let avg: bigint[] = [];
     for (let i = 0; i < jaccardDistances.length; i++) {
       avg[i] = BigInt(0);
       for (let j = 0; j < jaccardDistances.length; j++) {
         if (i === j) continue;
         avg[i] +=
-          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) ||
-          BigInt(0);
+          (i > j
+            ? BigInt(jaccardDistances[i]?.[j] * Math.pow(10, this.precision))
+            : BigInt(
+                jaccardDistances[j]?.[i] * Math.pow(10, this.precision),
+              )) || BigInt(0);
       }
       const realLength = jaccardDistances.length - 1;
       if (avg[i] > 0) avg[i] /= BigInt(realLength);
