@@ -146,7 +146,7 @@ export class NftRarityComputeService {
   ): number {
     let count = 0;
     for (let i = 0; i < map1.length; i++) {
-      if (map1[i] === map2[i]) count++;
+      if (map1[i] === map2[i] && map1[i] !== undefined) count++;
     }
     return count;
   }
