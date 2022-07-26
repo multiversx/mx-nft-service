@@ -1,16 +1,10 @@
+import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
 import { NftRarityData } from './nft-rarity-data.model';
 
 @Injectable()
 export class NftRarityComputeService {
-  private readonly precision: number = 15;
-  private readonly precisionCoefficient: bigint = BigInt(
-    Math.pow(10, this.precision),
-  );
-
-  constructor() {}
-
   /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
   async computeJaccardDistancesRarities(
     collection: string,
@@ -31,7 +25,7 @@ export class NftRarityComputeService {
     nfts = this.computeNftsAttributeMaps(nfts);
 
     const jaccardDistances: number[][] = await this.computeJd(nfts);
-    const avg: bigint[] = this.computeAvg(jaccardDistances);
+    const avg: number[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
     let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
@@ -75,57 +69,47 @@ export class NftRarityComputeService {
       const uniqueTraitsCount =
         nfts[i].attributesCount + nfts[j].attributesCount - commonTraitsCount;
 
-      const jaccardIndex: bigint =
-        (this.precisionCoefficient * BigInt(commonTraitsCount)) /
-        BigInt(uniqueTraitsCount);
+      const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
 
-      jaccardDistances[j] =
-        Number(this.precisionCoefficient * BigInt(10) - jaccardIndex) /
-        Number(this.precisionCoefficient);
+      jaccardDistances[j] = 1 - jaccardIndex;
     }
 
     return jaccardDistances;
   }
 
-  private computeAvg(jaccardDistances: number[][]): bigint[] {
-    let avg: bigint[] = [];
+  private computeAvg(jaccardDistances: number[][]): number[] {
+    let avg: number[] = [];
     for (let i = 0; i < jaccardDistances.length; i++) {
-      avg[i] = BigInt(0);
+      avg[i] = 0;
       for (let j = 0; j < jaccardDistances.length; j++) {
         if (i === j) continue;
         avg[i] +=
-          (i > j
-            ? BigInt(jaccardDistances[i]?.[j] * Math.pow(10, this.precision))
-            : BigInt(
-                jaccardDistances[j]?.[i] * Math.pow(10, this.precision),
-              )) || BigInt(0);
+          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
       }
       const realLength = jaccardDistances.length - 1;
-      if (avg[i] > 0) avg[i] /= BigInt(realLength);
+      if (avg[i] > 0) avg[i] /= realLength;
     }
 
     return avg;
   }
 
-  private computeScore(avg: bigint[]): number[] {
+  private computeScore(avg: number[]): number[] {
     let scores: number[] = [];
-    const avgMax: bigint = this.getMaxFromBigIntArray(avg);
-    const avgMin: bigint = this.getMinFromBigIntArray(avg, avgMax);
-    const avgDiff: bigint = avgMax - avgMin;
+
+    const avgMax: number = Math.max(...avg);
+    const avgMin: number = Math.min(...avg);
+    const avgDiff: number = avgMax - avgMin;
 
     for (let i = 0; i < avg.length; i++) {
       scores[i] = this.isUniqueByAvg(avg[i], avgDiff)
         ? 100
-        : Number(
-            ((avg[i] - avgMin) * BigInt(100) * this.precisionCoefficient) /
-              avgDiff,
-          ) / Number(this.precisionCoefficient);
+        : ((avg[i] - avgMin) / avgDiff) * 100;
     }
 
     return scores;
   }
 
-  private isUniqueByAvg(avg: bigint, avgDiff: bigint): boolean {
+  private isUniqueByAvg(avg: number, avgDiff: number): boolean {
     return (
       avg === undefined ||
       avg === null ||
@@ -211,21 +195,5 @@ export class NftRarityComputeService {
     }
 
     return attributeIndexes[traitIndex][traitValue];
-  }
-
-  private getMaxFromBigIntArray(array: bigint[]): bigint {
-    let max: bigint = BigInt(0);
-    for (const value of array) {
-      if (value > max) max = value;
-    }
-    return max;
-  }
-
-  private getMinFromBigIntArray(array: bigint[], max: bigint = null): bigint {
-    let min: bigint = max || this.getMaxFromBigIntArray(array);
-    for (const value of array) {
-      if (value < min) min = value;
-    }
-    return min;
   }
 }
