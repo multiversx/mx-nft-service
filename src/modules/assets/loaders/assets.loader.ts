@@ -23,7 +23,7 @@ export class AssetsProvider extends BaseProvider<string> {
 
   async getData(identifiers: string[]) {
     if (identifiers.includes('NFT-b4996c-0b')) {
-      console.log('Loading NFT Info', identifiers);
+      console.log(`Loading NFT Info: ${identifiers.join(', ')}. Length: ${identifiers.length}`);
     }
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
