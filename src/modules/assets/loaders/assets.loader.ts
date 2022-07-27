@@ -22,19 +22,26 @@ export class AssetsProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    console.log('Loading NFT Info');
+    if (identifiers.includes('NFT-b4996c-0b')) {
+      console.log('Loading NFT Info', identifiers);
+    }
     const nfts = await this.apiService.getNftsByIdentifiers(
       identifiers,
       0,
       'withOwner=true',
     );
-    console.log('NFT Info', nfts);
+
+    if (identifiers.includes('NFT-b4996c-0b')) {
+      console.log('NFT Info', nfts);
+    }
 
     const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
 
     this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
 
-    console.log('nftsGrouped', nftsGrouped);
+    if (identifiers.includes('NFT-b4996c-0b')) {
+      console.log('nftsGrouped', nftsGrouped);
+    }
 
     return nftsGrouped;
   }
