@@ -23,7 +23,7 @@ export class NftRarityService {
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
   ) {
-    //this.setElasticRarityMappings();
+    this.setElasticRarityMappings();
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
@@ -154,13 +154,6 @@ export class NftRarityService {
       nftsWithAttributes,
       collectionTicker,
     );
-
-    var fs = require('fs');
-    fs.writeFile('withBigInt.json', JSON.stringify(rarities), function (err) {
-      if (err) {
-        console.log(err);
-      }
-    });
 
     if (!rarities) {
       this.logger.error(`No rarities were computed`, {

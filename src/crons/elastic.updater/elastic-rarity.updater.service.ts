@@ -7,7 +7,7 @@ import { RarityUpdaterService } from './rarity.updater.service';
 export class ElasticRarityUpdaterService {
   constructor(private readonly rarityUpdaterService: RarityUpdaterService) {}
 
-  //@Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleValidateTokenRaritiesCronJob() {
     console.log('cronjob');
     await this.rarityUpdaterService.handleValidateTokenRarities(
@@ -15,14 +15,14 @@ export class ElasticRarityUpdaterService {
     );
   }
 
-  //@Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleUpdateTokenRaritiesCronJob() {
     await this.rarityUpdaterService.handleUpdateTokenRarities(
       cronJobs.rarity.colectionsToUpdateEvery10s,
     );
   }
 
-  //@Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleProcessTokenRarityQueueCronJob() {
     await this.rarityUpdaterService.processTokenRarityQueue();
   }
