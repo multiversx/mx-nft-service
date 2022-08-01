@@ -39,7 +39,7 @@ export class Collection {
   canAddQuantity: boolean;
   @Field(() => [CollectionRole], { nullable: true })
   roles: CollectionRole[];
-  @Field({ nullable: true })
+  @Field()
   verified: boolean;
   @Field({ nullable: true })
   website: string;
