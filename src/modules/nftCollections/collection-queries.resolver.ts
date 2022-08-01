@@ -71,8 +71,6 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   @ResolveField('collectionAsset', () => CollectionAsset)
   async collectionAssets(
     @Parent() collectionResponse: Collection,
-    @Args('assetsCount', { nullable: true, type: () => Int })
-    assetsCount: number = 4,
   ): Promise<CollectionAsset> {
     const { collection, collectionAsset } = collectionResponse;
     if (collectionAsset) return collectionAsset;
