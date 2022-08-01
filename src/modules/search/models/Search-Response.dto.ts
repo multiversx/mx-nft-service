@@ -1,14 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { SearchItemResponse } from './SearchItemResponse';
+import {
+  SearchNftCollectionResponse,
+  SearchItemResponse,
+} from './SearchItemResponse';
 
 @ObjectType()
 export class SearchResponse {
   @Field(() => ID, { nullable: true })
   searchTerm: string;
-  @Field(() => [SearchItemResponse], { nullable: true })
-  collections: SearchItemResponse[];
-  @Field(() => [SearchItemResponse], { nullable: true })
-  nfts: SearchItemResponse[];
+  @Field(() => [SearchNftCollectionResponse], { nullable: true })
+  collections: SearchNftCollectionResponse[];
+  @Field(() => [SearchNftCollectionResponse], { nullable: true })
+  nfts: SearchNftCollectionResponse[];
   @Field(() => [SearchItemResponse], { nullable: true })
   accounts: SearchItemResponse[];
   @Field(() => [SearchItemResponse], { nullable: true })

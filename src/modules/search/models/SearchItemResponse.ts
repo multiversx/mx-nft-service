@@ -11,3 +11,14 @@ export class SearchItemResponse {
     Object.assign(this, init);
   }
 }
+
+@ObjectType()
+export class SearchNftCollectionResponse extends SearchItemResponse {
+  @Field(() => Boolean, { nullable: true })
+  verified: boolean;
+
+  constructor(init?: Partial<SearchNftCollectionResponse>) {
+    super();
+    Object.assign(this, init);
+  }
+}

@@ -830,10 +830,16 @@ type SearchItemResponse {
   name: String
 }
 
+type SearchNftCollectionResponse {
+  identifier: String!
+  name: String
+  verified: Boolean
+}
+
 type SearchResponse {
   accounts: [SearchItemResponse!]
-  collections: [SearchItemResponse!]
-  nfts: [SearchItemResponse!]
+  collections: [SearchNftCollectionResponse!]
+  nfts: [SearchNftCollectionResponse!]
   searchTerm: ID
   tags: [SearchItemResponse!]
 }
