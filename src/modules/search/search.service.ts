@@ -12,7 +12,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 import {
-  NftCollectionResponse,
+  SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
 
@@ -144,7 +144,7 @@ export class SearchService {
     );
     return response?.map(
       (c) =>
-        new NftCollectionResponse({
+        new SearchNftCollectionResponse({
           identifier: c.collection,
           name: c.name,
           verified: c.assets ? true : false,
@@ -156,7 +156,7 @@ export class SearchService {
     return generateCacheKeyFromParams('search_collection', searchTerm);
   }
 
-  async getNfts(searchTerm: string): Promise<NftCollectionResponse[]> {
+  async getNfts(searchTerm: string): Promise<SearchNftCollectionResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -187,7 +187,7 @@ export class SearchService {
         `fields=${this.fieldsRequested}`,
       );
       return [
-        new NftCollectionResponse({
+        new SearchNftCollectionResponse({
           identifier: response?.identifier,
           name: response?.name,
           verified: response.assets ? true : false,
@@ -201,7 +201,7 @@ export class SearchService {
     );
     return response?.map(
       (c) =>
-        new NftCollectionResponse({
+        new SearchNftCollectionResponse({
           identifier: c?.identifier,
           name: c?.name,
           verified: c?.assets ? true : false,

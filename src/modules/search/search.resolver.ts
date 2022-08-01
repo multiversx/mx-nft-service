@@ -5,7 +5,7 @@ import { SearchFilter } from './models/Search.Filter';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { isValidAddress } from 'src/utils/helpers';
 import {
-  NftCollectionResponse,
+  SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
 
@@ -21,7 +21,7 @@ export class SearchResolver {
     return new SearchResponse({ searchTerm: filters.searchTerm });
   }
 
-  @ResolveField(() => [NftCollectionResponse])
+  @ResolveField(() => [SearchNftCollectionResponse])
   async collections(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
@@ -41,7 +41,7 @@ export class SearchResolver {
     return account;
   }
 
-  @ResolveField(() => [NftCollectionResponse])
+  @ResolveField(() => [SearchNftCollectionResponse])
   async nfts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {

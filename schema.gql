@@ -618,12 +618,6 @@ type Mutation {
   withdraw(auctionId: Int!): TransactionNode!
 }
 
-type NftCollectionResponse {
-  identifier: String!
-  name: String
-  verified: Boolean
-}
-
 enum NftTypeEnum {
   NonFungibleESDT
   SemiFungibleESDT
@@ -836,10 +830,16 @@ type SearchItemResponse {
   name: String
 }
 
+type SearchNftCollectionResponse {
+  identifier: String!
+  name: String
+  verified: Boolean
+}
+
 type SearchResponse {
   accounts: [SearchItemResponse!]
-  collections: [NftCollectionResponse!]
-  nfts: [NftCollectionResponse!]
+  collections: [SearchNftCollectionResponse!]
+  nfts: [SearchNftCollectionResponse!]
   searchTerm: ID
   tags: [SearchItemResponse!]
 }

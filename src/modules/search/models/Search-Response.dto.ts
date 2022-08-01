@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import {
-  NftCollectionResponse,
+  SearchNftCollectionResponse,
   SearchItemResponse,
 } from './SearchItemResponse';
 
@@ -8,10 +8,10 @@ import {
 export class SearchResponse {
   @Field(() => ID, { nullable: true })
   searchTerm: string;
-  @Field(() => [NftCollectionResponse], { nullable: true })
-  collections: NftCollectionResponse[];
-  @Field(() => [NftCollectionResponse], { nullable: true })
-  nfts: NftCollectionResponse[];
+  @Field(() => [SearchNftCollectionResponse], { nullable: true })
+  collections: SearchNftCollectionResponse[];
+  @Field(() => [SearchNftCollectionResponse], { nullable: true })
+  nfts: SearchNftCollectionResponse[];
   @Field(() => [SearchItemResponse], { nullable: true })
   accounts: SearchItemResponse[];
   @Field(() => [SearchItemResponse], { nullable: true })
