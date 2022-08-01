@@ -17,7 +17,7 @@ export class TrendingCollection {
   percentage: string;
   @Field({ nullable: true })
   imageUrl: string;
-  @Field({ nullable: true })
+  @Field()
   verified: boolean;
   constructor(init?: Partial<TrendingCollection>) {
     Object.assign(this, init);

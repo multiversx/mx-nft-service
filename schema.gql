@@ -68,7 +68,7 @@ type Asset {
   type: NftTypeEnum
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
-  verified: Boolean
+  verified: Boolean!
   viewsCount: Int
 }
 
@@ -351,7 +351,7 @@ type Collection {
   svgUrl: String
   ticker: String!
   type: String
-  verified: Boolean
+  verified: Boolean!
   website: String
 }
 
@@ -833,7 +833,7 @@ type SearchItemResponse {
 type SearchNftCollectionResponse {
   identifier: String!
   name: String
-  verified: Boolean
+  verified: Boolean!
 }
 
 type SearchResponse {
@@ -955,7 +955,7 @@ type TrendingCollection {
   imageUrl: String
   name: String
   percentage: String
-  verified: Boolean
+  verified: Boolean!
   volume: Price
 }
 
