@@ -53,9 +53,8 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     if (getNotCachedKeys?.length > 0) {
       let data = await createValueFunc();
       const redisValues = this.mapValues(returnValues, data);
-      const filterAssets = redisValues.filter((x) => x.values !== null);
 
-      for (const val of filterAssets) {
+      for (const val of redisValues) {
         const cacheKeys = this.getCacheKeys(
           val.values.map((value) => value.key),
         );
