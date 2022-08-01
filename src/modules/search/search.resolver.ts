@@ -4,11 +4,14 @@ import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { isValidAddress } from 'src/utils/helpers';
-import { SearchItemResponse } from './models/SearchItemResponse';
+import {
+  NftCollectionResponse,
+  SearchItemResponse,
+} from './models/SearchItemResponse';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
-  constructor(private accountsStatsService: SearchService) {}
+  constructor(private searchService: SearchService) {}
 
   @Query(() => SearchResponse)
   @UsePipes(new ValidationPipe())
@@ -18,15 +21,13 @@ export class SearchResolver {
     return new SearchResponse({ searchTerm: filters.searchTerm });
   }
 
-  @ResolveField(() => [SearchItemResponse])
+  @ResolveField(() => [NftCollectionResponse])
   async collections(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
       return [];
     }
-    const collection = await this.accountsStatsService.getCollections(
-      searchTerm,
-    );
+    const collection = await this.searchService.getCollections(searchTerm);
     return collection;
   }
 
@@ -34,19 +35,19 @@ export class SearchResolver {
   async accounts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
-      return [await this.accountsStatsService.getHerotagForAddress(searchTerm)];
+      return [await this.searchService.getHerotagForAddress(searchTerm)];
     }
-    const account = await this.accountsStatsService.getHerotags(searchTerm);
+    const account = await this.searchService.getHerotags(searchTerm);
     return account;
   }
 
-  @ResolveField(() => [SearchItemResponse])
+  @ResolveField(() => [NftCollectionResponse])
   async nfts(@Parent() stats: SearchResponse) {
     const { searchTerm } = stats;
     if (isValidAddress(searchTerm)) {
       return [];
     }
-    const nfts = await this.accountsStatsService.getNfts(searchTerm);
+    const nfts = await this.searchService.getNfts(searchTerm);
     return nfts;
   }
 
@@ -56,7 +57,7 @@ export class SearchResolver {
     if (isValidAddress(searchTerm)) {
       return [];
     }
-    const tags = await this.accountsStatsService.getTags(searchTerm);
+    const tags = await this.searchService.getTags(searchTerm);
     return tags;
   }
 }
