@@ -833,7 +833,7 @@ type SearchItemResponse {
 type SearchNftCollectionResponse {
   identifier: String!
   name: String
-  verified: Boolean
+  verified: Boolean!
 }
 
 type SearchResponse {
