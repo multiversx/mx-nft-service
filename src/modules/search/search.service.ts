@@ -147,7 +147,7 @@ export class SearchService {
         new SearchNftCollectionResponse({
           identifier: c.collection,
           name: c.name,
-          verified: c.assets ? true : false,
+          verified: !!c.assets,
         }),
     );
   }
@@ -190,7 +190,7 @@ export class SearchService {
         new SearchNftCollectionResponse({
           identifier: response?.identifier,
           name: response?.name,
-          verified: response.assets ? true : false,
+          verified: !!response.assets,
         }),
       ];
     }
@@ -204,7 +204,7 @@ export class SearchService {
         new SearchNftCollectionResponse({
           identifier: c?.identifier,
           name: c?.name,
-          verified: c?.assets ? true : false,
+          verified: !!c.assets,
         }),
     );
   }
