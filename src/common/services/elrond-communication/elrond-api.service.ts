@@ -302,7 +302,7 @@ export class ElrondApiService {
     searchTerm: string = '',
     size: number = 5,
   ): Promise<CollectionApi[]> {
-    const requestedFields = 'collection,name';
+    const requestedFields = 'collection,name,assets';
     return await this.doGetGeneric(
       this.getCollections.name,
       `collections?search=${encodeURIComponent(
