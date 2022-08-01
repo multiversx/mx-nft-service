@@ -1,8 +1,8 @@
-import { Query, Resolver, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
-import { FlagNftInput } from './models/flag-nft.input';
+import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 
@@ -20,6 +20,18 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     return this.flagService.updateNftNSFWByAdmin(
       input.identifier,
+      input.nsfwFlag,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  flagCollection(
+    @Args('input', { type: () => FlagCollectionInput })
+    input: FlagCollectionInput,
+  ): Promise<boolean> {
+    return this.flagService.updateCollectionNftsNSFWByAdmin(
+      input.collection,
       input.nsfwFlag,
     );
   }

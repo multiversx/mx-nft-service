@@ -14,10 +14,10 @@ export class ElasticRarityUpdaterService {
     );
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async handleUpdateTokenRaritiesCronJob() {
     await this.rarityUpdaterService.handleUpdateTokenRarities(
-      cronJobs.rarity.colectionsToUpdateEvery30s,
+      cronJobs.rarity.colectionsToUpdateEvery10s,
     );
   }
 

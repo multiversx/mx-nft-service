@@ -111,11 +111,16 @@ export class ElrondElasticService {
     body: any,
     urlParams: string = null,
   ): Promise<void> {
-    const url = `${this.url}/${collection}/_update/${identifier}${urlParams}`;
+    const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();
-
-    await this.apiService.post(url, body);
+    const promises = uris.map((uri) =>
+      this.apiService.post(
+        `${uri}/${collection}/_update/${identifier}${urlParams}`,
+        body,
+      ),
+    );
+    await Promise.all(promises);
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
@@ -127,27 +132,31 @@ export class ElrondElasticService {
     urlParams: string = '',
   ): Promise<void> {
     const batchSize = 100;
-
-    const url = `${this.url}/${collection}/_bulk${urlParams}`;
+    const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();
 
     try {
       for (let i = 0; i < updates.length; i += batchSize) {
         const body = this.buildBulkUpdateBody(updates.slice(i, i + batchSize));
-        await this.apiService.post(
-          url,
-          body,
-          new ApiSettings({
-            contentType: 'application/x-ndjson',
-          }),
+
+        const promises = uris.map((url) =>
+          this.apiService.post(
+            `${url}/${collection}/_bulk${urlParams}`,
+            body,
+            new ApiSettings({
+              contentType: 'application/x-ndjson',
+            }),
+          ),
         );
+
+        await Promise.all(promises);
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url,
+        url: `${collection}/_bulk${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,
@@ -159,90 +168,29 @@ export class ElrondElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  private buildBulkUpdateBody(updates: string[]): string {
-    let body = '';
-    for (let i = 0; i < updates.length; i++) {
-      body += updates[i];
-    }
-    return body;
-  }
-
-  buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
-    return {
-      doc: {
-        [fieldName]: fieldValue,
-      },
-    };
-  }
-
-  buildBulkUpdate<T>(
-    collection: string,
-    identifier: string,
-    fieldName: string,
-    fieldValue: T,
-  ): string {
-    return (
-      JSON.stringify({
-        update: {
-          _id: identifier,
-          _index: collection,
-        },
-      }) +
-      '\n' +
-      JSON.stringify({
-        doc: {
-          [fieldName]: fieldValue,
-        },
-      }) +
-      '\n'
-    );
-  }
-
-  buildPutMappingBody<T>(fieldName: string, filedType: string): string {
-    return JSON.stringify({
-      properties: {
-        [fieldName]: {
-          type: filedType,
-        },
-      },
-    });
-  }
-
-  buildPutMultipleMappingsBody<T>(
-    mappings: { key: string; value: any }[],
-  ): string {
-    let properties = {};
-    for (const mapping of mappings) {
-      properties[mapping.key] = {
-        type: mapping.value,
-      };
-    }
-    return JSON.stringify({
-      properties: properties,
-    });
-  }
-
   async putMappings(
     collection: string,
     body: string,
     urlParams: string = '',
   ): Promise<any> {
-    const url = `${this.url}/${collection}/_mapping${urlParams}`;
-
     const profiler = new PerformanceProfiler();
-
     try {
-      return await this.apiService.post(
-        url,
-        body,
-        new ApiSettings({
-          contentType: 'application/x-ndjson',
-        }),
+      const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
+
+      const promises = uris.map((uri) =>
+        this.apiService.post(
+          `${uri}/${collection}/_mapping${urlParams}`,
+          body,
+          new ApiSettings({
+            contentType: 'application/x-ndjson',
+          }),
+        ),
       );
+      await Promise.all(promises);
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url,
+        url: `${collection}/_mapping${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,
@@ -362,6 +310,69 @@ export class ElrondElasticService {
         scroll_id: scrollId,
       },
     );
+  }
+
+  buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
+    return {
+      doc: {
+        [fieldName]: fieldValue,
+      },
+    };
+  }
+
+  buildBulkUpdate<T>(
+    collection: string,
+    identifier: string,
+    fieldName: string,
+    fieldValue: T,
+  ): string {
+    return (
+      JSON.stringify({
+        update: {
+          _id: identifier,
+          _index: collection,
+        },
+      }) +
+      '\n' +
+      JSON.stringify({
+        doc: {
+          [fieldName]: fieldValue,
+        },
+      }) +
+      '\n'
+    );
+  }
+
+  buildPutMappingBody<T>(fieldName: string, filedType: string): string {
+    return JSON.stringify({
+      properties: {
+        [fieldName]: {
+          type: filedType,
+        },
+      },
+    });
+  }
+
+  buildPutMultipleMappingsBody<T>(
+    mappings: { key: string; value: any }[],
+  ): string {
+    let properties = {};
+    for (const mapping of mappings) {
+      properties[mapping.key] = {
+        type: mapping.value,
+      };
+    }
+    return JSON.stringify({
+      properties: properties,
+    });
+  }
+
+  private buildBulkUpdateBody(updates: string[]): string {
+    let body = '';
+    for (let i = 0; i < updates.length; i++) {
+      body += updates[i];
+    }
+    return body;
   }
 
   private formatItem(document: any, key: string) {

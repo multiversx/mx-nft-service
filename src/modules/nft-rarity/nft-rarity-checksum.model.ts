@@ -1,13 +1,12 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import BigNumber from 'bignumber.js';
 
 @ObjectType()
 export class NftRarityChecksum {
   @Field()
-  rank: BigNumber;
+  rank: number;
 
   @Field()
-  score: BigNumber;
+  score: number;
 
   constructor(init?: Partial<NftRarityChecksum>) {
     Object.assign(this, init);
