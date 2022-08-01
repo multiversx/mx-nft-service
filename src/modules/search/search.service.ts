@@ -76,10 +76,10 @@ export class SearchService {
   private async getAddressHerotag(
     address: string,
   ): Promise<SearchItemResponse> {
-    const herotagsResponse = await this.apiService.getAddressUsername(address);
+    const herotagsResponse = await this.accountsService.getProfile(address);
     return new SearchItemResponse({
       identifier: address,
-      name: herotagsResponse ? herotagsResponse.username : undefined,
+      name: herotagsResponse ? herotagsResponse.herotag : undefined,
     });
   }
 
