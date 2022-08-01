@@ -66,8 +66,12 @@ export class AssetsQuery {
     return this.addParamToQuery('withOwner', true);
   }
 
+  withNsfwFlag(): this {
+    return this.addParamToQuery('isNsfw', false);
+  }
+
   build(addDefaultQuery: boolean = true): string {
-    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true&isNsfw=false';
+    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
     return this.addQuery(defaultQuery).build(false);

@@ -204,12 +204,12 @@ export class ElrondApiService {
   }
 
   async getAllNfts(query: string = ''): Promise<Nft[]> {
-    const url = `nfts${new AssetsQuery(query).build()}`;
+    const url = `nfts${new AssetsQuery(query).withNsfwFlag().build()}`;
     return await this.doGetGeneric(this.getAllNfts.name, url);
   }
 
   async getNftsCount(query: string = ''): Promise<any> {
-    const url = `nfts/count${new AssetsQuery(query).build()}`;
+    const url = `nfts/count${new AssetsQuery(query).withNsfwFlag().build()}`;
     return await this.doGetGeneric(this.getNftsCount.name, url);
   }
 
@@ -217,7 +217,7 @@ export class ElrondApiService {
     query: string = '',
     collection,
   ): Promise<{ value: string; key: string }> {
-    const url = `nfts/count${new AssetsQuery(query).build()}`;
+    const url = `nfts/count${new AssetsQuery(query).withNsfwFlag().build()}`;
     const totalCount = await this.doGetGeneric(this.getNftsCount.name, url);
     return { key: collection, value: totalCount };
   }
