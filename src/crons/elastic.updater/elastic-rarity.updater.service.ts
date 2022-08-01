@@ -9,7 +9,6 @@ export class ElasticRarityUpdaterService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleValidateTokenRaritiesCronJob() {
-    console.log('cronjob');
     await this.rarityUpdaterService.handleValidateTokenRarities(
       cronJobs.rarity.collectionsToValidateEvery5m,
     );
