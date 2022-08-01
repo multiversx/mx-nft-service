@@ -22,15 +22,15 @@ export class NftRarityComputeService {
       ];
     }
 
-    nfts = this.computeNftsAttributeMaps(nfts);
+    const nftsWithMaps = this.computeNftsAttributeMaps(nfts);
 
-    const jaccardDistances: number[][] = await this.computeJd(nfts);
+    const jaccardDistances: number[][] = await this.computeJd(nftsWithMaps);
     const avg: number[] = this.computeAvg(jaccardDistances);
     const scoreArray: number[] = this.computeScore(avg);
 
     let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
 
-    return nfts.map((nft, i) => {
+    return nftsWithMaps.map((nft, i) => {
       const scoreIndex = scoreArrayAsc.indexOf(scoreArray[i]);
       scoreArrayAsc = this.markScoreAsUsed(scoreArrayAsc, scoreIndex);
 
@@ -136,10 +136,12 @@ export class NftRarityComputeService {
   }
 
   private computeNftsAttributeMaps(nfts: NftRarityData[]): NftRarityData[] {
+    let newNftsArray: NftRarityData[] = JSON.parse(JSON.stringify(nfts));
+
     let traitTypeIndexes: number[] = [];
     let attributeIndexes: number[][] = [];
 
-    for (let nft of nfts) {
+    for (let nft of newNftsArray) {
       nft.attributesMap = [];
 
       for (const [key, value] of Object.entries(nft.metadata.attributes)) {
@@ -165,7 +167,7 @@ export class NftRarityComputeService {
       nft.metadata = null;
     }
 
-    return nfts;
+    return newNftsArray;
   }
 
   private getOrSetTraitIndex(
