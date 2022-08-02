@@ -297,6 +297,7 @@ export class NftEventsService {
             transferTopics.collection,
             transferTopics.nonce,
           );
+          await new Promise((resolve) => setTimeout(resolve, 500));
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
           );
