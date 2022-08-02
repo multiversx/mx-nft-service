@@ -576,6 +576,7 @@ enum MediaTypeEnum {
   png
   wav
   webm
+  webp
 }
 
 type Metadata {
