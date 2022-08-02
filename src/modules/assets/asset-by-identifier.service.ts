@@ -43,6 +43,9 @@ export class AssetByIdentifierService {
     identifier: string,
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifier(identifier);
+    if (identifier === 'PIGGIES-de231c-04') {
+      console.log(nft);
+    }
     let ttl = TimeConstants.oneDay;
     if (!nft) {
       ttl = 3 * TimeConstants.oneSecond;
