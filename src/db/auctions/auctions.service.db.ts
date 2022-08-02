@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
+import { AssetsRedisHandler } from 'src/modules/assets';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
@@ -40,6 +41,7 @@ import {
 export class AuctionsServiceDb {
   constructor(
     private auctionsLoader: AuctionsForAssetRedisHandler,
+    private assetsRedisHandler: AssetsRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
@@ -488,6 +490,7 @@ export class AuctionsServiceDb {
     await this.assetsAuctionsCountLoader.clearKey(identifier);
     await this.onSaleAssetsCount.clearKey(collection);
     await this.availableTokensCountHandler.clearKey(identifier);
+    await this.assetsRedisHandler.clearKey(identifier);
   }
 
   private addOrderBy(

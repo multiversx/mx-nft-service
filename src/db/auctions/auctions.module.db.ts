@@ -10,6 +10,7 @@ import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-a
 import { TagsRepository } from './tags.repository';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
+import { AssetsRedisHandler } from 'src/modules/assets/loaders/assets.redis-handler';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftColle
     AuctionsServiceDb,
     AuctionsForAssetRedisHandler,
     AssetAuctionsCountRedisHandler,
+    AssetsRedisHandler,
     LowestAuctionRedisHandler,
     OnSaleAssetsCountForCollectionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
