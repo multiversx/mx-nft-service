@@ -33,7 +33,7 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
     input: CollectionAssetsRetriveCount,
   ) {
     const { collectionIdentifer, assets } = collectionAsset;
-    if (assets) return assets;
+    if (assets) return assets?.slice(0, input.size);
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
