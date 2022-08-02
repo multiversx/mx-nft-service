@@ -41,7 +41,6 @@ import {
 export class AuctionsServiceDb {
   constructor(
     private auctionsLoader: AuctionsForAssetRedisHandler,
-    private assetsRedisHandler: AssetsRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
@@ -491,7 +490,6 @@ export class AuctionsServiceDb {
     await this.assetsAuctionsCountLoader.clearKey(identifier);
     await this.onSaleAssetsCount.clearKey(collection);
     await this.availableTokensCountHandler.clearKey(identifier);
-    await this.assetsRedisHandler.clearKey(identifier);
   }
 
   private addOrderBy(

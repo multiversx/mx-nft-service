@@ -20,6 +20,9 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
     const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
+        if (item.key === 'PIGGIES-de231c-04') {
+          console.log(Asset.fromNft(assetsIdentifiers[item.key][0]));
+        }
         item.value = assetsIdentifiers[item.key]
           ? Asset.fromNft(assetsIdentifiers[item.key][0])
           : null;
@@ -38,6 +41,7 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
     ];
     return response;
   }
+
   private hasDefaultThumbnail(item: { key: string; value: any }) {
     return (
       item.value &&
