@@ -38,6 +38,7 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
     ];
     return response;
   }
+
   private hasDefaultThumbnail(item: { key: string; value: any }) {
     return (
       item.value &&

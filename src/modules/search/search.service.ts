@@ -11,13 +11,16 @@ import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
-import { SearchItemResponse } from './models/SearchItemResponse';
+import {
+  SearchNftCollectionResponse,
+  SearchItemResponse,
+} from './models/SearchItemResponse';
 
 @Injectable()
 export class SearchService {
   private redisClient: Redis.Redis;
   private readonly searchSize: number = 5;
-  private fieldsRequested: string = 'identifier,name';
+  private fieldsRequested: string = 'identifier,name,assets';
   constructor(
     private accountsService: ElrondIdentityService,
     private apiService: ElrondApiService,
@@ -76,10 +79,10 @@ export class SearchService {
   private async getAddressHerotag(
     address: string,
   ): Promise<SearchItemResponse> {
-    const herotagsResponse = await this.apiService.getAddressUsername(address);
+    const herotagsResponse = await this.accountsService.getProfile(address);
     return new SearchItemResponse({
       identifier: address,
-      name: herotagsResponse ? herotagsResponse.username : undefined,
+      name: herotagsResponse ? herotagsResponse.herotag : undefined,
     });
   }
 
@@ -140,7 +143,12 @@ export class SearchService {
       this.searchSize,
     );
     return response?.map(
-      (c) => new SearchItemResponse({ identifier: c.collection, name: c.name }),
+      (c) =>
+        new SearchNftCollectionResponse({
+          identifier: c.collection,
+          name: c.name,
+          verified: !!c.assets,
+        }),
     );
   }
 
@@ -148,7 +156,7 @@ export class SearchService {
     return generateCacheKeyFromParams('search_collection', searchTerm);
   }
 
-  async getNfts(searchTerm: string): Promise<SearchItemResponse[]> {
+  async getNfts(searchTerm: string): Promise<SearchNftCollectionResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
@@ -179,9 +187,10 @@ export class SearchService {
         `fields=${this.fieldsRequested}`,
       );
       return [
-        new SearchItemResponse({
+        new SearchNftCollectionResponse({
           identifier: response?.identifier,
           name: response?.name,
+          verified: !!response.assets,
         }),
       ];
     }
@@ -192,9 +201,10 @@ export class SearchService {
     );
     return response?.map(
       (c) =>
-        new SearchItemResponse({
+        new SearchNftCollectionResponse({
           identifier: c?.identifier,
           name: c?.name,
+          verified: !!c.assets,
         }),
     );
   }

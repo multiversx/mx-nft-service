@@ -2,11 +2,11 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class ContractInfo {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   address: string;
-  @Field()
+  @Field({ nullable: true })
   marketplaceCutPercentage: string;
-  @Field()
+  @Field({ nullable: true })
   isPaused: boolean;
   constructor(init?: Partial<ContractInfo>) {
     Object.assign(this, init);

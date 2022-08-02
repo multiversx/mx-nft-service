@@ -82,7 +82,7 @@ export class Asset {
   scamInfo: ScamInfo;
   @Field(() => [Media], { nullable: true })
   media: Media[];
-  @Field({ nullable: true })
+  @Field()
   verified: boolean;
   @Field({ nullable: true })
   isNsfw: boolean;

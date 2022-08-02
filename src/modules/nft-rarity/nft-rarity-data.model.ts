@@ -7,6 +7,9 @@ export class NftRarityData {
   nft_rarity_score?: number;
   nft_rarity_rank?: number;
 
+  attributesMap?: number[];
+  attributesCount?: number;
+
   constructor(init?: Partial<NftRarityData>) {
     Object.assign(this, init);
   }

@@ -292,6 +292,7 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTTransfer:
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
+          await new Promise((resolve) => setTimeout(resolve, 500));
           this.assetsRedisHandler.clearKey(
             `${transferTopics.collection}-${transferTopics.nonce}`,
           );

@@ -14,7 +14,10 @@ import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.s
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { SearchService } from '../search.service';
 import { ElrondIdentityServiceMock } from 'src/common/services/elrond-communication/elrond-identity.service.mock';
-import { SearchItemResponse } from '../models/SearchItemResponse';
+import {
+  SearchItemResponse,
+  SearchNftCollectionResponse,
+} from '../models/SearchItemResponse';
 
 describe('SearchService', () => {
   let service: SearchService;
@@ -72,7 +75,11 @@ describe('SearchService', () => {
       const results = await service.getCollections('searchTerm');
 
       expect(results).toStrictEqual([
-        new SearchItemResponse({ identifier: 'searchTerm', name: undefined }),
+        new SearchNftCollectionResponse({
+          identifier: 'searchTerm',
+          name: undefined,
+          verified: false,
+        }),
       ]);
     });
   });
@@ -82,7 +89,11 @@ describe('SearchService', () => {
       const results = await service.getNfts('searchTerm');
 
       expect(results).toStrictEqual([
-        new SearchItemResponse({ identifier: 'searchTerm', name: undefined }),
+        new SearchNftCollectionResponse({
+          identifier: 'searchTerm',
+          name: undefined,
+          verified: false,
+        }),
       ]);
     });
   });

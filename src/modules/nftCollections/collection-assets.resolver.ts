@@ -1,8 +1,9 @@
-import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, ResolveField, Parent, Args } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { CollectionAsset } from './models';
 import { CollectionAssetsProvider } from './loaders/collection-assets.loader';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
+import { CollectionAssetsRetriveCount } from './CollectionAssetsRetriveCount';
 
 @Resolver(() => CollectionAsset)
 export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
@@ -26,13 +27,19 @@ export class CollectionAssetsResolver extends BaseResolver(CollectionAsset) {
   }
 
   @ResolveField('assets', () => CollectionAsset)
-  async assets(@Parent() collectionAsset: CollectionAsset) {
+  async assets(
+    @Parent() collectionAsset: CollectionAsset,
+    @Args('input', { type: () => CollectionAssetsRetriveCount, nullable: true })
+    input: CollectionAssetsRetriveCount,
+  ) {
     const { collectionIdentifer, assets } = collectionAsset;
     if (assets) return assets;
     const response = await this.collectionAssetsProvider.load(
       collectionIdentifer,
     );
-
-    return response?.value ?? [];
+    if (response?.value) {
+      return response?.value?.slice(0, input.size);
+    }
+    return [];
   }
 }

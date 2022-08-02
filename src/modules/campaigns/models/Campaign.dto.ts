@@ -15,7 +15,7 @@ export class Campaign {
   @Field(() => String)
   mediaType: string;
 
-  @Field(() => Boolean)
+  @Field()
   verified: boolean;
 
   @Field(() => CampaignStatusEnum)

@@ -1,4 +1,4 @@
-import { Query, Resolver, ResolveField } from '@nestjs/graphql';
+import { Query, Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { elrondConfig } from 'src/config';
 import { NftMarketplaceAbiService } from '../auctions';
 import { ContractInfo } from './models/Contract-Info.dto';
@@ -13,12 +13,15 @@ export class ContractInfoResolver {
   }
 
   @ResolveField(() => String)
-  async marketplaceCutPercentage() {
-    return await this.nftAbiService.getCutPercentage();
+  async marketplaceCutPercentage(@Parent() contractInfo: ContractInfo) {
+    const { address } = contractInfo;
+
+    return address ? await this.nftAbiService.getCutPercentage() : null;
   }
 
   @ResolveField(() => Boolean)
-  async isPaused() {
-    return await this.nftAbiService.getIsPaused();
+  async isPaused(@Parent() contractInfo: ContractInfo) {
+    const { address } = contractInfo;
+    return address ? await this.nftAbiService.getIsPaused() : null;
   }
 }

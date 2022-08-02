@@ -351,7 +351,7 @@ export class AuctionsGetterService {
   private async getMappedAuctions(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
-    if (this.filtersByIdentifier(queryRequest)) {
+    if (this.filtersByIdentifierWithoutId(queryRequest)) {
       return await this.getAuctionsForIdentifier(queryRequest);
     }
     if (queryRequest?.groupByOption?.groupBy === GroupBy.IDENTIFIER) {
@@ -368,9 +368,14 @@ export class AuctionsGetterService {
     ];
   }
 
-  private filtersByIdentifier(queryRequest: QueryRequest) {
-    return queryRequest?.filters?.filters?.some(
-      (f) => f.field === 'identifier' && f.op === Operation.EQ,
+  private filtersByIdentifierWithoutId(queryRequest: QueryRequest) {
+    return (
+      queryRequest?.filters?.filters?.some(
+        (f) => f.field === 'identifier' && f.op === Operation.EQ,
+      ) &&
+      !queryRequest?.filters?.filters?.some(
+        (f) => f.field === 'id' && f.op === Operation.EQ,
+      )
     );
   }
 

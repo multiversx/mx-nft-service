@@ -68,7 +68,7 @@ type Asset {
   type: NftTypeEnum
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
-  verified: Boolean
+  verified: Boolean!
   viewsCount: Int
 }
 
@@ -337,7 +337,7 @@ type Collection {
   canTransferRole: Boolean
   canWipe: Boolean
   collection: String
-  collectionAsset(assetsCount: Int): CollectionAsset!
+  collectionAsset: CollectionAsset!
   creationDate: Int!
   description: String
   name: String!
@@ -351,18 +351,22 @@ type Collection {
   svgUrl: String
   ticker: String!
   type: String
-  verified: Boolean
+  verified: Boolean!
   website: String
 }
 
 type CollectionAsset {
-  assets: [CollectionAssetModel]
+  assets(input: CollectionAssetsRetriveCount): [CollectionAssetModel]
   totalCount: String
 }
 
 type CollectionAssetModel {
   identifier: String!
   thumbnailUrl: String
+}
+
+input CollectionAssetsRetriveCount {
+  size: Int = 4
 }
 
 type CollectionEdge {
@@ -445,9 +449,9 @@ input ConnectionArgs {
 }
 
 type ContractInfo {
-  address: ID!
-  isPaused: Boolean!
-  marketplaceCutPercentage: String!
+  address: ID
+  isPaused: Boolean
+  marketplaceCutPercentage: String
 }
 
 input CreateAuctionArgs {
@@ -572,6 +576,7 @@ enum MediaTypeEnum {
   png
   wav
   webm
+  webp
 }
 
 type Metadata {
@@ -826,10 +831,16 @@ type SearchItemResponse {
   name: String
 }
 
+type SearchNftCollectionResponse {
+  identifier: String!
+  name: String
+  verified: Boolean!
+}
+
 type SearchResponse {
   accounts: [SearchItemResponse!]
-  collections: [SearchItemResponse!]
-  nfts: [SearchItemResponse!]
+  collections: [SearchNftCollectionResponse!]
+  nfts: [SearchNftCollectionResponse!]
   searchTerm: ID
   tags: [SearchItemResponse!]
 }
@@ -945,7 +956,7 @@ type TrendingCollection {
   imageUrl: String
   name: String
   percentage: String
-  verified: Boolean
+  verified: Boolean!
   volume: Price
 }
 

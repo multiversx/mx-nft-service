@@ -23,7 +23,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
     const getNftsPromises = identifiers.map((identifier) => {
       const query = new AssetsQuery()
         .addCollection(identifier)
-        .addPageSize(0, 4)
+        .addPageSize(0, 10)
         .addFields(['media', 'identifier', 'collection'])
         .build();
       return this.apiService.getAllNfts(query);
