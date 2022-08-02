@@ -483,7 +483,6 @@ export class AuctionsServiceDb {
 
   private async invalidateCache(identifier: string, address: string) {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
-    console.log('invalidateCache', { identifier });
     await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
     await this.lowestAuctionLoader.clearKey(identifier);
