@@ -57,7 +57,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     let getNftsPromises = keys.map((collection) => {
       const query = new AssetsQuery()
         .addCollection(collection)
-        .addPageSize(0, 4)
+        .addPageSize(0, 10)
         .addFields(['media', 'identifier', 'collection'])
         .build();
       return this.apiService.getAllNfts(query);
