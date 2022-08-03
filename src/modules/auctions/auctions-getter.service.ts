@@ -256,7 +256,6 @@ export class AuctionsGetterService {
       queryRequest.offset,
       queryRequest.offset + queryRequest.limit,
     );
-
     return [
       auctions?.map((item) => Auction.fromEntity(item)),
       count,
@@ -268,18 +267,25 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
     auctions: AuctionWithStartBid[],
   ) {
+    let sortedAuctions = [...auctions];
     if (
       queryRequest.sorting?.length === 1 &&
       queryRequest.sorting[0].direction === Sort.DESC
     ) {
-      auctions = auctions.sortedDescending((a) => a.creationDate.getTime());
+      sortedAuctions = sortedAuctions?.sortedDescending((a) =>
+        new Date(a.creationDate).getTime(),
+      );
     } else if (
       queryRequest.sorting?.length === 1 &&
       queryRequest.sorting[0].direction === Sort.ASC
     ) {
-      auctions = auctions.sort((a) => a.creationDate.getTime());
+      sortedAuctions = sortedAuctions?.sort(
+        (a, b) =>
+          new Date(a.creationDate).getTime() -
+          new Date(b.creationDate).getTime(),
+      );
     }
-    return auctions;
+    return sortedAuctions;
   }
 
   private async getEndingAuctions(
