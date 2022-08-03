@@ -135,7 +135,7 @@ export class RarityUpdaterService {
     let lastIndex: number;
     try {
       await Locker.lock(
-        'handleValidateTokenRariyFlags',
+        'handleValidateTokenRarityFlags',
         async () => {
           lastIndex = await this.getLastFlagValidatedCollectionIndex();
           let collections: string[] = [];
