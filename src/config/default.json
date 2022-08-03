@@ -54,8 +54,9 @@
   },
   "cronJobs": {
     "rarity": {
-      "collectionsToValidateEvery5m": 10,
-      "colectionsToUpdateEvery10s": 2
+      "collectionRaritiesToValidateEvery5m": 10,
+      "colectionRaritiesToUpdateEvery10s": 2,
+      "collectionRarityFlagsToValidateEvery1m": 5
     }
   }
 }

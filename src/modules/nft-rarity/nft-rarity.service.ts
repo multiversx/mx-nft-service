@@ -23,7 +23,7 @@ export class NftRarityService {
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
   ) {
-    this.setElasticRarityMappings();
+    //this.setElasticRarityMappings();
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
@@ -33,6 +33,8 @@ export class NftRarityService {
         collection: collectionTicker,
       }),
     ]);
+
+    console.log(elasticNfts[0]);
 
     const [elasticChecksum, dbChecksum] = await Promise.all([
       this.getNftRarityChecksum(elasticNfts),
@@ -232,6 +234,7 @@ export class NftRarityService {
         `Collection rarity wrong checksum -> migrate rarities from DB -> Elastic`,
         customInfo,
       );
+      console.log(customInfo);
       await Promise.all([
         this.setCollectionRarityFlagInElastic(collectionTicker, true),
         this.setNftRaritiesInElastic(dbNfts),

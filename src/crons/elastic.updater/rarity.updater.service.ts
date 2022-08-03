@@ -134,6 +134,90 @@ export class RarityUpdaterService {
     }
   }
 
+  async handleValidateTokenRarityFlags(maxCollectionsToValidate: number) {
+    let lastIndex: number;
+    try {
+      await Locker.lock(
+        'handleValidateTokenRariyFlags',
+        async () => {
+          lastIndex = await this.getLastFlagValidatedCollectionIndex();
+          let collections: string[] = [];
+
+          const query: ElasticQuery = ElasticQuery.create()
+            .withMustNotExistCondition('nonce')
+            .withMustExistCondition('nft_hasRarities')
+            .withMustCondition(
+              QueryType.Match('nft_hasRarities', false, QueryOperator.AND),
+            )
+            .withMustMultiShouldCondition(
+              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+              (type) => QueryType.Match('type', type),
+            )
+            .withPagination({
+              from: 0,
+              size: 50,
+            });
+
+          await this.elasticService.getScrollableList(
+            'tokens',
+            'token',
+            query,
+            async (items) => {
+              collections = collections.concat(items.map((i) => i.token));
+            },
+            lastIndex + maxCollectionsToValidate,
+          );
+
+          const collectionsToValidate = collections.slice(
+            lastIndex,
+            lastIndex + maxCollectionsToValidate,
+          );
+
+          if (collectionsToValidate.length < maxCollectionsToValidate) {
+            await this.setLastFlagValidatedCollectionIndex(0);
+            return;
+          }
+
+          await this.validateTokenRarityFlags(collectionsToValidate);
+
+          await this.setLastFlagValidatedCollectionIndex(
+            lastIndex + collectionsToValidate.length,
+          );
+        },
+        true,
+      );
+    } catch (error) {
+      this.logger.error(`Error when scrolling through collections`, {
+        path: 'RarityUpdaterService.handleValidateTokenRarityFlags',
+        exception: error?.message,
+        lastIndex: lastIndex,
+      });
+    }
+  }
+
+  async validateTokenRarityFlags(collections: string[]): Promise<void> {
+    for (const collection of collections) {
+      try {
+        this.logger.log(
+          `validateTokenRarityFlags(): validateRarityFlags(${collection})`,
+        );
+        await Locker.lock(
+          `Update/Validate rarities for ${collection}`,
+          async () => {
+            await this.nftRarityService.updateRarities(collection);
+          },
+          true,
+        );
+      } catch (error) {
+        this.logger.error(`Error when validating collection rarity flags`, {
+          path: 'RarityUpdaterService.validateTokenRarityFlags',
+          exception: error?.message,
+          collection: collection,
+        });
+      }
+    }
+  }
+
   async handleUpdateTokenRarities(maxCollectionsToUpdate: number) {
     try {
       await Locker.lock(
@@ -257,6 +341,10 @@ export class RarityUpdaterService {
     return generateCacheKeyFromParams('rarityValidatorCounter');
   }
 
+  private getRarityFlagValidatorCounterCacheKey() {
+    return generateCacheKeyFromParams('rarityFlagValidatorCounter');
+  }
+
   private async getLastValidatedCollectionIndex(): Promise<number> {
     return (
       Number.parseInt(
@@ -270,6 +358,27 @@ export class RarityUpdaterService {
   private async setLastValidatedCollectionIndex(index: number): Promise<void> {
     await this.persistentRedisClient.set(
       this.getRarityValidatorCounterCacheKey(),
+      index.toString(),
+      'EX',
+      90 * TimeConstants.oneMinute,
+    );
+  }
+
+  private async getLastFlagValidatedCollectionIndex(): Promise<number> {
+    return (
+      Number.parseInt(
+        await this.persistentRedisClient.get(
+          this.getRarityFlagValidatorCounterCacheKey(),
+        ),
+      ) || 0
+    );
+  }
+
+  private async setLastFlagValidatedCollectionIndex(
+    index: number,
+  ): Promise<void> {
+    await this.persistentRedisClient.set(
+      this.getRarityFlagValidatorCounterCacheKey(),
       index.toString(),
       'EX',
       90 * TimeConstants.oneMinute,
