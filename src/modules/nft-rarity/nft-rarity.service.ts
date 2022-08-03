@@ -232,7 +232,6 @@ export class NftRarityService {
         `Collection rarity wrong checksum -> migrate rarities from DB -> Elastic`,
         customInfo,
       );
-
       await Promise.all([
         this.setCollectionRarityFlagInElastic(collectionTicker, true),
         this.setNftRaritiesInElastic(dbNfts),
