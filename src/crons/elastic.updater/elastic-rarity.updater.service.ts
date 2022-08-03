@@ -14,10 +14,10 @@ export class ElasticRarityUpdaterService {
     );
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleValidateTokenRarityFlagsCronJob() {
     await this.rarityUpdaterService.handleValidateTokenRarityFlags(
-      cronJobs.rarity.collectionRarityFlagsToValidateEvery1m,
+      cronJobs.rarity.collectionRarityFlagsToValidateEvery10m,
     );
   }
 
