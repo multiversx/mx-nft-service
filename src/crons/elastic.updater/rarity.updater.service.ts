@@ -114,9 +114,6 @@ export class RarityUpdaterService {
   async validateTokenRarities(collections: string[]): Promise<void> {
     for (const collection of collections) {
       try {
-        this.logger.log(
-          `handleValidateTokenRarity(): validateRarities(${collection})`,
-        );
         await Locker.lock(
           `Update/Validate rarities for ${collection}`,
           async () => {
@@ -198,9 +195,6 @@ export class RarityUpdaterService {
   async validateTokenRarityFlags(collections: string[]): Promise<void> {
     for (const collection of collections) {
       try {
-        this.logger.log(
-          `validateTokenRarityFlags(): validateRarityFlags(${collection})`,
-        );
         await Locker.lock(
           `Update/Validate rarities for ${collection}`,
           async () => {
