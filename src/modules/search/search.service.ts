@@ -88,14 +88,16 @@ export class SearchService {
 
   private async getMappedHerotags(
     searchTerm: string,
+    limit: number = 5,
   ): Promise<SearchItemResponse[]> {
     const herotagsResponse = await this.accountsService.getAcountsByHerotag(
       searchTerm,
     );
-    const promises = herotagsResponse?.herotags.map((hero) =>
+    const herotags = herotagsResponse?.herotags.slice(0, limit);
+    const addresses = herotags.map((hero) =>
       this.accountsService.getAddressByHerotag(hero),
     );
-    const response = await Promise.all(promises);
+    const response = await Promise.all(addresses);
     return response?.map(
       (r) =>
         new SearchItemResponse({
