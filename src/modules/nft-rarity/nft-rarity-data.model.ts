@@ -25,4 +25,16 @@ export class NftRarityData {
         }
       : null;
   }
+
+  static fromElasticNft(nft: any): NftRarityData {
+    return nft
+      ? {
+          identifier: nft.identifier,
+          nonce: nft.nonce,
+          metadata: undefined,
+          nft_rarity_score: nft.nft_rarity_score,
+          nft_rarity_rank: nft.nft_rarity_rank,
+        }
+      : null;
+  }
 }

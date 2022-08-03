@@ -444,7 +444,9 @@ export class NftRarityService {
         'identifier',
         query,
         async (items) => {
-          nfts = nfts.concat(items.map((nft) => NftRarityData.fromNft(nft)));
+          nfts = nfts.concat(
+            items.map((nft) => NftRarityData.fromElasticNft(nft)),
+          );
           return undefined;
         },
       );
