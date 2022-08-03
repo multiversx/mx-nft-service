@@ -94,8 +94,8 @@ export class SearchService {
       searchTerm,
     );
     const promises = herotagsResponse?.herotags
-      .map((hero) => this.accountsService.getAddressByHerotag(hero))
-      .slice(0, limit);
+      .slice(0, limit)
+      .map((hero) => this.accountsService.getAddressByHerotag(hero));
     const response = await Promise.all(promises);
     return response?.map(
       (r) =>
