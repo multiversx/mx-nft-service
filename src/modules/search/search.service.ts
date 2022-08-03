@@ -93,10 +93,11 @@ export class SearchService {
     const herotagsResponse = await this.accountsService.getAcountsByHerotag(
       searchTerm,
     );
-    const promises = herotagsResponse?.herotags
-      .slice(0, limit)
-      .map((hero) => this.accountsService.getAddressByHerotag(hero));
-    const response = await Promise.all(promises);
+    const herotags = herotagsResponse?.herotags.slice(0, limit);
+    const addresses = herotags.map((hero) =>
+      this.accountsService.getAddressByHerotag(hero),
+    );
+    const response = await Promise.all(addresses);
     return response?.map(
       (r) =>
         new SearchItemResponse({
