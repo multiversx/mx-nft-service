@@ -196,7 +196,7 @@ export class RarityUpdaterService {
     for (const collection of collections) {
       try {
         await Locker.lock(
-          `Update/Validate rarity flag for ${collection}`,
+          `Validate rarity flag for ${collection}`,
           async () => {
             await this.nftRarityService.updateRarities(collection);
           },
