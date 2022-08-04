@@ -19,7 +19,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
       if (item.value === null) {
         item.value = assetsIdentifiers[item.key]
           ? assetsIdentifiers[item.key][0]
-          : null;
+          : { key: item.key };
         redisValues.push(item);
       }
     }
@@ -42,12 +42,14 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
       .filter((item) => item.value === null)
       .map((value) => value.key);
     if (getNotCachedKeys?.length > 0) {
+      console.log(55555555555555, data);
       const redisValues = this.mapValues(returnValues, data);
 
       for (const val of redisValues) {
         const cacheKeys = this.getCacheKeys(
           val.values.map((value) => value.key),
         );
+        // console.log(55555555555555, val.values);
         await this.redisCacheService.batchSetCache(
           this.redisClient,
           cacheKeys,

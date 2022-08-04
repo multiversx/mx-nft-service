@@ -139,7 +139,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const rarity = await this.assetRarityProvider.load(identifier);
     const rarityValue = rarity?.value;
-    return rarityValue && Object.keys(rarityValue).length !== 0
+    return rarityValue && Object.keys(rarityValue).length > 1
       ? rarityValue
       : null;
   }
