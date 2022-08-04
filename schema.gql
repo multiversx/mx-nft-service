@@ -800,7 +800,7 @@ type Query {
 }
 
 type Rarity {
-  rank: Float
+  rank: Int
   score: Float
 }
 
