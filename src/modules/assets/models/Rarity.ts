@@ -3,9 +3,9 @@ import { Nft } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   rank: number;
-  @Field()
+  @Field({ nullable: true })
   score: number;
 
   constructor(init?: Partial<Rarity>) {

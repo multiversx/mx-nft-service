@@ -800,8 +800,8 @@ type Query {
 }
 
 type Rarity {
-  rank: Int!
-  score: Float!
+  rank: Int
+  score: Float
 }
 
 input RemoveLikeArgs {
