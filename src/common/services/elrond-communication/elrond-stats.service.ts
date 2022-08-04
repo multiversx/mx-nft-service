@@ -45,7 +45,7 @@ export class ElrondStatsService {
           exception: error,
         },
       );
-      return;
+      return new NftViewsCount({ identifier: identifier, viewsCount: 0 });
     }
   }
 }

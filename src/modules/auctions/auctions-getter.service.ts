@@ -10,7 +10,7 @@ import { cacheConfig } from 'src/config';
 import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { QueryRequest } from '../common/filters/QueryRequest';
-import { GroupBy, Operation } from '../common/filters/filtersTypes';
+import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { DateUtils } from 'src/utils/date-utils';
@@ -220,7 +220,18 @@ export class AuctionsGetterService {
               item.field === 'startDate' ||
               item.field === 'tags',
           ).length === 3)) &&
-      (!queryRequest.customFilters || queryRequest.customFilters?.length === 0)
+      (!queryRequest.customFilters ||
+        queryRequest.customFilters?.length === 0) &&
+      this.isSortingByCreationDate(queryRequest)
+    );
+  }
+
+  private isSortingByCreationDate(queryRequest: QueryRequest) {
+    return (
+      !queryRequest.sorting ||
+      queryRequest.sorting?.length === 0 ||
+      (queryRequest.sorting?.length === 1 &&
+        queryRequest.sorting[0].field === 'creationDate')
     );
   }
 
@@ -240,16 +251,41 @@ export class AuctionsGetterService {
       );
     }
     count = auctions.length;
+    auctions = this.sortByCreationDate(queryRequest, auctions);
     auctions = auctions?.slice(
       queryRequest.offset,
       queryRequest.offset + queryRequest.limit,
     );
-
     return [
       auctions?.map((item) => Auction.fromEntity(item)),
       count,
       priceRange,
     ];
+  }
+
+  private sortByCreationDate(
+    queryRequest: QueryRequest,
+    auctions: AuctionWithStartBid[],
+  ) {
+    let sortedAuctions = [...auctions];
+    if (
+      queryRequest.sorting?.length === 1 &&
+      queryRequest.sorting[0].direction === Sort.DESC
+    ) {
+      sortedAuctions = sortedAuctions?.sortedDescending((a) =>
+        new Date(a.creationDate).getTime(),
+      );
+    } else if (
+      queryRequest.sorting?.length === 1 &&
+      queryRequest.sorting[0].direction === Sort.ASC
+    ) {
+      sortedAuctions = sortedAuctions?.sort(
+        (a, b) =>
+          new Date(a.creationDate).getTime() -
+          new Date(b.creationDate).getTime(),
+      );
+    }
+    return sortedAuctions;
   }
 
   private async getEndingAuctions(

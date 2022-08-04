@@ -1,9 +1,9 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Nft, NftRarity } from 'src/common';
+import { Nft } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field({ nullable: true })
+  @Field(() => Int, { nullable: true })
   rank: number;
   @Field({ nullable: true })
   score: number;
