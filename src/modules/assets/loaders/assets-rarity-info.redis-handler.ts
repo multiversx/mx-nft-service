@@ -19,7 +19,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
       if (item.value === null) {
         item.value = assetsIdentifiers[item.key]
           ? assetsIdentifiers[item.key][0]
-          : { key: item.key };
+          : null;
         redisValues.push(item);
       }
     }
