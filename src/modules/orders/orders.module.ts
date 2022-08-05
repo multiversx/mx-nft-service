@@ -15,6 +15,7 @@ import { OrdersProvider } from './loaders/orders.loader';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
+import { CacheEventsPublisherModule } from '../rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   providers: [
@@ -37,6 +38,7 @@ import { AssetsModuleGraph } from '../assets/assets.module';
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => AssetsModuleGraph),
+    CacheEventsPublisherModule,
   ],
   exports: [OrdersService],
 })

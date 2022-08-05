@@ -1,21 +1,18 @@
 import {
   defaultNackErrorHandler,
-  Nack,
   RabbitSubscribe,
-  requeueErrorHandler,
 } from '@golevelup/nestjs-rabbitmq';
 import { applyDecorators } from '@nestjs/common';
+import { RabbitConsumerConfig } from './rabbit-config';
+import * as uuid from 'uuid';
 
 /** Competing Consumer which will be handled by only one instance of the microservice.
  * Make sure the exchange exists.
  */
-export const CompetingRabbitConsumer = (config: {
-  queueName: string;
-  exchange: string;
-  dlqExchange: string;
-}) => {
+export const CompetingRabbitConsumer = (config: RabbitConsumerConfig) => {
   return applyDecorators(
     RabbitSubscribe({
+      connection: config.connection ?? 'default',
       queue: config.queueName,
       exchange: config.exchange,
       routingKey: '',
@@ -29,6 +26,24 @@ export const CompetingRabbitConsumer = (config: {
           'x-single-active-consumer': true,
         },
         deadLetterExchange: config.dlqExchange,
+      },
+    }),
+  );
+};
+
+/** Public Consumer which will be handled by all instances of the microservice.
+ * Make sure the exchange exists.
+ */
+export const PublicRabbitConsumer = (config: RabbitConsumerConfig) => {
+  const { queueName, exchange, connection } = config;
+  return applyDecorators(
+    RabbitSubscribe({
+      connection: connection ?? 'default',
+      queue: `${queueName}_${uuid.v4()}`,
+      exchange,
+      routingKey: '',
+      queueOptions: {
+        autoDelete: true,
       },
     }),
   );

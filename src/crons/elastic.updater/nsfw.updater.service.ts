@@ -4,7 +4,11 @@ import { NftTypeEnum } from 'src/modules/assets/models';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
-import { AssetsRedisHandler } from 'src/modules/assets';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from 'src/modules/rabbitmq/change-events/events/owner-changed.event';
 
 type NsfwType = {
   identifier: string;
@@ -15,9 +19,9 @@ type NsfwType = {
 export class NsfwUpdaterService {
   constructor(
     private elasticService: ElrondElasticService,
+    private readonly rabbitPublisherService: CacheEventsPublisherService,
     @Inject(forwardRef(() => FlagNftService))
     private flagsNftService: FlagNftService,
-    private assetsRedisHandler: AssetsRedisHandler,
     private readonly logger: Logger,
   ) {}
 
@@ -153,7 +157,7 @@ export class NsfwUpdaterService {
     }
 
     await this.bulkUpdate(itemsToUpdate);
-    await this.assetsRedisHandler.clearMultipleKeys(
+    await this.triggerMultipleInvalidation(
       itemsToUpdate.map((nft) => nft.identifier),
     );
   }
@@ -239,6 +243,14 @@ export class NsfwUpdaterService {
         },
       }) +
       '\n'
+    );
+  }
+  private async triggerMultipleInvalidation(identifiers: string[]) {
+    await this.rabbitPublisherService.publish(
+      new ChangedEvent({
+        id: identifiers,
+        type: CacheEventTypeEnum.AssetsRefresh,
+      }),
     );
   }
 }

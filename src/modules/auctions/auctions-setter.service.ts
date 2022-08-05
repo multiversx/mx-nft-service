@@ -103,7 +103,6 @@ export class AuctionsSetterService {
   ): Promise<Auction | any> {
     let profiler = new PerformanceProfiler();
     try {
-      await this.invalidateCache();
       return await this.auctionServiceDb.updateAuction(id, status, hash);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
@@ -125,7 +124,7 @@ export class AuctionsSetterService {
     return await this.auctionServiceDb.updateAuctions(auctions);
   }
 
-  private async invalidateCache(): Promise<void> {
+  public async invalidateCache(): Promise<void> {
     return await this.redisCacheService.flushDb(this.redisClient);
   }
 }

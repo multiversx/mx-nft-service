@@ -12,6 +12,8 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
+import { RABBIT_PORT_ONE, RABBIT_PORT_TWO } from './utils/constants/ports';
+import { ChangeEventsModule } from './modules/rabbitmq/change-events/change-events.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -48,7 +50,13 @@ async function bootstrap() {
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
     rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(process.env.RABBIT_PORT, '0.0.0.0');
+    await rabbitMq.listen(RABBIT_PORT_ONE, '0.0.0.0');
+  }
+
+  if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
+    const rabbitMq = await NestFactory.create(ChangeEventsModule);
+    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen(RABBIT_PORT_TWO, '0.0.0.0');
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {

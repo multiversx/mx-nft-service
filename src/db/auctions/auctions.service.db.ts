@@ -19,6 +19,11 @@ import {
 } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from 'src/modules/rabbitmq/change-events/events/owner-changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -46,6 +51,7 @@ export class AuctionsServiceDb {
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersServiceDb,
     private accountStats: AccountsStatsService,
+    private readonly rabbitPublisherService: CacheEventsPublisherService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -367,7 +373,7 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    await this.invalidateCache(auction.identifier, auction.ownerAddress);
+    await this.triggerCacheInvalidation(auction);
     return await this.auctionsRepository.save(auction);
   }
 
@@ -464,7 +470,7 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.invalidateCache(auction.identifier, auction.ownerAddress);
+    await this.triggerCacheInvalidation(auction);
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -475,12 +481,12 @@ export class AuctionsServiceDb {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     for (let auction of auctions) {
-      await this.invalidateCache(auction.identifier, auction.ownerAddress);
+      await this.triggerCacheInvalidation(auction);
     }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private async invalidateCache(identifier: string, address: string) {
+  public async invalidateCache(identifier: string, address: string) {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     await this.accountStats.invalidateStats(address);
     await this.auctionsLoader.clearKey(identifier);
@@ -488,6 +494,16 @@ export class AuctionsServiceDb {
     await this.assetsAuctionsCountLoader.clearKey(identifier);
     await this.onSaleAssetsCount.clearKey(collection);
     await this.availableTokensCountHandler.clearKey(identifier);
+  }
+
+  private async triggerCacheInvalidation(auction: AuctionEntity) {
+    await this.rabbitPublisherService.publish(
+      new ChangedEvent({
+        id: auction?.identifier,
+        type: CacheEventTypeEnum.UpdateAuction,
+        ownerAddress: auction.ownerAddress,
+      }),
+    );
   }
 
   private addOrderBy(

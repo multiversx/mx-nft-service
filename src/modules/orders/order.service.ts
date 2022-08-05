@@ -21,6 +21,12 @@ import { NotificationTypeEnum } from '../notifications/models/Notification-type.
 import { NotificationStatusEnum } from '../notifications/models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { OrdersRedisHandler } from './loaders/orders.redis-handler';
+import { CacheEventsPublisherService } from '../rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/change-events/events/owner-changed.event';
 const hash = require('object-hash');
 
 @Injectable()
@@ -29,6 +35,7 @@ export class OrdersService {
   constructor(
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
+    private ordersRedisHandler: OrdersRedisHandler,
     private accountStats: AccountsStatsService,
     private auctionsService: AuctionsServiceDb,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
@@ -36,6 +43,7 @@ export class OrdersService {
     private redisCacheService: RedisCacheService,
     private notificationsService: NotificationsServiceDb,
     private assetByIdentifierService: AssetByIdentifierService,
+    private readonly rabbitPublisherService: CacheEventsPublisherService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
@@ -48,7 +56,7 @@ export class OrdersService {
         createOrderArgs.auctionId,
       );
 
-      await this.invalidateCache(
+      await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
@@ -114,7 +122,7 @@ export class OrdersService {
         auctionId,
       );
 
-      await this.invalidateCache(auctionId, activeOrder.ownerAddress);
+      await this.triggerCacheInvalidation(auctionId, activeOrder.ownerAddress);
       const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
         activeOrder,
         status,
@@ -132,7 +140,7 @@ export class OrdersService {
 
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.invalidateCache(
+      await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
@@ -195,11 +203,25 @@ export class OrdersService {
     return generateCacheKeyFromParams('orders', hash(request));
   }
 
-  private async invalidateCache(
+  private async triggerCacheInvalidation(
+    auctionId: number,
+    ownerAddress: string,
+  ) {
+    await this.rabbitPublisherService.publish(
+      new ChangedEvent({
+        id: auctionId.toString(),
+        type: CacheEventTypeEnum.OrderChanged,
+        ownerAddress: ownerAddress,
+      }),
+    );
+  }
+
+  public async invalidateCache(
     auctionId: number = 0,
     ownerAddress: string = '',
   ): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
+    await this.ordersRedisHandler.clearKey(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStats.invalidateStats(ownerAddress);
     return this.redisCacheService.flushDb(this.redisClient);

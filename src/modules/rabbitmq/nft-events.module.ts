@@ -5,11 +5,6 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
-import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
-import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
-import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
-import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
-import { AssetsRedisHandler } from '../assets';
 import { ElrondCommunicationModule } from 'src/common';
 import { CampaignsModuleGraph } from '../campaigns/campaigns.module';
 import { MinterEventsService } from './minter-events.service';
@@ -29,10 +24,12 @@ import { NotificationsModuleGraph } from '../notifications/notifications.module'
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
+import { CacheEventsPublisherModule } from './change-events/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   imports: [
     CommonModule,
+    CacheEventsPublisherModule,
     forwardRef(() => CachingModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
@@ -50,10 +47,6 @@ import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.servi
     RevertEventsService,
     ElasiticUpdatesConsumer,
     ElasticUpdatesEventsService,
-    AvailableTokensForAuctionRedisHandler,
-    AssetAvailableTokensCountRedisHandler,
-    CollectionAssetsCountRedisHandler,
-    CollectionAssetsRedisHandler,
     AssetRarityInfoRedisHandler,
     VerifyContentService,
     NftRarityService,
@@ -61,7 +54,6 @@ import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.servi
     FlagNftService,
     RarityUpdaterService,
     AssetByIdentifierService,
-    AssetsRedisHandler,
     NsfwUpdaterService,
   ],
   exports: [NftEventsService],
