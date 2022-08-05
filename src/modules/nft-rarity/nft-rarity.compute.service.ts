@@ -148,6 +148,10 @@ export class NftRarityComputeService {
         const traitType = value.trait_type;
         const traitValue = value.value;
 
+        if (traitValue.toLowerCase() === 'none' || traitValue === '') {
+          continue;
+        }
+
         let traitIndex: number = null;
         let attributeIndex: number = null;
 
