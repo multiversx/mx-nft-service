@@ -9,7 +9,6 @@ export class CacheEventsPublisherService {
   ) {}
 
   async publish(payload: ChangedEvent) {
-    console.log(payload);
     await this.rabbitPublisherService.publish('cache-events', payload);
   }
 }

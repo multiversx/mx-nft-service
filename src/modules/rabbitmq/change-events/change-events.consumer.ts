@@ -24,7 +24,6 @@ export class ChangedEventsConsumer {
     console.log(event);
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
-        console.log(2222222222222222);
         this.assetsRedisHandler.clearKey(event.id);
         break;
 
