@@ -9,6 +9,7 @@ export class CacheEventsPublisherService {
   ) {}
 
   async publish(payload: ChangedEvent) {
+    console.log(payload);
     await this.rabbitPublisherService.publish(
       process.env.EXTERNAL_EXCHANGE,
       payload,

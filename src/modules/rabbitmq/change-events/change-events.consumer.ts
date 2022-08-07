@@ -17,12 +17,14 @@ export class ChangedEventsConsumer {
 
   @PublicRabbitConsumer({
     connection: 'common',
-    exchange: process.env.EXTERNAL_EXCHANGE,
+    exchange: 'cache-events',
     queueName: 'nft-cache-events',
   })
   async consume(event: ChangedEvent): Promise<void> {
+    console.log(event);
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
+        console.log(2222222222222222);
         this.assetsRedisHandler.clearKey(event.id);
         break;
 

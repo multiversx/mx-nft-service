@@ -26,6 +26,8 @@ import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
+import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
+import { ChangeEventsModule } from './modules/rabbitmq/change-events/change-events.module';
 
 @Module({
   imports: [
@@ -70,6 +72,8 @@ import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.m
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
+    RabbitMqProcessorModule,
+    ChangeEventsModule,
   ],
 })
 export class AppModule {}

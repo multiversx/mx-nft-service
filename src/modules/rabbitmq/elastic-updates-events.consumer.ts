@@ -10,6 +10,7 @@ export class ElasiticUpdatesConsumer {
   ) {}
 
   @CompetingRabbitConsumer({
+    connection: 'default',
     queueName: process.env.RABBITMQ_QUEUE_ELASTIC,
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,

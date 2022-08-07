@@ -108,6 +108,9 @@ async function bootstrap() {
   logger.log(`Cache warmer active: ${process.env.ENABLE_CACHE_WARMER}`);
   logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
   logger.log(
+    `Cache invalidation is active: ${process.env.ENABLE_CACHE_INVALIDATION}`,
+  );
+  logger.log(
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);

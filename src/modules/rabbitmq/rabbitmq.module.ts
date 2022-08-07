@@ -12,6 +12,7 @@ export class RabbitMqModule {
         RabbitMQModule.forRootAsync(RabbitMQModule, {
           useFactory: () => {
             return {
+              name: 'default',
               uri: process.env.RABBITMQ_URL,
               exchanges: [
                 {
