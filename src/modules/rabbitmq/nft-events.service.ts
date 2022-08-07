@@ -273,7 +273,7 @@ export class NftEventsService {
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
           await new Promise((resolve) => setTimeout(resolve, 500));
-          this.triggerCacheInvalidation(
+          await this.triggerCacheInvalidation(
             `${transferTopics.collection}-${transferTopics.nonce}`,
           );
           break;
@@ -290,8 +290,8 @@ export class NftEventsService {
     }
   }
 
-  private triggerCacheInvalidation(identifier: string) {
-    this.rabbitPublisherService.publish(
+  private async triggerCacheInvalidation(identifier: string) {
+    await this.rabbitPublisherService.publish(
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.OwnerChanged,
