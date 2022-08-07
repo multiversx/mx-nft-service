@@ -27,7 +27,7 @@ import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.mo
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
-import { ChangeEventsModule } from './modules/rabbitmq/change-events/change-events.module';
+import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change-events.module';
 
 @Module({
   imports: [

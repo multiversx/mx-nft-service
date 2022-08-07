@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
+import { rabbitExchanges, rabbitQueues } from '../rabbit-config';
 import { PublicRabbitConsumer } from '../rabbitmq.consumers';
 import { AuctionInvalidationEventsService } from './auction-events/auction-invalidation-events.service';
 import { CacheEventTypeEnum, ChangedEvent } from './events/owner-changed.event';
@@ -17,8 +18,8 @@ export class ChangedEventsConsumer {
 
   @PublicRabbitConsumer({
     connection: 'common',
-    exchange: 'cache-events',
-    queueName: 'nft-cache-events',
+    exchange: rabbitExchanges.CACHE_INVALIDATION,
+    queueName: rabbitQueues.CACHE_INVALIDATION,
   })
   async consume(event: ChangedEvent): Promise<void> {
     console.log(event);

@@ -10,7 +10,7 @@ import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-a
 import { TagsRepository } from './tags.repository';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
-import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.module';
+import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   imports: [

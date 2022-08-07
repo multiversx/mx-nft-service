@@ -20,12 +20,12 @@ import { NotificationTypeEnum } from '../notifications/models/Notification-type.
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
 import { OrdersService } from '../orders/order.service';
-import { CacheEventsPublisherService } from './change-events/cache-invalidation-publisher/change-events-publisher.service';
+import { CacheEventsPublisherService } from './cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   BidChangeEvent,
   CacheEventTypeEnum,
   ChangedEvent,
-} from './change-events/events/owner-changed.event';
+} from './cache-invalidation/events/owner-changed.event';
 import {
   AuctionTokenEvent,
   BidEvent,

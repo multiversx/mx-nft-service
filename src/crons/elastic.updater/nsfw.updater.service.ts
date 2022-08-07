@@ -4,11 +4,11 @@ import { NftTypeEnum } from 'src/modules/assets/models';
 import { BatchUtils, ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
-import { CacheEventsPublisherService } from 'src/modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from 'src/modules/rabbitmq/change-events/events/owner-changed.event';
+} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
 
 type NsfwType = {
   identifier: string;

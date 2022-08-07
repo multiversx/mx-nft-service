@@ -3,6 +3,7 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
 import { OrdersModuleGraph } from 'src/modules/orders/orders.module';
+import { rabbitExchanges } from '../../rabbit-config';
 import { CommonRabbitModule } from '../common-rabbitmq.module';
 import { AuctionInvalidationEventsService } from './auction-invalidation-events.service';
 
@@ -13,7 +14,7 @@ import { AuctionInvalidationEventsService } from './auction-invalidation-events.
     forwardRef(() => AuctionsModuleDb),
     CommonRabbitModule.register(() => {
       return {
-        exchange: 'cache-events',
+        exchange: rabbitExchanges.CACHE_INVALIDATION,
         uri: process.env.COMMON_RABBITMQ_URL,
       };
     }),

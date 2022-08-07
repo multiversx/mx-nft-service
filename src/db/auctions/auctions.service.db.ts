@@ -19,11 +19,11 @@ import {
 } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
-import { CacheEventsPublisherService } from 'src/modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from 'src/modules/rabbitmq/change-events/events/owner-changed.event';
+} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';

@@ -4,6 +4,7 @@ import { CommonModule } from 'src/common.module';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
+import { rabbitExchanges } from '../rabbit-config';
 import { AuctionInvalidationEventsModule } from './auction-events/auction-invalidation-events.module';
 import { ChangedEventsConsumer } from './change-events.consumer';
 import { CommonRabbitModule } from './common-rabbitmq.module';
@@ -14,7 +15,7 @@ import { CommonRabbitModule } from './common-rabbitmq.module';
     AuctionInvalidationEventsModule,
     CommonRabbitModule.register(() => {
       return {
-        exchange: 'cache-events',
+        exchange: rabbitExchanges.CACHE_INVALIDATION,
         uri: process.env.COMMON_RABBITMQ_URL,
       };
     }),

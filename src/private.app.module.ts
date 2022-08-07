@@ -6,7 +6,7 @@ import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.mo
 import { ReindexController } from './modules/ingress/reindex.controller';
 import { MetricsController } from './modules/metrics/metrics.controller';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
-import { CacheEventsPublisherModule } from './modules/rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.module';
+import { CacheEventsPublisherModule } from './modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   providers: [NsfwUpdaterService, RarityUpdaterService],

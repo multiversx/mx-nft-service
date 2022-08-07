@@ -24,7 +24,7 @@ import { NotificationsModuleGraph } from '../notifications/notifications.module'
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
-import { CacheEventsPublisherModule } from './change-events/cache-invalidation-publisher/change-events-publisher.module';
+import { CacheEventsPublisherModule } from './cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   imports: [

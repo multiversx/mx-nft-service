@@ -22,11 +22,11 @@ import { NotificationStatusEnum } from '../notifications/models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { OrdersRedisHandler } from './loaders/orders.redis-handler';
-import { CacheEventsPublisherService } from '../rabbitmq/change-events/cache-invalidation-publisher/change-events-publisher.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../rabbitmq/change-events/events/owner-changed.event';
+} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 const hash = require('object-hash');
 
 @Injectable()

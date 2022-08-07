@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { rabbitExchanges } from '../../rabbit-config';
 import { CommonRabbitModule } from '../common-rabbitmq.module';
 import { CacheEventsPublisherService } from './change-events-publisher.service';
 
@@ -6,7 +7,7 @@ import { CacheEventsPublisherService } from './change-events-publisher.service';
   imports: [
     CommonRabbitModule.register(() => {
       return {
-        exchange: 'cache-events',
+        exchange: rabbitExchanges.CACHE_INVALIDATION,
         uri: process.env.COMMON_RABBITMQ_URL,
       };
     }),

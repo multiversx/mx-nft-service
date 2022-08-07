@@ -13,7 +13,7 @@ import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.u
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 import { RABBIT_PORT_ONE, RABBIT_PORT_TWO } from './utils/constants/ports';
-import { ChangeEventsModule } from './modules/rabbitmq/change-events/change-events.module';
+import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change-events.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
