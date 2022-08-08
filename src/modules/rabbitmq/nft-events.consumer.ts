@@ -24,33 +24,32 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events && process.env.ENABLE_RABBITMQ === 'true') {
-      return;
-    }
-    const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
-      return entry.toLowerCase().trim();
-    });
-    await this.nftTransactionsService.handleNftMintEvents(
-      nftAuctionEvents?.events?.filter(
-        (e: { identifier: NftEventEnum | CollectionEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTCreate ||
-          e.identifier === NftEventEnum.ESDTNFTTransfer ||
-          e.identifier === NftEventEnum.MultiESDTNFTTransfer,
-      ),
-      nftAuctionEvents.hash,
-    );
-    await this.nftTransactionsService.handleNftAuctionEvents(
-      nftAuctionEvents?.events?.filter(
-        (e: { address: any }) =>
-          e.address === elrondConfig.nftMarketplaceAddress,
-      ),
-      nftAuctionEvents.hash,
-    );
+      const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
+        return entry.toLowerCase().trim();
+      });
+      await this.nftTransactionsService.handleNftMintEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { identifier: NftEventEnum | CollectionEventEnum }) =>
+            e.identifier === NftEventEnum.ESDTNFTCreate ||
+            e.identifier === NftEventEnum.ESDTNFTTransfer ||
+            e.identifier === NftEventEnum.MultiESDTNFTTransfer,
+        ),
+        nftAuctionEvents.hash,
+      );
+      await this.nftTransactionsService.handleNftAuctionEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { address: any }) =>
+            e.address === elrondConfig.nftMarketplaceAddress,
+        ),
+        nftAuctionEvents.hash,
+      );
 
-    await this.minterEventsService.handleNftMinterEvents(
-      nftAuctionEvents?.events?.filter(
-        (e: { address: any }) => minters.includes(e.address) === true,
-      ),
-      nftAuctionEvents.hash,
-    );
+      await this.minterEventsService.handleNftMinterEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { address: any }) => minters.includes(e.address) === true,
+        ),
+        nftAuctionEvents.hash,
+      );
+    }
   }
 }

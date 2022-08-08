@@ -16,6 +16,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftColle
 import { AuctionsForAssetRedisHandler } from '../loaders/asset-auctions.redis-handler';
 import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-handler';
 import { Auction } from '../models';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 
 const hash = require('object-hash');
 
@@ -64,7 +65,7 @@ export class AuctionsCachingService {
   }
 
   public async getOrSetAuctions(
-    queryRequest,
+    queryRequest: QueryRequest,
     getAuctions: () => any,
   ): Promise<[Auction[], number, PriceRange]> {
     return this.redisCacheService.getOrSet(

@@ -16,6 +16,7 @@ import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
+import { OrdersCachingModule } from './caching/orders-caching.module';
 
 @Module({
   providers: [
@@ -34,6 +35,7 @@ import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache
   imports: [
     ElrondCommunicationModule,
     OrdersModuleDb,
+    OrdersCachingModule,
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => NotificationsModuleDb),

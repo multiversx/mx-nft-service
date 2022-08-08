@@ -27,7 +27,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/owner-changed.event';
-const hash = require('object-hash');
+import { OrdersCachingService } from './caching/orders-caching.service';
 
 @Injectable()
 export class OrdersService {
@@ -39,15 +39,11 @@ export class OrdersService {
     private auctionsService: AuctionsServiceDb,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
+    private ordersCachingService: OrdersCachingService,
     private notificationsService: NotificationsServiceDb,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly rabbitPublisherService: CacheEventsPublisherService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.ordersRedisClientName,
-    );
-  }
+  ) {}
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
@@ -158,8 +154,6 @@ export class OrdersService {
 
   async rollbackOrdersByHash(hash: string): Promise<any> {
     try {
-      await this.invalidateCache();
-
       return this.orderServiceDb.rollbackOrdersByHash(hash);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
@@ -171,13 +165,8 @@ export class OrdersService {
   }
 
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
-    const cacheKey = this.getAuctionsCacheKey(queryRequest);
-    const getOrders = () => this.getMappedOrders(queryRequest);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getOrders,
-      TimeConstants.oneDay,
+    return this.ordersCachingService.getOrSetOrders(queryRequest, () =>
+      this.getMappedOrders(queryRequest),
     );
   }
 
@@ -198,10 +187,6 @@ export class OrdersService {
     return [ordersEntities.map((order) => Order.fromEntity(order)), count];
   }
 
-  private getAuctionsCacheKey(request: QueryRequest) {
-    return generateCacheKeyFromParams('orders', hash(request));
-  }
-
   private async triggerCacheInvalidation(
     auctionId: number,
     ownerAddress: string,
@@ -213,16 +198,5 @@ export class OrdersService {
         ownerAddress: ownerAddress,
       }),
     );
-  }
-
-  public async invalidateCache(
-    auctionId: number = 0,
-    ownerAddress: string = '',
-  ): Promise<void> {
-    await this.lastOrderRedisHandler.clearKey(auctionId);
-    await this.ordersRedisHandler.clearKey(auctionId);
-    await this.auctionAvailableTokens.clearKey(auctionId);
-    // await this.accountStats.invalidateStats(ownerAddress);
-    return this.redisCacheService.flushDb(this.redisClient);
   }
 }
