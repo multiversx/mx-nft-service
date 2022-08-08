@@ -20,18 +20,18 @@ async function bootstrap() {
     await startPublicApp();
   }
 
+  if (process.env.ENABLE_RABBITMQ === 'true') {
+    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
+    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen(6014);
+  }
+
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
     await privateApp.listen(
       parseInt(process.env.PRIVATE_PORT),
       process.env.PRIVATE_LISTEN_ADDRESS,
     );
-  }
-
-  if (process.env.ENABLE_RABBITMQ === 'true') {
-    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(6014);
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
