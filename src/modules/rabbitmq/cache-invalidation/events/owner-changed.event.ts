@@ -21,7 +21,7 @@ export enum CacheEventTypeEnum {
   AssetsRefresh,
   Mint,
   UpdateAuction,
-  OrderChanged,
+  UpdateOrder,
   BuySft,
   Bid,
 }

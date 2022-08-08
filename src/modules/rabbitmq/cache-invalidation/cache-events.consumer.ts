@@ -13,7 +13,7 @@ export class CacheEventsConsumer {
     private assetsRedisHandler: AssetsRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
     private collectionAssets: CollectionAssetsRedisHandler,
-    private auctionInvalidation: CacheInvalidationEventsService,
+    private cacheInvalidationService: CacheInvalidationEventsService,
   ) {}
 
   @PublicRabbitConsumer({
@@ -38,14 +38,18 @@ export class CacheEventsConsumer {
         this.collectionAssetsCount.clearKey(event.id);
         break;
 
-      case CacheEventTypeEnum.Bid:
-        console.log(event);
-        this.collectionAssets.clearKey(event.id);
-        this.collectionAssetsCount.clearKey(event.id);
-        break;
+      // case CacheEventTypeEnum.Bid:
+      //   console.log(event);
+      //   this.collectionAssets.clearKey(event.id);
+      //   this.collectionAssetsCount.clearKey(event.id);
+      //   break;
 
       case CacheEventTypeEnum.UpdateAuction:
-        await this.auctionInvalidation.invalidateAuction(event);
+        await this.cacheInvalidationService.invalidateAuction(event);
+        break;
+
+      case CacheEventTypeEnum.UpdateOrder:
+        await this.cacheInvalidationService.invalidateOrder(event);
         break;
     }
   }

@@ -29,14 +29,15 @@ export class CacheInvalidationEventsService {
   }
 
   async invalidateAuction(payload: ChangedEvent) {
-    this.auctionsCachingService.invalidateCache();
+    await this.auctionsCachingService.invalidateCache();
+    this.auctionsCachingService.invalidatePersistentCaching;
     await this.auctionsCachingService.invalidateCacheByPattern(
       payload.ownerAddress,
     );
     await this.availableTokensCount.clearKey(payload.id);
   }
 
-  async invalidateOrder(payload: BidChangeEvent) {
+  async invalidateOrder(payload: ChangedEvent) {
     await this.ordersCachingService.invalidateCache(
       parseInt(payload.id),
       payload.ownerAddress,

@@ -194,7 +194,7 @@ export class OrdersService {
     await this.rabbitPublisherService.publish(
       new ChangedEvent({
         id: auctionId.toString(),
-        type: CacheEventTypeEnum.OrderChanged,
+        type: CacheEventTypeEnum.UpdateOrder,
         ownerAddress: ownerAddress,
       }),
     );
