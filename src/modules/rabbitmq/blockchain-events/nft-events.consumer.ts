@@ -20,7 +20,13 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events) {
-      console.log(111111111, JSON.stringify(nftAuctionEvents.events));
+      console.log(
+        111111111,
+        JSON.stringify(
+          nftAuctionEvents.events,
+          elrondConfig.nftMarketplaceAddress,
+        ),
+      );
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
