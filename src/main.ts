@@ -29,11 +29,9 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
-    const rabbitMq = await NestFactory.createMicroservice(
-      RabbitMqProcessorModule,
-    );
+    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
     rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen();
+    await rabbitMq.listen(6014);
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
@@ -50,17 +48,15 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
-    let processorApp = await NestFactory.createMicroservice(CacheWarmerModule);
+    let processorApp = await NestFactory.create(CacheWarmerModule);
 
-    await processorApp.listen();
+    await processorApp.listen(process.env.CACHE_PORT);
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
-    let processorApp = await NestFactory.createMicroservice(
-      ElasticNsfwUpdaterModule,
-    );
+    let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen();
+    await processorApp.listen(process.env.NSFW_PORT);
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {

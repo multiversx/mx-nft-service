@@ -26,7 +26,6 @@ import {
 } from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
@@ -44,13 +43,7 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private auctionsLoader: AuctionsForAssetRedisHandler,
-    private lowestAuctionLoader: LowestAuctionRedisHandler,
-    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
-    private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
-    private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersServiceDb,
-    private accountStats: AccountsStatsService,
     private readonly rabbitPublisherService: CacheEventsPublisherService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
@@ -484,16 +477,6 @@ export class AuctionsServiceDb {
       await this.triggerCacheInvalidation(auction);
     }
     return await this.auctionsRepository.save(auctions);
-  }
-
-  public async invalidateCache(identifier: string, address: string) {
-    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
-    await this.accountStats.invalidateStats(address);
-    await this.auctionsLoader.clearKey(identifier);
-    await this.lowestAuctionLoader.clearKey(identifier);
-    await this.assetsAuctionsCountLoader.clearKey(identifier);
-    await this.onSaleAssetsCount.clearKey(collection);
-    await this.availableTokensCountHandler.clearKey(identifier);
   }
 
   private async triggerCacheInvalidation(auction: AuctionEntity) {

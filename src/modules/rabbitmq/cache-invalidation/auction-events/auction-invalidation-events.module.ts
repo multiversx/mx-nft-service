@@ -1,17 +1,12 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
-import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
-import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
-import { OrdersModuleGraph } from 'src/modules/orders/orders.module';
+import { Module } from '@nestjs/common';
+import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
 import { rabbitExchanges } from '../../rabbit-config';
 import { CommonRabbitModule } from '../common-rabbitmq.module';
 import { AuctionInvalidationEventsService } from './auction-invalidation-events.service';
 
 @Module({
   imports: [
-    AuctionsModuleGraph,
-    OrdersModuleGraph,
-    forwardRef(() => AuctionsModuleDb),
+    AuctionsCachingModule,
     CommonRabbitModule.register(() => {
       return {
         exchange: rabbitExchanges.CACHE_INVALIDATION,
@@ -19,10 +14,7 @@ import { AuctionInvalidationEventsService } from './auction-invalidation-events.
       };
     }),
   ],
-  providers: [
-    AuctionInvalidationEventsService,
-    AssetAvailableTokensCountRedisHandler,
-  ],
+  providers: [AuctionInvalidationEventsService],
   exports: [AuctionInvalidationEventsService],
 })
 export class AuctionInvalidationEventsModule {}

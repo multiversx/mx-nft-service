@@ -1,0 +1,142 @@
+import { Injectable } from '@nestjs/common';
+import '../../../utils/extentions';
+import * as Redis from 'ioredis';
+import { cacheConfig } from 'src/config';
+import { RedisCacheService } from 'src/common';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { TimeConstants } from 'src/utils/time-utils';
+import { PriceRange } from 'src/db/auctions/price-range';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { AuctionWithBidsCount } from 'src/db/auctions/auctionWithBidCount.dto';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
+import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
+import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
+import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
+import { AuctionsForAssetRedisHandler } from '../loaders/asset-auctions.redis-handler';
+import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-handler';
+import { Auction } from '../models';
+
+const hash = require('object-hash');
+
+@Injectable()
+export class AuctionsCachingService {
+  private redisClient: Redis.Redis;
+  constructor(
+    private auctionsLoader: AuctionsForAssetRedisHandler,
+    private lowestAuctionLoader: LowestAuctionRedisHandler,
+    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
+    private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
+    private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
+    private accountStatsCachingService: AccountsStatsCachingService,
+    private redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.auctionsRedisClientName,
+    );
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.persistentRedisClientName,
+    );
+  }
+
+  public async invalidateCache(): Promise<void> {
+    return await this.redisCacheService.flushDb(this.redisClient);
+  }
+
+  public async invalidatePersistentCaching(
+    identifier: string,
+    address: string,
+  ) {
+    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
+    await this.accountStatsCachingService.invalidateStats(address);
+    await this.auctionsLoader.clearKey(identifier);
+    await this.lowestAuctionLoader.clearKey(identifier);
+    await this.assetsAuctionsCountLoader.clearKey(identifier);
+    await this.onSaleAssetsCount.clearKey(collection);
+    await this.availableTokensCountHandler.clearKey(identifier);
+  }
+
+  public async invalidateCacheByPattern(address: string) {
+    await this.redisCacheService.delByPattern(
+      this.redisClient,
+      generateCacheKeyFromParams('claimable_auctions', address),
+    );
+  }
+
+  public async getOrSetAuctions(
+    queryRequest,
+    getAuctions: () => any,
+  ): Promise<[Auction[], number, PriceRange]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getAuctionsCacheKey(queryRequest),
+      () => getAuctions(),
+      30 * TimeConstants.oneSecond,
+    );
+  }
+
+  public async getAuctionsOrderByNoBids(
+    queryRequest,
+    getAuctions: () => any,
+  ): Promise<[Auction[], number, PriceRange]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getAuctionsCacheKey(queryRequest),
+      () => getAuctions(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getAuctionsEndingInAMonth(
+    getAuctions: () => any,
+  ): Promise<[AuctionWithBidsCount[], number, PriceRange]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      CacheInfo.AuctionsEndingInAMonth.key,
+      () => getAuctions(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getMinAndMax(
+    getData: () => any,
+  ): Promise<{ minBid: string; maxBid: string }> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      generateCacheKeyFromParams('minMaxPrice'),
+      () => getData(),
+      5 * TimeConstants.oneMinute,
+    );
+  }
+
+  public async getClaimableAuctions(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+    getData: () => any,
+  ): Promise<[Auction[], number]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getClaimableAuctionsCacheKey(address, limit, offset),
+      () => getData(),
+      30 * TimeConstants.oneSecond,
+    );
+  }
+
+  private getAuctionsCacheKey(request: any) {
+    return generateCacheKeyFromParams('auctions', hash(request));
+  }
+
+  private getClaimableAuctionsCacheKey(
+    address: string,
+    limit: number,
+    offset: number,
+  ) {
+    return generateCacheKeyFromParams(
+      'claimable_auctions',
+      address,
+      limit,
+      offset,
+    );
+  }
+}

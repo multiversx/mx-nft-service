@@ -26,8 +26,8 @@ import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
-import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
-import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change-events.module';
+import * as ormconfig from './ormconfig';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -35,6 +35,8 @@ import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       introspection: process.env.NODE_ENV !== 'production',
@@ -72,8 +74,6 @@ import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
-    // RabbitMqProcessorModule,
-    // ChangeEventsModule,
   ],
 })
 export class AppModule {}

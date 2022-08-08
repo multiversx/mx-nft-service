@@ -36,7 +36,6 @@ export class OrdersService {
     private orderServiceDb: OrdersServiceDb,
     private lastOrderRedisHandler: LastOrderRedisHandler,
     private ordersRedisHandler: OrdersRedisHandler,
-    private accountStats: AccountsStatsService,
     private auctionsService: AuctionsServiceDb,
     private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
@@ -223,7 +222,7 @@ export class OrdersService {
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKey(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
-    await this.accountStats.invalidateStats(ownerAddress);
+    // await this.accountStats.invalidateStats(ownerAddress);
     return this.redisCacheService.flushDb(this.redisClient);
   }
 }
