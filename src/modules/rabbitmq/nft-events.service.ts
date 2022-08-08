@@ -50,6 +50,7 @@ export class NftEventsService {
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
+    console.log('auctionEvents', auctionEvents);
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
