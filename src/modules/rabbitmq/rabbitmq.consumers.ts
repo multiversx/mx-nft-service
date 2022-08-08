@@ -10,6 +10,9 @@ import * as uuid from 'uuid';
  * Make sure the exchange exists.
  */
 export const CompetingRabbitConsumer = (config: RabbitConsumerConfig) => {
+  if (config.disable) {
+    return applyDecorators();
+  }
   return applyDecorators(
     RabbitSubscribe({
       connection: config.connection ?? 'default',
@@ -36,6 +39,9 @@ export const CompetingRabbitConsumer = (config: RabbitConsumerConfig) => {
  */
 export const PublicRabbitConsumer = (config: RabbitConsumerConfig) => {
   const { queueName, exchange, connection } = config;
+  if (config.disable) {
+    return applyDecorators();
+  }
   return applyDecorators(
     RabbitSubscribe({
       connection: connection ?? 'default',

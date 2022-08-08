@@ -20,6 +20,7 @@ export class ChangedEventsConsumer {
     connection: 'common',
     exchange: rabbitExchanges.CACHE_INVALIDATION,
     queueName: rabbitQueues.CACHE_INVALIDATION,
+    disable: process.env.ENABLE_CACHE_INVALIDATION === 'true' ? false : true,
   })
   async consume(event: ChangedEvent): Promise<void> {
     console.log(event);

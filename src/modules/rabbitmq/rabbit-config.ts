@@ -2,6 +2,7 @@ export interface RabbitConsumerConfig {
   connection?: string | undefined;
   exchange: string;
   queueName: string;
+  disable?: boolean;
   dlqExchange?: string;
 }
 
