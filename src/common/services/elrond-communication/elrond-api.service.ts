@@ -324,6 +324,64 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsBySearch.name, url);
   }
 
+  async getAllNftsByCollection(
+    collection: string,
+    fields: string = 'identifier,name',
+  ): Promise<Nft[]> {
+    let batchSize = 250;
+    let additionalBatchSize: number = 0;
+    let currentBatchExpectedSize: number;
+
+    let nfts: Nft[] = [];
+    let batch: Nft[] = [];
+
+    let smallestTimestampInLastBatch: number = undefined;
+    let smallestNonceInLastBatch: number = undefined;
+
+    do {
+      currentBatchExpectedSize = batchSize + additionalBatchSize;
+
+      let query = new AssetsQuery()
+        .addCollection(collection)
+        .addPageSize(0, currentBatchExpectedSize)
+        .addQuery(`&fields=${fields}`);
+      if (smallestTimestampInLastBatch !== undefined) {
+        query = query.addBefore(smallestTimestampInLastBatch);
+      }
+
+      const url = `nfts${query.build()}`;
+
+      batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
+
+      if (batch.length !== 0) {
+        nfts = nfts.concat(batch);
+
+        smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;
+
+        const smallestNonceInCurrentBatch: number = batch[0].nonce;
+
+        if (smallestNonceInLastBatch === smallestNonceInCurrentBatch) {
+          additionalBatchSize += Math.max(batchSize / 2, 1);
+        } else if (additionalBatchSize > 0) {
+          additionalBatchSize = 0;
+        } else {
+          smallestNonceInLastBatch = smallestNonceInCurrentBatch;
+        }
+      }
+    } while (batch.length === currentBatchExpectedSize);
+
+    let filteredNfts: Nft[] = [];
+    let nonceMap: boolean[] = [];
+    for (let i = 0; i < nfts.length; i++) {
+      if (nonceMap[nfts[i].nonce] !== true) {
+        filteredNfts.push(nfts[i]);
+        nonceMap[nfts[i].nonce] = true;
+      }
+    }
+
+    return filteredNfts;
+  }
+
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
     return await this.doGetGeneric(
       this.getTagsBySearch.name,

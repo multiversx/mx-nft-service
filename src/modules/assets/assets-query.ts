@@ -70,6 +70,10 @@ export class AssetsQuery {
     return this.addParamToQuery('isNsfw', false);
   }
 
+  addBefore(timestamp: number): this {
+    return this.addParamToQuery('before', timestamp);
+  }
+
   build(addDefaultQuery: boolean = true): string {
     const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
