@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CompetingRabbitConsumer } from './rabbitmq.consumers';
+import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { RevertEventsService } from './revert.events.service';
 
 @Injectable()

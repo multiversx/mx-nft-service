@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { AuctionsSetterService } from '../auctions';
-import { OrdersService } from '../orders/order.service';
+import { AuctionsSetterService } from 'src/modules/auctions';
+import { OrdersService } from 'src/modules/orders/order.service';
 
 @Injectable()
 export class RevertEventsService {

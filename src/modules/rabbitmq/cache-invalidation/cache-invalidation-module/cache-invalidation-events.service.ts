@@ -5,7 +5,7 @@ import { OrdersCachingService } from 'src/modules/orders/caching/orders-caching.
 import { BidChangeEvent, ChangedEvent } from '../events/owner-changed.event';
 
 @Injectable()
-export class AuctionInvalidationEventsService {
+export class CacheInvalidationEventsService {
   constructor(
     private auctionsCachingService: AuctionsCachingService,
     private ordersCachingService: OrdersCachingService,

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
 import { OrdersCachingModule } from 'src/modules/orders/caching/orders-caching.module';
-import { AuctionInvalidationEventsService } from './auction-invalidation-events.service';
+import { CacheInvalidationEventsService } from './cache-invalidation-events.service';
 
 @Module({
   imports: [AuctionsCachingModule, OrdersCachingModule],
-  providers: [AuctionInvalidationEventsService],
-  exports: [AuctionInvalidationEventsService],
+  providers: [CacheInvalidationEventsService],
+  exports: [CacheInvalidationEventsService],
 })
-export class AuctionInvalidationEventsModule {}
+export class CacheInvalidationEventsModule {}

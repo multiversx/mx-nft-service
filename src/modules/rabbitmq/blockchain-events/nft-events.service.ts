@@ -8,33 +8,33 @@ import {
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { AssetByIdentifierService } from 'src/modules/assets';
+import { AuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
 import {
-  AuctionEventEnum,
-  NftEventEnum,
-} from '../assets/models/AuctionEvent.enum';
-import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
-import { AuctionStatusEnum } from '../auctions/models';
-import { NotificationStatusEnum } from '../notifications/models';
-import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
-import { NotificationsService } from '../notifications/notifications.service';
-import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
-import { OrdersService } from '../orders/order.service';
-import { CacheEventsPublisherService } from './cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+  AuctionsSetterService,
+  AuctionsGetterService,
+} from 'src/modules/auctions';
+import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { NotificationStatusEnum } from 'src/modules/notifications/models';
+import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
+import { OrdersService } from 'src/modules/orders/order.service';
+import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   BidChangeEvent,
   CacheEventTypeEnum,
   ChangedEvent,
-} from './cache-invalidation/events/owner-changed.event';
+} from '../cache-invalidation/events/owner-changed.event';
 import {
-  AuctionTokenEvent,
   BidEvent,
   BuySftEvent,
-  EndAuctionEvent,
   WithdrawEvent,
-} from './entities/auction';
-import { MintEvent } from './entities/auction/mint.event';
-import { TransferEvent } from './entities/auction/transfer.event';
+  EndAuctionEvent,
+  AuctionTokenEvent,
+} from '../entities/auction';
+import { MintEvent } from '../entities/auction/mint.event';
+import { TransferEvent } from '../entities/auction/transfer.event';
 
 @Injectable()
 export class NftEventsService {

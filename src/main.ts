@@ -12,7 +12,7 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
-import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change-events.module';
+import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -35,7 +35,7 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
-    const rabbitMq = await NestFactory.createMicroservice(ChangeEventsModule);
+    const rabbitMq = await NestFactory.createMicroservice(CacheEventsModule);
     rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
     await rabbitMq.listen();
   }
