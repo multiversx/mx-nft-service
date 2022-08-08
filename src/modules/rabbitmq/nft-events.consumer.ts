@@ -20,10 +20,9 @@ export class NftEventsConsumer {
     queueName: process.env.RABBITMQ_QUEUE,
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
-    disable: process.env.ENABLE_RABBITMQ === 'true' ? false : true,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
-    if (nftAuctionEvents.events && process.env.ENABLE_RABBITMQ === 'true') {
+    if (nftAuctionEvents.events) {
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });

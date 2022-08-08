@@ -234,7 +234,6 @@ export class NftEventsService {
   }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
-    console.log('auctionEvents', mintEvents);
     for (let event of mintEvents) {
       switch (event.identifier) {
         case NftEventEnum.ESDTNFTCreate:
