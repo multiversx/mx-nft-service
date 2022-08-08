@@ -72,8 +72,8 @@ import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
-    RabbitMqProcessorModule,
-    ChangeEventsModule,
+    // RabbitMqProcessorModule,
+    // ChangeEventsModule,
   ],
 })
 export class AppModule {}
