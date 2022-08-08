@@ -12,32 +12,13 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
-import { RABBIT_PORT_ONE, RABBIT_PORT_TWO } from './utils/constants/ports';
 import { ChangeEventsModule } from './modules/rabbitmq/cache-invalidation/change-events.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
-  const app = await NestFactory.create(AppModule);
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-  const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
-  app.useGlobalInterceptors(new LoggingInterceptor());
-
-  const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
-  httpServer.keepAliveTimeout = parseInt(
-    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
-  );
-
-  await app.listen(process.env.PORT);
+  if (process.env.ENABLE_PUBLIC_API === 'true') {
+    await startPublicApp();
+  }
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
@@ -48,32 +29,38 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
-    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(RABBIT_PORT_ONE, '0.0.0.0');
+    const rabbitMq = await NestFactory.createMicroservice(
+      RabbitMqProcessorModule,
+    );
+    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen();
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
-    const rabbitMq = await NestFactory.create(ChangeEventsModule);
-    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(RABBIT_PORT_TWO, '0.0.0.0');
+    const rabbitMq = await NestFactory.createMicroservice(ChangeEventsModule);
+    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen();
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
-    let processorApp = await NestFactory.create(ClaimableAuctionsModule);
-    await processorApp.listen(process.env.CLAIMABLE_PORT);
+    let processorApp = await NestFactory.createMicroservice(
+      ClaimableAuctionsModule,
+    );
+    await processorApp.listen();
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
-    let processorApp = await NestFactory.create(CacheWarmerModule);
+    let processorApp = await NestFactory.createMicroservice(CacheWarmerModule);
 
-    await processorApp.listen(process.env.CACHE_PORT);
+    await processorApp.listen();
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
-    let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
+    let processorApp = await NestFactory.createMicroservice(
+      ElasticNsfwUpdaterModule,
+    );
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(process.env.NSFW_PORT);
+    await processorApp.listen();
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
@@ -123,3 +110,26 @@ async function bootstrap() {
 }
 
 bootstrap();
+async function startPublicApp() {
+  const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
+  const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
+  httpServer.keepAliveTimeout = parseInt(
+    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
+  );
+
+  await app.listen(process.env.PORT);
+}
