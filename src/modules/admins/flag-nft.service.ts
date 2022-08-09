@@ -25,7 +25,7 @@ export class FlagNftService {
     private nftFlagsRepository: NftsFlagsRepository,
     @Inject(forwardRef(() => NsfwUpdaterService))
     private nsfwUpdateService: NsfwUpdaterService,
-    private readonly rabbitPublisherService: CacheEventsPublisherService,
+    private readonly cacheEventPublisherService: CacheEventsPublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -212,7 +212,7 @@ export class FlagNftService {
   }
 
   private async triggerCacheInvalidation(identifier: string) {
-    await this.rabbitPublisherService.publish(
+    await this.cacheEventPublisherService.publish(
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.OwnerChanged,
@@ -221,7 +221,7 @@ export class FlagNftService {
   }
 
   private async triggerMultipleInvalidation(identifiers: string[]) {
-    await this.rabbitPublisherService.publish(
+    await this.cacheEventPublisherService.publish(
       new ChangedEvent({
         id: identifiers,
         type: CacheEventTypeEnum.AssetsRefresh,

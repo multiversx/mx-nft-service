@@ -44,7 +44,7 @@ import {
 export class AuctionsServiceDb {
   constructor(
     private ordersService: OrdersServiceDb,
-    private readonly rabbitPublisherService: CacheEventsPublisherService,
+    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -366,7 +366,10 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    await this.triggerCacheInvalidation(auction);
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
     return await this.auctionsRepository.save(auction);
   }
 
@@ -463,7 +466,10 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.triggerCacheInvalidation(auction);
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -474,17 +480,23 @@ export class AuctionsServiceDb {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     for (let auction of auctions) {
-      await this.triggerCacheInvalidation(auction);
+      await this.triggerCacheInvalidation(
+        auction.identifier,
+        auction.ownerAddress,
+      );
     }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private async triggerCacheInvalidation(auction: AuctionEntity) {
-    await this.rabbitPublisherService.publish(
+  private async triggerCacheInvalidation(
+    identifier: string,
+    ownerAddress: string,
+  ) {
+    await this.cacheEventsPublisherService.publish(
       new ChangedEvent({
-        id: auction?.identifier,
+        id: identifier,
         type: CacheEventTypeEnum.UpdateAuction,
-        ownerAddress: auction.ownerAddress,
+        ownerAddress: ownerAddress,
       }),
     );
   }

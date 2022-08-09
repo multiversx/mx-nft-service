@@ -12,22 +12,6 @@ export class CacheInvalidationEventsService {
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
   ) {}
 
-  async invalidateBidCaching(payload: BidChangeEvent) {
-    this.auctionsCachingService.invalidateCache();
-    await this.auctionsCachingService.invalidateCacheByPattern(
-      payload.ownerAddress,
-    );
-    this.auctionsCachingService.invalidatePersistentCaching(
-      payload.identifier,
-      payload.ownerAddress,
-    );
-    await this.ordersCachingService.invalidateCache(
-      parseInt(payload.id),
-      payload.ownerAddress,
-    );
-    await this.availableTokensCount.clearKey(payload.identifier);
-  }
-
   async invalidateAuction(payload: ChangedEvent) {
     await this.auctionsCachingService.invalidateCache();
     this.auctionsCachingService.invalidatePersistentCaching;

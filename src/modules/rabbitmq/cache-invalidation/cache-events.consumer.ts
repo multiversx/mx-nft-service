@@ -38,12 +38,6 @@ export class CacheEventsConsumer {
         this.collectionAssetsCount.clearKey(event.id);
         break;
 
-      // case CacheEventTypeEnum.Bid:
-      //   console.log(event);
-      //   this.collectionAssets.clearKey(event.id);
-      //   this.collectionAssetsCount.clearKey(event.id);
-      //   break;
-
       case CacheEventTypeEnum.UpdateAuction:
         await this.cacheInvalidationService.invalidateAuction(event);
         break;

@@ -19,7 +19,7 @@ type NsfwType = {
 export class NsfwUpdaterService {
   constructor(
     private elasticService: ElrondElasticService,
-    private readonly rabbitPublisherService: CacheEventsPublisherService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
     @Inject(forwardRef(() => FlagNftService))
     private flagsNftService: FlagNftService,
     private readonly logger: Logger,
@@ -246,7 +246,7 @@ export class NsfwUpdaterService {
     );
   }
   private async triggerMultipleInvalidation(identifiers: string[]) {
-    await this.rabbitPublisherService.publish(
+    await this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: identifiers,
         type: CacheEventTypeEnum.AssetsRefresh,

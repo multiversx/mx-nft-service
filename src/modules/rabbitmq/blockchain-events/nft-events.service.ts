@@ -46,11 +46,10 @@ export class NftEventsService {
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
-    private readonly rabbitPublisherService: CacheEventsPublisherService,
+    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
-    console.log('auctionEvents', auctionEvents);
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
@@ -86,14 +85,6 @@ export class NftEventsService {
                 price: topics.currentBid,
                 auctionId: parseInt(topics.auctionId, 16),
               },
-            }),
-          );
-          await this.rabbitPublisherService.publish(
-            new BidChangeEvent({
-              id: parseInt(topics.auctionId, 16).toString(),
-              type: CacheEventTypeEnum.Bid,
-              identifier: auction?.identifier,
-              ownerAddress: topics.currentWinner,
             }),
           );
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
@@ -240,11 +231,9 @@ export class NftEventsService {
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          this.rabbitPublisherService.publish(
-            new ChangedEvent({
-              id: createTopics.collection,
-              type: CacheEventTypeEnum.Mint,
-            }),
+          this.triggerCacheInvalidation(
+            createTopics.collection,
+            CacheEventTypeEnum.Mint,
           );
           const collection =
             await this.elrondApi.getCollectionByIdentifierForQuery(
@@ -276,6 +265,7 @@ export class NftEventsService {
           await new Promise((resolve) => setTimeout(resolve, 500));
           await this.triggerCacheInvalidation(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+            CacheEventTypeEnum.OwnerChanged,
           );
           break;
 
@@ -284,6 +274,7 @@ export class NftEventsService {
           const multiTransferTopics = multiTransferEvent.getTopics();
           this.triggerCacheInvalidation(
             `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
+            CacheEventTypeEnum.OwnerChanged,
           );
 
           break;
@@ -291,11 +282,14 @@ export class NftEventsService {
     }
   }
 
-  private async triggerCacheInvalidation(identifier: string) {
-    await this.rabbitPublisherService.publish(
+  private async triggerCacheInvalidation(
+    id: string,
+    eventType: CacheEventTypeEnum,
+  ) {
+    await this.cacheEventsPublisherService.publish(
       new ChangedEvent({
-        id: identifier,
-        type: CacheEventTypeEnum.OwnerChanged,
+        id: id,
+        type: eventType,
       }),
     );
   }

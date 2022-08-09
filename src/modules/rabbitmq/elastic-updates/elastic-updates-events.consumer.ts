@@ -16,7 +16,7 @@ export class ElasiticUpdatesConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeMintEvents(mintEvents: any) {
-    if (mintEvents.events) {
+    if (mintEvents.events && process.env.ENABLE_ELASTIC_UPDATES === 'true') {
       await Promise.all([
         this.elasticUpdateService.handleNftMintEvents(
           mintEvents?.events?.filter(
