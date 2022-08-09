@@ -39,7 +39,7 @@ export class CampaignsService {
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
 
-    if (filters?.campaignId && filters.minterAddress) {
+    if (filters?.campaignId && filters?.minterAddress) {
       const campaigns = allCampaigns?.items?.filter(
         (c) =>
           c.campaignId === filters.campaignId &&
