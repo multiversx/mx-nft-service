@@ -4,14 +4,14 @@ import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 @Injectable()
 export class AccountsStatsCachingServiceMock {
   public async getPublicStats(
-    address: string,
+    _address: string,
     _getAccountStats: () => any,
   ): Promise<AccountStatsEntity> {
     return new AccountStatsEntity({
       auctions: '2',
       orders: '0',
       biddingBalance: '0',
-      address: address,
+      address: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
     });
   }
 
