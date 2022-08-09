@@ -403,10 +403,9 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<NftRarityData[]> {
     try {
-      const query = new AssetsQuery().addPageSize(0, 10000).build();
-      const res = await this.apiService.getAllCollectionNftsForQuery(
+      const res = await this.apiService.getAllNftsByCollection(
         collectionTicker,
-        query,
+        'identifier,nonce,metadata,score,rank,timestamp',
       );
       return res.map((nft) => NftRarityData.fromNft(nft));
     } catch (error) {

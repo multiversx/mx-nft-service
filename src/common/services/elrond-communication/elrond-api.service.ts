@@ -5,7 +5,7 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
 import * as Agent from 'agentkeepalive';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { elrondConfig } from 'src/config';
+import { constants, elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
@@ -324,6 +324,55 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsBySearch.name, url);
   }
 
+  async getAllNftsByCollection(
+    collection: string,
+    fields: string = 'identifier,name',
+  ): Promise<Nft[]> {
+    const batchSize = constants.getNftsFromApiBatchSize;
+    let additionalBatchSize: number = 0;
+    let currentBatchExpectedSize: number;
+
+    let nfts: Nft[] = [];
+    let batch: Nft[] = [];
+
+    let smallestTimestampInLastBatch: number = undefined;
+    let smallestNonceInLastBatch: number = undefined;
+
+    do {
+      currentBatchExpectedSize = batchSize + additionalBatchSize;
+
+      let query = new AssetsQuery()
+        .addCollection(collection)
+        .addPageSize(0, currentBatchExpectedSize)
+        .addQuery(`&fields=${fields}`);
+      if (smallestTimestampInLastBatch !== undefined) {
+        query = query.addBefore(smallestTimestampInLastBatch);
+      }
+
+      const url = `nfts${query.build()}`;
+
+      batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
+
+      if (batch.length !== 0) {
+        nfts = nfts.concat(batch);
+
+        smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;
+
+        const smallestNonceInCurrentBatch: number = batch[0].nonce;
+
+        if (smallestNonceInLastBatch === smallestNonceInCurrentBatch) {
+          additionalBatchSize += Math.max(batchSize / 2, 1);
+        } else if (additionalBatchSize > 0) {
+          additionalBatchSize = 0;
+        } else {
+          smallestNonceInLastBatch = smallestNonceInCurrentBatch;
+        }
+      }
+    } while (batch.length === currentBatchExpectedSize);
+
+    return this.filterUniqueNftsByNonce(nfts);
+  }
+
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
     return await this.doGetGeneric(
       this.getTagsBySearch.name,
@@ -358,5 +407,9 @@ export class ElrondApiService {
       this.getCollectionsCount.name,
       `collections/count${query}`,
     );
+  }
+
+  private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
+    return [...new Map(nfts.map((nft) => [nft['nonce'], nft])).values()];
   }
 }
