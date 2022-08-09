@@ -5,7 +5,7 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
 import * as Agent from 'agentkeepalive';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { elrondConfig } from 'src/config';
+import { constants, elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
@@ -328,7 +328,7 @@ export class ElrondApiService {
     collection: string,
     fields: string = 'identifier,name',
   ): Promise<Nft[]> {
-    const batchSize = 250;
+    const batchSize = constants.getNftsFromApiBatchSize;
     let additionalBatchSize: number = 0;
     let currentBatchExpectedSize: number;
 

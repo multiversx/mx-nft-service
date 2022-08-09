@@ -58,5 +58,9 @@
       "colectionRaritiesToUpdateEvery10s": 2,
       "collectionRarityFlagsToValidateEvery10m": 10
     }
+  },
+  "constants": {
+    "getNftsFromApiBatchSize": 250,
+    "bulkUpdateElasticBatchSize": 100
   }
 }
