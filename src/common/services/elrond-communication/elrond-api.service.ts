@@ -208,7 +208,7 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getAllNfts.name, url);
   }
 
-  async getNftsCount(query: string = ''): Promise<any> {
+  async getNftsCount(query: string = ''): Promise<number> {
     const url = `nfts/count${new AssetsQuery(query).withNsfwFlag().build()}`;
     return await this.doGetGeneric(this.getNftsCount.name, url);
   }

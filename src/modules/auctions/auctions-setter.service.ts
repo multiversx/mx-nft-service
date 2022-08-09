@@ -18,19 +18,13 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
 
 @Injectable()
 export class AuctionsSetterService {
-  private redisClient: Redis.Redis;
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
+  ) {}
 
   async saveAuction(
     auctionId: number,
@@ -39,7 +33,6 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      await this.invalidateCache();
       const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
@@ -103,7 +96,6 @@ export class AuctionsSetterService {
   ): Promise<Auction | any> {
     let profiler = new PerformanceProfiler();
     try {
-      await this.invalidateCache();
       return await this.auctionServiceDb.updateAuction(id, status, hash);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
@@ -121,11 +113,6 @@ export class AuctionsSetterService {
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
-    await this.invalidateCache();
     return await this.auctionServiceDb.updateAuctions(auctions);
-  }
-
-  private async invalidateCache(): Promise<void> {
-    return await this.redisCacheService.flushDb(this.redisClient);
   }
 }

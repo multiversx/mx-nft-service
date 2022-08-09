@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { DeleteResult } from 'typeorm/query-builder/result/DeleteResult';
-import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
-import { NftTypeEnum } from '../assets/models/NftTypes.enum';
-import { NftRarityService } from '../nft-rarity/nft-rarity.service';
-import { FlagNftService } from '../admins/flag-nft.service';
-import { MintEvent } from './entities/auction/mint.event';
-import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
+import { FlagNftService } from 'src/modules/admins/flag-nft.service';
+import { AssetByIdentifierService } from 'src/modules/assets';
+import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
+import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { DeleteResult } from 'typeorm';
+import { MintEvent } from '../entities/auction/mint.event';
+import * as Redis from 'ioredis';
 
 @Injectable()
 export class ElasticUpdatesEventsService {

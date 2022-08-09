@@ -12,30 +12,19 @@ import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
+import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
-  const app = await NestFactory.create(AppModule);
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-  const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
+  if (process.env.ENABLE_PUBLIC_API === 'true') {
+    await startPublicApp();
+  }
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
-    }),
-  );
-
-  app.useGlobalInterceptors(new LoggingInterceptor());
-
-  const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
-  httpServer.keepAliveTimeout = parseInt(
-    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
-  );
-
-  await app.listen(process.env.PORT);
+  if (process.env.ENABLE_RABBITMQ === 'true') {
+    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
+    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
+    await rabbitMq.listen(6014);
+  }
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
@@ -45,15 +34,17 @@ async function bootstrap() {
     );
   }
 
-  if (process.env.ENABLE_RABBITMQ === 'true') {
-    const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    rabbitMq.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen(process.env.RABBIT_PORT, '0.0.0.0');
+  if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
+    const cacheEvents = await NestFactory.createMicroservice(CacheEventsModule);
+    cacheEvents.useLogger(cacheEvents.get(WINSTON_MODULE_NEST_PROVIDER));
+    await cacheEvents.listen();
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
-    let processorApp = await NestFactory.create(ClaimableAuctionsModule);
-    await processorApp.listen(process.env.CLAIMABLE_PORT);
+    let processorApp = await NestFactory.createMicroservice(
+      ClaimableAuctionsModule,
+    );
+    await processorApp.listen();
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
@@ -100,6 +91,9 @@ async function bootstrap() {
   logger.log(`Cache warmer active: ${process.env.ENABLE_CACHE_WARMER}`);
   logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
   logger.log(
+    `Cache invalidation is active: ${process.env.ENABLE_CACHE_INVALIDATION}`,
+  );
+  logger.log(
     `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
   );
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
@@ -112,3 +106,26 @@ async function bootstrap() {
 }
 
 bootstrap();
+async function startPublicApp() {
+  const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
+  const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
+  httpServer.keepAliveTimeout = parseInt(
+    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
+  );
+
+  await app.listen(process.env.PORT);
+}

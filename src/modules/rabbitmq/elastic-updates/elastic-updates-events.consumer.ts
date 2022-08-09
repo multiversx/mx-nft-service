@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { NftEventEnum } from '../assets/models/AuctionEvent.enum';
+import { NftEventEnum } from '../../assets/models/AuctionEvent.enum';
+import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
-import { CompetingRabbitConsumer } from './rabbitmq.consumers';
 
 @Injectable()
 export class ElasiticUpdatesConsumer {
@@ -10,6 +10,7 @@ export class ElasiticUpdatesConsumer {
   ) {}
 
   @CompetingRabbitConsumer({
+    connection: 'default',
     queueName: process.env.RABBITMQ_QUEUE_ELASTIC,
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,

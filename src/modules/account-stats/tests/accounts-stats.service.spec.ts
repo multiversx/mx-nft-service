@@ -12,12 +12,19 @@ import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.s
 import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AccountStatsRepositoryMock } from 'src/db/account-stats/account-stats.repository-mock';
+import { AccountsStatsCachingServiceMock } from './accounts-stats.caching.service.mock';
+import { AccountsStatsCachingService } from '../accounts-stats.caching.service';
 
 describe('AccountsStatsService', () => {
   let service: AccountsStatsService;
   const ElrondApiServiceProvider = {
     provide: ElrondApiService,
     useClass: ElrondApiServiceMock,
+  };
+
+  const AccountsStatsCachingServiceProvider = {
+    provide: AccountsStatsCachingService,
+    useClass: AccountsStatsCachingServiceMock,
   };
 
   const AccountStatsRepositoryProvider = {
@@ -45,6 +52,7 @@ describe('AccountsStatsService', () => {
         AccountStatsRepositoryProvider,
         AccountsStatsService,
         RedisCacheServiceProvider,
+        AccountsStatsCachingServiceProvider,
       ],
       imports: [
         WinstonModule.forRoot({
@@ -117,7 +125,10 @@ describe('AccountsStatsService', () => {
         biddingBalance: '0',
         orders: '0',
       });
-      const results = await service.getStats('', true);
+      const results = await service.getStats(
+        'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+        true,
+      );
       expect(results).toMatchObject(expected);
     });
   });

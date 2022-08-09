@@ -27,16 +27,18 @@ import { AvailableTokensForAuctionRedisHandler } from './loaders/available-token
 import { LastOrderRedisHandler } from '../orders/loaders/last-order.redis-handler';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { CommonModule } from 'src/common.module';
+import { AuctionsCachingModule } from './caching/auctions-caching.module';
+import { AuctionsCachingService } from './caching/auctions-caching.service';
 
 @Module({
   providers: [
     AuctionsSetterService,
+    AuctionsCachingService,
     AuctionsGetterService,
     AuctionsQueriesResolver,
     AuctionsMutationsResolver,
     AuctionOrdersResolver,
     NftMarketplaceAbiService,
-    AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
     AvailableTokensForAuctionRedisHandler,
     AvailableTokensForAuctionProvider,
@@ -54,6 +56,7 @@ import { CommonModule } from 'src/common.module';
   imports: [
     ElrondCommunicationModule,
     CommonModule,
+    forwardRef(() => AuctionsCachingModule),
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => OrdersModuleDb),
@@ -63,7 +66,6 @@ import { CommonModule } from 'src/common.module';
     AuctionsSetterService,
     AuctionsGetterService,
     NftMarketplaceAbiService,
-    AuctionsForAssetRedisHandler,
     AuctionsForAssetProvider,
     LastOrderRedisHandler,
   ],

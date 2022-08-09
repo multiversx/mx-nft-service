@@ -1,16 +1,16 @@
-import {
-  BatchUtils,
-  ElasticQuery,
-  QueryOperator,
-  QueryType,
-} from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, NftMedia } from 'src/common';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
-import { AssetsRedisHandler, AssetByIdentifierService } from '../assets';
+import { AssetByIdentifierService } from '../assets';
 import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 type NsfwType = {
   identifier: string;
   nsfw: any;
@@ -25,7 +25,7 @@ export class FlagNftService {
     private nftFlagsRepository: NftsFlagsRepository,
     @Inject(forwardRef(() => NsfwUpdaterService))
     private nsfwUpdateService: NsfwUpdaterService,
-    private assetsRedisHandler: AssetsRedisHandler,
+    private readonly cacheEventPublisherService: CacheEventsPublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -41,7 +41,7 @@ export class FlagNftService {
       const value = await this.getNsfwValue(nftMedia, identifier);
       if (value) {
         await this.addNsfwFlag(identifier, value);
-        this.assetsRedisHandler.clearKey(identifier);
+        this.triggerCacheInvalidation(identifier);
       }
       return true;
     } catch (error) {
@@ -172,7 +172,7 @@ export class FlagNftService {
           return { identifier: i.identifier, nsfw: value };
         }),
       );
-      await this.assetsRedisHandler.clearMultipleKeys(
+      await this.triggerMultipleInvalidation(
         itemsToUpdate.map((nft) => nft.identifier),
       );
     }
@@ -197,7 +197,7 @@ export class FlagNftService {
         '?retry_on_conflict=2',
       );
 
-      this.assetsRedisHandler.clearKey(identifier);
+      await this.triggerCacheInvalidation(identifier);
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW', {
@@ -209,6 +209,24 @@ export class FlagNftService {
 
       return false;
     }
+  }
+
+  private async triggerCacheInvalidation(identifier: string) {
+    await this.cacheEventPublisherService.publish(
+      new ChangedEvent({
+        id: identifier,
+        type: CacheEventTypeEnum.OwnerChanged,
+      }),
+    );
+  }
+
+  private async triggerMultipleInvalidation(identifiers: string[]) {
+    await this.cacheEventPublisherService.publish(
+      new ChangedEvent({
+        id: identifiers,
+        type: CacheEventTypeEnum.AssetsRefresh,
+      }),
+    );
   }
 
   private getNftMedia(nft: Asset): NftMedia | undefined {

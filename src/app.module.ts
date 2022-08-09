@@ -1,4 +1,4 @@
-import '../node_modules/@elrondnetwork/erdnest/lib/utils/extensions/number.extensions';
+import '../node_modules/@elrondnetwork/erdnest/lib/src/utils/extensions/number.extensions';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -26,6 +26,8 @@ import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
 import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
+import * as ormconfig from './ormconfig';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.m
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       introspection: process.env.NODE_ENV !== 'production',

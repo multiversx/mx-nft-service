@@ -11,7 +11,7 @@ import {
 } from '../assets/models';
 import { AssetHistoryLog } from './models';
 import BigNumber from 'bignumber.js';
-const hash = require('object-hash');
+import * as hash from 'object-hash';
 
 @Injectable()
 export class AssetsHistoryService {

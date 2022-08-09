@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { TimeConstants } from 'src/utils/time-utils';
-import { MinterEventEnum } from '../assets/models/AuctionEvent.enum';
-import { CampaignsService } from '../campaigns/campaigns.service';
-import { BrandCreatedEvent } from './entities/auction/brandCreated.event';
-import { RandomNftEvent } from './entities/auction/randomNft.event';
+import { MinterEventEnum } from '../../assets/models/AuctionEvent.enum';
+import { CampaignsService } from '../../campaigns/campaigns.service';
+import { BrandCreatedEvent } from '../entities/auction/brandCreated.event';
+import { RandomNftEvent } from '../entities/auction/randomNft.event';
 
 @Injectable()
 export class MinterEventsService {
