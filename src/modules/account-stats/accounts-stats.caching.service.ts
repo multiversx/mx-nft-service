@@ -16,7 +16,7 @@ export class AccountsStatsCachingService {
   }
 
   public async getPublicStats(
-    address,
+    address: string,
     getAccountStats: () => any,
   ): Promise<AccountStatsEntity> {
     return this.redisCacheService.getOrSet(
@@ -28,7 +28,7 @@ export class AccountsStatsCachingService {
   }
 
   public async getStatsForOwner(
-    address,
+    address: string,
     getAccountStats: () => any,
   ): Promise<AccountStatsEntity> {
     return this.redisCacheService.getOrSet(
@@ -78,7 +78,7 @@ export class AccountsStatsCachingService {
   public async getCreationsCount(
     address: string,
     getCreationsCount: () => any,
-  ): Promise<AccountStatsEntity> {
+  ): Promise<number> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
       generateCacheKeyFromParams('account_creations', address),
