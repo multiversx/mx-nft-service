@@ -22,7 +22,6 @@ import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
-  BidChangeEvent,
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../cache-invalidation/events/owner-changed.event';
