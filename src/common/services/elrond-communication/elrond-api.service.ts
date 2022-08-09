@@ -328,7 +328,7 @@ export class ElrondApiService {
     collection: string,
     fields: string = 'identifier,name',
   ): Promise<Nft[]> {
-    let batchSize = 250;
+    const batchSize = 250;
     let additionalBatchSize: number = 0;
     let currentBatchExpectedSize: number;
 
@@ -370,16 +370,7 @@ export class ElrondApiService {
       }
     } while (batch.length === currentBatchExpectedSize);
 
-    let filteredNfts: Nft[] = [];
-    let nonceMap: boolean[] = [];
-    for (let i = 0; i < nfts.length; i++) {
-      if (nonceMap[nfts[i].nonce] !== true) {
-        filteredNfts.push(nfts[i]);
-        nonceMap[nfts[i].nonce] = true;
-      }
-    }
-
-    return filteredNfts;
+    return this.filterUniqueNfts(nfts);
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
@@ -416,5 +407,17 @@ export class ElrondApiService {
       this.getCollectionsCount.name,
       `collections/count${query}`,
     );
+  }
+
+  private filterUniqueNfts(nfts: Nft[]): Nft[] {
+    let filteredNfts: Nft[] = [];
+    let nonceMap: boolean[] = [];
+    for (let i = 0; i < nfts.length; i++) {
+      if (nonceMap[nfts[i].nonce] !== true) {
+        filteredNfts.push(nfts[i]);
+        nonceMap[nfts[i].nonce] = true;
+      }
+    }
+    return filteredNfts;
   }
 }
