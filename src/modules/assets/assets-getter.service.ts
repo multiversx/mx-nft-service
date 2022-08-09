@@ -13,7 +13,7 @@ import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
-const hash = require('object-hash');
+import * as hash from 'object-hash';
 
 @Injectable()
 export class AssetsGetterService {

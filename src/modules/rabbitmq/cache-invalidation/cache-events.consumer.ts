@@ -23,19 +23,18 @@ export class CacheEventsConsumer {
     disable: process.env.ENABLE_CACHE_INVALIDATION === 'true' ? false : true,
   })
   async consume(event: ChangedEvent): Promise<void> {
-    console.log(event);
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
-        this.assetsRedisHandler.clearKey(event.id);
+        await this.assetsRedisHandler.clearKey(event.id);
         break;
 
       case CacheEventTypeEnum.AssetsRefresh:
-        this.assetsRedisHandler.clearMultipleKeys(event.id);
+        await this.assetsRedisHandler.clearMultipleKeys(event.id);
         break;
 
       case CacheEventTypeEnum.Mint:
-        this.collectionAssets.clearKey(event.id);
-        this.collectionAssetsCount.clearKey(event.id);
+        await this.collectionAssets.clearKey(event.id);
+        await this.collectionAssetsCount.clearKey(event.id);
         break;
 
       case CacheEventTypeEnum.UpdateAuction:

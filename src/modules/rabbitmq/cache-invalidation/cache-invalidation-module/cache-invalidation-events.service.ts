@@ -14,7 +14,10 @@ export class CacheInvalidationEventsService {
 
   async invalidateAuction(payload: ChangedEvent) {
     await this.auctionsCachingService.invalidateCache();
-    this.auctionsCachingService.invalidatePersistentCaching;
+    await this.auctionsCachingService.invalidatePersistentCaching(
+      payload.id,
+      payload.ownerAddress,
+    );
     await this.auctionsCachingService.invalidateCacheByPattern(
       payload.ownerAddress,
     );

@@ -11,7 +11,6 @@ export class RabbitPublisherService {
   /** Will publish the input to the exchange. */
   async publish(exchange: string, input: unknown): Promise<void> {
     try {
-      console.log(exchange, input);
       await this.amqpConnection.publish(exchange, '', input);
     } catch (err) {
       this.logger.error(

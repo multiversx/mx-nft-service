@@ -11,7 +11,7 @@ import { LastOrderRedisHandler } from '../loaders/last-order.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { OrdersRedisHandler } from '../loaders/orders.redis-handler';
 import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
-const hash = require('object-hash');
+import * as hash from 'object-hash';
 
 @Injectable()
 export class OrdersCachingService {

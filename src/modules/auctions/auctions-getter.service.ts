@@ -37,8 +37,9 @@ export class AuctionsGetterService {
         return await this.getMarketplaceAuctions(queryRequest);
       }
 
-      return this.auctionCachiungService.getOrSetAuctions(queryRequest, () =>
-        this.getMappedAuctions(queryRequest),
+      return await this.auctionCachiungService.getOrSetAuctions(
+        queryRequest,
+        () => this.getMappedAuctions(queryRequest),
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -57,7 +58,7 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      return this.auctionCachiungService.getAuctionsOrderByNoBids(
+      return await this.auctionCachiungService.getAuctionsOrderByNoBids(
         queryRequest,
         async () => this.getMappedAuctionsOrderBids(queryRequest),
       );
@@ -79,7 +80,7 @@ export class AuctionsGetterService {
     address: string,
   ): Promise<[Auction[], number]> {
     try {
-      return this.auctionCachiungService.getClaimableAuctions(
+      return await this.auctionCachiungService.getClaimableAuctions(
         limit,
         offset,
         address,
@@ -152,7 +153,7 @@ export class AuctionsGetterService {
 
   async getMinMaxPrice(): Promise<{ minBid: string; maxBid: string }> {
     try {
-      return this.auctionCachiungService.getMinAndMax(() =>
+      return await this.auctionCachiungService.getMinAndMax(() =>
         this.auctionServiceDb.getMinMax(),
       );
     } catch (error) {

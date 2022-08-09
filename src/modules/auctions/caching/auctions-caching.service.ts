@@ -17,8 +17,7 @@ import { AuctionsForAssetRedisHandler } from '../loaders/asset-auctions.redis-ha
 import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-handler';
 import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
-
-const hash = require('object-hash');
+import * as hash from 'object-hash';
 
 @Injectable()
 export class AuctionsCachingService {
@@ -46,12 +45,14 @@ export class AuctionsCachingService {
     address: string,
   ) {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
-    await this.accountStatsCachingService.invalidateStats(address);
-    await this.auctionsLoader.clearKey(identifier);
-    await this.lowestAuctionLoader.clearKey(identifier);
-    await this.assetsAuctionsCountLoader.clearKey(identifier);
-    await this.onSaleAssetsCount.clearKey(collection);
-    await this.availableTokensCountHandler.clearKey(identifier);
+    return await Promise.all([
+      this.accountStatsCachingService.invalidateStats(address),
+      this.auctionsLoader.clearKey(identifier),
+      this.lowestAuctionLoader.clearKey(identifier),
+      this.assetsAuctionsCountLoader.clearKey(identifier),
+      this.onSaleAssetsCount.clearKey(collection),
+      this.availableTokensCountHandler.clearKey(identifier),
+    ]);
   }
 
   public async invalidateCacheByPattern(address: string) {
