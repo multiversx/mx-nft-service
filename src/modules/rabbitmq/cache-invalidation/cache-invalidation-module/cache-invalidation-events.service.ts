@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
 import { OrdersCachingService } from 'src/modules/orders/caching/orders-caching.service';
-import { BidChangeEvent, ChangedEvent } from '../events/owner-changed.event';
+import { ChangedEvent } from '../events/owner-changed.event';
 
 @Injectable()
 export class CacheInvalidationEventsService {
@@ -13,15 +13,17 @@ export class CacheInvalidationEventsService {
   ) {}
 
   async invalidateAuction(payload: ChangedEvent) {
-    await this.auctionsCachingService.invalidateCache();
-    await this.auctionsCachingService.invalidatePersistentCaching(
-      payload.id,
-      payload.ownerAddress,
-    );
-    await this.auctionsCachingService.invalidateCacheByPattern(
-      payload.ownerAddress,
-    );
-    await this.availableTokensCount.clearKey(payload.id);
+    await Promise.all([
+      await this.auctionsCachingService.invalidateCache(),
+      await this.auctionsCachingService.invalidatePersistentCaching(
+        payload.id,
+        payload.ownerAddress,
+      ),
+      await this.auctionsCachingService.invalidateCacheByPattern(
+        payload.ownerAddress,
+      ),
+      await this.availableTokensCount.clearKey(payload.id),
+    ]);
   }
 
   async invalidateOrder(payload: ChangedEvent) {
