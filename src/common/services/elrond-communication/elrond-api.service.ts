@@ -370,7 +370,7 @@ export class ElrondApiService {
       }
     } while (batch.length === currentBatchExpectedSize);
 
-    return this.filterUniqueNfts(nfts);
+    return this.filterUniqueNftsByNonce(nfts);
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
@@ -409,7 +409,7 @@ export class ElrondApiService {
     );
   }
 
-  private filterUniqueNfts(nfts: Nft[]): Nft[] {
+  private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
     let filteredNfts: Nft[] = [];
     let nonceMap: boolean[] = [];
     for (let i = 0; i < nfts.length; i++) {
