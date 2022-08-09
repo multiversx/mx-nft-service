@@ -353,7 +353,7 @@ export class ElrondApiService {
 
       batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
 
-      if (batch.length !== 0) {
+      if (batch?.length !== 0) {
         nfts = nfts.concat(batch);
 
         smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;

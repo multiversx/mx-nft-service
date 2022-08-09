@@ -79,7 +79,7 @@ export class NftRarityService {
     ]);
 
     if (raritiesFlag === undefined) {
-      this.logger.error(`Wrong collection ID`, {
+      this.logger.warn(`Wrong collection ID`, {
         path: 'NftRarityService.updateRarities',
         collection: collectionTicker,
       });
