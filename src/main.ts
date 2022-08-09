@@ -35,9 +35,9 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
-    const rabbitMq = await NestFactory.createMicroservice(CacheEventsModule);
-    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
-    await rabbitMq.listen();
+    const cacheEvents = await NestFactory.createMicroservice(CacheEventsModule);
+    cacheEvents.useLogger(cacheEvents.get(WINSTON_MODULE_NEST_PROVIDER));
+    await cacheEvents.listen();
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
