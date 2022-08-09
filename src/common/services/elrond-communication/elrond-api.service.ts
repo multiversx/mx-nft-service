@@ -410,14 +410,6 @@ export class ElrondApiService {
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    let filteredNfts: Nft[] = [];
-    let nonceMap: boolean[] = [];
-    for (let i = 0; i < nfts.length; i++) {
-      if (nonceMap[nfts[i].nonce] !== true) {
-        filteredNfts.push(nfts[i]);
-        nonceMap[nfts[i].nonce] = true;
-      }
-    }
-    return filteredNfts;
+    return [...new Map(nfts.map((nft) => [nft['nonce'], nft])).values()];
   }
 }
