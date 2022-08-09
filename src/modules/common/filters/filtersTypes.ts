@@ -189,10 +189,10 @@ export class CollectionsFilter {
 
 @InputType()
 export class CampaignsFilter {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   campaignId: string;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   minterAddress: string;
