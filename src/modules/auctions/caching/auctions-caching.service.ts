@@ -35,9 +35,6 @@ export class AuctionsCachingService {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.auctionsRedisClientName,
     );
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
   }
 
   public async invalidateCache(): Promise<void> {
