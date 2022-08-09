@@ -26,9 +26,6 @@ export class OrdersCachingService {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.ordersRedisClientName,
     );
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
   }
 
   public async getOrSetOrders(
