@@ -46,7 +46,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetScamProvider: AssetScamInfoProvider,
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
-    private subdomainProvider: InternalMarketplaceProvider,
+    private internalMarketplaceProvider: InternalMarketplaceProvider,
   ) {
     super();
   }
@@ -205,7 +205,9 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       address.isContractAddress() &&
       address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
-      const marketplace = await this.subdomainProvider.load(collection);
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
       return [Marketplace.fromEntity(marketplace?.value, identifier)];
     }
   }
@@ -216,7 +218,9 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   ): Promise<Marketplace[]> {
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
     if (!!assetAuctions?.value) {
-      const marketplace = await this.subdomainProvider.load(collection);
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
       return [Marketplace.fromEntity(marketplace?.value, identifier)];
     }
     return null;
