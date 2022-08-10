@@ -2,14 +2,14 @@ import DataLoader = require('dataloader');
 import { getRepository } from 'typeorm';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { SubdomainsRedisHandler } from './subdomain.redis-handler';
-import { SubdomainCollectionEntity } from 'src/db/subdomains/subdomain-collection.entity';
+import { InternalMarketplaceRedisHandler } from './internal-marketplace.redis-handler';
+import { MarketplaceCollectionEntity } from 'src/db/marketplaces';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
-export class SubdomainsProvider extends BaseProvider<string> {
-  constructor(subdomainRedisHandler: SubdomainsRedisHandler) {
+export class InternalMarketplaceProvider extends BaseProvider<string> {
+  constructor(subdomainRedisHandler: InternalMarketplaceRedisHandler) {
     super(
       subdomainRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
@@ -17,7 +17,7 @@ export class SubdomainsProvider extends BaseProvider<string> {
   }
 
   async getData(collections: string[]) {
-    const subdomain = await getRepository(SubdomainCollectionEntity)
+    const subdomain = await getRepository(MarketplaceCollectionEntity)
       .createQueryBuilder('sc')
       .select('sc.collectionIdentifier as collectionIdentifier')
       .addSelect('sd.name as name')

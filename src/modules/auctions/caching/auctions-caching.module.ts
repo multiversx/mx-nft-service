@@ -8,6 +8,7 @@ import { AccountsStatsCachingService } from '../../account-stats/accounts-stats.
 import { AssetAuctionsCountRedisHandler } from '../../assets/loaders/asset-auctions-count.redis-handler';
 import { AssetAvailableTokensCountRedisHandler } from '../../assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from '../../nftCollections/loaders/onsale-assets-count.redis-handler';
+import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
 
 @Module({
   providers: [
@@ -18,6 +19,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from '../../nftCollections
     OnSaleAssetsCountForCollectionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
     AccountsStatsCachingService,
+    InternalMarketplaceRedisHandler,
   ],
   imports: [CachingModule, CommonModule],
   exports: [
@@ -28,6 +30,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from '../../nftCollections
     OnSaleAssetsCountForCollectionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
     AccountsStatsCachingService,
+    InternalMarketplaceRedisHandler,
   ],
 })
 export class AuctionsCachingModule {}

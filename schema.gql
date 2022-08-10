@@ -42,16 +42,15 @@ type Asset {
   creationDate: Int
   creator: Account
   creatorAddress: String!
-  featuredMarketplace: FeaturedMarketplace
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
-  internalMarketplace: InternalMarketplace
   isLiked(byAddress: String!): Boolean
   isNsfw: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction: Auction
+  marketplaces: [Marketplace!]
   media: [Media!]
   metadata: Metadata
   name: String
@@ -475,12 +474,6 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
-type FeaturedMarketplace {
-  address: String!
-  name: String!
-  url: String!
-}
-
 input Filter {
   field: String!
   op: Operation!
@@ -525,11 +518,6 @@ input HistoryPagination {
   timestamp: Int
 }
 
-type InternalMarketplace {
-  name: String!
-  url: String!
-}
-
 input IssueCampaignArgs {
   campaignId: String!
   collectionIpfsHash: String!
@@ -558,6 +546,12 @@ input IssueCollectionArgs {
 type KeyValueType {
   key: String!
   value: String!
+}
+
+type Marketplace {
+  address: String!
+  name: String!
+  url: String!
 }
 
 type Media {

@@ -3,7 +3,7 @@ import { getRepository } from 'typeorm';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { FeaturedMarketplaceRedisHandler } from './featured-marketplace.redis-handler';
-import { FeaturedMarketplaceEntity } from 'src/db/featuredMarketplaces';
+import { MarketplaceEntity } from 'src/db/marketplaces';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -19,7 +19,7 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(addresses: string[]) {
-    const featuredMarketplace = await getRepository(FeaturedMarketplaceEntity)
+    const featuredMarketplace = await getRepository(MarketplaceEntity)
       .createQueryBuilder('fm')
       .select('fm.address as address')
       .addSelect('fm.url as url')

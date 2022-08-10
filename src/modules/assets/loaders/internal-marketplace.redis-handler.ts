@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
-import { SubdomainEntity } from 'src/db/subdomains';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
+import { Marketplace } from '../models/FeaturedMarketplace.dto';
 
 @Injectable()
-export class SubdomainsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
+export class InternalMarketplaceRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'subdomain');
+    super(redisCacheService, 'internal_marketplace');
   }
 
   mapValues(
     returnValues: { key: string; value: any }[],
-    collectionIdentifiers: { [key: string]: SubdomainEntity[] },
+    collectionIdentifiers: { [key: string]: Marketplace[] },
   ) {
     const redisValues = [];
     for (const item of returnValues) {
@@ -28,7 +28,7 @@ export class SubdomainsRedisHandler extends RedisKeyValueDataloaderHandler<strin
     return [
       new RedisValue({
         values: redisValues,
-        ttl: 30 * TimeConstants.oneSecond,
+        ttl: 30 * TimeConstants.oneMinute,
       }),
     ];
   }
