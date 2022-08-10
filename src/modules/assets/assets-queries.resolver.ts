@@ -176,8 +176,21 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
   @ResolveField(() => [Marketplace])
   async marketplaces(@Parent() asset: Asset) {
-    const { ownerAddress, identifier, collection } = asset;
+    const { ownerAddress, identifier, collection, type } = asset;
+    if (type === NftTypeEnum.NonFungibleESDT) {
+      return this.getMarketplaceForNft(ownerAddress, collection, identifier);
+    }
+    if (type === NftTypeEnum.SemiFungibleESDT) {
+      return this.getMarketplaceForSft(collection, identifier);
+    }
+    return null;
+  }
 
+  private async getMarketplaceForNft(
+    ownerAddress: string,
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
     if (!ownerAddress) return null;
     const address = new Address(ownerAddress);
     if (
@@ -192,6 +205,17 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       address.isContractAddress() &&
       address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
+      const marketplace = await this.subdomainProvider.load(collection);
+      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+    }
+  }
+
+  private async getMarketplaceForSft(
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
+    const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
+    if (!!assetAuctions?.value) {
       const marketplace = await this.subdomainProvider.load(collection);
       return [Marketplace.fromEntity(marketplace?.value, identifier)];
     }
