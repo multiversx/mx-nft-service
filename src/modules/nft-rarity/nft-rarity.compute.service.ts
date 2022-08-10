@@ -145,8 +145,16 @@ export class NftRarityComputeService {
       nft.attributesMap = [];
 
       for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-        const traitType = value.trait_type;
-        const traitValue = value.value;
+        if (value.trait_type === undefined || value.value === undefined) {
+          continue;
+        }
+
+        const traitType = String(value.trait_type);
+        const traitValue = String(value.value);
+
+        if (traitValue.toLowerCase() === 'none' || traitValue === '') {
+          continue;
+        }
 
         let traitIndex: number = null;
         let attributeIndex: number = null;

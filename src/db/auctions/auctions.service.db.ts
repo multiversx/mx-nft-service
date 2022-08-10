@@ -19,9 +19,13 @@ import {
 } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
@@ -39,13 +43,8 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private auctionsLoader: AuctionsForAssetRedisHandler,
-    private lowestAuctionLoader: LowestAuctionRedisHandler,
-    private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
-    private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
-    private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private ordersService: OrdersServiceDb,
-    private accountStats: AccountsStatsService,
+    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -367,7 +366,10 @@ export class AuctionsServiceDb {
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
-    await this.invalidateCache(auction.identifier, auction.ownerAddress);
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
     return await this.auctionsRepository.save(auction);
   }
 
@@ -464,7 +466,10 @@ export class AuctionsServiceDb {
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
 
-    await this.invalidateCache(auction.identifier, auction.ownerAddress);
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
@@ -475,19 +480,25 @@ export class AuctionsServiceDb {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     for (let auction of auctions) {
-      await this.invalidateCache(auction.identifier, auction.ownerAddress);
+      await this.triggerCacheInvalidation(
+        auction.identifier,
+        auction.ownerAddress,
+      );
     }
     return await this.auctionsRepository.save(auctions);
   }
 
-  private async invalidateCache(identifier: string, address: string) {
-    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
-    await this.accountStats.invalidateStats(address);
-    await this.auctionsLoader.clearKey(identifier);
-    await this.lowestAuctionLoader.clearKey(identifier);
-    await this.assetsAuctionsCountLoader.clearKey(identifier);
-    await this.onSaleAssetsCount.clearKey(collection);
-    await this.availableTokensCountHandler.clearKey(identifier);
+  private async triggerCacheInvalidation(
+    identifier: string,
+    ownerAddress: string,
+  ) {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        id: identifier,
+        type: CacheEventTypeEnum.UpdateAuction,
+        ownerAddress: ownerAddress,
+      }),
+    );
   }
 
   private addOrderBy(

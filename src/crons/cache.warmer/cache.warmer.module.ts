@@ -7,9 +7,12 @@ import { CollectionsService } from 'src/modules/nftCollections/collection.servic
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { AuctionsWarmerService } from './auctions.warmer.service';
 import { CollectionsWarmerService } from './collections.warmer.service';
+import * as ormconfig from './../../ormconfig';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     PubSubListenerModule,

@@ -10,6 +10,7 @@ import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-a
 import { TagsRepository } from './tags.repository';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
+import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftColle
     TypeOrmModule.forFeature([TagsRepository]),
     forwardRef(() => OrdersModuleDb),
     AccountsStatsModuleGraph,
+    CacheEventsPublisherModule,
   ],
   providers: [
     AuctionsServiceDb,

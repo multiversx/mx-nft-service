@@ -7,6 +7,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { ApiSettings } from './models/api-settings';
+import { constants } from 'src/config';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -131,7 +132,7 @@ export class ElrondElasticService {
     updates: string[],
     urlParams: string = '',
   ): Promise<void> {
-    const batchSize = 100;
+    const batchSize = constants.bulkUpdateElasticBatchSize;
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();

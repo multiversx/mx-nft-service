@@ -39,7 +39,7 @@ export class CampaignsService {
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
 
-    if (filters?.campaignId) {
+    if (filters?.campaignId && filters?.minterAddress) {
       const campaigns = allCampaigns?.items?.filter(
         (c) =>
           c.campaignId === filters.campaignId &&
@@ -49,7 +49,24 @@ export class CampaignsService {
         count: campaigns ? campaigns?.length : 0,
         items: campaigns,
       });
+    } else if (filters?.campaignId) {
+      const campaigns = allCampaigns?.items?.filter(
+        (c) => c.campaignId === filters.campaignId,
+      );
+      return new CollectionType({
+        count: campaigns ? campaigns?.length : 0,
+        items: campaigns,
+      });
+    } else if (filters?.minterAddress) {
+      const campaigns = allCampaigns?.items?.filter(
+        (c) => c.minterAddress === filters.minterAddress,
+      );
+      return new CollectionType({
+        count: campaigns ? campaigns?.length : 0,
+        items: campaigns,
+      });
     }
+
     const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
 
     return new CollectionType({

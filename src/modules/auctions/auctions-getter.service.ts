@@ -5,9 +5,6 @@ import { AuctionEntity } from 'src/db/auctions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { cacheConfig } from 'src/config';
-import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
@@ -20,21 +17,17 @@ import {
 } from 'src/db/auctions/auctionWithBidCount.dto';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
-const hash = require('object-hash');
+import { AuctionsCachingService } from './caching/auctions-caching.service';
 
 @Injectable()
 export class AuctionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private auctionServiceDb: AuctionsServiceDb,
+    private auctionCachiungService: AuctionsCachingService,
     private cacheService: CachingService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
+  ) {}
 
   async getAuctions(
     queryRequest: QueryRequest,
@@ -43,11 +36,10 @@ export class AuctionsGetterService {
       if (this.filtersForMarketplaceAuctions(queryRequest)) {
         return await this.getMarketplaceAuctions(queryRequest);
       }
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        this.getAuctionsCacheKey(queryRequest),
+
+      return await this.auctionCachiungService.getOrSetAuctions(
+        queryRequest,
         () => this.getMappedAuctions(queryRequest),
-        30 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -66,11 +58,9 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        this.getAuctionsCacheKey(queryRequest),
+      return await this.auctionCachiungService.getAuctionsOrderByNoBids(
+        queryRequest,
         async () => this.getMappedAuctionsOrderBids(queryRequest),
-        TimeConstants.oneHour,
       );
     } catch (error) {
       this.logger.error(
@@ -90,16 +80,11 @@ export class AuctionsGetterService {
     address: string,
   ): Promise<[Auction[], number]> {
     try {
-      const cacheKey = this.getClaimableAuctionsCacheKey(
-        address,
+      return await this.auctionCachiungService.getClaimableAuctions(
         limit,
         offset,
-      );
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
+        address,
         () => this.getMappedClaimableAuctions(limit, offset, address),
-        30 * TimeConstants.oneSecond,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -168,11 +153,8 @@ export class AuctionsGetterService {
 
   async getMinMaxPrice(): Promise<{ minBid: string; maxBid: string }> {
     try {
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        generateCacheKeyFromParams('minMaxPrice'),
-        () => this.auctionServiceDb.getMinMax(),
-        5 * TimeConstants.oneMinute,
+      return await this.auctionCachiungService.getMinAndMax(() =>
+        this.auctionServiceDb.getMinMax(),
       );
     } catch (error) {
       this.logger.error('An error occurred while getting min max price', {
@@ -180,13 +162,6 @@ export class AuctionsGetterService {
         exception: error,
       });
     }
-  }
-
-  public async invalidateCache(address: string) {
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      generateCacheKeyFromParams('claimable_auctions', address),
-    );
   }
 
   private filtersForRunningAndEndDate(queryRequest: QueryRequest) {
@@ -359,14 +334,10 @@ export class AuctionsGetterService {
   private async getAuctionsEndingInAMonth(): Promise<
     [AuctionWithBidsCount[], number, PriceRange]
   > {
-    return await this.redisCacheService.getOrSet(
-      this.redisClient,
-      CacheInfo.AuctionsEndingInAMonth.key,
-      () =>
-        this.getRunningAuctionsEndingBefore(
-          DateUtils.getCurrentTimestampPlusDays(30),
-        ),
-      TimeConstants.oneHour,
+    return await this.auctionCachiungService.getAuctionsEndingInAMonth(() =>
+      this.getRunningAuctionsEndingBefore(
+        DateUtils.getCurrentTimestampPlusDays(30),
+      ),
     );
   }
 
@@ -458,22 +429,5 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
-  }
-
-  private getAuctionsCacheKey(request: any) {
-    return generateCacheKeyFromParams('auctions', hash(request));
-  }
-
-  private getClaimableAuctionsCacheKey(
-    address: string,
-    limit: number,
-    offset: number,
-  ) {
-    return generateCacheKeyFromParams(
-      'claimable_auctions',
-      address,
-      limit,
-      offset,
-    );
   }
 }

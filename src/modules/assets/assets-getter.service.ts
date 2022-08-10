@@ -13,7 +13,7 @@ import { AssetsFilter } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
-const hash = require('object-hash');
+import * as hash from 'object-hash';
 
 @Injectable()
 export class AssetsGetterService {
@@ -98,7 +98,7 @@ export class AssetsGetterService {
   async getAssetsForCollection(
     filters: AssetsFilter,
     limit: number = 4,
-  ): Promise<[any[], string]> {
+  ): Promise<[any[], number]> {
     const apiQuery = new AssetsQuery()
       .addCollection(filters?.collection)
       .addPageSize(0, limit)
@@ -125,7 +125,7 @@ export class AssetsGetterService {
 
   private async getCollectionAssets(
     query: string = '',
-  ): Promise<[any[], string]> {
+  ): Promise<[any[], number]> {
     query = new AssetsQuery(query).addFields(['media', 'identifier']).build();
     const [nfts, count] = await Promise.all([
       this.apiService.getAllNfts(query),

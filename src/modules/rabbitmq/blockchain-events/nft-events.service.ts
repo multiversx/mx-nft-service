@@ -8,48 +8,44 @@ import {
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetsRedisHandler } from '../assets';
-import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { AssetAvailableTokensCountRedisHandler } from '../assets/loaders/asset-available-tokens-count.redis-handler';
+import { AssetByIdentifierService } from 'src/modules/assets';
+import { AuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
 import {
-  AuctionEventEnum,
-  NftEventEnum,
-} from '../assets/models/AuctionEvent.enum';
-import { AuctionsGetterService, AuctionsSetterService } from '../auctions';
-import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
-import { AuctionStatusEnum } from '../auctions/models';
-import { CollectionAssetsCountRedisHandler } from '../nftCollections/loaders/collection-assets-count.redis-handler';
-import { CollectionAssetsRedisHandler } from '../nftCollections/loaders/collection-assets.redis-handler';
-import { NotificationStatusEnum } from '../notifications/models';
-import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
-import { NotificationsService } from '../notifications/notifications.service';
-import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
-import { OrdersService } from '../orders/order.service';
+  AuctionsSetterService,
+  AuctionsGetterService,
+} from 'src/modules/auctions';
+import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { NotificationStatusEnum } from 'src/modules/notifications/models';
+import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
+import { OrdersService } from 'src/modules/orders/order.service';
+import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
-  AuctionTokenEvent,
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../cache-invalidation/events/owner-changed.event';
+import {
   BidEvent,
   BuySftEvent,
-  EndAuctionEvent,
   WithdrawEvent,
-} from './entities/auction';
-import { MintEvent } from './entities/auction/mint.event';
-import { TransferEvent } from './entities/auction/transfer.event';
+  EndAuctionEvent,
+  AuctionTokenEvent,
+} from '../entities/auction';
+import { MintEvent } from '../entities/auction/mint.event';
+import { TransferEvent } from '../entities/auction/transfer.event';
 
 @Injectable()
 export class NftEventsService {
   constructor(
     private auctionsService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
-    private availableTokens: AvailableTokensForAuctionRedisHandler,
-    private availableTokensCount: AssetAvailableTokensCountRedisHandler,
-    private collectionAssetsCount: CollectionAssetsCountRedisHandler,
-    private collectionAssets: CollectionAssetsRedisHandler,
-    private assetsRedisHandler: AssetsRedisHandler,
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private accountFeedService: ElrondFeedService,
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
+    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -60,9 +56,6 @@ export class NftEventsService {
           const topics = bidEvent.getTopics();
           const auction = await this.auctionsGetterService.getAuctionById(
             parseInt(topics.auctionId, 16),
-          );
-          await this.auctionsGetterService.invalidateCache(
-            topics.currentWinner,
           );
           const order = await this.ordersService.createOrder(
             new CreateOrderArgs({
@@ -93,7 +86,6 @@ export class NftEventsService {
               },
             }),
           );
-          this.availableTokensCount.clearKey(auction.identifier);
           if (auction.maxBidDenominated === order.priceAmountDenominated) {
             this.notificationsService.updateNotificationStatus([auction?.id]);
             this.addNotifications(auction, order);
@@ -153,8 +145,6 @@ export class NftEventsService {
               },
             }),
           );
-          this.availableTokens.clearKey(parseInt(buySftTopics.auctionId, 16));
-          this.availableTokensCount.clearKey(identifier);
           break;
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);
@@ -233,29 +223,6 @@ export class NftEventsService {
     }
   }
 
-  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
-    const asset = await this.elrondApi.getNftByIdentifier(auction.identifier);
-    const assetName = asset ? asset.name : '';
-    this.notificationsService.saveNotifications([
-      new NotificationEntity({
-        auctionId: auction.id,
-        identifier: auction.identifier,
-        ownerAddress: auction.ownerAddress,
-        status: NotificationStatusEnum.Active,
-        type: NotificationTypeEnum.Ended,
-        name: assetName,
-      }),
-      new NotificationEntity({
-        auctionId: auction.id,
-        identifier: auction.identifier,
-        ownerAddress: order.ownerAddress,
-        status: NotificationStatusEnum.Active,
-        type: NotificationTypeEnum.Won,
-        name: assetName,
-      }),
-    ]);
-  }
-
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
       switch (event.identifier) {
@@ -263,8 +230,10 @@ export class NftEventsService {
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          this.collectionAssets.clearKey(createTopics.collection);
-          this.collectionAssetsCount.clearKey(createTopics.collection);
+          this.triggerCacheInvalidation(
+            createTopics.collection,
+            CacheEventTypeEnum.Mint,
+          );
           const collection =
             await this.elrondApi.getCollectionByIdentifierForQuery(
               createTopics.collection,
@@ -293,21 +262,57 @@ export class NftEventsService {
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
           await new Promise((resolve) => setTimeout(resolve, 500));
-          this.assetsRedisHandler.clearKey(
+          await this.triggerCacheInvalidation(
             `${transferTopics.collection}-${transferTopics.nonce}`,
+            CacheEventTypeEnum.OwnerChanged,
           );
-
           break;
 
         case NftEventEnum.MultiESDTNFTTransfer:
           const multiTransferEvent = new TransferEvent(event);
           const multiTransferTopics = multiTransferEvent.getTopics();
-          this.assetsRedisHandler.clearKey(
+          this.triggerCacheInvalidation(
             `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
+            CacheEventTypeEnum.OwnerChanged,
           );
 
           break;
       }
     }
+  }
+
+  private async triggerCacheInvalidation(
+    id: string,
+    eventType: CacheEventTypeEnum,
+  ) {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        id: id,
+        type: eventType,
+      }),
+    );
+  }
+
+  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+    const asset = await this.elrondApi.getNftByIdentifier(auction.identifier);
+    const assetName = asset ? asset.name : '';
+    this.notificationsService.saveNotifications([
+      new NotificationEntity({
+        auctionId: auction.id,
+        identifier: auction.identifier,
+        ownerAddress: auction.ownerAddress,
+        status: NotificationStatusEnum.Active,
+        type: NotificationTypeEnum.Ended,
+        name: assetName,
+      }),
+      new NotificationEntity({
+        auctionId: auction.id,
+        identifier: auction.identifier,
+        ownerAddress: order.ownerAddress,
+        status: NotificationStatusEnum.Active,
+        type: NotificationTypeEnum.Won,
+        name: assetName,
+      }),
+    ]);
   }
 }

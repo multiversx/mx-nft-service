@@ -73,19 +73,16 @@ export class OrdersServiceDb {
   }
 
   async saveOrder(order: OrderEntity) {
-    this.clearCache(order.auctionId);
     return await this.ordersRepository.save(order);
   }
 
   async updateOrder(order: OrderEntity) {
-    this.clearCache(order.auctionId);
     order.status = OrderStatusEnum.Inactive;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
-    this.clearCache(order.auctionId);
     order.status = status;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.ordersRepository.save(order);
@@ -150,10 +147,5 @@ export class OrdersServiceDb {
         queryBuilder.addOrderBy('id', 'DESC');
       }
     }
-  }
-
-  private clearCache(auctionId: number) {
-    this.ordersRedisHandler.clearKeyByPattern(auctionId);
-    this.lastOrderRedisHandler.clearKey(auctionId);
   }
 }
