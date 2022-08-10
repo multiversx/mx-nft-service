@@ -29,7 +29,7 @@ import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-market
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
-import { Subdomain } from './models/Subdomain.dto';
+import { InternalMarketplace } from './models/Subdomain.dto';
 import { SubdomainsProvider } from './loaders/subdomain.loader';
 
 @Resolver(() => Asset)
@@ -191,11 +191,10 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return null;
   }
 
-  @ResolveField(() => Subdomain)
+  @ResolveField(() => InternalMarketplace)
   async internalMarketplace(@Parent() asset: Asset) {
     const { collection, ownerAddress } = asset;
 
-    console.log(collection, ownerAddress);
     if (!ownerAddress) return null;
     const address = new Address(ownerAddress);
     if (
@@ -203,7 +202,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.subdomainProvider.load(collection);
-      return Subdomain.fromEntity(marketplace?.value);
+      return InternalMarketplace.fromEntity(marketplace?.value);
     }
     return null;
   }

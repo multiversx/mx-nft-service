@@ -46,7 +46,7 @@ type Asset {
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
-  internalMarketplace: Subdomain
+  internalMarketplace: InternalMarketplace
   isLiked(byAddress: String!): Boolean
   isNsfw: Boolean
   isWhitelistedStorage: Boolean!
@@ -525,6 +525,11 @@ input HistoryPagination {
   timestamp: Int
 }
 
+type InternalMarketplace {
+  name: String!
+  url: String!
+}
+
 input IssueCampaignArgs {
   campaignId: String!
   collectionIpfsHash: String!
@@ -870,11 +875,6 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
-}
-
-type Subdomain {
-  name: String!
-  url: String!
 }
 
 type Tag {
