@@ -42,6 +42,8 @@ import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { CommonModule } from 'src/common.module';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
+import { SubdomainsProvider } from './loaders/subdomain.loader';
+import { SubdomainsRedisHandler } from './loaders/subdomain.redis-handler';
 
 @Module({
   providers: [
@@ -79,6 +81,8 @@ import { AssetByIdentifierService } from './asset-by-identifier.service';
     AssetsProvider,
     FeaturedMarketplaceProvider,
     FeaturedMarketplaceRedisHandler,
+    SubdomainsProvider,
+    SubdomainsRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,

@@ -8,6 +8,7 @@ import { Media } from './Media.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { FeaturedMarketplace } from './FeaturedMarketplace.dto';
 import { Rarity } from './Rarity';
+import { Subdomain } from './Subdomain.dto';
 
 @ObjectType()
 export class Asset {
@@ -88,6 +89,8 @@ export class Asset {
   isNsfw: boolean;
   @Field({ nullable: true })
   featuredMarketplace: FeaturedMarketplace;
+  @Field({ nullable: true })
+  internalMarketplace: Subdomain;
   @Field(() => Rarity, { nullable: true })
   rarity: Rarity;
 

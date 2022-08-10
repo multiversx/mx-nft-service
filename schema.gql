@@ -46,6 +46,7 @@ type Asset {
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
+  internalMarketplace: Subdomain
   isLiked(byAddress: String!): Boolean
   isNsfw: Boolean
   isWhitelistedStorage: Boolean!
@@ -869,6 +870,11 @@ input Sorting {
 input StopNftCreateArgs {
   collection: String!
   ownerAddress: String!
+}
+
+type Subdomain {
+  name: String!
+  url: String!
 }
 
 type Tag {

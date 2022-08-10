@@ -29,6 +29,8 @@ import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-market
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
+import { Subdomain } from './models/Subdomain.dto';
+import { SubdomainsProvider } from './loaders/subdomain.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -45,6 +47,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetScamProvider: AssetScamInfoProvider,
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
+    private subdomainProvider: SubdomainsProvider,
   ) {
     super();
   }
@@ -184,6 +187,23 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
       return FeaturedMarketplace.fromEntity(marketplace?.value, identifier);
+    }
+    return null;
+  }
+
+  @ResolveField(() => Subdomain)
+  async internalMarketplace(@Parent() asset: Asset) {
+    const { collection, ownerAddress } = asset;
+
+    console.log(collection, ownerAddress);
+    if (!ownerAddress) return null;
+    const address = new Address(ownerAddress);
+    if (
+      address.isContractAddress() &&
+      address.equals(new Address(elrondConfig.nftMarketplaceAddress))
+    ) {
+      const marketplace = await this.subdomainProvider.load(collection);
+      return Subdomain.fromEntity(marketplace?.value);
     }
     return null;
   }
