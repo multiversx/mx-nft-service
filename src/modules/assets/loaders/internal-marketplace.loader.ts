@@ -17,19 +17,19 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(collections: string[]) {
-    const subdomain = await getRepository(MarketplaceCollectionEntity)
+    const marketplace = await getRepository(MarketplaceCollectionEntity)
       .createQueryBuilder('sc')
       .select('sc.collectionIdentifier as collectionIdentifier')
       .addSelect('sd.name as name')
       .addSelect('sd.url as url')
-      .innerJoin('subdomains', 'sd', 'sd.id=sc.subdomainId')
+      .innerJoin('marketplaces', 'sd', 'sd.id=sc.marketplaceId')
       .where(
         `sc.collectionIdentifier IN(${collections.map(
           (value) => `'${value}'`,
         )})`,
       )
       .execute();
-    return subdomain?.groupBy(
+    return marketplace?.groupBy(
       (subdomainCollection: { collectionIdentifier: any }) =>
         subdomainCollection.collectionIdentifier,
     );
