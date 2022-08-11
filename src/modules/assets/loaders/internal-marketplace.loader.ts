@@ -18,14 +18,14 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
 
   async getData(collections: string[]) {
     const marketplace = await getRepository(MarketplaceCollectionEntity)
-      .createQueryBuilder('sc')
-      .select('sc.collectionIdentifier as collectionIdentifier')
-      .addSelect('sd.name as name')
-      .addSelect('sd.url as url')
-      .addSelect('sd.address as address')
-      .innerJoin('marketplaces', 'sd', 'sd.id=sc.marketplaceId')
+      .createQueryBuilder('mc')
+      .select('mc.collectionIdentifier as collectionIdentifier')
+      .addSelect('m.name as name')
+      .addSelect('m.url as url')
+      .addSelect('m.address as address')
+      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
       .where(
-        `sc.collectionIdentifier IN(${collections.map(
+        `mc.collectionIdentifier IN(${collections.map(
           (value) => `'${value}'`,
         )})`,
       )
