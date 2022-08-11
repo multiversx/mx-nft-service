@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
+import { Marketplace } from 'src/modules/marketplaces/models/Marketplace.dto';
 import { TimeConstants } from 'src/utils/time-utils';
-import { Marketplace } from '../models/FeaturedMarketplace.dto';
 
 @Injectable()
 export class InternalMarketplaceRedisHandler extends RedisKeyValueDataloaderHandler<string> {

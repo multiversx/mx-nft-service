@@ -28,6 +28,7 @@ import { NotificationsModuleGraph } from './modules/notifications/notifications.
 import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
 import * as ormconfig from './ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
+    MarketplacesModuleGraph,
   ],
 })
 export class AppModule {}
