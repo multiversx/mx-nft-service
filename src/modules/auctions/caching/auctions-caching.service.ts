@@ -18,6 +18,7 @@ import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-hand
 import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import * as hash from 'object-hash';
+import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
 
 @Injectable()
 export class AuctionsCachingService {
@@ -29,6 +30,7 @@ export class AuctionsCachingService {
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private accountStatsCachingService: AccountsStatsCachingService,
+    private internalMarketplaceRedisHandler: InternalMarketplaceRedisHandler,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -52,6 +54,7 @@ export class AuctionsCachingService {
       this.assetsAuctionsCountLoader.clearKey(identifier),
       this.onSaleAssetsCount.clearKey(collection),
       this.availableTokensCountHandler.clearKey(identifier),
+      this.internalMarketplaceRedisHandler.clearKey(collection),
     ]);
   }
 

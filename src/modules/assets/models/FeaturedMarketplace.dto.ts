@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { FeaturedMarketplaceEntity } from 'src/db/featuredMarketplaces';
+import { MarketplaceEntity } from 'src/db/marketplaces';
 @ObjectType()
-export class FeaturedMarketplace {
+export class Marketplace {
   @Field(() => String)
   address: string;
 
@@ -11,13 +11,13 @@ export class FeaturedMarketplace {
   @Field(() => String)
   url: string;
 
-  constructor(init?: Partial<FeaturedMarketplace>) {
+  constructor(init?: Partial<Marketplace>) {
     Object.assign(this, init);
   }
 
-  static fromEntity(entity: FeaturedMarketplaceEntity, identifier: string) {
+  static fromEntity(entity: MarketplaceEntity, identifier: string) {
     return entity && Object.keys(entity).length > 0
-      ? new FeaturedMarketplace({
+      ? new Marketplace({
           address: entity.address,
           name: entity.name,
           url: `${entity.url}${identifier}`,

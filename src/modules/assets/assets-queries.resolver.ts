@@ -24,11 +24,12 @@ import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { elrondConfig } from 'src/config';
-import { FeaturedMarketplace } from './models/FeaturedMarketplace.dto';
+import { Marketplace } from './models/FeaturedMarketplace.dto';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
+import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -45,6 +46,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetScamProvider: AssetScamInfoProvider,
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
+    private internalMarketplaceProvider: InternalMarketplaceProvider,
   ) {
     super();
   }
@@ -172,10 +174,23 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return Account.fromEntity(account?.value, ownerAddress);
   }
 
-  @ResolveField(() => FeaturedMarketplace)
-  async featuredMarketplace(@Parent() asset: Asset) {
-    const { ownerAddress, identifier } = asset;
+  @ResolveField(() => [Marketplace])
+  async marketplaces(@Parent() asset: Asset) {
+    const { ownerAddress, identifier, collection, type } = asset;
+    if (type === NftTypeEnum.NonFungibleESDT) {
+      return this.getMarketplaceForNft(ownerAddress, collection, identifier);
+    }
+    if (type === NftTypeEnum.SemiFungibleESDT) {
+      return this.getMarketplaceForSft(collection, identifier);
+    }
+    return null;
+  }
 
+  private async getMarketplaceForNft(
+    ownerAddress: string,
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
     if (!ownerAddress) return null;
     const address = new Address(ownerAddress);
     if (
@@ -183,7 +198,30 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
-      return FeaturedMarketplace.fromEntity(marketplace?.value, identifier);
+      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+    }
+
+    if (
+      address.isContractAddress() &&
+      address.equals(new Address(elrondConfig.nftMarketplaceAddress))
+    ) {
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
+      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+    }
+  }
+
+  private async getMarketplaceForSft(
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
+    const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
+    if (!!assetAuctions?.value) {
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
+      return [Marketplace.fromEntity(marketplace?.value, identifier)];
     }
     return null;
   }
