@@ -198,7 +198,12 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
-      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
     }
 
     if (
@@ -208,7 +213,12 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       const marketplace = await this.internalMarketplaceProvider.load(
         collection,
       );
-      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
     }
   }
 
@@ -221,7 +231,11 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       const marketplace = await this.internalMarketplaceProvider.load(
         collection,
       );
-      return [Marketplace.fromEntity(marketplace?.value, identifier)];
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
     }
     return null;
   }
