@@ -11,6 +11,9 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ length: 62 })
   name: string;
 
+  @Column({ length: 20, unique: true })
+  key: string;
+
   @Column()
   url: string;
 

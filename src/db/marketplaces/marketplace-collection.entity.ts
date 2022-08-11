@@ -11,7 +11,7 @@ export class MarketplaceCollectionEntity extends BaseEntity {
   @Column({ length: 20 })
   collectionName: string;
 
-  @ManyToOne(() => MarketplaceEntity, (subdomain) => subdomain.collections)
+  @ManyToOne(() => MarketplaceEntity, (marketplace) => marketplace.collections)
   @JoinColumn({ name: 'marketplaceId', referencedColumnName: 'id' })
   marketplace: MarketplaceEntity;
 

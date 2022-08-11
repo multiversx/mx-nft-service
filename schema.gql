@@ -550,8 +550,27 @@ type KeyValueType {
 
 type Marketplace {
   address: String!
+  key: ID!
   name: String!
   url: String!
+}
+
+type MarketplaceEdge {
+  cursor: String
+  node: Marketplace
+}
+
+type MarketplacePageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type MarketplacesResponse {
+  edges: [MarketplaceEdge!]
+  pageData: PageData
+  pageInfo: MarketplacePageInfo
 }
 
 type Media {
@@ -788,6 +807,7 @@ type Query {
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaceCutPercentage: String! @deprecated(reason: "This will be removed in the next version")
+  marketplaces(pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   notifications(pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!

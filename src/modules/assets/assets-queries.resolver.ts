@@ -24,12 +24,12 @@ import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { elrondConfig } from 'src/config';
-import { Marketplace } from './models/FeaturedMarketplace.dto';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
 import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
+import { Marketplace } from '../marketplaces/models';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {

@@ -42,6 +42,7 @@ export class AuctionsSetterService {
             auctionData,
             asset?.tags?.toString(),
             hash,
+            '',
           ),
         );
 
