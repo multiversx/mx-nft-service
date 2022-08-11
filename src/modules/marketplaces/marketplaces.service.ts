@@ -36,7 +36,6 @@ export class MarketplacesService {
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
     let [campaigns, count]: [MarketplaceEntity[], number] =
       await this.marketplacesRepository.getMarketplaces();
-    console.log(campaigns, count);
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),

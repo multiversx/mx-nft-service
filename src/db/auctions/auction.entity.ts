@@ -69,6 +69,7 @@ export class AuctionEntity extends BaseEntity {
   blockHash: string;
 
   @Column({ length: 20 })
+  @Index('auction_marketplace_key')
   marketplaceKey: string;
 
   @OneToMany(() => OrderEntity, (order) => order.auction)
