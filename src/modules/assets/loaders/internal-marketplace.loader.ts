@@ -22,6 +22,7 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
       .select('sc.collectionIdentifier as collectionIdentifier')
       .addSelect('sd.name as name')
       .addSelect('sd.url as url')
+      .addSelect('sd.address as address')
       .innerJoin('marketplaces', 'sd', 'sd.id=sc.marketplaceId')
       .where(
         `sc.collectionIdentifier IN(${collections.map(
