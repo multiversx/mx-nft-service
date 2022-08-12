@@ -98,7 +98,7 @@ export class AuctionEntity extends BaseEntity {
   ) {
     return auction
       ? new AuctionEntity({
-          id: auctionId,
+          marketplaceAuctionId: auctionId,
           collection: auction.auctioned_tokens.token_identifier
             .valueOf()
             .toString(),
