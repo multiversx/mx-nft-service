@@ -15,6 +15,8 @@ import {
   AuctionsGetterService,
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { Marketplace } from 'src/modules/marketplaces/models';
 import { NotificationStatusEnum } from 'src/modules/notifications/models';
 import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
@@ -46,6 +48,7 @@ export class NftEventsService {
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
+    private readonly marketplaceService: MarketplacesService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
@@ -54,18 +57,26 @@ export class NftEventsService {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
-          const auction = await this.auctionsGetterService.getAuctionById(
-            parseInt(topics.auctionId, 16),
-          );
+          const bidMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topics.collection,
+              event.getAddress(),
+            );
+          const auction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topics.auctionId, 16),
+              bidMarketplace.key,
+            );
           const order = await this.ordersService.createOrder(
             new CreateOrderArgs({
               ownerAddress: topics.currentWinner,
-              auctionId: parseInt(topics.auctionId, 16),
+              auctionId: auction.id,
               priceToken: 'EGLD',
               priceAmount: topics.currentBid,
               priceNonce: 0,
               blockHash: hash,
               status: OrderStatusEnum.Active,
+              marketplaceKey: bidMarketplace.key,
             }),
           );
 
@@ -82,7 +93,7 @@ export class NftEventsService {
                 nftName: bidNftData?.name,
                 verified: bidNftData?.verified ? true : false,
                 price: topics.currentBid,
-                auctionId: parseInt(topics.auctionId, 16),
+                auctionId: auction.id,
               },
             }),
           );
@@ -101,15 +112,22 @@ export class NftEventsService {
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
           const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
+          const buyMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              buySftTopics.collection,
+              event.getAddress(),
+            );
           const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
+            buyMarketplace.key,
           );
           const totalRemaining = result
             ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
             : 0;
           if (totalRemaining === 0) {
-            this.auctionsService.updateAuction(
+            this.auctionsService.updateAuctionByMarketplaceKey(
               parseInt(buySftTopics.auctionId, 16),
+              buyMarketplace.key,
               AuctionStatusEnum.Ended,
               hash,
               AuctionStatusEnum.Ended,
@@ -125,6 +143,7 @@ export class NftEventsService {
               blockHash: hash,
               status: OrderStatusEnum.Bought,
               boughtTokens: buySftTopics.boughtTokens,
+              marketplaceKey: buyMarketplace.key,
             }),
           );
           const buySftNftData = await this.assetByIdentifierService.getAsset(
@@ -142,6 +161,7 @@ export class NftEventsService {
                 price: buySftTopics.bid,
                 auctionId: parseInt(buySftTopics.auctionId, 16),
                 boughtTokens: buySftTopics.boughtTokens,
+                marketplaceKey: buyMarketplace.key,
               },
             }),
           );
@@ -149,19 +169,41 @@ export class NftEventsService {
         case AuctionEventEnum.WithdrawEvent:
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
+          const withdrawMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsWithdraw.collection,
+              event.getAddress(),
+            );
+          const withdrawAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topics.auctionId, 16),
+              withdrawMarketplace.key,
+            );
+
           this.auctionsService.updateAuction(
-            parseInt(topicsWithdraw.auctionId, 16),
+            withdrawAuction.id,
             AuctionStatusEnum.Closed,
             hash,
             AuctionEventEnum.WithdrawEvent,
           );
           break;
         case AuctionEventEnum.EndAuctionEvent:
-          const endAuction = new EndAuctionEvent(event);
-          const topicsEndAuction = endAuction.getTopics();
+          const endAuctionEvent = new EndAuctionEvent(event);
+          const topicsEndAuction = endAuctionEvent.getTopics();
+          const endMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsEndAuction.collection,
+              event.getAddress(),
+            );
+          const endAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topics.auctionId, 16),
+              endMarketplace.key,
+            );
+
           const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
           this.auctionsService.updateAuction(
-            parseInt(topicsEndAuction.auctionId, 16),
+            endAuction.id,
             AuctionStatusEnum.Ended,
             hash,
             AuctionEventEnum.EndAuctionEvent,
@@ -169,10 +211,7 @@ export class NftEventsService {
           this.notificationsService.updateNotificationStatus([
             parseInt(topicsEndAuction.auctionId, 16),
           ]);
-          this.ordersService.updateOrder(
-            parseInt(topicsEndAuction.auctionId, 16),
-            OrderStatusEnum.Bought,
-          );
+          this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
           const endAuctionNftData =
             await this.assetByIdentifierService.getAsset(endAuctionIdentifier);
           await this.accountFeedService.addFeed(
@@ -181,10 +220,11 @@ export class NftEventsService {
               event: EventEnum.won,
               reference: endAuctionIdentifier,
               extraInfo: {
-                auctionId: parseInt(topicsEndAuction.auctionId, 16),
+                auctionId: endAuction.id,
                 nftName: endAuctionNftData?.name,
                 verified: endAuctionNftData?.verified ? true : false,
                 price: topicsEndAuction.currentBid,
+                marketplaceKey: buyMarketplace.key,
               },
             }),
           );
@@ -194,9 +234,15 @@ export class NftEventsService {
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
           const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
+          const auctionTokenMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsAuctionToken.collection,
+              event.getAddress(),
+            );
           const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
             startAuctionIdentifier,
+            auctionTokenMarketplace.key,
             hash,
           );
           if (startAuction) {
@@ -209,11 +255,12 @@ export class NftEventsService {
                 event: EventEnum.startAuction,
                 reference: startAuctionIdentifier,
                 extraInfo: {
-                  auctionId: parseInt(topicsAuctionToken.auctionId, 16),
+                  auctionId: startAuction.id,
                   nftName: nftData?.name,
                   verified: nftData?.verified ? true : false,
                   minBid: startAuction.minBid,
                   maxBid: startAuction.maxBid,
+                  marketplaceKey: buyMarketplace.key,
                 },
               }),
             );

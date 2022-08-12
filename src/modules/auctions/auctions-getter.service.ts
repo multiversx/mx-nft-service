@@ -147,7 +147,17 @@ export class AuctionsGetterService {
     return await this.auctionServiceDb.getAuction(id);
   }
 
-  async getAvailableTokens(id: number): Promise<number> {
+  async getAuctionByIdAndMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.auctionServiceDb.getAuction(id);
+  }
+
+  async getAvailableTokens(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<number> {
     return await this.auctionServiceDb.getAvailableTokens(id);
   }
 

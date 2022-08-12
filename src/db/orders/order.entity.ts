@@ -35,6 +35,10 @@ export class OrderEntity extends BaseEntity {
   @Column({ length: 64 })
   blockHash: string;
 
+  @Column({ length: 20 })
+  @Index('order_marketplace_key')
+  marketplaceKey: string;
+
   @ManyToOne(() => AuctionEntity, (auction) => auction.orders)
   @JoinColumn({ name: 'auctionId', referencedColumnName: 'id' })
   auction: AuctionEntity;

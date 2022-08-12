@@ -7,6 +7,7 @@ import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { Marketplace } from './models';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class MarketplacesCachingService {
@@ -23,6 +24,18 @@ export class MarketplacesCachingService {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllMarketplaces.key,
+      () => getMarketplaces(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getAllMarketplacesByAddressAndCollection(
+    getMarketplaces: () => any,
+    key: string,
+  ): Promise<Marketplace> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      generateCacheKeyFromParams('marketplaceCollection', key),
       () => getMarketplaces(),
       TimeConstants.oneHour,
     );

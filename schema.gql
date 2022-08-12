@@ -552,6 +552,7 @@ type Marketplace {
   address: String!
   key: ID!
   name: String!
+  type: MarketplaceTypeEnum!
   url: String!
 }
 
@@ -565,6 +566,11 @@ type MarketplacePageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+enum MarketplaceTypeEnum {
+  External
+  Internal
 }
 
 type MarketplacesResponse {

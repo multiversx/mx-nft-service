@@ -14,6 +14,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneHour,
   };
 
+  static InternalMarketplaces: CacheInfo = {
+    key: 'InternalMarketplaces',
+    ttl: TimeConstants.oneHour,
+  };
+
   static AuctionsEndingToday: CacheInfo = {
     key: 'auctionsEndingToday',
     ttl: TimeConstants.oneHour,

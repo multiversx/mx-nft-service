@@ -15,6 +15,7 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -22,6 +23,7 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
+    private marketplacesService: MarketplacesService,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
@@ -29,6 +31,7 @@ export class AuctionsSetterService {
   async saveAuction(
     auctionId: number,
     identifier: string,
+    marketplaceKey: string,
     hash: string,
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
@@ -42,7 +45,7 @@ export class AuctionsSetterService {
             auctionData,
             asset?.tags?.toString(),
             hash,
-            '',
+            marketplaceKey,
           ),
         );
 
@@ -91,6 +94,31 @@ export class AuctionsSetterService {
 
   async updateAuction(
     id: number,
+    status: AuctionStatusEnum,
+    hash: string,
+    auctionEvent: string,
+  ): Promise<Auction | any> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.auctionServiceDb.updateAuction(id, status, hash);
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction', {
+        path: 'AuctionsService.updateAuction',
+        id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuctionByMarketplaceKey(
+    id: number,
+    marketplaceKey: string,
     status: AuctionStatusEnum,
     hash: string,
     auctionEvent: string,
