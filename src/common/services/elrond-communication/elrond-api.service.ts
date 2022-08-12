@@ -368,7 +368,7 @@ export class ElrondApiService {
           smallestNonceInLastBatch = smallestNonceInCurrentBatch;
         }
       }
-    } while (batch.length === currentBatchExpectedSize);
+    } while (batch?.length === currentBatchExpectedSize);
 
     return this.filterUniqueNftsByNonce(nfts);
   }
