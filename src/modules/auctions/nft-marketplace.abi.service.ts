@@ -36,6 +36,7 @@ import {
   BuySftRequest,
   CreateAuctionRequest,
 } from './models/requests';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -45,6 +46,7 @@ export class NftMarketplaceAbiService {
     private elrondProxyService: ElrondProxyService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private marketplaceService: MarketplacesService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -58,15 +60,19 @@ export class NftMarketplaceAbiService {
     args: CreateAuctionRequest,
   ): Promise<TransactionNode> {
     const contract = getSmartContract(ownerAddress);
-
-    let createAuctionTx = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateAuctionArgs(args),
-      gasLimit: gas.startAuction,
-      chainID: elrondConfig.chainID,
-    });
-    return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    const { collection } = getCollectionAndNonceFromIdentifier(args.identifier);
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(collection);
+    if (marketplace) {
+      let createAuctionTx = contract.call({
+        func: new ContractFunction('ESDTNFTTransfer'),
+        value: TokenPayment.egldFromAmount(0),
+        args: this.getCreateAuctionArgs(args, marketplace.address),
+        gasLimit: gas.startAuction,
+        chainID: elrondConfig.chainID,
+      });
+      return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    }
   }
 
   async bid(
@@ -237,7 +243,10 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private getCreateAuctionArgs(args: CreateAuctionRequest): TypedValue[] {
+  private getCreateAuctionArgs(
+    args: CreateAuctionRequest,
+    address: string,
+  ): TypedValue[] {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -245,7 +254,7 @@ export class NftMarketplaceAbiService {
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
       new U64Value(new BigNumber(args.quantity)),
-      new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
+      new AddressValue(new Address(address)),
       BytesValue.fromUTF8('auctionToken'),
       new BigUIntValue(new BigNumber(args.minBid)),
       new BigUIntValue(new BigNumber(args.maxBid || 0)),

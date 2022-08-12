@@ -6,6 +6,7 @@ import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { MarketplacesResolver } from './marketplaces.resolver';
 import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
+import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { MarketplacesCachingService } from './marketplaces-caching.service';
     PubSubListenerModule,
     ElrondCommunicationModule,
     TypeOrmModule.forFeature([MarketplaceRepository]),
+    TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
   ],
   exports: [MarketplacesService],
 })

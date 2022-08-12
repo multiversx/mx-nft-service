@@ -6,11 +6,13 @@ import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 
 @Injectable()
 export class MarketplacesService {
   constructor(
     private marketplacesRepository: MarketplaceRepository,
+    private marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private cacheService: MarketplacesCachingService,
   ) {}
 
@@ -49,6 +51,13 @@ export class MarketplacesService {
     );
   }
 
+  async getMarketplaceByCollection(collection: string): Promise<Marketplace> {
+    return await this.cacheService.getMarketplacesByCollection(
+      () => this.getMarketplacesByCollectionFromDb(collection),
+      collection,
+    );
+  }
+
   private async getAllMarketplaces(): Promise<CollectionType<Marketplace>> {
     return await this.cacheService.getAllMarketplaces(() =>
       this.getMarketplacesFromDb(),
@@ -69,9 +78,21 @@ export class MarketplacesService {
     address: string,
   ): Promise<Marketplace> {
     let marketplace: MarketplaceEntity[] =
-      await this.marketplacesRepository.getMarketplaceByAddressAndCollection(
+      await this.marketplaceCollectionsRepository.getMarketplaceByAddressAndCollection(
         collection,
         address,
+      );
+    return marketplace?.length > 0
+      ? Marketplace.fromEntity(marketplace[0])
+      : null;
+  }
+
+  async getMarketplacesByCollectionFromDb(
+    collection: string,
+  ): Promise<Marketplace> {
+    let marketplace: MarketplaceEntity[] =
+      await this.marketplaceCollectionsRepository.getMarketplaceByCollection(
+        collection,
       );
     return marketplace?.length > 0
       ? Marketplace.fromEntity(marketplace[0])

@@ -35,7 +35,19 @@ export class MarketplacesCachingService {
   ): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
-      generateCacheKeyFromParams('marketplaceCollection', key),
+      generateCacheKeyFromParams('marketplace_address_collection', key),
+      () => getMarketplaces(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getMarketplacesByCollection(
+    getMarketplaces: () => any,
+    key: string,
+  ): Promise<Marketplace> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      generateCacheKeyFromParams('marketplace_collection', key),
       () => getMarketplaces(),
       TimeConstants.oneHour,
     );
