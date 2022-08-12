@@ -129,10 +129,15 @@ export class AuctionsSetterService {
   ): Promise<Auction | any> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuction(id, status, hash);
+      return await this.auctionServiceDb.updateAuctionByMarketplace(
+        id,
+        marketplaceKey,
+        status,
+        hash,
+      );
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
-        path: 'AuctionsService.updateAuction',
+        path: 'AuctionsService.updateAuctionByMarketplaceKey',
         id,
         exception: error,
       });

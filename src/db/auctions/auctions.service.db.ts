@@ -351,6 +351,18 @@ export class AuctionsServiceDb {
     return null;
   }
 
+  async getAuctionByMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    if (id || id === 0) {
+      return await this.auctionsRepository.findOne({
+        where: [{ marketplaceAuctionId: id, marketplaceKey: marketplaceKey }],
+      });
+    }
+    return null;
+  }
+
   async getAvailableTokens(id: number): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionId(id),
@@ -465,6 +477,26 @@ export class AuctionsServiceDb {
     hash: string,
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
+
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
+    if (auction) {
+      auction.status = status;
+      auction.blockHash = hash;
+      return await this.auctionsRepository.save(auction);
+    }
+    return null;
+  }
+
+  async updateAuctionByMarketplace(
+    auctionId: number,
+    marketplaceKey: string,
+    status: AuctionStatusEnum,
+    hash: string,
+  ): Promise<AuctionEntity> {
+    let auction = await this.getAuctionByMarketplace(auctionId, marketplaceKey);
 
     await this.triggerCacheInvalidation(
       auction.identifier,

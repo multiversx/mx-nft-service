@@ -176,7 +176,7 @@ export class NftEventsService {
             );
           const withdrawAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topics.auctionId, 16),
+              parseInt(topicsWithdraw.auctionId, 16),
               withdrawMarketplace.key,
             );
 
@@ -197,7 +197,7 @@ export class NftEventsService {
             );
           const endAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topics.auctionId, 16),
+              parseInt(topicsEndAuction.auctionId, 16),
               endMarketplace.key,
             );
 
