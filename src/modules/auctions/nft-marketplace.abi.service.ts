@@ -84,12 +84,14 @@ export class NftMarketplaceAbiService {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
     );
-    const contract = await this.configureContract(request.auctionId);
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
     let bid = contract.call({
       func: new ContractFunction('bid'),
       value: TokenPayment.egldFromBigInteger(request.price),
       args: [
-        new U64Value(new BigNumber(request.auctionId)),
+        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
       ],
@@ -99,7 +101,25 @@ export class NftMarketplaceAbiService {
     return bid.toPlainObject(new Address(ownerAddress));
   }
 
-  private async configureContract(auctionId: number) {
+  async withdraw(
+    ownerAddress: string,
+    auctionId: number,
+  ): Promise<TransactionNode> {
+    const { contract, auction } = await this.configureTransactionData(
+      auctionId,
+    );
+
+    let withdraw = contract.call({
+      func: new ContractFunction('withdraw'),
+      value: TokenPayment.egldFromAmount(0),
+      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
+      gasLimit: gas.withdraw,
+      chainID: elrondConfig.chainID,
+    });
+    return withdraw.toPlainObject(new Address(ownerAddress));
+  }
+
+  private async configureTransactionData(auctionId: number) {
     const auction = await this.auctionsService.getAuctionById(auctionId);
     const marketplace =
       await this.marketplaceService.getInternalMarketplacesAddresesByKey(
@@ -107,35 +127,21 @@ export class NftMarketplaceAbiService {
       );
     const contract =
       await this.elrondProxyService.getMarketplaceAbiSmartContract(marketplace);
-    return contract;
-  }
-
-  async withdraw(
-    ownerAddress: string,
-    auctionId: number,
-  ): Promise<TransactionNode> {
-    const contract = await this.configureContract(auctionId);
-
-    let withdraw = contract.call({
-      func: new ContractFunction('withdraw'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auctionId))],
-      gasLimit: gas.withdraw,
-      chainID: elrondConfig.chainID,
-    });
-    return withdraw.toPlainObject(new Address(ownerAddress));
+    return { contract, auction };
   }
 
   async endAuction(
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract = await this.configureContract(auctionId);
+    const { contract, auction } = await this.configureTransactionData(
+      auctionId,
+    );
 
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
       value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auctionId))],
+      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.endAuction,
       chainID: elrondConfig.chainID,
     });
@@ -147,12 +153,14 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.configureContract(request.auctionId);
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
 
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
       value: TokenPayment.egldFromBigInteger(request.price),
-      args: this.getBuySftArguments(request),
+      args: this.getBuySftArguments(request, auction.marketplaceAuctionId),
       gasLimit: gas.buySft,
       chainID: elrondConfig.chainID,
     });
@@ -243,12 +251,15 @@ export class NftMarketplaceAbiService {
     return response.firstValue.valueOf();
   }
 
-  private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {
+  private getBuySftArguments(
+    args: BuySftActionArgs,
+    auctionId: number,
+  ): TypedValue[] {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
     let returnArgs: TypedValue[] = [
-      new U64Value(new BigNumber(args.auctionId)),
+      new U64Value(new BigNumber(auctionId)),
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
     ];
