@@ -60,7 +60,7 @@ export class NftEventsService {
           const bidMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               topics.collection,
-              event.getAddress(),
+              bidEvent.getAddress(),
             );
           const auction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
@@ -115,7 +115,7 @@ export class NftEventsService {
           const buyMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               buySftTopics.collection,
-              event.getAddress(),
+              buySftEvent.getAddress(),
             );
           const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
@@ -172,7 +172,7 @@ export class NftEventsService {
           const withdrawMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               topicsWithdraw.collection,
-              event.getAddress(),
+              withdraw.getAddress(),
             );
           const withdrawAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
@@ -193,7 +193,7 @@ export class NftEventsService {
           const endMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               topicsEndAuction.collection,
-              event.getAddress(),
+              endAuctionEvent.getAddress(),
             );
           const endAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
@@ -224,7 +224,7 @@ export class NftEventsService {
                 nftName: endAuctionNftData?.name,
                 verified: endAuctionNftData?.verified ? true : false,
                 price: topicsEndAuction.currentBid,
-                marketplaceKey: buyMarketplace.key,
+                marketplaceKey: endMarketplace.key,
               },
             }),
           );
@@ -237,7 +237,7 @@ export class NftEventsService {
           const auctionTokenMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               topicsAuctionToken.collection,
-              event.getAddress(),
+              auctionToken.getAddress(),
             );
           const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
@@ -261,7 +261,7 @@ export class NftEventsService {
                   verified: nftData?.verified ? true : false,
                   minBid: startAuction.minBid,
                   maxBid: startAuction.maxBid,
-                  marketplaceKey: buyMarketplace.key,
+                  marketplaceKey: auctionTokenMarketplace.key,
                 },
               }),
             );
