@@ -6,8 +6,8 @@ import { Nft } from 'src/common';
 import { ScamInfo } from './ScamInfo.dto';
 import { Media } from './Media.dto';
 import { Account } from 'src/modules/account-stats/models';
-import { FeaturedMarketplace } from './FeaturedMarketplace.dto';
 import { Rarity } from './Rarity';
+import { Marketplace } from 'src/modules/marketplaces/models';
 
 @ObjectType()
 export class Asset {
@@ -86,8 +86,8 @@ export class Asset {
   verified: boolean;
   @Field({ nullable: true })
   isNsfw: boolean;
-  @Field({ nullable: true })
-  featuredMarketplace: FeaturedMarketplace;
+  @Field(() => [Marketplace], { nullable: true })
+  marketplaces: [Marketplace];
   @Field(() => Rarity, { nullable: true })
   rarity: Rarity;
 

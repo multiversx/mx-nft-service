@@ -68,6 +68,10 @@ export class AuctionEntity extends BaseEntity {
   @Column({ length: 64 })
   blockHash: string;
 
+  @Column({ length: 20 })
+  @Index('auction_marketplace_key')
+  marketplaceKey: string;
+
   @OneToMany(() => OrderEntity, (order) => order.auction)
   orders: OrderEntity[];
   @OneToMany(() => TagEntity, (tag) => tag.auction)
@@ -83,6 +87,7 @@ export class AuctionEntity extends BaseEntity {
     auction: AuctionAbi,
     tags: string,
     hash: string,
+    marketplaceKey: string,
   ) {
     return auction
       ? new AuctionEntity({
@@ -129,6 +134,7 @@ export class AuctionEntity extends BaseEntity {
           )}`,
           tags: tags ? `,${tags},` : '',
           blockHash: hash,
+          marketplaceKey: marketplaceKey,
         })
       : null;
   }
