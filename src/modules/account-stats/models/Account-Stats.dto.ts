@@ -20,19 +20,26 @@ export class AccountStats {
   orders: string;
   @Field({ nullable: true })
   claimable: string;
+  @Field({ nullable: true })
+  marketplaceKey: string;
 
   constructor(init?: Partial<AccountStats>) {
     Object.assign(this, init);
   }
 
-  static fromEntity(account: AccountStatsEntity, address: string = '') {
+  static fromEntity(
+    account: AccountStatsEntity,
+    address: string = '',
+    marketplaceKey: string = '',
+  ) {
     return account
       ? new AccountStats({
           address: address,
           auctions: account.auctions,
           biddingBalance: nominateAmount(account.biddingBalance),
           orders: account.orders,
+          marketplaceKey: marketplaceKey,
         })
-      : new AccountStats({ address: address });
+      : new AccountStats({ address: address, marketplaceKey: marketplaceKey });
   }
 }

@@ -22,15 +22,21 @@ export class AccountsStatsResolver {
     const account = await this.accountsStatsService.getStats(
       filters?.address,
       filters?.isOwner,
+      filters?.marketplaceKey,
     );
-    return AccountStats.fromEntity(account, filters?.address);
+    return AccountStats.fromEntity(
+      account,
+      filters?.address,
+      filters?.marketplaceKey,
+    );
   }
 
   @ResolveField(() => Int)
   async claimable(@Parent() stats: AccountStats) {
-    const { address } = stats;
+    const { address, marketplaceKey } = stats;
     const claimableCount = await this.accountsStatsService.getClaimableCount(
       address,
+      marketplaceKey,
     );
     return claimableCount || 0;
   }

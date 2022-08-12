@@ -39,6 +39,9 @@ export class Order {
   @Field(() => Int, { nullable: true })
   endDate: number;
 
+  @Field(() => String)
+  marketplaceKey: string;
+
   constructor(init?: Partial<Order>) {
     Object.assign(this, init);
   }
@@ -62,6 +65,7 @@ export class Order {
           creationDate: DateUtils.getTimestamp(order.creationDate),
           endDate: DateUtils.getTimestamp(order.modifiedDate),
           auctionId: order.auctionId,
+          marketplaceKey: order.marketplaceKey,
         })
       : null;
   }

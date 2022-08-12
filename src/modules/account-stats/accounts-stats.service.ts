@@ -19,16 +19,24 @@ export class AccountsStatsService {
   async getStats(
     address: string,
     isOwner: boolean,
+    marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {
     if (isOwner) {
-      return this.getStatsForOwner(address);
-    } else return this.getPublicStats(address);
+      return this.getStatsForOwner(address, marketplaceKey);
+    } else return this.getPublicStats(address, marketplaceKey);
   }
 
-  private async getPublicStats(address: string): Promise<AccountStatsEntity> {
+  private async getPublicStats(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<AccountStatsEntity> {
     try {
-      return this.accountStatsCachingService.getPublicStats(address, () =>
-        this.accountsStatsRepository.getPublicAccountStats(address),
+      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
+      return this.accountStatsCachingService.getPublicStats(key, () =>
+        this.accountsStatsRepository.getPublicAccountStats(
+          address,
+          marketplaceKey,
+        ),
       );
     } catch (err) {
       this.logger.error(
@@ -43,10 +51,17 @@ export class AccountsStatsService {
     }
   }
 
-  private async getStatsForOwner(address: string): Promise<AccountStatsEntity> {
+  private async getStatsForOwner(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<AccountStatsEntity> {
     try {
-      return this.accountStatsCachingService.getStatsForOwner(address, () =>
-        this.accountsStatsRepository.getOnwerAccountStats(address),
+      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
+      return this.accountStatsCachingService.getStatsForOwner(key, () =>
+        this.accountsStatsRepository.getOnwerAccountStats(
+          address,
+          marketplaceKey,
+        ),
       );
     } catch (err) {
       this.logger.error(
@@ -54,6 +69,7 @@ export class AccountsStatsService {
         {
           path: 'AccountsStatsService.getStatsForOwner',
           address,
+          marketplaceKey,
           exception: err?.message,
         },
       );
@@ -61,10 +77,17 @@ export class AccountsStatsService {
     }
   }
 
-  async getClaimableCount(address: string): Promise<number> {
+  async getClaimableCount(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<number> {
     try {
-      return this.accountStatsCachingService.getClaimableCount(address, () =>
-        this.accountsStatsRepository.getAccountClaimableCount(address),
+      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
+      return this.accountStatsCachingService.getClaimableCount(key, () =>
+        this.accountsStatsRepository.getAccountClaimableCount(
+          address,
+          marketplaceKey,
+        ),
       );
     } catch (err) {
       this.logger.error(

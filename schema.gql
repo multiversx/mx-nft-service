@@ -20,12 +20,14 @@ type AccountStats {
   collected: String
   collections: String
   creations: String
+  marketplaceKey: String
   orders: String
 }
 
 input AccountStatsFilter {
   address: String!
   isOwner: Boolean
+  marketplaceKey: String
 }
 
 input AddLikeArgs {
@@ -162,6 +164,7 @@ type Auction {
   endDate: Int!
   id: ID!
   identifier: String!
+  marketplaceKey: String!
   maxBid: Price!
   minBid: Price!
   minBidDiff: Price!
@@ -706,6 +709,7 @@ type Order {
   endDate: Int
   from: Account
   id: ID!
+  marketplaceKey: String!
   ownerAddress: String!
   price: Price!
   status: OrderStatusEnum!
