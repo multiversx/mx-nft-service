@@ -25,6 +25,7 @@ import { OrdersModuleGraph } from 'src/modules/orders/orders.module';
 import { CacheEventsPublisherModule } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-events.consumer';
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
+import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
+    forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
