@@ -16,12 +16,12 @@ export class ContractInfoResolver {
   async marketplaceCutPercentage(@Parent() contractInfo: ContractInfo) {
     const { address } = contractInfo;
 
-    return address ? await this.nftAbiService.getCutPercentage() : null;
+    return address ? await this.nftAbiService.getCutPercentage(address) : null;
   }
 
   @ResolveField(() => Boolean)
   async isPaused(@Parent() contractInfo: ContractInfo) {
     const { address } = contractInfo;
-    return address ? await this.nftAbiService.getIsPaused() : null;
+    return address ? await this.nftAbiService.getIsPaused(address) : null;
   }
 }

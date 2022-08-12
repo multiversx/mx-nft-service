@@ -40,6 +40,16 @@ export class MarketplacesService {
     return internalMarketplaces.map((m) => m.address);
   }
 
+  async getInternalMarketplacesAddresesByKey(key: string): Promise<string> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const internalMarketplace = allMarketplaces?.items?.find(
+      (m) => m.key === key,
+    );
+
+    return internalMarketplace?.address;
+  }
+
   async getMarketplaceByCollectionAndAddress(
     collection: string,
     address: string,

@@ -37,6 +37,7 @@ import {
   CreateAuctionRequest,
 } from './models/requests';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
+import { AuctionsGetterService } from './auctions-getter.service';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -44,6 +45,7 @@ export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
   constructor(
     private elrondProxyService: ElrondProxyService,
+    private auctionsService: AuctionsGetterService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
@@ -82,8 +84,7 @@ export class NftMarketplaceAbiService {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
     );
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const contract = await this.configureContract(request.auctionId);
     let bid = contract.call({
       func: new ContractFunction('bid'),
       value: TokenPayment.egldFromBigInteger(request.price),
@@ -98,12 +99,22 @@ export class NftMarketplaceAbiService {
     return bid.toPlainObject(new Address(ownerAddress));
   }
 
+  private async configureContract(auctionId: number) {
+    const auction = await this.auctionsService.getAuctionById(auctionId);
+    const marketplace =
+      await this.marketplaceService.getInternalMarketplacesAddresesByKey(
+        auction.marketplaceKey,
+      );
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract(marketplace);
+    return contract;
+  }
+
   async withdraw(
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const contract = await this.configureContract(auctionId);
 
     let withdraw = contract.call({
       func: new ContractFunction('withdraw'),
@@ -119,8 +130,8 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const contract = await this.configureContract(auctionId);
+
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
       value: TokenPayment.egldFromAmount(0),
@@ -136,8 +147,7 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const contract = await this.configureContract(request.auctionId);
 
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
@@ -149,9 +159,14 @@ export class NftMarketplaceAbiService {
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
   }
 
-  async getAuctionQuery(auctionId: number): Promise<AuctionAbi> {
+  async getAuctionQuery(
+    contractAddress: string,
+    auctionId: number,
+  ): Promise<AuctionAbi> {
     const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+      await this.elrondProxyService.getMarketplaceAbiSmartContract(
+        contractAddress,
+      );
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
@@ -164,13 +179,16 @@ export class NftMarketplaceAbiService {
     return auction;
   }
 
-  async getCutPercentage(): Promise<string> {
+  async getCutPercentage(contractAddress: string): Promise<string> {
     try {
-      const cacheKey = generateCacheKeyFromParams('marketplaceCutPercentage');
+      const cacheKey = generateCacheKeyFromParams(
+        'marketplaceCutPercentage',
+        contractAddress,
+      );
       return await this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        () => this.getCutPercentageMap(),
+        () => this.getCutPercentageMap(contractAddress),
         TimeConstants.oneWeek,
       );
     } catch (err) {
@@ -184,12 +202,12 @@ export class NftMarketplaceAbiService {
     }
   }
 
-  async getIsPaused(): Promise<boolean> {
+  async getIsPaused(contractAddress: string): Promise<boolean> {
     try {
       return await this.redisCacheService.getOrSet(
         this.redisClient,
-        generateCacheKeyFromParams('isPaused'),
-        () => this.getIsPausedAbi(),
+        generateCacheKeyFromParams('isPaused', contractAddress),
+        () => this.getIsPausedAbi(contractAddress),
         TimeConstants.oneWeek,
       );
     } catch (err) {
@@ -203,9 +221,11 @@ export class NftMarketplaceAbiService {
     }
   }
 
-  private async getCutPercentageMap(): Promise<string> {
+  private async getCutPercentageMap(contractAddress: string): Promise<string> {
     const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+      await this.elrondProxyService.getMarketplaceAbiSmartContract(
+        contractAddress,
+      );
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getMarketplaceCutPercentage()
     );
@@ -213,9 +233,11 @@ export class NftMarketplaceAbiService {
     return response.firstValue.valueOf().toFixed();
   }
 
-  private async getIsPausedAbi(): Promise<boolean> {
+  private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
     const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+      await this.elrondProxyService.getMarketplaceAbiSmartContract(
+        contractAddress,
+      );
     let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf();

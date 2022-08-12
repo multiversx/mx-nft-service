@@ -243,6 +243,7 @@ export class NftEventsService {
             parseInt(topicsAuctionToken.auctionId, 16),
             startAuctionIdentifier,
             auctionTokenMarketplace.key,
+            auctionTokenMarketplace.address,
             hash,
           );
           if (startAuction) {

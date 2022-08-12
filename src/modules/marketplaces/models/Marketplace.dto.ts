@@ -18,6 +18,12 @@ export class Marketplace {
   @Field(() => MarketplaceTypeEnum)
   type: string;
 
+  @Field({ nullable: true })
+  marketplaceCutPercentage: string;
+
+  @Field({ nullable: true })
+  isPaused: boolean;
+
   constructor(init?: Partial<Marketplace>) {
     Object.assign(this, init);
   }
@@ -29,6 +35,7 @@ export class Marketplace {
           name: entity.name,
           url: identifier ? `${entity.url}${identifier}` : entity.url,
           key: entity.key,
+          type: entity.type,
         })
       : null;
   }

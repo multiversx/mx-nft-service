@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
-import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
@@ -35,7 +34,6 @@ import { PriceRange } from './models/PriceRange.dto';
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsGetterService,
-    private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrdersProvider,
@@ -126,13 +124,6 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
         ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
         : null,
     };
-  }
-
-  @Query(() => String, {
-    deprecationReason: 'This will be removed in the next version',
-  })
-  async marketplaceCutPercentage() {
-    return await this.nftAbiService.getCutPercentage();
   }
 
   @Query(() => PriceRange)

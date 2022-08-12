@@ -550,7 +550,9 @@ type KeyValueType {
 
 type Marketplace {
   address: String!
+  isPaused: Boolean
   key: ID!
+  marketplaceCutPercentage: String
   name: String!
   type: MarketplaceTypeEnum!
   url: String!
@@ -812,7 +814,6 @@ type Query {
   contractInfo: ContractInfo!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  marketplaceCutPercentage: String! @deprecated(reason: "This will be removed in the next version")
   marketplaces(pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   notifications(pagination: ConnectionArgs): NotificationsResponse!

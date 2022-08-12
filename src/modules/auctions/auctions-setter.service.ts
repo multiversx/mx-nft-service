@@ -32,11 +32,15 @@ export class AuctionsSetterService {
     auctionId: number,
     identifier: string,
     marketplaceKey: string,
+    marketplaceAddress: string,
     hash: string,
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+      const auctionData = await this.nftAbiService.getAuctionQuery(
+        marketplaceAddress,
+        auctionId,
+      );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
         const savedAuction = await this.auctionServiceDb.insertAuction(
