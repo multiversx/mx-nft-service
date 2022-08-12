@@ -566,6 +566,10 @@ type MarketplaceEdge {
   node: Marketplace
 }
 
+input MarketplaceFilters {
+  marketplaceKey: String!
+}
+
 type MarketplacePageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -818,7 +822,7 @@ type Query {
   contractInfo: ContractInfo!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  marketplaces(pagination: ConnectionArgs): MarketplacesResponse!
+  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
   notifications(pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!

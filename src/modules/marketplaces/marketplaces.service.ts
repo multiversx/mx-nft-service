@@ -7,6 +7,7 @@ import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { MarketplaceFilters } from './models/Marketplace.Filter';
 
 @Injectable()
 export class MarketplacesService {
@@ -19,14 +20,24 @@ export class MarketplacesService {
   async getMarketplaces(
     limit: number = 10,
     offset: number = 0,
+    filters: MarketplaceFilters,
   ): Promise<CollectionType<Marketplace>> {
-    let allCampaigns = await this.getAllMarketplaces();
+    let allMarketplaces = await this.getAllMarketplaces();
+    if (filters?.marketplaceKey) {
+      const marketplace = allMarketplaces?.items?.find(
+        (m) => m.key === filters?.marketplaceKey,
+      );
 
-    const campaigns = allCampaigns?.items?.slice(offset, offset + limit);
+      return new CollectionType({
+        count: marketplace ? 1 : 0,
+        items: [marketplace],
+      });
+    }
+    const marketplaces = allMarketplaces?.items?.slice(offset, offset + limit);
 
     return new CollectionType({
-      count: campaigns?.length,
-      items: campaigns,
+      count: marketplaces?.length,
+      items: marketplaces,
     });
   }
 

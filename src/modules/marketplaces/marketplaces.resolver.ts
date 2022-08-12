@@ -6,6 +6,7 @@ import { MarketplacesService } from './marketplaces.service';
 import { Marketplace } from './models/Marketplace.dto';
 import { MarketplacesResponse } from './models';
 import { NftMarketplaceAbiService } from '../auctions/nft-marketplace.abi.service';
+import { MarketplaceFilters } from './models/Marketplace.Filter';
 
 @Resolver(() => Marketplace)
 export class MarketplacesResolver extends BaseResolver(Marketplace) {
@@ -18,6 +19,8 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
 
   @Query(() => MarketplacesResponse)
   async marketplaces(
+    @Args({ name: 'filters', type: () => MarketplaceFilters, nullable: true })
+    filters: MarketplaceFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -25,6 +28,7 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
     const campaigns = await this.marketplaceService.getMarketplaces(
       limit,
       offset,
+      filters,
     );
     return PageResponse.mapResponse<Marketplace>(
       campaigns?.items || [],
