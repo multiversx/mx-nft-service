@@ -61,12 +61,10 @@ export class OrdersService {
     createOrderArgs: CreateOrderArgs,
     activeOrder: OrderEntity,
   ) {
-    const notification =
-      await this.notificationsService.getNotificationByIdAndOwner(
-        createOrderArgs.auctionId,
-        createOrderArgs.ownerAddress,
-      );
-    this.notificationsService.updateNotification(notification);
+    this.notificationsService.updateNotification(
+      createOrderArgs.auctionId,
+      createOrderArgs.ownerAddress,
+    );
     await this.addNotification(createOrderArgs, activeOrder);
   }
 

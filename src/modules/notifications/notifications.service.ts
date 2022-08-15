@@ -88,33 +88,83 @@ export class NotificationsService {
   }
 
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
-    await this.notificationServiceDb.saveNotifications(notifications);
+    try {
+      await this.notificationServiceDb.saveNotifications(notifications);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to update notifications status.',
+        {
+          path: 'NotificationsService.saveNotifications',
+          exception: error?.toString(),
+        },
+      );
+    }
   }
 
   async saveNotification(notification: NotificationEntity): Promise<void> {
-    await this.publishClearNotificationEvent(
-      notification.ownerAddress,
-      notification.marketplaceKey,
-    );
-    await this.notificationServiceDb.saveNotification(notification);
+    try {
+      await this.publishClearNotificationEvent(
+        notification.ownerAddress,
+        notification.marketplaceKey,
+      );
+      await this.notificationServiceDb.saveNotification(notification);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to save notifications status.',
+        {
+          path: 'NotificationsService.saveNotification',
+          exception: error?.toString(),
+        },
+      );
+    }
   }
 
   async getNotificationByIdAndOwner(
     auctionId: number,
     ownerAddress: string,
   ): Promise<NotificationEntity> {
-    return await this.notificationServiceDb.getNotificationByIdAndOwner(
-      auctionId,
-      ownerAddress,
-    );
+    try {
+      return await this.notificationServiceDb.getNotificationByIdAndOwner(
+        auctionId,
+        ownerAddress,
+      );
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to get a notification.',
+        {
+          path: 'NotificationsService.getNotificationByIdAndOwner',
+          auctionId,
+          ownerAddress,
+          exception: error?.toString(),
+        },
+      );
+    }
   }
 
-  async updateNotification(notification: NotificationEntity) {
-    await this.publishClearNotificationEvent(
-      notification.ownerAddress,
-      notification.marketplaceKey,
-    );
-    return await this.notificationServiceDb.updateNotification(notification);
+  async updateNotification(auctionId: number, ownerAddress: string) {
+    try {
+      const notification = await this.getNotificationByIdAndOwner(
+        auctionId,
+        ownerAddress,
+      );
+      if (notification) {
+        await this.publishClearNotificationEvent(
+          notification.ownerAddress,
+          notification.marketplaceKey,
+        );
+        return await this.notificationServiceDb.updateNotification(
+          notification,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to update notifications status.',
+        {
+          path: 'NotificationsService.updateNotification',
+          exception: error?.toString(),
+        },
+      );
+    }
   }
 
   private async updateInactiveStatus(
@@ -160,7 +210,7 @@ export class NotificationsService {
     ];
   }
 
-  public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
       const asset = await this.assetByIdentifierService.getAsset(
         auction.identifier,
