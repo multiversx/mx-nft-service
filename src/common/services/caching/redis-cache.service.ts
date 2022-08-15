@@ -194,6 +194,7 @@ export class RedisCacheService {
     keys: string[],
     region: string = null,
   ): Promise<void> {
+    console.log(keys);
     if (keys?.length > 0) {
       const redisKeys = keys.map((key) => generateCacheKey(key, region));
       try {
