@@ -6,10 +6,12 @@ import { NotificationsModuleDb } from 'src/db/notifications/notifications.module
 import { CommonModule } from 'src/common.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { NotificationsCachingService } from './notifications-caching.service';
 
 @Module({
   providers: [
     NotificationsService,
+    NotificationsCachingService,
     NotificationsResolver,
     AssetByIdentifierService,
   ],
@@ -19,6 +21,10 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => OrdersModuleGraph),
   ],
-  exports: [NotificationsService, AssetByIdentifierService],
+  exports: [
+    NotificationsService,
+    AssetByIdentifierService,
+    NotificationsCachingService,
+  ],
 })
 export class NotificationsModuleGraph {}

@@ -35,6 +35,25 @@ export class NotificationsServiceDb {
       .getManyAndCount();
   }
 
+  async getNotificationsForMarketplace(
+    address: string,
+    merketplaceKey: string,
+  ): Promise<[NotificationEntity[], number]> {
+    const defaultSize = 100;
+    return await this.notificationsRepository
+      .createQueryBuilder('not')
+      .where(
+        `not.ownerAddress = :address AND not.status='active' AND not.marketplaceKey = :marketplaceKey`,
+        {
+          address: address,
+          marketplaceKey: merketplaceKey,
+        },
+      )
+      .limit(defaultSize)
+      .orderBy('id', 'DESC')
+      .getManyAndCount();
+  }
+
   async getNotificationsByAuctionIds(
     auctionIds: number[],
   ): Promise<NotificationEntity[]> {

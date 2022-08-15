@@ -352,6 +352,7 @@ export class NftEventsService {
         status: NotificationStatusEnum.Active,
         type: NotificationTypeEnum.Ended,
         name: assetName,
+        marketplaceKey: auction.marketplaceKey,
       }),
       new NotificationEntity({
         auctionId: auction.id,
@@ -360,6 +361,7 @@ export class NftEventsService {
         status: NotificationStatusEnum.Active,
         type: NotificationTypeEnum.Won,
         name: assetName,
+        marketplaceKey: auction.marketplaceKey,
       }),
     ]);
   }

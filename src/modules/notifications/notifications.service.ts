@@ -1,11 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { TimeConstants } from 'src/utils/time-utils';
 import {
   NotificationEntity,
   NotificationsServiceDb,
@@ -15,30 +10,31 @@ import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { NotificationsCachingService } from './notifications-caching.service';
 
 @Injectable()
 export class NotificationsService {
-  private redisClient: Redis.Redis;
   constructor(
     private readonly notificationServiceDb: NotificationsServiceDb,
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
     private readonly assetByIdentifierService: AssetByIdentifierService,
-    private readonly redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private readonly notificationCachingService: NotificationsCachingService,
+  ) {}
 
-  async getNotifications(address: string): Promise<[Notification[], number]> {
-    const cacheKey = this.getNotificationsCacheKey(address);
-    const getNotifications = () => this.getMappedNotifications(address);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getNotifications,
-      TimeConstants.oneDay,
+  async getNotifications(
+    address: string,
+    marketplaceKey: string = undefined,
+  ): Promise<[Notification[], number]> {
+    if (marketplaceKey) {
+      return this.notificationCachingService.getNotificationsForMarketplace(
+        address,
+        marketplaceKey,
+        () => this.getNotificationsForMarketplace(address, marketplaceKey),
+      );
+    }
+    return this.notificationCachingService.getAllNotifications(address, () =>
+      this.getMappedNotifications(address),
     );
   }
 
@@ -48,7 +44,6 @@ export class NotificationsService {
       auctions?.map((a) => a.id),
     );
 
-    this.clearCache(auctions, orders);
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }
@@ -100,6 +95,24 @@ export class NotificationsService {
     ];
   }
 
+  private async getNotificationsForMarketplace(
+    address: string,
+    marketplaceKey: string,
+  ) {
+    const [notificationsEntities, count] =
+      await this.notificationServiceDb.getNotificationsForMarketplace(
+        address,
+        marketplaceKey,
+      );
+
+    return [
+      notificationsEntities.map((notification) =>
+        Notification.fromEntity(notification),
+      ),
+      count,
+    ];
+  }
+
   public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
       const asset = await this.assetByIdentifierService.getAsset(
@@ -115,6 +128,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
           new NotificationEntity({
             auctionId: auction.id,
@@ -123,6 +137,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Won,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
         ]);
       } else {
@@ -134,6 +149,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
         ]);
       }
@@ -148,28 +164,5 @@ export class NotificationsService {
         },
       );
     }
-  }
-
-  private clearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
-    let addreses = auctions.map((a) => a.ownerAddress);
-    for (const orderGroup in orders) {
-      addreses = [...addreses, orders[orderGroup][0].ownerAddress];
-    }
-    const uniqueAddresses = [...new Set(addreses)];
-    this.redisCacheService.delMultiple(
-      this.redisClient,
-      uniqueAddresses.map((a) => this.getNotificationsCacheKey(a)),
-    );
-  }
-
-  private getNotificationsCacheKey(address: string) {
-    return generateCacheKeyFromParams('notifications', address);
-  }
-
-  public async invalidateCache(ownerAddress: string = ''): Promise<void> {
-    return this.redisCacheService.del(
-      this.redisClient,
-      this.getNotificationsCacheKey(ownerAddress),
-    );
   }
 }

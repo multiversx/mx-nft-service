@@ -24,6 +24,9 @@ export class Notification {
   @Field(() => String)
   identifier: string;
 
+  @Field(() => String)
+  marketplaceKey: string;
+
   constructor(init?: Partial<Notification>) {
     Object.assign(this, init);
   }
@@ -37,6 +40,7 @@ export class Notification {
           creationDate: DateUtils.getTimestamp(notification.creationDate),
           identifier: notification.identifier,
           auctionId: notification.auctionId,
+          marketplaceKey: notification.marketplaceKey,
         })
       : null;
   }

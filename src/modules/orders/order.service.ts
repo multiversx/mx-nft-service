@@ -104,6 +104,7 @@ export class OrdersService {
         status: NotificationStatusEnum.Active,
         identifier: auction?.identifier,
         name: assetName,
+        marketplaceKey: createOrderArgs.marketplaceKey,
       }),
     );
   }
