@@ -44,6 +44,10 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.UpdateOrder:
         await this.cacheInvalidationService.invalidateOrder(event);
         break;
+
+      case CacheEventTypeEnum.UpdateNotifications:
+        await this.cacheInvalidationService.invalidateNotifications(event);
+        break;
     }
   }
 }
