@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
+import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
 import { OrdersCachingService } from 'src/modules/orders/caching/orders-caching.service';
 import { ChangedEvent } from '../events/owner-changed.event';
 
@@ -9,6 +10,7 @@ export class CacheInvalidationEventsService {
   constructor(
     private auctionsCachingService: AuctionsCachingService,
     private ordersCachingService: OrdersCachingService,
+    private notificationsCachingService: NotificationsCachingService,
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
   ) {}
 
@@ -30,6 +32,13 @@ export class CacheInvalidationEventsService {
     await this.ordersCachingService.invalidateCache(
       parseInt(payload.id),
       payload.ownerAddress,
+    );
+  }
+
+  async invalidateNotifications(payload: ChangedEvent) {
+    this.notificationsCachingService.clearMultipleCache(
+      payload.id,
+      payload.extraInfo?.marketplaceKey,
     );
   }
 }

@@ -6,8 +6,6 @@ import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { TimeConstants } from 'src/utils/time-utils';
-import { AuctionEntity } from 'src/db/auctions';
-import { OrderEntity } from 'src/db/orders';
 
 @Injectable()
 export class NotificationsCachingService {
@@ -43,20 +41,22 @@ export class NotificationsCachingService {
     );
   }
 
-  private clearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
-    let addreses = auctions.map((a) => a.ownerAddress);
-    for (const orderGroup in orders) {
-      addreses = [...addreses, orders[orderGroup][0].ownerAddress];
-    }
-    const uniqueAddresses = [...new Set(addreses)];
-    this.redisCacheService.delMultiple(
-      this.redisClient,
-      uniqueAddresses.map((a) => this.getNotificationsCacheKey(a)),
-    );
-  }
-
   private getNotificationsCacheKey(address: string) {
     return generateCacheKeyFromParams('notifications', address);
+  }
+
+  public clearMultipleCache(addresses: string[], marketplaceKey: string) {
+    this.redisCacheService.delMultiple(
+      this.redisClient,
+      addresses.map((a) => this.getNotificationsCacheKey(a)),
+    );
+
+    this.redisCacheService.delMultiple(
+      this.redisClient,
+      addresses.map((a) =>
+        this.getNotificationsCacheKey(`${a}_${marketplaceKey}`),
+      ),
+    );
   }
 
   public async invalidateCache(ownerAddress: string = ''): Promise<void> {

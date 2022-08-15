@@ -686,6 +686,10 @@ enum NotificationTypeEnum {
   Won
 }
 
+input NotificationsFilters {
+  marketplaceKey: String!
+}
+
 type NotificationsResponse {
   edges: [NotificationEdge!]
   pageData: PageData
@@ -825,7 +829,7 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
-  notifications(pagination: ConnectionArgs): NotificationsResponse!
+  notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange: PriceRange!

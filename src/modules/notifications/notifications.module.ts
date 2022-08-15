@@ -7,6 +7,7 @@ import { CommonModule } from 'src/common.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NotificationsCachingService } from './notifications-caching.service';
+import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 
 @Module({
   providers: [
@@ -17,6 +18,7 @@ import { NotificationsCachingService } from './notifications-caching.service';
   ],
   imports: [
     ElrondCommunicationModule,
+    CacheEventsPublisherModule,
     CommonModule,
     forwardRef(() => NotificationsModuleDb),
     forwardRef(() => OrdersModuleGraph),

@@ -11,6 +11,11 @@ import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NotificationsCachingService } from './notifications-caching.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 
 @Injectable()
 export class NotificationsService {
@@ -20,6 +25,7 @@ export class NotificationsService {
     private readonly logger: Logger,
     private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly notificationCachingService: NotificationsCachingService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
   ) {}
 
   async getNotifications(
@@ -44,6 +50,7 @@ export class NotificationsService {
       auctions?.map((a) => a.id),
     );
 
+    this.triggerClearCache(auctions, orders);
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }
@@ -164,5 +171,20 @@ export class NotificationsService {
         },
       );
     }
+  }
+
+  private triggerClearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
+    let addreses = auctions.map((a) => a.ownerAddress);
+    for (const orderGroup in orders) {
+      addreses = [...addreses, orders[orderGroup][0].ownerAddress];
+    }
+    const uniqueAddresses = [...new Set(addreses)];
+    this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: uniqueAddresses,
+        type: CacheEventTypeEnum.UpdateNotifications,
+        extraInfo: { marketplaceKey: auctions[0].marketplaceKey },
+      }),
+    );
   }
 }
