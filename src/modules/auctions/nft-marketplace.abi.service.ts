@@ -119,17 +119,6 @@ export class NftMarketplaceAbiService {
     return withdraw.toPlainObject(new Address(ownerAddress));
   }
 
-  private async configureTransactionData(auctionId: number) {
-    const auction = await this.auctionsService.getAuctionById(auctionId);
-    const marketplace =
-      await this.marketplaceService.getInternalMarketplacesAddresesByKey(
-        auction.marketplaceKey,
-      );
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract(marketplace);
-    return { contract, auction };
-  }
-
   async endAuction(
     ownerAddress: string,
     auctionId: number,
@@ -227,6 +216,17 @@ export class NftMarketplaceAbiService {
         },
       );
     }
+  }
+
+  private async configureTransactionData(auctionId: number) {
+    const auction = await this.auctionsService.getAuctionById(auctionId);
+    const marketplace =
+      await this.marketplaceService.getInternalMarketplacesAddresesByKey(
+        auction.marketplaceKey,
+      );
+    const contract =
+      await this.elrondProxyService.getMarketplaceAbiSmartContract(marketplace);
+    return { contract, auction };
   }
 
   private async getCutPercentageMap(contractAddress: string): Promise<string> {

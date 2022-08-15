@@ -41,10 +41,6 @@ export class NotificationsCachingService {
     );
   }
 
-  private getNotificationsCacheKey(address: string) {
-    return generateCacheKeyFromParams('notifications', address);
-  }
-
   public clearMultipleCache(addresses: string[], marketplaceKey: string) {
     this.redisCacheService.delMultiple(
       this.redisClient,
@@ -74,5 +70,9 @@ export class NotificationsCachingService {
         this.getNotificationsCacheKey(`${ownerAddress}_${marketplaceKey}`),
       ),
     ]);
+  }
+
+  private getNotificationsCacheKey(key: string) {
+    return generateCacheKeyFromParams('notifications', key);
   }
 }
