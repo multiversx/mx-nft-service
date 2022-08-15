@@ -174,7 +174,7 @@ export class NotificationsService {
   }
 
   private triggerClearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
-    if (!auctions && !orders) return;
+    if (!auctions?.length && !orders?.length) return;
     let addreses = auctions.map((a) => a.ownerAddress);
     for (const orderGroup in orders) {
       addreses = [...addreses, orders[orderGroup][0].ownerAddress];
