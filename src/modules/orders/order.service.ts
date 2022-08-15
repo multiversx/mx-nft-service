@@ -2,45 +2,30 @@ import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
 import { Logger } from 'winston';
-import { cacheConfig } from 'src/config';
-import { AccountsStatsService } from '../account-stats/accounts-stats.service';
 import { QueryRequest } from '../common/filters/QueryRequest';
-import { AvailableTokensForAuctionRedisHandler } from '../auctions/loaders/available-tokens-auctions.redis-handler';
-import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
-import { TimeConstants } from 'src/utils/time-utils';
-import {
-  NotificationEntity,
-  NotificationsServiceDb,
-} from 'src/db/notifications';
+import { NotificationEntity } from 'src/db/notifications';
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
 import { NotificationStatusEnum } from '../notifications/models';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { OrdersRedisHandler } from './loaders/orders.redis-handler';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 import { OrdersCachingService } from './caching/orders-caching.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
-  private redisClient: Redis.Redis;
   constructor(
     private orderServiceDb: OrdersServiceDb,
-    private lastOrderRedisHandler: LastOrderRedisHandler,
-    private ordersRedisHandler: OrdersRedisHandler,
     private auctionsService: AuctionsServiceDb,
-    private auctionAvailableTokens: AvailableTokensForAuctionRedisHandler,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private ordersCachingService: OrdersCachingService,
-    private notificationsService: NotificationsServiceDb,
+    private notificationsService: NotificationsService,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly rabbitPublisherService: CacheEventsPublisherService,
   ) {}
@@ -76,12 +61,12 @@ export class OrdersService {
     createOrderArgs: CreateOrderArgs,
     activeOrder: OrderEntity,
   ) {
-    const notifications =
+    const notification =
       await this.notificationsService.getNotificationByIdAndOwner(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
-    this.notificationsService.updateNotification(notifications);
+    this.notificationsService.updateNotification(notification);
     await this.addNotification(createOrderArgs, activeOrder);
   }
 

@@ -59,10 +59,20 @@ export class NotificationsCachingService {
     );
   }
 
-  public async invalidateCache(ownerAddress: string = ''): Promise<void> {
-    return this.redisCacheService.del(
-      this.redisClient,
-      this.getNotificationsCacheKey(ownerAddress),
-    );
+  public async invalidateCache(
+    ownerAddress: string = '',
+    marketplaceKey: string = '',
+  ): Promise<void> {
+    await Promise.all([
+      this.redisCacheService.del(
+        this.redisClient,
+        this.getNotificationsCacheKey(ownerAddress),
+      ),
+
+      this.redisCacheService.del(
+        this.redisClient,
+        this.getNotificationsCacheKey(`${ownerAddress}_${marketplaceKey}`),
+      ),
+    ]);
   }
 }

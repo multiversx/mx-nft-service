@@ -15,4 +15,5 @@ export enum CacheEventTypeEnum {
   UpdateAuction,
   UpdateOrder,
   UpdateNotifications,
+  UpdateOneNotification,
 }

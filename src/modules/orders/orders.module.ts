@@ -13,10 +13,10 @@ import { LastOrdersProvider } from './loaders/last-order.loader';
 import { OrdersRedisHandler } from './loaders/orders.redis-handler';
 import { OrdersProvider } from './loaders/orders.loader';
 import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
-import { NotificationsModuleDb } from 'src/db/notifications/notifications.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { OrdersCachingModule } from './caching/orders-caching.module';
+import { NotificationsModuleGraph } from '../notifications/notifications.module';
 
 @Module({
   providers: [
@@ -38,7 +38,7 @@ import { OrdersCachingModule } from './caching/orders-caching.module';
     OrdersCachingModule,
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => AuctionsModuleDb),
-    forwardRef(() => NotificationsModuleDb),
+    forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
     CacheEventsPublisherModule,
   ],

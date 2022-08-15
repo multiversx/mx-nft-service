@@ -41,4 +41,11 @@ export class CacheInvalidationEventsService {
       payload.extraInfo?.marketplaceKey,
     );
   }
+
+  async invalidateOneNotification(payload: ChangedEvent) {
+    this.notificationsCachingService.invalidateCache(
+      payload.id,
+      payload.extraInfo?.marketplaceKey,
+    );
+  }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
 import {
@@ -21,6 +21,7 @@ import {
 export class NotificationsService {
   constructor(
     private readonly notificationServiceDb: NotificationsServiceDb,
+    @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
     private readonly assetByIdentifierService: AssetByIdentifierService,
@@ -70,9 +71,9 @@ export class NotificationsService {
             modifiedDate: new Date(new Date().toUTCString()),
           };
         });
-        await this.notificationServiceDb.saveNotifications(
-          inactiveNotifications,
-        );
+        if (inactiveNotifications?.length > 0) {
+          await this.updateInactiveStatus(inactiveNotifications);
+        }
       }
     } catch (error) {
       this.logger.error(
@@ -88,6 +89,45 @@ export class NotificationsService {
 
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
     await this.notificationServiceDb.saveNotifications(notifications);
+  }
+
+  async saveNotification(notification: NotificationEntity): Promise<void> {
+    await this.publishClearNotificationEvent(
+      notification.ownerAddress,
+      notification.marketplaceKey,
+    );
+    await this.notificationServiceDb.saveNotification(notification);
+  }
+
+  async getNotificationByIdAndOwner(
+    auctionId: number,
+    ownerAddress: string,
+  ): Promise<NotificationEntity> {
+    return await this.notificationServiceDb.getNotificationByIdAndOwner(
+      auctionId,
+      ownerAddress,
+    );
+  }
+
+  async updateNotification(notification: NotificationEntity) {
+    await this.publishClearNotificationEvent(
+      notification.ownerAddress,
+      notification.marketplaceKey,
+    );
+    return await this.notificationServiceDb.updateNotification(notification);
+  }
+
+  private async updateInactiveStatus(
+    inactiveNotifications: NotificationEntity[],
+  ) {
+    this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: inactiveNotifications?.map((n) => n.ownerAddress),
+        type: CacheEventTypeEnum.UpdateNotifications,
+        extraInfo: { marketplaceKey: inactiveNotifications[0].marketplaceKey },
+      }),
+    );
+    await this.notificationServiceDb.saveNotifications(inactiveNotifications);
   }
 
   private async getMappedNotifications(address: string) {
@@ -185,6 +225,19 @@ export class NotificationsService {
         id: uniqueAddresses,
         type: CacheEventTypeEnum.UpdateNotifications,
         extraInfo: { marketplaceKey: auctions[0].marketplaceKey },
+      }),
+    );
+  }
+
+  private async publishClearNotificationEvent(
+    id: string,
+    marketplaceKey: string,
+  ) {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: id,
+        type: CacheEventTypeEnum.UpdateOneNotification,
+        extraInfo: { marketplaceKey: marketplaceKey },
       }),
     );
   }
