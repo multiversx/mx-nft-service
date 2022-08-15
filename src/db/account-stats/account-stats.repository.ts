@@ -54,8 +54,12 @@ export class AccountStatsRepository {
         .createQueryBuilder<AuctionEntity>(AuctionEntity, 'a')
         .innerJoin('orders', 'o', 'o.auctionId=a.id')
         .where(
-          `a.status = '${AuctionStatusEnum.Claimable}' AND a.marketplaceKey = '${marketplaceKey}'  AND a.type <> 'SftOnePerPayment' AND
-      ((o.ownerAddress = '${address}' AND o.status='active'))`,
+          `a.status = '${AuctionStatusEnum.Claimable}' AND a.marketplaceKey = :marketplaceKey AND a.type <> 'SftOnePerPayment' 
+          AND ((o.ownerAddress = :ownerAddress AND o.status='active'))`,
+          {
+            marketplaceKey: marketplaceKey,
+            ownerAddress: address,
+          },
         )
         .groupBy('a.id')
         .getCount();
@@ -65,7 +69,10 @@ export class AccountStatsRepository {
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
         `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND
-      ((o.ownerAddress = '${address}' AND o.status='active'))`,
+      ((o.ownerAddress = :ownerAddress AND o.status='active'))`,
+        {
+          ownerAddress: address,
+        },
       )
       .groupBy('a.id')
       .getCount();
