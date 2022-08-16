@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
@@ -7,6 +7,7 @@ import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { Marketplace } from './models';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class MarketplacesCachingService {
@@ -24,6 +25,30 @@ export class MarketplacesCachingService {
       this.redisClient,
       CacheInfo.AllMarketplaces.key,
       () => getMarketplaces(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getMarketplaceByAddressAndCollection(
+    getMarketplaceByAddress: () => any,
+    key: string,
+  ): Promise<Marketplace> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      generateCacheKeyFromParams('marketplace_address_collection', key),
+      () => getMarketplaceByAddress(),
+      TimeConstants.oneHour,
+    );
+  }
+
+  public async getMarketplaceByCollection(
+    getMarketplaceByCollection: () => any,
+    key: string,
+  ): Promise<Marketplace> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      generateCacheKeyFromParams('marketplace_collection', key),
+      () => getMarketplaceByCollection(),
       TimeConstants.oneHour,
     );
   }

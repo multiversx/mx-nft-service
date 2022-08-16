@@ -1,19 +1,26 @@
-import { Resolver, Query, Args } from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { MarketplacesService } from './marketplaces.service';
 import { Marketplace } from './models/Marketplace.dto';
 import { MarketplacesResponse } from './models';
+import { NftMarketplaceAbiService } from '../auctions/nft-marketplace.abi.service';
+import { MarketplaceFilters } from './models/Marketplace.Filter';
 
 @Resolver(() => Marketplace)
 export class MarketplacesResolver extends BaseResolver(Marketplace) {
-  constructor(private marketplaceService: MarketplacesService) {
+  constructor(
+    private marketplaceService: MarketplacesService,
+    private nftAbiService: NftMarketplaceAbiService,
+  ) {
     super();
   }
 
   @Query(() => MarketplacesResponse)
   async marketplaces(
+    @Args({ name: 'filters', type: () => MarketplaceFilters, nullable: true })
+    filters: MarketplaceFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -21,6 +28,7 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
     const campaigns = await this.marketplaceService.getMarketplaces(
       limit,
       offset,
+      filters,
     );
     return PageResponse.mapResponse<Marketplace>(
       campaigns?.items || [],
@@ -29,5 +37,18 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
       offset,
       limit,
     );
+  }
+
+  @ResolveField(() => String)
+  async marketplaceCutPercentage(@Parent() contractInfo: Marketplace) {
+    const { address } = contractInfo;
+
+    return address ? await this.nftAbiService.getCutPercentage(address) : null;
+  }
+
+  @ResolveField(() => Boolean)
+  async isPaused(@Parent() contractInfo: Marketplace) {
+    const { address } = contractInfo;
+    return address ? await this.nftAbiService.getIsPaused(address) : null;
   }
 }

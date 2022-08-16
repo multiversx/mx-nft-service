@@ -36,15 +36,27 @@ import {
   BuySftRequest,
   CreateAuctionRequest,
 } from './models/requests';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
+import { AuctionsGetterService } from './auctions-getter.service';
+import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 
 @Injectable()
 export class NftMarketplaceAbiService {
   private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
+  private readonly abiPath: string = './src/abis/esdt-nft-marketplace.abi.json';
+  private readonly abiInterface: string = 'EsdtNftMarketplace';
+  private readonly contract = new ContractLoader(
+    this.abiPath,
+    this.abiInterface,
+  );
+
   constructor(
     private elrondProxyService: ElrondProxyService,
+    private auctionsService: AuctionsGetterService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private marketplaceService: MarketplacesService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -58,15 +70,19 @@ export class NftMarketplaceAbiService {
     args: CreateAuctionRequest,
   ): Promise<TransactionNode> {
     const contract = getSmartContract(ownerAddress);
-
-    let createAuctionTx = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateAuctionArgs(args),
-      gasLimit: gas.startAuction,
-      chainID: elrondConfig.chainID,
-    });
-    return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    const { collection } = getCollectionAndNonceFromIdentifier(args.identifier);
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(collection);
+    if (marketplace) {
+      let createAuctionTx = contract.call({
+        func: new ContractFunction('ESDTNFTTransfer'),
+        value: TokenPayment.egldFromAmount(0),
+        args: this.getCreateAuctionArgs(args, marketplace.address),
+        gasLimit: gas.startAuction,
+        chainID: elrondConfig.chainID,
+      });
+      return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    }
   }
 
   async bid(
@@ -76,13 +92,14 @@ export class NftMarketplaceAbiService {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
     );
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
     let bid = contract.call({
       func: new ContractFunction('bid'),
       value: TokenPayment.egldFromBigInteger(request.price),
       args: [
-        new U64Value(new BigNumber(request.auctionId)),
+        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
       ],
@@ -96,13 +113,14 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const { contract, auction } = await this.configureTransactionData(
+      auctionId,
+    );
 
     let withdraw = contract.call({
       func: new ContractFunction('withdraw'),
       value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auctionId))],
+      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.withdraw,
       chainID: elrondConfig.chainID,
     });
@@ -113,12 +131,14 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const { contract, auction } = await this.configureTransactionData(
+      auctionId,
+    );
+
     let endAuction = contract.call({
       func: new ContractFunction('endAuction'),
       value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auctionId))],
+      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.endAuction,
       chainID: elrondConfig.chainID,
     });
@@ -130,22 +150,26 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
 
     let buySftAfterEndAuction = contract.call({
       func: new ContractFunction('buySft'),
       value: TokenPayment.egldFromBigInteger(request.price),
-      args: this.getBuySftArguments(request),
+      args: this.getBuySftArguments(request, auction.marketplaceAuctionId),
       gasLimit: gas.buySft,
       chainID: elrondConfig.chainID,
     });
     return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
   }
 
-  async getAuctionQuery(auctionId: number): Promise<AuctionAbi> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+  async getAuctionQuery(
+    contractAddress: string,
+    auctionId: number,
+  ): Promise<AuctionAbi> {
+    const contract = await this.contract.getContract(contractAddress);
+
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
@@ -158,13 +182,16 @@ export class NftMarketplaceAbiService {
     return auction;
   }
 
-  async getCutPercentage(): Promise<string> {
+  async getCutPercentage(contractAddress: string): Promise<string> {
     try {
-      const cacheKey = generateCacheKeyFromParams('marketplaceCutPercentage');
+      const cacheKey = generateCacheKeyFromParams(
+        'marketplaceCutPercentage',
+        contractAddress,
+      );
       return await this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        () => this.getCutPercentageMap(),
+        () => this.getCutPercentageMap(contractAddress),
         TimeConstants.oneWeek,
       );
     } catch (err) {
@@ -178,12 +205,12 @@ export class NftMarketplaceAbiService {
     }
   }
 
-  async getIsPaused(): Promise<boolean> {
+  async getIsPaused(contractAddress: string): Promise<boolean> {
     try {
       return await this.redisCacheService.getOrSet(
         this.redisClient,
-        generateCacheKeyFromParams('isPaused'),
-        () => this.getIsPausedAbi(),
+        generateCacheKeyFromParams('isPaused', contractAddress),
+        () => this.getIsPausedAbi(contractAddress),
         TimeConstants.oneWeek,
       );
     } catch (err) {
@@ -197,9 +224,19 @@ export class NftMarketplaceAbiService {
     }
   }
 
-  private async getCutPercentageMap(): Promise<string> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+  private async configureTransactionData(auctionId: number) {
+    const auction = await this.auctionsService.getAuctionById(auctionId);
+    const marketplaceAddress =
+      await this.marketplaceService.getInternalMarketplacesAddresesByKey(
+        auction.marketplaceKey,
+      );
+
+    const contract = await this.contract.getContract(marketplaceAddress);
+    return { contract, auction };
+  }
+
+  private async getCutPercentageMap(contractAddress: string): Promise<string> {
+    const contract = await this.contract.getContract(contractAddress);
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getMarketplaceCutPercentage()
     );
@@ -207,20 +244,22 @@ export class NftMarketplaceAbiService {
     return response.firstValue.valueOf().toFixed();
   }
 
-  private async getIsPausedAbi(): Promise<boolean> {
-    const contract =
-      await this.elrondProxyService.getMarketplaceAbiSmartContract();
+  private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
+    const contract = await this.contract.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf();
   }
 
-  private getBuySftArguments(args: BuySftActionArgs): TypedValue[] {
+  private getBuySftArguments(
+    args: BuySftActionArgs,
+    auctionId: number,
+  ): TypedValue[] {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
     let returnArgs: TypedValue[] = [
-      new U64Value(new BigNumber(args.auctionId)),
+      new U64Value(new BigNumber(auctionId)),
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
     ];
@@ -237,7 +276,10 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private getCreateAuctionArgs(args: CreateAuctionRequest): TypedValue[] {
+  private getCreateAuctionArgs(
+    args: CreateAuctionRequest,
+    address: string,
+  ): TypedValue[] {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       args.identifier,
     );
@@ -245,7 +287,7 @@ export class NftMarketplaceAbiService {
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
       new U64Value(new BigNumber(args.quantity)),
-      new AddressValue(new Address(elrondConfig.nftMarketplaceAddress)),
+      new AddressValue(new Address(address)),
       BytesValue.fromUTF8('auctionToken'),
       new BigUIntValue(new BigNumber(args.minBid)),
       new BigUIntValue(new BigNumber(args.maxBid || 0)),

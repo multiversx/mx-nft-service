@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { MarketplaceEntity } from 'src/db/marketplaces';
+import { MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
 export class Marketplace {
   @Field(() => ID)
@@ -14,6 +15,15 @@ export class Marketplace {
   @Field(() => String)
   url: string;
 
+  @Field(() => MarketplaceTypeEnum)
+  type: string;
+
+  @Field({ nullable: true })
+  marketplaceCutPercentage: string;
+
+  @Field({ nullable: true })
+  isPaused: boolean;
+
   constructor(init?: Partial<Marketplace>) {
     Object.assign(this, init);
   }
@@ -25,6 +35,7 @@ export class Marketplace {
           name: entity.name,
           url: identifier ? `${entity.url}${identifier}` : entity.url,
           key: entity.key,
+          type: entity.type,
         })
       : null;
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
 import { NftEventEnum } from 'src/modules/assets/models';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
@@ -10,6 +10,7 @@ export class NftEventsConsumer {
   constructor(
     private readonly nftTransactionsService: NftEventsService,
     private readonly minterEventsService: MinterEventsService,
+    private readonly marketplaceService: MarketplacesService,
   ) {}
 
   @CompetingRabbitConsumer({
@@ -20,6 +21,8 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events) {
+      const marketplaces =
+        await this.marketplaceService.getInternalMarketplacesAddreses();
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
@@ -34,8 +37,7 @@ export class NftEventsConsumer {
       );
       await this.nftTransactionsService.handleNftAuctionEvents(
         nftAuctionEvents?.events?.filter(
-          (e: { address: any }) =>
-            e.address === elrondConfig.nftMarketplaceAddress,
+          (e: { address: any }) => marketplaces.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
       );

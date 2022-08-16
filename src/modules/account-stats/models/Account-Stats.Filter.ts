@@ -9,6 +9,8 @@ export class AccountStatsFilter {
   address: string;
   @Field(() => Boolean, { nullable: true })
   isOwner: boolean;
+  @Field(() => String, { nullable: true })
+  marketplaceKey: string;
   constructor(init?: Partial<AccountStatsFilter>) {
     Object.assign(this, init);
   }

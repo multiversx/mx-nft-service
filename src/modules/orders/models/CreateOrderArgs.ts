@@ -11,6 +11,7 @@ export class CreateOrderArgs {
   blockHash: string;
   priceNonce: number;
   auctionId: number;
+  marketplaceKey: string;
 
   constructor(init?: Partial<CreateOrderArgs>) {
     Object.assign(this, init);
@@ -34,6 +35,7 @@ export class CreateOrderArgs {
       boughtTokensNo: args.boughtTokens,
       blockHash: args.blockHash,
       status: args.status,
+      marketplaceKey: args.marketplaceKey,
     });
   }
 }

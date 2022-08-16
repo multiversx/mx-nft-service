@@ -4,13 +4,20 @@ import {
   AuctionAbi,
 } from 'src/modules/auctions/models';
 import denominate, { nominateVal } from 'src/utils/formatters';
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';
 import { TagEntity } from './tags.entity';
 
 @Entity('auctions')
+@Unique('AuctionEntity_UQ_Marketplace', [
+  'marketplaceAuctionId',
+  'marketplaceKey',
+])
 export class AuctionEntity extends BaseEntity {
+  @Column()
+  marketplaceAuctionId: number;
+
   @Column({ length: 20 })
   collection: string;
 
@@ -91,7 +98,7 @@ export class AuctionEntity extends BaseEntity {
   ) {
     return auction
       ? new AuctionEntity({
-          id: auctionId,
+          marketplaceAuctionId: auctionId,
           collection: auction.auctioned_tokens.token_identifier
             .valueOf()
             .toString(),

@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AccountsStatsService } from 'src/modules/account-stats/accounts-stats.service';
-import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
-import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
-import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
-import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -18,7 +13,6 @@ import {
   Operator,
 } from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
-import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
@@ -35,6 +29,7 @@ import {
   getAuctionsForIdentifierSortByPriceCount,
   getAuctionsOrderByNoBidsQuery,
   getAvailableTokensbyAuctionId,
+  getAvailableTokensbyAuctionIdForMarketplace,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -343,9 +338,21 @@ export class AuctionsServiceDb {
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
-    if (id || id === 0) {
+    if (id !== undefined) {
       return await this.auctionsRepository.findOne({
         where: [{ id: id }],
+      });
+    }
+    return null;
+  }
+
+  async getAuctionByMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    if (id !== undefined) {
+      return await this.auctionsRepository.findOne({
+        where: [{ marketplaceAuctionId: id, marketplaceKey: marketplaceKey }],
       });
     }
     return null;
@@ -354,6 +361,15 @@ export class AuctionsServiceDb {
   async getAvailableTokens(id: number): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionId(id),
+    );
+  }
+
+  async getAvailableTokensForSpecificMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
     );
   }
 
@@ -465,6 +481,26 @@ export class AuctionsServiceDb {
     hash: string,
   ): Promise<AuctionEntity> {
     let auction = await this.getAuction(auctionId);
+
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
+    if (auction) {
+      auction.status = status;
+      auction.blockHash = hash;
+      return await this.auctionsRepository.save(auction);
+    }
+    return null;
+  }
+
+  async updateAuctionByMarketplace(
+    auctionId: number,
+    marketplaceKey: string,
+    status: AuctionStatusEnum,
+    hash: string,
+  ): Promise<AuctionEntity> {
+    let auction = await this.getAuctionByMarketplace(auctionId, marketplaceKey);
 
     await this.triggerCacheInvalidation(
       auction.identifier,

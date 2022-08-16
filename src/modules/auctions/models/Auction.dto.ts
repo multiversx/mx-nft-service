@@ -76,6 +76,9 @@ export class Auction {
   @Field(() => OrdersResponse, { nullable: true })
   orders: OrdersResponse;
 
+  @Field(() => String)
+  marketplaceKey: string;
+
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
   }
@@ -116,6 +119,7 @@ export class Auction {
           }),
           tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
+          marketplaceKey: auction.marketplaceKey,
         });
   }
 }
