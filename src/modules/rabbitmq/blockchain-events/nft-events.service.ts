@@ -9,7 +9,11 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import { AuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
+import {
+  AuctionEventEnum,
+  ExternalAuctionEventEnum,
+  NftEventEnum,
+} from 'src/modules/assets/models';
 import {
   AuctionsSetterService,
   AuctionsGetterService,
@@ -242,6 +246,229 @@ export class NftEventsService {
           const auctionTokenMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               topicsAuctionToken.collection,
+              auctionToken.getAddress(),
+            );
+          const startAuction = await this.auctionsService.saveAuction(
+            parseInt(topicsAuctionToken.auctionId, 16),
+            startAuctionIdentifier,
+            auctionTokenMarketplace.key,
+            auctionTokenMarketplace.address,
+            hash,
+          );
+          if (startAuction) {
+            const nftData = await this.assetByIdentifierService.getAsset(
+              startAuctionIdentifier,
+            );
+            await this.accountFeedService.addFeed(
+              new Feed({
+                actor: topicsAuctionToken.originalOwner,
+                event: EventEnum.startAuction,
+                reference: startAuctionIdentifier,
+                extraInfo: {
+                  auctionId: startAuction.id,
+                  nftName: nftData?.name,
+                  verified: nftData?.verified ? true : false,
+                  minBid: startAuction.minBid,
+                  maxBid: startAuction.maxBid,
+                  marketplaceKey: auctionTokenMarketplace.key,
+                },
+              }),
+            );
+          }
+          break;
+      }
+    }
+  }
+
+  public async handleExternalAuctionEvents(
+    externalAuctionEvents: any[],
+    hash: string,
+  ) {
+    console.log({ externalAuctionEvents });
+    for (let event of externalAuctionEvents) {
+      switch (event.identifier) {
+        // case ExternalAuctionEventEnum.BidEvent:
+        //   const bidEvent = new BidEvent(event);
+        //   const topics = bidEvent.getTopics();
+        //   const bidMarketplace: Marketplace =
+        //     await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+        //       topics.collection,
+        //       bidEvent.getAddress(),
+        //     );
+        //   const auction =
+        //     await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+        //       parseInt(topics.auctionId, 16),
+        //       bidMarketplace.key,
+        //     );
+        //   const order = await this.ordersService.createOrder(
+        //     new CreateOrderArgs({
+        //       ownerAddress: topics.currentWinner,
+        //       auctionId: auction.id,
+        //       priceToken: 'EGLD',
+        //       priceAmount: topics.currentBid,
+        //       priceNonce: 0,
+        //       blockHash: hash,
+        //       status: OrderStatusEnum.Active,
+        //       marketplaceKey: bidMarketplace.key,
+        //     }),
+        //   );
+
+        //   const bidNftData = await this.assetByIdentifierService.getAsset(
+        //     auction.identifier,
+        //   );
+        //   await this.accountFeedService.addFeed(
+        //     new Feed({
+        //       actor: topics.currentWinner,
+        //       event: EventEnum.bid,
+        //       reference: auction?.identifier,
+        //       extraInfo: {
+        //         orderId: order.id,
+        //         nftName: bidNftData?.name,
+        //         verified: bidNftData?.verified ? true : false,
+        //         price: topics.currentBid,
+        //         auctionId: auction.id,
+        //       },
+        //     }),
+        //   );
+        //   if (auction.maxBidDenominated === order.priceAmountDenominated) {
+        //     this.notificationsService.updateNotificationStatus([auction?.id]);
+        //     this.addNotifications(auction, order);
+        //     this.auctionsService.updateAuction(
+        //       auction.id,
+        //       AuctionStatusEnum.Claimable,
+        //       hash,
+        //       AuctionStatusEnum.Claimable,
+        //     );
+        //   }
+        //   break;
+        // case AuctionEventEnum.BuySftEvent:
+        //   const buySftEvent = new BuySftEvent(event);
+        //   const buySftTopics = buySftEvent.getTopics();
+        //   const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
+        //   const buyMarketplace: Marketplace =
+        //     await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+        //       buySftTopics.collection,
+        //       buySftEvent.getAddress(),
+        //     );
+        //   const result = await this.auctionsGetterService.getAvailableTokens(
+        //     parseInt(buySftTopics.auctionId, 16),
+        //     buyMarketplace.key,
+        //   );
+        //   const totalRemaining = result
+        //     ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
+        //     : 0;
+        //   if (totalRemaining === 0) {
+        //     this.auctionsService.updateAuctionByMarketplaceKey(
+        //       parseInt(buySftTopics.auctionId, 16),
+        //       buyMarketplace.key,
+        //       AuctionStatusEnum.Ended,
+        //       hash,
+        //       AuctionStatusEnum.Ended,
+        //     );
+        //   }
+        //   const orderSft = await this.ordersService.createOrderForSft(
+        //     new CreateOrderArgs({
+        //       ownerAddress: buySftTopics.currentWinner,
+        //       auctionId: parseInt(buySftTopics.auctionId, 16),
+        //       priceToken: 'EGLD',
+        //       priceAmount: buySftTopics.bid,
+        //       priceNonce: 0,
+        //       blockHash: hash,
+        //       status: OrderStatusEnum.Bought,
+        //       boughtTokens: buySftTopics.boughtTokens,
+        //       marketplaceKey: buyMarketplace.key,
+        //     }),
+        //   );
+        //   const buySftNftData = await this.assetByIdentifierService.getAsset(
+        //     identifier,
+        //   );
+        //   await this.accountFeedService.addFeed(
+        //     new Feed({
+        //       actor: buySftTopics.currentWinner,
+        //       event: EventEnum.buy,
+        //       reference: identifier,
+        //       extraInfo: {
+        //         orderId: orderSft.id,
+        //         nftName: buySftNftData?.name,
+        //         verified: buySftNftData?.verified ? true : false,
+        //         price: buySftTopics.bid,
+        //         auctionId: parseInt(buySftTopics.auctionId, 16),
+        //         boughtTokens: buySftTopics.boughtTokens,
+        //         marketplaceKey: buyMarketplace.key,
+        //       },
+        //     }),
+        //   );
+        //   break;
+        case AuctionEventEnum.WithdrawEvent:
+          const withdraw = new WithdrawEvent(event);
+          const topicsWithdraw = withdraw.getTopics();
+          const withdrawMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsWithdraw.collection,
+              withdraw.getAddress(),
+            );
+          const withdrawAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topicsWithdraw.auctionId, 16),
+              withdrawMarketplace.key,
+            );
+
+          this.auctionsService.updateAuction(
+            withdrawAuction.id,
+            AuctionStatusEnum.Closed,
+            hash,
+            AuctionEventEnum.WithdrawEvent,
+          );
+          break;
+        case AuctionEventEnum.EndAuctionEvent:
+          const endAuctionEvent = new EndAuctionEvent(event);
+          const topicsEndAuction = endAuctionEvent.getTopics();
+          const endMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsEndAuction.collection,
+              endAuctionEvent.getAddress(),
+            );
+          const endAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topicsEndAuction.auctionId, 16),
+              endMarketplace.key,
+            );
+
+          const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
+          this.auctionsService.updateAuction(
+            endAuction.id,
+            AuctionStatusEnum.Ended,
+            hash,
+            AuctionEventEnum.EndAuctionEvent,
+          );
+          this.notificationsService.updateNotificationStatus([
+            parseInt(topicsEndAuction.auctionId, 16),
+          ]);
+          this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
+          const endAuctionNftData =
+            await this.assetByIdentifierService.getAsset(endAuctionIdentifier);
+          await this.accountFeedService.addFeed(
+            new Feed({
+              actor: topicsEndAuction.currentWinner,
+              event: EventEnum.won,
+              reference: endAuctionIdentifier,
+              extraInfo: {
+                auctionId: endAuction.id,
+                nftName: endAuctionNftData?.name,
+                verified: endAuctionNftData?.verified ? true : false,
+                price: topicsEndAuction.currentBid,
+                marketplaceKey: endMarketplace.key,
+              },
+            }),
+          );
+
+          break;
+        case ExternalAuctionEventEnum.Listing:
+          const auctionToken = new AuctionTokenEvent(event);
+          const topicsAuctionToken = auctionToken.getTopics();
+          const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
+          const auctionTokenMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
               auctionToken.getAddress(),
             );
           const startAuction = await this.auctionsService.saveAuction(

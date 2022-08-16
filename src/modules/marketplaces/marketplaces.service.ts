@@ -51,6 +51,16 @@ export class MarketplacesService {
     return internalMarketplaces.map((m) => m.address);
   }
 
+  async getExternalMarketplacesAddreses(): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const externalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.External,
+    );
+
+    return externalMarketplaces.map((m) => m.address);
+  }
+
   async getInternalMarketplacesAddresesByKey(key: string): Promise<string> {
     let allMarketplaces = await this.getAllMarketplaces();
 
@@ -106,6 +116,12 @@ export class MarketplacesService {
     return marketplace?.length > 0
       ? Marketplace.fromEntity(marketplace[0])
       : null;
+  }
+
+  async getMarketplaceByAddress(address: string): Promise<Marketplace> {
+    let marketplace: MarketplaceEntity =
+      await this.marketplacesRepository.getMarketplaceByAddress(address);
+    return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 
   async getMarketplaceByCollectionFromDb(

@@ -21,8 +21,11 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events) {
-      const marketplaces =
+      const internalMarketplaces =
         await this.marketplaceService.getInternalMarketplacesAddreses();
+
+      const externalMarketplaces =
+        await this.marketplaceService.getExternalMarketplacesAddreses();
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
@@ -37,7 +40,16 @@ export class NftEventsConsumer {
       );
       await this.nftTransactionsService.handleNftAuctionEvents(
         nftAuctionEvents?.events?.filter(
-          (e: { address: any }) => marketplaces.includes(e.address) === true,
+          (e: { address: any }) =>
+            internalMarketplaces.includes(e.address) === true,
+        ),
+        nftAuctionEvents.hash,
+      );
+
+      await this.nftTransactionsService.handleExternalAuctionEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { address: any }) =>
+            externalMarketplaces.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
       );

@@ -6,6 +6,11 @@ export enum AuctionEventEnum {
   WithdrawEvent = 'withdraw',
 }
 
+export enum ExternalAuctionEventEnum {
+  Listing = 'listing',
+  WithdrawEvent = 'withdraw',
+}
+
 export enum NftEventEnum {
   ESDTNFTAddQuantity = 'ESDTNFTAddQuantity',
   ESDTNFTTransfer = 'ESDTNFTTransfer',
