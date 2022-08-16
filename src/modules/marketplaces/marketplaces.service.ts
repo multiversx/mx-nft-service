@@ -65,16 +65,16 @@ export class MarketplacesService {
     collection: string,
     address: string,
   ): Promise<Marketplace> {
-    return await this.cacheService.getAllMarketplacesByAddressAndCollection(
+    return await this.cacheService.getMarketplaceByAddressAndCollection(
       () =>
-        this.getMarketplacesByAddressAndCollectionFromDb(collection, address),
+        this.getMarketplaceByAddressAndCollectionFromDb(collection, address),
       `${collection}_${address}`,
     );
   }
 
   async getMarketplaceByCollection(collection: string): Promise<Marketplace> {
-    return await this.cacheService.getMarketplacesByCollection(
-      () => this.getMarketplacesByCollectionFromDb(collection),
+    return await this.cacheService.getMarketplaceByCollection(
+      () => this.getMarketplaceByCollectionFromDb(collection),
       collection,
     );
   }
@@ -94,7 +94,7 @@ export class MarketplacesService {
     });
   }
 
-  async getMarketplacesByAddressAndCollectionFromDb(
+  async getMarketplaceByAddressAndCollectionFromDb(
     collection: string,
     address: string,
   ): Promise<Marketplace> {
@@ -108,7 +108,7 @@ export class MarketplacesService {
       : null;
   }
 
-  async getMarketplacesByCollectionFromDb(
+  async getMarketplaceByCollectionFromDb(
     collection: string,
   ): Promise<Marketplace> {
     let marketplace: MarketplaceEntity[] =

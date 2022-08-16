@@ -161,7 +161,10 @@ export class AuctionsGetterService {
     id: number,
     marketplaceKey: string,
   ): Promise<number> {
-    return await this.auctionServiceDb.getAvailableTokens(id);
+    return await this.auctionServiceDb.getAvailableTokensForSpecificMarketplace(
+      id,
+      marketplaceKey,
+    );
   }
 
   async getMinMaxPrice(): Promise<{ minBid: string; maxBid: string }> {

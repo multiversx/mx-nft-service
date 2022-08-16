@@ -101,7 +101,7 @@ export class AuctionsSetterService {
     status: AuctionStatusEnum,
     hash: string,
     auctionEvent: string,
-  ): Promise<Auction | any> {
+  ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
       return await this.auctionServiceDb.updateAuction(id, status, hash);
@@ -126,7 +126,7 @@ export class AuctionsSetterService {
     status: AuctionStatusEnum,
     hash: string,
     auctionEvent: string,
-  ): Promise<Auction | any> {
+  ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
       return await this.auctionServiceDb.updateAuctionByMarketplace(

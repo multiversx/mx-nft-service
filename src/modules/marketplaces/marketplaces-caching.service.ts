@@ -29,26 +29,26 @@ export class MarketplacesCachingService {
     );
   }
 
-  public async getAllMarketplacesByAddressAndCollection(
-    getMarketplaces: () => any,
+  public async getMarketplaceByAddressAndCollection(
+    getMarketplaceByAddress: () => any,
     key: string,
   ): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       generateCacheKeyFromParams('marketplace_address_collection', key),
-      () => getMarketplaces(),
+      () => getMarketplaceByAddress(),
       TimeConstants.oneHour,
     );
   }
 
-  public async getMarketplacesByCollection(
-    getMarketplaces: () => any,
+  public async getMarketplaceByCollection(
+    getMarketplaceByCollection: () => any,
     key: string,
   ): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       generateCacheKeyFromParams('marketplace_collection', key),
-      () => getMarketplaces(),
+      () => getMarketplaceByCollection(),
       TimeConstants.oneHour,
     );
   }
