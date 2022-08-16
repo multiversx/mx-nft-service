@@ -114,12 +114,12 @@ export class AuctionsCachingService {
   public async getClaimableAuctions(
     limit: number = 10,
     offset: number = 0,
-    address: string,
+    key: string,
     getData: () => any,
   ): Promise<[Auction[], number]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getClaimableAuctionsCacheKey(address, limit, offset),
+      this.getClaimableAuctionsCacheKey(key, limit, offset),
       () => getData(),
       30 * TimeConstants.oneSecond,
     );

@@ -207,6 +207,30 @@ export class AuctionsServiceDb {
       .getManyAndCount();
   }
 
+  async getClaimableAuctionsForMarketplaceKey(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+    marketplaceKey: string,
+  ): Promise<[AuctionEntity[], number]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .innerJoin('orders', 'o', 'o.auctionId=a.id')
+      .where(
+        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND a.marketplaceKey = :marketplaceKey
+        ((o.ownerAddress = :address AND o.status='active'))`,
+        {
+          address: address,
+          marketplaceKey: marketplaceKey,
+        },
+      )
+      .groupBy('a.id')
+      .orderBy('a.Id', 'DESC')
+      .offset(offset)
+      .limit(limit)
+      .getManyAndCount();
+  }
+
   async getAuctionsOrderByOrdersCountGroupByIdentifier(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
