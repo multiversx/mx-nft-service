@@ -206,10 +206,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return mappedMarketplace ? [mappedMarketplace] : null;
     }
 
-    if (
-      address.isContractAddress() &&
-      address.equals(new Address(elrondConfig.nftMarketplaceAddress))
-    ) {
+    if (address.isContractAddress()) {
       const marketplace = await this.internalMarketplaceProvider.load(
         collection,
       );
