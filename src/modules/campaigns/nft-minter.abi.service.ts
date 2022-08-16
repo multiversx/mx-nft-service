@@ -25,27 +25,24 @@ import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { AbiLoadService } from 'src/common/services/elrond-communication/abi-load.service';
+import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 
 @Injectable()
 export class NftMinterAbiService {
   private readonly parser: ResultsParser;
   private readonly abiPath: string = './src/abis/nft-minter.abi.json';
   private readonly abiInterface: string = 'NftMinter';
+  private readonly contract = new ContractLoader(
+    this.abiPath,
+    this.abiInterface,
+  );
 
-  constructor(
-    private elrondProxyService: ElrondProxyService,
-    private abiLoadService: AbiLoadService,
-  ) {
+  constructor(private elrondProxyService: ElrondProxyService) {
     this.parser = new ResultsParser();
   }
 
   public async getCampaignsForScAddress(address: string) {
-    const contract = await this.abiLoadService.getSmartContract(
-      address,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(address);
     let getDataQuery = <Interaction>contract.methodsExplicit.getAllBrandsInfo();
 
     const response = await this.getFirstQueryResult(getDataQuery);
@@ -57,11 +54,7 @@ export class NftMinterAbiService {
     ownerAddress: string,
     request: IssueCampaignRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.abiLoadService.getSmartContract(
-      request.minterAddress,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(request.minterAddress);
 
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
@@ -77,11 +70,8 @@ export class NftMinterAbiService {
     ownerAddress: string,
     request: BuyRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.abiLoadService.getSmartContract(
-      request.minterAddress,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(request.minterAddress);
+
     let buyRandomNft = contract.call({
       func: new ContractFunction('buyRandomNft'),
       value: TokenPayment.egldFromBigInteger(request.price),

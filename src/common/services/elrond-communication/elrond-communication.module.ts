@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AbiLoadService } from './abi-load.service';
 import { ApiService } from './api.service';
 import { ElrondApiService } from './elrond-api.service';
 import { ElrondDataService } from './elrond-data.service';
@@ -23,7 +22,6 @@ import { SlackReportService } from './slack-report.service';
     ElrondDataService,
     ElrondFeedService,
     SlackReportService,
-    AbiLoadService,
   ],
   exports: [
     ApiService,
@@ -36,7 +34,6 @@ import { SlackReportService } from './slack-report.service';
     ElrondDataService,
     ElrondFeedService,
     SlackReportService,
-    AbiLoadService,
   ],
 })
 export class ElrondCommunicationModule {}

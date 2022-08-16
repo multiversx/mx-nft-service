@@ -38,7 +38,7 @@ import {
 } from './models/requests';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
-import { AbiLoadService } from 'src/common/services/elrond-communication/abi-load.service';
+import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -46,10 +46,13 @@ export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
   private readonly abiPath: string = './src/abis/esdt-nft-marketplace.abi.json';
   private readonly abiInterface: string = 'EsdtNftMarketplace';
+  private readonly contract = new ContractLoader(
+    this.abiPath,
+    this.abiInterface,
+  );
 
   constructor(
     private elrondProxyService: ElrondProxyService,
-    private abiLoadService: AbiLoadService,
     private auctionsService: AuctionsGetterService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -165,11 +168,8 @@ export class NftMarketplaceAbiService {
     contractAddress: string,
     auctionId: number,
   ): Promise<AuctionAbi> {
-    const contract = await this.abiLoadService.getSmartContract(
-      contractAddress,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(contractAddress);
+
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
@@ -226,24 +226,17 @@ export class NftMarketplaceAbiService {
 
   private async configureTransactionData(auctionId: number) {
     const auction = await this.auctionsService.getAuctionById(auctionId);
-    const marketplace =
+    const marketplaceAddress =
       await this.marketplaceService.getInternalMarketplacesAddresesByKey(
         auction.marketplaceKey,
       );
-    const contract = await this.abiLoadService.getSmartContract(
-      marketplace,
-      this.abiPath,
-      this.abiInterface,
-    );
+
+    const contract = await this.contract.getContract(marketplaceAddress);
     return { contract, auction };
   }
 
   private async getCutPercentageMap(contractAddress: string): Promise<string> {
-    const contract = await this.abiLoadService.getSmartContract(
-      contractAddress,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(contractAddress);
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getMarketplaceCutPercentage()
     );
@@ -252,11 +245,7 @@ export class NftMarketplaceAbiService {
   }
 
   private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
-    const contract = await this.abiLoadService.getSmartContract(
-      contractAddress,
-      this.abiPath,
-      this.abiInterface,
-    );
+    const contract = await this.contract.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf();
