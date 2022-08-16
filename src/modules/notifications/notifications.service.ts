@@ -50,11 +50,11 @@ export class NotificationsService {
     const orders = await this.ordersService.getOrdersByAuctionIds(
       auctions?.map((a) => a.id),
     );
-
-    this.triggerClearCache(auctions, orders);
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }
+
+    this.triggerClearCache(auctions, orders);
   }
 
   async updateNotificationStatus(auctionIds: number[]) {
@@ -103,11 +103,11 @@ export class NotificationsService {
 
   async saveNotification(notification: NotificationEntity): Promise<void> {
     try {
+      await this.notificationServiceDb.saveNotification(notification);
       await this.publishClearNotificationEvent(
         notification.ownerAddress,
         notification.marketplaceKey,
       );
-      await this.notificationServiceDb.saveNotification(notification);
     } catch (error) {
       this.logger.error(
         'An error occurred while trying to save notifications status.',
@@ -170,14 +170,14 @@ export class NotificationsService {
   private async updateInactiveStatus(
     inactiveNotifications: NotificationEntity[],
   ) {
-    this.cacheEventsPublisher.publish(
+    await this.notificationServiceDb.saveNotifications(inactiveNotifications);
+    await this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: inactiveNotifications?.map((n) => n.ownerAddress),
         type: CacheEventTypeEnum.UpdateNotifications,
         extraInfo: { marketplaceKey: inactiveNotifications[0].marketplaceKey },
       }),
     );
-    await this.notificationServiceDb.saveNotifications(inactiveNotifications);
   }
 
   private async getMappedNotifications(address: string) {

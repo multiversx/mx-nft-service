@@ -338,7 +338,7 @@ export class AuctionsServiceDb {
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
-    if (id != undefined) {
+    if (id !== undefined) {
       return await this.auctionsRepository.findOne({
         where: [{ id: id }],
       });
@@ -350,7 +350,7 @@ export class AuctionsServiceDb {
     id: number,
     marketplaceKey: string,
   ): Promise<AuctionEntity> {
-    if (id != undefined) {
+    if (id !== undefined) {
       return await this.auctionsRepository.findOne({
         where: [{ marketplaceAuctionId: id, marketplaceKey: marketplaceKey }],
       });
