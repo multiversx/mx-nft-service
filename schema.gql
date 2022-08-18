@@ -653,6 +653,10 @@ type Mutation {
   withdraw(auctionId: Int!): TransactionNode!
 }
 
+input MyClaimableAuctionsFilters {
+  marketplaceKey: String!
+}
+
 enum NftTypeEnum {
   NonFungibleESDT
   SemiFungibleESDT
@@ -828,7 +832,7 @@ type Query {
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
-  myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
+  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!

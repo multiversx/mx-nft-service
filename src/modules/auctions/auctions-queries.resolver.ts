@@ -29,6 +29,7 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { PriceRange } from './models/PriceRange.dto';
+import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -136,6 +137,12 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(
     @User() user: any,
+    @Args({
+      name: 'filters',
+      type: () => MyClaimableAuctionsFilters,
+      nullable: true,
+    })
+    filters: MyClaimableAuctionsFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -144,6 +151,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       limit,
       offset,
       user.publicKey,
+      filters?.marketplaceKey,
     );
     return PageResponse.mapResponse<Auction>(
       auctions,

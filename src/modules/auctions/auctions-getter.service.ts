@@ -78,13 +78,23 @@ export class AuctionsGetterService {
     limit: number = 10,
     offset: number = 0,
     address: string,
+    marketplaceKey: string,
   ): Promise<[Auction[], number]> {
+    const key: string = marketplaceKey
+      ? `${address}_${marketplaceKey}`
+      : address;
     try {
       return await this.auctionCachiungService.getClaimableAuctions(
         limit,
         offset,
-        address,
-        () => this.getMappedClaimableAuctions(limit, offset, address),
+        key,
+        () =>
+          this.getMappedClaimableAuctions(
+            limit,
+            offset,
+            address,
+            marketplaceKey,
+          ),
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -361,13 +371,24 @@ export class AuctionsGetterService {
     limit: number = 10,
     offset: number = 0,
     address: string,
+    marketplaceKey: string,
   ) {
-    const [auctions, count] = await this.auctionServiceDb.getClaimableAuctions(
-      limit,
-      offset,
-      address,
-    );
-
+    let [auctions, count] = [[], 0];
+    if (marketplaceKey) {
+      [auctions, count] =
+        await this.auctionServiceDb.getClaimableAuctionsForMarketplaceKey(
+          limit,
+          offset,
+          address,
+          marketplaceKey,
+        );
+    } else {
+      [auctions, count] = await this.auctionServiceDb.getClaimableAuctions(
+        limit,
+        offset,
+        address,
+      );
+    }
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 

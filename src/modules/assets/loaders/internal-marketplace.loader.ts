@@ -23,6 +23,7 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
       .addSelect('m.name as name')
       .addSelect('m.url as url')
       .addSelect('m.address as address')
+      .addSelect('m.key as `key`')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
       .where(
         `mc.collectionIdentifier IN(${collections.map(
