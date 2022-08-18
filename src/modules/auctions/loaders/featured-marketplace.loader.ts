@@ -24,7 +24,7 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
       .select('fm.address as address')
       .addSelect('fm.url as url')
       .addSelect('fm.name as name')
-      .addSelect('fm.key as key')
+      .addSelect('fm.key as `key`')
       .where(`fm.address IN(${addresses.map((value) => `'${value}'`)})`)
       .execute();
     return featuredMarketplace?.groupBy((asset) => asset.address);
