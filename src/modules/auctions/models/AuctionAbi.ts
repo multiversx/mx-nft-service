@@ -26,15 +26,11 @@ export interface AuctionAbi {
 }
 
 export interface ExternalAuctionAbi {
-  auctioned_token: {
-    token_type: TokenIdentifierValue;
-    nonce: U64Value;
-  };
+  auctioned_token_type: TokenIdentifierValue;
+  auctioned_token_nonce: U64Value;
   nr_auctioned_tokens: BigUIntValue;
-  payment_token: {
-    token_type: TokenIdentifierValue;
-    nonce: U64Value;
-  };
+  payment_token_type: TokenIdentifierValue;
+  payment_token_nonce: U64Value;
   auction_type: any;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;

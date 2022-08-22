@@ -157,16 +157,16 @@ export class AuctionEntity extends BaseEntity {
     return auction
       ? new AuctionEntity({
           id: auctionId,
-          collection: auction.auctioned_token.token_type.valueOf().toString(),
-          nonce: parseInt(auction.auctioned_token.nonce.valueOf().toString()),
+          collection: auction.auctioned_token_type.valueOf().toString(),
+          nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
           nrAuctionedTokens: parseInt(
             auction.nr_auctioned_tokens.valueOf().toString(),
           ),
           status: AuctionStatusEnum.Running,
           type: AuctionTypeEnum[auction.auction_type.valueOf().name],
-          paymentToken: auction.payment_token.token_type.valueOf().toString(),
+          paymentToken: auction.payment_token_type.valueOf().toString(),
           paymentNonce: parseInt(
-            auction.payment_token.nonce.valueOf().toString(),
+            auction.payment_token_nonce.valueOf().toString(),
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
@@ -190,10 +190,10 @@ export class AuctionEntity extends BaseEntity {
           ),
           startDate: parseInt(auction.start_time.valueOf().toString()),
           endDate: parseInt(auction.deadline.valueOf().toString()),
-          identifier: `${auction.auctioned_token.token_type
+          identifier: `${auction.auctioned_token_type
             .valueOf()
             .toString()}-${nominateVal(
-            parseInt(auction.auctioned_token.nonce.valueOf().toString()),
+            parseInt(auction.auctioned_token_nonce.valueOf().toString()),
           )}`,
           tags: tags ? `,${tags},` : '',
           blockHash: hash,
