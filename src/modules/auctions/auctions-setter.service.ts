@@ -42,6 +42,7 @@ export class AuctionsSetterService {
         auctionId,
         marketplaceKey,
       );
+      console.log({ auctionData });
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
         const auctionEntity =
