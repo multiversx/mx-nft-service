@@ -403,8 +403,7 @@ export class NftEventsService {
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
           const withdrawMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsWithdraw.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               withdraw.getAddress(),
             );
           const withdrawAuction =
@@ -424,8 +423,7 @@ export class NftEventsService {
           const endAuctionEvent = new EndAuctionEvent(event);
           const topicsEndAuction = endAuctionEvent.getTopics();
           const endMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsEndAuction.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               endAuctionEvent.getAddress(),
             );
           const endAuction =
