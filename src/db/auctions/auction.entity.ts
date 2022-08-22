@@ -156,7 +156,7 @@ export class AuctionEntity extends BaseEntity {
   ) {
     return auction
       ? new AuctionEntity({
-          id: auctionId,
+          marketplaceAuctionId: auctionId,
           collection: auction.auctioned_token_type.toString(),
           nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
           nrAuctionedTokens: parseInt(
