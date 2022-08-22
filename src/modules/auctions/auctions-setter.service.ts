@@ -39,14 +39,24 @@ export class AuctionsSetterService {
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
+        const auctionEntity =
+          marketplaceKey && marketplaceKey === 'xoxno'
+            ? AuctionEntity.fromAuctionAbi(
+                auctionId,
+                auctionData,
+                asset?.tags?.toString(),
+                hash,
+                marketplaceKey,
+              )
+            : AuctionEntity.fromAuctionAbi(
+                auctionId,
+                auctionData,
+                asset?.tags?.toString(),
+                hash,
+                marketplaceKey,
+              );
         const savedAuction = await this.auctionServiceDb.insertAuction(
-          AuctionEntity.fromAuctionAbi(
-            auctionId,
-            auctionData,
-            asset?.tags?.toString(),
-            hash,
-            marketplaceKey,
-          ),
+          auctionEntity,
         );
 
         if (asset?.tags) {
