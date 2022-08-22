@@ -216,7 +216,7 @@ from
 left join orders o on
 	a.id = o.auctionId
 WHERE
-	a.marketplaceAuctionId = ${id} AND a.marketplaceKey = ${marketplaceKey}`;
+	a.marketplaceAuctionId = ${id} AND a.marketplaceKey = '${marketplaceKey}'`;
 }
 
 export function getAuctionsForIdentifierSortByPrice(
