@@ -184,6 +184,7 @@ export class NftMarketplaceAbiService {
 
     const response = await this.getFirstQueryResult(getDataQuery);
 
+    console.log({ response }, JSON.stringify(response));
     const auction: AuctionAbi = response?.firstValue?.valueOf();
     return auction;
   }
