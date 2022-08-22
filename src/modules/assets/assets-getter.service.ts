@@ -48,7 +48,7 @@ export class AssetsGetterService {
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, countQuery),
     ]);
-    const assets = nfts?.map((element) => Asset.fromNft(element));
+    const assets = nfts?.map((element) => Asset.fromNft(element, address));
     return new CollectionType({ count, items: assets });
   }
 
@@ -115,7 +115,7 @@ export class AssetsGetterService {
       onwerAddress,
       identifier,
     );
-    return Asset.fromNft(nft);
+    return Asset.fromNft(nft, onwerAddress);
   }
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {

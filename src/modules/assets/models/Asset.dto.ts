@@ -95,7 +95,7 @@ export class Asset {
     Object.assign(this, init);
   }
 
-  static fromNft(nft: Nft) {
+  static fromNft(nft: Nft, address: string = null) {
     return nft
       ? new Asset({
           collection: nft.collection,
@@ -103,7 +103,7 @@ export class Asset {
           nonce: nft.nonce ?? 0,
           identifier: nft.identifier,
           creatorAddress: nft.creator ?? '',
-          ownerAddress: nft.owner,
+          ownerAddress: nft.owner ? nft.owner : address,
           attributes: nft.attributes ?? '',
           creationDate: nft.timestamp,
           hash: nft.hash ?? '',
