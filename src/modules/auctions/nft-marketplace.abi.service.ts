@@ -173,6 +173,21 @@ export class NftMarketplaceAbiService {
     if (marketplaceKey && marketplaceKey === 'xoxno') {
       this.contract = new ContractLoader(this.abiXoxnoPath, this.abiInterface);
       scContract = await this.contract.getContract(contractAddress);
+      let getDataQuery = <Interaction>(
+        scContract.methodsExplicit.getFullAuctionData([
+          new U64Value(new BigNumber(auctionId)),
+        ])
+      );
+
+      const response = await this.getFirstQueryResult(getDataQuery);
+
+      console.log(
+        { response },
+        response?.firstValue,
+        (response.firstValue as OptionalValue).getTypedValue(),
+      );
+      const auction: AuctionAbi = response?.firstValue?.valueOf();
+      return auction;
     } else {
       scContract = await this.contract.getContract(contractAddress);
     }
@@ -184,7 +199,6 @@ export class NftMarketplaceAbiService {
 
     const response = await this.getFirstQueryResult(getDataQuery);
 
-    console.log({ response }, response?.firstValue);
     const auction: AuctionAbi = response?.firstValue?.valueOf();
     return auction;
   }
