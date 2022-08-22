@@ -5,9 +5,6 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
@@ -15,7 +12,6 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -23,7 +19,6 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
-    private marketplacesService: MarketplacesService,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
@@ -40,6 +35,7 @@ export class AuctionsSetterService {
       const auctionData = await this.nftAbiService.getAuctionQuery(
         marketplaceAddress,
         auctionId,
+        marketplaceKey,
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {

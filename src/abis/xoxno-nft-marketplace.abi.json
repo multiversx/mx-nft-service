@@ -1,0 +1,1263 @@
+{
+  "buildInfo": {
+    "rustc": {
+      "version": "1.60.0-nightly",
+      "commitHash": "1409c015b44a4d4d38bef2250b2a37c17b8b7463",
+      "commitDate": "2022-01-11",
+      "channel": "Nightly",
+      "short": "rustc 1.60.0-nightly (1409c015b 2022-01-11)"
+    },
+    "contractCrate": {
+      "name": "esdt-nft-marketplace",
+      "version": "0.0.0"
+    },
+    "framework": {
+      "name": "elrond-wasm",
+      "version": "0.29.3"
+    }
+  },
+  "name": "EsdtNftMarketplace",
+  "constructor": {
+    "inputs": [
+      {
+        "name": "bid_cut_percentage",
+        "type": "u64"
+      }
+    ],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "setCutPercentage",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "new_cut_percentage",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addRewardBalance",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "setRewardTicker",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setSpecialRewardAmount",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setDefaultRewardAmount",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addBlackListWallet",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "wallet",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "setAcceptedTokens",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeAcceptedTokens",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "addWitelistedSC",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "sc",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setStatus",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "status",
+          "type": "bool"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "listing",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "min_bid",
+          "type": "BigUint"
+        },
+        {
+          "name": "max_bid",
+          "type": "BigUint"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "accepted_payment_token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "bid",
+          "type": "bool"
+        },
+        {
+          "name": "opt_sft_max_one_per_payment",
+          "type": "optional<bool>",
+          "multi_arg": true
+        },
+        {
+          "name": "opt_start_time",
+          "type": "optional<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "sendOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "nft_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nft_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "nft_amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "deleteOffersByWallet",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "bid",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
+        {
+          "name": "nft_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nft_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "endAuction",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "buy",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
+        {
+          "name": "nft_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nft_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "opt_sft_buy_amount",
+          "type": "optional<BigUint>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "acceptOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdraw",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdrawOffer",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "changePrice",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
+        {
+          "name": "new_price",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "claimTokens",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "claim_destination",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getMarketplaceCutPercentage",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getOffersByWallet",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "checkOfferSent",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "nft",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "payment_token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "getListingsByWallet",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getActiveListingsBids",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getTokenItemsForSale",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getTokenAuctionIds",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getTokenOffersIds",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getTokenItemsQuantityForSale",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getAcceptedTokens",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<TokenIdentifier>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "blackListWallets",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "whitelistedContracts",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getClaimableAmount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getClaimableTokens",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<TokenIdentifier>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getClaimableTokenNonces",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getCollectionsListed",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<TokenIdentifier>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getListings",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getOffers",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getStatus",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "offerById",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Offer"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidAuctionId",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getRewardBalance",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getRewardTicker",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "TokenIdentifier"
+        }
+      ]
+    },
+    {
+      "name": "specialRewardAmount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "defaultRewardAmount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidOfferId",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getListingsCount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getOffersCount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getCollectionsCount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "isCollectionListed",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "getAcceptedTokensCount",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getTokenItemsForSaleCount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "getOnSaleTokensForTicker",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonces",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<TokensOnSale>"
+        }
+      ]
+    },
+    {
+      "name": "checkTokenOffers",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonces",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<BulkOffers>"
+        }
+      ]
+    },
+    {
+      "name": "getBulkOffers",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "offers",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<BulkOffers>"
+        }
+      ]
+    },
+    {
+      "name": "getBulkListings",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_ids",
+          "type": "variadic<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<TokensOnSale>"
+        }
+      ]
+    },
+    {
+      "name": "doesAuctionExist",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "doesOfferExist",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "getAuctionedToken",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<multi<TokenIdentifier,u64,BigUint>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getAuctionType",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "AuctionType"
+        }
+      ]
+    },
+    {
+      "name": "getPaymentTokenForAuction",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<multi<TokenIdentifier,u64>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getMinMaxBid",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<multi<BigUint,BigUint>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getStartTime",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getDeadline",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getOriginalOwner",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getCurrentWinningBid",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<BigUint>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getCurrentWinner",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getFullAuctionData",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<Auction>",
+          "multi_result": true
+        }
+      ]
+    }
+  ],
+  "hasCallback": false,
+  "types": {
+    "AuctionType": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "None",
+          "discriminant": 0
+        },
+        {
+          "name": "NftBid",
+          "discriminant": 1
+        },
+        {
+          "name": "Nft",
+          "discriminant": 2
+        },
+        {
+          "name": "SftAll",
+          "discriminant": 3
+        },
+        {
+          "name": "SftOnePerPayment",
+          "discriminant": 4
+        }
+      ]
+    },
+    "Auction": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "auctioned_token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "auctioned_token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "nr_auctioned_tokens",
+          "type": "BigUint"
+        },
+        {
+          "name": "auction_type",
+          "type": "AuctionType"
+        },
+        {
+          "name": "payment_token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "payment_token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "min_bid",
+          "type": "BigUint"
+        },
+        {
+          "name": "max_bid",
+          "type": "Option<BigUint>"
+        },
+        {
+          "name": "start_time",
+          "type": "u64"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "original_owner",
+          "type": "Address"
+        },
+        {
+          "name": "current_bid",
+          "type": "BigUint"
+        },
+        {
+          "name": "current_winner",
+          "type": "Address"
+        },
+        {
+          "name": "marketplace_cut_percentage",
+          "type": "BigUint"
+        },
+        {
+          "name": "creator_royalties_percentage",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "TokensOnSale": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "auction",
+          "type": "Auction"
+        },
+        {
+          "name": "auction_id",
+          "type": "u64"
+        }
+      ]
+    },
+    "OfferStatus": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "Pending",
+          "discriminant": 0
+        },
+        {
+          "name": "Accepted",
+          "discriminant": 1
+        },
+        {
+          "name": "Declined",
+          "discriminant": 2
+        },
+        {
+          "name": "Withdraw",
+          "discriminant": 3
+        }
+      ]
+    },
+    "Offer": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "quantity",
+          "type": "BigUint"
+        },
+        {
+          "name": "status",
+          "type": "OfferStatus"
+        },
+        {
+          "name": "payment_token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "payment_token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "price",
+          "type": "BigUint"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "timestamp",
+          "type": "u64"
+        },
+        {
+          "name": "offer_owner",
+          "type": "Address"
+        },
+        {
+          "name": "marketplace_cut_percentage",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "BulkOffers": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "offer",
+          "type": "Offer"
+        },
+        {
+          "name": "offer_id",
+          "type": "u64"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    }
+  }
+}

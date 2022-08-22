@@ -19,6 +19,7 @@ import {
   BigUIntType,
   TokenPayment,
   ResultsParser,
+  SmartContract,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
@@ -45,11 +46,10 @@ export class NftMarketplaceAbiService {
   private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
   private readonly abiPath: string = './src/abis/esdt-nft-marketplace.abi.json';
+  private readonly abiXoxnoPath: string =
+    './src/abis/xoxno-nft-marketplace.abi.json';
   private readonly abiInterface: string = 'EsdtNftMarketplace';
-  private readonly contract = new ContractLoader(
-    this.abiPath,
-    this.abiInterface,
-  );
+  private contract = new ContractLoader(this.abiPath, this.abiInterface);
 
   constructor(
     private elrondProxyService: ElrondProxyService,
@@ -167,11 +167,17 @@ export class NftMarketplaceAbiService {
   async getAuctionQuery(
     contractAddress: string,
     auctionId: number,
+    marketplaceKey?: string,
   ): Promise<AuctionAbi> {
-    const contract = await this.contract.getContract(contractAddress);
-
+    let scContract: SmartContract;
+    if (marketplaceKey && marketplaceKey === 'xoxno') {
+      this.contract = new ContractLoader(this.abiXoxnoPath, this.abiInterface);
+      scContract = await this.contract.getContract(contractAddress);
+    } else {
+      scContract = await this.contract.getContract(contractAddress);
+    }
     let getDataQuery = <Interaction>(
-      contract.methodsExplicit.getFullAuctionData([
+      scContract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
       ])
     );
