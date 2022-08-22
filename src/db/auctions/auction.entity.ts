@@ -170,7 +170,7 @@ export class AuctionEntity extends BaseEntity {
           ),
           ownerAddress: auction.original_owner.valueOf().toString(),
           minBid: auction.min_bid.valueOf().toString(),
-          minBidDiff: auction.min_bid_diff.valueOf().toString(),
+          // minBidDiff: auction.min_bid_diff.valueOf().toString(),
           minBidDenominated: parseFloat(
             denominate({
               input: auction.min_bid.valueOf()?.toString(),
