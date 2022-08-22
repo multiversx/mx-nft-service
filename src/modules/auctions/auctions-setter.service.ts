@@ -1,5 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Auction, AuctionStatusEnum } from './models';
+import {
+  Auction,
+  AuctionAbi,
+  AuctionStatusEnum,
+  ExternalAuctionAbi,
+} from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -41,16 +46,16 @@ export class AuctionsSetterService {
       if (auctionData) {
         const auctionEntity =
           marketplaceKey && marketplaceKey === 'xoxno'
-            ? AuctionEntity.fromAuctionAbi(
+            ? AuctionEntity.fromExternalAuctionAbi(
                 auctionId,
-                auctionData,
+                auctionData as ExternalAuctionAbi,
                 asset?.tags?.toString(),
                 hash,
                 marketplaceKey,
               )
             : AuctionEntity.fromAuctionAbi(
                 auctionId,
-                auctionData,
+                auctionData as AuctionAbi,
                 asset?.tags?.toString(),
                 hash,
                 marketplaceKey,

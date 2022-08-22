@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
-import { AuctionAbi, BuySftActionArgs } from './models';
+import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -168,7 +168,7 @@ export class NftMarketplaceAbiService {
     contractAddress: string,
     auctionId: number,
     marketplaceKey?: string,
-  ): Promise<AuctionAbi> {
+  ): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
     if (marketplaceKey && marketplaceKey === 'xoxno') {
       this.contract = new ContractLoader(this.abiXoxnoPath, this.abiInterface);
