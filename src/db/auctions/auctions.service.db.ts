@@ -410,6 +410,7 @@ export class AuctionsServiceDb {
       auction.identifier,
       auction.ownerAddress,
     );
+    console.log({ auction });
     return await this.auctionsRepository.save(auction);
   }
 
