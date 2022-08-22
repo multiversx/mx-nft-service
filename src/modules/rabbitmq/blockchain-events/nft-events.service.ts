@@ -112,10 +112,16 @@ export class NftEventsService {
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
           const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
+
           const buyMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
               buySftTopics.collection,
               buySftEvent.getAddress(),
+            );
+          const buyAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(buySftTopics.auctionId, 16),
+              buyMarketplace.key,
             );
           const result = await this.auctionsGetterService.getAvailableTokens(
             parseInt(buySftTopics.auctionId, 16),
@@ -125,9 +131,8 @@ export class NftEventsService {
             ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
             : 0;
           if (totalRemaining === 0) {
-            this.auctionsService.updateAuctionByMarketplaceKey(
-              parseInt(buySftTopics.auctionId, 16),
-              buyMarketplace.key,
+            this.auctionsService.updateAuction(
+              buyAuction.id,
               AuctionStatusEnum.Ended,
               hash,
               AuctionStatusEnum.Ended,
@@ -136,7 +141,7 @@ export class NftEventsService {
           const orderSft = await this.ordersService.createOrderForSft(
             new CreateOrderArgs({
               ownerAddress: buySftTopics.currentWinner,
-              auctionId: parseInt(buySftTopics.auctionId, 16),
+              auctionId: buyAuction.id,
               priceToken: 'EGLD',
               priceAmount: buySftTopics.bid,
               priceNonce: 0,
