@@ -291,8 +291,7 @@ export class NftEventsService {
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
           const bidMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topics.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               bidEvent.getAddress(),
             );
           const auction =
@@ -346,8 +345,7 @@ export class NftEventsService {
           const buySftTopics = buySftEvent.getTopics();
           const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
           const buyMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              buySftTopics.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               buySftEvent.getAddress(),
             );
           const result = await this.auctionsGetterService.getAvailableTokens(
