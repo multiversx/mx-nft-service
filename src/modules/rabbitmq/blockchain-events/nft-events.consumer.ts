@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
+import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
 
@@ -9,6 +10,7 @@ import { NftEventsService } from './nft-events.service';
 export class NftEventsConsumer {
   constructor(
     private readonly nftTransactionsService: NftEventsService,
+    private readonly externalMarketplacesEventsService: ExternalMarketplaceEventsService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -46,7 +48,7 @@ export class NftEventsConsumer {
         nftAuctionEvents.hash,
       );
 
-      await this.nftTransactionsService.handleExternalAuctionEvents(
+      await this.externalMarketplacesEventsService.handleExternalAuctionEvents(
         nftAuctionEvents?.events?.filter(
           (e: { address: any }) =>
             externalMarketplaces.includes(e.address) === true,
