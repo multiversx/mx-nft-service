@@ -17,6 +17,7 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { MarketplaceUtils } from './marketplaceUtils';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -44,22 +45,23 @@ export class AuctionsSetterService {
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
-        const auctionEntity =
-          marketplaceKey && marketplaceKey === 'xoxno'
-            ? AuctionEntity.fromExternalAuctionAbi(
-                auctionId,
-                auctionData as ExternalAuctionAbi,
-                asset?.tags?.toString(),
-                hash,
-                marketplaceKey,
-              )
-            : AuctionEntity.fromAuctionAbi(
-                auctionId,
-                auctionData as AuctionAbi,
-                asset?.tags?.toString(),
-                hash,
-                marketplaceKey,
-              );
+        const auctionEntity = MarketplaceUtils.isXoxnoMarketplace(
+          marketplaceKey,
+        )
+          ? AuctionEntity.fromExternalAuctionAbi(
+              auctionId,
+              auctionData as ExternalAuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplaceKey,
+            )
+          : AuctionEntity.fromAuctionAbi(
+              auctionId,
+              auctionData as AuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplaceKey,
+            );
         const savedAuction = await this.auctionServiceDb.insertAuction(
           auctionEntity,
         );

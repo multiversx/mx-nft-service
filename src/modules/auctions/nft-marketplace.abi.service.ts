@@ -40,16 +40,17 @@ import {
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { MarketplaceUtils } from './marketplaceUtils';
 
 @Injectable()
 export class NftMarketplaceAbiService {
   private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
-  private readonly abiPath: string = './src/abis/esdt-nft-marketplace.abi.json';
-  private readonly abiXoxnoPath: string =
-    './src/abis/xoxno-nft-marketplace.abi.json';
-  private readonly abiInterface: string = 'EsdtNftMarketplace';
-  private contract = new ContractLoader(this.abiPath, this.abiInterface);
+
+  private contract = new ContractLoader(
+    MarketplaceUtils.commonMarketplaceAbiPath,
+    MarketplaceUtils.abiInterface,
+  );
 
   constructor(
     private elrondProxyService: ElrondProxyService,
@@ -170,8 +171,11 @@ export class NftMarketplaceAbiService {
     marketplaceKey?: string,
   ): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
-    if (marketplaceKey && marketplaceKey === 'xoxno') {
-      this.contract = new ContractLoader(this.abiXoxnoPath, this.abiInterface);
+    if (MarketplaceUtils.isXoxnoMarketplace(marketplaceKey)) {
+      this.contract = new ContractLoader(
+        MarketplaceUtils.xoxnoMarketplaceAbiPath,
+        MarketplaceUtils.abiInterface,
+      );
       scContract = await this.contract.getContract(contractAddress);
     } else {
       scContract = await this.contract.getContract(contractAddress);
