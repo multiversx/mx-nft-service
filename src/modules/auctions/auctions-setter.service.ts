@@ -16,6 +16,7 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { MarketplaceUtils } from './marketplaceUtils';
+import { nominateVal } from 'src/utils';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
