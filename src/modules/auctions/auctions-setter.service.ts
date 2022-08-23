@@ -17,6 +17,8 @@ import { TagEntity } from 'src/db/auctions/tags.entity';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { nominateVal } from 'src/utils';
+import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
+import { OrdersService } from '../orders/order.service';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
