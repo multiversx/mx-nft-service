@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CollectionApi, ElrondApiService } from 'src/common';
-import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
-import {
-  EventEnum,
-  Feed,
-} from 'src/common/services/elrond-communication/models/feed.dto';
+import { ElrondApiService } from 'src/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetByIdentifierService } from 'src/modules/assets';
-import { AuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
+import {
+  AuctionEventEnum,
+  ExternalAuctionEventEnum,
+} from 'src/modules/assets/models';
 import {
   AuctionsSetterService,
   AuctionsGetterService,
@@ -22,11 +19,7 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
-import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../cache-invalidation/events/owner-changed.event';
+import denominate from 'src/utils/formatters';
 import {
   BidEvent,
   BuySftEvent,
@@ -34,12 +27,11 @@ import {
   EndAuctionEvent,
   AuctionTokenEvent,
 } from '../entities/auction';
-import { MintEvent } from '../entities/auction/mint.event';
-import { TransferEvent } from '../entities/auction/transfer.event';
+import { ChangePriceEvent } from '../entities/auction/changePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
-export class NftEventsService {
+export class ExternalMarketplaceEventsService {
   constructor(
     private auctionsService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
@@ -47,20 +39,20 @@ export class NftEventsService {
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
-    private assetByIdentifierService: AssetByIdentifierService,
-    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
-  public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
-    for (let event of auctionEvents) {
+  public async handleExternalAuctionEvents(
+    externalAuctionEvents: any[],
+    hash: string,
+  ) {
+    for (let event of externalAuctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
           const bidMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topics.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               bidEvent.getAddress(),
             );
           const auction =
@@ -81,6 +73,7 @@ export class NftEventsService {
                 marketplaceKey: bidMarketplace.key,
               }),
             );
+
             await this.feedEventsSenderService.sendBidEvent(
               auction,
               topics,
@@ -91,21 +84,18 @@ export class NftEventsService {
               this.addNotifications(auction, order);
               this.auctionsService.updateAuctionStatus(
                 auction.id,
-                AuctionStatusEnum.Claimable,
+                AuctionStatusEnum.Ended,
                 hash,
-                AuctionStatusEnum.Claimable,
+                AuctionStatusEnum.Ended,
               );
             }
           }
           break;
-        case AuctionEventEnum.BuySftEvent:
+        case ExternalAuctionEventEnum.Buy:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
-
           const buyMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              buySftTopics.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               buySftEvent.getAddress(),
             );
           const buyAuction =
@@ -155,8 +145,7 @@ export class NftEventsService {
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
           const withdrawMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsWithdraw.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               withdraw.getAddress(),
             );
           const withdrawAuction =
@@ -164,20 +153,20 @@ export class NftEventsService {
               parseInt(topicsWithdraw.auctionId, 16),
               withdrawMarketplace.key,
             );
-
-          this.auctionsService.updateAuctionStatus(
-            withdrawAuction.id,
-            AuctionStatusEnum.Closed,
-            hash,
-            AuctionEventEnum.WithdrawEvent,
-          );
+          if (withdrawAuction) {
+            this.auctionsService.updateAuctionStatus(
+              withdrawAuction.id,
+              AuctionStatusEnum.Closed,
+              hash,
+              AuctionEventEnum.WithdrawEvent,
+            );
+          }
           break;
         case AuctionEventEnum.EndAuctionEvent:
           const endAuctionEvent = new EndAuctionEvent(event);
           const topicsEndAuction = endAuctionEvent.getTopics();
           const endMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsEndAuction.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               endAuctionEvent.getAddress(),
             );
           const endAuction =
@@ -185,32 +174,33 @@ export class NftEventsService {
               parseInt(topicsEndAuction.auctionId, 16),
               endMarketplace.key,
             );
-
-          const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
-          this.auctionsService.updateAuctionStatus(
-            endAuction.id,
-            AuctionStatusEnum.Ended,
-            hash,
-            AuctionEventEnum.EndAuctionEvent,
-          );
-          this.notificationsService.updateNotificationStatus([
-            parseInt(topicsEndAuction.auctionId, 16),
-          ]);
-          this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
-          await this.feedEventsSenderService.sendWonAuctionEvent(
-            topicsEndAuction,
-            endAuction,
-            endMarketplace,
-          );
-
+          if (endAuction) {
+            this.auctionsService.updateAuctionStatus(
+              endAuction.id,
+              AuctionStatusEnum.Ended,
+              hash,
+              AuctionEventEnum.EndAuctionEvent,
+            );
+            this.notificationsService.updateNotificationStatus([
+              parseInt(topicsEndAuction.auctionId, 16),
+            ]);
+            this.ordersService.updateOrder(
+              endAuction.id,
+              OrderStatusEnum.Bought,
+            );
+            await this.feedEventsSenderService.sendWonAuctionEvent(
+              topicsEndAuction,
+              endAuction,
+              endMarketplace,
+            );
+          }
           break;
-        case AuctionEventEnum.AuctionTokenEvent:
+        case ExternalAuctionEventEnum.Listing:
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
           const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
           const auctionTokenMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsAuctionToken.collection,
+            await this.marketplaceService.getMarketplaceByAddress(
               auctionToken.getAddress(),
             );
           const startAuction = await this.auctionsService.saveAuction(
@@ -228,68 +218,61 @@ export class NftEventsService {
             );
           }
           break;
-      }
-    }
-  }
-
-  public async handleNftMintEvents(mintEvents: any[], hash: string) {
-    for (let event of mintEvents) {
-      switch (event.identifier) {
-        case NftEventEnum.ESDTNFTCreate:
-          const mintEvent = new MintEvent(event);
-          const createTopics = mintEvent.getTopics();
-          const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          this.triggerCacheInvalidation(
-            createTopics.collection,
-            CacheEventTypeEnum.Mint,
-          );
-          const collection =
-            await this.elrondApi.getCollectionByIdentifierForQuery(
-              createTopics.collection,
-              'fields=name',
+        case ExternalAuctionEventEnum.ChangePrice:
+          const changePriceEvent = new ChangePriceEvent(event);
+          const topicsChangePrice = changePriceEvent.getTopics();
+          const changePriceMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
+              changePriceEvent.getAddress(),
             );
-          await this.feedEventsSenderService.sendMintEvent(
-            identifier,
-            mintEvent,
-            createTopics,
-            collection,
-          );
+          let changePriceAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topicsChangePrice.auctionId, 16),
+              changePriceMarketplace.key,
+            );
 
-          break;
+          if (changePriceAuction) {
+            this.updateAuctionPrice(
+              changePriceAuction,
+              topicsChangePrice.newBid,
+              hash,
+            );
 
-        case NftEventEnum.ESDTNFTTransfer:
-          const transferEvent = new TransferEvent(event);
-          const transferTopics = transferEvent.getTopics();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          await this.triggerCacheInvalidation(
-            `${transferTopics.collection}-${transferTopics.nonce}`,
-            CacheEventTypeEnum.OwnerChanged,
-          );
-          break;
-
-        case NftEventEnum.MultiESDTNFTTransfer:
-          const multiTransferEvent = new TransferEvent(event);
-          const multiTransferTopics = multiTransferEvent.getTopics();
-          this.triggerCacheInvalidation(
-            `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
-            CacheEventTypeEnum.OwnerChanged,
-          );
-
+            this.auctionsService.updateAuction(
+              changePriceAuction,
+              ExternalAuctionEventEnum.ChangePrice,
+            );
+          }
           break;
       }
     }
   }
 
-  private async triggerCacheInvalidation(
-    id: string,
-    eventType: CacheEventTypeEnum,
+  private updateAuctionPrice(
+    changePriceAuction: AuctionEntity,
+    newBid: string,
+
+    hash: string,
   ) {
-    await this.cacheEventsPublisherService.publish(
-      new ChangedEvent({
-        id: id,
-        type: eventType,
-      }),
+    changePriceAuction.minBid = newBid;
+    changePriceAuction.minBidDenominated = parseFloat(
+      denominate({
+        input: newBid.valueOf()?.toString(),
+        denomination: 18,
+        decimals: 2,
+        showLastNonZeroDecimal: true,
+      }).replace(',', ''),
     );
+    changePriceAuction.maxBid = newBid;
+    changePriceAuction.maxBidDenominated = parseFloat(
+      denominate({
+        input: newBid.valueOf()?.toString(),
+        denomination: 18,
+        decimals: 2,
+        showLastNonZeroDecimal: true,
+      }).replace(',', ''),
+    );
+    changePriceAuction.blockHash = hash;
   }
 
   private async addNotifications(auction: AuctionEntity, order: OrderEntity) {

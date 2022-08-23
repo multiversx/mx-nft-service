@@ -1,13 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Auction, AuctionStatusEnum } from './models';
+import {
+  Auction,
+  AuctionAbi,
+  AuctionStatusEnum,
+  ExternalAuctionAbi,
+} from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
@@ -15,7 +17,7 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { MarketplacesService } from '../marketplaces/marketplaces.service';
+import { MarketplaceUtils } from './marketplaceUtils';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -23,7 +25,6 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
-    private marketplacesService: MarketplacesService,
     private tagsRepository: TagsRepository,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
@@ -40,17 +41,29 @@ export class AuctionsSetterService {
       const auctionData = await this.nftAbiService.getAuctionQuery(
         marketplaceAddress,
         auctionId,
+        marketplaceKey,
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
+        const auctionEntity = MarketplaceUtils.isXoxnoMarketplace(
+          marketplaceKey,
+        )
+          ? AuctionEntity.fromExternalAuctionAbi(
+              auctionId,
+              auctionData as ExternalAuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplaceKey,
+            )
+          : AuctionEntity.fromAuctionAbi(
+              auctionId,
+              auctionData as AuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplaceKey,
+            );
         const savedAuction = await this.auctionServiceDb.insertAuction(
-          AuctionEntity.fromAuctionAbi(
-            auctionId,
-            auctionData,
-            asset?.tags?.toString(),
-            hash,
-            marketplaceKey,
-          ),
+          auctionEntity,
         );
 
         if (asset?.tags) {
@@ -96,7 +109,7 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuction(
+  async updateAuctionStatus(
     id: number,
     status: AuctionStatusEnum,
     hash: string,
@@ -104,11 +117,33 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuction(id, status, hash);
+      return await this.auctionServiceDb.updateAuctionStatus(id, status, hash);
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction status', {
+        path: 'AuctionsService.updateAuctionStatus',
+        id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuction(
+    auction: AuctionEntity,
+    auctionEvent: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.auctionServiceDb.updateAuction(auction);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuction',
-        id,
+        id: auction.id,
         exception: error,
       });
     } finally {

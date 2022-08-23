@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
+import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
 
@@ -9,6 +10,7 @@ import { NftEventsService } from './nft-events.service';
 export class NftEventsConsumer {
   constructor(
     private readonly nftTransactionsService: NftEventsService,
+    private readonly externalMarketplacesEventsService: ExternalMarketplaceEventsService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -21,8 +23,11 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events) {
-      const marketplaces =
+      const internalMarketplaces =
         await this.marketplaceService.getInternalMarketplacesAddreses();
+
+      const externalMarketplaces =
+        await this.marketplaceService.getExternalMarketplacesAddreses();
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
@@ -37,7 +42,16 @@ export class NftEventsConsumer {
       );
       await this.nftTransactionsService.handleNftAuctionEvents(
         nftAuctionEvents?.events?.filter(
-          (e: { address: any }) => marketplaces.includes(e.address) === true,
+          (e: { address: any }) =>
+            internalMarketplaces.includes(e.address) === true,
+        ),
+        nftAuctionEvents.hash,
+      );
+
+      await this.externalMarketplacesEventsService.handleExternalAuctionEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { address: any }) =>
+            externalMarketplaces.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
       );

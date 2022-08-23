@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
-import { AuctionAbi, BuySftActionArgs } from './models';
+import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
@@ -19,6 +19,7 @@ import {
   BigUIntType,
   TokenPayment,
   ResultsParser,
+  SmartContract,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
@@ -39,16 +40,16 @@ import {
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { MarketplaceUtils } from './marketplaceUtils';
 
 @Injectable()
 export class NftMarketplaceAbiService {
   private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
-  private readonly abiPath: string = './src/abis/esdt-nft-marketplace.abi.json';
-  private readonly abiInterface: string = 'EsdtNftMarketplace';
-  private readonly contract = new ContractLoader(
-    this.abiPath,
-    this.abiInterface,
+
+  private contract = new ContractLoader(
+    MarketplaceUtils.commonMarketplaceAbiPath,
+    MarketplaceUtils.abiInterface,
   );
 
   constructor(
@@ -167,11 +168,20 @@ export class NftMarketplaceAbiService {
   async getAuctionQuery(
     contractAddress: string,
     auctionId: number,
-  ): Promise<AuctionAbi> {
-    const contract = await this.contract.getContract(contractAddress);
-
+    marketplaceKey?: string,
+  ): Promise<AuctionAbi | ExternalAuctionAbi> {
+    let scContract: SmartContract;
+    if (MarketplaceUtils.isXoxnoMarketplace(marketplaceKey)) {
+      this.contract = new ContractLoader(
+        MarketplaceUtils.xoxnoMarketplaceAbiPath,
+        MarketplaceUtils.abiInterface,
+      );
+      scContract = await this.contract.getContract(contractAddress);
+    } else {
+      scContract = await this.contract.getContract(contractAddress);
+    }
     let getDataQuery = <Interaction>(
-      contract.methodsExplicit.getFullAuctionData([
+      scContract.methodsExplicit.getFullAuctionData([
         new U64Value(new BigNumber(auctionId)),
       ])
     );

@@ -26,6 +26,8 @@ import { CacheEventsPublisherModule } from '../cache-invalidation/cache-invalida
 import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-events.consumer';
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
+import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
+import { FeedEventsSenderService } from './feed-events.service';
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
   providers: [
     NftEventsConsumer,
     NftEventsService,
+    ExternalMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
@@ -57,6 +60,7 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
     RarityUpdaterService,
     AssetByIdentifierService,
     NsfwUpdaterService,
+    FeedEventsSenderService,
   ],
   exports: [NftEventsService],
 })
