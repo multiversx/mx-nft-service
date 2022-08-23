@@ -72,9 +72,9 @@ export class ExternalMarketplaceEventsService {
               new CreateOrderArgs({
                 ownerAddress: topics.currentWinner,
                 auctionId: auction.id,
-                priceToken: 'EGLD',
+                priceToken: auction.paymentToken,
                 priceAmount: topics.currentBid,
-                priceNonce: 0,
+                priceNonce: auction.paymentNonce,
                 blockHash: hash,
                 status: OrderStatusEnum.Active,
                 marketplaceKey: bidMarketplace.key,
@@ -144,9 +144,9 @@ export class ExternalMarketplaceEventsService {
               new CreateOrderArgs({
                 ownerAddress: buySftTopics.currentWinner,
                 auctionId: buyAuction.id,
-                priceToken: 'EGLD',
+                priceToken: buyAuction.paymentToken,
                 priceAmount: buySftTopics.bid,
-                priceNonce: 0,
+                priceNonce: buyAuction.paymentNonce,
                 blockHash: hash,
                 status: OrderStatusEnum.Bought,
                 boughtTokens: buySftTopics.boughtTokens,
