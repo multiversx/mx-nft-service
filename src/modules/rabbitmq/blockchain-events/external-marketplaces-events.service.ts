@@ -103,9 +103,9 @@ export class ExternalMarketplaceEventsService {
               this.addNotifications(auction, order);
               this.auctionsService.updateAuctionStatus(
                 auction.id,
-                AuctionStatusEnum.Claimable,
+                AuctionStatusEnum.Ended,
                 hash,
-                AuctionStatusEnum.Claimable,
+                AuctionStatusEnum.Ended,
               );
             }
           }
