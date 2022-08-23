@@ -26,6 +26,7 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
+import denominate from 'src/utils/formatters';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
@@ -38,6 +39,7 @@ import {
   EndAuctionEvent,
   AuctionTokenEvent,
 } from '../entities/auction';
+import { ChangePriceEvent } from '../entities/auction/changePrice.event';
 import { MintEvent } from '../entities/auction/mint.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 
@@ -105,7 +107,7 @@ export class NftEventsService {
             if (auction.maxBidDenominated === order.priceAmountDenominated) {
               this.notificationsService.updateNotificationStatus([auction?.id]);
               this.addNotifications(auction, order);
-              this.auctionsService.updateAuction(
+              this.auctionsService.updateAuctionStatus(
                 auction.id,
                 AuctionStatusEnum.Claimable,
                 hash,
@@ -139,7 +141,7 @@ export class NftEventsService {
                 parseFloat(buySftTopics.boughtTokens)
               : 0;
             if (totalRemaining === 0) {
-              this.auctionsService.updateAuction(
+              this.auctionsService.updateAuctionStatus(
                 buyAuction.id,
                 AuctionStatusEnum.Ended,
                 hash,
@@ -194,7 +196,7 @@ export class NftEventsService {
               withdrawMarketplace.key,
             );
 
-          this.auctionsService.updateAuction(
+          this.auctionsService.updateAuctionStatus(
             withdrawAuction.id,
             AuctionStatusEnum.Closed,
             hash,
@@ -216,7 +218,7 @@ export class NftEventsService {
             );
 
           const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
-          this.auctionsService.updateAuction(
+          this.auctionsService.updateAuctionStatus(
             endAuction.id,
             AuctionStatusEnum.Ended,
             hash,
@@ -338,7 +340,7 @@ export class NftEventsService {
             if (auction.maxBidDenominated === order.priceAmountDenominated) {
               this.notificationsService.updateNotificationStatus([auction?.id]);
               this.addNotifications(auction, order);
-              this.auctionsService.updateAuction(
+              this.auctionsService.updateAuctionStatus(
                 auction.id,
                 AuctionStatusEnum.Claimable,
                 hash,
@@ -370,7 +372,7 @@ export class NftEventsService {
                 parseFloat(buySftTopics.boughtTokens)
               : 0;
             if (totalRemaining === 0) {
-              this.auctionsService.updateAuction(
+              this.auctionsService.updateAuctionStatus(
                 buyAuction.id,
                 AuctionStatusEnum.Ended,
                 hash,
@@ -424,7 +426,7 @@ export class NftEventsService {
               withdrawMarketplace.key,
             );
           if (withdrawAuction) {
-            this.auctionsService.updateAuction(
+            this.auctionsService.updateAuctionStatus(
               withdrawAuction.id,
               AuctionStatusEnum.Closed,
               hash,
@@ -446,7 +448,7 @@ export class NftEventsService {
             );
           if (endAuction) {
             const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
-            this.auctionsService.updateAuction(
+            this.auctionsService.updateAuctionStatus(
               endAuction.id,
               AuctionStatusEnum.Ended,
               hash,
@@ -512,6 +514,37 @@ export class NftEventsService {
                   marketplaceKey: auctionTokenMarketplace.key,
                 },
               }),
+            );
+          }
+          break;
+        case ExternalAuctionEventEnum.ChangePrice:
+          const changePriceEvent = new ChangePriceEvent(event);
+          const topicsChangePrice = changePriceEvent.getTopics();
+          const changePriceMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
+              changePriceEvent.getAddress(),
+            );
+          let changePriceAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topicsChangePrice.auctionId, 16),
+              changePriceMarketplace.key,
+            );
+
+          if (changePriceAuction) {
+            changePriceAuction.minBid = topicsChangePrice.newBid;
+            changePriceAuction.minBidDenominated = parseFloat(
+              denominate({
+                input: topicsChangePrice.newBid.valueOf()?.toString(),
+                denomination: 18,
+                decimals: 2,
+                showLastNonZeroDecimal: true,
+              }).replace(',', ''),
+            );
+            changePriceAuction.blockHash = hash;
+
+            this.auctionsService.updateAuction(
+              changePriceAuction,
+              ExternalAuctionEventEnum.ChangePrice,
             );
           }
           break;

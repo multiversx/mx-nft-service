@@ -107,7 +107,7 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuction(
+  async updateAuctionStatus(
     id: number,
     status: AuctionStatusEnum,
     hash: string,
@@ -115,11 +115,33 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuction(id, status, hash);
+      return await this.auctionServiceDb.updateAuctionStatus(id, status, hash);
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction status', {
+        path: 'AuctionsService.updateAuctionStatus',
+        id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuction(
+    auction: AuctionEntity,
+    auctionEvent: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.auctionServiceDb.updateAuction(auction);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuction',
-        id,
+        id: auction.id,
         exception: error,
       });
     } finally {

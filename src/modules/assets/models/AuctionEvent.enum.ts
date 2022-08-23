@@ -9,6 +9,7 @@ export enum AuctionEventEnum {
 export enum ExternalAuctionEventEnum {
   Listing = 'listing',
   Buy = 'buy',
+  ChangePrice = 'changePrice',
 }
 
 export enum NftEventEnum {

@@ -499,7 +499,15 @@ export class AuctionsServiceDb {
     );
   }
 
-  async updateAuction(
+  async updateAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+    await this.triggerCacheInvalidation(
+      auction.identifier,
+      auction.ownerAddress,
+    );
+    return await this.auctionsRepository.save(auction);
+  }
+
+  async updateAuctionStatus(
     auctionId: number,
     status: AuctionStatusEnum,
     hash: string,
