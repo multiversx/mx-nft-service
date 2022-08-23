@@ -531,16 +531,11 @@ export class NftEventsService {
             );
 
           if (changePriceAuction) {
-            changePriceAuction.minBid = topicsChangePrice.newBid;
-            changePriceAuction.minBidDenominated = parseFloat(
-              denominate({
-                input: topicsChangePrice.newBid.valueOf()?.toString(),
-                denomination: 18,
-                decimals: 2,
-                showLastNonZeroDecimal: true,
-              }).replace(',', ''),
+            this.updateAuctionPrice(
+              changePriceAuction,
+              topicsChangePrice.newBid,
+              hash,
             );
-            changePriceAuction.blockHash = hash;
 
             this.auctionsService.updateAuction(
               changePriceAuction,
@@ -550,6 +545,33 @@ export class NftEventsService {
           break;
       }
     }
+  }
+
+  private updateAuctionPrice(
+    changePriceAuction: AuctionEntity,
+    newBid: string,
+
+    hash: string,
+  ) {
+    changePriceAuction.minBid = newBid;
+    changePriceAuction.minBidDenominated = parseFloat(
+      denominate({
+        input: newBid.valueOf()?.toString(),
+        denomination: 18,
+        decimals: 2,
+        showLastNonZeroDecimal: true,
+      }).replace(',', ''),
+    );
+    changePriceAuction.maxBid = newBid;
+    changePriceAuction.maxBidDenominated = parseFloat(
+      denominate({
+        input: newBid.valueOf()?.toString(),
+        denomination: 18,
+        decimals: 2,
+        showLastNonZeroDecimal: true,
+      }).replace(',', ''),
+    );
+    changePriceAuction.blockHash = hash;
   }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
