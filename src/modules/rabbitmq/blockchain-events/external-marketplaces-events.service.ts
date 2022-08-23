@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common';
-import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
-import {
-  EventEnum,
-  Feed,
-} from 'src/common/services/elrond-communication/models/feed.dto';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetByIdentifierService } from 'src/modules/assets';
 import {
   AuctionEventEnum,
   ExternalAuctionEventEnum,
@@ -34,6 +28,7 @@ import {
   AuctionTokenEvent,
 } from '../entities/auction';
 import { ChangePriceEvent } from '../entities/auction/changePrice.event';
+import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
 export class ExternalMarketplaceEventsService {
@@ -42,9 +37,8 @@ export class ExternalMarketplaceEventsService {
     private auctionsGetterService: AuctionsGetterService,
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
-    private accountFeedService: ElrondFeedService,
+    private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
-    private assetByIdentifierService: AssetByIdentifierService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -80,22 +74,10 @@ export class ExternalMarketplaceEventsService {
               }),
             );
 
-            const bidNftData = await this.assetByIdentifierService.getAsset(
-              auction.identifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: topics.currentWinner,
-                event: EventEnum.bid,
-                reference: auction?.identifier,
-                extraInfo: {
-                  orderId: order.id,
-                  nftName: bidNftData?.name,
-                  verified: bidNftData?.verified ? true : false,
-                  price: topics.currentBid,
-                  auctionId: auction.id,
-                },
-              }),
+            await this.feedEventsSenderService.sendBidEvent(
+              auction,
+              topics,
+              order,
             );
             if (auction.maxBidDenominated === order.priceAmountDenominated) {
               this.notificationsService.updateNotificationStatus([auction?.id]);
@@ -112,7 +94,6 @@ export class ExternalMarketplaceEventsService {
         case ExternalAuctionEventEnum.Buy:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
           const buyMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByAddress(
               buySftEvent.getAddress(),
@@ -152,24 +133,11 @@ export class ExternalMarketplaceEventsService {
                 marketplaceKey: buyMarketplace.key,
               }),
             );
-            const buySftNftData = await this.assetByIdentifierService.getAsset(
-              identifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: buySftTopics.currentWinner,
-                event: EventEnum.buy,
-                reference: identifier,
-                extraInfo: {
-                  orderId: orderSft.id,
-                  nftName: buySftNftData?.name,
-                  verified: buySftNftData?.verified ? true : false,
-                  price: buySftTopics.bid,
-                  auctionId: buyAuction.id,
-                  boughtTokens: buySftTopics.boughtTokens,
-                  marketplaceKey: buyMarketplace.key,
-                },
-              }),
+            await this.feedEventsSenderService.sendBuyEvent(
+              buySftTopics,
+              orderSft,
+              buyAuction,
+              buyMarketplace,
             );
           }
           break;
@@ -207,7 +175,6 @@ export class ExternalMarketplaceEventsService {
               endMarketplace.key,
             );
           if (endAuction) {
-            const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
             this.auctionsService.updateAuctionStatus(
               endAuction.id,
               AuctionStatusEnum.Ended,
@@ -221,23 +188,10 @@ export class ExternalMarketplaceEventsService {
               endAuction.id,
               OrderStatusEnum.Bought,
             );
-            const endAuctionNftData =
-              await this.assetByIdentifierService.getAsset(
-                endAuctionIdentifier,
-              );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: topicsEndAuction.currentWinner,
-                event: EventEnum.won,
-                reference: endAuctionIdentifier,
-                extraInfo: {
-                  auctionId: endAuction.id,
-                  nftName: endAuctionNftData?.name,
-                  verified: endAuctionNftData?.verified ? true : false,
-                  price: topicsEndAuction.currentBid,
-                  marketplaceKey: endMarketplace.key,
-                },
-              }),
+            await this.feedEventsSenderService.sendWonAuctionEvent(
+              topicsEndAuction,
+              endAuction,
+              endMarketplace,
             );
           }
           break;
@@ -257,23 +211,10 @@ export class ExternalMarketplaceEventsService {
             hash,
           );
           if (startAuction) {
-            const nftData = await this.assetByIdentifierService.getAsset(
-              startAuctionIdentifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: topicsAuctionToken.originalOwner,
-                event: EventEnum.startAuction,
-                reference: startAuctionIdentifier,
-                extraInfo: {
-                  auctionId: startAuction.id,
-                  nftName: nftData?.name,
-                  verified: nftData?.verified ? true : false,
-                  minBid: startAuction.minBid,
-                  maxBid: startAuction.maxBid,
-                  marketplaceKey: auctionTokenMarketplace.key,
-                },
-              }),
+            await this.feedEventsSenderService.sendStartAuctionEvent(
+              topicsAuctionToken,
+              startAuction,
+              auctionTokenMarketplace,
             );
           }
           break;

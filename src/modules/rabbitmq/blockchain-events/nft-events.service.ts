@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { CollectionApi, ElrondApiService } from 'src/common';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
 import {
   EventEnum,
@@ -36,6 +36,7 @@ import {
 } from '../entities/auction';
 import { MintEvent } from '../entities/auction/mint.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
+import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
 export class NftEventsService {
@@ -44,7 +45,7 @@ export class NftEventsService {
     private auctionsGetterService: AuctionsGetterService,
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
-    private accountFeedService: ElrondFeedService,
+    private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
@@ -80,23 +81,10 @@ export class NftEventsService {
                 marketplaceKey: bidMarketplace.key,
               }),
             );
-
-            const bidNftData = await this.assetByIdentifierService.getAsset(
-              auction.identifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: topics.currentWinner,
-                event: EventEnum.bid,
-                reference: auction?.identifier,
-                extraInfo: {
-                  orderId: order.id,
-                  nftName: bidNftData?.name,
-                  verified: bidNftData?.verified ? true : false,
-                  price: topics.currentBid,
-                  auctionId: auction.id,
-                },
-              }),
+            await this.feedEventsSenderService.sendBidEvent(
+              auction,
+              topics,
+              order,
             );
             if (auction.maxBidDenominated === order.priceAmountDenominated) {
               this.notificationsService.updateNotificationStatus([auction?.id]);
@@ -155,24 +143,11 @@ export class NftEventsService {
                 marketplaceKey: buyMarketplace.key,
               }),
             );
-            const buySftNftData = await this.assetByIdentifierService.getAsset(
-              identifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: buySftTopics.currentWinner,
-                event: EventEnum.buy,
-                reference: identifier,
-                extraInfo: {
-                  orderId: orderSft.id,
-                  nftName: buySftNftData?.name,
-                  verified: buySftNftData?.verified ? true : false,
-                  price: buySftTopics.bid,
-                  auctionId: buyAuction.id,
-                  boughtTokens: buySftTopics.boughtTokens,
-                  marketplaceKey: buyMarketplace.key,
-                },
-              }),
+            await this.feedEventsSenderService.sendBuyEvent(
+              buySftTopics,
+              orderSft,
+              buyAuction,
+              buyMarketplace,
             );
           }
           break;
@@ -222,21 +197,10 @@ export class NftEventsService {
             parseInt(topicsEndAuction.auctionId, 16),
           ]);
           this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
-          const endAuctionNftData =
-            await this.assetByIdentifierService.getAsset(endAuctionIdentifier);
-          await this.accountFeedService.addFeed(
-            new Feed({
-              actor: topicsEndAuction.currentWinner,
-              event: EventEnum.won,
-              reference: endAuctionIdentifier,
-              extraInfo: {
-                auctionId: endAuction.id,
-                nftName: endAuctionNftData?.name,
-                verified: endAuctionNftData?.verified ? true : false,
-                price: topicsEndAuction.currentBid,
-                marketplaceKey: endMarketplace.key,
-              },
-            }),
+          await this.feedEventsSenderService.sendWonAuctionEvent(
+            topicsEndAuction,
+            endAuction,
+            endMarketplace,
           );
 
           break;
@@ -257,23 +221,10 @@ export class NftEventsService {
             hash,
           );
           if (startAuction) {
-            const nftData = await this.assetByIdentifierService.getAsset(
-              startAuctionIdentifier,
-            );
-            await this.accountFeedService.addFeed(
-              new Feed({
-                actor: topicsAuctionToken.originalOwner,
-                event: EventEnum.startAuction,
-                reference: startAuctionIdentifier,
-                extraInfo: {
-                  auctionId: startAuction.id,
-                  nftName: nftData?.name,
-                  verified: nftData?.verified ? true : false,
-                  minBid: startAuction.minBid,
-                  maxBid: startAuction.maxBid,
-                  marketplaceKey: auctionTokenMarketplace.key,
-                },
-              }),
+            await this.feedEventsSenderService.sendStartAuctionEvent(
+              topicsAuctionToken,
+              startAuction,
+              auctionTokenMarketplace,
             );
           }
           break;
@@ -297,21 +248,11 @@ export class NftEventsService {
               createTopics.collection,
               'fields=name',
             );
-          const nftData = await this.assetByIdentifierService.getAsset(
+          await this.feedEventsSenderService.sendMintEvent(
             identifier,
-          );
-          await this.accountFeedService.addFeed(
-            new Feed({
-              actor: mintEvent.getAddress(),
-              event: EventEnum.mintNft,
-              reference: createTopics.collection,
-              extraInfo: {
-                identifier: identifier,
-                nftName: nftData?.name,
-                verified: nftData?.verified ? true : false,
-                collectionName: collection?.name,
-              },
-            }),
+            mintEvent,
+            createTopics,
+            collection,
           );
 
           break;

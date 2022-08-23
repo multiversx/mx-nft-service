@@ -27,6 +27,7 @@ import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-even
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
+import { FeedEventsSenderService } from './feed-events.service';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ExternalMarketplaceEventsService } from './external-marketplaces-events
     RarityUpdaterService,
     AssetByIdentifierService,
     NsfwUpdaterService,
+    FeedEventsSenderService,
   ],
   exports: [NftEventsService],
 })
