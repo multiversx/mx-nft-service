@@ -154,6 +154,7 @@ export class AuctionEntity extends BaseEntity {
     hash: string,
     marketplaceKey: string,
   ) {
+    console.log({ auction }, auction.payment_token_nonce.valueOf());
     return auction
       ? new AuctionEntity({
           marketplaceAuctionId: auctionId,
