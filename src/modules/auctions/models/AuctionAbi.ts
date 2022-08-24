@@ -11,7 +11,6 @@ export interface GeneralAuctionAbi {
   auction_type: any;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
-  min_bid_diff: BigUIntValue;
   max_bid: OptionValue;
   deadline: U64Value;
   start_time: U64Value;
