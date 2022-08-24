@@ -10,7 +10,7 @@ export class XoxnoReindexService {
 
   async handleReindexXoxno() {
     try {
-      const maxId = 1000;
+      const maxId = 6000;
       for (let index = 0; index < maxId; index++) {
         const auction = await this.auctionService.saveAuctionXoxno(
           index + 1,
