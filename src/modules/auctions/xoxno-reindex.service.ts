@@ -11,13 +11,14 @@ export class XoxnoReindexService {
   async handleReindexXoxno() {
     try {
       const maxId = 286042;
-      const startId = 1;
+      let startId = 1;
       while (startId <= maxId) {
         await this.auctionService.saveAuctionXoxno(
           startId,
           'xoxno',
           'erd1qqqqqqqqqqqqqpgq6wegs2xkypfpync8mn2sa5cmpqjlvrhwz5nqgepyg8',
         );
+        startId++;
       }
     } catch (error) {
       this.logger.error(`Error when reindexing collection rarities`, {

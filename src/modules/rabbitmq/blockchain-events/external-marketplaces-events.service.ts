@@ -53,6 +53,7 @@ export class ExternalMarketplaceEventsService {
     externalAuctionEvents: any[],
     hash: string,
   ) {
+    console.log(externalAuctionEvents);
     for (let event of externalAuctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
