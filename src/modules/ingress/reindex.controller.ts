@@ -23,6 +23,7 @@ export class ReindexController {
 
   @Get('/trigger-xoxno-reindex')
   async triggerXoxnoReindex(): Promise<void> {
+    console.log('triggerXoxnoReindex');
     await this.xoxnoReindexService.handleReindexXoxno();
   }
 }
