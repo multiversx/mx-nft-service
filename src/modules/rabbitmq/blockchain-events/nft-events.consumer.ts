@@ -38,6 +38,7 @@ export class NftEventsConsumer {
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
+
       await this.nftTransactionsService.handleNftMintEvents(
         nftAuctionEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>

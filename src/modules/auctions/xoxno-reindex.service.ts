@@ -10,19 +10,17 @@ export class XoxnoReindexService {
 
   async handleReindexXoxno() {
     try {
-      const maxId = 286042;
-      let startId = 1;
-      while (startId <= maxId) {
+      const maxId = 6042;
+      for (let index = 0; index < maxId; index++) {
         await this.auctionService.saveAuctionXoxno(
-          startId,
+          index + 1,
           'xoxno',
           'erd1qqqqqqqqqqqqqpgq6wegs2xkypfpync8mn2sa5cmpqjlvrhwz5nqgepyg8',
         );
-        startId++;
       }
     } catch (error) {
-      this.logger.error(`Error when reindexing collection rarities`, {
-        path: 'RarityUpdaterService.handleReindexTokenRarities',
+      this.logger.error(`Error when reindexing xoxno auctions`, {
+        path: 'XoxnoReindexService.handleReindexXoxno',
         exception: error?.message,
       });
     }
