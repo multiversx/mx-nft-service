@@ -47,11 +47,11 @@ async function bootstrap() {
     await processorApp.listen();
   }
 
-  if (process.env.ENABLE_CACHE_WARMER === 'true') {
-    let processorApp = await NestFactory.create(CacheWarmerModule);
+  // if (process.env.ENABLE_CACHE_WARMER === 'true') {
+  //   let processorApp = await NestFactory.create(CacheWarmerModule);
 
-    await processorApp.listen(process.env.CACHE_PORT);
-  }
+  //   await processorApp.listen(process.env.CACHE_PORT);
+  // }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
