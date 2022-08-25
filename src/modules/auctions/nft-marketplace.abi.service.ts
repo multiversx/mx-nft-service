@@ -170,6 +170,7 @@ export class NftMarketplaceAbiService {
     auctionId: number,
     marketplaceKey?: string,
   ): Promise<AuctionAbi | ExternalAuctionAbi> {
+    console.log({ contractAddress });
     let scContract: SmartContract;
     if (MarketplaceUtils.isXoxnoMarketplace(marketplaceKey)) {
       this.contract = new ContractLoader(
@@ -188,6 +189,7 @@ export class NftMarketplaceAbiService {
 
     const response = await this.getFirstQueryResult(getDataQuery);
 
+    console.log({ response });
     const auction: AuctionAbi = response?.firstValue?.valueOf();
     return auction;
   }
