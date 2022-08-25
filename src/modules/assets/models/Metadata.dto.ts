@@ -56,13 +56,19 @@ export class AttributeType {
       for (const pair of attributes) {
         if (pair === Object(pair)) {
           let data: KeyValueType[] = [];
-          for (const key in pair) {
-            if (Object.prototype.hasOwnProperty.call(pair, key)) {
-              const element = pair[key];
-              data.push(new KeyValueType({ key: key, value: element }));
-            }
+          if (pair['trait_type'] && pair['value']) {
+            data.push(
+              new KeyValueType({
+                key: 'trait_type',
+                value: pair['trait_type'],
+              }),
+              new KeyValueType({
+                key: 'value',
+                value: pair['value'],
+              }),
+            );
+            res.push(new AttributeType({ attribute: data }));
           }
-          res.push(new AttributeType({ attribute: data }));
         }
       }
     }
