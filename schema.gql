@@ -164,6 +164,7 @@ type Auction {
   endDate: Int!
   id: ID!
   identifier: String!
+  marketplace: Marketplace
   marketplaceKey: String!
   maxBid: Price!
   minBid: Price!
@@ -226,6 +227,7 @@ enum AuctionStatusEnum {
 
 enum AuctionTypeEnum {
   Nft
+  NftBid
   None
   SftAll
   SftOnePerPayment

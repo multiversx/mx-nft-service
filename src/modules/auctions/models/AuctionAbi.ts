@@ -8,7 +8,6 @@ import {
 import { AuctionStatusEnum } from '.';
 
 export interface GeneralAuctionAbi {
-  payment_token: TokenIdentifierValue;
   auction_type: any;
   auction_status: AuctionStatusEnum;
   min_bid: BigUIntValue;
@@ -25,12 +24,13 @@ export interface GeneralAuctionAbi {
 
 export interface AuctionAbi extends GeneralAuctionAbi {
   auctioned_tokens: EsdtTokenPayment;
+  payment_token: TokenIdentifierValue;
   payment_nonce: U64Value;
   min_bid_diff: BigUIntValue;
 }
 
 export interface ExternalAuctionAbi extends GeneralAuctionAbi {
-  payment_token_type: any;
+  payment_token_type: TokenIdentifierValue;
   payment_token_nonce: U64Value;
   auctioned_token_type: TokenIdentifierValue;
   auctioned_token_nonce: U64Value;

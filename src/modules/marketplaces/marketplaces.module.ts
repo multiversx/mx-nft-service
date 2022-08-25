@@ -10,6 +10,8 @@ import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplac
 import { NftMarketplaceAbiService } from '../auctions';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { CommonModule } from 'src/common.module';
+import { MarketplaceProvider } from './loaders/marketplace.loader';
+import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
 
 @Module({
   providers: [
@@ -17,6 +19,8 @@ import { CommonModule } from 'src/common.module';
     MarketplacesService,
     MarketplacesCachingService,
     NftMarketplaceAbiService,
+    MarketplaceProvider,
+    MarketplaceRedisHandler,
   ],
   imports: [
     PubSubListenerModule,
