@@ -30,6 +30,8 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { PriceRange } from './models/PriceRange.dto';
 import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
+import { Marketplace } from '../marketplaces/models';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -38,6 +40,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrdersProvider,
+    private marketplaceProvider: MarketplaceProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();
@@ -220,6 +223,16 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
     if (!ownerAddress) return null;
     return await this.getAccount(fields, ownerAddress);
+  }
+
+  @ResolveField('marketplace', () => Marketplace)
+  async marketplace(@Parent() auction: Auction) {
+    const { marketplaceKey } = auction;
+
+    if (!marketplaceKey) return null;
+    const marketplace = await this.marketplaceProvider.load(marketplaceKey);
+    const marketplaceValue = marketplace?.value;
+    return marketplaceValue?.length > 0 ? marketplaceValue[0] : null;
   }
 
   private hasToResolveAsset(fields: string[]) {

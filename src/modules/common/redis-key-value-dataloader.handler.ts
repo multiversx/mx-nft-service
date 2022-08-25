@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { RedisCacheService } from 'src/common';
+import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisValue } from './redis-value.dto';
@@ -9,6 +10,7 @@ import { RedisValue } from './redis-value.dto';
 export abstract class RedisKeyValueDataloaderHandler<T> {
   protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
+  private readonly logger: Logger;
   private cacheKeyName: string;
   constructor(
     redisCacheService: RedisCacheService,
@@ -18,6 +20,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
     this.redisClient = this.redisCacheService.getClient(redisClientName);
+    this.logger = new Logger(RedisKeyValueDataloaderHandler.name);
   }
   abstract mapValues(keys: { key: T; value: any }[], dataKeys): RedisValue[];
 
@@ -40,34 +43,47 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {
-    const cacheKeys = this.getCacheKeys(keys);
-    const getDataFromRedis: { key: T; value: any }[] =
-      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
-    const returnValues: { key: T; value: any }[] = this.mapReturnValues<T>(
-      keys,
-      getDataFromRedis,
-    );
-    const getNotCachedKeys = returnValues
-      .filter((item) => item.value === null)
-      .map((value) => value.key);
-    if (getNotCachedKeys?.length > 0) {
-      let data = await createValueFunc();
-      const redisValues = this.mapValues(returnValues, data);
+    try {
+      const cacheKeys = this.getCacheKeys(keys);
+      const getDataFromRedis: { key: T; value: any }[] =
+        await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+      const returnValues: { key: T; value: any }[] = this.mapReturnValues<T>(
+        keys,
+        getDataFromRedis,
+      );
+      const getNotCachedKeys = returnValues
+        .filter((item) => item.value === null)
+        .map((value) => value.key);
+      if (getNotCachedKeys?.length > 0) {
+        let data = await createValueFunc();
+        const redisValues = this.mapValues(returnValues, data);
 
-      for (const val of redisValues) {
-        const cacheKeys = this.getCacheKeys(
-          val.values.map((value) => value.key),
-        );
-        await this.redisCacheService.batchSetCache(
-          this.redisClient,
-          cacheKeys,
-          val.values,
-          val.ttl,
-        );
+        for (const val of redisValues) {
+          const cacheKeys = this.getCacheKeys(
+            val.values.map((value) => value.key),
+          );
+          await this.redisCacheService.batchSetCache(
+            this.redisClient,
+            cacheKeys,
+            val.values,
+            val.ttl,
+          );
+        }
+        return returnValues;
       }
-      return returnValues;
+      return getDataFromRedis;
+    } catch (error) {
+      this.logger.error(
+        `An error has ocurred while trying to resolve data for cacheKey: ${this.cacheKeyName} values: ${keys} ${this.cacheKeyName}`,
+        {
+          path: 'RedisKeyValueDataloaderHandler.batchLoad',
+          exception: error?.message,
+        },
+      );
+      throw new UnableToLoadError(
+        `An error has ocurred while trying to resolve data for cacheKey: ${this.cacheKeyName} values: ${keys} ${this.cacheKeyName}`,
+      );
     }
-    return getDataFromRedis;
   };
 
   getCacheKeys(key: T[]) {

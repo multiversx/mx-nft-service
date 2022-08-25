@@ -7,6 +7,7 @@ import {
 } from 'src/db/auctions/auctionWithBidCount.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
+import { Marketplace } from 'src/modules/marketplaces/models';
 import { OrdersResponse } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';
 import { AuctionStatusEnum, AuctionTypeEnum } from '.';
@@ -78,6 +79,9 @@ export class Auction {
 
   @Field(() => String)
   marketplaceKey: string;
+
+  @Field(() => Marketplace, { nullable: true })
+  marketplace: Marketplace;
 
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);

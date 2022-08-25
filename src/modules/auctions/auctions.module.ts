@@ -29,6 +29,8 @@ import { CommonModule } from 'src/common.module';
 import { AuctionsCachingModule } from './caching/auctions-caching.module';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
+import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
 
 @Module({
   providers: [
@@ -52,6 +54,8 @@ import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
     LastOrdersProvider,
     AccountsProvider,
     AccountsRedisHandler,
+    MarketplaceProvider,
+    MarketplaceRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,
