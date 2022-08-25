@@ -38,12 +38,19 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
+      console.log({
+        auctionId,
+        marketplaceAddress,
+        marketplaceKey,
+        identifier,
+      });
       const auctionData = await this.nftAbiService.getAuctionQuery(
         marketplaceAddress,
         auctionId,
         marketplaceKey,
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
+      console.log({ auctionData });
       if (auctionData) {
         const auctionEntity = MarketplaceUtils.isXoxnoMarketplace(
           marketplaceKey,

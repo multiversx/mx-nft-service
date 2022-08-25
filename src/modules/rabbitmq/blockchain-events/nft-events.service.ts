@@ -47,7 +47,6 @@ export class NftEventsService {
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
-    private assetByIdentifierService: AssetByIdentifierService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -101,7 +100,6 @@ export class NftEventsService {
         case AuctionEventEnum.BuySftEvent:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
-          const identifier = `${buySftTopics.collection}-${buySftTopics.nonce}`;
 
           const buyMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByCollectionAndAddress(
@@ -186,7 +184,6 @@ export class NftEventsService {
               endMarketplace.key,
             );
 
-          const endAuctionIdentifier = `${topicsEndAuction.collection}-${topicsEndAuction.nonce}`;
           this.auctionsService.updateAuctionStatus(
             endAuction.id,
             AuctionStatusEnum.Ended,
