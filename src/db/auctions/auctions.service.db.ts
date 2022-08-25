@@ -401,7 +401,9 @@ export class AuctionsServiceDb {
     return await this.auctionsRepository
       .createQueryBuilder('a')
       .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.endDate <= ${DateUtils.getCurrentTimestamp()}`)
+      .andWhere(
+        `a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`,
+      )
       .getMany();
   }
 
