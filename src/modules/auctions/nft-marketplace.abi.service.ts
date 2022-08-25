@@ -341,9 +341,11 @@ export class NftMarketplaceAbiService {
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
+    console.log({ interaction });
     let queryResponse = await this.elrondProxyService
       .getService()
       .queryContract(interaction.buildQuery());
+    console.log({ queryResponse });
     let result = this.parser.parseQueryResponse(
       queryResponse,
       interaction.getEndpoint(),
