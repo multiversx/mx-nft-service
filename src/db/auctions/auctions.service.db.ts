@@ -404,6 +404,7 @@ export class AuctionsServiceDb {
       .andWhere(
         `a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`,
       )
+      .limit(1000)
       .getMany();
   }
 
