@@ -30,6 +30,8 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
 import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
 import { Marketplace } from '../marketplaces/models';
+import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
+import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -43,6 +45,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
+    private lowestAuctionForMarketplaceProvider: LowestAuctionForMarketplaceProvider,
     private assetScamProvider: AssetScamInfoProvider,
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
@@ -147,10 +150,21 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('lowestAuction', () => Auction)
-  async lowestAuction(@Parent() asset: Asset) {
+  async lowestAuction(
+    @Parent() asset: Asset,
+    @Args({ name: 'filters', type: () => MarketplaceFilters, nullable: true })
+    filters: MarketplaceFilters,
+  ) {
     const { identifier } = asset;
     if (!identifier) {
       return null;
+    }
+
+    if (filters?.marketplaceKey) {
+      const auctions = await this.lowestAuctionForMarketplaceProvider.load(
+        `${identifier}_${filters?.marketplaceKey}`,
+      );
+      return auctions?.value ? Auction.fromEntity(auctions?.value) : null;
     }
     const auctions = await this.lowestAuctionProvider.load(identifier);
     return auctions?.value ? Auction.fromEntity(auctions?.value) : null;

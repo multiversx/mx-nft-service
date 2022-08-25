@@ -44,6 +44,8 @@ import { CommonModule } from 'src/common.module';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
+import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
+import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 
 @Module({
   providers: [
@@ -61,6 +63,8 @@ import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.
     IsAssetLikedProvider,
     LowestAuctionRedisHandler,
     LowestAuctionProvider,
+    LowestAuctionForMarketplaceRedisHandler,
+    LowestAuctionForMarketplaceProvider,
     AssetsSupplyRedisHandler,
     AssetsSupplyLoader,
     AssetAuctionsCountRedisHandler,
