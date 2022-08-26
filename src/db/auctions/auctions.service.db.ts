@@ -293,6 +293,7 @@ export class AuctionsServiceDb {
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .groupBy('a.id')
       .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.endDate > 0`)
       .andWhere(`a.endDate <= ${endDate}`)
       .execute();
     const getPriceRange = this.getMinMaxForQuery(
@@ -436,7 +437,12 @@ export class AuctionsServiceDb {
           filters: [
             { field: 'status', values: ['Running'], op: Operation.EQ },
             { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
-            { field: 'endDate', values: [`${startDate}`], op: Operation.LE },
+            {
+              field: 'endDate',
+              values: [`${endDate ? endDate : startDate}`],
+              op: Operation.LE,
+            },
+            { field: 'endDate', values: ['1'], op: Operation.GE },
           ],
           operator: Operator.AND,
         },
