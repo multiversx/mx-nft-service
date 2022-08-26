@@ -45,3 +45,12 @@ export const isValidAddress = (address: string): boolean => {
     return false;
   }
 };
+
+export const removeCredentialsFromUrl = (url: string): string => {
+  const urlCredentialsRegex = new RegExp('(?<=//).*(?<=@)');
+  const credentials = url.match(urlCredentialsRegex);
+  if (credentials !== null) {
+    return url.replace(credentials[0], '');
+  }
+  return url;
+};
