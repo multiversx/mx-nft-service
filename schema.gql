@@ -51,7 +51,7 @@ type Asset {
   isNsfw: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
-  lowestAuction: Auction
+  lowestAuction(filters: MarketplaceFilters): Auction
   marketplaces: [Marketplace!]
   media: [Media!]
   metadata: Metadata

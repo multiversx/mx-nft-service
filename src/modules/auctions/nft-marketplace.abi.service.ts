@@ -178,7 +178,11 @@ export class NftMarketplaceAbiService {
       );
       scContract = await this.contract.getContract(contractAddress);
     } else {
-      scContract = await this.contract.getContract(contractAddress);
+      const contract = new ContractLoader(
+        MarketplaceUtils.commonMarketplaceAbiPath,
+        MarketplaceUtils.abiInterface,
+      );
+      scContract = await contract.getContract(contractAddress);
     }
     let getDataQuery = <Interaction>(
       scContract.methodsExplicit.getFullAuctionData([
