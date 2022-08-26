@@ -7,6 +7,7 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ApiSettings } from './models/api-settings';
+import { removeCredentialsFromUrl } from 'src/utils/helpers';
 
 @Injectable()
 export class ApiService {
@@ -78,7 +79,7 @@ export class ApiService {
       if (!handled) {
         let customError = {
           method: 'GET',
-          url,
+          url: removeCredentialsFromUrl(url),
           response: error.response?.data,
           status: error.response?.status,
           message: error.message,
@@ -109,7 +110,7 @@ export class ApiService {
       if (!handled) {
         let customError = {
           method: 'POST',
-          url,
+          url: removeCredentialsFromUrl(url),
           body: data,
           response: error.response?.data,
           status: error.response?.status,
@@ -149,7 +150,7 @@ export class ApiService {
       if (!handled) {
         let customError = {
           method: 'DELETE',
-          url,
+          url: removeCredentialsFromUrl(url),
           response: error.response?.data,
           status: error.response?.status,
           message: error.message,
