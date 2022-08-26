@@ -797,6 +797,10 @@ type Price {
   usdAmount: String
 }
 
+input PriceFilters {
+  token: String = "EGLD"
+}
+
 type PriceRange {
   maxBid: Price!
   minBid: Price!
@@ -838,7 +842,7 @@ type Query {
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
-  priceRange: PriceRange!
+  priceRange(filters: PriceFilters): PriceRange!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!

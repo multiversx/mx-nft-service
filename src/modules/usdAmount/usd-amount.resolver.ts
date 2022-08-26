@@ -13,21 +13,23 @@ export class UsdAmountResolver extends BaseResolver(Price) {
 
   @ResolveField(() => String)
   async usdAmount(@Parent() price: Price) {
-    const { timestamp, amount } = price;
-    const priceUsd = await this.usdPriceLoader.load(timestamp);
-    const priceUsdRedisValue = priceUsd.value;
+    const { timestamp, amount, token } = price;
+    if (token.toLocaleLowerCase() === 'egld') {
+      const priceUsd = await this.usdPriceLoader.load(timestamp);
+      const priceUsdRedisValue = priceUsd.value;
 
-    return timestamp
-      ? usdValue(
-          denominate({
-            input: amount,
-            denomination: 18,
-            decimals: 18,
-            showLastNonZeroDecimal: true,
-          }).replace(',', ''),
-          priceUsdRedisValue?.value,
-          2,
-        )
-      : null;
+      return timestamp
+        ? usdValue(
+            denominate({
+              input: amount,
+              denomination: 18,
+              decimals: 18,
+              showLastNonZeroDecimal: true,
+            }).replace(',', ''),
+            priceUsdRedisValue?.value,
+            2,
+          )
+        : null;
+    }
   }
 }

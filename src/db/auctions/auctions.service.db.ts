@@ -322,7 +322,7 @@ export class AuctionsServiceDb {
     return await Promise.all([getAuctions, getPriceRange]);
   }
 
-  async getMinMax(): Promise<PriceRange> {
+  async getMinMax(token: string): Promise<PriceRange> {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
@@ -331,9 +331,9 @@ export class AuctionsServiceDb {
       .leftJoin(
         'orders',
         'o',
-        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+        `o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id AND o2.priceToken='${token}')`,
       )
-      .where({ status: AuctionStatusEnum.Running })
+      .where({ status: AuctionStatusEnum.Running, paymentToken: token })
       .execute();
     return response[0];
   }
