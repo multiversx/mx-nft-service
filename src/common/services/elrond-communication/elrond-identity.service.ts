@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { removeCredentialsFromUrl } from 'src/utils/helpers';
 import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { Privacy } from './models';
@@ -28,7 +29,9 @@ export class ElrondIdentityService {
       });
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondIdentityService.getProfiles',
           addresses: addresses,
@@ -56,7 +59,9 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondIdentityService.getProfile',
           address: address,
@@ -82,7 +87,9 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondIdentityService.getAcountsByHerotag',
           address: searchTerm,
@@ -111,7 +118,9 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${url}`,
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondIdentityService.getAddressByHerotag',
           herotag: herotag,
