@@ -32,7 +32,7 @@ import { PriceRange } from './models/PriceRange.dto';
 import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
 import { Marketplace } from '../marketplaces/models';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
-import { TokenFilter } from './models/Price.Filter';
+import { TokenFilter } from './models/Token.Filter';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
