@@ -1,30 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import DataLoader = require('dataloader');
-import { ElrondDataService } from 'src/common';
-import { BaseProvider } from 'src/modules/common/base.loader';
-import { UsdPriceRedisHandler } from './usd-price.redis-handler';
+import { ElrondApiService } from 'src/common';
+import { CachingService } from 'src/common/services/caching/caching.service';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import * as Redis from 'ioredis';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { TimeConstants } from 'src/utils/time-utils';
+import { cacheConfig, elrondConfig } from 'src/config';
+import denominate from 'src/utils/formatters';
+import { computeUsdAmount } from 'src/utils/helpers';
 
 @Injectable()
-export class UsdPriceLoader extends BaseProvider<number> {
+export class UsdPriceLoader {
+  private readonly persistentRedisClient: Redis.Redis;
+
   constructor(
-    usdPriceLoaderRedisHandler: UsdPriceRedisHandler,
-    private dataService: ElrondDataService,
+    private cacheService: CachingService,
+    private readonly elrondApiService: ElrondApiService,
   ) {
-    super(
-      usdPriceLoaderRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
+    this.persistentRedisClient = this.cacheService.getClient(
+      cacheConfig.persistentRedisClientName,
     );
   }
 
-  async getData(timestamps: number[]) {
-    const response = await Promise.all(
-      timestamps.map(async (timestamp) => {
-        return {
-          timestamp,
-          value: await this.dataService.getQuotesHistoricalTimestamp(timestamp),
-        };
-      }),
+  private async getToken(tokenId: string): Promise<Token> {
+    const allTokens: Token[] = await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.AllTokens.key,
+      async () => await this.elrondApiService.getAllTokensWithDecimals(),
+      30 * TimeConstants.oneMinute,
     );
-    return response?.groupBy((asset) => asset.timestamp);
+
+    let token: Token;
+    if (tokenId === elrondConfig.egld) {
+      token = allTokens.find((t) => t.id === elrondConfig.wegld);
+    } else {
+      token = allTokens.find((t) => t.id === tokenId);
+    }
+
+    return token;
+  }
+
+  async getUsdAmount(tokenId: string, amount: string): Promise<string> {
+    const token: Token = await this.getToken(tokenId);
+    return computeUsdAmount(token.price, amount, token.decimals);
+  }
+
+  async getUsdAmountDenom(tokenId: string, amount: string): Promise<string> {
+    const token: Token = await this.getToken(tokenId);
+    const tokenPriceUsd = computeUsdAmount(token.price, amount, token.decimals);
+    return denominate({
+      input: tokenPriceUsd,
+      denomination: 6,
+      decimals: 3,
+      showLastNonZeroDecimal: false,
+    });
   }
 }

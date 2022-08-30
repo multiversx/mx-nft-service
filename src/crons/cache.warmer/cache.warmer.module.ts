@@ -9,6 +9,7 @@ import { AuctionsWarmerService } from './auctions.warmer.service';
 import { CollectionsWarmerService } from './collections.warmer.service';
 import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TokensWarmerService } from './tokens.warmer.service';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     CollectionsNftsRedisHandler,
     CollectionsWarmerService,
     AuctionsWarmerService,
+    TokensWarmerService,
   ],
   exports: [CommonModule],
 })

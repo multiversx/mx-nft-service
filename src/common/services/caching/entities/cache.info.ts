@@ -42,4 +42,9 @@ export class CacheInfo {
     key: 'nftTags',
     ttl: 5 * TimeConstants.oneMinute,
   };
+
+  static AllTokens: CacheInfo = {
+    key: 'allTokens',
+    ttl: 30 * TimeConstants.oneMinute,
+  };
 }

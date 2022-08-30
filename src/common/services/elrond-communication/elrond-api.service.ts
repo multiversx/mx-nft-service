@@ -10,6 +10,7 @@ import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
+import { Token } from './models/Token.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -407,6 +408,46 @@ export class ElrondApiService {
       this.getCollectionsCount.name,
       `collections/count${query}`,
     );
+  }
+
+  // todo: a solution for when there will be more than 10,000 tokens
+  async getAllTokens(): Promise<Token[]> {
+    const batchSize = constants.getTokensFromApiBatchSize;
+    let tokens: Token[] = [];
+    let newBatch: Token[] = [];
+
+    do {
+      newBatch = await this.doGetGeneric(
+        this.getAllTokens.name,
+        `mex/tokens?size=${batchSize}&from=${tokens.length}`,
+      );
+      tokens.push(...newBatch);
+    } while (newBatch.length !== 0);
+
+    return tokens;
+  }
+
+  async getAllTokensWithDecimals(): Promise<Token[]> {
+    const batchSize = constants.getTokensFromApiBatchSize;
+    const tokens: Token[] = await this.getAllTokens();
+
+    for (let i = 0; i < tokens.length; i += batchSize) {
+      const newBatchIds = tokens
+        .slice(i * batchSize, i * batchSize + batchSize)
+        .map((t) => t.id);
+      const identifiersParam: string = newBatchIds.join(',');
+      const newBatch = await this.doGetGeneric(
+        this.getAllTokensWithDecimals.name,
+        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
+      );
+
+      for (const tokenWithDecimals of newBatch) {
+        tokens.find((t) => t.id === tokenWithDecimals.identifier).decimals =
+          tokenWithDecimals.decimals;
+      }
+    }
+
+    return tokens;
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

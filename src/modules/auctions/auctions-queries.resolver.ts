@@ -32,7 +32,7 @@ import { PriceRange } from './models/PriceRange.dto';
 import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
 import { Marketplace } from '../marketplaces/models';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
-import { PriceFilters } from './models/Price.Filter';
+import { TokenFilter } from './models/Price.Filter';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -135,10 +135,10 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   async priceRange(
     @Args({
       name: 'filters',
-      type: () => PriceFilters,
+      type: () => TokenFilter,
       nullable: true,
     })
-    filters: PriceFilters,
+    filters: TokenFilter,
   ) {
     const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice(
       filters?.token ?? 'EGLD',
