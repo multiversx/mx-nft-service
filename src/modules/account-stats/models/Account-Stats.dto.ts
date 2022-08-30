@@ -30,7 +30,7 @@ export class AccountStats {
   static fromEntity(
     account: AccountStatsEntity,
     address: string = '',
-    marketplaceKey: string = '',
+    marketplaceKey: string = null,
   ) {
     return account
       ? new AccountStats({

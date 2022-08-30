@@ -53,6 +53,18 @@ export class MarketplacesCachingService {
     );
   }
 
+  public async getCollectionsByMarketplace(
+    getCollectionsByMarketplace: () => any,
+    key: string,
+  ): Promise<string[]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      generateCacheKeyFromParams('collections_by_marketplace', key),
+      () => getCollectionsByMarketplace(),
+      30 * TimeConstants.oneMinute,
+    );
+  }
+
   public async invalidateCache() {
     await this.cacheService.deleteInCache(
       this.redisClient,
