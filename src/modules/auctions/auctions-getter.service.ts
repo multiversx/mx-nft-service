@@ -465,7 +465,7 @@ export class AuctionsGetterService {
 
       const auctions = allAuctions.slice(offset, offset + limit);
 
-      return [auctions, auctions.length, priceRange];
+      return [auctions, allAuctions.length, priceRange];
     }
 
     const [auctions, count, priceRange] =
