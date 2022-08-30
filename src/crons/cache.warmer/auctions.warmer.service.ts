@@ -23,7 +23,7 @@ export class AuctionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleAuctionsEndingInAMonth() {
     await Locker.lock(
       'Auctions tokens ending in a month invalidations',
