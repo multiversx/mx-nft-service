@@ -115,7 +115,6 @@ export class AccountsStatsService {
           await this.marketplacesService.getCollectionsByMarketplace(
             marketplaceKey,
           );
-        console.log(collections);
         query.addCollections(collections).build();
       }
       return this.accountStatsCachingService.getCollectedCount(address, () =>

@@ -47,7 +47,6 @@ export class AssetsQuery {
   }
 
   addCollections(collections: string[]): this {
-    console.log(collections);
     return this.addParamToQuery('collections', collections?.toString());
   }
 

@@ -200,7 +200,6 @@ export class ElrondApiService {
     const url = `accounts/${address}/nfts/count${new AssetsQuery(
       query,
     ).build()}`;
-    console.log(url);
     return await this.doGetGeneric(this.getNftsForUserCount.name, url);
   }
 
