@@ -14,6 +14,8 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
 import { AccountStatsRepositoryMock } from 'src/db/account-stats/account-stats.repository-mock';
 import { AccountsStatsCachingServiceMock } from './accounts-stats.caching.service.mock';
 import { AccountsStatsCachingService } from '../accounts-stats.caching.service';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { MarketplacesServiceMock } from 'src/modules/marketplaces/marketplaces.service.mock';
 
 describe('AccountsStatsService', () => {
   let service: AccountsStatsService;
@@ -25,6 +27,11 @@ describe('AccountsStatsService', () => {
   const AccountsStatsCachingServiceProvider = {
     provide: AccountsStatsCachingService,
     useClass: AccountsStatsCachingServiceMock,
+  };
+
+  const MarketplaceServiceProvider = {
+    provide: MarketplacesService,
+    useClass: MarketplacesServiceMock,
   };
 
   const AccountStatsRepositoryProvider = {
@@ -51,6 +58,7 @@ describe('AccountsStatsService', () => {
         ElrondApiServiceProvider,
         AccountStatsRepositoryProvider,
         AccountsStatsService,
+        MarketplaceServiceProvider,
         RedisCacheServiceProvider,
         AccountsStatsCachingServiceProvider,
       ],
