@@ -237,12 +237,14 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
   @ResolveField('marketplace', () => Marketplace)
   async marketplace(@Parent() auction: Auction) {
-    const { marketplaceKey } = auction;
+    const { marketplaceKey, identifier } = auction;
 
     if (!marketplaceKey) return null;
     const marketplace = await this.marketplaceProvider.load(marketplaceKey);
     const marketplaceValue = marketplace?.value;
-    return marketplaceValue?.length > 0 ? marketplaceValue[0] : null;
+    return marketplaceValue?.length > 0
+      ? Marketplace.fromEntity(marketplaceValue[0], identifier)
+      : null;
   }
 
   private hasToResolveAsset(fields: string[]) {
