@@ -293,6 +293,7 @@ export class AuctionsServiceDb {
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
       .groupBy('a.id')
       .where({ status: AuctionStatusEnum.Running })
+      .andWhere(`a.endDate > 0`)
       .andWhere(`a.endDate <= ${endDate}`)
       .execute();
     const getPriceRange = this.getMinMaxForQuery(
@@ -322,7 +323,7 @@ export class AuctionsServiceDb {
     return await Promise.all([getAuctions, getPriceRange]);
   }
 
-  async getMinMax(): Promise<PriceRange> {
+  async getMinMax(token: string): Promise<PriceRange> {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
@@ -331,9 +332,9 @@ export class AuctionsServiceDb {
       .leftJoin(
         'orders',
         'o',
-        'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
+        `o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id AND o2.priceToken='${token}')`,
       )
-      .where({ status: AuctionStatusEnum.Running })
+      .where({ status: AuctionStatusEnum.Running, paymentToken: token })
       .execute();
     return response[0];
   }
@@ -436,7 +437,12 @@ export class AuctionsServiceDb {
           filters: [
             { field: 'status', values: ['Running'], op: Operation.EQ },
             { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
-            { field: 'endDate', values: [`${startDate}`], op: Operation.LE },
+            {
+              field: 'endDate',
+              values: [`${endDate ? endDate : startDate}`],
+              op: Operation.LE,
+            },
+            { field: 'endDate', values: ['1'], op: Operation.GE },
           ],
           operator: Operator.AND,
         },

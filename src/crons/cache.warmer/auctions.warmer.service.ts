@@ -24,25 +24,6 @@ export class AuctionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  async handleAuctionsEndingToday() {
-    await Locker.lock(
-      'Auctions ending today tokens invalidations',
-      async () => {
-        const tokens =
-          await this.auctionsGetterService.getRunningAuctionsEndingBefore(
-            DateUtils.getCurrentTimestampPlus(24),
-          );
-        await this.invalidateKey(
-          CacheInfo.AuctionsEndingToday.key,
-          tokens,
-          5 * TimeConstants.oneMinute,
-        );
-      },
-      true,
-    );
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
   async handleAuctionsEndingInAMonth() {
     await Locker.lock(
       'Auctions tokens ending in a month invalidations',

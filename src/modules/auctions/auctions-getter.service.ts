@@ -177,10 +177,12 @@ export class AuctionsGetterService {
     );
   }
 
-  async getMinMaxPrice(): Promise<{ minBid: string; maxBid: string }> {
+  async getMinMaxPrice(
+    token: string,
+  ): Promise<{ minBid: string; maxBid: string }> {
     try {
       return await this.auctionCachiungService.getMinAndMax(() =>
-        this.auctionServiceDb.getMinMax(),
+        this.auctionServiceDb.getMinMax(token),
       );
     } catch (error) {
       this.logger.error('An error occurred while getting min max price', {
