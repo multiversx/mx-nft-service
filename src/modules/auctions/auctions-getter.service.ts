@@ -33,9 +33,9 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
     try {
-      if (this.filtersForMarketplaceAuctions(queryRequest)) {
-        return await this.getMarketplaceAuctions(queryRequest);
-      }
+      // if (this.filtersForMarketplaceAuctions(queryRequest)) {
+      //   return await this.getMarketplaceAuctions(queryRequest);
+      // }
 
       return await this.auctionCachiungService.getOrSetAuctions(
         queryRequest,
