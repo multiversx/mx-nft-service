@@ -10,7 +10,14 @@ import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
-import { Filter, FiltersExpression, GroupBy, Grouping, Operation, Operator } from 'src/modules/common/filters/filtersTypes';
+import {
+  Filter,
+  FiltersExpression,
+  GroupBy,
+  Grouping,
+  Operation,
+  Operator,
+} from 'src/modules/common/filters/filtersTypes';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
@@ -51,53 +58,54 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Featured collection auctions',
       async () => {
-        const marketplaces = await this.marketplacesService.getMarketplacesFromDb();
-        for (const marketplace of marketplaces.items) {
-          const collections = await this.marketplacesService.getCollectionsByMarketplaceFromDb(marketplace.key);
+        const collections =
+          await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
 
-          for (const collection of collections) {
-            const queryRequest = new QueryRequest({
-              customFilters: [],
-              offset: 0,
-              limit: 10000,
-              filters: new FiltersExpression({
-                filters: [
-                  new Filter({
-                    field: 'status',
-                    values: ['Running'],
-                    op: Operation.EQ,
-                  }),
-                  new Filter({
-                    field: 'tags',
-                    values: [null],
-                    op: Operation.LIKE,
-                  }),
-                  new Filter({
-                    field: 'startDate',
-                    values: [Math.round(new Date().getTime() / 1000).toString()],
-                    op: Operation.LE,
-                  }),
-                  new Filter({
-                    field: 'collection',
-                    values: [collection],
-                    op: Operation.EQ,
-                  })
-                ],
-                operator: Operator.AND,
-              }),
-              groupByOption: new Grouping({ 
-                groupBy: GroupBy.IDENTIFIER
-              }),
-              sorting: [],
-            });
-  
-            const auctionResult = await this.auctionsGetterService.getAuctionsGroupByIdentifierRaw(queryRequest);
-            await this.invalidateKey(
-              `collectionAuctions:${collection}`,
-              auctionResult,
-              10 * TimeConstants.oneMinute,
+        for (const collection of collections) {
+          const queryRequest = new QueryRequest({
+            customFilters: [],
+            offset: 0,
+            limit: 10000,
+            filters: new FiltersExpression({
+              filters: [
+                new Filter({
+                  field: 'status',
+                  values: ['Running'],
+                  op: Operation.EQ,
+                }),
+                new Filter({
+                  field: 'tags',
+                  values: [null],
+                  op: Operation.LIKE,
+                }),
+                new Filter({
+                  field: 'startDate',
+                  values: [Math.round(new Date().getTime() / 1000).toString()],
+                  op: Operation.LE,
+                }),
+                new Filter({
+                  field: 'collection',
+                  values: [collection],
+                  op: Operation.EQ,
+                }),
+              ],
+              operator: Operator.AND,
+            }),
+            groupByOption: new Grouping({
+              groupBy: GroupBy.IDENTIFIER,
+            }),
+            sorting: [],
+          });
+
+          const auctionResult =
+            await this.auctionsGetterService.getAuctionsGroupByIdentifierRaw(
+              queryRequest,
             );
-          }
+          await this.invalidateKey(
+            `collectionAuctions:${collection}`,
+            auctionResult,
+            10 * TimeConstants.oneMinute,
+          );
         }
       },
       true,

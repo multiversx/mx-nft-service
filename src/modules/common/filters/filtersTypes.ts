@@ -86,9 +86,7 @@ export class Sorting {
 
 @InputType()
 export class Grouping {
-  constructor(
-    init?: Partial<Grouping>
-  ) {
+  constructor(init?: Partial<Grouping>) {
     Object.assign(this, init);
   }
 
@@ -98,9 +96,7 @@ export class Grouping {
 
 @InputType()
 export class FiltersExpression {
-  constructor(
-    init?: Partial<FiltersExpression>
-  ) {
+  constructor(init?: Partial<FiltersExpression>) {
     Object.assign(this, init);
   }
 

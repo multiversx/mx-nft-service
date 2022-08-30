@@ -155,4 +155,10 @@ export class MarketplacesService {
       );
     return collections.map((c) => c.collectionIdentifier);
   }
+
+  async getAllCollectionsIdentifiersFromDb(): Promise<string[]> {
+    const collections =
+      await this.marketplaceCollectionsRepository.getAllCollections();
+    return collections.map((c) => c.collectionIdentifier);
+  }
 }
