@@ -89,6 +89,13 @@ export class MarketplacesService {
     );
   }
 
+  async getCollectionsByMarketplace(marketplaceKey: string): Promise<string[]> {
+    return await this.cacheService.getCollectionsByMarketplace(
+      () => this.getCollectionsByMarketplaceFromDb(marketplaceKey),
+      marketplaceKey,
+    );
+  }
+
   private async getAllMarketplaces(): Promise<CollectionType<Marketplace>> {
     return await this.cacheService.getAllMarketplaces(() =>
       this.getMarketplacesFromDb(),
@@ -134,5 +141,15 @@ export class MarketplacesService {
     return marketplace?.length > 0
       ? Marketplace.fromEntity(marketplace[0])
       : null;
+  }
+
+  async getCollectionsByMarketplaceFromDb(
+    marketplaceKey: string,
+  ): Promise<string[]> {
+    const collections =
+      await this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
+        marketplaceKey,
+      );
+    return collections.map((c) => c.collectionIdentifier);
   }
 }

@@ -6,6 +6,7 @@ import { Logger } from 'winston';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
 @Injectable()
 export class AccountsStatsService {
@@ -14,6 +15,7 @@ export class AccountsStatsService {
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
+    private marketplacesService: MarketplacesService,
   ) {}
 
   async getStats(
@@ -102,16 +104,27 @@ export class AccountsStatsService {
     }
   }
 
-  async getCollectedCount(address: string): Promise<number> {
+  async getCollectedCount(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<number> {
     try {
-      const query = new AssetsQuery().build();
+      const query = new AssetsQuery();
+      if (marketplaceKey) {
+        const collections =
+          await this.marketplacesService.getCollectionsByMarketplace(
+            marketplaceKey,
+          );
+        query.addCollections(collections).build();
+      }
       return this.accountStatsCachingService.getCollectedCount(address, () =>
-        this.apiService.getNftsForUserCount(address, query),
+        this.apiService.getNftsForUserCount(address, query.build()),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting collected count', {
         path: 'AccountsStatsService.getCollectedCount',
         address,
+        marketplaceKey,
         exception: err?.message,
       });
       return 0;
