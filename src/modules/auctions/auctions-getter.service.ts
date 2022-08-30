@@ -18,6 +18,8 @@ import {
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
+import { Constants, RedisCacheService } from '@elrondnetwork/erdnest';
+import { cacheConfig } from 'src/config';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -27,7 +29,11 @@ export class AuctionsGetterService {
     private auctionCachiungService: AuctionsCachingService,
     private cacheService: CachingService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
+  ) {
+    this.redisClient = this.cacheService.getClient(
+      cacheConfig.persistentRedisClientName,
+    );
+  }
 
   async getAuctions(
     queryRequest: QueryRequest,
@@ -437,11 +443,47 @@ export class AuctionsGetterService {
     ];
   }
 
-  private async getAuctionsGroupByIdentifier(
+  async getAuctionsGroupByIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number, PriceRange]> {
+    const collectionValues = queryRequest.filters.filters.find(x => x.field === 'collection')?.values;
+    if (collectionValues && collectionValues.length > 0) {
+      const collection = collectionValues[0];
+
+      const offset = queryRequest.offset;
+      const limit = queryRequest.limit;
+
+      queryRequest.limit = 10000;
+
+      const [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+        this.redisClient,
+        `collectionAuctions:${collection}`,
+        async () => await this.getAuctionsGroupByIdentifierRaw(queryRequest),
+        Constants.oneMinute() * 10,
+        Constants.oneSecond() * 30,
+      );
+
+      const auctions = allAuctions.slice(offset, offset + limit);
+
+      return [auctions, auctions.length, priceRange];
+    }
+
+    const [auctions, count, priceRange] =
+      await this.auctionServiceDb.getAuctionsGroupBy(queryRequest);
+
+    return [
+      auctions?.map((element) => Auction.fromEntity(element)),
+      count,
+      priceRange,
+    ];
+  }
+
+  async getAuctionsGroupByIdentifierRaw(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
     const [auctions, count, priceRange] =
       await this.auctionServiceDb.getAuctionsGroupBy(queryRequest);
+
     return [
       auctions?.map((element) => Auction.fromEntity(element)),
       count,

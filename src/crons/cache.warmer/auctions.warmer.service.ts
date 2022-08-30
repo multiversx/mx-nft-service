@@ -9,6 +9,9 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { Filter, FiltersExpression, GroupBy, Grouping, Operation, Operator } from 'src/modules/common/filters/filtersTypes';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsWarmerService {
@@ -17,6 +20,7 @@ export class AuctionsWarmerService {
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
     private cacheService: CachingService,
+    private marketplacesService: MarketplacesService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.auctionsRedisClientName,
@@ -37,6 +41,64 @@ export class AuctionsWarmerService {
           tokens,
           3 * TimeConstants.oneMinute,
         );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForFeaturedCollections() {
+    await Locker.lock(
+      'Featured collection auctions',
+      async () => {
+        const marketplaces = await this.marketplacesService.getMarketplacesFromDb();
+        for (const marketplace of marketplaces.items) {
+          const collections = await this.marketplacesService.getCollectionsByMarketplaceFromDb(marketplace.key);
+
+          for (const collection of collections) {
+            const queryRequest = new QueryRequest({
+              customFilters: [],
+              offset: 0,
+              limit: 10000,
+              filters: new FiltersExpression({
+                filters: [
+                  new Filter({
+                    field: 'status',
+                    values: ['Running'],
+                    op: Operation.EQ,
+                  }),
+                  new Filter({
+                    field: 'tags',
+                    values: [null],
+                    op: Operation.LIKE,
+                  }),
+                  new Filter({
+                    field: 'startDate',
+                    values: [Math.round(new Date().getTime() / 1000).toString()],
+                    op: Operation.LE,
+                  }),
+                  new Filter({
+                    field: 'collection',
+                    values: [collection],
+                    op: Operation.EQ,
+                  })
+                ],
+                operator: Operator.AND,
+              }),
+              groupByOption: new Grouping({ 
+                groupBy: GroupBy.IDENTIFIER
+              }),
+              sorting: [],
+            });
+  
+            const auctionResult = await this.auctionsGetterService.getAuctionsGroupByIdentifierRaw(queryRequest);
+            await this.invalidateKey(
+              `collectionAuctions:${collection}`,
+              auctionResult,
+              10 * TimeConstants.oneMinute,
+            );
+          }
+        }
       },
       true,
     );
