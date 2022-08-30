@@ -33,14 +33,14 @@ export class CachingService {
     if (!forceRefresh) {
       const cachedValue = await this.localCacheService.getCacheValue<T>(key);
       if (cachedValue !== undefined) {
-        profiler.stop(`Local Cache hit for key ${key}`, true);
+        profiler.stop(`Local Cache hit for key ${key}`);
         return cachedValue;
       }
 
       const cached = await this.redisCacheService.get(client, key);
 
       if (cached !== undefined && cached !== null) {
-        profiler.stop(`Remote Cache hit for key ${key}`, true);
+        profiler.stop(`Remote Cache hit for key ${key}`);
 
         // we only set ttl to half because we don't know what the real ttl of the item is and we want it to work good in most scenarios
         await this.localCacheService.setCacheValue<T>(key, cached, localTtl);
@@ -51,7 +51,7 @@ export class CachingService {
       `caching:set:${key}`,
       promise,
     );
-    profiler.stop(`Cache miss for key ${key}`, true);
+    profiler.stop(`Cache miss for key ${key}`);
 
     if (localTtl > 0) {
       await this.localCacheService.setCacheValue<T>(key, value, localTtl);
