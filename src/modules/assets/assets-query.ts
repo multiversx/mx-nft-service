@@ -46,6 +46,11 @@ export class AssetsQuery {
     return this.addParamToQuery('collection', collection);
   }
 
+  addCollections(collections: string[]): this {
+    console.log(collections);
+    return this.addParamToQuery('collections', collections?.toString());
+  }
+
   addType(type: NftTypeEnum): this {
     return this.addParamToQuery('type', type);
   }

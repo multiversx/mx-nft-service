@@ -34,4 +34,14 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceEnti
       .where(`mc.collectionIdentifier = '${collection}'`)
       .execute();
   }
+
+  async getCollectionsByMarketplace(
+    marketplaceKey: string,
+  ): Promise<MarketplaceCollectionEntity[]> {
+    return await this.createQueryBuilder('mc')
+      .select('mc.collectionIdentifier as collectionIdentifier')
+      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .where(`m.key = '${marketplaceKey}'`)
+      .execute();
+  }
 }

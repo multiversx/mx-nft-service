@@ -43,9 +43,10 @@ export class AccountsStatsResolver {
 
   @ResolveField(() => Int)
   async collected(@Parent() stats: AccountStats) {
-    const { address } = stats;
+    const { address, marketplaceKey } = stats;
     const collectedCount = await this.accountsStatsService.getCollectedCount(
       address,
+      marketplaceKey,
     );
     return collectedCount || 0;
   }
