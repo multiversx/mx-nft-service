@@ -237,6 +237,7 @@ export class AssetsGetterService {
       .addTags(filters?.tags)
       .addIdentifiers(filters?.identifiers)
       .addCollection(filters?.collection)
+      .addCollections(filters?.collections)
       .addType(filters?.type)
       .withOwner()
       .withSupply()
@@ -254,6 +255,7 @@ export class AssetsGetterService {
       .addTags(filters?.tags)
       .addIdentifiers(filters?.identifiers)
       .addCollection(filters?.collection)
+      .addCollections(filters?.collections)
       .addType(filters?.type)
       .withSupply()
       .addPageSize(offset, limit)
@@ -266,6 +268,7 @@ export class AssetsGetterService {
       .addTags(filters?.tags)
       .addIdentifiers(filters?.identifiers)
       .addCollection(filters?.collection)
+      .addCollections(filters?.collections)
       .addType(filters?.type)
       .build();
   }

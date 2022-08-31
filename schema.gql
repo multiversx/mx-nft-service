@@ -132,6 +132,9 @@ type AssetPageInfo {
 
 input AssetsFilter {
   collection: String
+
+  """This will work only with an owner address"""
+  collections: [String!]
   creatorAddress: String
   identifier: String
   identifiers: [String!]
