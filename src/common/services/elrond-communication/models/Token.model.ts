@@ -4,13 +4,13 @@ import { Field, ObjectType } from '@nestjs/graphql';
 export class Token {
   @Field(() => String)
   identifier: string;
-  @Field(() => String)
-  symbol: string;
-  @Field(() => String)
-  name: string;
-  @Field(() => String)
-  priceUsd: string;
-  @Field(() => Number)
+  @Field(() => String, {nullable: true})
+  symbol?: string;
+  @Field(() => String, {nullable: true})
+  name?: string;
+  @Field(() => String, {nullable: true})
+  priceUsd?: string;
+  @Field(() => Number, {nullable: true})
   decimals?: number;
 
   constructor(init?: Partial<Token>) {

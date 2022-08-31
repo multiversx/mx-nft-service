@@ -62,7 +62,9 @@ export class UsdPriceLoader {
       return newToken;
     }
 
-    return null;
+    return new Token({
+      identifier: tokenId,
+    });
   }
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {
@@ -75,7 +77,7 @@ export class UsdPriceLoader {
     amount: string,
   ): Promise<string | null> {
     const token: Token = await this.getToken(tokenId);
-    if (token) {
+    if (token && token.priceUsd && token.decimals) {
       const usdAmount = computeUsdAmount(
         token.priceUsd,
         amount,
