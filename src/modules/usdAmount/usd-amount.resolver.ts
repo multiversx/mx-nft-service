@@ -5,14 +5,13 @@ import { UsdPriceLoader } from './loaders/usd-price.loader';
 
 @Resolver(() => Price)
 export class UsdAmountResolver extends BaseResolver(Price) {
-  constructor(private readonly usdPriceLoaderService: UsdPriceLoader) {
+  constructor(private readonly usdPriceLoader: UsdPriceLoader) {
     super();
   }
 
   @ResolveField(() => String)
   async usdAmount(@Parent() price: Price) {
-    console.log('price', price);
-    return this.usdPriceLoaderService.getUsdAmountDenom(
+    return this.usdPriceLoader.getUsdAmountDenom(
       price.token,
       price.amount,
     );
