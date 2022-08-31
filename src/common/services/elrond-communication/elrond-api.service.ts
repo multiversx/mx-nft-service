@@ -421,7 +421,8 @@ export class ElrondApiService {
         this.getAllTokens.name,
         `mex/tokens?size=${batchSize}&from=${tokens.length}`,
       );
-      tokens.push(...newBatch.map((t) => Token.fromElrondApiToken(t)));
+      const newBatchTokens = newBatch.map((t) => Token.fromElrondApiToken(t));
+      tokens.push(...newBatchTokens);
     } while (newBatch.length !== 0);
 
     return tokens;
@@ -441,9 +442,15 @@ export class ElrondApiService {
         `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
       );
 
+      if (newBatch === undefined) {
+        continue;
+      }
+
       for (const tokenWithDecimals of newBatch) {
-        tokens.find((t) => t.id === tokenWithDecimals.identifier).decimals =
-          tokenWithDecimals.decimals;
+        const token = tokens.find((t) => t.id === tokenWithDecimals.identifier);
+        if (token !== undefined) {
+          token.decimals = tokenWithDecimals.decimals;
+        }
       }
     }
 

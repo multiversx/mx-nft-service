@@ -27,18 +27,25 @@ export class UsdPriceLoader {
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,
       async () => await this.elrondApiService.getAllTokensWithDecimals(),
-      30 * TimeConstants.oneMinute,
+      CacheInfo.AllTokens.ttl,
     );
 
     let token: Token;
     if (tokenId === elrondConfig.egld) {
       token = allTokens.find((t) => t.id === elrondConfig.wegld);
-      token.id = token.name = token.symbol = tokenId;
     } else {
       token = allTokens.find((t) => t.id === tokenId);
     }
 
-    return token;
+    if (token) {
+      const newToken: Token = JSON.parse(JSON.stringify(token));
+      if (tokenId === elrondConfig.egld) {
+        newToken.id = newToken.name = newToken.symbol = tokenId;
+      }
+      return newToken;
+    }
+
+    throw new Error(`Can't find token ${tokenId}`);
   }
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {

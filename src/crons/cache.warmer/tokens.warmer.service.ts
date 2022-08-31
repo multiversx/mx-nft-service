@@ -31,7 +31,7 @@ export class TokensWarmerService {
         await this.invalidateKey(
           CacheInfo.AllTokens.key,
           tokens,
-          30 * TimeConstants.oneMinute,
+          CacheInfo.AllTokens.ttl,
         );
       },
       true,
