@@ -425,7 +425,7 @@ export class ElrondApiService {
 
     const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
     for (const tokenChunk of tokenChunks) {
-      const identifiersParam = tokenChunk.map((t) => t.id).join(',');
+      const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
       const tokensWithDecimals = await this.doGetGeneric(
         this.getAllTokensWithDecimals.name,
         `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
@@ -436,7 +436,7 @@ export class ElrondApiService {
       }
 
       for (const tokenWithDecimals of tokensWithDecimals) {
-        const token = tokens.find((t) => t.id === tokenWithDecimals.identifier);
+        const token = tokens.find((t) => t.identifier === tokenWithDecimals.identifier);
         if (token) {
           token.decimals = tokenWithDecimals.decimals;
         }

@@ -3,7 +3,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Token {
   @Field(() => String)
-  id: string;
+  identifier: string;
   @Field(() => String)
   symbol: string;
   @Field(() => String)
@@ -19,7 +19,7 @@ export class Token {
 
   static fromElrondApiToken(token: any): Token {
     return new Token({
-      id: token.id,
+      identifier: token.id,
       symbol: token.symbol,
       name: token.name,
       priceUsd: token.price,

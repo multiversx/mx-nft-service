@@ -33,15 +33,15 @@ export class UsdPriceLoader {
 
     let token: Token;
     if (tokenId === elrondConfig.egld) {
-      token = allTokens.find((t) => t.id === elrondConfig.wegld);
+      token = allTokens.find((t) => t.identifier === elrondConfig.wegld);
     } else {
-      token = allTokens.find((t) => t.id === tokenId);
+      token = allTokens.find((t) => t.identifier === tokenId);
     }
 
     if (token) {
       const newToken: Token = JSON.parse(JSON.stringify(token));
       if (tokenId === elrondConfig.egld) {
-        newToken.id = newToken.name = newToken.symbol = tokenId;
+        newToken.identifier = newToken.name = newToken.symbol = tokenId;
       }
       return newToken;
     }
