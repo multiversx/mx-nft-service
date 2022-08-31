@@ -163,6 +163,7 @@ export class FeedEventsSenderService {
           verified: bidNftData?.verified ? true : false,
           price: topics.currentBid,
           auctionId: auction.id,
+          marketplaceKey: auction.marketplaceKey,
         },
       }),
     );
