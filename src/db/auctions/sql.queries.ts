@@ -1,3 +1,5 @@
+import { QueryRequest } from "src/modules/common/filters/QueryRequest";
+
 export function getDefaultAuctionsForIdentifierQuery(
   identifier: string,
   endDate: number,
@@ -56,18 +58,34 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
    GROUP BY a.collection`;
 }
 
-export function getDefaultAuctionsQuery(endDate: number) {
+export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequest) {
+  let supplementalFilters = '';
+
+  const collection = queryRequest.getFilter('collection');
+  if (collection) {
+    supplementalFilters += ` AND a.collection = '${collection}'`;
+  }
+
+  const marketplaceKey = queryRequest.getFilter('marketplaceKey');
+  if (marketplaceKey) {
+    supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
+  }
+
   return `((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' AND a.endDate <= ${endDate})
+    WHERE a.status='Running' 
+       AND a.endDate <= ${endDate}
+       ${supplementalFilters})
     UNION All 
     (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
     FROM auctions a 
     LEFT JOIN LATERAL 
     (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' AND a.endDate> ${endDate}))
+    WHERE a.status='Running' 
+      AND a.endDate> ${endDate}
+       ${supplementalFilters}))
     order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
 }
 

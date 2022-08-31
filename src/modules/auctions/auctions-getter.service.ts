@@ -440,49 +440,10 @@ export class AuctionsGetterService {
     ];
   }
 
-  private getQueryFilter(queryRequest: QueryRequest, name: string): string | undefined {
-    const values = queryRequest.filters.filters.find(x => x.field === name)?.values;
-    if (!values || values.length === 0) {
-      return undefined;
-    }
-
-    return values[0];
-  }
-
-  private getQueryRange(queryRequest: QueryRequest, field: AuctionCustomEnum): { startPrice: string, endPrice: string } | undefined {
-    const customFilters = queryRequest.customFilters;
-    if (!customFilters) {
-      return undefined;
-    }
-
-    const customFilter = customFilters.find(x => x.field === field && x.op === Operation.BETWEEN);
-    if (!customFilter) {
-      return undefined;
-    }
-
-    const values = customFilters[0].values;
-    if (!values || values.length !== 2) {
-      return undefined;
-    }
-
-    return {
-      startPrice: values[0],
-      endPrice: values[1],
-    };
-  }
-
-  private getQuerySort(queryRequest: QueryRequest): { field: string, direction: Sort } | undefined {
-    if (!queryRequest.sorting || queryRequest.sorting.length === 0) {
-      return undefined;
-    }
-
-    return queryRequest.sorting[0];
-  }
-
   async getAuctionsGroupByIdentifier(queryRequest: QueryRequest): Promise<[Auction[], number, PriceRange]> {
-    const collectionFilter = this.getQueryFilter(queryRequest, 'collection');
-    const currentPriceFilter = this.getQueryRange(queryRequest, AuctionCustomEnum.CURRENTPRICE);
-    const sort = this.getQuerySort(queryRequest);
+    const collectionFilter = queryRequest.getFilter('collection');
+    const currentPriceFilter = queryRequest.getRange(AuctionCustomEnum.CURRENTPRICE);
+    const sort = queryRequest.getSort();
 
     const hasCurrentPriceFilter = currentPriceFilter && (currentPriceFilter.startPrice !== '0000000000000000000' || currentPriceFilter.endPrice !== '0000000000000000000');
 
@@ -495,7 +456,7 @@ export class AuctionsGetterService {
         Constants.oneSecond() * 30,
       );
 
-      const marketplaceFilter = this.getQueryFilter(queryRequest, 'marketplaceKey');
+      const marketplaceFilter = queryRequest.getFilter('marketplaceKey');
       if (marketplaceFilter) {
         allAuctions = allAuctions.filter(x => x.marketplaceKey === marketplaceFilter);
       }

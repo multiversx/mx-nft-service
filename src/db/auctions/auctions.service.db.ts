@@ -91,7 +91,7 @@ export class AuctionsServiceDb {
     queryBuilder
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY eD, IF(price, price, minBidDenominated) ASC) AS id
-    FROM (${getDefaultAuctionsQuery(endDate)})`,
+    FROM (${getDefaultAuctionsQuery(endDate, queryRequest)})`,
         't',
         'a.id = t.id',
       )
