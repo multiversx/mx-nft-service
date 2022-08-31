@@ -43,7 +43,7 @@ export class TokensWarmerService {
     await Locker.lock(
       'Egld Token invalidation',
       async () => {
-        const tokens = await this.elrondApiService.getEgldPriceFromBinanceCex();
+        const tokens = await this.elrondApiService.getEgldPriceFromEconomics();
         await this.invalidateKey(
           CacheInfo.EgldToken.key,
           tokens,

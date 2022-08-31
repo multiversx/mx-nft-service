@@ -27,7 +27,7 @@ export class UsdPriceLoader {
       this.cacheService.getOrSetCache(
         this.persistentRedisClient,
         CacheInfo.EgldToken.key,
-        async () => await this.elrondApiService.getEgldPriceFromBinanceCex(),
+        async () => await this.elrondApiService.getEgldPriceFromEconomics(),
         CacheInfo.EgldToken.ttl,
         TimeConstants.oneMinute,
       ),
