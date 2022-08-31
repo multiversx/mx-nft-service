@@ -6,7 +6,8 @@
     "chainID": "1",
     "version": 1,
     "metaChainShardId": 4294967295,
-    "egld": "EGLD"
+    "egld": "EGLD",
+    "wegld": "WEGLD-bd4d79"
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

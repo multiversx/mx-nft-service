@@ -101,11 +101,12 @@ export class AuctionsCachingService {
   }
 
   public async getMinAndMax(
+    token: string,
     getData: () => any,
   ): Promise<{ minBid: string; maxBid: string }> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      generateCacheKeyFromParams('minMaxPrice'),
+      generateCacheKeyFromParams('minMaxPrice', token),
       () => getData(),
       5 * TimeConstants.oneMinute,
     );

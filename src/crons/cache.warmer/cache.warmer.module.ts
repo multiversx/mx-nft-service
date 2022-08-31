@@ -14,6 +14,7 @@ import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.reposito
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
+import { TokensWarmerService } from './tokens.warmer.service';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
     CollectionsNftsRedisHandler,
     CollectionsWarmerService,
     AuctionsWarmerService,
+    TokensWarmerService,
   ],
   exports: [CommonModule],
 })

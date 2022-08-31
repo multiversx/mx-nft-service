@@ -1,30 +1,98 @@
 import { Injectable } from '@nestjs/common';
-import DataLoader = require('dataloader');
-import { ElrondDataService } from 'src/common';
-import { BaseProvider } from 'src/modules/common/base.loader';
-import { UsdPriceRedisHandler } from './usd-price.redis-handler';
+import { ElrondApiService } from 'src/common';
+import { CachingService } from 'src/common/services/caching/caching.service';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import * as Redis from 'ioredis';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { TimeConstants } from 'src/utils/time-utils';
+import { cacheConfig, elrondConfig } from 'src/config';
+import denominate from 'src/utils/formatters';
+import { computeUsdAmount } from 'src/utils/helpers';
 
 @Injectable()
-export class UsdPriceLoader extends BaseProvider<number> {
+export class UsdPriceLoader {
+  private readonly persistentRedisClient: Redis.Redis;
+
   constructor(
-    usdPriceLoaderRedisHandler: UsdPriceRedisHandler,
-    private dataService: ElrondDataService,
+    private cacheService: CachingService,
+    private readonly elrondApiService: ElrondApiService,
   ) {
-    super(
-      usdPriceLoaderRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
+    this.persistentRedisClient = this.cacheService.getClient(
+      cacheConfig.persistentRedisClientName,
     );
   }
 
-  async getData(timestamps: number[]) {
-    const response = await Promise.all(
-      timestamps.map(async (timestamp) => {
-        return {
-          timestamp,
-          value: await this.dataService.getQuotesHistoricalTimestamp(timestamp),
-        };
-      }),
-    );
-    return response?.groupBy((asset) => asset.timestamp);
+  async getToken(tokenId: string): Promise<Token | null> {
+    const [egldPriceUsd, allTokens] = await Promise.all([
+      this.cacheService.getOrSetCache(
+        this.persistentRedisClient,
+        CacheInfo.EgldToken.key,
+        async () => await this.elrondApiService.getEgldPriceFromEconomics(),
+        CacheInfo.EgldToken.ttl,
+        TimeConstants.oneMinute,
+      ),
+      this.cacheService.getOrSetCache(
+        this.persistentRedisClient,
+        CacheInfo.AllTokens.key,
+        async () => await this.elrondApiService.getAllTokensWithDecimals(),
+        CacheInfo.AllTokens.ttl,
+        TimeConstants.oneMinute,
+      ),
+    ]);
+
+    let token: Token;
+
+    if (tokenId === elrondConfig.egld) {
+      return new Token({
+        identifier: elrondConfig.egld,
+        symbol: elrondConfig.egld,
+        name: elrondConfig.egld,
+        decimals: elrondConfig.decimals,
+        priceUsd: egldPriceUsd,
+      });
+    }
+
+    token = allTokens.find((t) => t.identifier === tokenId);
+
+    if (token) {
+      const newToken: Token = JSON.parse(JSON.stringify(token));
+      if (tokenId === elrondConfig.egld) {
+        newToken.identifier = newToken.name = newToken.symbol = tokenId;
+      }
+      return newToken;
+    }
+
+    return new Token({
+      identifier: tokenId,
+    });
+  }
+
+  async getUsdAmount(tokenId: string, amount: string): Promise<string> {
+    const token: Token = await this.getToken(tokenId);
+    return computeUsdAmount(token.priceUsd, amount, token.decimals);
+  }
+
+  async getUsdAmountDenom(
+    tokenId: string,
+    amount: string,
+  ): Promise<string | null> {
+    const token: Token = await this.getToken(tokenId);
+    if (token && token.priceUsd && token.decimals) {
+      const usdAmount = computeUsdAmount(
+        token.priceUsd,
+        amount,
+        token.decimals,
+      );
+      if (tokenId === elrondConfig.egld) {
+        return usdAmount;
+      }
+      return denominate({
+        input: usdAmount,
+        denomination: 6,
+        decimals: 3,
+        showLastNonZeroDecimal: false,
+      });
+    }
+    return null;
   }
 }
