@@ -448,9 +448,9 @@ export class ElrondApiService {
     return tokens;
   }
 
-  async getEgldPriceFromBinanceCex(): Promise<string> {
+  async getEgldPriceFromEconomics(): Promise<string> {
     return await this.doGetGeneric(
-      this.getEgldPriceFromBinanceCex.name,
+      this.getEgldPriceFromEconomics.name,
       'economics?extract=price',
     );
   }
