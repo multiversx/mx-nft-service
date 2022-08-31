@@ -11,6 +11,7 @@ import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
+import { BatchUtils } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class ElrondApiService {
@@ -410,45 +411,32 @@ export class ElrondApiService {
     );
   }
 
-  // todo: a solution for when there will be more than 10,000 tokens
   async getAllTokens(): Promise<Token[]> {
-    const batchSize = constants.getTokensFromApiBatchSize;
-    let tokens: Token[] = [];
-    let newBatch: Token[] = [];
-
-    do {
-      newBatch = await this.doGetGeneric(
-        this.getAllTokens.name,
-        `mex/tokens?size=${batchSize}&from=${tokens.length}`,
-      );
-      const newBatchTokens = newBatch.map((t) => Token.fromElrondApiToken(t));
-      tokens.push(...newBatchTokens);
-    } while (newBatch.length !== 0);
-
-    return tokens;
+    return await this.doGetGeneric(
+      this.getAllTokens.name,
+      'mex/tokens?size=10000',
+    );
   }
 
   async getAllTokensWithDecimals(): Promise<Token[]> {
     const batchSize = constants.getTokensFromApiBatchSize;
     const tokens: Token[] = await this.getAllTokens();
 
-    for (let i = 0; i < tokens.length; i += batchSize) {
-      const newBatchIds = tokens
-        .slice(i * batchSize, i * batchSize + batchSize)
-        .map((t) => t.id);
-      const identifiersParam: string = newBatchIds.join(',');
-      const newBatch = await this.doGetGeneric(
+    const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
+    for (const tokenChunk of tokenChunks) {
+      const identifiersParam = tokenChunk.map(t => t.id).join(',');
+      const tokensWithDecimals = await this.doGetGeneric(
         this.getAllTokensWithDecimals.name,
         `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
       );
 
-      if (newBatch === undefined) {
+      if (!tokensWithDecimals) {
         continue;
       }
 
-      for (const tokenWithDecimals of newBatch) {
+      for (const tokenWithDecimals of tokensWithDecimals) {
         const token = tokens.find((t) => t.id === tokenWithDecimals.identifier);
-        if (token !== undefined) {
+        if (token) {
           token.decimals = tokenWithDecimals.decimals;
         }
       }
@@ -458,6 +446,6 @@ export class ElrondApiService {
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    return [...new Map(nfts.map((nft) => [nft['nonce'], nft])).values()];
+    return nfts.distinct(nft => nft.nonce);
   }
 }
