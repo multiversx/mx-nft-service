@@ -188,7 +188,7 @@ export class ExternalMarketplaceEventsService {
               AuctionEventEnum.EndAuctionEvent,
             );
             this.notificationsService.updateNotificationStatus([
-              parseInt(topicsEndAuction.auctionId, 16),
+              endAuction.id,
             ]);
             this.ordersService.updateOrder(
               endAuction.id,
