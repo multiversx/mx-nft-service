@@ -573,7 +573,8 @@ type MarketplaceEdge {
 }
 
 input MarketplaceFilters {
-  marketplaceKey: String!
+  marketplaceAddress: String
+  marketplaceKey: String
 }
 
 type MarketplacePageInfo {
