@@ -168,6 +168,7 @@ type Auction {
   id: ID!
   identifier: String!
   marketplace: Marketplace
+  marketplaceAuctionId: Int!
   marketplaceKey: String!
   maxBid: Price!
   minBid: Price!
