@@ -26,6 +26,19 @@ export class MarketplacesService {
     filters: MarketplaceFilters,
   ): Promise<CollectionType<Marketplace>> {
     let allMarketplaces = await this.getAllMarketplaces();
+
+    if (filters?.marketplaceKey && filters?.marketplaceAddress) {
+      const marketplace = allMarketplaces?.items?.find(
+        (m) =>
+          m.key === filters?.marketplaceKey &&
+          m.address === filters.marketplaceAddress,
+      );
+
+      return new CollectionType({
+        count: marketplace ? 1 : 0,
+        items: [marketplace],
+      });
+    }
     if (filters?.marketplaceKey) {
       const marketplace = allMarketplaces?.items?.find(
         (m) => m.key === filters?.marketplaceKey,
@@ -34,6 +47,17 @@ export class MarketplacesService {
       return new CollectionType({
         count: marketplace ? 1 : 0,
         items: [marketplace],
+      });
+    }
+
+    if (filters?.marketplaceAddress) {
+      let marketplaces = allMarketplaces?.items?.filter(
+        (m) => m.address === filters?.marketplaceAddress,
+      );
+      marketplaces = marketplaces?.slice(offset, offset + limit);
+      return new CollectionType({
+        count: marketplaces?.length,
+        items: marketplaces,
       });
     }
     const marketplaces = allMarketplaces?.items?.slice(offset, offset + limit);
