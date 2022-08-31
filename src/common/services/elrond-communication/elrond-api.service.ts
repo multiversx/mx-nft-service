@@ -448,6 +448,13 @@ export class ElrondApiService {
     return tokens;
   }
 
+  async getEgldPriceFromBinanceCex(): Promise<string> {
+    return await this.doGetGeneric(
+      this.getEgldPriceFromBinanceCex.name,
+      'economics?extract=price',
+    );
+  }
+
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
     return nfts.distinct((nft) => nft.nonce);
   }

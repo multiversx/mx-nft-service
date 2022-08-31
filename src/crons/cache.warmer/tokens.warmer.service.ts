@@ -38,6 +38,22 @@ export class TokensWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async updateEgldTokens() {
+    await Locker.lock(
+      'Egld Token invalidation',
+      async () => {
+        const tokens = await this.elrondApiService.getEgldPriceFromBinanceCex();
+        await this.invalidateKey(
+          CacheInfo.EgldToken.key,
+          tokens,
+          CacheInfo.EgldToken.ttl,
+        );
+      },
+      true,
+    );
+  }
+
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
     await this.refreshCacheKey(key, ttl);

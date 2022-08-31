@@ -23,20 +23,36 @@ export class UsdPriceLoader {
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
-    const allTokens: Token[] = await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
-      CacheInfo.AllTokens.key,
-      async () => await this.elrondApiService.getAllTokensWithDecimals(),
-      CacheInfo.AllTokens.ttl,
-      TimeConstants.oneMinute,
-    );
+    const [egldPriceUsd, allTokens] = await Promise.all([
+      this.cacheService.getOrSetCache(
+        this.persistentRedisClient,
+        CacheInfo.EgldToken.key,
+        async () => await this.elrondApiService.getEgldPriceFromBinanceCex(),
+        CacheInfo.EgldToken.ttl,
+        TimeConstants.oneMinute,
+      ),
+      this.cacheService.getOrSetCache(
+        this.persistentRedisClient,
+        CacheInfo.AllTokens.key,
+        async () => await this.elrondApiService.getAllTokensWithDecimals(),
+        CacheInfo.AllTokens.ttl,
+        TimeConstants.oneMinute,
+      ),
+    ]);
 
     let token: Token;
+
     if (tokenId === elrondConfig.egld) {
-      token = allTokens.find((t) => t.identifier === elrondConfig.wegld);
-    } else {
-      token = allTokens.find((t) => t.identifier === tokenId);
+      return new Token({
+        identifier: elrondConfig.egld,
+        symbol: elrondConfig.egld,
+        name: elrondConfig.egld,
+        decimals: elrondConfig.decimals,
+        priceUsd: egldPriceUsd,
+      });
     }
+
+    token = allTokens.find((t) => t.identifier === tokenId);
 
     if (token) {
       const newToken: Token = JSON.parse(JSON.stringify(token));
@@ -65,6 +81,9 @@ export class UsdPriceLoader {
         amount,
         token.decimals,
       );
+      if (tokenId === elrondConfig.egld) {
+        return usdAmount;
+      }
       return denominate({
         input: usdAmount,
         denomination: 6,
