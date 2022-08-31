@@ -214,8 +214,7 @@ export class ExternalMarketplaceEventsService {
           const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
             startAuctionIdentifier,
-            auctionTokenMarketplace.key,
-            auctionTokenMarketplace.address,
+            auctionTokenMarketplace,
             hash,
           );
           if (startAuction) {

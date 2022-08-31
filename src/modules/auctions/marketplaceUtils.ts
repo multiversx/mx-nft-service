@@ -1,3 +1,5 @@
+import { MarketplaceTypeEnum } from '../marketplaces/models/MarketplaceType.enum';
+
 export class MarketplaceUtils {
   public static readonly commonMarketplaceAbiPath: string =
     './src/abis/esdt-nft-marketplace.abi.json';
@@ -7,7 +9,7 @@ export class MarketplaceUtils {
 
   public static readonly abiInterface: string = 'EsdtNftMarketplace';
 
-  static isXoxnoMarketplace(marketplaceKey: string) {
-    return marketplaceKey && marketplaceKey === 'xoxno';
+  static isExternalMarketplace(type: MarketplaceTypeEnum) {
+    return type === MarketplaceTypeEnum.External;
   }
 }

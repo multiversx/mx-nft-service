@@ -16,7 +16,7 @@ export class Marketplace {
   url: string;
 
   @Field(() => MarketplaceTypeEnum)
-  type: string;
+  type: MarketplaceTypeEnum;
 
   @Field({ nullable: true })
   marketplaceCutPercentage: string;

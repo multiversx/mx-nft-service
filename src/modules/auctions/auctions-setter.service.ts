@@ -18,6 +18,7 @@ import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { MarketplaceUtils } from './marketplaceUtils';
+import { Marketplace } from '../marketplaces/models';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -32,35 +33,33 @@ export class AuctionsSetterService {
   async saveAuction(
     auctionId: number,
     identifier: string,
-    marketplaceKey: string,
-    marketplaceAddress: string,
+    marketplace: Marketplace,
     hash: string,
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
       const auctionData = await this.nftAbiService.getAuctionQuery(
-        marketplaceAddress,
         auctionId,
-        marketplaceKey,
+        marketplace,
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
-        const auctionEntity = MarketplaceUtils.isXoxnoMarketplace(
-          marketplaceKey,
+        const auctionEntity = MarketplaceUtils.isExternalMarketplace(
+          marketplace.type,
         )
           ? AuctionEntity.fromExternalAuctionAbi(
               auctionId,
               auctionData as ExternalAuctionAbi,
               asset?.tags?.toString(),
               hash,
-              marketplaceKey,
+              marketplace.key,
             )
           : AuctionEntity.fromAuctionAbi(
               auctionId,
               auctionData as AuctionAbi,
               asset?.tags?.toString(),
               hash,
-              marketplaceKey,
+              marketplace.key,
             );
         const savedAuction = await this.auctionServiceDb.insertAuction(
           auctionEntity,
