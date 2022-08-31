@@ -196,6 +196,7 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case ExternalAuctionEventEnum.Listing:
+        case AuctionEventEnum.AuctionTokenEvent:
           const auctionToken = new AuctionTokenEvent(event);
           const topicsAuctionToken = auctionToken.getTopics();
           const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
