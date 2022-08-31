@@ -17,6 +17,9 @@ export class Auction {
   @Field(() => ID)
   id: number;
 
+  @Field(() => Int)
+  marketplaceAuctionId: number;
+
   @Field(() => String, { nullable: true })
   ownerAddress: string;
 
@@ -124,6 +127,7 @@ export class Auction {
           tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
           marketplaceKey: auction.marketplaceKey,
+          marketplaceAuctionId: auction.marketplaceAuctionId,
         });
   }
 }
