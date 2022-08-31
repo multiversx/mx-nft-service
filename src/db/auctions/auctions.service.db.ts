@@ -358,6 +358,7 @@ export class AuctionsServiceDb {
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
+      .andWhere('o.priceToken = "EGLD"')
       .execute();
     return response[0];
   }

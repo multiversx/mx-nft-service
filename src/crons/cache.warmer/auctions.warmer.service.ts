@@ -58,49 +58,11 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Featured collection auctions',
       async () => {
-        const collections =
-          await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
+        const collections = await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
 
         for (const collection of collections) {
-          const queryRequest = new QueryRequest({
-            customFilters: [],
-            offset: 0,
-            limit: 10000,
-            filters: new FiltersExpression({
-              filters: [
-                new Filter({
-                  field: 'status',
-                  values: ['Running'],
-                  op: Operation.EQ,
-                }),
-                new Filter({
-                  field: 'tags',
-                  values: [null],
-                  op: Operation.LIKE,
-                }),
-                new Filter({
-                  field: 'startDate',
-                  values: [Math.round(new Date().getTime() / 1000).toString()],
-                  op: Operation.LE,
-                }),
-                new Filter({
-                  field: 'collection',
-                  values: [collection],
-                  op: Operation.EQ,
-                }),
-              ],
-              operator: Operator.AND,
-            }),
-            groupByOption: new Grouping({
-              groupBy: GroupBy.IDENTIFIER,
-            }),
-            sorting: [],
-          });
+          const auctionResult = await this.auctionsGetterService.getAuctionsByCollection(collection);
 
-          const auctionResult =
-            await this.auctionsGetterService.getAuctionsGroupByIdentifierRaw(
-              queryRequest,
-            );
           await this.invalidateKey(
             `collectionAuctions:${collection}`,
             auctionResult,
@@ -111,25 +73,6 @@ export class AuctionsWarmerService {
       true,
     );
   }
-
-  // @Cron(CronExpression.EVERY_MINUTE)
-  // async handleMarketplaceAuctions() {
-  //   await Locker.lock(
-  //     'Marketplace Auctions invalidations',
-  //     async () => {
-  //       const tokens =
-  //         await this.auctionsGetterService.getMarketplaceAuctionsQuery(
-  //           DateUtils.getCurrentTimestamp(),
-  //         );
-  //       await this.invalidateKey(
-  //         CacheInfo.MarketplaceAuctions.key,
-  //         tokens,
-  //         3 * TimeConstants.oneMinute,
-  //       );
-  //     },
-  //     true,
-  //   );
-  // }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
