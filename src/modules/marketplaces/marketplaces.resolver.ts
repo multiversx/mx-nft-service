@@ -25,16 +25,18 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const campaigns = await this.marketplaceService.getMarketplaces(
+    const marketplaces = await this.marketplaceService.getMarketplaces(
       limit,
       offset,
       filters,
     );
+    // todo: investigate
+    pagination.after = undefined;
     return PageResponse.mapResponse<Marketplace>(
-      campaigns?.items || [],
+      marketplaces?.items || [],
       pagination,
-      campaigns?.count || 0,
-      offset,
+      marketplaces?.count || 0,
+      0,
       limit,
     );
   }
