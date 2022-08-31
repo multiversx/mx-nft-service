@@ -143,6 +143,12 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   collection: string;
 
+  @Field(() => [String], {
+    nullable: true,
+    description: 'This will work only with an owner address',
+  })
+  collections: string[];
+
   @Field(() => [String], { nullable: true })
   tags: [string];
 
