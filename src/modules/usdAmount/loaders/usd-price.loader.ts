@@ -22,7 +22,7 @@ export class UsdPriceLoader {
     );
   }
 
-  private async getToken(tokenId: string): Promise<Token> {
+  async getToken(tokenId: string): Promise<Token> {
     const allTokens: Token[] = await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,
@@ -33,6 +33,7 @@ export class UsdPriceLoader {
     let token: Token;
     if (tokenId === elrondConfig.egld) {
       token = allTokens.find((t) => t.id === elrondConfig.wegld);
+      token.id = token.name = token.symbol = tokenId;
     } else {
       token = allTokens.find((t) => t.id === tokenId);
     }
@@ -42,12 +43,16 @@ export class UsdPriceLoader {
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {
     const token: Token = await this.getToken(tokenId);
-    return computeUsdAmount(token.price, amount, token.decimals);
+    return computeUsdAmount(token.priceUsd, amount, token.decimals);
   }
 
   async getUsdAmountDenom(tokenId: string, amount: string): Promise<string> {
     const token: Token = await this.getToken(tokenId);
-    const tokenPriceUsd = computeUsdAmount(token.price, amount, token.decimals);
+    const tokenPriceUsd = computeUsdAmount(
+      token.priceUsd,
+      amount,
+      token.decimals,
+    );
     return denominate({
       input: tokenPriceUsd,
       denomination: 6,

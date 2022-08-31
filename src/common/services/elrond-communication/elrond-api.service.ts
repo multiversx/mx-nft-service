@@ -421,7 +421,7 @@ export class ElrondApiService {
         this.getAllTokens.name,
         `mex/tokens?size=${batchSize}&from=${tokens.length}`,
       );
-      tokens.push(...newBatch);
+      tokens.push(...newBatch.map((t) => Token.fromElrondApiToken(t)));
     } while (newBatch.length !== 0);
 
     return tokens;

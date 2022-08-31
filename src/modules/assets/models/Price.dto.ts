@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { elrondConfig } from 'src/config';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
@@ -15,6 +16,9 @@ export class Price {
   usdAmount: string;
   @Field(() => Int)
   nonce: number;
+
+  @Field(() => Token, { nullable: true })
+  tokenData: Token;
 
   constructor(init?: Partial<Price>) {
     Object.assign(this, init);
