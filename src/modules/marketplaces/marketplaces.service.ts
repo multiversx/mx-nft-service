@@ -8,11 +8,14 @@ import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class MarketplacesService {
   constructor(
+    @InjectRepository(MarketplaceRepository)
     private marketplacesRepository: MarketplaceRepository,
+    @InjectRepository(MarketplaceCollectionsRepository)
     private marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private cacheService: MarketplacesCachingService,
   ) {}
@@ -150,6 +153,12 @@ export class MarketplacesService {
       await this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
         marketplaceKey,
       );
+    return collections.map((c) => c.collectionIdentifier);
+  }
+
+  async getAllCollectionsIdentifiersFromDb(): Promise<string[]> {
+    const collections =
+      await this.marketplaceCollectionsRepository.getAllCollections();
     return collections.map((c) => c.collectionIdentifier);
   }
 }

@@ -977,11 +977,11 @@ enum TierStatusEnum {
 }
 
 type Token {
-  decimals: Float!
-  id: String!
-  name: String!
-  priceUsd: String!
-  symbol: String!
+  decimals: Float
+  identifier: String!
+  name: String
+  priceUsd: String
+  symbol: String
 }
 
 input TokenFilter {

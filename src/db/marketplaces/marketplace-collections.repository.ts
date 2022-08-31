@@ -3,7 +3,7 @@ import { MarketplaceCollectionEntity } from './marketplace-collection.entity';
 import { MarketplaceEntity } from './marketplace.entity';
 
 @EntityRepository(MarketplaceCollectionEntity)
-export class MarketplaceCollectionsRepository extends Repository<MarketplaceEntity> {
+export class MarketplaceCollectionsRepository extends Repository<MarketplaceCollectionEntity> {
   async getMarketplaceByAddressAndCollection(
     collection: string,
     address: string,
@@ -19,6 +19,9 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceEnti
         `mc.collectionIdentifier = '${collection}' and m.address= '${address}'`,
       )
       .execute();
+  }
+  async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
+    return await this.find();
   }
 
   async getMarketplaceByCollection(

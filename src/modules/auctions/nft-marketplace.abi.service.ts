@@ -41,6 +41,7 @@ import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
+import { Marketplace } from '../marketplaces/models';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -166,23 +167,22 @@ export class NftMarketplaceAbiService {
   }
 
   async getAuctionQuery(
-    contractAddress: string,
     auctionId: number,
-    marketplaceKey?: string,
+    marketplace: Marketplace,
   ): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
-    if (MarketplaceUtils.isXoxnoMarketplace(marketplaceKey)) {
+    if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
       this.contract = new ContractLoader(
         MarketplaceUtils.xoxnoMarketplaceAbiPath,
         MarketplaceUtils.abiInterface,
       );
-      scContract = await this.contract.getContract(contractAddress);
+      scContract = await this.contract.getContract(marketplace.address);
     } else {
       const contract = new ContractLoader(
         MarketplaceUtils.commonMarketplaceAbiPath,
         MarketplaceUtils.abiInterface,
       );
-      scContract = await contract.getContract(contractAddress);
+      scContract = await contract.getContract(marketplace.address);
     }
     let getDataQuery = <Interaction>(
       scContract.methodsExplicit.getFullAuctionData([

@@ -91,7 +91,7 @@ export class AuctionsServiceDb {
     queryBuilder
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY eD, IF(price, price, minBidDenominated) ASC) AS id
-    FROM (${getDefaultAuctionsQuery(endDate)})`,
+    FROM (${getDefaultAuctionsQuery(endDate, queryRequest)})`,
         't',
         'a.id = t.id',
       )
@@ -358,6 +358,7 @@ export class AuctionsServiceDb {
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
+      .andWhere('o.priceToken = "EGLD"')
       .execute();
     return response[0];
   }

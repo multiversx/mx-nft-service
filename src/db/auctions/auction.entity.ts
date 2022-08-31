@@ -20,6 +20,7 @@ export class AuctionEntity extends BaseEntity {
   marketplaceAuctionId: number;
 
   @Column({ length: 20 })
+  @Index('auction_collection')
   collection: string;
 
   @Column()
@@ -65,9 +66,11 @@ export class AuctionEntity extends BaseEntity {
   maxBidDenominated: number;
 
   @Column()
+  @Index('auction_start_date')
   startDate: number;
 
   @Column()
+  @Index('auction_end_date')
   endDate: number;
 
   @Column()

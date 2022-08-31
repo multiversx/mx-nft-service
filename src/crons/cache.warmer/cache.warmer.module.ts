@@ -9,6 +9,7 @@ import { AuctionsWarmerService } from './auctions.warmer.service';
 import { CollectionsWarmerService } from './collections.warmer.service';
 import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { TokensWarmerService } from './tokens.warmer.service';
 
 @Module({
@@ -17,6 +18,7 @@ import { TokensWarmerService } from './tokens.warmer.service';
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     PubSubListenerModule,
+    MarketplacesModuleGraph,
   ],
   providers: [
     CollectionsService,

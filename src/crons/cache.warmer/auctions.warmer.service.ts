@@ -9,6 +9,16 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import {
+  Filter,
+  FiltersExpression,
+  GroupBy,
+  Grouping,
+  Operation,
+  Operator,
+} from 'src/modules/common/filters/filtersTypes';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsWarmerService {
@@ -17,6 +27,7 @@ export class AuctionsWarmerService {
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
     private cacheService: CachingService,
+    private marketplacesService: MarketplacesService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.auctionsRedisClientName,
@@ -42,24 +53,26 @@ export class AuctionsWarmerService {
     );
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
-  // async handleMarketplaceAuctions() {
-  //   await Locker.lock(
-  //     'Marketplace Auctions invalidations',
-  //     async () => {
-  //       const tokens =
-  //         await this.auctionsGetterService.getMarketplaceAuctionsQuery(
-  //           DateUtils.getCurrentTimestamp(),
-  //         );
-  //       await this.invalidateKey(
-  //         CacheInfo.MarketplaceAuctions.key,
-  //         tokens,
-  //         3 * TimeConstants.oneMinute,
-  //       );
-  //     },
-  //     true,
-  //   );
-  // }
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForFeaturedCollections() {
+    await Locker.lock(
+      'Featured collection auctions',
+      async () => {
+        const collections = await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
+
+        for (const collection of collections) {
+          const auctionResult = await this.auctionsGetterService.getAuctionsByCollection(collection);
+
+          await this.invalidateKey(
+            `collectionAuctions:${collection}`,
+            auctionResult,
+            10 * TimeConstants.oneMinute,
+          );
+        }
+      },
+      true,
+    );
+  }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
