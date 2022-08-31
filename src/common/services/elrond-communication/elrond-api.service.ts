@@ -412,10 +412,11 @@ export class ElrondApiService {
   }
 
   async getAllTokens(): Promise<Token[]> {
-    return await this.doGetGeneric(
+    const allTokens = await this.doGetGeneric(
       this.getAllTokens.name,
       'mex/tokens?size=10000',
     );
+    return allTokens.map((t) => Token.fromElrondApiToken(t));
   }
 
   async getAllTokensWithDecimals(): Promise<Token[]> {
@@ -424,7 +425,7 @@ export class ElrondApiService {
 
     const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
     for (const tokenChunk of tokenChunks) {
-      const identifiersParam = tokenChunk.map(t => t.id).join(',');
+      const identifiersParam = tokenChunk.map((t) => t.id).join(',');
       const tokensWithDecimals = await this.doGetGeneric(
         this.getAllTokensWithDecimals.name,
         `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
@@ -446,6 +447,6 @@ export class ElrondApiService {
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    return nfts.distinct(nft => nft.nonce);
+    return nfts.distinct((nft) => nft.nonce);
   }
 }

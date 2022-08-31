@@ -28,6 +28,7 @@ export class UsdPriceLoader {
       CacheInfo.AllTokens.key,
       async () => await this.elrondApiService.getAllTokensWithDecimals(),
       CacheInfo.AllTokens.ttl,
+      TimeConstants.oneMinute,
     );
 
     let token: Token;
@@ -55,13 +56,9 @@ export class UsdPriceLoader {
 
   async getUsdAmountDenom(tokenId: string, amount: string): Promise<string> {
     const token: Token = await this.getToken(tokenId);
-    const tokenPriceUsd = computeUsdAmount(
-      token.priceUsd,
-      amount,
-      token.decimals,
-    );
+    const usdAmount = computeUsdAmount(token.priceUsd, amount, token.decimals);
     return denominate({
-      input: tokenPriceUsd,
+      input: usdAmount,
       denomination: 6,
       decimals: 3,
       showLastNonZeroDecimal: false,

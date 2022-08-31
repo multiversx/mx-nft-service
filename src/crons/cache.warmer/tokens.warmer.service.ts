@@ -22,7 +22,7 @@ export class TokensWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async updateTokens() {
     await Locker.lock(
       'Tokens invalidations',
