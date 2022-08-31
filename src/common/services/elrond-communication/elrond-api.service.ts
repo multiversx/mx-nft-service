@@ -436,7 +436,9 @@ export class ElrondApiService {
       }
 
       for (const tokenWithDecimals of tokensWithDecimals) {
-        const token = tokens.find((t) => t.identifier === tokenWithDecimals.identifier);
+        const token = tokens.find(
+          (t) => t.identifier === tokenWithDecimals.identifier,
+        );
         if (token) {
           token.decimals = tokenWithDecimals.decimals;
         }

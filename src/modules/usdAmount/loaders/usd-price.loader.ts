@@ -22,7 +22,7 @@ export class UsdPriceLoader {
     );
   }
 
-  async getToken(tokenId: string): Promise<Token> {
+  async getToken(tokenId: string): Promise<Token | null> {
     const allTokens: Token[] = await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,
@@ -46,7 +46,7 @@ export class UsdPriceLoader {
       return newToken;
     }
 
-    throw new Error(`Can't find token ${tokenId}`);
+    return null;
   }
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {
@@ -54,14 +54,24 @@ export class UsdPriceLoader {
     return computeUsdAmount(token.priceUsd, amount, token.decimals);
   }
 
-  async getUsdAmountDenom(tokenId: string, amount: string): Promise<string> {
+  async getUsdAmountDenom(
+    tokenId: string,
+    amount: string,
+  ): Promise<string | null> {
     const token: Token = await this.getToken(tokenId);
-    const usdAmount = computeUsdAmount(token.priceUsd, amount, token.decimals);
-    return denominate({
-      input: usdAmount,
-      denomination: 6,
-      decimals: 3,
-      showLastNonZeroDecimal: false,
-    });
+    if (token) {
+      const usdAmount = computeUsdAmount(
+        token.priceUsd,
+        amount,
+        token.decimals,
+      );
+      return denominate({
+        input: usdAmount,
+        denomination: 6,
+        decimals: 3,
+        showLastNonZeroDecimal: false,
+      });
+    }
+    return null;
   }
 }
