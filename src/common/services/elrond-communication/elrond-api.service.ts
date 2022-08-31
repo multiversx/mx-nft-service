@@ -10,6 +10,8 @@ import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
+import { Token } from './models/Token.model';
+import { BatchUtils } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class ElrondApiService {
@@ -409,7 +411,51 @@ export class ElrondApiService {
     );
   }
 
+  async getAllTokens(): Promise<Token[]> {
+    const allTokens = await this.doGetGeneric(
+      this.getAllTokens.name,
+      'mex/tokens?size=10000',
+    );
+    return allTokens.map((t) => Token.fromElrondApiToken(t));
+  }
+
+  async getAllTokensWithDecimals(): Promise<Token[]> {
+    const batchSize = constants.getTokensFromApiBatchSize;
+    const tokens: Token[] = await this.getAllTokens();
+
+    const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
+    for (const tokenChunk of tokenChunks) {
+      const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
+      const tokensWithDecimals = await this.doGetGeneric(
+        this.getAllTokensWithDecimals.name,
+        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
+      );
+
+      if (!tokensWithDecimals) {
+        continue;
+      }
+
+      for (const tokenWithDecimals of tokensWithDecimals) {
+        const token = tokens.find(
+          (t) => t.identifier === tokenWithDecimals.identifier,
+        );
+        if (token) {
+          token.decimals = tokenWithDecimals.decimals;
+        }
+      }
+    }
+
+    return tokens;
+  }
+
+  async getEgldPriceFromEconomics(): Promise<string> {
+    return await this.doGetGeneric(
+      this.getEgldPriceFromEconomics.name,
+      'economics?extract=price',
+    );
+  }
+
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    return [...new Map(nfts.map((nft) => [nft['nonce'], nft])).values()];
+    return nfts.distinct((nft) => nft.nonce);
   }
 }

@@ -181,7 +181,7 @@ export class AuctionsGetterService {
     token: string,
   ): Promise<{ minBid: string; maxBid: string }> {
     try {
-      return await this.auctionCachiungService.getMinAndMax(() =>
+      return await this.auctionCachiungService.getMinAndMax(token, () =>
         this.auctionServiceDb.getMinMax(token),
       );
     } catch (error) {

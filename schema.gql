@@ -798,11 +798,8 @@ type Price {
   nonce: Int!
   timestamp: Int!
   token: ID!
+  tokenData: Token
   usdAmount: String
-}
-
-input PriceFilters {
-  token: String = "EGLD"
 }
 
 type PriceRange {
@@ -846,7 +843,7 @@ type Query {
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
-  priceRange(filters: PriceFilters): PriceRange!
+  priceRange(filters: TokenFilter): PriceRange!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
@@ -977,6 +974,18 @@ input TierArgs {
 enum TierStatusEnum {
   Running
   Sold
+}
+
+type Token {
+  decimals: Float!
+  id: String!
+  name: String!
+  priceUsd: String!
+  symbol: String!
+}
+
+input TokenFilter {
+  token: String = "EGLD"
 }
 
 type TransactionNode {
