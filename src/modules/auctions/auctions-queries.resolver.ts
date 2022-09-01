@@ -33,6 +33,7 @@ import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
 import { Marketplace } from '../marketplaces/models';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 import { TokenFilter } from './models/Token.Filter';
+import { elrondConfig } from 'src/config';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -142,7 +143,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     filters: TokenFilter,
   ) {
     const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice(
-      filters?.token ?? 'EGLD',
+      filters?.token ?? elrondConfig.egld,
     );
     return PriceRange.fromEntity(minBid, maxBid);
   }
