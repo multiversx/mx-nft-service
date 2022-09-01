@@ -153,7 +153,7 @@ export class ElrondApiService {
       .addIdentifiers(identifiers)
       .addPageSize(offset, identifiers.length)
       .addQuery(query)
-      .build()}`;
+      .build(false)}`;
     return await this.doGetGeneric(this.getNftsByIdentifiers.name, query);
   }
 

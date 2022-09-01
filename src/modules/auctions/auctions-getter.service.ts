@@ -61,6 +61,11 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
+      const tags = queryRequest.getFilter('tags');
+      if (tags && tags.length > 0 && tags[0]) {
+        return this.getMappedAuctionsOrderBids(queryRequest);
+      }
+
       const [allAuctions, count, priceRange] = await this.cacheService.getOrSetCache(
         this.redisClient,
         CacheInfo.TopAuctionsOrderByNoBids.key,
