@@ -7,7 +7,7 @@ export function getDefaultAuctionsForIdentifierQuery(
   offset: number = 0,
   status: string[] = ['Running', 'Claimable'],
 ) {
-  return `(SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
+  return `(SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
@@ -16,14 +16,14 @@ export function getDefaultAuctionsForIdentifierQuery(
     )}) AND a.identifier = '${identifier}'
      AND a.endDate <= ${endDate})
     UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
+    (SELECT a.*, o.priceAmountDenominated as price
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status in (${status.map(
       (value) => `'${value}'`,
     )}) AND a.identifier = '${identifier}' AND a.endDate > ${endDate})
-    order by eD, if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
+    order by if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
 
 export function getDefaultAuctionsForIdentifierQueryCount(
@@ -31,7 +31,7 @@ export function getDefaultAuctionsForIdentifierQueryCount(
   endDate: number,
   status: string[] = ['Running', 'Claimable'],
 ) {
-  return `SELECT COUNT(1) as Count from ((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
+  return `SELECT COUNT(1) as Count from ((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
@@ -40,14 +40,14 @@ export function getDefaultAuctionsForIdentifierQueryCount(
     )}) AND a.identifier = '${identifier}'
      AND a.endDate <= ${endDate})
     UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
+    (SELECT a.*, o.priceAmountDenominated as price
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status in (${status.map(
       (value) => `'${value}'`,
     )}) AND a.identifier = '${identifier}' AND a.endDate> ${endDate})
-    order by eD, if(price, price, minBidDenominated) ASC) as temp`;
+    order by if(price, price, minBidDenominated) ASC) as temp`;
 }
 
 export function getOnSaleAssetsCountForCollection(collections: string[]) {
@@ -71,7 +71,7 @@ export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequ
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
   }
 
-  return `((SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
+  return `((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
@@ -79,14 +79,14 @@ export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequ
        AND a.endDate <= ${endDate}
        ${supplementalFilters})
     UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
+    (SELECT a.*, o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
     WHERE a.status='Running' 
       AND a.endDate> ${endDate}
        ${supplementalFilters}))
-    order by eD, if(price, price, minBidDenominated) ASC ) as temp`;
+    order if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
 export function getLowestAuctionForIdentifiers(
