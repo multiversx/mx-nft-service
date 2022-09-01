@@ -10,6 +10,7 @@ import {
 import {
   AuctionsSetterService,
   AuctionsGetterService,
+  NftMarketplaceAbiService,
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
@@ -28,6 +29,7 @@ import {
   AuctionTokenEvent,
 } from '../entities/auction';
 import { ChangePriceEvent } from '../entities/auction/changePrice.event';
+import { UpdatePriceEvent } from '../entities/auction/updatePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
@@ -40,6 +42,7 @@ export class ExternalMarketplaceEventsService {
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
+    private nftAbiService: NftMarketplaceAbiService,
     private elrondApi: ElrondApiService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -234,7 +237,6 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case ExternalAuctionEventEnum.ChangePrice:
-        case ExternalAuctionEventEnum.UpdatePrice:
           const changePriceEvent = new ChangePriceEvent(event);
           const topicsChangePrice = changePriceEvent.getTopics();
           const changePriceMarketplace: Marketplace =
@@ -263,6 +265,34 @@ export class ExternalMarketplaceEventsService {
             );
           }
           break;
+        case ExternalAuctionEventEnum.UpdatePrice:
+          const updatePriceEvent = new UpdatePriceEvent(event);
+          const topicsUpdatePrice = updatePriceEvent.getTopics();
+          const updatePriceMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
+              updatePriceEvent.getAddress(),
+            );
+          this.logger.log(
+            `Update price event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
+          );
+          let updatePriceAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(topicsUpdatePrice.auctionId, 16),
+              updatePriceMarketplace.key,
+            );
+          const [minBid] = await this.nftAbiService.getMinMaxAuction(
+            parseInt(topicsUpdatePrice.auctionId, 16),
+            updatePriceMarketplace,
+          );
+          if (updatePriceAuction && minBid) {
+            this.updateAuctionPrice(updatePriceAuction, minBid.toFixed(), hash);
+
+            this.auctionsService.updateAuction(
+              updatePriceAuction,
+              ExternalAuctionEventEnum.UpdatePrice,
+            );
+          }
+          break;
       }
     }
   }
@@ -270,7 +300,6 @@ export class ExternalMarketplaceEventsService {
   private updateAuctionPrice(
     changePriceAuction: AuctionEntity,
     newBid: string,
-
     hash: string,
   ) {
     changePriceAuction.minBid = newBid;
