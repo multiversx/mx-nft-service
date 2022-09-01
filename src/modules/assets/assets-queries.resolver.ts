@@ -134,7 +134,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
-    return scamInfoValue && Object.keys(scamInfoValue).length !== 0
+    return scamInfoValue && Object.keys(scamInfoValue).length > 1
       ? scamInfoValue
       : null;
   }
