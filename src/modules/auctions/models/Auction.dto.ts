@@ -104,7 +104,10 @@ export class Auction {
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,
-          endDate: auction.endDate,
+          endDate:
+            auction.endDate > DateUtils.getCurrentTimestampPlusYears(1)
+              ? 0
+              : auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: auction.paymentToken,
