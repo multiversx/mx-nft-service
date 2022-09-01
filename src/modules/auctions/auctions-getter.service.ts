@@ -18,7 +18,7 @@ import {
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
-import { Constants, PerformanceProfiler, RedisCacheService } from '@elrondnetwork/erdnest';
+import { Constants } from '@elrondnetwork/erdnest';
 import { cacheConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 
