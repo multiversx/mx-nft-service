@@ -56,7 +56,7 @@ export class Order {
             amount: order.priceAmount,
             nonce: order.priceNonce,
             token:
-              order?.priceToken === 'EGLD'
+              order?.priceToken === elrondConfig.egld
                 ? elrondConfig.egld
                 : order?.priceToken,
             timestamp: DateUtils.getTimestamp(order.creationDate),

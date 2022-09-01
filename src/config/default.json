@@ -16,7 +16,7 @@
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
-    "egld": "XEGLD"
+    "egld": "EGLD"
   },
   "caching": {
     "ordersRedisClientName": "orders",
