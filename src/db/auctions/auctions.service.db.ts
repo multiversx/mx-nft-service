@@ -90,7 +90,7 @@ export class AuctionsServiceDb {
     );
     queryBuilder
       .innerJoin(
-        `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY eD, IF(price, price, minBidDenominated) ASC) AS id
+        `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
     FROM (${getDefaultAuctionsQuery(endDate, queryRequest)})`,
         't',
         'a.id = t.id',
@@ -243,7 +243,10 @@ export class AuctionsServiceDb {
       filterQueryBuilder.build();
 
     queryBuilder
-      .addSelect('(SELECT COUNT(*) FROM orders WHERE orders.auctionId = a.id)', 'count')
+      .addSelect(
+        '(SELECT COUNT(*) FROM orders WHERE orders.auctionId = a.id)',
+        'count',
+      )
       .addOrderBy('count', 'DESC')
       .addOrderBy('a.creationDate', 'DESC')
       .offset(queryRequest.offset)
