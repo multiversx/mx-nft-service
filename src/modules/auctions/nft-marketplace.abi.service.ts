@@ -196,6 +196,32 @@ export class NftMarketplaceAbiService {
     return auction;
   }
 
+  async getMinMaxAuction(
+    auctionId: number,
+    marketplace: Marketplace,
+  ): Promise<[BigNumber, BigNumber]> {
+    let scContract: SmartContract;
+    if (!MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
+      return;
+    }
+    this.contract = new ContractLoader(
+      MarketplaceUtils.xoxnoMarketplaceAbiPath,
+      MarketplaceUtils.abiInterface,
+    );
+    scContract = await this.contract.getContract(marketplace.address);
+
+    let getDataQuery = <Interaction>(
+      scContract.methodsExplicit.getMinMaxBid([
+        new U64Value(new BigNumber(auctionId)),
+      ])
+    );
+
+    const response = await this.getFirstQueryResult(getDataQuery);
+
+    const [minBid, maxBid] = response?.firstValue?.valueOf();
+    return [minBid, maxBid];
+  }
+
   async getCutPercentage(contractAddress: string): Promise<string> {
     try {
       const cacheKey = generateCacheKeyFromParams(
