@@ -234,6 +234,7 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case ExternalAuctionEventEnum.ChangePrice:
+        case ExternalAuctionEventEnum.UpdatePrice:
           const changePriceEvent = new ChangePriceEvent(event);
           const topicsChangePrice = changePriceEvent.getTopics();
           const changePriceMarketplace: Marketplace =
