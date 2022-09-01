@@ -23,7 +23,7 @@ export class UsdPriceLoader {
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
-    const [egldPriceUsd, allTokens] = await Promise.all([
+    const [egldPriceUsd, mexTokens] = await Promise.all([
       this.cacheService.getOrSetCache(
         this.persistentRedisClient,
         CacheInfo.EgldToken.key,
@@ -34,7 +34,7 @@ export class UsdPriceLoader {
       this.cacheService.getOrSetCache(
         this.persistentRedisClient,
         CacheInfo.AllTokens.key,
-        async () => await this.elrondApiService.getAllTokensWithDecimals(),
+        async () => await this.elrondApiService.getAllMexTokensWithDecimals(),
         CacheInfo.AllTokens.ttl,
         TimeConstants.oneMinute,
       ),
@@ -53,7 +53,7 @@ export class UsdPriceLoader {
         });
       }
       case elrondConfig.lkmex: {
-        token = allTokens.find((t) => t.identifier === elrondConfig.mex);
+        token = mexTokens.find((t) => t.identifier === elrondConfig.mex);
         return new Token({
           identifier: tokenId,
           name: 'LockedMEX',
@@ -63,7 +63,7 @@ export class UsdPriceLoader {
         });
       }
       default: {
-        token = allTokens.find((t) => t.identifier === tokenId);
+        token = mexTokens.find((t) => t.identifier === tokenId);
         if (token) {
           return token;
         }
