@@ -113,6 +113,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
+
     const [auctions, count, priceRange] =
       await this.auctionsService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),

@@ -18,7 +18,7 @@ import {
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
-import { Constants, RedisCacheService } from '@elrondnetwork/erdnest';
+import { Constants, PerformanceProfiler, RedisCacheService } from '@elrondnetwork/erdnest';
 import { cacheConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 
@@ -27,7 +27,7 @@ export class AuctionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private auctionServiceDb: AuctionsServiceDb,
-    private auctionCachiungService: AuctionsCachingService,
+    private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
@@ -40,7 +40,7 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
     try {
-      return await this.auctionCachiungService.getOrSetAuctions(
+      return await this.auctionCachingService.getOrSetAuctions(
         queryRequest,
         () => this.getMappedAuctions(queryRequest),
       );
@@ -61,10 +61,16 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      return await this.auctionCachiungService.getAuctionsOrderByNoBids(
-        queryRequest,
-        async () => this.getMappedAuctionsOrderBids(queryRequest),
+      const [allAuctions, count, priceRange] = await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.TopAuctionsOrderByNoBids.key,
+        async () => this.getTopAuctionsOrderByNoBids(),
+        CacheInfo.TopAuctionsOrderByNoBids.ttl,
       );
+
+      const auctions = allAuctions.slice(queryRequest.offset, queryRequest.offset + queryRequest.limit);
+
+      return [auctions, count, priceRange];
     } catch (error) {
       this.logger.error(
         'An error occurred while get auctions order by number of bids',
@@ -87,7 +93,7 @@ export class AuctionsGetterService {
       ? `${address}_${marketplaceKey}`
       : address;
     try {
-      return await this.auctionCachiungService.getClaimableAuctions(
+      return await this.auctionCachingService.getClaimableAuctions(
         limit,
         offset,
         key,
@@ -184,7 +190,7 @@ export class AuctionsGetterService {
     token: string,
   ): Promise<{ minBid: string; maxBid: string }> {
     try {
-      return await this.auctionCachiungService.getMinAndMax(token, () =>
+      return await this.auctionCachingService.getMinAndMax(token, () =>
         this.auctionServiceDb.getMinMax(token),
       );
     } catch (error) {
@@ -365,7 +371,7 @@ export class AuctionsGetterService {
   private async getAuctionsEndingInAMonth(): Promise<
     [AuctionWithBidsCount[], number, PriceRange]
   > {
-    return await this.auctionCachiungService.getAuctionsEndingInAMonth(() =>
+    return await this.auctionCachingService.getAuctionsEndingInAMonth(() =>
       this.getRunningAuctionsEndingBefore(
         DateUtils.getCurrentTimestampPlusDays(30),
       ),
@@ -481,6 +487,40 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  async getTopAuctionsOrderByNoBids(): Promise<[Auction[], number, PriceRange]> {
+    const queryRequest = new QueryRequest({
+      customFilters: [],
+      offset: 0,
+      limit: 1000,
+      filters: new FiltersExpression({
+        filters: [
+          new Filter({
+            field: 'status',
+            values: ['Running'],
+            op: Operation.EQ,
+          }),
+          new Filter({
+            field: 'tags',
+            values: [null],
+            op: Operation.LIKE,
+          }),
+          new Filter({
+            field: 'startDate',
+            values: [Math.round(new Date().getTime() / 1000).toString()],
+            op: Operation.LE,
+          }),
+        ],
+        operator: Operator.AND,
+      }),
+      groupByOption: new Grouping({
+        groupBy: GroupBy.IDENTIFIER,
+      }),
+      sorting: [],
+    });
+
+    return this.getMappedAuctionsOrderBids(queryRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
