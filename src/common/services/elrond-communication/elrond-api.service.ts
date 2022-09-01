@@ -458,7 +458,7 @@ export class ElrondApiService {
   async getTokenData(tokenId: string): Promise<Token> {
     const token = await this.doGetGeneric(
       this.getTokenData.name,
-      `tokens/${tokenId}`,
+      `tokens/${tokenId}?fields=identifier,name,ticker,decimals`,
     );
     return new Token({
       ...token,

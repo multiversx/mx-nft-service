@@ -77,13 +77,11 @@ export class UsdPriceLoader {
         if (token) {
           return token;
         }
-        break;
+        return new Token({
+          identifier: tokenId,
+        });
       }
     }
-
-    return new Token({
-      identifier: tokenId,
-    });
   }
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {
