@@ -278,10 +278,10 @@ export class ExternalMarketplaceEventsService {
           );
           let updatePriceAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topicsChangePrice.auctionId, 16),
+              parseInt(topicsUpdatePrice.auctionId, 16),
               updatePriceMarketplace.key,
             );
-          const [minBid, maxBid] = await this.nftAbiService.getMinMaxAuction(
+          const [minBid] = await this.nftAbiService.getMinMaxAuction(
             parseInt(topicsUpdatePrice.auctionId, 16),
             updatePriceMarketplace,
           );
@@ -301,7 +301,6 @@ export class ExternalMarketplaceEventsService {
   private updateAuctionPrice(
     changePriceAuction: AuctionEntity,
     newBid: string,
-
     hash: string,
   ) {
     changePriceAuction.minBid = newBid;

@@ -1,5 +1,4 @@
 import { GenericEvent } from '../generic.event';
-import { ChangePriceEventsTopics } from './changePrice.event.topics';
 import { UpdatePriceEventsTopics } from './updatePrice.event.topics';
 
 export class UpdatePriceEvent extends GenericEvent {
