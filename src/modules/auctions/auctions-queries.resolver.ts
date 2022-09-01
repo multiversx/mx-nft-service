@@ -243,10 +243,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     if (!marketplaceKey) return null;
     const marketplace = await this.marketplaceProvider.load(marketplaceKey);
     const marketplaceValue = marketplace?.value;
-    if (
-      marketplaceValue?.length > 0 &&
-      marketplaceValue[0].marketplaceKey === 'xoxno'
-    ) {
+    if (marketplaceValue?.length > 0 && marketplaceValue[0].key === 'xoxno') {
       const asset = await this.assetsProvider.load(identifier);
       const assetValue = asset?.value;
       return Marketplace.fromEntityForXoxno(
