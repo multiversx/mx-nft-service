@@ -52,7 +52,6 @@ export class ExternalMarketplaceEventsService {
     hash: string,
   ) {
     for (let event of externalAuctionEvents) {
-      console.log(JSON.stringify(event));
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
