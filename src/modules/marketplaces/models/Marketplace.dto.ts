@@ -41,6 +41,7 @@ export class Marketplace {
       url = identifier && id ? `${url}/auction/${id}` : url;
     }
 
+    console.log({ entity, marketplaceAuctionId, nftType });
     if (
       entity.key === 'xoxno' &&
       marketplaceAuctionId &&
