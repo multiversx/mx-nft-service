@@ -7,7 +7,9 @@
     "version": 1,
     "metaChainShardId": 4294967295,
     "egld": "EGLD",
-    "wegld": "WEGLD-bd4d79"
+    "wegld": "WEGLD-bd4d79",
+    "mex": "MEX-455c57",
+    "lkmex": "LKMEX-aab910"
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

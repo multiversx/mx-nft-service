@@ -42,24 +42,33 @@ export class UsdPriceLoader {
 
     let token: Token;
 
-    if (tokenId === elrondConfig.egld) {
-      return new Token({
-        identifier: elrondConfig.egld,
-        symbol: elrondConfig.egld,
-        name: elrondConfig.egld,
-        decimals: elrondConfig.decimals,
-        priceUsd: egldPriceUsd,
-      });
-    }
-
-    token = allTokens.find((t) => t.identifier === tokenId);
-
-    if (token) {
-      const newToken: Token = JSON.parse(JSON.stringify(token));
-      if (tokenId === elrondConfig.egld) {
-        newToken.identifier = newToken.name = newToken.symbol = tokenId;
+    switch (tokenId) {
+      case elrondConfig.egld: {
+        return new Token({
+          identifier: elrondConfig.egld,
+          symbol: elrondConfig.egld,
+          name: elrondConfig.egld,
+          decimals: elrondConfig.decimals,
+          priceUsd: egldPriceUsd,
+        });
       }
-      return newToken;
+      case elrondConfig.lkmex: {
+        token = allTokens.find((t) => t.identifier === elrondConfig.mex);
+        if (token) {
+          const newToken: Token = JSON.parse(JSON.stringify(token));
+          newToken.identifier = newToken.name = newToken.symbol = tokenId;
+          return newToken;
+        }
+        break;
+      }
+      default: {
+        token = allTokens.find((t) => t.identifier === tokenId);
+        if (token) {
+          const newToken: Token = JSON.parse(JSON.stringify(token));
+          return newToken;
+        }
+        break;
+      }
     }
 
     return new Token({
@@ -86,6 +95,9 @@ export class UsdPriceLoader {
       if (tokenId === elrondConfig.egld) {
         return usdAmount;
       }
+      // console.log(
+      //   `${tokenId} ${amount} ${token.priceUsd} ${amount} ${usdAmount}`,
+      // );
       return denominate({
         input: usdAmount,
         denomination: 6,
