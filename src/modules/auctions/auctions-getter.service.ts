@@ -489,6 +489,7 @@ export class AuctionsGetterService {
     ];
   }
 
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getTopAuctionsOrderByNoBids(): Promise<[Auction[], number, PriceRange]> {
     const queryRequest = new QueryRequest({
       customFilters: [],
