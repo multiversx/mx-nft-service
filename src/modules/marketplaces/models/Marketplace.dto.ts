@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { MarketplaceEntity } from 'src/db/marketplaces';
+import { NftTypeEnum } from 'src/modules/assets/models';
 import { MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
 export class Marketplace {
@@ -32,10 +33,20 @@ export class Marketplace {
     entity: MarketplaceEntity,
     identifier?: string,
     id?: number,
+    marketplaceAuctionId?: number,
+    nftType?: NftTypeEnum,
   ) {
     let url = identifier ? `${entity.url}${identifier}` : entity.url;
     if (entity.type === MarketplaceTypeEnum.Internal) {
       url = identifier && id ? `${url}/auction/${id}` : url;
+    }
+
+    if (
+      entity.key === 'xoxno' &&
+      marketplaceAuctionId &&
+      nftType === NftTypeEnum.SemiFungibleESDT
+    ) {
+      url = identifier && id ? `${url}-${id}` : url;
     }
     return entity && Object.keys(entity).length > 0
       ? new Marketplace({
