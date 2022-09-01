@@ -243,17 +243,12 @@ export class AuctionsServiceDb {
       filterQueryBuilder.build();
 
     queryBuilder
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .innerJoin(
-        `(SELECT FIRST_VALUE(id) over ( PARTITION by identifier ORDER BY COUNT(id) DESC) AS id
-      FROM (${getAuctionsOrderByNoBidsQuery()})`,
-        't',
-        'a.id = t.id',
-      )
-      .groupBy('a.id')
-      .orderBy('COUNT(a.Id)', 'DESC')
+      .addSelect('(SELECT COUNT(*) FROM orders WHERE orders.auctionId = a.id)', 'count')
+      .addOrderBy('count', 'DESC')
+      .addOrderBy('a.creationDate', 'DESC')
       .offset(queryRequest.offset)
       .limit(queryRequest.limit);
+
     const [auctions, priceRange] = await Promise.all([
       queryBuilder.getManyAndCount(),
       this.getMinMaxForQuery(queryRequest),
