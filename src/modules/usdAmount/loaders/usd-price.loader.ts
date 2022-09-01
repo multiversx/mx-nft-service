@@ -22,49 +22,74 @@ export class UsdPriceLoader {
     );
   }
 
-  async getToken(tokenId: string): Promise<Token | null> {
-    const [egldPriceUsd, allTokens] = await Promise.all([
-      this.cacheService.getOrSetCache(
-        this.persistentRedisClient,
-        CacheInfo.EgldToken.key,
-        async () => await this.elrondApiService.getEgldPriceFromEconomics(),
-        CacheInfo.EgldToken.ttl,
-        TimeConstants.oneMinute,
-      ),
-      this.cacheService.getOrSetCache(
-        this.persistentRedisClient,
-        CacheInfo.AllTokens.key,
-        async () => await this.elrondApiService.getAllTokensWithDecimals(),
-        CacheInfo.AllTokens.ttl,
-        TimeConstants.oneMinute,
-      ),
-    ]);
+  private async getCachedMexTokensWithDecimals(): Promise<Token[]> {
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.AllTokens.key,
+      async () => await this.elrondApiService.getAllMexTokensWithDecimals(),
+      CacheInfo.AllTokens.ttl,
+      TimeConstants.oneMinute,
+    );
+  }
 
-    let token: Token;
-
-    if (tokenId === elrondConfig.egld) {
-      return new Token({
-        identifier: elrondConfig.egld,
-        symbol: elrondConfig.egld,
-        name: elrondConfig.egld,
-        decimals: elrondConfig.decimals,
-        priceUsd: egldPriceUsd,
-      });
-    }
-
-    token = allTokens.find((t) => t.identifier === tokenId);
-
+  private async getCachedTokenData(
+    tokenId: string,
+  ): Promise<Token | undefined> {
+    const mexTokens = await this.getCachedMexTokensWithDecimals();
+    const token = mexTokens.find((t) => t.identifier === tokenId);
     if (token) {
-      const newToken: Token = JSON.parse(JSON.stringify(token));
-      if (tokenId === elrondConfig.egld) {
-        newToken.identifier = newToken.name = newToken.symbol = tokenId;
-      }
-      return newToken;
+      return token;
     }
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      `token_${tokenId}`,
+      async () => await this.elrondApiService.getTokenData(tokenId),
+      CacheInfo.AllTokens.ttl,
+      TimeConstants.oneMinute,
+    );
+  }
 
-    return new Token({
-      identifier: tokenId,
-    });
+  private async getCachedEgldPrice(): Promise<string> {
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.EgldToken.key,
+      async () => await this.elrondApiService.getEgldPriceFromEconomics(),
+      CacheInfo.EgldToken.ttl,
+      TimeConstants.oneMinute,
+    );
+  }
+
+  async getToken(tokenId: string): Promise<Token | null> {
+    switch (tokenId) {
+      case elrondConfig.egld: {
+        const egldPriceUsd: string = await this.getCachedEgldPrice();
+        return new Token({
+          identifier: elrondConfig.egld,
+          symbol: elrondConfig.egld,
+          name: elrondConfig.egld,
+          decimals: elrondConfig.decimals,
+          priceUsd: egldPriceUsd,
+        });
+      }
+      case elrondConfig.lkmex: {
+        const mexToken = await this.getCachedTokenData(elrondConfig.mex);
+        return new Token({
+          identifier: tokenId,
+          name: 'LockedMEX',
+          symbol: 'LKMEX',
+          decimals: elrondConfig.decimals,
+          priceUsd: mexToken?.priceUsd ?? null,
+        });
+      }
+      default: {
+        let token: Token = await this.getCachedTokenData(tokenId);
+        return token
+          ? token
+          : new Token({
+              identifier: tokenId,
+            });
+      }
+    }
   }
 
   async getUsdAmount(tokenId: string, amount: string): Promise<string> {

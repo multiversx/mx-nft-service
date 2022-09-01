@@ -55,7 +55,7 @@ export class CacheInfo {
   };
 
   static EgldToken: CacheInfo = {
-    key: 'egldTokens',
+    key: 'egldToken',
     ttl: 10 * TimeConstants.oneMinute,
   };
 }

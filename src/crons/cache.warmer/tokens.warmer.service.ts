@@ -25,9 +25,10 @@ export class TokensWarmerService {
   @Cron(CronExpression.EVERY_MINUTE)
   async updateTokens() {
     await Locker.lock(
-      'Tokens invalidations',
+      'MEX Tokens invalidations',
       async () => {
-        const tokens = await this.elrondApiService.getAllTokensWithDecimals();
+        const tokens =
+          await this.elrondApiService.getAllMexTokensWithDecimals();
         await this.invalidateKey(
           CacheInfo.AllTokens.key,
           tokens,
