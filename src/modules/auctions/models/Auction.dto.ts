@@ -107,19 +107,19 @@ export class Auction {
           endDate: auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.minBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           minBidDiff: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.minBidDiff,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           maxBid: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.maxBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
