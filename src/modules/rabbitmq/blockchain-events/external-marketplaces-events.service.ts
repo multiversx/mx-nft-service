@@ -57,7 +57,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               bidEvent.getAddress(),
             );
-          this.logger.log(`Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`);
+          this.logger.log(
+            `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
+          );
           const auction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topics.auctionId, 16),
@@ -101,7 +103,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               buySftEvent.getAddress(),
             );
-          this.logger.log(`Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`);
+          this.logger.log(
+            `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
+          );
           const buyAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(buySftTopics.auctionId, 16),
@@ -116,7 +120,7 @@ export class ExternalMarketplaceEventsService {
               ? result[0]?.availableTokens -
                 parseFloat(buySftTopics.boughtTokens)
               : 0;
-            if (totalRemaining === 0) {
+            if (totalRemaining <= 0) {
               this.auctionsService.updateAuctionStatus(
                 buyAuction.id,
                 AuctionStatusEnum.Ended,
@@ -152,7 +156,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               withdraw.getAddress(),
             );
-          this.logger.log(`Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`);
+          this.logger.log(
+            `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
+          );
           const withdrawAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topicsWithdraw.auctionId, 16),
@@ -174,7 +180,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               endAuctionEvent.getAddress(),
             );
-          this.logger.log(`End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`);
+          this.logger.log(
+            `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
+          );
           const endAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topicsEndAuction.auctionId, 16),
@@ -187,9 +195,7 @@ export class ExternalMarketplaceEventsService {
               hash,
               AuctionEventEnum.EndAuctionEvent,
             );
-            this.notificationsService.updateNotificationStatus([
-              endAuction.id,
-            ]);
+            this.notificationsService.updateNotificationStatus([endAuction.id]);
             this.ordersService.updateOrder(
               endAuction.id,
               OrderStatusEnum.Bought,
@@ -210,7 +216,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               auctionToken.getAddress(),
             );
-          this.logger.log(`Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`);
+          this.logger.log(
+            `Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`,
+          );
           const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
             startAuctionIdentifier,
@@ -232,7 +240,9 @@ export class ExternalMarketplaceEventsService {
             await this.marketplaceService.getMarketplaceByAddress(
               changePriceEvent.getAddress(),
             );
-          this.logger.log(`Change price event detected for hash '${hash}' and marketplace '${changePriceMarketplace?.name}'`);
+          this.logger.log(
+            `Change price event detected for hash '${hash}' and marketplace '${changePriceMarketplace?.name}'`,
+          );
           let changePriceAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topicsChangePrice.auctionId, 16),
