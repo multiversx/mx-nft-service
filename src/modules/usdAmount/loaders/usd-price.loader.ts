@@ -56,8 +56,12 @@ export class UsdPriceLoader {
         token = allTokens.find((t) => t.identifier === elrondConfig.mex);
         if (token) {
           const newToken: Token = JSON.parse(JSON.stringify(token));
-          newToken.identifier = newToken.name = newToken.symbol = tokenId;
-          return newToken;
+          return new Token({
+            ...newToken,
+            identifier: tokenId,
+            name: 'LockedMEX',
+            symbol: 'LKMEX',
+          });
         }
         break;
       }
