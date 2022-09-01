@@ -1,4 +1,4 @@
-import { QueryRequest } from "src/modules/common/filters/QueryRequest";
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 
 export function getDefaultAuctionsForIdentifierQuery(
   identifier: string,
@@ -58,7 +58,10 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
    GROUP BY a.collection`;
 }
 
-export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequest) {
+export function getDefaultAuctionsQuery(
+  endDate: number,
+  queryRequest: QueryRequest,
+) {
   let supplementalFilters = '';
 
   const collection = queryRequest.getFilter('collection');
@@ -86,7 +89,7 @@ export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequ
     WHERE a.status='Running' 
       AND a.endDate> ${endDate}
        ${supplementalFilters}))
-    order if(price, price, minBidDenominated) ASC ) as temp`;
+    order by if(price, price, minBidDenominated) ASC ) as temp`;
 }
 
 export function getLowestAuctionForIdentifiers(
