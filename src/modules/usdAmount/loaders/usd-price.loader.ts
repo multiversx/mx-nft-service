@@ -95,9 +95,6 @@ export class UsdPriceLoader {
       if (tokenId === elrondConfig.egld) {
         return usdAmount;
       }
-      // console.log(
-      //   `${tokenId} ${amount} ${token.priceUsd} ${amount} ${usdAmount}`,
-      // );
       return denominate({
         input: usdAmount,
         denomination: 6,
