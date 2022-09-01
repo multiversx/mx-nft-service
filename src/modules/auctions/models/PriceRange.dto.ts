@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { elrondConfig } from 'src/config';
 import { Price } from 'src/modules/assets/models';
-import { nominateAmount, nominateStringVal, nominateVal } from 'src/utils';
+import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()
