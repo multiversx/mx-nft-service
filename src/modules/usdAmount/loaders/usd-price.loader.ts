@@ -54,22 +54,28 @@ export class UsdPriceLoader {
       }
       case elrondConfig.lkmex: {
         token = allTokens.find((t) => t.identifier === elrondConfig.mex);
-        if (token) {
-          const newToken: Token = JSON.parse(JSON.stringify(token));
-          return new Token({
-            ...newToken,
-            identifier: tokenId,
-            name: 'LockedMEX',
-            symbol: 'LKMEX',
-          });
-        }
-        break;
+        return new Token({
+          identifier: tokenId,
+          name: 'LockedMEX',
+          symbol: 'LKMEX',
+          decimals: elrondConfig.decimals,
+          priceUsd: token?.priceUsd ?? null,
+        });
       }
       default: {
         token = allTokens.find((t) => t.identifier === tokenId);
         if (token) {
-          const newToken: Token = JSON.parse(JSON.stringify(token));
-          return newToken;
+          return token;
+        }
+        token = await this.cacheService.getOrSetCache(
+          this.persistentRedisClient,
+          `token_${tokenId}`,
+          async () => await this.elrondApiService.getTokenData(tokenId),
+          CacheInfo.AllTokens.ttl,
+          TimeConstants.oneMinute,
+        );
+        if (token) {
+          return token;
         }
         break;
       }

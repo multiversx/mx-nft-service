@@ -455,6 +455,17 @@ export class ElrondApiService {
     );
   }
 
+  async getTokenData(tokenId: string): Promise<Token> {
+    const token = await this.doGetGeneric(
+      this.getTokenData.name,
+      `tokens/${tokenId}`,
+    );
+    return new Token({
+      ...token,
+      symbol: token.ticker,
+    });
+  }
+
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
     return nfts.distinct((nft) => nft.nonce);
   }
