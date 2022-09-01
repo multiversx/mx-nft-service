@@ -127,7 +127,7 @@ export class ExternalMarketplaceEventsService {
               buySftTopics.boughtTokens,
               parseFloat(buySftTopics.boughtTokens),
             );
-            if (totalRemaining === 0) {
+            if (totalRemaining <= 0) {
               this.auctionsService.updateAuctionStatus(
                 buyAuction.id,
                 AuctionStatusEnum.Ended,
