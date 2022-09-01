@@ -273,7 +273,7 @@ export class ExternalMarketplaceEventsService {
               updatePriceEvent.getAddress(),
             );
           this.logger.log(
-            `Change price event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
+            `Update price event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
           );
           let updatePriceAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
