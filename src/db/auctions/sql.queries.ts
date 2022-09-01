@@ -1,4 +1,4 @@
-import { QueryRequest } from "src/modules/common/filters/QueryRequest";
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 
 export function getDefaultAuctionsForIdentifierQuery(
   identifier: string,
@@ -58,7 +58,10 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
    GROUP BY a.collection`;
 }
 
-export function getDefaultAuctionsQuery(endDate: number, queryRequest: QueryRequest) {
+export function getDefaultAuctionsQuery(
+  endDate: number,
+  queryRequest: QueryRequest,
+) {
   let supplementalFilters = '';
 
   const collection = queryRequest.getFilter('collection');
@@ -93,32 +96,15 @@ export function getLowestAuctionForIdentifiers(
   endDate: number,
   identifiers: string[],
 ) {
-  return `WITH 
-  endingSoon AS (SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
-          FROM auctions a 
-          LEFT JOIN LATERAL 
-          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-          WHERE a.status='Running' AND a.identifier in (${identifiers.map(
-            (value) => `'${value}'`,
-          )})
-           AND a.endDate <= ${endDate}),   
-  minPrice AS (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
+  return `
+  SELECT a.*, o.priceAmountDenominated as price
         FROM auctions a 
         LEFT JOIN LATERAL 
         (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
         WHERE a.status='Running' AND a.identifier in (${identifiers.map(
           (value) => `'${value}'`,
-        )})  AND a.endDate> ${endDate})
-     
-SELECT temp.* from (
-  SELECT temp.*, row_number() over (partition by identifier order by eD, if(price, price, minBidDenominated) ASC) as seqnum
-   from (
-     select * from endingSoon       
-    UNION All 
-    select * from minPrice   
-  order by eD, if(price, price, minBidDenominated) ASC
-  ) as temp) temp
-  WHERE  temp.seqnum <=1;
+        )})  AND a.endDate> ${endDate} and a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+        ORDER by if(price, price, minBidDenominated)
 `;
 }
 
@@ -127,32 +113,15 @@ export function getLowestAuctionForIdentifiersAndMarketplace(
   identifiers: string[],
   marketplaceKey: string,
 ) {
-  return `WITH 
-  endingSoon AS (SELECT a.*,o.priceAmountDenominated as price,a.endDate as eD
-          FROM auctions a 
-          LEFT JOIN LATERAL 
-          (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-          WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier in (${identifiers.map(
+  return `
+  SELECT a.*, o.priceAmountDenominated as price
+  FROM auctions a 
+  LEFT JOIN LATERAL 
+  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
+  WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier in (${identifiers.map(
     (value) => `'${value}'`,
-  )})
-           AND a.endDate <= ${endDate}),   
-  minPrice AS (SELECT a.*, o.priceAmountDenominated as price, if(startDate> UNIX_TIMESTAMP(CURRENT_TIMESTAMP), 1634977819457,163497781945) as eD
-        FROM auctions a 
-        LEFT JOIN LATERAL 
-        (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-        WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier in (${identifiers.map(
-    (value) => `'${value}'`,
-  )})  AND a.endDate> ${endDate})
-     
-SELECT temp.*, CONCAT(temp.identifier,"_",temp.marketplaceKey) as identifierKey from (
-  SELECT temp.*, row_number() over (partition by identifier order by eD, if(price, price, minBidDenominated) ASC) as seqnum
-   from (
-     select * from endingSoon       
-    UNION All 
-    select * from minPrice   
-  order by eD, if(price, price, minBidDenominated) ASC
-  ) as temp) temp
-  WHERE  temp.seqnum <=1;
+  )})  AND a.endDate> ${endDate} and a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+  ORDER by if(price, price, minBidDenominated)
 `;
 }
 
