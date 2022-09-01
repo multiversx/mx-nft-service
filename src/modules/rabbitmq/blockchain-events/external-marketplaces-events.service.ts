@@ -120,13 +120,6 @@ export class ExternalMarketplaceEventsService {
               ? result[0]?.availableTokens -
                 parseFloat(buySftTopics.boughtTokens)
               : 0;
-            console.log(
-              'buyAuction ',
-              JSON.stringify(result),
-              totalRemaining,
-              buySftTopics.boughtTokens,
-              parseFloat(buySftTopics.boughtTokens),
-            );
             if (totalRemaining <= 0) {
               this.auctionsService.updateAuctionStatus(
                 buyAuction.id,
