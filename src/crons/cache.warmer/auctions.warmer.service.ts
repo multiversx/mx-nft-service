@@ -74,6 +74,23 @@ export class AuctionsWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleAuctionsOrderByNoBids() {
+    await Locker.lock(
+      'Top auctions order by number of bids',
+      async () => {
+        const result = await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
+
+        await this.invalidateKey(
+          CacheInfo.TopAuctionsOrderByNoBids.key,
+          result,
+          CacheInfo.TopAuctionsOrderByNoBids.ttl,
+        );
+      },
+      true,
+    );
+  }
+
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
     await this.refreshCacheKey(key, ttl);

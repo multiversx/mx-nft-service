@@ -83,7 +83,7 @@ export class AuctionsCachingService {
   ): Promise<[Auction[], number, PriceRange]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getAuctionsCacheKey(queryRequest),
+      CacheInfo.TopAuctionsOrderByNoBids.key,
       () => getAuctions(),
       TimeConstants.oneHour,
     );
