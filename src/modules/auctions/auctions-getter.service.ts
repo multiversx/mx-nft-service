@@ -523,29 +523,25 @@ export class AuctionsGetterService {
   }
 
   private computePriceRange(auctions: Auction[]): PriceRange {
-    const minBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => x.minBid.amount);
-    let minBid: BigNumber | undefined = undefined;
-    let maxBid: BigNumber | undefined = undefined;
+    const minBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => new BigNumber(x.minBid.amount).dividedBy(new BigNumber(10 ** 18)));
+    let minBid = new BigNumber('Infinity');
     for (const amount of minBids) {
-      if (new BigNumber(amount) < new BigNumber(minBid) || minBid === undefined) {
-        minBid = new BigNumber(amount);
-      }
-
-      if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
-        maxBid = new BigNumber(amount);
+      if (amount.isLessThan(minBid)) {
+        minBid = amount;
       }
     }
 
-    const maxBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => x.maxBid.amount);
+    const maxBids = auctions.filter(x => x.maxBid.token === elrondConfig.egld).map(x => new BigNumber(x.maxBid.amount));
+    let maxBid = minBid;
     for (const amount of maxBids) {
-      if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
-        maxBid = new BigNumber(amount);
+      if (amount.isGreaterThan(maxBid)) {
+        maxBid = amount;
       }
     }
 
     return {
-      minBid: minBid?.toFixed() ?? '0',
-      maxBid: maxBid?.toFixed() ?? '0'
+      minBid: minBid.isFinite() ? minBid.toString() : '0',
+      maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
     };
   }
 

@@ -70,7 +70,7 @@ export class AuctionsSetterService {
           for (const tag of asset?.tags) {
             tags = [
               ...tags,
-              new TagEntity({ auctionId: savedAuction.id, tag: tag }),
+              new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
             ];
           }
 
