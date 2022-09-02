@@ -541,8 +541,8 @@ export class AuctionsGetterService {
     }
 
     return {
-      minBid: minBid ? (minBid.dividedBy(new BigNumber(10 ** 18))).toFixed() : '0',
-      maxBid: maxBid ? (maxBid.dividedBy(new BigNumber(10 ** 18))).toFixed() : '0',
+      minBid: minBid ? (minBid.dividedBy(new BigNumber(10 ** 18))).toString() : '0',
+      maxBid: maxBid ? (maxBid.dividedBy(new BigNumber(10 ** 18))).toString() : '0',
     };
   }
 
