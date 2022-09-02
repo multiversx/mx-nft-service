@@ -67,12 +67,14 @@ export class FeedEventsSenderService {
           auctionId: startAuction.id,
           nftName: nftData?.name,
           verified: nftData?.verified ? true : false,
-          minBid: {
+          minBid: startAuction.minBid,
+          maxBid: startAuction.maxBid,
+          minBidData: {
             amount: startAuction.minBid,
             usdAmount: minBidUsdAmount ?? null,
             tokenData: tokenData ?? null,
           },
-          maxBid: {
+          maxBidData: {
             amount: startAuction.maxBid,
             usdAmount: maxBidUsdAmount ?? null,
             tokenData: tokenData ?? null,
