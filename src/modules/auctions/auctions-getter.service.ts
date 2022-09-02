@@ -531,7 +531,7 @@ export class AuctionsGetterService {
       }
     }
 
-    const maxBids = auctions.filter(x => x.maxBid.token === elrondConfig.egld).map(x => new BigNumber(x.maxBid.amount));
+    const maxBids = auctions.filter(x => x.maxBid.token === elrondConfig.egld).map(x => new BigNumber(x.maxBid.amount).dividedBy(new BigNumber(10 ** 18)));
     let maxBid = minBid;
     for (const amount of maxBids) {
       if (amount.isGreaterThan(maxBid)) {
