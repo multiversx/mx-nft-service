@@ -22,6 +22,24 @@ export class QueryRequest {
     return values[0];
   }
 
+  getAllFilters(): Record<string, string> {
+    if (!this.filters || !this.filters.filters) {
+      return {};
+    }
+
+    const result: Record<string, string> = {};
+
+    for (const filter of this.filters.filters) {
+      if (!filter.values || filter.values.length === 0 || (filter.values.length === 1 && !filter.values[0])) {
+        continue;
+      }
+
+      result[filter.field] = filter.values[0];
+    }
+
+    return result;
+  }
+
   getRange(field: AuctionCustomEnum): { startPrice: string, endPrice: string } | undefined {
     const customFilters = this.customFilters;
     if (!customFilters) {

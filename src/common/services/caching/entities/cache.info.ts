@@ -19,6 +19,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneHour,
   };
 
+  static ActiveAuctions: CacheInfo = {
+    key: 'activeAuctions',
+    ttl: TimeConstants.oneMinute * 10,
+  };
+
   static TopAuctionsOrderByNoBids: CacheInfo = {
     key: 'auctionsOrderByNoBids',
     ttl: TimeConstants.oneMinute * 10,
