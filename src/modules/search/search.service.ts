@@ -143,9 +143,9 @@ export class SearchService {
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
     const [collections, count] = await this.collectionsService.getFullCollections();
-    let allResults = collections.filter(x => x.verified && x.name?.toLowerCase()?.includes(searchTerm)).slice(0, 5);
+    let allResults = collections.filter(x => x.verified && x.name?.toLowerCase()?.includes(searchTerm.toLowerCase())).slice(0, 5);
     if (allResults.length < 5) {
-      const nonVerifiedResults = collections.filter(x => !x.verified && x.name?.toLowerCase()?.includes(searchTerm)).slice(0, 5 - allResults.length);
+      const nonVerifiedResults = collections.filter(x => !x.verified && x.name?.toLowerCase()?.includes(searchTerm.toLowerCase())).slice(0, 5 - allResults.length);
       allResults.push(...nonVerifiedResults);
     }
 
