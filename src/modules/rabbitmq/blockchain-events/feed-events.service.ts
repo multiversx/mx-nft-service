@@ -36,6 +36,28 @@ export class FeedEventsSenderService {
     const nftData = await this.assetByIdentifierService.getAsset(
       startAuction.identifier,
     );
+
+    let minBidUsdAmount: String;
+    let maxBidUsdAmount: String;
+    let tokenData: Token;
+    if (
+      startAuction.paymentToken &&
+      startAuction.minBid &&
+      startAuction.maxBid
+    ) {
+      [tokenData, minBidUsdAmount, maxBidUsdAmount] = await Promise.all([
+        this.usdPriceLoader.getToken(startAuction.paymentToken),
+        this.usdPriceLoader.getUsdAmountDenom(
+          startAuction.paymentToken,
+          startAuction.minBid,
+        ),
+        this.usdPriceLoader.getUsdAmountDenom(
+          startAuction.paymentToken,
+          startAuction.maxBid,
+        ),
+      ]);
+    }
+
     await this.accountFeedService.addFeed(
       new Feed({
         actor: topicsAuctionToken.originalOwner,
@@ -45,8 +67,16 @@ export class FeedEventsSenderService {
           auctionId: startAuction.id,
           nftName: nftData?.name,
           verified: nftData?.verified ? true : false,
-          minBid: startAuction.minBid,
-          maxBid: startAuction.maxBid,
+          minBid: {
+            amount: startAuction.minBid,
+            usdAmount: minBidUsdAmount ?? null,
+            tokenData: tokenData ?? null,
+          },
+          maxBid: {
+            amount: startAuction.maxBid,
+            usdAmount: maxBidUsdAmount ?? null,
+            tokenData: tokenData ?? null,
+          },
           marketplaceKey: auctionTokenMarketplace.key,
         },
       }),
@@ -92,9 +122,7 @@ export class FeedEventsSenderService {
           verified: endAuctionNftData?.verified ? true : false,
           price: topicsEndAuction.currentBid,
           usdAmount: usdAmount ?? null,
-          tokenSymbol: tokenData?.symbol ?? null,
-          tokenIdentifier: tokenData?.identifier ?? null,
-          tokenName: tokenData?.name ?? null,
+          tokenData: tokenData ?? null,
           marketplaceKey: endMarketplace.key,
         },
       }),
@@ -141,9 +169,7 @@ export class FeedEventsSenderService {
           verified: buySftNftData?.verified ? true : false,
           price: buySftTopics.bid,
           usdAmount: usdAmount ?? null,
-          tokenSymbol: tokenData?.symbol ?? null,
-          tokenIdentifier: tokenData?.identifier ?? null,
-          tokenName: tokenData?.name ?? null,
+          tokenData: tokenData ?? null,
           auctionId: buyAuction.id,
           boughtTokens: buySftTopics.boughtTokens,
           marketplaceKey: buyMarketplace.key,
@@ -213,9 +239,7 @@ export class FeedEventsSenderService {
           verified: bidNftData?.verified ? true : false,
           price: topics.currentBid,
           usdAmount: usdAmount ?? null,
-          tokenSymbol: tokenData?.symbol ?? null,
-          tokenIdentifier: tokenData?.identifier ?? null,
-          tokenName: tokenData?.name ?? null,
+          tokenData: tokenData ?? null,
           auctionId: auction.id,
           marketplaceKey: auction.marketplaceKey,
         },
