@@ -28,6 +28,8 @@ import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { FeedEventsSenderService } from './feed-events.service';
+import { UsdAmountModuleGraph } from 'src/modules/usdAmount/usd-amount.module';
+import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { FeedEventsSenderService } from './feed-events.service';
     forwardRef(() => ElrondCommunicationModule),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
+    UsdAmountModuleGraph,
   ],
   providers: [
     NftEventsConsumer,
@@ -61,6 +64,7 @@ import { FeedEventsSenderService } from './feed-events.service';
     AssetByIdentifierService,
     NsfwUpdaterService,
     FeedEventsSenderService,
+    UsdPriceLoader,
   ],
   exports: [NftEventsService],
 })
