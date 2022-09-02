@@ -529,14 +529,11 @@ export class AuctionsGetterService {
     for (const amount of minBids) {
       if (new BigNumber(amount) < new BigNumber(minBid) || minBid === undefined) {
         minBid = new BigNumber(amount);
-      }
-
-      if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
         maxBid = new BigNumber(amount);
       }
     }
 
-    const maxBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => x.maxBid.amount);
+    const maxBids = auctions.filter(x => x.maxBid.token === elrondConfig.egld).map(x => x.maxBid.amount);
     for (const amount of maxBids) {
       if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
         maxBid = new BigNumber(amount);
