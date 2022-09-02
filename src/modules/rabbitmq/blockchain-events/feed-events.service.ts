@@ -10,13 +10,16 @@ import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
+import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
 import { MintEvent } from '../entities/auction/mint.event';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Injectable()
 export class FeedEventsSenderService {
   constructor(
     private accountFeedService: ElrondFeedService,
     private assetByIdentifierService: AssetByIdentifierService,
+    private readonly usdPriceLoader: UsdPriceLoader,
   ) {}
 
   public async sendStartAuctionEvent(
@@ -33,6 +36,28 @@ export class FeedEventsSenderService {
     const nftData = await this.assetByIdentifierService.getAsset(
       startAuction.identifier,
     );
+
+    let minBidUsdAmount: String;
+    let maxBidUsdAmount: String;
+    let tokenData: Token;
+    if (
+      startAuction.paymentToken &&
+      startAuction.minBid &&
+      startAuction.maxBid
+    ) {
+      [tokenData, minBidUsdAmount, maxBidUsdAmount] = await Promise.all([
+        this.usdPriceLoader.getToken(startAuction.paymentToken),
+        this.usdPriceLoader.getUsdAmountDenom(
+          startAuction.paymentToken,
+          startAuction.minBid,
+        ),
+        this.usdPriceLoader.getUsdAmountDenom(
+          startAuction.paymentToken,
+          startAuction.maxBid,
+        ),
+      ]);
+    }
+
     await this.accountFeedService.addFeed(
       new Feed({
         actor: topicsAuctionToken.originalOwner,
@@ -44,6 +69,16 @@ export class FeedEventsSenderService {
           verified: nftData?.verified ? true : false,
           minBid: startAuction.minBid,
           maxBid: startAuction.maxBid,
+          minBidData: {
+            amount: startAuction.minBid,
+            usdAmount: minBidUsdAmount ?? undefined,
+            tokenData: tokenData ?? undefined,
+          },
+          maxBidData: {
+            amount: startAuction.maxBid,
+            usdAmount: maxBidUsdAmount ?? undefined,
+            tokenData: tokenData ?? undefined,
+          },
           marketplaceKey: auctionTokenMarketplace.key,
         },
       }),
@@ -65,6 +100,19 @@ export class FeedEventsSenderService {
     const endAuctionNftData = await this.assetByIdentifierService.getAsset(
       endAuction.identifier,
     );
+
+    let usdAmount: String;
+    let tokenData: Token;
+    if (endAuction.paymentToken && topicsEndAuction.currentBid) {
+      [tokenData, usdAmount] = await Promise.all([
+        this.usdPriceLoader.getToken(endAuction.paymentToken),
+        this.usdPriceLoader.getUsdAmountDenom(
+          endAuction.paymentToken,
+          topicsEndAuction.currentBid,
+        ),
+      ]);
+    }
+
     await this.accountFeedService.addFeed(
       new Feed({
         actor: topicsEndAuction.currentWinner,
@@ -75,6 +123,8 @@ export class FeedEventsSenderService {
           nftName: endAuctionNftData?.name,
           verified: endAuctionNftData?.verified ? true : false,
           price: topicsEndAuction.currentBid,
+          usdAmount: usdAmount ?? undefined,
+          tokenData: tokenData ?? undefined,
           marketplaceKey: endMarketplace.key,
         },
       }),
@@ -97,6 +147,19 @@ export class FeedEventsSenderService {
     const buySftNftData = await this.assetByIdentifierService.getAsset(
       buyAuction.identifier,
     );
+
+    let usdAmount: String;
+    let tokenData: Token;
+    if (buyAuction.paymentToken && buySftTopics.bid) {
+      [tokenData, usdAmount] = await Promise.all([
+        this.usdPriceLoader.getToken(buyAuction.paymentToken),
+        this.usdPriceLoader.getUsdAmountDenom(
+          buyAuction.paymentToken,
+          buySftTopics.bid,
+        ),
+      ]);
+    }
+
     await this.accountFeedService.addFeed(
       new Feed({
         actor: buySftTopics.currentWinner,
@@ -107,6 +170,8 @@ export class FeedEventsSenderService {
           nftName: buySftNftData?.name,
           verified: buySftNftData?.verified ? true : false,
           price: buySftTopics.bid,
+          usdAmount: usdAmount ?? undefined,
+          tokenData: tokenData ?? undefined,
           auctionId: buyAuction.id,
           boughtTokens: buySftTopics.boughtTokens,
           marketplaceKey: buyMarketplace.key,
@@ -152,6 +217,19 @@ export class FeedEventsSenderService {
     const bidNftData = await this.assetByIdentifierService.getAsset(
       auction.identifier,
     );
+
+    let usdAmount: String;
+    let tokenData: Token;
+    if (auction.paymentToken && topics.currentBid) {
+      [tokenData, usdAmount] = await Promise.all([
+        this.usdPriceLoader.getToken(auction.paymentToken),
+        this.usdPriceLoader.getUsdAmountDenom(
+          auction.paymentToken,
+          topics.currentBid,
+        ),
+      ]);
+    }
+
     await this.accountFeedService.addFeed(
       new Feed({
         actor: topics.currentWinner,
@@ -162,6 +240,8 @@ export class FeedEventsSenderService {
           nftName: bidNftData?.name,
           verified: bidNftData?.verified ? true : false,
           price: topics.currentBid,
+          usdAmount: usdAmount ?? undefined,
+          tokenData: tokenData ?? undefined,
           auctionId: auction.id,
           marketplaceKey: auction.marketplaceKey,
         },
