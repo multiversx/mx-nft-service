@@ -454,7 +454,10 @@ export class AuctionsGetterService {
   async getAuctionsGroupByIdentifier(queryRequest: QueryRequest): Promise<[Auction[], number, PriceRange]> {
     const collectionFilter = queryRequest.getFilter('collection');
     const currentPriceFilter = queryRequest.getRange(AuctionCustomEnum.CURRENTPRICE);
+    const statusFilter = queryRequest.getFilter('status');
+    const startDateFilter = queryRequest.getFilter('startDate');
     const sort = queryRequest.getSort();
+    const allFilters = queryRequest.getAllFilters();
 
     const hasCurrentPriceFilter = currentPriceFilter && (currentPriceFilter.startPrice !== '0000000000000000000' || currentPriceFilter.endPrice !== '0000000000000000000');
 
@@ -471,6 +474,28 @@ export class AuctionsGetterService {
       if (marketplaceFilter) {
         allAuctions = allAuctions.filter(x => x.marketplaceKey === marketplaceFilter);
       }
+
+      if (sort) {
+        if (sort.direction === Sort.ASC) {
+          allAuctions = allAuctions.sorted(x => x[sort.field]);
+        } else {
+          allAuctions = allAuctions.sortedDescending(x => x[sort.field]);
+        }
+      }
+
+      const auctions = allAuctions.slice(queryRequest.offset, queryRequest.offset + queryRequest.limit);
+
+      return [auctions, allAuctions.length, priceRange];
+    }
+
+    if (Object.keys(allFilters).length === 2 && statusFilter && startDateFilter) {
+      let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.ActiveAuctions.key,
+        async () => await this.getActiveAuctions(),
+        CacheInfo.ActiveAuctions.ttl,
+        Constants.oneSecond() * 30,
+      );
 
       if (sort) {
         if (sort.direction === Sort.ASC) {
@@ -527,6 +552,36 @@ export class AuctionsGetterService {
     });
 
     return this.getMappedAuctionsOrderBids(queryRequest);
+  }
+
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
+  async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
+    const queryRequest = new QueryRequest({
+      customFilters: [],
+      offset: 0,
+      limit: 10000,
+      filters: new FiltersExpression({
+        filters: [
+          new Filter({
+            field: 'status',
+            values: ['Running'],
+            op: Operation.EQ,
+          }),
+          new Filter({
+            field: 'startDate',
+            values: [Math.round(new Date().getTime() / 1000).toString()],
+            op: Operation.LE,
+          }),
+        ],
+        operator: Operator.AND,
+      }),
+      groupByOption: new Grouping({
+        groupBy: GroupBy.IDENTIFIER,
+      }),
+      sorting: [],
+    });
+
+    return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model

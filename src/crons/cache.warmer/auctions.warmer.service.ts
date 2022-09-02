@@ -75,6 +75,23 @@ export class AuctionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForActiveAuctions() {
+    await Locker.lock(
+      'Active auctions',
+      async () => {
+        const auctionResult = await this.auctionsGetterService.getActiveAuctions();
+
+        await this.invalidateKey(
+          CacheInfo.ActiveAuctions.key,
+          auctionResult,
+          CacheInfo.ActiveAuctions.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleAuctionsOrderByNoBids() {
     await Locker.lock(
       'Top auctions order by number of bids',
