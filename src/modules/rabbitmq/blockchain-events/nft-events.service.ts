@@ -248,7 +248,7 @@ export class NftEventsService {
             );
           if (
             collection?.type === NftTypeEnum.NonFungibleESDT ||
-            NftTypeEnum.SemiFungibleESDT
+            collection?.type === NftTypeEnum.SemiFungibleESDT
           ) {
             await this.feedEventsSenderService.sendMintEvent(
               identifier,
