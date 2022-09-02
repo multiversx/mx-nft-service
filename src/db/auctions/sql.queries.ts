@@ -74,7 +74,7 @@ export function getDefaultAuctionsQuery(
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
   }
 
-  return `((SELECT a.*,o.priceAmountDenominated as price
+  const result =  `((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
@@ -90,6 +90,8 @@ export function getDefaultAuctionsQuery(
       AND a.endDate> ${endDate}
        ${supplementalFilters}))
     order by if(price, price, minBidDenominated) ASC ) as temp`;
+
+  return result;
 }
 
 export function getLowestAuctionForIdentifiers(

@@ -107,6 +107,7 @@ export class AuctionsServiceDb {
       queryBuilder.getManyAndCount(),
       this.getMinMaxForQuery(queryRequest),
     ]);
+
     return [...auctions, priceRange];
   }
 

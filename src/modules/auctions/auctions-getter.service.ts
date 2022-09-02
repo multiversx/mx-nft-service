@@ -475,7 +475,7 @@ export class AuctionsGetterService {
       if (marketplaceFilter) {
         allAuctions = allAuctions.filter(x => x.marketplaceKey === marketplaceFilter);
 
-        priceRange = this.computePriceRange(allAuctions);
+        // priceRange = this.computePriceRange(allAuctions);
       }
 
       if (sort) {
