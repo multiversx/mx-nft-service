@@ -19,8 +19,9 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { Constants } from '@elrondnetwork/erdnest';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -473,6 +474,8 @@ export class AuctionsGetterService {
       const marketplaceFilter = queryRequest.getFilter('marketplaceKey');
       if (marketplaceFilter) {
         allAuctions = allAuctions.filter(x => x.marketplaceKey === marketplaceFilter);
+
+        priceRange = this.computePriceRange(allAuctions);
       }
 
       if (sort) {
@@ -517,6 +520,33 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  private computePriceRange(auctions: Auction[]): PriceRange {
+    const minBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => x.minBid.amount);
+    let minBid: BigNumber | undefined = undefined;
+    let maxBid: BigNumber | undefined = undefined;
+    for (const amount of minBids) {
+      if (new BigNumber(amount) < new BigNumber(minBid) || minBid === undefined) {
+        minBid = new BigNumber(amount);
+      }
+
+      if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
+        maxBid = new BigNumber(amount);
+      }
+    }
+
+    const maxBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => x.maxBid.amount);
+    for (const amount of maxBids) {
+      if (new BigNumber(amount) > new BigNumber(maxBid) || maxBid === undefined) {
+        maxBid = new BigNumber(amount);
+      }
+    }
+
+    return {
+      minBid: minBid?.toFixed() ?? '0',
+      maxBid: maxBid?.toFixed() ?? '0'
+    };
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
