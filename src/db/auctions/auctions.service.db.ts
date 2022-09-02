@@ -248,6 +248,7 @@ export class AuctionsServiceDb {
         '(SELECT COUNT(*) FROM orders WHERE orders.auctionId = a.id)',
         'count',
       )
+      .andWhere(`a.type <> 'SftOnePerPayment'`)
       .addOrderBy('count', 'DESC')
       .addOrderBy('a.creationDate', 'DESC')
       .offset(queryRequest.offset)
