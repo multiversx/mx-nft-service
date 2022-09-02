@@ -525,15 +525,14 @@ export class AuctionsGetterService {
   private computePriceRange(auctions: Auction[]): PriceRange {
     const minBids = auctions.filter(x => x.minBid.token === elrondConfig.egld).map(x => new BigNumber(x.minBid.amount).dividedBy(new BigNumber(10 ** 18)));
     let minBid = new BigNumber('Infinity');
-    let maxBid = new BigNumber(0);
     for (const amount of minBids) {
       if (amount.isLessThan(minBid)) {
         minBid = amount;
-        maxBid = amount;
       }
     }
 
     const maxBids = auctions.filter(x => x.maxBid.token === elrondConfig.egld).map(x => new BigNumber(x.maxBid.amount));
+    let maxBid = minBid;
     for (const amount of maxBids) {
       if (amount.isGreaterThan(maxBid)) {
         maxBid = amount;
@@ -542,7 +541,7 @@ export class AuctionsGetterService {
 
     return {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
-      maxBid: maxBid.toString(),
+      maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
     };
   }
 
