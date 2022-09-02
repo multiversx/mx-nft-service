@@ -349,14 +349,14 @@ export class AuctionsServiceDb {
       filterQueryBuilder.build();
     const response = await queryBuilder
       .select(
-        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated) OR ISNULL(MAX(`o`.`priceAmountDenominated`)), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
       )
       .leftJoin(
         'orders',
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
-      .andWhere('o.priceToken = "EGLD"')
+      .andWhere('a.paymentToken = \'EGLD\'')
       .execute();
     return response[0];
   }
