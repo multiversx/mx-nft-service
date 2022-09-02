@@ -9,7 +9,11 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import { AuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
+import {
+  AuctionEventEnum,
+  NftEventEnum,
+  NftTypeEnum,
+} from 'src/modules/assets/models';
 import {
   AuctionsSetterService,
   AuctionsGetterService,
@@ -190,9 +194,7 @@ export class NftEventsService {
             hash,
             AuctionEventEnum.EndAuctionEvent,
           );
-          this.notificationsService.updateNotificationStatus([
-            endAuction.id,
-          ]);
+          this.notificationsService.updateNotificationStatus([endAuction.id]);
           this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
           await this.feedEventsSenderService.sendWonAuctionEvent(
             topicsEndAuction,
@@ -242,15 +244,19 @@ export class NftEventsService {
           const collection =
             await this.elrondApi.getCollectionByIdentifierForQuery(
               createTopics.collection,
-              'fields=name',
+              'fields=name,type',
             );
-          await this.feedEventsSenderService.sendMintEvent(
-            identifier,
-            mintEvent,
-            createTopics,
-            collection,
-          );
-
+          if (
+            collection?.type === NftTypeEnum.NonFungibleESDT ||
+            NftTypeEnum.SemiFungibleESDT
+          ) {
+            await this.feedEventsSenderService.sendMintEvent(
+              identifier,
+              mintEvent,
+              createTopics,
+              collection,
+            );
+          }
           break;
 
         case NftEventEnum.ESDTNFTTransfer:
