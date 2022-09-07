@@ -42,7 +42,7 @@ export class AssetByIdentifierService {
   async getMappedAssetByIdentifier(
     identifier: string,
   ): Promise<{ key: string; value: Asset; ttl: number }> {
-    const nft = await this.apiService.getNftByIdentifier(identifier);
+    const nft = await this.apiService.getNftByIdentifierForQuery(identifier);
     let ttl = TimeConstants.oneDay;
     if (!nft) {
       ttl = 3 * TimeConstants.oneSecond;

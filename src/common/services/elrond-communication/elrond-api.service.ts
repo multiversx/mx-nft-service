@@ -166,7 +166,7 @@ export class ElrondApiService {
 
   async getNftByIdentifierForQuery(
     identifier: string,
-    query: string,
+    query: string = 'withOwner=true&withSupply=true',
   ): Promise<Nft> {
     const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
     return await this.doGetGeneric(this.getNftByIdentifier.name, url);
