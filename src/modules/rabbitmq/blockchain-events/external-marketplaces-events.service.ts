@@ -20,6 +20,7 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
+import { DEADRARE_KEY, XOXNO_KEY } from 'src/utils/constants';
 import denominate from 'src/utils/formatters';
 import {
   BidEvent,
@@ -281,12 +282,12 @@ export class ExternalMarketplaceEventsService {
               parseInt(topicsUpdatePrice.auctionId, 16),
               updatePriceMarketplace.key,
             );
-          let newBid: string = await this.getNewPrice(
+          let newPrice: string = await this.getNewPrice(
             updatePriceMarketplace,
             topicsUpdatePrice,
           );
-          if (updatePriceAuction && newBid) {
-            this.updateAuctionPrice(updatePriceAuction, newBid, hash);
+          if (updatePriceAuction && newPrice) {
+            this.updateAuctionPrice(updatePriceAuction, newPrice, hash);
 
             this.auctionsService.updateAuction(
               updatePriceAuction,
@@ -306,7 +307,7 @@ export class ExternalMarketplaceEventsService {
             `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
           );
           if (
-            acceptOfferMarketplace.key === 'xoxno' &&
+            acceptOfferMarketplace.key === XOXNO_KEY &&
             topicsAcceptOffer.auctionId > 0
           ) {
             let updatePriceAuction =
@@ -339,7 +340,7 @@ export class ExternalMarketplaceEventsService {
     },
   ) {
     let newBid: string;
-    if (updatePriceMarketplace.key === 'deadrare') {
+    if (updatePriceMarketplace.key === DEADRARE_KEY) {
       const [minBid] = await this.nftAbiService.getMinMaxAuction(
         parseInt(topicsUpdatePrice.auctionId, 16),
         updatePriceMarketplace,
