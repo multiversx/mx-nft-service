@@ -296,6 +296,7 @@ export class ExternalMarketplaceEventsService {
           break;
 
         case ExternalAuctionEventEnum.AcceptOffer:
+          console.log(JSON.stringify(event));
           const acceptOfferEvent = new AcceptOfferEvent(event);
           const topicsAcceptOffer = acceptOfferEvent.getTopics();
           const acceptOfferMarketplace: Marketplace =
