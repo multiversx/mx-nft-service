@@ -28,6 +28,7 @@ import {
   EndAuctionEvent,
   AuctionTokenEvent,
 } from '../entities/auction';
+import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
 import { ChangePriceEvent } from '../entities/auction/changePrice.event';
 import { UpdatePriceEvent } from '../entities/auction/updatePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
@@ -292,6 +293,37 @@ export class ExternalMarketplaceEventsService {
               ExternalAuctionEventEnum.UpdatePrice,
             );
           }
+          break;
+
+        case ExternalAuctionEventEnum.AcceptOffer:
+          const acceptOfferEvent = new AcceptOfferEvent(event);
+          const topicsAcceptOffer = acceptOfferEvent.getTopics();
+          const acceptOfferMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
+              acceptOfferEvent.getAddress(),
+            );
+          this.logger.log(
+            `Accept Offer event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
+          );
+          if (
+            acceptOfferMarketplace.key === 'xoxno' &&
+            topicsAcceptOffer.auctionId > 0
+          ) {
+            let updatePriceAuction =
+              await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+                topicsAcceptOffer.auctionId,
+                updatePriceMarketplace.key,
+              );
+            updatePriceAuction.status = AuctionStatusEnum.Closed;
+            updatePriceAuction.modifiedDate = new Date(
+              new Date().toUTCString(),
+            );
+            this.auctionsService.updateAuction(
+              updatePriceAuction,
+              ExternalAuctionEventEnum.AcceptOffer,
+            );
+          }
+
           break;
       }
     }
