@@ -339,17 +339,15 @@ export class ExternalMarketplaceEventsService {
       newBid: string;
     },
   ) {
-    let newBid: string;
     if (updatePriceMarketplace.key === DEADRARE_KEY) {
       const [minBid] = await this.nftAbiService.getMinMaxAuction(
         parseInt(topicsUpdatePrice.auctionId, 16),
         updatePriceMarketplace,
       );
-      newBid = minBid.toFixed();
-    } else {
-      newBid = topicsUpdatePrice.newBid;
+      return minBid.toFixed();
     }
-    return newBid;
+
+    return topicsUpdatePrice.newBid;
   }
 
   private updateAuctionPrice(
