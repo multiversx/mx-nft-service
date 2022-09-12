@@ -303,7 +303,7 @@ export class ExternalMarketplaceEventsService {
               acceptOfferEvent.getAddress(),
             );
           this.logger.log(
-            `Accept Offer event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
+            `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
           );
           if (
             acceptOfferMarketplace.key === 'xoxno' &&
@@ -312,7 +312,7 @@ export class ExternalMarketplaceEventsService {
             let updatePriceAuction =
               await this.auctionsGetterService.getAuctionByIdAndMarketplace(
                 topicsAcceptOffer.auctionId,
-                updatePriceMarketplace.key,
+                acceptOfferMarketplace.key,
               );
             updatePriceAuction.status = AuctionStatusEnum.Closed;
             updatePriceAuction.modifiedDate = new Date(
