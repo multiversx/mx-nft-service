@@ -11,6 +11,7 @@ export enum ExternalAuctionEventEnum {
   Buy = 'buy',
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
+  AcceptOffer = 'acceptOffer',
 }
 
 export enum NftEventEnum {
