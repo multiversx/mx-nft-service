@@ -7,6 +7,7 @@ import { Marketplace } from './models/Marketplace.dto';
 import { MarketplacesResponse } from './models';
 import { NftMarketplaceAbiService } from '../auctions/nft-marketplace.abi.service';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
+import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 
 @Resolver(() => Marketplace)
 export class MarketplacesResolver extends BaseResolver(Marketplace) {
@@ -50,7 +51,9 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
 
   @ResolveField(() => Boolean)
   async isPaused(@Parent() contractInfo: Marketplace) {
-    const { address } = contractInfo;
-    return address ? await this.nftAbiService.getIsPaused(address) : null;
+    const { address, type } = contractInfo;
+    return address && type === MarketplaceTypeEnum.Internal
+      ? await this.nftAbiService.getIsPaused(address)
+      : null;
   }
 }
