@@ -96,11 +96,11 @@ export function getDefaultAuctionsQuery(
 
 export function getLowestAuctionForIdentifiers(identifiers: string[]) {
   return `
-  SELECT a.*, o.priceAmountDenominated as price
+  SELECT a.*, o.priceAmountDenominated AS price
         FROM auctions a 
         LEFT JOIN LATERAL 
-        (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-        WHERE a.status='Running' AND a.identifier in (${identifiers.map(
+        (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) AS o ON 1=1 
+        WHERE a.status='Running' AND a.identifier IN (${identifiers.map(
           (value) => `'${value}'`,
         )})  AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
         ORDER by if(price, price, minBidDenominated)
@@ -112,11 +112,11 @@ export function getLowestAuctionForIdentifiersAndMarketplace(
   marketplaceKey: string,
 ) {
   return `
-  SELECT a.*, o.priceAmountDenominated as price, CONCAT(a.identifier,"_",'${marketplaceKey}') as identifierKey
+  SELECT a.*, o.priceAmountDenominated as price, CONCAT(a.identifier,"_",'${marketplaceKey}') AS identifierKey
   FROM auctions a 
   LEFT JOIN LATERAL 
-  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-  WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier in (${identifiers.map(
+  (SELECT * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) AS o ON 1=1 
+  WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier IN (${identifiers.map(
     (value) => `'${value}'`,
   )})  AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
   ORDER by if(price, price, minBidDenominated)
