@@ -19,9 +19,8 @@ export class LowestAuctionProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const auctions = await getRepository(AuctionEntity).query(
-      getLowestAuctionForIdentifiers(endDate, identifiers),
+      getLowestAuctionForIdentifiers(identifiers),
     );
 
     return auctions?.groupBy((auction) => auction.identifier);

@@ -74,7 +74,7 @@ export function getDefaultAuctionsQuery(
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
   }
 
-  const result =  `((SELECT a.*,o.priceAmountDenominated as price
+  const result = `((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
@@ -94,10 +94,7 @@ export function getDefaultAuctionsQuery(
   return result;
 }
 
-export function getLowestAuctionForIdentifiers(
-  endDate: number,
-  identifiers: string[],
-) {
+export function getLowestAuctionForIdentifiers(identifiers: string[]) {
   return `
   SELECT a.*, o.priceAmountDenominated as price
         FROM auctions a 
@@ -105,24 +102,23 @@ export function getLowestAuctionForIdentifiers(
         (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
         WHERE a.status='Running' AND a.identifier in (${identifiers.map(
           (value) => `'${value}'`,
-        )})  AND a.endDate> ${endDate} and a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+        )})  AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
         ORDER by if(price, price, minBidDenominated)
 `;
 }
 
 export function getLowestAuctionForIdentifiersAndMarketplace(
-  endDate: number,
   identifiers: string[],
   marketplaceKey: string,
 ) {
   return `
-  SELECT a.*, o.priceAmountDenominated as price
+  SELECT a.*, o.priceAmountDenominated as price, CONCAT(a.identifier,"_",'${marketplaceKey}') as identifierKey
   FROM auctions a 
   LEFT JOIN LATERAL 
   (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
   WHERE a.status='Running' AND a.marketplaceKey='${marketplaceKey}' AND a.identifier in (${identifiers.map(
     (value) => `'${value}'`,
-  )})  AND a.endDate> ${endDate} and a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
+  )})  AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
   ORDER by if(price, price, minBidDenominated)
 `;
 }
