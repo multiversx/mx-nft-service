@@ -17,6 +17,7 @@ const config: ConnectionOptions = {
   type: 'mysql',
   synchronize: false,
   dropSchema: false,
+  logging: true,
   replication: {
     master: db,
     slaves: dbSlaves,
