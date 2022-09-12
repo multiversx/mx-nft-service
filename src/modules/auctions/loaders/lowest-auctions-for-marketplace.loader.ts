@@ -21,15 +21,12 @@ export class LowestAuctionForMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const auctions = await getRepository(AuctionEntity).query(
       getLowestAuctionForIdentifiersAndMarketplace(
-        endDate,
         identifiers.map((value) => value.split('_')[0]),
         identifiers[0].split('_')[1],
       ),
     );
-
     return auctions?.groupBy((auction) => auction.identifierKey);
   }
 }
