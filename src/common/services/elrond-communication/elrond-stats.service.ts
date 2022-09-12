@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { removeCredentialsFromUrl } from 'src/utils/helpers';
 import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { NftViewsCount } from './models/nft-views.dto';
@@ -19,7 +20,9 @@ export class ElrondStatsService {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond stats service on url ${url}`,
+        `An error occurred while calling the elrond stats service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondStatsService.getTrending',
           dimension,
@@ -38,7 +41,9 @@ export class ElrondStatsService {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond stats service on url ${url}`,
+        `An error occurred while calling the elrond stats service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'ElrondStatsService.getNftsViewsCount',
           identifier,

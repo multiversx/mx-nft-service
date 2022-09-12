@@ -21,6 +21,12 @@ export class DateUtils {
     return new Date(today.toUTCString()).getTime() / 1000;
   }
 
+  static getCurrentTimestampPlusYears(years: number): number {
+    let today = new Date();
+    today.setFullYear(today.getFullYear() + years);
+    return new Date(today.toUTCString()).getTime() / 1000;
+  }
+
   static getCurrentTimestamp(): number {
     return new Date(new Date().toUTCString()).getTime() / 1000;
   }

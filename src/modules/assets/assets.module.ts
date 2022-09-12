@@ -42,6 +42,10 @@ import { AssetRarityInfoRedisHandler } from './loaders/assets-rarity-info.redis-
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { CommonModule } from 'src/common.module';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
+import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
+import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
+import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
+import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 
 @Module({
   providers: [
@@ -59,6 +63,8 @@ import { AssetByIdentifierService } from './asset-by-identifier.service';
     IsAssetLikedProvider,
     LowestAuctionRedisHandler,
     LowestAuctionProvider,
+    LowestAuctionForMarketplaceRedisHandler,
+    LowestAuctionForMarketplaceProvider,
     AssetsSupplyRedisHandler,
     AssetsSupplyLoader,
     AssetAuctionsCountRedisHandler,
@@ -79,6 +85,8 @@ import { AssetByIdentifierService } from './asset-by-identifier.service';
     AssetsProvider,
     FeaturedMarketplaceProvider,
     FeaturedMarketplaceRedisHandler,
+    InternalMarketplaceProvider,
+    InternalMarketplaceRedisHandler,
   ],
   imports: [
     ElrondCommunicationModule,

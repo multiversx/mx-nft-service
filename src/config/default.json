@@ -16,7 +16,7 @@
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
-    "egld": "XEGLD"
+    "egld": "EGLD"
   },
   "caching": {
     "ordersRedisClientName": "orders",
@@ -61,6 +61,7 @@
   },
   "constants": {
     "getNftsFromApiBatchSize": 250,
-    "bulkUpdateElasticBatchSize": 100
+    "bulkUpdateElasticBatchSize": 100,
+    "getTokensFromApiBatchSize": 100
   }
 }

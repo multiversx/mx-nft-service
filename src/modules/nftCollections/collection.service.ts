@@ -171,7 +171,7 @@ export class CollectionsService {
     return [collections, count];
   }
 
-  private async getFullCollections(): Promise<[Collection[], number]> {
+  async getFullCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllCollections.key,

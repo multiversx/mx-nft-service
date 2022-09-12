@@ -7,6 +7,7 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../auth/user';
+import { NotificationsFilters } from './models/Notifications.Filter';
 
 @Resolver(() => Notification)
 export class NotificationsResolver extends BaseResolver(Notification) {
@@ -17,13 +18,18 @@ export class NotificationsResolver extends BaseResolver(Notification) {
   @Query(() => NotificationsResponse)
   @UseGuards(GqlAuthGuard)
   async notifications(
+    @Args({ name: 'filters', type: () => NotificationsFilters, nullable: true })
+    filters: NotificationsFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
     @User() user: any,
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [notifications, count] =
-      await this.notificationsService.getNotifications(user.publicKey);
+      await this.notificationsService.getNotifications(
+        user.publicKey,
+        filters?.marketplaceKey,
+      );
     const page = connectionFromArraySlice(notifications, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,

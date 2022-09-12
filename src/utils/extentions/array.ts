@@ -8,8 +8,29 @@ declare global {
       keyPredicate: (item: T) => string,
       valuePredicate?: (item: T) => TOUT,
     ): Record<string, TOUT>;
+    distinct<TResult>(predicate?: (element: T) => TResult): T[];
   }
 }
+
+Array.prototype.distinct = function <TCollection, TResult>(predicate?: (element: TCollection) => TResult): TCollection[] {
+  if (!predicate) {
+    // @ts-ignore
+    return [...new Set(this)];
+  }
+
+  const distinctProjections: TResult[] = [];
+  const result: TCollection[] = [];
+
+  for (const element of this) {
+    const projection = predicate(element);
+    if (!distinctProjections.includes(projection)) {
+      distinctProjections.push(projection);
+      result.push(element);
+    }
+  }
+
+  return result;
+};
 
 Array.prototype.groupBy = function (predicate: Function, asArray = false) {
   let result = this.reduce(function (rv, x) {

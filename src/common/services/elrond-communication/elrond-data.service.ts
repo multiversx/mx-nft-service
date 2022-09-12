@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { removeCredentialsFromUrl } from 'src/utils/helpers';
 import { Logger } from 'winston';
 import { ApiService } from './api.service';
 
@@ -19,7 +20,9 @@ export class ElrondDataService {
       return data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond data service on url ${url}`,
+        `An error occurred while calling the elrond data service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: `ElrondDataService.${ElrondDataService.name}`,
           error,

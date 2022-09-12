@@ -157,7 +157,7 @@ export class ElrondElasticService {
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url: `${collection}/_bulk${urlParams}`,
+        resourceUrl: `${collection}/_bulk${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,
@@ -191,7 +191,7 @@ export class ElrondElasticService {
     } catch (error) {
       this.logger.error({
         method: 'POST',
-        url: `${collection}/_mapping${urlParams}`,
+        resourceUrl: `${collection}/_mapping${urlParams}`,
         response: error.response?.data,
         status: error.response?.status,
         message: error.message,

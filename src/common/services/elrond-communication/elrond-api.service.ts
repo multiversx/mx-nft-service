@@ -10,6 +10,8 @@ import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
+import { Token } from './models/Token.model';
+import { BatchUtils } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class ElrondApiService {
@@ -151,7 +153,7 @@ export class ElrondApiService {
       .addIdentifiers(identifiers)
       .addPageSize(offset, identifiers.length)
       .addQuery(query)
-      .build()}`;
+      .build(false)}`;
     return await this.doGetGeneric(this.getNftsByIdentifiers.name, query);
   }
 
@@ -164,7 +166,7 @@ export class ElrondApiService {
 
   async getNftByIdentifierForQuery(
     identifier: string,
-    query: string,
+    query: string = 'withOwner=true&withSupply=true',
   ): Promise<Nft> {
     const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
     return await this.doGetGeneric(this.getNftByIdentifier.name, url);
@@ -409,7 +411,64 @@ export class ElrondApiService {
     );
   }
 
+  async getAllMexTokens(): Promise<Token[]> {
+    const allTokens = await this.doGetGeneric(
+      this.getAllMexTokens.name,
+      'mex/tokens?size=10000',
+    );
+    return allTokens.map((t) => Token.fromElrondApiToken(t));
+  }
+
+  async getAllMexTokensWithDecimals(): Promise<Token[]> {
+    const batchSize = constants.getTokensFromApiBatchSize;
+    const tokens: Token[] = await this.getAllMexTokens();
+
+    const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
+    for (const tokenChunk of tokenChunks) {
+      const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
+      const tokensWithDecimals = await this.doGetGeneric(
+        this.getAllMexTokensWithDecimals.name,
+        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
+      );
+
+      if (!tokensWithDecimals) {
+        continue;
+      }
+
+      for (const tokenWithDecimals of tokensWithDecimals) {
+        const token = tokens.find(
+          (t) => t.identifier === tokenWithDecimals.identifier,
+        );
+        if (token) {
+          token.decimals = tokenWithDecimals.decimals;
+        }
+      }
+    }
+
+    return tokens;
+  }
+
+  async getEgldPriceFromEconomics(): Promise<string> {
+    return await this.doGetGeneric(
+      this.getEgldPriceFromEconomics.name,
+      'economics?extract=price',
+    );
+  }
+
+  async getTokenData(tokenId: string): Promise<Token | undefined> {
+    const token = await this.doGetGeneric(
+      this.getTokenData.name,
+      `tokens/${tokenId}?fields=identifier,name,ticker,decimals`,
+    );
+    return token
+      ? new Token({
+          ...token,
+          symbol: token.ticker,
+        })
+      : undefined;
+  }
+
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    return [...new Map(nfts.map((nft) => [nft['nonce'], nft])).values()];
+    return nfts.distinct((nft) => nft.nonce);
   }
 }

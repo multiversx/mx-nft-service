@@ -10,7 +10,7 @@ export function getCollectionStats(identifier: string) {
     LEFT JOIN auctions a ON o.auctionId = a.id 
     WHERE a.collection  = '${identifier}' AND o.status = 'Bought'),
 
-    activeAuctions AS (SELECT MIN(if(o.priceAmountDenominated, o.priceAmount , a.minBid)) AS minPrice, 
+    activeAuctions AS (SELECT MIN(if(o.priceAmountDenominated, o.priceAmountDenominated , a.minBidDenominated)) AS minPrice, 
     COUNT(DISTINCT(a.id)) AS activeAuctions,
     a.collection AS activeIdentifier
     FROM auctions a

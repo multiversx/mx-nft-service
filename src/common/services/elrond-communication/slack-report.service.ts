@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { removeCredentialsFromUrl } from 'src/utils/helpers';
 import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
@@ -30,7 +31,9 @@ export class SlackReportService {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the slack report service on url ${url}`,
+        `An error occurred while calling the slack report service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
         {
           path: 'SlackReportService.sendReport',
           identifier,

@@ -9,6 +9,16 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import {
+  Filter,
+  FiltersExpression,
+  GroupBy,
+  Grouping,
+  Operation,
+  Operator,
+} from 'src/modules/common/filters/filtersTypes';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsWarmerService {
@@ -17,28 +27,10 @@ export class AuctionsWarmerService {
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
     private cacheService: CachingService,
+    private marketplacesService: MarketplacesService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.auctionsRedisClientName,
-    );
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
-  async handleAuctionsEndingToday() {
-    await Locker.lock(
-      'Auctions ending today tokens invalidations',
-      async () => {
-        const tokens =
-          await this.auctionsGetterService.getRunningAuctionsEndingBefore(
-            DateUtils.getCurrentTimestampPlus(24),
-          );
-        await this.invalidateKey(
-          CacheInfo.AuctionsEndingToday.key,
-          tokens,
-          5 * TimeConstants.oneMinute,
-        );
-      },
-      true,
     );
   }
 
@@ -62,18 +54,54 @@ export class AuctionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  async handleMarketplaceAuctions() {
+  async handleCachingForFeaturedCollections() {
     await Locker.lock(
-      'Marketplace Auctions invalidations',
+      'Featured collection auctions',
       async () => {
-        const tokens =
-          await this.auctionsGetterService.getMarketplaceAuctionsQuery(
-            DateUtils.getCurrentTimestamp(),
+        const collections = await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
+
+        for (const collection of collections) {
+          const auctionResult = await this.auctionsGetterService.getAuctionsByCollection(collection);
+
+          await this.invalidateKey(
+            `collectionAuctions:${collection}`,
+            auctionResult,
+            10 * TimeConstants.oneMinute,
           );
+        }
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForActiveAuctions() {
+    await Locker.lock(
+      'Active auctions',
+      async () => {
+        const auctionResult = await this.auctionsGetterService.getActiveAuctions();
+
         await this.invalidateKey(
-          CacheInfo.MarketplaceAuctions.key,
-          tokens,
-          3 * TimeConstants.oneMinute,
+          CacheInfo.ActiveAuctions.key,
+          auctionResult,
+          CacheInfo.ActiveAuctions.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleAuctionsOrderByNoBids() {
+    await Locker.lock(
+      'Top auctions order by number of bids',
+      async () => {
+        const result = await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
+
+        await this.invalidateKey(
+          CacheInfo.TopAuctionsOrderByNoBids.key,
+          result,
+          CacheInfo.TopAuctionsOrderByNoBids.ttl,
         );
       },
       true,

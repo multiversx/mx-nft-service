@@ -20,12 +20,14 @@ type AccountStats {
   collected: String
   collections: String
   creations: String
+  marketplaceKey: String
   orders: String
 }
 
 input AccountStatsFilter {
   address: String!
   isOwner: Boolean
+  marketplaceKey: String
 }
 
 input AddLikeArgs {
@@ -42,7 +44,6 @@ type Asset {
   creationDate: Int
   creator: Account
   creatorAddress: String!
-  featuredMarketplace: FeaturedMarketplace
   hasAvailableAuctions: Boolean
   hash: String
   identifier: String!
@@ -50,7 +51,8 @@ type Asset {
   isNsfw: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
-  lowestAuction: Auction
+  lowestAuction(filters: MarketplaceFilters): Auction
+  marketplaces: [Marketplace!]
   media: [Media!]
   metadata: Metadata
   name: String
@@ -130,6 +132,9 @@ type AssetPageInfo {
 
 input AssetsFilter {
   collection: String
+
+  """This will work only with an owner address"""
+  collections: [String!]
   creatorAddress: String
   identifier: String
   identifiers: [String!]
@@ -162,6 +167,9 @@ type Auction {
   endDate: Int!
   id: ID!
   identifier: String!
+  marketplace: Marketplace
+  marketplaceAuctionId: Int!
+  marketplaceKey: String!
   maxBid: Price!
   minBid: Price!
   minBidDiff: Price!
@@ -223,6 +231,7 @@ enum AuctionStatusEnum {
 
 enum AuctionTypeEnum {
   Nft
+  NftBid
   None
   SftAll
   SftOnePerPayment
@@ -474,12 +483,6 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
-type FeaturedMarketplace {
-  address: String!
-  name: String!
-  url: String!
-}
-
 input Filter {
   field: String!
   op: Operation!
@@ -554,6 +557,44 @@ type KeyValueType {
   value: String!
 }
 
+type Marketplace {
+  address: String!
+  isPaused: Boolean
+  key: ID!
+  marketplaceCutPercentage: String
+  name: String!
+  type: MarketplaceTypeEnum!
+  url: String!
+}
+
+type MarketplaceEdge {
+  cursor: String
+  node: Marketplace
+}
+
+input MarketplaceFilters {
+  marketplaceAddress: String
+  marketplaceKey: String
+}
+
+type MarketplacePageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum MarketplaceTypeEnum {
+  External
+  Internal
+}
+
+type MarketplacesResponse {
+  edges: [MarketplaceEdge!]
+  pageData: PageData
+  pageInfo: MarketplacePageInfo
+}
+
 type Media {
   fileSize: String
   fileType: String
@@ -619,6 +660,10 @@ type Mutation {
   withdraw(auctionId: Int!): TransactionNode!
 }
 
+input MyClaimableAuctionsFilters {
+  marketplaceKey: String!
+}
+
 enum NftTypeEnum {
   NonFungibleESDT
   SemiFungibleESDT
@@ -629,6 +674,7 @@ type Notification {
   creationDate: Int
   id: ID!
   identifier: String!
+  marketplaceKey: String!
   name: String!
   type: NotificationTypeEnum!
 }
@@ -649,6 +695,10 @@ enum NotificationTypeEnum {
   Ended
   Outbidded
   Won
+}
+
+input NotificationsFilters {
+  marketplaceKey: String!
 }
 
 type NotificationsResponse {
@@ -679,6 +729,7 @@ type Order {
   endDate: Int
   from: Account
   id: ID!
+  marketplaceKey: String!
   ownerAddress: String!
   price: Price!
   status: OrderStatusEnum!
@@ -748,6 +799,7 @@ type Price {
   nonce: Int!
   timestamp: Int!
   token: ID!
+  tokenData: Token
   usdAmount: String
 }
 
@@ -787,12 +839,12 @@ type Query {
   contractInfo: ContractInfo!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  marketplaceCutPercentage: String! @deprecated(reason: "This will be removed in the next version")
-  myClaimableAuctions(pagination: ConnectionArgs): AuctionResponse!
-  notifications(pagination: ConnectionArgs): NotificationsResponse!
+  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
+  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
+  notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
-  priceRange: PriceRange!
+  priceRange(filters: TokenFilter): PriceRange!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
@@ -923,6 +975,18 @@ input TierArgs {
 enum TierStatusEnum {
   Running
   Sold
+}
+
+type Token {
+  decimals: Float
+  identifier: String!
+  name: String
+  priceUsd: String
+  symbol: String
+}
+
+input TokenFilter {
+  token: String = "EGLD"
 }
 
 type TransactionNode {

@@ -1,4 +1,5 @@
 import { Address } from '@elrondnetwork/erdjs';
+import BigNumber from 'bignumber.js';
 
 export function oneSecond(): number {
   return 1;
@@ -44,4 +45,24 @@ export const isValidAddress = (address: string): boolean => {
   } catch {
     return false;
   }
+};
+
+export const removeCredentialsFromUrl = (url: string): string => {
+  const urlCredentialsRegex = new RegExp('(?<=//).*(?<=@)');
+  const credentials = url.match(urlCredentialsRegex);
+  if (credentials !== null) {
+    return url.replace(credentials[0], '');
+  }
+  return url;
+};
+
+export const computeUsdAmount = (
+  tokenPriceUsd: string,
+  tokenAmount: string,
+  tokenDecimals: number,
+): string => {
+  const amountUsd: BigNumber = new BigNumber(tokenAmount)
+    .multipliedBy(tokenPriceUsd)
+    .dividedBy(Math.pow(10, tokenDecimals));
+  return amountUsd.toString();
 };

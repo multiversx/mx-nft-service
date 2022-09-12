@@ -14,7 +14,6 @@ import { AssetsModuleGraph } from '../assets/assets.module';
 import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
-import { AuctionsForAssetRedisHandler } from './loaders/asset-auctions.redis-handler';
 import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
@@ -29,6 +28,10 @@ import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { CommonModule } from 'src/common.module';
 import { AuctionsCachingModule } from './caching/auctions-caching.module';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
+import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
+import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
+import { CachingService } from 'src/common/services/caching/caching.service';
 
 @Module({
   providers: [
@@ -52,9 +55,13 @@ import { AuctionsCachingService } from './caching/auctions-caching.service';
     LastOrdersProvider,
     AccountsProvider,
     AccountsRedisHandler,
+    MarketplaceProvider,
+    MarketplaceRedisHandler,
+    CachingService,
   ],
   imports: [
     ElrondCommunicationModule,
+    MarketplacesModuleGraph,
     CommonModule,
     forwardRef(() => AuctionsCachingModule),
     forwardRef(() => AuctionsModuleDb),

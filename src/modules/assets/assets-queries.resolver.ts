@@ -24,11 +24,14 @@ import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { elrondConfig } from 'src/config';
-import { FeaturedMarketplace } from './models/FeaturedMarketplace.dto';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetsGetterService } from './assets-getter.service';
+import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
+import { Marketplace } from '../marketplaces/models';
+import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
+import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -42,9 +45,11 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetsAuctionsProvider: AssetAuctionsCountProvider,
     private assetAvailableTokensCountProvider: AssetAvailableTokensCountProvider,
     private lowestAuctionProvider: LowestAuctionProvider,
+    private lowestAuctionForMarketplaceProvider: LowestAuctionForMarketplaceProvider,
     private assetScamProvider: AssetScamInfoProvider,
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
+    private internalMarketplaceProvider: InternalMarketplaceProvider,
   ) {
     super();
   }
@@ -129,7 +134,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
-    return scamInfoValue && Object.keys(scamInfoValue).length !== 0
+    return scamInfoValue && Object.keys(scamInfoValue).length > 1
       ? scamInfoValue
       : null;
   }
@@ -145,10 +150,21 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   }
 
   @ResolveField('lowestAuction', () => Auction)
-  async lowestAuction(@Parent() asset: Asset) {
+  async lowestAuction(
+    @Parent() asset: Asset,
+    @Args({ name: 'filters', type: () => MarketplaceFilters, nullable: true })
+    filters: MarketplaceFilters,
+  ) {
     const { identifier } = asset;
     if (!identifier) {
       return null;
+    }
+
+    if (filters?.marketplaceKey) {
+      const auctions = await this.lowestAuctionForMarketplaceProvider.load(
+        `${identifier}_${filters?.marketplaceKey}`,
+      );
+      return auctions?.value ? Auction.fromEntity(auctions?.value) : null;
     }
     const auctions = await this.lowestAuctionProvider.load(identifier);
     return auctions?.value ? Auction.fromEntity(auctions?.value) : null;
@@ -172,10 +188,23 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return Account.fromEntity(account?.value, ownerAddress);
   }
 
-  @ResolveField(() => FeaturedMarketplace)
-  async featuredMarketplace(@Parent() asset: Asset) {
-    const { ownerAddress, identifier } = asset;
+  @ResolveField(() => [Marketplace])
+  async marketplaces(@Parent() asset: Asset) {
+    const { ownerAddress, identifier, collection, type } = asset;
+    if (type === NftTypeEnum.NonFungibleESDT) {
+      return this.getMarketplaceForNft(ownerAddress, collection, identifier);
+    }
+    if (type === NftTypeEnum.SemiFungibleESDT) {
+      return this.getMarketplaceForSft(collection, identifier);
+    }
+    return null;
+  }
 
+  private async getMarketplaceForNft(
+    ownerAddress: string,
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
     if (!ownerAddress) return null;
     const address = new Address(ownerAddress);
     if (
@@ -183,7 +212,41 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
-      return FeaturedMarketplace.fromEntity(marketplace?.value, identifier);
+
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
+    }
+
+    if (address.isContractAddress()) {
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
+
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
+    }
+  }
+
+  private async getMarketplaceForSft(
+    collection: string,
+    identifier: string,
+  ): Promise<Marketplace[]> {
+    const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
+    if (!!assetAuctions?.value) {
+      const marketplace = await this.internalMarketplaceProvider.load(
+        collection,
+      );
+      const mappedMarketplace = Marketplace.fromEntity(
+        marketplace?.value,
+        identifier,
+      );
+      return mappedMarketplace ? [mappedMarketplace] : null;
     }
     return null;
   }

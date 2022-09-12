@@ -32,7 +32,7 @@ export class CollectionStats {
           activeAuctions: entity?.activeAuctions || 0,
           auctionsEnded: entity?.auctionsEnded || 0,
           maxPrice: nominateAmount(entity.maxPrice ? entity.maxPrice : '0'),
-          minPrice: entity?.minPrice || '0',
+          minPrice: nominateAmount(entity?.minPrice ? entity?.minPrice : '0'),
           saleAverage: nominateAmount(
             entity.saleAverage ? entity.saleAverage : '0',
           )

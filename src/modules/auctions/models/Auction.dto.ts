@@ -7,6 +7,7 @@ import {
 } from 'src/db/auctions/auctionWithBidCount.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
+import { Marketplace } from 'src/modules/marketplaces/models';
 import { OrdersResponse } from 'src/modules/orders/models';
 import { DateUtils } from 'src/utils/date-utils';
 import { AuctionStatusEnum, AuctionTypeEnum } from '.';
@@ -15,6 +16,9 @@ import { AuctionStatusEnum, AuctionTypeEnum } from '.';
 export class Auction {
   @Field(() => ID)
   id: number;
+
+  @Field(() => Int)
+  marketplaceAuctionId: number;
 
   @Field(() => String, { nullable: true })
   ownerAddress: string;
@@ -76,6 +80,12 @@ export class Auction {
   @Field(() => OrdersResponse, { nullable: true })
   orders: OrdersResponse;
 
+  @Field(() => String)
+  marketplaceKey: string;
+
+  @Field(() => Marketplace, { nullable: true })
+  marketplace: Marketplace;
+
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
   }
@@ -94,28 +104,33 @@ export class Auction {
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,
-          endDate: auction.endDate,
+          endDate:
+            auction.endDate > DateUtils.getCurrentTimestampPlusYears(1)
+              ? 0
+              : auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.minBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           minBidDiff: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.minBidDiff,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           maxBid: new Price({
-            token: elrondConfig.egld,
+            token: auction.paymentToken,
             nonce: 0,
             amount: auction.maxBid,
             timestamp: DateUtils.getTimestamp(auction.creationDate),
           }),
           tags: auction.tags.split(',').filter((i) => i),
           creationDate: DateUtils.getTimestamp(auction.creationDate),
+          marketplaceKey: auction.marketplaceKey,
+          marketplaceAuctionId: auction.marketplaceAuctionId,
         });
   }
 }

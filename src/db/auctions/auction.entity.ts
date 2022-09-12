@@ -2,16 +2,25 @@ import {
   AuctionTypeEnum,
   AuctionStatusEnum,
   AuctionAbi,
+  ExternalAuctionAbi,
 } from 'src/modules/auctions/models';
 import denominate, { nominateVal } from 'src/utils/formatters';
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';
 import { TagEntity } from './tags.entity';
 
 @Entity('auctions')
+@Unique('AuctionEntity_UQ_Marketplace', [
+  'marketplaceAuctionId',
+  'marketplaceKey',
+])
 export class AuctionEntity extends BaseEntity {
+  @Column()
+  marketplaceAuctionId: number;
+
   @Column({ length: 20 })
+  @Index('auction_collection')
   collection: string;
 
   @Column()
@@ -57,9 +66,11 @@ export class AuctionEntity extends BaseEntity {
   maxBidDenominated: number;
 
   @Column()
+  @Index('auction_start_date')
   startDate: number;
 
   @Column()
+  @Index('auction_end_date')
   endDate: number;
 
   @Column()
@@ -67,6 +78,10 @@ export class AuctionEntity extends BaseEntity {
 
   @Column({ length: 64 })
   blockHash: string;
+
+  @Column({ length: 20 })
+  @Index('auction_marketplace_key')
+  marketplaceKey: string;
 
   @OneToMany(() => OrderEntity, (order) => order.auction)
   orders: OrderEntity[];
@@ -83,10 +98,11 @@ export class AuctionEntity extends BaseEntity {
     auction: AuctionAbi,
     tags: string,
     hash: string,
+    marketplaceKey: string,
   ) {
     return auction
       ? new AuctionEntity({
-          id: auctionId,
+          marketplaceAuctionId: auctionId,
           collection: auction.auctioned_tokens.token_identifier
             .valueOf()
             .toString(),
@@ -129,6 +145,60 @@ export class AuctionEntity extends BaseEntity {
           )}`,
           tags: tags ? `,${tags},` : '',
           blockHash: hash,
+          marketplaceKey: marketplaceKey,
+        })
+      : null;
+  }
+
+  static fromExternalAuctionAbi(
+    auctionId: number,
+    auction: ExternalAuctionAbi,
+    tags: string,
+    hash: string,
+    marketplaceKey: string,
+  ) {
+    return auction
+      ? new AuctionEntity({
+          marketplaceAuctionId: auctionId,
+          collection: auction.auctioned_token_type.toString(),
+          nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
+          nrAuctionedTokens: parseInt(
+            auction.nr_auctioned_tokens.valueOf().toString(),
+          ),
+          status: AuctionStatusEnum.Running,
+          type: AuctionTypeEnum[auction.auction_type.valueOf().name],
+          paymentToken: auction.payment_token_type.toString(),
+          paymentNonce: parseInt(
+            auction.payment_token_nonce.valueOf().toString(),
+          ),
+          ownerAddress: auction.original_owner.valueOf().toString(),
+          minBid: auction.min_bid.valueOf().toString(),
+          // minBidDiff: auction.min_bid_diff.valueOf().toString(),
+          minBidDenominated: parseFloat(
+            denominate({
+              input: auction.min_bid.valueOf()?.toString(),
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }).replace(',', ''),
+          ),
+          maxBid: auction.max_bid?.valueOf()?.toString() || '0',
+          maxBidDenominated: parseFloat(
+            denominate({
+              input: auction?.max_bid?.valueOf()?.toString() || '0',
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }).replace(',', ''),
+          ),
+          startDate: parseInt(auction.start_time.valueOf().toString()),
+          endDate: parseInt(auction.deadline.valueOf().toString()),
+          identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
+            parseInt(auction.auctioned_token_nonce.valueOf().toString()),
+          )}`,
+          tags: tags ? `,${tags},` : '',
+          blockHash: hash,
+          marketplaceKey: marketplaceKey,
         })
       : null;
   }

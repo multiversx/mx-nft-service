@@ -18,6 +18,7 @@ import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-hand
 import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import * as hash from 'object-hash';
+import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
 
 @Injectable()
 export class AuctionsCachingService {
@@ -29,6 +30,7 @@ export class AuctionsCachingService {
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private accountStatsCachingService: AccountsStatsCachingService,
+    private internalMarketplaceRedisHandler: InternalMarketplaceRedisHandler,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
@@ -52,6 +54,7 @@ export class AuctionsCachingService {
       this.assetsAuctionsCountLoader.clearKey(identifier),
       this.onSaleAssetsCount.clearKey(collection),
       this.availableTokensCountHandler.clearKey(identifier),
+      this.internalMarketplaceRedisHandler.clearKey(collection),
     ]);
   }
 
@@ -80,7 +83,7 @@ export class AuctionsCachingService {
   ): Promise<[Auction[], number, PriceRange]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getAuctionsCacheKey(queryRequest),
+      CacheInfo.TopAuctionsOrderByNoBids.key,
       () => getAuctions(),
       TimeConstants.oneHour,
     );
@@ -98,11 +101,12 @@ export class AuctionsCachingService {
   }
 
   public async getMinAndMax(
+    token: string,
     getData: () => any,
   ): Promise<{ minBid: string; maxBid: string }> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      generateCacheKeyFromParams('minMaxPrice'),
+      generateCacheKeyFromParams('minMaxPrice', token),
       () => getData(),
       5 * TimeConstants.oneMinute,
     );
@@ -111,12 +115,12 @@ export class AuctionsCachingService {
   public async getClaimableAuctions(
     limit: number = 10,
     offset: number = 0,
-    address: string,
+    key: string,
     getData: () => any,
   ): Promise<[Auction[], number]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getClaimableAuctionsCacheKey(address, limit, offset),
+      this.getClaimableAuctionsCacheKey(key, limit, offset),
       () => getData(),
       30 * TimeConstants.oneSecond,
     );

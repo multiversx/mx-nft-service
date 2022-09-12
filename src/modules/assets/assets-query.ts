@@ -46,6 +46,10 @@ export class AssetsQuery {
     return this.addParamToQuery('collection', collection);
   }
 
+  addCollections(collections: string[]): this {
+    return this.addParamToQuery('collections', collections?.toString());
+  }
+
   addType(type: NftTypeEnum): this {
     return this.addParamToQuery('type', type);
   }
@@ -75,7 +79,9 @@ export class AssetsQuery {
   }
 
   build(addDefaultQuery: boolean = true): string {
-    const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
+    // TODO: handle whitelisting in a different way
+    // const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
+    const defaultQuery = 'hasUris=true';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
     return this.addQuery(defaultQuery).build(false);

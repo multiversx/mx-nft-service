@@ -1,13 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Auction, AuctionStatusEnum } from './models';
+import {
+  Auction,
+  AuctionAbi,
+  AuctionStatusEnum,
+  ExternalAuctionAbi,
+} from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { RedisCacheService } from 'src/common';
 import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
@@ -15,6 +17,8 @@ import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { MarketplaceUtils } from './marketplaceUtils';
+import { Marketplace } from '../marketplaces/models';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -29,20 +33,36 @@ export class AuctionsSetterService {
   async saveAuction(
     auctionId: number,
     identifier: string,
+    marketplace: Marketplace,
     hash: string,
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      const auctionData = await this.nftAbiService.getAuctionQuery(auctionId);
+      const auctionData = await this.nftAbiService.getAuctionQuery(
+        auctionId,
+        marketplace,
+      );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
+        const auctionEntity = MarketplaceUtils.isExternalMarketplace(
+          marketplace.type,
+        )
+          ? AuctionEntity.fromExternalAuctionAbi(
+              auctionId,
+              auctionData as ExternalAuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplace.key,
+            )
+          : AuctionEntity.fromAuctionAbi(
+              auctionId,
+              auctionData as AuctionAbi,
+              asset?.tags?.toString(),
+              hash,
+              marketplace.key,
+            );
         const savedAuction = await this.auctionServiceDb.insertAuction(
-          AuctionEntity.fromAuctionAbi(
-            auctionId,
-            auctionData,
-            asset?.tags?.toString(),
-            hash,
-          ),
+          auctionEntity,
         );
 
         if (asset?.tags) {
@@ -50,7 +70,7 @@ export class AuctionsSetterService {
           for (const tag of asset?.tags) {
             tags = [
               ...tags,
-              new TagEntity({ auctionId: savedAuction.id, tag: tag }),
+              new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
             ];
           }
 
@@ -88,18 +108,70 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuction(
+  async updateAuctionStatus(
     id: number,
     status: AuctionStatusEnum,
     hash: string,
     auctionEvent: string,
-  ): Promise<Auction | any> {
+  ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuction(id, status, hash);
+      return await this.auctionServiceDb.updateAuctionStatus(id, status, hash);
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction status', {
+        path: 'AuctionsService.updateAuctionStatus',
+        id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuction(
+    auction: AuctionEntity,
+    auctionEvent: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.auctionServiceDb.updateAuction(auction);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuction',
+        id: auction.id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuctionByMarketplaceKey(
+    id: number,
+    marketplaceKey: string,
+    status: AuctionStatusEnum,
+    hash: string,
+    auctionEvent: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.auctionServiceDb.updateAuctionByMarketplace(
+        id,
+        marketplaceKey,
+        status,
+        hash,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while updating auction', {
+        path: 'AuctionsService.updateAuctionByMarketplaceKey',
         id,
         exception: error,
       });

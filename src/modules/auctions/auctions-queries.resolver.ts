@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
-import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
@@ -30,15 +29,20 @@ import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-au
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
 import { PriceRange } from './models/PriceRange.dto';
+import { MyClaimableAuctionsFilters } from './models/MyClaimable.Filter';
+import { Marketplace } from '../marketplaces/models';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
+import { TokenFilter } from './models/Token.Filter';
+import { elrondConfig } from 'src/config';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   constructor(
     private auctionsService: AuctionsGetterService,
-    private nftAbiService: NftMarketplaceAbiService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrdersProvider,
+    private marketplaceProvider: MarketplaceProvider,
     private availableTokensProvider: AvailableTokensForAuctionProvider,
   ) {
     super();
@@ -110,6 +114,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
+
     const [auctions, count, priceRange] =
       await this.auctionsService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
@@ -128,16 +133,18 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     };
   }
 
-  @Query(() => String, {
-    deprecationReason: 'This will be removed in the next version',
-  })
-  async marketplaceCutPercentage() {
-    return await this.nftAbiService.getCutPercentage();
-  }
-
   @Query(() => PriceRange)
-  async priceRange() {
-    const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice();
+  async priceRange(
+    @Args({
+      name: 'filters',
+      type: () => TokenFilter,
+      nullable: true,
+    })
+    filters: TokenFilter,
+  ) {
+    const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice(
+      filters?.token ?? elrondConfig.egld,
+    );
     return PriceRange.fromEntity(minBid, maxBid);
   }
 
@@ -145,6 +152,12 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(
     @User() user: any,
+    @Args({
+      name: 'filters',
+      type: () => MyClaimableAuctionsFilters,
+      nullable: true,
+    })
+    filters: MyClaimableAuctionsFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
@@ -153,6 +166,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       limit,
       offset,
       user.publicKey,
+      filters?.marketplaceKey,
     );
     return PageResponse.mapResponse<Auction>(
       auctions,
@@ -221,6 +235,28 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
     if (!ownerAddress) return null;
     return await this.getAccount(fields, ownerAddress);
+  }
+
+  @ResolveField('marketplace', () => Marketplace)
+  async marketplace(@Parent() auction: Auction) {
+    const { marketplaceKey, identifier, id, marketplaceAuctionId } = auction;
+
+    if (!marketplaceKey) return null;
+    const marketplace = await this.marketplaceProvider.load(marketplaceKey);
+    const marketplaceValue = marketplace?.value;
+    if (marketplaceValue?.length > 0 && marketplaceValue[0].key === 'xoxno') {
+      const asset = await this.assetsProvider.load(identifier);
+      const assetValue = asset?.value;
+      return Marketplace.fromEntityForXoxno(
+        marketplaceValue[0],
+        identifier,
+        marketplaceAuctionId,
+        assetValue.type,
+      );
+    }
+    return marketplaceValue?.length > 0
+      ? Marketplace.fromEntity(marketplaceValue[0], identifier, id)
+      : null;
   }
 
   private hasToResolveAsset(fields: string[]) {

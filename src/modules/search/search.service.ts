@@ -15,6 +15,7 @@ import {
   SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
+import { CollectionsService } from '../nftCollections/collection.service';
 
 @Injectable()
 export class SearchService {
@@ -26,6 +27,7 @@ export class SearchService {
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
+    private collectionsService: CollectionsService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -140,18 +142,27 @@ export class SearchService {
   private async getMappedCollections(
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
-    const response = await this.apiService.getCollectionsBySearch(
-      searchTerm,
-      this.searchSize,
-    );
-    return response?.map(
-      (c) =>
-        new SearchNftCollectionResponse({
-          identifier: c.collection,
-          name: c.name,
-          verified: !!c.assets,
-        }),
-    );
+    const [collections, count] = await this.collectionsService.getFullCollections();
+    let allResults = collections.filter(x => 
+      x.verified && 
+      (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+    ).slice(0, 5);
+    
+    if (allResults.length < 5) {
+      const nonVerifiedResults = collections.filter(x => 
+        !x.verified && 
+        (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase()))
+      ).slice(0, 5 - allResults.length);
+      allResults.push(...nonVerifiedResults);
+    }
+
+    const result = allResults.map(result => new SearchNftCollectionResponse({
+      identifier: result.collection,
+      name: result.name,
+      verified: result.verified
+    }));
+
+    return result;
   }
 
   private getCollectionCacheKey(searchTerm: string) {

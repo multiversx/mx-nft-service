@@ -1,11 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { TimeConstants } from 'src/utils/time-utils';
 import {
   NotificationEntity,
   NotificationsServiceDb,
@@ -15,30 +10,38 @@ import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { NotificationsCachingService } from './notifications-caching.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 
 @Injectable()
 export class NotificationsService {
-  private redisClient: Redis.Redis;
   constructor(
     private readonly notificationServiceDb: NotificationsServiceDb,
+    @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
     private readonly assetByIdentifierService: AssetByIdentifierService,
-    private readonly redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private readonly notificationCachingService: NotificationsCachingService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
+  ) {}
 
-  async getNotifications(address: string): Promise<[Notification[], number]> {
-    const cacheKey = this.getNotificationsCacheKey(address);
-    const getNotifications = () => this.getMappedNotifications(address);
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
-      getNotifications,
-      TimeConstants.oneDay,
+  async getNotifications(
+    address: string,
+    marketplaceKey: string = undefined,
+  ): Promise<[Notification[], number]> {
+    if (marketplaceKey) {
+      return this.notificationCachingService.getNotificationsForMarketplace(
+        address,
+        marketplaceKey,
+        () => this.getNotificationsForMarketplace(address, marketplaceKey),
+      );
+    }
+    return this.notificationCachingService.getAllNotifications(address, () =>
+      this.getMappedNotifications(address),
     );
   }
 
@@ -47,11 +50,11 @@ export class NotificationsService {
     const orders = await this.ordersService.getOrdersByAuctionIds(
       auctions?.map((a) => a.id),
     );
-
-    this.clearCache(auctions, orders);
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }
+
+    this.triggerClearCache(auctions, orders);
   }
 
   async updateNotificationStatus(auctionIds: number[]) {
@@ -68,9 +71,9 @@ export class NotificationsService {
             modifiedDate: new Date(new Date().toUTCString()),
           };
         });
-        await this.notificationServiceDb.saveNotifications(
-          inactiveNotifications,
-        );
+        if (inactiveNotifications?.length > 0) {
+          await this.updateInactiveStatus(inactiveNotifications);
+        }
       }
     } catch (error) {
       this.logger.error(
@@ -85,7 +88,96 @@ export class NotificationsService {
   }
 
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
-    await this.notificationServiceDb.saveNotifications(notifications);
+    try {
+      await this.notificationServiceDb.saveNotifications(notifications);
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to update notifications status.',
+        {
+          path: 'NotificationsService.saveNotifications',
+          exception: error?.toString(),
+        },
+      );
+    }
+  }
+
+  async saveNotification(notification: NotificationEntity): Promise<void> {
+    try {
+      await this.notificationServiceDb.saveNotification(notification);
+      await this.publishClearNotificationEvent(
+        notification.ownerAddress,
+        notification.marketplaceKey,
+      );
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to save notifications status.',
+        {
+          path: 'NotificationsService.saveNotification',
+          exception: error?.toString(),
+        },
+      );
+    }
+  }
+
+  async getNotificationByIdAndOwner(
+    auctionId: number,
+    ownerAddress: string,
+  ): Promise<NotificationEntity> {
+    try {
+      return await this.notificationServiceDb.getNotificationByIdAndOwner(
+        auctionId,
+        ownerAddress,
+      );
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to get a notification.',
+        {
+          path: 'NotificationsService.getNotificationByIdAndOwner',
+          auctionId,
+          ownerAddress,
+          exception: error?.toString(),
+        },
+      );
+    }
+  }
+
+  async updateNotification(auctionId: number, ownerAddress: string) {
+    try {
+      const notification = await this.getNotificationByIdAndOwner(
+        auctionId,
+        ownerAddress,
+      );
+      if (notification) {
+        await this.publishClearNotificationEvent(
+          notification.ownerAddress,
+          notification.marketplaceKey,
+        );
+        return await this.notificationServiceDb.updateNotification(
+          notification,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to update notifications status.',
+        {
+          path: 'NotificationsService.updateNotification',
+          exception: error?.toString(),
+        },
+      );
+    }
+  }
+
+  private async updateInactiveStatus(
+    inactiveNotifications: NotificationEntity[],
+  ) {
+    await this.notificationServiceDb.saveNotifications(inactiveNotifications);
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: inactiveNotifications?.map((n) => n.ownerAddress),
+        type: CacheEventTypeEnum.UpdateNotifications,
+        extraInfo: { marketplaceKey: inactiveNotifications[0].marketplaceKey },
+      }),
+    );
   }
 
   private async getMappedNotifications(address: string) {
@@ -100,7 +192,25 @@ export class NotificationsService {
     ];
   }
 
-  public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  private async getNotificationsForMarketplace(
+    address: string,
+    marketplaceKey: string,
+  ) {
+    const [notificationsEntities, count] =
+      await this.notificationServiceDb.getNotificationsForMarketplace(
+        address,
+        marketplaceKey,
+      );
+
+    return [
+      notificationsEntities.map((notification) =>
+        Notification.fromEntity(notification),
+      ),
+      count,
+    ];
+  }
+
+  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
       const asset = await this.assetByIdentifierService.getAsset(
         auction.identifier,
@@ -115,6 +225,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
           new NotificationEntity({
             auctionId: auction.id,
@@ -123,6 +234,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Won,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
         ]);
       } else {
@@ -134,6 +246,7 @@ export class NotificationsService {
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Ended,
             name: assetName,
+            marketplaceKey: auction.marketplaceKey,
           }),
         ]);
       }
@@ -150,26 +263,32 @@ export class NotificationsService {
     }
   }
 
-  private clearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
+  private triggerClearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
+    if (!auctions?.length && !orders?.length) return;
     let addreses = auctions.map((a) => a.ownerAddress);
     for (const orderGroup in orders) {
       addreses = [...addreses, orders[orderGroup][0].ownerAddress];
     }
     const uniqueAddresses = [...new Set(addreses)];
-    this.redisCacheService.delMultiple(
-      this.redisClient,
-      uniqueAddresses.map((a) => this.getNotificationsCacheKey(a)),
+    this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: uniqueAddresses,
+        type: CacheEventTypeEnum.UpdateNotifications,
+        extraInfo: { marketplaceKey: auctions[0].marketplaceKey },
+      }),
     );
   }
 
-  private getNotificationsCacheKey(address: string) {
-    return generateCacheKeyFromParams('notifications', address);
-  }
-
-  public async invalidateCache(ownerAddress: string = ''): Promise<void> {
-    return this.redisCacheService.del(
-      this.redisClient,
-      this.getNotificationsCacheKey(ownerAddress),
+  private async publishClearNotificationEvent(
+    id: string,
+    marketplaceKey: string,
+  ) {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: id,
+        type: CacheEventTypeEnum.UpdateOneNotification,
+        extraInfo: { marketplaceKey: marketplaceKey },
+      }),
     );
   }
 }

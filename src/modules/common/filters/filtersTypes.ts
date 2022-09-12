@@ -86,12 +86,20 @@ export class Sorting {
 
 @InputType()
 export class Grouping {
+  constructor(init?: Partial<Grouping>) {
+    Object.assign(this, init);
+  }
+
   @Field(() => GroupBy)
   groupBy: GroupBy;
 }
 
 @InputType()
 export class FiltersExpression {
+  constructor(init?: Partial<FiltersExpression>) {
+    Object.assign(this, init);
+  }
+
   @Field(() => Operator)
   operator: Operator;
   @Field(() => [Filter])
@@ -134,6 +142,12 @@ export class AssetsFilter {
   })
   @Field(() => String, { nullable: true })
   collection: string;
+
+  @Field(() => [String], {
+    nullable: true,
+    description: 'This will work only with an owner address',
+  })
+  collections: string[];
 
   @Field(() => [String], { nullable: true })
   tags: [string];

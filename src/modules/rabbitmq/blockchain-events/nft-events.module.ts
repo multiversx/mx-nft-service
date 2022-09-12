@@ -25,6 +25,11 @@ import { OrdersModuleGraph } from 'src/modules/orders/orders.module';
 import { CacheEventsPublisherModule } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-events.consumer';
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
+import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
+import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
+import { FeedEventsSenderService } from './feed-events.service';
+import { UsdAmountModuleGraph } from 'src/modules/usdAmount/usd-amount.module';
+import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
 
 @Module({
   imports: [
@@ -35,13 +40,16 @@ import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
+    forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
+    UsdAmountModuleGraph,
   ],
   providers: [
     NftEventsConsumer,
     NftEventsService,
+    ExternalMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
@@ -55,6 +63,8 @@ import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-
     RarityUpdaterService,
     AssetByIdentifierService,
     NsfwUpdaterService,
+    FeedEventsSenderService,
+    UsdPriceLoader,
   ],
   exports: [NftEventsService],
 })

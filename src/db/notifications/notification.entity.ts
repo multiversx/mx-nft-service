@@ -26,6 +26,10 @@ export class NotificationEntity extends BaseEntity {
   @Index('auction_id')
   auctionId: number;
 
+  @Column({ length: 20 })
+  @Index('notification_marketplace_key')
+  marketplaceKey: string;
+
   constructor(init?: Partial<NotificationEntity>) {
     super();
     Object.assign(this, init);

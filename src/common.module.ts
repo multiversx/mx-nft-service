@@ -1,7 +1,6 @@
 import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,

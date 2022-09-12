@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { BuyRandomNftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
@@ -21,28 +21,28 @@ import {
 } from '@elrondnetwork/erdjs';
 import { elrondConfig, gas } from '../../config';
 import { ElrondProxyService } from 'src/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { isNumber } from '@nestjs/common/utils/shared.utils';
+import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 
 @Injectable()
 export class NftMinterAbiService {
   private readonly parser: ResultsParser;
-  constructor(
-    private elrondProxyService: ElrondProxyService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {
+  private readonly abiPath: string = './src/abis/nft-minter.abi.json';
+  private readonly abiInterface: string = 'NftMinter';
+  private readonly contract = new ContractLoader(
+    this.abiPath,
+    this.abiInterface,
+  );
+
+  constructor(private elrondProxyService: ElrondProxyService) {
     this.parser = new ResultsParser();
   }
 
   public async getCampaignsForScAddress(address: string) {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
-      address,
-    );
+    const contract = await this.contract.getContract(address);
     let getDataQuery = <Interaction>contract.methodsExplicit.getAllBrandsInfo();
 
     const response = await this.getFirstQueryResult(getDataQuery);
@@ -54,9 +54,8 @@ export class NftMinterAbiService {
     ownerAddress: string,
     request: IssueCampaignRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
-      request.minterAddress,
-    );
+    const contract = await this.contract.getContract(request.minterAddress);
+
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
       value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
@@ -71,9 +70,8 @@ export class NftMinterAbiService {
     ownerAddress: string,
     request: BuyRequest,
   ): Promise<TransactionNode> {
-    const contract = await this.elrondProxyService.getMinterAbiSmartContract(
-      request.minterAddress,
-    );
+    const contract = await this.contract.getContract(request.minterAddress);
+
     let buyRandomNft = contract.call({
       func: new ContractFunction('buyRandomNft'),
       value: TokenPayment.egldFromBigInteger(request.price),

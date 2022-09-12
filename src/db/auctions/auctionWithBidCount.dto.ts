@@ -5,6 +5,7 @@ import {
 
 export class AuctionWithBidsCount {
   id: number;
+  marketplaceAuctionId: number;
   creationDate: Date = new Date(new Date().toUTCString());
   modifiedDate: Date;
   collection: string;
@@ -26,6 +27,7 @@ export class AuctionWithBidsCount {
   ordersCount: number;
   tags: string;
   blockHash: string;
+  marketplaceKey: string;
 
   constructor(init?: Partial<AuctionWithBidsCount>) {
     Object.assign(this, init);
@@ -34,6 +36,7 @@ export class AuctionWithBidsCount {
 
 export class AuctionWithStartBid {
   id: number;
+  marketplaceAuctionId: number;
   creationDate: Date;
   modifiedDate: Date;
   collection: string;
@@ -55,6 +58,7 @@ export class AuctionWithStartBid {
   startBid: number;
   tags: string;
   blockHash: string;
+  marketplaceKey: string;
 
   constructor(init?: Partial<AuctionWithStartBid>) {
     Object.assign(this, init);
