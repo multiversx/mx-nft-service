@@ -282,12 +282,12 @@ export class ExternalMarketplaceEventsService {
               parseInt(topicsUpdatePrice.auctionId, 16),
               updatePriceMarketplace.key,
             );
-          const [minBid] = await this.nftAbiService.getMinMaxAuction(
-            parseInt(topicsUpdatePrice.auctionId, 16),
+          let newBid: string = await this.getNewPrice(
             updatePriceMarketplace,
+            topicsUpdatePrice,
           );
-          if (updatePriceAuction && minBid) {
-            this.updateAuctionPrice(updatePriceAuction, minBid.toFixed(), hash);
+          if (updatePriceAuction && newBid) {
+            this.updateAuctionPrice(updatePriceAuction, newBid, hash);
 
             this.auctionsService.updateAuction(
               updatePriceAuction,
@@ -328,6 +328,28 @@ export class ExternalMarketplaceEventsService {
           break;
       }
     }
+  }
+
+  private async getNewPrice(
+    updatePriceMarketplace: Marketplace,
+    topicsUpdatePrice: {
+      collection: string;
+      nonce: string;
+      auctionId: string;
+      newBid: string;
+    },
+  ) {
+    let newBid: string;
+    if (updatePriceMarketplace.key === 'deadrare') {
+      const [minBid] = await this.nftAbiService.getMinMaxAuction(
+        parseInt(topicsUpdatePrice.auctionId, 16),
+        updatePriceMarketplace,
+      );
+      newBid = minBid.toFixed();
+    } else {
+      newBid = topicsUpdatePrice.newBid;
+    }
+    return newBid;
   }
 
   private updateAuctionPrice(
