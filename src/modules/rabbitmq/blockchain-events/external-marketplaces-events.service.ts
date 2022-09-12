@@ -267,6 +267,7 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case ExternalAuctionEventEnum.UpdatePrice:
+          console.log(JSON.stringify(event));
           const updatePriceEvent = new UpdatePriceEvent(event);
           const topicsUpdatePrice = updatePriceEvent.getTopics();
           const updatePriceMarketplace: Marketplace =
@@ -296,7 +297,6 @@ export class ExternalMarketplaceEventsService {
           break;
 
         case ExternalAuctionEventEnum.AcceptOffer:
-          console.log(JSON.stringify(event));
           const acceptOfferEvent = new AcceptOfferEvent(event);
           const topicsAcceptOffer = acceptOfferEvent.getTopics();
           const acceptOfferMarketplace: Marketplace =
