@@ -7,7 +7,6 @@ import { AccountsStatsModuleGraph } from 'src/modules/account-stats/accounts-sta
 import { AuctionsForAssetRedisHandler } from 'src/modules/auctions';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
 import { LowestAuctionRedisHandler } from 'src/modules/auctions/loaders/lowest-auctions.redis-handler';
-import { TagsRepository } from './tags.repository';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from 'src/modules/nftCollections/loaders/onsale-assets-count.redis-handler';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
@@ -15,7 +14,6 @@ import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidat
 @Module({
   imports: [
     TypeOrmModule.forFeature([AuctionEntity]),
-    TypeOrmModule.forFeature([TagsRepository]),
     forwardRef(() => OrdersModuleDb),
     AccountsStatsModuleGraph,
     CacheEventsPublisherModule,
@@ -28,10 +26,6 @@ import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidat
     OnSaleAssetsCountForCollectionRedisHandler,
     AssetAvailableTokensCountRedisHandler,
   ],
-  exports: [
-    AuctionsServiceDb,
-    TypeOrmModule.forFeature([TagsRepository]),
-    TypeOrmModule.forFeature([AuctionEntity]),
-  ],
+  exports: [AuctionsServiceDb, TypeOrmModule.forFeature([AuctionEntity])],
 })
 export class AuctionsModuleDb {}

@@ -15,10 +15,10 @@ import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
-import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -26,7 +26,7 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private auctionServiceDb: AuctionsServiceDb,
-    private tagsRepository: TagsRepository,
+    private persistanceService: PersistenceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -74,7 +74,7 @@ export class AuctionsSetterService {
             ];
           }
 
-          await this.tagsRepository.saveTags(tags);
+          await this.persistanceService.saveTags(tags);
         }
         return savedAuction;
       }
