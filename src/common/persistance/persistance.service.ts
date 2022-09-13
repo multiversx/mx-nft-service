@@ -11,6 +11,11 @@ import { TierEntity } from 'src/db/campaigns/tiers.entity';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
+import { FeaturedNftEntity } from 'src/db/featuredNfts/featured.entity';
+import {
+  FeaturedCollectionsRepository,
+  FeaturedNftsRepository,
+} from 'src/db/featuredNfts/featured.repository';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
@@ -25,6 +30,8 @@ export class PersistenceService implements PersistenceInterface {
     private readonly collectionStatsRepository: CollectionStatsRepository,
     private readonly campaignsRepository: CampaignsRepository,
     private readonly tiersRepository: TiersRepository,
+    private readonly featuredCollectionsRepository: FeaturedCollectionsRepository,
+    private readonly featuredNftsRepository: FeaturedNftsRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -233,6 +240,26 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'saveTiers',
       this.tiersRepository.saveTiers(tiers),
+    );
+  }
+
+  async getFeaturedCollections(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<[FeaturedNftEntity[], number]> {
+    return await this.execute(
+      'getFeaturedCollections',
+      this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
+    );
+  }
+
+  async getFeaturedNfts(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<[FeaturedNftEntity[], number]> {
+    return await this.execute(
+      'getFeaturedNfts',
+      this.featuredNftsRepository.getFeaturedNfts(limit, offset),
     );
   }
 }

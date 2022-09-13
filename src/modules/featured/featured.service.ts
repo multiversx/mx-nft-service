@@ -5,21 +5,17 @@ import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
-import {
-  FeaturedCollectionsRepository,
-  FeaturedNftsRepository,
-} from 'src/db/featuredNfts';
 import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
 import { TimeConstants } from 'src/utils/time-utils';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class FeaturedService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
-    private fearturedNftsRepo: FeaturedNftsRepository,
-    private fearturedCollectionsRepo: FeaturedCollectionsRepository,
+    private persistenceService: PersistenceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -35,7 +31,7 @@ export class FeaturedService {
     try {
       const cacheKey = this.getFeaturedNftsCacheKey(limit, offset);
       const getAssetLiked = () =>
-        this.fearturedNftsRepo.getFeaturedNfts(limit, offset);
+        this.persistenceService.getFeaturedNfts(limit, offset);
       const [featuredNfts, count] = await this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -65,7 +61,7 @@ export class FeaturedService {
     try {
       const cacheKey = this.getFeaturedCollectionsCacheKey(limit, offset);
       const getFeaturedCollections = () =>
-        this.fearturedCollectionsRepo.getFeaturedCollections(limit, offset);
+        this.persistenceService.getFeaturedCollections(limit, offset);
       const [featuredCollections, count] =
         await this.redisCacheService.getOrSet(
           this.redisClient,
