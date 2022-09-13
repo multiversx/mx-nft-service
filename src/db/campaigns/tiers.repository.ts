@@ -36,4 +36,16 @@ export class TiersRepository extends Repository<TierEntity> {
       throw err;
     }
   }
+
+  async saveTiers(tiers: TierEntity[]): Promise<TierEntity[]> {
+    try {
+      return await this.save(tiers);
+    } catch (err) {
+      // If like already exists, we ignore the error.
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
+        return null;
+      }
+      throw err;
+    }
+  }
 }

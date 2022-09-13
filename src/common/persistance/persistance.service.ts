@@ -5,6 +5,10 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
+import { CampaignEntity } from 'src/db/campaigns/campaign.entity';
+import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
+import { TierEntity } from 'src/db/campaigns/tiers.entity';
+import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
@@ -19,6 +23,8 @@ export class PersistenceService implements PersistenceInterface {
     private readonly accountStatsRepository: AccountStatsRepository,
     private readonly tagsRepository: TagsRepository,
     private readonly collectionStatsRepository: CollectionStatsRepository,
+    private readonly campaignsRepository: CampaignsRepository,
+    private readonly tiersRepository: TiersRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -160,6 +166,73 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'getStats',
       this.collectionStatsRepository.getStats(identifier),
+    );
+  }
+
+  async getCampaign(
+    campaignId: string,
+    minterAddress: string,
+  ): Promise<CampaignEntity> {
+    return await this.execute(
+      'getCampaign',
+      this.campaignsRepository.getCampaign(campaignId, minterAddress),
+    );
+  }
+
+  async getCampaignByCollectionTicker(
+    collectionTicker: string,
+  ): Promise<CampaignEntity> {
+    return await this.execute(
+      'getCampaignByCollectionTicker',
+      this.campaignsRepository.getCampaignByCollectionTicker(collectionTicker),
+    );
+  }
+
+  async getCampaignByMinterAddress(
+    minterAddress: string,
+  ): Promise<CampaignEntity[]> {
+    return await this.execute(
+      'getCampaignByMinterAddress',
+      this.campaignsRepository.getCampaignByMinterAddress(minterAddress),
+    );
+  }
+
+  async getCampaigns(): Promise<[CampaignEntity[], number]> {
+    return await this.execute(
+      'getCampaigns',
+      this.campaignsRepository.getCampaigns(),
+    );
+  }
+
+  async saveCampaign(campaign: CampaignEntity): Promise<CampaignEntity> {
+    return await this.execute(
+      'saveCampaign',
+      this.campaignsRepository.saveCampaign(campaign),
+    );
+  }
+
+  async getTier(campaignId: number, tierName: string): Promise<TierEntity> {
+    return await this.execute(
+      'getTier',
+      this.tiersRepository.getTier(campaignId, tierName),
+    );
+  }
+
+  async getTiersForCampaign(campaignId: number): Promise<TierEntity[]> {
+    return await this.execute(
+      'getTiersForCampaign',
+      this.tiersRepository.getTiersForCampaign(campaignId),
+    );
+  }
+
+  async saveTier(tier: TierEntity): Promise<TierEntity> {
+    return await this.execute('saveTier', this.tiersRepository.saveTier(tier));
+  }
+
+  async saveTiers(tiers: TierEntity[]): Promise<TierEntity[]> {
+    return await this.execute(
+      'saveTiers',
+      this.tiersRepository.saveTiers(tiers),
     );
   }
 }
