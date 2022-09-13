@@ -1,8 +1,8 @@
 import DataLoader = require('dataloader');
-import { AssetsLikesRepository } from 'src/db/assets';
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { IsAssetLikedRedisHandler } from './asset-is-liked.redis-handler';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { IsAssetLikedRedisHandler } from './asset-is-liked.redis-handler';
 export class IsAssetLikedProvider extends BaseProvider<string> {
   constructor(
     isAssetLikedRedisHandler: IsAssetLikedRedisHandler,
-    private assetsLikesRepository: AssetsLikesRepository,
+    private persistenceService: PersistenceService,
   ) {
     super(
       isAssetLikedRedisHandler,
@@ -19,7 +19,7 @@ export class IsAssetLikedProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const assetsLike = await this.assetsLikesRepository.getIsLikedAsset(
+    const assetsLike = await this.persistenceService.getIsLikedAsset(
       identifiers,
     );
     return assetsLike?.groupBy((asset) => asset.identifier);

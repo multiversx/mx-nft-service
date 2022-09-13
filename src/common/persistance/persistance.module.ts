@@ -1,11 +1,12 @@
-import { DynamicModule, Global, Module, Type } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { PersistenceService } from './persistance.service';
 
 @Global()
-@Module({})
-export class PersistenceModule {
-  static register(): DynamicModule {
-    return {
-      module: PersistenceModule,
-    };
-  }
-}
+@Module({
+  imports: [TypeOrmModule.forFeature([AssetsLikesRepository])],
+  providers: [PersistenceService],
+  exports: [PersistenceService],
+})
+export class PersistenceModule {}

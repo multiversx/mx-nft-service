@@ -38,7 +38,7 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     });
   }
 
-  async getAssetLikesCountForIdentifiers(identifiers: string[]): Promise<any> {
+  async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
     return await this.createQueryBuilder('al')
       .select('al.identifier as identifier')
       .addSelect('COUNT(al.identifier) as likesCount')
