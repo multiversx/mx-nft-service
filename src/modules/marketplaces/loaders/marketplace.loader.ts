@@ -1,15 +1,17 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { MarketplaceRedisHandler } from './marketplace.redis-handler';
-import { MarketplaceEntity } from 'src/db/marketplaces';
+import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class MarketplaceProvider extends BaseProvider<string> {
-  constructor(redisHandler: MarketplaceRedisHandler) {
+  constructor(
+    redisHandler: MarketplaceRedisHandler,
+    private marketplacesRepository: MarketplaceRepository,
+  ) {
     super(
       redisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
@@ -17,12 +19,8 @@ export class MarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(marketplaceKeys: string[]) {
-    const marketplaces = await getRepository(MarketplaceEntity)
-      .createQueryBuilder('marketplaces')
-      .where('`key` IN(:...marketplaceKeys)', {
-        marketplaceKeys: marketplaceKeys,
-      })
-      .getMany();
+    const marketplaces =
+      await this.marketplacesRepository.getMarketplacesByKeys(marketplaceKeys);
     return marketplaces?.groupBy((marketplace) => marketplace.key);
   }
 }

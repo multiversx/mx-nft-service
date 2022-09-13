@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
-import { AssetsQuery } from 'src/modules/assets';
+import { ElrondApiService, ElrondElasticService } from 'src/common';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
-import { DeleteResult } from 'typeorm';
 import { NftRarityChecksum } from './nft-rarity-checksum.model';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from '../assets/models';
@@ -184,7 +182,7 @@ export class NftRarityService {
     return true;
   }
 
-  async deleteNftRarity(identifier: string): Promise<DeleteResult> {
+  async deleteNftRarity(identifier: string): Promise<any> {
     return await this.nftRarityRepository.delete({ identifier: identifier });
   }
 

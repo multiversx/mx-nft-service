@@ -17,6 +17,8 @@ import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-
 import { ElrondCommunicationModule } from 'src/common/services/elrond-communication/elrond-communication.module';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 
 @Module({
   providers: [
@@ -40,6 +42,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-ass
   imports: [
     forwardRef(() => ElrondCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
+    forwardRef(() => AuctionsModuleDb),
   ],
   exports: [CollectionsService, LocalCacheService],
 })

@@ -25,14 +25,19 @@ import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 import { PriceRange } from './price-range';
 import {
+  getAuctionsForAsset,
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
-  getAuctionsOrderByNoBidsQuery,
   getAvailableTokensbyAuctionId,
   getAvailableTokensbyAuctionIdForMarketplace,
+  getAvailableTokensbyAuctionIds,
+  getAvailableTokensScriptsByIdentifiers,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
+  getLowestAuctionForIdentifiers,
+  getLowestAuctionForIdentifiersAndMarketplace,
+  getOnSaleAssetsCountForCollection,
 } from './sql.queries';
 
 @Injectable()
@@ -358,7 +363,7 @@ export class AuctionsServiceDb {
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
-      .andWhere('a.paymentToken = \'EGLD\'')
+      .andWhere("a.paymentToken = 'EGLD'")
       .execute();
     return response[0];
   }
@@ -370,6 +375,15 @@ export class AuctionsServiceDb {
       });
     }
     return null;
+  }
+
+  async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('auctions')
+      .where('id IN(:...auctionsIds)', {
+        auctionsIds: auctionsIds,
+      })
+      .getMany();
   }
 
   async getAuctionByMarketplace(
@@ -384,9 +398,67 @@ export class AuctionsServiceDb {
     return null;
   }
 
+  async getAuctionCountForIdentifiers(
+    identifiers: string[],
+  ): Promise<AuctionEntity[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.identifier as identifier')
+      .addSelect('COUNT(a.identifier) as auctionsCount')
+      .where(
+        `a.identifier IN(${identifiers.map(
+          (value) => `'${value}'`,
+        )}) and a.status='Running'`,
+        {
+          identifiers: identifiers,
+        },
+      )
+      .groupBy('a.identifier')
+      .execute();
+  }
+
+  async getAuctionsForIdentifiers(identifiers: string[]): Promise<any[]> {
+    return await this.auctionsRepository.query(
+      getAuctionsForAsset(
+        identifiers.map((value) => value.split('_')[0]),
+        parseInt(identifiers[0].split('_')[1]),
+        parseInt(identifiers[0].split('_')[2]),
+      ),
+    );
+  }
+
   async getAvailableTokens(id: number): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionId(id),
+    );
+  }
+
+  async getAvailableTokensForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensScriptsByIdentifiers(identifiers),
+    );
+  }
+
+  async getAvailableTokensForAuctionIds(auctionIds: number[]): Promise<any> {
+    return await this.auctionsRepository.query(
+      getAvailableTokensbyAuctionIds(auctionIds),
+    );
+  }
+
+  async getLowestAuctionForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.auctionsRepository.query(
+      getLowestAuctionForIdentifiers(identifiers),
+    );
+  }
+
+  async getLowestAuctionForIdentifiersAndMarketplace(
+    identifiers: string[],
+  ): Promise<any> {
+    return await this.auctionsRepository.query(
+      getLowestAuctionForIdentifiersAndMarketplace(
+        identifiers.map((value) => value.split('_')[0]),
+        identifiers[0].split('_')[1],
+      ),
     );
   }
 
@@ -396,6 +468,12 @@ export class AuctionsServiceDb {
   ): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
+    );
+  }
+
+  async getOnSaleAssetCountForCollections(identifiers: string[]): Promise<any> {
+    return await this.auctionsRepository.query(
+      getOnSaleAssetsCountForCollection(identifiers),
     );
   }
 

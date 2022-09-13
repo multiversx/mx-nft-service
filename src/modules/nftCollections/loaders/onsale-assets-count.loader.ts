@@ -1,10 +1,8 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
-import { AuctionEntity } from '../../../db/auctions/auction.entity';
 import { BaseProvider } from '../../common/base.loader';
-import { getOnSaleAssetsCountForCollection } from 'src/db/auctions/sql.queries';
 import { Injectable, Scope } from '@nestjs/common';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './onsale-assets-count.redis-handler';
+import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -12,6 +10,7 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from './onsale-assets-coun
 export class OnSaleAssetsCountForCollectionProvider extends BaseProvider<string> {
   constructor(
     auctionsForAssetRedisHandler: OnSaleAssetsCountForCollectionRedisHandler,
+    private auctionsServiceDb: AuctionsServiceDb,
   ) {
     super(
       auctionsForAssetRedisHandler,
@@ -20,9 +19,10 @@ export class OnSaleAssetsCountForCollectionProvider extends BaseProvider<string>
   }
 
   async getData(identifiers: string[]) {
-    const auctions = await getRepository(AuctionEntity).query(
-      getOnSaleAssetsCountForCollection(identifiers),
-    );
+    const auctions =
+      await this.auctionsServiceDb.getOnSaleAssetCountForCollections(
+        identifiers,
+      );
     return auctions?.groupBy((auction) => auction.collection);
   }
 }

@@ -1,9 +1,8 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { FeaturedMarketplaceRedisHandler } from './featured-marketplace.redis-handler';
-import { MarketplaceEntity } from 'src/db/marketplaces';
+import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -11,6 +10,7 @@ import { MarketplaceEntity } from 'src/db/marketplaces';
 export class FeaturedMarketplaceProvider extends BaseProvider<string> {
   constructor(
     featuredMarketplaceRedisHandler: FeaturedMarketplaceRedisHandler,
+    private marketplaceRepository: MarketplaceRepository,
   ) {
     super(
       featuredMarketplaceRedisHandler,
@@ -19,14 +19,8 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(addresses: string[]) {
-    const featuredMarketplace = await getRepository(MarketplaceEntity)
-      .createQueryBuilder('fm')
-      .select('fm.address as address')
-      .addSelect('fm.url as url')
-      .addSelect('fm.name as name')
-      .addSelect('fm.key as `key`')
-      .where(`fm.address IN(${addresses.map((value) => `'${value}'`)})`)
-      .execute();
+    const featuredMarketplace =
+      await this.marketplaceRepository.getMarketplacesByAddresses(addresses);
     return featuredMarketplace?.groupBy((asset) => asset.address);
   }
 }

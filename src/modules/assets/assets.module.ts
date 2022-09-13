@@ -46,6 +46,9 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
+import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 
 @Module({
   providers: [
@@ -95,6 +98,9 @@ import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
     TypeOrmModule.forFeature([AssetsLikesRepository]),
+    TypeOrmModule.forFeature([NftRarityRepository]),
+    TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
+    TypeOrmModule.forFeature([MarketplaceRepository]),
   ],
   exports: [
     AssetsTransactionService,

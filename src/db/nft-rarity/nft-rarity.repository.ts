@@ -22,4 +22,13 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       .execute();
     return res.map((nft) => nft.collection);
   }
+
+  async getBulkRarities(identifiers: string[]): Promise<NftRarityEntity[]> {
+    return await this.createQueryBuilder()
+      .select('identifier, score, `rank`')
+      .where(`identifier IN(:identifiers)`, {
+        identifiers: identifiers,
+      })
+      .execute();
+  }
 }

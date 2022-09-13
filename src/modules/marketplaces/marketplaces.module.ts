@@ -30,6 +30,9 @@ import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
     TypeOrmModule.forFeature([MarketplaceRepository]),
     TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
   ],
-  exports: [MarketplacesService],
+  exports: [
+    MarketplacesService,
+    TypeOrmModule.forFeature([MarketplaceRepository]),
+  ],
 })
 export class MarketplacesModuleGraph {}

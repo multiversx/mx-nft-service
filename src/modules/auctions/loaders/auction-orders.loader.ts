@@ -1,8 +1,6 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { OrderEntity } from 'src/db/orders';
-import { getOrdersForAuctions } from 'src/db/auctions/sql.queries';
+import { OrdersServiceDb } from 'src/db/orders';
 import { Injectable, Scope } from '@nestjs/common';
 import { AuctionsOrdersRedisHandler } from './auction-orders.redis-handler';
 
@@ -10,7 +8,10 @@ import { AuctionsOrdersRedisHandler } from './auction-orders.redis-handler';
   scope: Scope.REQUEST,
 })
 export class AuctionsOrdersProvider extends BaseProvider<string> {
-  constructor(auctionsOrdersRedisHandler: AuctionsOrdersRedisHandler) {
+  constructor(
+    auctionsOrdersRedisHandler: AuctionsOrdersRedisHandler,
+    private ordersServiceDb: OrdersServiceDb,
+  ) {
     super(
       auctionsOrdersRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
@@ -18,13 +19,9 @@ export class AuctionsOrdersProvider extends BaseProvider<string> {
   }
 
   async getData(auctionIds: string[]) {
-    const orders = await getRepository(OrderEntity).query(
-      getOrdersForAuctions(
-        auctionIds.map((value) => value.split('_')[0]),
-        parseInt(auctionIds[0].split('_')[1]),
-        parseInt(auctionIds[0].split('_')[2]),
-      ),
+    const orders = await this.ordersServiceDb.getOrdersByComposedKeys(
+      auctionIds,
     );
-    return orders?.groupBy((auction) => auction.batchKey);
+    return orders?.groupBy((orders) => orders.batchKey);
   }
 }

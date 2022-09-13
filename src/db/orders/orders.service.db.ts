@@ -8,6 +8,7 @@ import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { OrdersRedisHandler } from 'src/modules/orders/loaders/orders.redis-handler';
 import { LastOrderRedisHandler } from 'src/modules/orders/loaders/last-order.redis-handler';
+import { getOrdersForAuctions } from '../auctions/sql.queries';
 
 @Injectable()
 export class OrdersServiceDb {
@@ -45,15 +46,52 @@ export class OrdersServiceDb {
       .getMany();
   }
 
-  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
-    const orders = await this.ordersRepository
+  async getOrdersByAuctionIdsOrderByPrice(
+    auctionIds: number[],
+  ): Promise<OrderEntity[]> {
+    return await this.ordersRepository
       .createQueryBuilder('orders')
-      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+      .orderBy('priceAmountDenominated', 'DESC')
+      .where(`auctionId IN(:...auctionIds)`, {
         auctionIds: auctionIds,
       })
       .getMany();
+  }
 
-    return orders?.groupBy((asset) => asset.auctionId);
+  async getOrdersByComposedKeys(auctionIds: string[]): Promise<any[]> {
+    return await this.ordersRepository.query(
+      getOrdersForAuctions(
+        auctionIds.map((value) => value.split('_')[0]),
+        parseInt(auctionIds[0].split('_')[1]),
+        parseInt(auctionIds[0].split('_')[2]),
+      ),
+    );
+  }
+
+  async getLastOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
+    return await this.ordersRepository
+      .createQueryBuilder('orders')
+      .orderBy('priceAmountDenominated', 'DESC')
+      .where(
+        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
+        {
+          auctionIds: auctionIds,
+        },
+      )
+      .getMany();
+  }
+
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
+    return await this.ordersRepository
+      .createQueryBuilder('orders')
+      .orderBy('priceAmountDenominated', 'DESC')
+      .where(
+        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
+        {
+          auctionIds: auctionIds,
+        },
+      )
+      .getMany();
   }
 
   async getOrders(

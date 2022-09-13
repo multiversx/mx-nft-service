@@ -2,8 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AssetRarityInfoRedisHandler } from './assets-rarity-info.redis-handler';
-import { getRepository } from 'typeorm';
-import { NftRarityEntity } from 'src/db/nft-rarity';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -11,6 +10,7 @@ import { NftRarityEntity } from 'src/db/nft-rarity';
 export class AssetRarityInfoProvider extends BaseProvider<string> {
   constructor(
     private assetRarityInfoRedisHandler: AssetRarityInfoRedisHandler,
+    private rarityRepository: NftRarityRepository,
   ) {
     super(
       assetRarityInfoRedisHandler,
@@ -19,13 +19,9 @@ export class AssetRarityInfoProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const nftRarities = await getRepository(NftRarityEntity)
-      .createQueryBuilder()
-      .select('identifier, score, `rank`')
-      .where(`identifier IN(:identifiers)`, {
-        identifiers: identifiers,
-      })
-      .execute();
+    const nftRarities = await this.rarityRepository.getBulkRarities(
+      identifiers,
+    );
     return nftRarities?.groupBy((rarity) => rarity.identifier);
   }
 
