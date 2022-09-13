@@ -110,7 +110,7 @@ export class MetricsCollector {
 
   static setPersistenceDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
-    MetricsCollector.auctionsEventsDurationHistogram
+    MetricsCollector.persistenceDurationHistogram
       .labels(action)
       .observe(duration);
   }
