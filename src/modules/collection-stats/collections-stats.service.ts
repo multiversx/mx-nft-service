@@ -7,14 +7,14 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
-import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class CollectionsStatsService {
   private redisClient: Redis.Redis;
   constructor(
-    private collectionStatsRepository: CollectionStatsRepository,
+    private persistenceService: PersistenceService,
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -28,7 +28,7 @@ export class CollectionsStatsService {
     try {
       const cacheKey = this.getStatsCacheKey(identifier);
       const getCollectionStats = () =>
-        this.collectionStatsRepository.getStats(identifier);
+        this.persistenceService.getStats(identifier);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,

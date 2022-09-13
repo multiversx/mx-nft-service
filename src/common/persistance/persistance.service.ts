@@ -5,6 +5,8 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
+import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
+import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
@@ -16,6 +18,7 @@ export class PersistenceService implements PersistenceInterface {
     private readonly assetsLikesRepository: AssetsLikesRepository,
     private readonly accountStatsRepository: AccountStatsRepository,
     private readonly tagsRepository: TagsRepository,
+    private readonly collectionStatsRepository: CollectionStatsRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -151,5 +154,12 @@ export class PersistenceService implements PersistenceInterface {
 
   async saveTags(tags: TagEntity[]): Promise<TagEntity[]> {
     return await this.execute('saveTags', this.tagsRepository.saveTags(tags));
+  }
+
+  async getStats(identifier: string): Promise<CollectionStatsEntity> {
+    return await this.execute(
+      'getStats',
+      this.collectionStatsRepository.getStats(identifier),
+    );
   }
 }
