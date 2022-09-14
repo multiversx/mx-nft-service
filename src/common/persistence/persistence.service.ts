@@ -80,49 +80,49 @@ export class PersistenceService {
     address: string,
   ): Promise<[AssetLikeEntity[], number]> {
     return await this.execute(
-      'getAssetsLiked',
+      this.getAssetsLiked.name,
       this.assetsLikesRepository.getAssetsLiked(limit, offset, address),
     );
   }
 
   async isAssetLiked(identifier: string, address: string): Promise<boolean> {
     return await this.execute(
-      'isAssetLiked',
+      this.isAssetLiked.name,
       this.assetsLikesRepository.isAssetLiked(identifier, address),
     );
   }
 
   async getAssetLikesCount(identifier: string): Promise<number> {
     return await this.execute(
-      'getAssetLikesCount',
+      this.getAssetLikesCount.name,
       this.assetsLikesRepository.getAssetLikesCount(identifier),
     );
   }
 
   async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
     return await this.execute(
-      'getBulkAssetLikesCount',
+      this.getBulkAssetLikesCount.name,
       this.assetsLikesRepository.getBulkAssetLikesCount(identifiers),
     );
   }
 
   async getIsLikedAsset(identifiers: string[]): Promise<any> {
     return await this.execute(
-      'getIsLikedAsset',
+      this.getIsLikedAsset.name,
       this.assetsLikesRepository.getIsLikedAsset(identifiers),
     );
   }
 
   async addLike(assetLikeEntity: AssetLikeEntity): Promise<AssetLikeEntity> {
     return await this.execute(
-      'addLike',
+      this.addLike.name,
       this.assetsLikesRepository.addLike(assetLikeEntity),
     );
   }
 
   async removeLike(identifier: string, address: string): Promise<DeleteResult> {
     return await this.execute(
-      'removeLike',
+      this.removeLike.name,
       this.assetsLikesRepository.removeLike(identifier, address),
     );
   }
@@ -132,7 +132,7 @@ export class PersistenceService {
     marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {
     return await this.execute(
-      'getPublicAccountStats',
+      this.getPublicAccountStats.name,
       this.accountStatsRepository.getPublicAccountStats(
         address,
         marketplaceKey,
@@ -145,7 +145,7 @@ export class PersistenceService {
     marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {
     return await this.execute(
-      'getOnwerAccountStats',
+      this.getOnwerAccountStats.name,
       this.accountStatsRepository.getOnwerAccountStats(address, marketplaceKey),
     );
   }
@@ -155,7 +155,7 @@ export class PersistenceService {
     marketplaceKey: string = null,
   ): Promise<number> {
     return await this.execute(
-      'getAccountClaimableCount',
+      this.getAccountClaimableCount.name,
       this.accountStatsRepository.getAccountClaimableCount(
         address,
         marketplaceKey,
@@ -169,36 +169,42 @@ export class PersistenceService {
     size: number = 10,
   ): Promise<NftTag[]> {
     return await this.execute(
-      'getTagsBySearchTerm',
+      this.getTagsBySearchTerm.name,
       this.tagsRepository.getTagsBySearchTerm(searchTerm, page, size),
     );
   }
 
   async getTags(size: number): Promise<NftTag[]> {
-    return await this.execute('getTags', this.tagsRepository.getTags(size));
+    return await this.execute(
+      this.getTags.name,
+      this.tagsRepository.getTags(size),
+    );
   }
 
   async getTagsCount(): Promise<number> {
     return await this.execute(
-      'getTagsCount',
+      this.getTagsCount.name,
       this.tagsRepository.getTagsCount(),
     );
   }
 
   async getTagsBySearchTermCount(searchTerm: string): Promise<number> {
     return await this.execute(
-      'getTagsBySearchTermCount',
+      this.getTagsBySearchTermCount.name,
       this.tagsRepository.getTagsBySearchTermCount(searchTerm),
     );
   }
 
   async saveTags(tags: TagEntity[]): Promise<TagEntity[]> {
-    return await this.execute('saveTags', this.tagsRepository.saveTags(tags));
+    return await this.execute(
+      this.saveTags.name,
+      this.tagsRepository.saveTags(tags),
+    );
   }
 
   async getStats(identifier: string): Promise<CollectionStatsEntity> {
     return await this.execute(
-      'getStats',
+      this.getStats.name,
       this.collectionStatsRepository.getStats(identifier),
     );
   }
@@ -208,7 +214,7 @@ export class PersistenceService {
     minterAddress: string,
   ): Promise<CampaignEntity> {
     return await this.execute(
-      'getCampaign',
+      this.getCampaign.name,
       this.campaignsRepository.getCampaign(campaignId, minterAddress),
     );
   }
@@ -217,7 +223,7 @@ export class PersistenceService {
     collectionTicker: string,
   ): Promise<CampaignEntity> {
     return await this.execute(
-      'getCampaignByCollectionTicker',
+      this.getCampaignByCollectionTicker.name,
       this.campaignsRepository.getCampaignByCollectionTicker(collectionTicker),
     );
   }
@@ -226,46 +232,49 @@ export class PersistenceService {
     minterAddress: string,
   ): Promise<CampaignEntity[]> {
     return await this.execute(
-      'getCampaignByMinterAddress',
+      this.getCampaignByMinterAddress.name,
       this.campaignsRepository.getCampaignByMinterAddress(minterAddress),
     );
   }
 
   async getCampaigns(): Promise<[CampaignEntity[], number]> {
     return await this.execute(
-      'getCampaigns',
+      this.getCampaigns.name,
       this.campaignsRepository.getCampaigns(),
     );
   }
 
   async saveCampaign(campaign: CampaignEntity): Promise<CampaignEntity> {
     return await this.execute(
-      'saveCampaign',
+      this.saveCampaign.name,
       this.campaignsRepository.saveCampaign(campaign),
     );
   }
 
   async getTier(campaignId: number, tierName: string): Promise<TierEntity> {
     return await this.execute(
-      'getTier',
+      this.getTier.name,
       this.tiersRepository.getTier(campaignId, tierName),
     );
   }
 
   async getTiersForCampaign(campaignId: number): Promise<TierEntity[]> {
     return await this.execute(
-      'getTiersForCampaign',
+      this.getTiersForCampaign.name,
       this.tiersRepository.getTiersForCampaign(campaignId),
     );
   }
 
   async saveTier(tier: TierEntity): Promise<TierEntity> {
-    return await this.execute('saveTier', this.tiersRepository.saveTier(tier));
+    return await this.execute(
+      this.saveTier.name,
+      this.tiersRepository.saveTier(tier),
+    );
   }
 
   async saveTiers(tiers: TierEntity[]): Promise<TierEntity[]> {
     return await this.execute(
-      'saveTiers',
+      this.saveTiers.name,
       this.tiersRepository.saveTiers(tiers),
     );
   }
@@ -275,7 +284,7 @@ export class PersistenceService {
     offset: number = 0,
   ): Promise<[FeaturedNftEntity[], number]> {
     return await this.execute(
-      'getFeaturedCollections',
+      this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
     );
   }
@@ -285,7 +294,7 @@ export class PersistenceService {
     offset: number = 0,
   ): Promise<[FeaturedNftEntity[], number]> {
     return await this.execute(
-      'getFeaturedNfts',
+      this.getFeaturedNfts.name,
       this.featuredNftsRepository.getFeaturedNfts(limit, offset),
     );
   }
@@ -295,7 +304,7 @@ export class PersistenceService {
     address: string,
   ): Promise<MarketplaceEntity[]> {
     return await this.execute(
-      'getMarketplaceByAddressAndCollection',
+      this.getMarketplaceByAddressAndCollection.name,
       this.marketplaceCollectionsRepository.getMarketplaceByAddressAndCollection(
         collection,
         address,
@@ -305,7 +314,7 @@ export class PersistenceService {
 
   async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(
-      'getAllCollections',
+      this.getAllCollections.name,
       this.marketplaceCollectionsRepository.getAllCollections(),
     );
   }
@@ -314,7 +323,7 @@ export class PersistenceService {
     collection: string,
   ): Promise<MarketplaceEntity[]> {
     return await this.execute(
-      'getMarketplaceByCollection',
+      this.getMarketplaceByCollection.name,
       this.marketplaceCollectionsRepository.getMarketplaceByCollection(
         collection,
       ),
@@ -325,7 +334,7 @@ export class PersistenceService {
     collectionIdentifiers: string[],
   ): Promise<any[]> {
     return await this.execute(
-      'getMarketplaceByCollection',
+      this.getMarketplaceByCollection.name,
       this.marketplaceCollectionsRepository.getMarketplaceByCollections(
         collectionIdentifiers,
       ),
@@ -336,7 +345,7 @@ export class PersistenceService {
     marketplaceKey: string,
   ): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(
-      'getCollectionsByMarketplace',
+      this.getCollectionsByMarketplace.name,
       this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
         marketplaceKey,
       ),
@@ -345,14 +354,14 @@ export class PersistenceService {
 
   async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
     return await this.execute(
-      'getMarketplaces',
+      this.getMarketplaces.name,
       this.marketplaceRepository.getMarketplaces(),
     );
   }
 
   async getMarketplaceByAddress(address: string): Promise<MarketplaceEntity> {
     return await this.execute(
-      'getMarketplaceByAddress',
+      this.getMarketplaceByAddress.name,
       this.marketplaceRepository.getMarketplaceByAddress(address),
     );
   }
@@ -361,7 +370,7 @@ export class PersistenceService {
     marketplaceKeys: string[],
   ): Promise<MarketplaceEntity[]> {
     return await this.execute(
-      'getMarketplacesByKeys',
+      this.getMarketplacesByKeys.name,
       this.marketplaceRepository.getMarketplacesByKeys(marketplaceKeys),
     );
   }
@@ -370,77 +379,77 @@ export class PersistenceService {
     addresses: string[],
   ): Promise<MarketplaceEntity[]> {
     return await this.execute(
-      'getMarketplacesByAddresses',
+      this.getMarketplacesByAddresses.name,
       this.marketplaceRepository.getMarketplacesByAddresses(addresses),
     );
   }
 
   async isReportedBy(identifier: string, address: string): Promise<boolean> {
     return await this.execute(
-      'isReportedBy',
+      this.isReportedBy.name,
       this.reportNftsRepository.isReportedBy(identifier, address),
     );
   }
 
   async addReport(reportEntity: ReportNftEntity): Promise<ReportNftEntity> {
     return await this.execute(
-      'addReport',
+      this.addReport.name,
       this.reportNftsRepository.addReport(reportEntity),
     );
   }
 
   async getReportCount(identifier: string): Promise<number> {
     return await this.execute(
-      'getReportCount',
+      this.getReportCount.name,
       this.reportNftsRepository.getReportCount(identifier),
     );
   }
 
   async addFlag(flagEntity: NftFlagsEntity): Promise<NftFlagsEntity> {
     return await this.execute(
-      'addFlag',
+      this.addFlag.name,
       this.nftsFlagsRepository.addFlag(flagEntity),
     );
   }
 
   async batchGetFlags(identifiers: string[]): Promise<Record<string, any>> {
     return await this.execute(
-      'batchGetFlags',
+      this.batchGetFlags.name,
       this.nftsFlagsRepository.batchGetFlags(identifiers),
     );
   }
 
   async upsertFlags(entities: NftFlagsEntity[]): Promise<any> {
     return await this.execute(
-      'upsertFlags',
+      this.upsertFlags.name,
       this.nftsFlagsRepository.upsertFlags(entities),
     );
   }
 
   async updateFlag(identifier: string, flag: NftFlagsEntity): Promise<any> {
     return await this.execute(
-      'updateFlag',
+      this.updateFlag.name,
       this.nftsFlagsRepository.update(identifier, flag),
     );
   }
 
   async saveOrUpdateBulk(nftRarities: NftRarityEntity[]): Promise<void> {
     return await this.execute(
-      'saveOrUpdateBulk',
+      this.saveOrUpdateBulk.name,
       this.nftRarityRepository.saveOrUpdateBulk(nftRarities),
     );
   }
 
   async getCollectionIds(): Promise<string[]> {
     return await this.execute(
-      'getCollectionIds',
+      this.getCollectionIds.name,
       this.nftRarityRepository.getCollectionIds(),
     );
   }
 
   async getBulkRarities(identifiers: string[]): Promise<NftRarityEntity[]> {
     return await this.execute(
-      'getBulkRarities',
+      this.getBulkRarities.name,
       this.nftRarityRepository.getBulkRarities(identifiers),
     );
   }
@@ -449,14 +458,14 @@ export class PersistenceService {
     collectionTicker: string,
   ): Promise<NftRarityEntity[]> {
     return await this.execute(
-      'findNftRarityByCollection',
+      this.findNftRarityByCollection.name,
       this.nftRarityRepository.findNftRarityByCollection(collectionTicker),
     );
   }
 
   async deleteNftRarity(identifier: string): Promise<any> {
     return await this.execute(
-      'deleteNftRarity',
+      this.deleteNftRarity.name,
       this.nftRarityRepository.deleteNftRarity(identifier),
     );
   }
@@ -465,7 +474,7 @@ export class PersistenceService {
     address: string,
   ): Promise<[NotificationEntity[], number]> {
     return await this.execute(
-      'getNotificationsForAddress',
+      this.getNotificationsForAddress.name,
       this.notificationRepository.getNotificationsForAddress(address),
     );
   }
@@ -475,7 +484,7 @@ export class PersistenceService {
     merketplaceKey: string,
   ): Promise<[NotificationEntity[], number]> {
     return await this.execute(
-      'getNotificationsForMarketplace',
+      this.getNotificationsForMarketplace.name,
       this.notificationRepository.getNotificationsForMarketplace(
         address,
         merketplaceKey,
@@ -487,7 +496,7 @@ export class PersistenceService {
     auctionIds: number[],
   ): Promise<NotificationEntity[]> {
     return await this.execute(
-      'getNotificationsByAuctionIds',
+      this.getNotificationsByAuctionIds.name,
       this.notificationRepository.getNotificationsByAuctionIds(auctionIds),
     );
   }
@@ -497,7 +506,7 @@ export class PersistenceService {
     ownerAddress: string,
   ): Promise<NotificationEntity> {
     return await this.execute(
-      'getNotificationByIdAndOwner',
+      this.getNotificationByIdAndOwner.name,
       this.notificationRepository.getNotificationByIdAndOwner(
         auctionId,
         ownerAddress,
@@ -507,35 +516,35 @@ export class PersistenceService {
 
   async saveNotification(notification: NotificationEntity) {
     return await this.execute(
-      'saveNotification',
+      this.saveNotification.name,
       this.notificationRepository.saveNotification(notification),
     );
   }
 
   async saveNotifications(notifications: NotificationEntity[]) {
     return await this.execute(
-      'saveNotifications',
+      this.saveNotifications.name,
       this.notificationRepository.saveNotifications(notifications),
     );
   }
 
   async updateNotification(notification: NotificationEntity) {
     return await this.execute(
-      'updateNotification',
+      this.updateNotification.name,
       this.notificationRepository.updateNotification(notification),
     );
   }
 
   async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
     return await this.execute(
-      'getActiveOrderForAuction',
+      this.getActiveOrderForAuction.name,
       this.ordersRepository.getActiveOrderForAuction(auctionId),
     );
   }
 
   async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
     return await this.execute(
-      'getActiveOrdersForAuction',
+      this.getActiveOrdersForAuction.name,
       this.ordersRepository.getActiveOrdersForAuction(auctionId),
     );
   }
@@ -544,28 +553,28 @@ export class PersistenceService {
     auctionIds: number[],
   ): Promise<OrderEntity[]> {
     return await this.execute(
-      'getOrdersByAuctionIdsOrderByPrice',
+      this.getOrdersByAuctionIdsOrderByPrice.name,
       this.ordersRepository.getOrdersByAuctionIdsOrderByPrice(auctionIds),
     );
   }
 
   async getOrdersByComposedKeys(auctionIds: string[]): Promise<any[]> {
     return await this.execute(
-      'getOrdersByComposedKeys',
+      this.getOrdersByComposedKeys.name,
       this.ordersRepository.getOrdersByComposedKeys(auctionIds),
     );
   }
 
   async getLastOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
     return await this.execute(
-      'getLastOrdersByAuctionIds',
+      this.getLastOrdersByAuctionIds.name,
       this.ordersRepository.getLastOrdersByAuctionIds(auctionIds),
     );
   }
 
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
     return await this.execute(
-      'getOrdersByAuctionIds',
+      this.getOrdersByAuctionIds.name,
       this.ordersRepository.getOrdersByAuctionIds(auctionIds),
     );
   }
@@ -574,35 +583,35 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[OrderEntity[], number]> {
     return await this.execute(
-      'getOrders',
+      this.getOrders.name,
       this.ordersRepository.getOrders(queryRequest),
     );
   }
 
   async saveOrder(order: OrderEntity) {
     return await this.execute(
-      'saveOrder',
+      this.saveOrder.name,
       this.ordersRepository.saveOrder(order),
     );
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
     return await this.execute(
-      'updateOrderWithStatus',
+      this.updateOrderWithStatus.name,
       this.ordersRepository.updateOrderWithStatus(order, status),
     );
   }
 
   async rollbackOrdersByHash(blockHash: string) {
     return await this.execute(
-      'rollbackOrdersByHash',
+      this.rollbackOrdersByHash.name,
       this.ordersRepository.rollbackOrdersByHash(blockHash),
     );
   }
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
     return await this.execute(
-      'deleteOrdersByAuctionId',
+      this.deleteOrdersByAuctionId.name,
       this.ordersRepository.deleteOrdersByAuctionId(auctionIds),
     );
   }
@@ -611,7 +620,7 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     return await this.execute(
-      'getAuctions',
+      this.getAuctions.name,
       this.auctionsRepository.getAuctions(queryRequest),
     );
   }
@@ -620,7 +629,7 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     return await this.execute(
-      'getAuctionsGroupBy',
+      this.getAuctionsGroupBy.name,
       this.auctionsRepository.getAuctionsGroupBy(queryRequest),
     );
   }
@@ -629,14 +638,14 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     return await this.execute(
-      'getAuctionsForIdentifier',
+      this.getAuctionsForIdentifier.name,
       this.auctionsRepository.getAuctionsForIdentifier(queryRequest),
     );
   }
 
   async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
     return await this.execute(
-      'getAuctionsForHash',
+      this.getAuctionsForHash.name,
       this.auctionsRepository.getAuctionsForHash(blockHash),
     );
   }
@@ -647,7 +656,7 @@ export class PersistenceService {
     address: string,
   ): Promise<[AuctionEntity[], number]> {
     return await this.execute(
-      'getClaimableAuctions',
+      this.getClaimableAuctions.name,
       this.auctionsRepository.getClaimableAuctions(limit, offset, address),
     );
   }
@@ -659,7 +668,7 @@ export class PersistenceService {
     marketplaceKey: string,
   ): Promise<[AuctionEntity[], number]> {
     return await this.execute(
-      'getClaimableAuctions',
+      this.getClaimableAuctions.name,
       this.auctionsRepository.getClaimableAuctionsForMarketplaceKey(
         limit,
         offset,
@@ -673,7 +682,7 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     return await this.execute(
-      'getAuctionsOrderByOrdersCountGroupByIdentifier',
+      this.getAuctionsOrderByOrdersCountGroupByIdentifier.name,
       this.auctionsRepository.getAuctionsOrderByOrdersCountGroupByIdentifier(
         queryRequest,
       ),
@@ -684,14 +693,14 @@ export class PersistenceService {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     return await this.execute(
-      'getAuctionsOrderByOrdersCount',
+      this.getAuctionsOrderByOrdersCount.name,
       this.auctionsRepository.getAuctionsOrderByOrdersCount(queryRequest),
     );
   }
 
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     return await this.execute(
-      'getAuctionsEndingBefore',
+      this.getAuctionsEndingBefore.name,
       this.auctionsRepository.getAuctionsEndingBefore(endDate),
     );
   }
@@ -700,28 +709,28 @@ export class PersistenceService {
     startDate: number,
   ): Promise<[any[], PriceRange]> {
     return await this.execute(
-      'getAuctionsForMarketplace',
+      this.getAuctionsForMarketplace.name,
       this.auctionsRepository.getAuctionsForMarketplace(startDate),
     );
   }
 
   async getMinMax(token: string): Promise<PriceRange> {
     return await this.execute(
-      'getMinMax',
+      this.getMinMax.name,
       this.auctionsRepository.getMinMax(token),
     );
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
     return await this.execute(
-      'getAuction',
+      this.getAuction.name,
       this.auctionsRepository.getAuction(id),
     );
   }
 
   async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
     return await this.execute(
-      'getBulkAuctions',
+      this.getBulkAuctions.name,
       this.auctionsRepository.getBulkAuctions(auctionsIds),
     );
   }
@@ -731,7 +740,7 @@ export class PersistenceService {
     marketplaceKey: string,
   ): Promise<AuctionEntity> {
     return await this.execute(
-      'getAuctionByMarketplace',
+      this.getAuctionByMarketplace.name,
       this.auctionsRepository.getAuctionByMarketplace(id, marketplaceKey),
     );
   }
@@ -740,35 +749,35 @@ export class PersistenceService {
     identifiers: string[],
   ): Promise<AuctionEntity[]> {
     return await this.execute(
-      'getAuctionCountForIdentifiers',
+      this.getAuctionCountForIdentifiers.name,
       this.auctionsRepository.getAuctionCountForIdentifiers(identifiers),
     );
   }
 
   async getAuctionsForIdentifiers(identifiers: string[]): Promise<any[]> {
     return await this.execute(
-      'getAuctionsForIdentifiers',
+      this.getAuctionsForIdentifiers.name,
       this.auctionsRepository.getAuctionsForIdentifiers(identifiers),
     );
   }
 
   async getAvailableTokensForIdentifiers(identifiers: string[]): Promise<any> {
     return await this.execute(
-      'getAvailableTokensForIdentifiers',
+      this.getAvailableTokensForIdentifiers.name,
       this.auctionsRepository.getAvailableTokensForIdentifiers(identifiers),
     );
   }
 
   async getAvailableTokensForAuctionIds(auctionIds: number[]): Promise<any> {
     return await this.execute(
-      'getAvailableTokensForAuctionIds',
+      this.getAvailableTokensForAuctionIds.name,
       this.auctionsRepository.getAvailableTokensForAuctionIds(auctionIds),
     );
   }
 
   async getLowestAuctionForIdentifiers(identifiers: string[]): Promise<any> {
     return await this.execute(
-      'getLowestAuctionForIdentifiers',
+      this.getLowestAuctionForIdentifiers.name,
       this.auctionsRepository.getLowestAuctionForIdentifiers(identifiers),
     );
   }
@@ -777,7 +786,7 @@ export class PersistenceService {
     identifiers: string[],
   ): Promise<any> {
     return await this.execute(
-      'getLowestAuctionForIdentifiersAndMarketplace',
+      this.getLowestAuctionForIdentifiersAndMarketplace.name,
       this.auctionsRepository.getLowestAuctionForIdentifiersAndMarketplace(
         identifiers,
       ),
@@ -789,7 +798,7 @@ export class PersistenceService {
     marketplaceKey: string,
   ): Promise<any> {
     return await this.execute(
-      'getAvailableTokensForSpecificMarketplace',
+      this.getAvailableTokensForSpecificMarketplace.name,
       this.auctionsRepository.getAvailableTokensForSpecificMarketplace(
         id,
         marketplaceKey,
@@ -799,35 +808,35 @@ export class PersistenceService {
 
   async getOnSaleAssetCountForCollections(identifiers: string[]): Promise<any> {
     return await this.execute(
-      'getOnSaleAssetCountForCollections',
+      this.getOnSaleAssetCountForCollections.name,
       this.auctionsRepository.getOnSaleAssetCountForCollections(identifiers),
     );
   }
 
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
     return await this.execute(
-      'getAuctionsThatReachedDeadline',
+      this.getAuctionsThatReachedDeadline.name,
       this.auctionsRepository.getAuctionsThatReachedDeadline(),
     );
   }
 
   async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
     return await this.execute(
-      'insertAuction',
+      this.insertAuction.name,
       this.auctionsRepository.insertAuction(auction),
     );
   }
 
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
     return await this.execute(
-      'rollbackAuctionAndOrdersByHash',
+      this.rollbackAuctionAndOrdersByHash.name,
       this.auctionsRepository.rollbackAuctionAndOrdersByHash(blockHash),
     );
   }
 
   async updateAuction(auction: AuctionEntity): Promise<AuctionEntity> {
     return await this.execute(
-      'updateAuction',
+      this.updateAuction.name,
       this.auctionsRepository.updateAuction(auction),
     );
   }
@@ -838,7 +847,7 @@ export class PersistenceService {
     hash: string,
   ): Promise<AuctionEntity> {
     return await this.execute(
-      'updateAuctionStatus',
+      this.updateAuctionStatus.name,
       this.auctionsRepository.updateAuctionStatus(auctionId, status, hash),
     );
   }
@@ -850,7 +859,7 @@ export class PersistenceService {
     hash: string,
   ): Promise<AuctionEntity> {
     return await this.execute(
-      'updateAuctionByMarketplace',
+      this.updateAuctionByMarketplace.name,
       this.auctionsRepository.updateAuctionByMarketplace(
         auctionId,
         marketplaceKey,
@@ -862,7 +871,7 @@ export class PersistenceService {
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
     return await this.execute(
-      'updateAuctions',
+      this.updateAuctions.name,
       this.auctionsRepository.updateAuctions(auctions),
     );
   }

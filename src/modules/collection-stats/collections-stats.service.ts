@@ -8,7 +8,7 @@ import { Logger } from 'winston';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class CollectionsStatsService {

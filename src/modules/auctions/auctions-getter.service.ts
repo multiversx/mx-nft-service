@@ -29,7 +29,7 @@ import { Constants } from '@elrondnetwork/erdnest';
 import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AuctionsGetterService {

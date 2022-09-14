@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { AssetAvailableTokensCountRedisHandler } from './asset-available-tokens-count.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,

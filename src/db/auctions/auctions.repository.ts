@@ -1,4 +1,4 @@
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,

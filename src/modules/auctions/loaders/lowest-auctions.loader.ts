@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { LowestAuctionRedisHandler } from './lowest-auctions.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,

@@ -6,7 +6,7 @@ import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AccountsStatsService {

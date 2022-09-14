@@ -13,7 +13,7 @@ import {
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AssetsLikesService {

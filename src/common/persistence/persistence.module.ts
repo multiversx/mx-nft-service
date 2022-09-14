@@ -18,7 +18,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
-import { PersistenceService } from './persistance.service';
+import { PersistenceService } from './persistence.service';
 
 @Global()
 @Module({

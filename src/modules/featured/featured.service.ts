@@ -8,7 +8,7 @@ import { cacheConfig } from 'src/config';
 import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
 import { TimeConstants } from 'src/utils/time-utils';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class FeaturedService {

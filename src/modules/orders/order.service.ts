@@ -16,7 +16,7 @@ import {
 } from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class OrdersService {

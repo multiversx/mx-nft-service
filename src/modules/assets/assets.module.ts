@@ -43,7 +43,7 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
-import { PersistenceModule } from 'src/common/persistance/persistance.module';
+import { PersistenceModule } from 'src/common/persistence/persistence.module';
 
 @Module({
   providers: [

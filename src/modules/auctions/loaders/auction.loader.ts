@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { AuctionsRedisHandler } from './auctions.redis-handler';
 

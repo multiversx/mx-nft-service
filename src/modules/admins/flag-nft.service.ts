@@ -1,7 +1,7 @@
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, NftMedia } from 'src/common';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { NftFlagsEntity } from 'src/db/nftFlags';
 import { AssetByIdentifierService } from '../assets';

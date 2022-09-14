@@ -3,7 +3,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
-import { PersistenceService } from 'src/common/persistance/persistance.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class ReportNftsService {
