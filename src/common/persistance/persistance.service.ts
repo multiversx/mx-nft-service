@@ -36,10 +36,9 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
-import { PersistenceInterface } from './persistance.interface';
 
 @Injectable()
-export class PersistenceService implements PersistenceInterface {
+export class PersistenceService {
   constructor(
     private readonly assetsLikesRepository: AssetsLikesRepository,
     private readonly accountStatsRepository: AccountStatsRepository,
