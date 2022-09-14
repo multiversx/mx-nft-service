@@ -1,8 +1,9 @@
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, NftMedia } from 'src/common';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
-import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import { NftFlagsEntity } from 'src/db/nftFlags';
 import { AssetByIdentifierService } from '../assets';
 import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
@@ -22,7 +23,7 @@ export class FlagNftService {
     private assetByIdentifierService: AssetByIdentifierService,
     private verifyContent: VerifyContentService,
     private elasticUpdater: ElrondElasticService,
-    private nftFlagsRepository: NftsFlagsRepository,
+    private persistenceService: PersistenceService,
     @Inject(forwardRef(() => NsfwUpdaterService))
     private nsfwUpdateService: NsfwUpdaterService,
     private readonly cacheEventPublisherService: CacheEventsPublisherService,
@@ -104,7 +105,7 @@ export class FlagNftService {
 
   public async getNftFlagsForIdentifiers(identifiers: string[]) {
     try {
-      return await this.nftFlagsRepository.batchGetFlags(identifiers);
+      return await this.persistenceService.batchGetFlags(identifiers);
     } catch (error) {
       this.logger.error('An error occurred while getting the flags from db', {
         path: 'FlagNftService.getNftFlagsForIdentifiers',
@@ -140,7 +141,7 @@ export class FlagNftService {
     this.logger.log(
       `Setting nsfw for '${identifier}' with value ${savedValue}`,
     );
-    await this.nftFlagsRepository.addFlag(
+    await this.persistenceService.addFlag(
       new NftFlagsEntity({
         identifier: identifier,
         nsfw: savedValue,
@@ -161,7 +162,7 @@ export class FlagNftService {
     const size = 100;
     for (let i = 0; i < items.length; i += size) {
       let itemsToUpdate = items.slice(i, i + size);
-      await this.nftFlagsRepository.upsertEntities(
+      await this.persistenceService.upsertFlags(
         itemsToUpdate.map(
           (nft) =>
             new NftFlagsEntity({ identifier: nft.identifier, nsfw: value }),
@@ -180,8 +181,8 @@ export class FlagNftService {
 
   public async updateNftNSFWByAdmin(identifier: string, value) {
     try {
-      await this.nftFlagsRepository.update(
-        { identifier: identifier },
+      await this.persistenceService.updateFlag(
+        identifier,
         new NftFlagsEntity({
           identifier: identifier,
           nsfw: value.toRounded(2),

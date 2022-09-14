@@ -9,7 +9,6 @@ import {
   AssetsProvider,
 } from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { S3Service } from '../s3/s3.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { ElrondCommunicationModule } from 'src/common';
@@ -45,7 +44,6 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
-import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { PersistenceModule } from 'src/common/persistance/persistance.module';
 
 @Module({
@@ -95,7 +93,6 @@ import { PersistenceModule } from 'src/common/persistance/persistance.module';
     forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
-    TypeOrmModule.forFeature([NftRarityRepository]),
     PersistenceModule,
   ],
   exports: [

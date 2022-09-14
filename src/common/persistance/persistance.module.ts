@@ -12,6 +12,9 @@ import {
 } from 'src/db/featuredNfts/featured.repository';
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
+import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
+import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
 import { PersistenceService } from './persistance.service';
 
 @Global()
@@ -25,6 +28,9 @@ import { PersistenceService } from './persistance.service';
     TypeOrmModule.forFeature([TiersRepository]),
     TypeOrmModule.forFeature([MarketplaceRepository]),
     TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
+    TypeOrmModule.forFeature([ReportNftsRepository]),
+    TypeOrmModule.forFeature([NftsFlagsRepository]),
+    TypeOrmModule.forFeature([NftRarityRepository]),
   ],
   providers: [
     PersistenceService,

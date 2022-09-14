@@ -31,4 +31,14 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       })
       .execute();
   }
+
+  async findNftRarityByCollection(
+    collectionTicker: string,
+  ): Promise<NftRarityEntity[]> {
+    return await this.find({ collection: collectionTicker });
+  }
+
+  async deleteNftRarity(identifier: string): Promise<any> {
+    return await this.delete({ identifier: identifier });
+  }
 }

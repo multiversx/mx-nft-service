@@ -22,6 +22,10 @@ import {
 } from 'src/db/marketplaces';
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
+import { NftRarityEntity } from 'src/db/nft-rarity/nft-rarity.entity';
+import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
+import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
@@ -40,13 +44,15 @@ export class PersistenceService implements PersistenceInterface {
     private readonly featuredNftsRepository: FeaturedNftsRepository,
     private readonly marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private readonly marketplaceRepository: MarketplaceRepository,
+    private readonly reportNftsRepository: ReportNftsRepository,
+    private readonly nftsFlagsRepository: NftsFlagsRepository,
+    private readonly nftRarityRepository: NftRarityRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
     const profiler = new PerformanceProfiler();
 
     try {
-      console.log({ key });
       return await action;
     } finally {
       profiler.stop();
@@ -353,6 +359,92 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'getMarketplacesByAddresses',
       this.marketplaceRepository.getMarketplacesByAddresses(addresses),
+    );
+  }
+
+  async isReportedBy(identifier: string, address: string): Promise<boolean> {
+    return await this.execute(
+      'isReportedBy',
+      this.reportNftsRepository.isReportedBy(identifier, address),
+    );
+  }
+
+  async addReport(reportEntity: ReportNftEntity): Promise<ReportNftEntity> {
+    return await this.execute(
+      'addReport',
+      this.reportNftsRepository.addReport(reportEntity),
+    );
+  }
+
+  async getReportCount(identifier: string): Promise<number> {
+    return await this.execute(
+      'getReportCount',
+      this.reportNftsRepository.getReportCount(identifier),
+    );
+  }
+
+  async addFlag(flagEntity: NftFlagsEntity): Promise<NftFlagsEntity> {
+    return await this.execute(
+      'addFlag',
+      this.nftsFlagsRepository.addFlag(flagEntity),
+    );
+  }
+
+  async batchGetFlags(identifiers: string[]): Promise<Record<string, any>> {
+    return await this.execute(
+      'batchGetFlags',
+      this.nftsFlagsRepository.batchGetFlags(identifiers),
+    );
+  }
+
+  async upsertFlags(entities: NftFlagsEntity[]): Promise<any> {
+    return await this.execute(
+      'upsertFlags',
+      this.nftsFlagsRepository.upsertFlags(entities),
+    );
+  }
+
+  async updateFlag(identifier: string, flag: NftFlagsEntity): Promise<any> {
+    return await this.execute(
+      'updateFlag',
+      this.nftsFlagsRepository.update(identifier, flag),
+    );
+  }
+
+  async saveOrUpdateBulk(nftRarities: NftRarityEntity[]): Promise<void> {
+    return await this.execute(
+      'saveOrUpdateBulk',
+      this.nftRarityRepository.saveOrUpdateBulk(nftRarities),
+    );
+  }
+
+  async getCollectionIds(): Promise<string[]> {
+    return await this.execute(
+      'getCollectionIds',
+      this.nftRarityRepository.getCollectionIds(),
+    );
+  }
+
+  async getBulkRarities(identifiers: string[]): Promise<NftRarityEntity[]> {
+    return await this.execute(
+      'getBulkRarities',
+      this.nftRarityRepository.getBulkRarities(identifiers),
+    );
+  }
+
+  async findNftRarityByCollection(
+    collectionTicker: string,
+  ): Promise<NftRarityEntity[]> {
+    return await this.execute(
+      'findNftRarityByCollection',
+      this.nftRarityRepository.findNftRarityByCollection(collectionTicker),
+    );
+  }
+
+  async deleteNftRarity(identifier: string): Promise<any> {
+    return await this.execute(
+      'deleteNftRarity',
+      this.nftRarityRepository.deleteNftRarity(identifier),
     );
   }
 }

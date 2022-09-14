@@ -8,7 +8,7 @@ import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
-import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class RarityUpdaterService {
@@ -19,7 +19,7 @@ export class RarityUpdaterService {
     private readonly elasticService: ElrondElasticService,
     private readonly nftRarityService: NftRarityService,
     private readonly redisCacheService: RedisCacheService,
-    private readonly nftRarityRepository: NftRarityRepository,
+    private readonly persistenceService: PersistenceService,
     private readonly logger: Logger,
   ) {
     this.rarityQueueRedisClient = this.redisCacheService.getClient(
@@ -35,7 +35,7 @@ export class RarityUpdaterService {
       await Locker.lock(
         `handleReindexTokenRarities`,
         async () => {
-          const collections = await this.nftRarityRepository.getCollectionIds();
+          const collections = await this.persistenceService.getCollectionIds();
           for (const collection of collections) {
             await this.nftRarityService.validateRarities(collection);
           }

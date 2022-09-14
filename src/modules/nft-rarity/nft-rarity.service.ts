@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
-import { NftRarityRepository } from '../../db/nft-rarity/nft-rarity.repository';
 import { NftRarityChecksum } from './nft-rarity-checksum.model';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from '../assets/models';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 import { NftRarityData } from './nft-rarity-data.model';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class NftRarityService {
@@ -16,7 +16,7 @@ export class NftRarityService {
     private readonly apiService: ElrondApiService,
     private readonly privateApiService: ElrondPrivateApiService,
     private readonly elasticService: ElrondElasticService,
-    private readonly nftRarityRepository: NftRarityRepository,
+    private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
@@ -27,9 +27,7 @@ export class NftRarityService {
   async validateRarities(collectionTicker: string): Promise<boolean> {
     const [elasticNfts, dbNfts] = await Promise.all([
       this.getAllCollectionNftsFromElastic(collectionTicker),
-      this.nftRarityRepository.find({
-        collection: collectionTicker,
-      }),
+      this.persistenceService.findNftRarityByCollection(collectionTicker),
     ]);
 
     const [elasticChecksum, dbChecksum] = await Promise.all([
@@ -163,7 +161,7 @@ export class NftRarityService {
 
     try {
       await Promise.all([
-        this.nftRarityRepository.saveOrUpdateBulk(rarities),
+        this.persistenceService.saveOrUpdateBulk(rarities),
         this.setCollectionRarityFlagInElastic(collectionTicker, true),
         this.setNftRaritiesInElastic(rarities),
         this.assetRarityRedisHandler.clearMultipleKeys(
@@ -183,7 +181,7 @@ export class NftRarityService {
   }
 
   async deleteNftRarity(identifier: string): Promise<any> {
-    return await this.nftRarityRepository.delete({ identifier: identifier });
+    return await this.persistenceService.deleteNftRarity(identifier);
   }
 
   private async computeRarities(
