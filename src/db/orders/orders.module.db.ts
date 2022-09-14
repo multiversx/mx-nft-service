@@ -3,16 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheService } from 'src/common';
 import { LastOrderRedisHandler } from 'src/modules/orders/loaders/last-order.redis-handler';
 import { OrdersRedisHandler } from 'src/modules/orders/loaders/orders.redis-handler';
-import { OrderEntity, OrdersServiceDb } from '.';
+import { OrderEntity } from '.';
 
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity])],
-  providers: [
-    RedisCacheService,
-    OrdersServiceDb,
-    OrdersRedisHandler,
-    LastOrderRedisHandler,
-  ],
-  exports: [OrdersServiceDb],
+  providers: [RedisCacheService, OrdersRedisHandler, LastOrderRedisHandler],
+  exports: [],
 })
 export class OrdersModuleDb {}

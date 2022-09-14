@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { LastOrderRedisHandler } from './last-order.redis-handler';
-import { OrdersServiceDb } from 'src/db/orders';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { OrdersServiceDb } from 'src/db/orders';
 export class LastOrdersProvider extends BaseProvider<number> {
   constructor(
     lastOrder: LastOrderRedisHandler,
-    private ordersServiceDb: OrdersServiceDb,
+    private persistenceService: PersistenceService,
   ) {
     super(
       lastOrder,
@@ -19,7 +19,7 @@ export class LastOrdersProvider extends BaseProvider<number> {
   }
 
   async getData(auctionIds: number[]) {
-    const orders = await this.ordersServiceDb.getLastOrdersByAuctionIds(
+    const orders = await this.persistenceService.getLastOrdersByAuctionIds(
       auctionIds,
     );
 

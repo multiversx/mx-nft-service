@@ -29,8 +29,11 @@ import {
   NotificationEntity,
   NotificationsRepository,
 } from 'src/db/notifications';
+import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
+import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
 import { PersistenceInterface } from './persistance.interface';
@@ -52,6 +55,7 @@ export class PersistenceService implements PersistenceInterface {
     private readonly nftsFlagsRepository: NftsFlagsRepository,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
+    private readonly ordersRepository: OrdersRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -515,6 +519,87 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'updateNotification',
       this.notificationRepository.updateNotification(notification),
+    );
+  }
+
+  async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
+    return await this.execute(
+      'getActiveOrderForAuction',
+      this.ordersRepository.getActiveOrderForAuction(auctionId),
+    );
+  }
+
+  async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
+    return await this.execute(
+      'getActiveOrdersForAuction',
+      this.ordersRepository.getActiveOrdersForAuction(auctionId),
+    );
+  }
+
+  async getOrdersByAuctionIdsOrderByPrice(
+    auctionIds: number[],
+  ): Promise<OrderEntity[]> {
+    return await this.execute(
+      'getOrdersByAuctionIdsOrderByPrice',
+      this.ordersRepository.getOrdersByAuctionIdsOrderByPrice(auctionIds),
+    );
+  }
+
+  async getOrdersByComposedKeys(auctionIds: string[]): Promise<any[]> {
+    return await this.execute(
+      'getOrdersByComposedKeys',
+      this.ordersRepository.getOrdersByComposedKeys(auctionIds),
+    );
+  }
+
+  async getLastOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
+    return await this.execute(
+      'getLastOrdersByAuctionIds',
+      this.ordersRepository.getLastOrdersByAuctionIds(auctionIds),
+    );
+  }
+
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
+    return await this.execute(
+      'getOrdersByAuctionIds',
+      this.ordersRepository.getOrdersByAuctionIds(auctionIds),
+    );
+  }
+
+  async getOrders(
+    queryRequest: QueryRequest,
+  ): Promise<[OrderEntity[], number]> {
+    return await this.execute(
+      'getOrders',
+      this.ordersRepository.getOrders(queryRequest),
+    );
+  }
+
+  async saveOrder(order: OrderEntity) {
+    return await this.execute(
+      'saveOrder',
+      this.ordersRepository.saveOrder(order),
+    );
+  }
+
+  async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
+    return await this.execute(
+      'updateOrderWithStatus',
+      this.ordersRepository.updateOrderWithStatus(order, status),
+    );
+  }
+
+  async rollbackOrdersByHash(blockHash: string) {
+    return await this.execute(
+      'rollbackOrdersByHash',
+      this.ordersRepository.rollbackOrdersByHash(blockHash),
+    );
+  }
+
+  async deleteOrdersByAuctionId(auctionIds: number[]) {
+    return await this.execute(
+      'deleteOrdersByAuctionId',
+      this.ordersRepository.deleteOrdersByAuctionId(auctionIds),
     );
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -21,7 +22,6 @@ import {
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { OrdersServiceDb } from '../orders';
 import { AuctionEntity } from './auction.entity';
 import { PriceRange } from './price-range';
 import {
@@ -43,7 +43,7 @@ import {
 @Injectable()
 export class AuctionsServiceDb {
   constructor(
-    private ordersService: OrdersServiceDb,
+    private persistenceService: PersistenceService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
@@ -567,7 +567,7 @@ export class AuctionsServiceDb {
         runningAuction.map((a) => a.id),
       );
       if (deleteAuction) {
-        await this.ordersService.deleteOrdersByAuctionId(
+        await this.persistenceService.deleteOrdersByAuctionId(
           runningAuction.map((a) => a.id),
         );
       }

@@ -1,8 +1,8 @@
 import DataLoader = require('dataloader');
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { OrdersServiceDb } from 'src/db/orders';
 import { Injectable, Scope } from '@nestjs/common';
 import { AuctionsOrdersRedisHandler } from './auction-orders.redis-handler';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { AuctionsOrdersRedisHandler } from './auction-orders.redis-handler';
 export class AuctionsOrdersProvider extends BaseProvider<string> {
   constructor(
     auctionsOrdersRedisHandler: AuctionsOrdersRedisHandler,
-    private ordersServiceDb: OrdersServiceDb,
+    private persistenceService: PersistenceService,
   ) {
     super(
       auctionsOrdersRedisHandler,
@@ -19,7 +19,7 @@ export class AuctionsOrdersProvider extends BaseProvider<string> {
   }
 
   async getData(auctionIds: string[]) {
-    const orders = await this.ordersServiceDb.getOrdersByComposedKeys(
+    const orders = await this.persistenceService.getOrdersByComposedKeys(
       auctionIds,
     );
     return orders?.groupBy((orders) => orders.batchKey);
