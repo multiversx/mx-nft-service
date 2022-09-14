@@ -10,6 +10,8 @@ import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
 } from 'src/db/featuredNfts/featured.repository';
+import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { PersistenceService } from './persistance.service';
 
 @Global()
@@ -21,6 +23,8 @@ import { PersistenceService } from './persistance.service';
     TypeOrmModule.forFeature([TagsRepository]),
     TypeOrmModule.forFeature([CampaignsRepository]),
     TypeOrmModule.forFeature([TiersRepository]),
+    TypeOrmModule.forFeature([MarketplaceRepository]),
+    TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
   ],
   providers: [
     PersistenceService,

@@ -5,9 +5,6 @@ import { AccountsStatsService } from './accounts-stats.service';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
-import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 
 @Module({
   providers: [
@@ -17,11 +14,7 @@ import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplac
     MarketplacesService,
     MarketplacesCachingService,
   ],
-  imports: [
-    ElrondCommunicationModule,
-    TypeOrmModule.forFeature([MarketplaceRepository]),
-    TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
-  ],
+  imports: [ElrondCommunicationModule],
   exports: [AccountsStatsService],
 })
 export class AccountsStatsModuleGraph {}

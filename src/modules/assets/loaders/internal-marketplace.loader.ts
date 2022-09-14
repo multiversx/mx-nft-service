@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { InternalMarketplaceRedisHandler } from './internal-marketplace.redis-handler';
-import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplac
 export class InternalMarketplaceProvider extends BaseProvider<string> {
   constructor(
     subdomainRedisHandler: InternalMarketplaceRedisHandler,
-    private marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
+    private persistenceService: PersistenceService,
   ) {
     super(
       subdomainRedisHandler,
@@ -20,9 +20,7 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
 
   async getData(collections: string[]) {
     const marketplace =
-      await this.marketplaceCollectionsRepository.getMarketplaceByCollections(
-        collections,
-      );
+      await this.persistenceService.getMarketplaceByCollections(collections);
     return marketplace?.groupBy(
       (subdomainCollection: { collectionIdentifier: any }) =>
         subdomainCollection.collectionIdentifier,

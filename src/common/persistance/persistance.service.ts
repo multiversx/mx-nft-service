@@ -16,6 +16,12 @@ import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
 } from 'src/db/featuredNfts/featured.repository';
+import {
+  MarketplaceCollectionEntity,
+  MarketplaceEntity,
+} from 'src/db/marketplaces';
+import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
@@ -32,6 +38,8 @@ export class PersistenceService implements PersistenceInterface {
     private readonly tiersRepository: TiersRepository,
     private readonly featuredCollectionsRepository: FeaturedCollectionsRepository,
     private readonly featuredNftsRepository: FeaturedNftsRepository,
+    private readonly marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
+    private readonly marketplaceRepository: MarketplaceRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -260,6 +268,91 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'getFeaturedNfts',
       this.featuredNftsRepository.getFeaturedNfts(limit, offset),
+    );
+  }
+
+  async getMarketplaceByAddressAndCollection(
+    collection: string,
+    address: string,
+  ): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      'getMarketplaceByAddressAndCollection',
+      this.marketplaceCollectionsRepository.getMarketplaceByAddressAndCollection(
+        collection,
+        address,
+      ),
+    );
+  }
+
+  async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
+    return await this.execute(
+      'getAllCollections',
+      this.marketplaceCollectionsRepository.getAllCollections(),
+    );
+  }
+
+  async getMarketplaceByCollection(
+    collection: string,
+  ): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      'getMarketplaceByCollection',
+      this.marketplaceCollectionsRepository.getMarketplaceByCollection(
+        collection,
+      ),
+    );
+  }
+
+  async getMarketplaceByCollections(
+    collectionIdentifiers: string[],
+  ): Promise<any[]> {
+    return await this.execute(
+      'getMarketplaceByCollection',
+      this.marketplaceCollectionsRepository.getMarketplaceByCollections(
+        collectionIdentifiers,
+      ),
+    );
+  }
+
+  async getCollectionsByMarketplace(
+    marketplaceKey: string,
+  ): Promise<MarketplaceCollectionEntity[]> {
+    return await this.execute(
+      'getCollectionsByMarketplace',
+      this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
+        marketplaceKey,
+      ),
+    );
+  }
+
+  async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
+    return await this.execute(
+      'getMarketplaces',
+      this.marketplaceRepository.getMarketplaces(),
+    );
+  }
+
+  async getMarketplaceByAddress(address: string): Promise<MarketplaceEntity> {
+    return await this.execute(
+      'getMarketplaceByAddress',
+      this.marketplaceRepository.getMarketplaceByAddress(address),
+    );
+  }
+
+  async getMarketplacesByKeys(
+    marketplaceKeys: string[],
+  ): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      'getMarketplacesByKeys',
+      this.marketplaceRepository.getMarketplacesByKeys(marketplaceKeys),
+    );
+  }
+
+  async getMarketplacesByAddresses(
+    addresses: string[],
+  ): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      'getMarketplacesByAddresses',
+      this.marketplaceRepository.getMarketplacesByAddresses(addresses),
     );
   }
 }

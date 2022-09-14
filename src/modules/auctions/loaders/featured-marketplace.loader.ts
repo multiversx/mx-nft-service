@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { FeaturedMarketplaceRedisHandler } from './featured-marketplace.redis-handler';
-import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.reposito
 export class FeaturedMarketplaceProvider extends BaseProvider<string> {
   constructor(
     featuredMarketplaceRedisHandler: FeaturedMarketplaceRedisHandler,
-    private marketplaceRepository: MarketplaceRepository,
+    private persistanceService: PersistenceService,
   ) {
     super(
       featuredMarketplaceRedisHandler,
@@ -20,7 +20,7 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
 
   async getData(addresses: string[]) {
     const featuredMarketplace =
-      await this.marketplaceRepository.getMarketplacesByAddresses(addresses);
+      await this.persistanceService.getMarketplacesByAddresses(addresses);
     return featuredMarketplace?.groupBy((asset) => asset.address);
   }
 }
