@@ -1,10 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
 import { Notification, NotificationStatusEnum } from './models';
-import {
-  NotificationEntity,
-  NotificationsServiceDb,
-} from 'src/db/notifications';
+import { NotificationEntity } from 'src/db/notifications';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationTypeEnum } from './models/Notification-type.enum';
 import { OrderEntity } from 'src/db/orders';
@@ -16,11 +13,12 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/owner-changed.event';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable()
 export class NotificationsService {
   constructor(
-    private readonly notificationServiceDb: NotificationsServiceDb,
+    private readonly persistenceService: PersistenceService,
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly logger: Logger,
@@ -61,7 +59,7 @@ export class NotificationsService {
     try {
       if (auctionIds && auctionIds.length > 0) {
         const notifications =
-          await this.notificationServiceDb.getNotificationsByAuctionIds(
+          await this.persistenceService.getNotificationsByAuctionIds(
             auctionIds,
           );
         const inactiveNotifications = notifications.map((n) => {
@@ -89,7 +87,7 @@ export class NotificationsService {
 
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
     try {
-      await this.notificationServiceDb.saveNotifications(notifications);
+      await this.persistenceService.saveNotifications(notifications);
     } catch (error) {
       this.logger.error(
         'An error occurred while trying to update notifications status.',
@@ -103,7 +101,7 @@ export class NotificationsService {
 
   async saveNotification(notification: NotificationEntity): Promise<void> {
     try {
-      await this.notificationServiceDb.saveNotification(notification);
+      await this.persistenceService.saveNotification(notification);
       await this.publishClearNotificationEvent(
         notification.ownerAddress,
         notification.marketplaceKey,
@@ -124,7 +122,7 @@ export class NotificationsService {
     ownerAddress: string,
   ): Promise<NotificationEntity> {
     try {
-      return await this.notificationServiceDb.getNotificationByIdAndOwner(
+      return await this.persistenceService.getNotificationByIdAndOwner(
         auctionId,
         ownerAddress,
       );
@@ -152,9 +150,7 @@ export class NotificationsService {
           notification.ownerAddress,
           notification.marketplaceKey,
         );
-        return await this.notificationServiceDb.updateNotification(
-          notification,
-        );
+        return await this.persistenceService.updateNotification(notification);
       }
     } catch (error) {
       this.logger.error(
@@ -170,7 +166,7 @@ export class NotificationsService {
   private async updateInactiveStatus(
     inactiveNotifications: NotificationEntity[],
   ) {
-    await this.notificationServiceDb.saveNotifications(inactiveNotifications);
+    await this.persistenceService.saveNotifications(inactiveNotifications);
     await this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: inactiveNotifications?.map((n) => n.ownerAddress),
@@ -182,7 +178,7 @@ export class NotificationsService {
 
   private async getMappedNotifications(address: string) {
     const [notificationsEntities, count] =
-      await this.notificationServiceDb.getNotificationsForAddress(address);
+      await this.persistenceService.getNotificationsForAddress(address);
 
     return [
       notificationsEntities.map((notification) =>
@@ -197,7 +193,7 @@ export class NotificationsService {
     marketplaceKey: string,
   ) {
     const [notificationsEntities, count] =
-      await this.notificationServiceDb.getNotificationsForMarketplace(
+      await this.persistenceService.getNotificationsForMarketplace(
         address,
         marketplaceKey,
       );

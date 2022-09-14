@@ -25,6 +25,10 @@ import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.reposito
 import { NftRarityEntity } from 'src/db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftFlagsEntity, NftsFlagsRepository } from 'src/db/nftFlags';
+import {
+  NotificationEntity,
+  NotificationsRepository,
+} from 'src/db/notifications';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { DeleteResult } from 'typeorm';
@@ -47,6 +51,7 @@ export class PersistenceService implements PersistenceInterface {
     private readonly reportNftsRepository: ReportNftsRepository,
     private readonly nftsFlagsRepository: NftsFlagsRepository,
     private readonly nftRarityRepository: NftRarityRepository,
+    private readonly notificationRepository: NotificationsRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -445,6 +450,71 @@ export class PersistenceService implements PersistenceInterface {
     return await this.execute(
       'deleteNftRarity',
       this.nftRarityRepository.deleteNftRarity(identifier),
+    );
+  }
+
+  async getNotificationsForAddress(
+    address: string,
+  ): Promise<[NotificationEntity[], number]> {
+    return await this.execute(
+      'getNotificationsForAddress',
+      this.notificationRepository.getNotificationsForAddress(address),
+    );
+  }
+
+  async getNotificationsForMarketplace(
+    address: string,
+    merketplaceKey: string,
+  ): Promise<[NotificationEntity[], number]> {
+    return await this.execute(
+      'getNotificationsForMarketplace',
+      this.notificationRepository.getNotificationsForMarketplace(
+        address,
+        merketplaceKey,
+      ),
+    );
+  }
+
+  async getNotificationsByAuctionIds(
+    auctionIds: number[],
+  ): Promise<NotificationEntity[]> {
+    return await this.execute(
+      'getNotificationsByAuctionIds',
+      this.notificationRepository.getNotificationsByAuctionIds(auctionIds),
+    );
+  }
+
+  async getNotificationByIdAndOwner(
+    auctionId: number,
+    ownerAddress: string,
+  ): Promise<NotificationEntity> {
+    return await this.execute(
+      'getNotificationByIdAndOwner',
+      this.notificationRepository.getNotificationByIdAndOwner(
+        auctionId,
+        ownerAddress,
+      ),
+    );
+  }
+
+  async saveNotification(notification: NotificationEntity) {
+    return await this.execute(
+      'saveNotification',
+      this.notificationRepository.saveNotification(notification),
+    );
+  }
+
+  async saveNotifications(notifications: NotificationEntity[]) {
+    return await this.execute(
+      'saveNotifications',
+      this.notificationRepository.saveNotifications(notifications),
+    );
+  }
+
+  async updateNotification(notification: NotificationEntity) {
+    return await this.execute(
+      'updateNotification',
+      this.notificationRepository.updateNotification(notification),
     );
   }
 }
