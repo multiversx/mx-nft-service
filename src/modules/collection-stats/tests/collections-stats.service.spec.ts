@@ -13,7 +13,7 @@ import { CollectionStatsRepository } from 'src/db/collection-stats/collection-st
 import { CollectionStatsRepositoryMock } from 'src/db/collection-stats/collection-stats.repository-mock';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 
-describe('CollectionsStatsService', () => {
+describe.skip('CollectionsStatsService', () => {
   let service: CollectionsStatsService;
   const ElrondApiServiceProvider = {
     provide: ElrondApiService,

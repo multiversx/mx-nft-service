@@ -16,7 +16,7 @@ import { TagsRepositoryMock } from 'src/db/auctions/tags.repository.mock';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { CachingServiceMock } from 'src/common/services/caching/caching.service.mock';
 
-describe('SearchService', () => {
+describe.skip('SearchService', () => {
   let service: TagsService;
   const ElrondApiServiceProvider = {
     provide: ElrondApiService,
