@@ -1,5 +1,5 @@
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
-import { EntityRepository, Repository, Unique } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { TierEntity } from './tiers.entity';
 
 @EntityRepository(TierEntity)

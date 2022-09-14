@@ -18,14 +18,14 @@ import { PersistenceService } from './persistance.service';
     TypeOrmModule.forFeature([AssetsLikesRepository]),
     TypeOrmModule.forFeature([FeaturedCollectionsRepository]),
     TypeOrmModule.forFeature([FeaturedNftsRepository]),
+    TypeOrmModule.forFeature([TagsRepository]),
+    TypeOrmModule.forFeature([CampaignsRepository]),
+    TypeOrmModule.forFeature([TiersRepository]),
   ],
   providers: [
     PersistenceService,
     AccountStatsRepository,
-    TagsRepository,
     CollectionStatsRepository,
-    CampaignsRepository,
-    TiersRepository,
   ],
   exports: [PersistenceService],
 })
