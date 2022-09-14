@@ -19,6 +19,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
+import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
 
 @Global()
@@ -38,6 +39,7 @@ import { PersistenceService } from './persistence.service';
     TypeOrmModule.forFeature([NotificationsRepository]),
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
+    CacheEventsPublisherModule,
   ],
   providers: [
     PersistenceService,
