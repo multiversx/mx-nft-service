@@ -1,5 +1,5 @@
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
-import { EntityRepository, Repository, Unique } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { TierEntity } from './tiers.entity';
 
 @EntityRepository(TierEntity)
@@ -28,6 +28,18 @@ export class TiersRepository extends Repository<TierEntity> {
   async saveTier(tier: TierEntity): Promise<TierEntity> {
     try {
       return await this.save(tier);
+    } catch (err) {
+      // If like already exists, we ignore the error.
+      if (err.errno === MYSQL_ALREADY_EXISTS) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  async saveTiers(tiers: TierEntity[]): Promise<TierEntity[]> {
+    try {
+      return await this.save(tiers);
     } catch (err) {
       // If like already exists, we ignore the error.
       if (err.errno === MYSQL_ALREADY_EXISTS) {

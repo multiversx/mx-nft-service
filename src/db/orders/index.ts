@@ -1,2 +1,2 @@
 export * from './order.entity';
-export * from './orders.service.db';
+export * from './orders.repository';

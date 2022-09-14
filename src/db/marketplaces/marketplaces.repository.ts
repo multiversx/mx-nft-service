@@ -14,4 +14,28 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
       },
     });
   }
+
+  async getMarketplacesByKeys(
+    marketplaceKeys: string[],
+  ): Promise<MarketplaceEntity[]> {
+    return await this.createQueryBuilder('marketplaces')
+      .where('`key` IN(:...marketplaceKeys)', {
+        marketplaceKeys: marketplaceKeys,
+      })
+      .getMany();
+  }
+
+  async getMarketplacesByAddresses(
+    addresses: string[],
+  ): Promise<MarketplaceEntity[]> {
+    return await this.createQueryBuilder('fm')
+      .select('fm.address as address')
+      .addSelect('fm.url as url')
+      .addSelect('fm.name as name')
+      .addSelect('fm.key as `key`')
+      .where('fm.address IN(:...addresses)', {
+        addresses: addresses,
+      })
+      .execute();
+  }
 }

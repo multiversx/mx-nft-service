@@ -3,7 +3,7 @@ import { ElrondElasticService } from 'src/common';
 import { ElrondElasticServiceMock } from 'src/common/services/elrond-communication/elrond-elastic.service.mock';
 import { AssetsHistoryService } from './assets-history.service';
 
-describe('AssetsHistoryService', () => {
+describe.skip('AssetsHistoryService', () => {
   let service: AssetsHistoryService;
   const ElrondElasticServiceProvider = {
     provide: ElrondElasticService,

@@ -1,10 +1,8 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import { getAvailableTokensScriptsByIdentifiers } from 'src/db/auctions/sql.queries';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetAvailableTokensCountRedisHandler } from './asset-available-tokens-count.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -12,6 +10,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class AssetAvailableTokensCountProvider extends BaseProvider<string> {
   constructor(
     assetsAvailableRedisHandler: AssetAvailableTokensCountRedisHandler,
+    private persistenceService: PersistenceService,
   ) {
     super(
       assetsAvailableRedisHandler,
@@ -20,10 +19,12 @@ export class AssetAvailableTokensCountProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const availableTokens = await getRepository(AuctionEntity).query(
-      getAvailableTokensScriptsByIdentifiers(identifiers),
+    const availableTokens =
+      await this.persistenceService.getAvailableTokensForIdentifiers(
+        identifiers,
+      );
+    return availableTokens?.groupBy(
+      (auction: { identifier: any }) => auction.identifier,
     );
-
-    return availableTokens?.groupBy((auction) => auction.identifier);
   }
 }

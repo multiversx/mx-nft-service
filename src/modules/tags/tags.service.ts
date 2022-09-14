@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondApiService, NftTag } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { Tag } from './models';
 import { TagTypeEnum } from './models/Tag-type.enum';
 import { TagsFilter } from './models/Tags.Filter';
@@ -9,13 +8,14 @@ import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class TagsService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
-    private tagsRepository: TagsRepository,
+    private persistenceService: PersistenceService,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -92,8 +92,8 @@ export class TagsService {
 
   async getAuctionTagsFromDb(limit: number = 100): Promise<[Tag[], number]> {
     const [tagsApi, count] = await Promise.all([
-      this.tagsRepository.getTags(limit),
-      this.tagsRepository.getTagsCount(),
+      this.persistenceService.getTags(limit),
+      this.persistenceService.getTagsCount(),
     ]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
     return [tags, count];
@@ -105,12 +105,12 @@ export class TagsService {
     limit: number,
   ): Promise<[Tag[], number]> {
     const [tagsApi, count] = await Promise.all([
-      this.tagsRepository.getTagsBySearchTerm(
+      this.persistenceService.getTagsBySearchTerm(
         filters.searchTerm,
         offset,
         limit,
       ),
-      this.tagsRepository.getTagsBySearchTermCount(filters.searchTerm),
+      this.persistenceService.getTagsBySearchTermCount(filters.searchTerm),
     ]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
     return [tags, count];

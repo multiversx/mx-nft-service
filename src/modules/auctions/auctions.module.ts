@@ -9,12 +9,10 @@ import {
 } from '.';
 import { AuctionsQueriesResolver } from './auctions-queries.resolver';
 import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
-import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { ElrondCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
-import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
@@ -64,9 +62,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
     MarketplacesModuleGraph,
     CommonModule,
     forwardRef(() => AuctionsCachingModule),
-    forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AssetsModuleGraph),
-    forwardRef(() => OrdersModuleDb),
     forwardRef(() => AccountsStatsModuleGraph),
   ],
   exports: [

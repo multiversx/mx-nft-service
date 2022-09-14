@@ -10,23 +10,21 @@ import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
 import { TagEntity } from 'src/db/auctions/tags.entity';
-import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AuctionsSetterService {
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
-    private auctionServiceDb: AuctionsServiceDb,
-    private tagsRepository: TagsRepository,
+    private persistenceService: PersistenceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -61,7 +59,7 @@ export class AuctionsSetterService {
               hash,
               marketplace.key,
             );
-        const savedAuction = await this.auctionServiceDb.insertAuction(
+        const savedAuction = await this.persistenceService.insertAuction(
           auctionEntity,
         );
 
@@ -74,7 +72,7 @@ export class AuctionsSetterService {
             ];
           }
 
-          await this.tagsRepository.saveTags(tags);
+          await this.persistenceService.saveTags(tags);
         }
         return savedAuction;
       }
@@ -96,7 +94,7 @@ export class AuctionsSetterService {
 
   async rollbackAuctionByHash(blockHash: string): Promise<boolean> {
     try {
-      return await this.auctionServiceDb.rollbackAuctionAndOrdersByHash(
+      return await this.persistenceService.rollbackAuctionAndOrdersByHash(
         blockHash,
       );
     } catch (error) {
@@ -116,7 +114,11 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuctionStatus(id, status, hash);
+      return await this.persistenceService.updateAuctionStatus(
+        id,
+        status,
+        hash,
+      );
     } catch (error) {
       this.logger.error('An error occurred while updating auction status', {
         path: 'AuctionsService.updateAuctionStatus',
@@ -138,7 +140,7 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuction(auction);
+      return await this.persistenceService.updateAuction(auction);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuction',
@@ -163,7 +165,7 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.auctionServiceDb.updateAuctionByMarketplace(
+      return await this.persistenceService.updateAuctionByMarketplace(
         id,
         marketplaceKey,
         status,
@@ -185,6 +187,6 @@ export class AuctionsSetterService {
   }
 
   async updateAuctions(auctions: AuctionEntity[]): Promise<Auction | any> {
-    return await this.auctionServiceDb.updateAuctions(auctions);
+    return await this.persistenceService.updateAuctions(auctions);
   }
 }

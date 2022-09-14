@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import '../../utils/extentions';
-import { OrderEntity, OrdersServiceDb } from 'src/db/orders';
+import { OrderEntity } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
@@ -8,7 +8,6 @@ import { QueryRequest } from '../common/filters/QueryRequest';
 import { NotificationEntity } from 'src/db/notifications';
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
 import { NotificationStatusEnum } from '../notifications/models';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
@@ -17,12 +16,12 @@ import {
 } from '../rabbitmq/cache-invalidation/events/owner-changed.event';
 import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    private orderServiceDb: OrdersServiceDb,
-    private auctionsService: AuctionsServiceDb,
+    private persistenceService: PersistenceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private ordersCachingService: OrdersCachingService,
     private notificationsService: NotificationsService,
@@ -32,20 +31,24 @@ export class OrdersService {
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
-      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
-        createOrderArgs.auctionId,
-      );
+      const activeOrder =
+        await this.persistenceService.getActiveOrderForAuction(
+          createOrderArgs.auctionId,
+        );
 
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
-      const orderEntity = await this.orderServiceDb.saveOrder(
+      const orderEntity = await this.persistenceService.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
-        await this.orderServiceDb.updateOrder(activeOrder);
+        await this.persistenceService.updateOrderWithStatus(
+          activeOrder,
+          OrderStatusEnum.Inactive,
+        );
       }
       return orderEntity;
     } catch (error) {
@@ -72,7 +75,7 @@ export class OrdersService {
     createOrderArgs: CreateOrderArgs,
     activeOrder: OrderEntity,
   ) {
-    const auction = await this.auctionsService.getAuction(
+    const auction = await this.persistenceService.getAuction(
       createOrderArgs.auctionId,
     );
     const asset = await this.assetByIdentifierService.getAsset(
@@ -97,12 +100,11 @@ export class OrdersService {
     status: OrderStatusEnum,
   ): Promise<OrderEntity> {
     try {
-      const activeOrder = await this.orderServiceDb.getActiveOrderForAuction(
-        auctionId,
-      );
+      const activeOrder =
+        await this.persistenceService.getActiveOrderForAuction(auctionId);
 
       await this.triggerCacheInvalidation(auctionId, activeOrder.ownerAddress);
-      const orderEntity = await this.orderServiceDb.updateOrderWithStatus(
+      const orderEntity = await this.persistenceService.updateOrderWithStatus(
         activeOrder,
         status,
       );
@@ -123,7 +125,7 @@ export class OrdersService {
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
-      const orderEntity = await this.orderServiceDb.saveOrder(
+      const orderEntity = await this.persistenceService.saveOrder(
         CreateOrderArgs.toEntity(createOrderArgs),
       );
       return Order.fromEntity(orderEntity);
@@ -138,7 +140,7 @@ export class OrdersService {
 
   async rollbackOrdersByHash(hash: string): Promise<any> {
     try {
-      return this.orderServiceDb.rollbackOrdersByHash(hash);
+      return this.persistenceService.rollbackOrdersByHash(hash);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.rollbackOrdersByHash',
@@ -156,7 +158,7 @@ export class OrdersService {
 
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
     if (auctionIds?.length > 0) {
-      const orders = await this.orderServiceDb.getOrdersByAuctionIds(
+      const orders = await this.persistenceService.getOrdersByAuctionIds(
         auctionIds,
       );
       return orders;
@@ -164,7 +166,7 @@ export class OrdersService {
   }
 
   private async getMappedOrders(queryRequest: QueryRequest) {
-    const [ordersEntities, count] = await this.orderServiceDb.getOrders(
+    const [ordersEntities, count] = await this.persistenceService.getOrders(
       queryRequest,
     );
 

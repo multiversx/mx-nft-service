@@ -1,15 +1,17 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { AuctionEntity } from 'src/db/auctions/auction.entity';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { getRepository } from 'typeorm';
 import { AuctionsRedisHandler } from './auctions.redis-handler';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class AuctionProvider extends BaseProvider<number> {
-  constructor(auctionsRedisHandler: AuctionsRedisHandler) {
+  constructor(
+    auctionsRedisHandler: AuctionsRedisHandler,
+    private persistenceService: PersistenceService,
+  ) {
     super(
       auctionsRedisHandler,
       new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
@@ -17,12 +19,7 @@ export class AuctionProvider extends BaseProvider<number> {
   }
 
   async getData(auctionsIds: number[]) {
-    const auctions = await getRepository(AuctionEntity)
-      .createQueryBuilder('auctions')
-      .where('id IN(:...auctionsIds)', {
-        auctionsIds: auctionsIds,
-      })
-      .getMany();
+    const auctions = await this.persistenceService.getBulkAuctions(auctionsIds);
     return auctions?.groupBy((auction) => auction.id);
   }
 }

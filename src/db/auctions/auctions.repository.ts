@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -20,35 +19,39 @@ import {
 } from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
-import { Repository, SelectQueryBuilder } from 'typeorm';
-import { OrdersServiceDb } from '../orders';
+import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
 import { PriceRange } from './price-range';
 import {
+  getAuctionsForAsset,
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
-  getAuctionsOrderByNoBidsQuery,
   getAvailableTokensbyAuctionId,
   getAvailableTokensbyAuctionIdForMarketplace,
+  getAvailableTokensbyAuctionIds,
+  getAvailableTokensScriptsByIdentifiers,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
+  getLowestAuctionForIdentifiers,
+  getLowestAuctionForIdentifiersAndMarketplace,
+  getOnSaleAssetsCountForCollection,
 } from './sql.queries';
 
-@Injectable()
-export class AuctionsServiceDb {
+@EntityRepository(AuctionEntity)
+export class AuctionsRepository extends Repository<AuctionEntity> {
   constructor(
-    private ordersService: OrdersServiceDb,
+    private persistenceService: PersistenceService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
-    @InjectRepository(AuctionEntity)
-    private auctionsRepository: Repository<AuctionEntity>,
-  ) {}
+  ) {
+    super();
+  }
 
   async getAuctions(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
+      this,
       queryRequest.filters,
       'a',
     );
@@ -76,7 +79,7 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
+      this,
       queryRequest.filters,
       'a',
     );
@@ -174,8 +177,8 @@ export class AuctionsServiceDb {
       queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
     );
     const [auctions, count, priceRange] = await Promise.all([
-      this.auctionsRepository.query(defaultAuctionsQuery),
-      this.auctionsRepository.query(sqlAuctionsCount),
+      this.query(defaultAuctionsQuery),
+      this.query(sqlAuctionsCount),
       this.getMinMaxForQuery(queryRequest),
     ]);
 
@@ -183,10 +186,7 @@ export class AuctionsServiceDb {
   }
 
   async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
-    return this.auctionsRepository
-      .createQueryBuilder()
-      .where({ blockHash: blockHash })
-      .getMany();
+    return this.createQueryBuilder().where({ blockHash: blockHash }).getMany();
   }
 
   async getClaimableAuctions(
@@ -194,8 +194,7 @@ export class AuctionsServiceDb {
     offset: number = 0,
     address: string,
   ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
+    return await this.createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
         `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND 
@@ -214,8 +213,7 @@ export class AuctionsServiceDb {
     address: string,
     marketplaceKey: string,
   ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
+    return await this.createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
         `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND a.marketplaceKey = :marketplaceKey
@@ -236,7 +234,7 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
+      this,
       queryRequest.filters,
       'a',
     );
@@ -265,7 +263,7 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
+      this,
       queryRequest.filters,
       'a',
     );
@@ -286,8 +284,7 @@ export class AuctionsServiceDb {
   }
 
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    const getAuctions = this.auctionsRepository
-      .createQueryBuilder('a')
+    const getAuctions = this.createQueryBuilder('a')
       .select('a.*')
       .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
       .leftJoin('orders', 'o', 'o.auctionId=a.id')
@@ -306,8 +303,7 @@ export class AuctionsServiceDb {
   async getAuctionsForMarketplace(
     startDate: number,
   ): Promise<[any[], PriceRange]> {
-    const getAuctions = await this.auctionsRepository
-      .createQueryBuilder('a')
+    const getAuctions = await this.createQueryBuilder('a')
       .select('a.*')
       .addSelect(
         'if(COUNT(`o`.`auctionId`)>0,MAX(o.priceAmountDenominated),a.minBidDenominated) as startBid',
@@ -324,8 +320,7 @@ export class AuctionsServiceDb {
   }
 
   async getMinMax(token: string): Promise<PriceRange> {
-    const response = await this.auctionsRepository
-      .createQueryBuilder('a')
+    const response = await this.createQueryBuilder('a')
       .select(
         'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
       )
@@ -343,7 +338,7 @@ export class AuctionsServiceDb {
     queryRequest: QueryRequest,
   ): Promise<PriceRange> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
-      this.auctionsRepository,
+      this,
       queryRequest.filters,
       'a',
     );
@@ -358,18 +353,26 @@ export class AuctionsServiceDb {
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
-      .andWhere('a.paymentToken = \'EGLD\'')
+      .andWhere("a.paymentToken = 'EGLD'")
       .execute();
     return response[0];
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
     if (id !== undefined) {
-      return await this.auctionsRepository.findOne({
+      return await this.findOne({
         where: [{ id: id }],
       });
     }
     return null;
+  }
+
+  async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
+    return await this.createQueryBuilder('auctions')
+      .where('id IN(:...auctionsIds)', {
+        auctionsIds: auctionsIds,
+      })
+      .getMany();
   }
 
   async getAuctionByMarketplace(
@@ -377,16 +380,67 @@ export class AuctionsServiceDb {
     marketplaceKey: string,
   ): Promise<AuctionEntity> {
     if (id !== undefined) {
-      return await this.auctionsRepository.findOne({
+      return await this.findOne({
         where: [{ marketplaceAuctionId: id, marketplaceKey: marketplaceKey }],
       });
     }
     return null;
   }
 
+  async getAuctionCountForIdentifiers(
+    identifiers: string[],
+  ): Promise<AuctionEntity[]> {
+    return await this.createQueryBuilder('a')
+      .select('a.identifier as identifier')
+      .addSelect('COUNT(a.identifier) as auctionsCount')
+      .where(
+        `a.identifier IN(${identifiers.map(
+          (value) => `'${value}'`,
+        )}) and a.status='Running'`,
+        {
+          identifiers: identifiers,
+        },
+      )
+      .groupBy('a.identifier')
+      .execute();
+  }
+
+  async getAuctionsForIdentifiers(identifiers: string[]): Promise<any[]> {
+    return await this.query(
+      getAuctionsForAsset(
+        identifiers.map((value) => value.split('_')[0]),
+        parseInt(identifiers[0].split('_')[1]),
+        parseInt(identifiers[0].split('_')[2]),
+      ),
+    );
+  }
+
   async getAvailableTokens(id: number): Promise<any> {
-    return await this.auctionsRepository.query(
-      getAvailableTokensbyAuctionId(id),
+    return await this.query(getAvailableTokensbyAuctionId(id));
+  }
+
+  async getAvailableTokensForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.query(
+      getAvailableTokensScriptsByIdentifiers(identifiers),
+    );
+  }
+
+  async getAvailableTokensForAuctionIds(auctionIds: number[]): Promise<any> {
+    return await this.query(getAvailableTokensbyAuctionIds(auctionIds));
+  }
+
+  async getLowestAuctionForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.query(getLowestAuctionForIdentifiers(identifiers));
+  }
+
+  async getLowestAuctionForIdentifiersAndMarketplace(
+    identifiers: string[],
+  ): Promise<any> {
+    return await this.query(
+      getLowestAuctionForIdentifiersAndMarketplace(
+        identifiers.map((value) => value.split('_')[0]),
+        identifiers[0].split('_')[1],
+      ),
     );
   }
 
@@ -394,14 +448,17 @@ export class AuctionsServiceDb {
     id: number,
     marketplaceKey: string,
   ): Promise<any> {
-    return await this.auctionsRepository.query(
+    return await this.query(
       getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
     );
   }
 
+  async getOnSaleAssetCountForCollections(identifiers: string[]): Promise<any> {
+    return await this.query(getOnSaleAssetsCountForCollection(identifiers));
+  }
+
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
+    return await this.createQueryBuilder('a')
       .where({ status: AuctionStatusEnum.Running })
       .andWhere(
         `a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`,
@@ -415,7 +472,7 @@ export class AuctionsServiceDb {
       auction.identifier,
       auction.ownerAddress,
     );
-    return await this.auctionsRepository.save(auction);
+    return await this.save(auction);
   }
 
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
@@ -466,16 +523,14 @@ export class AuctionsServiceDb {
     identifier: string,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
     const [auctions, count, priceRange] = await Promise.all([
-      this.auctionsRepository.query(
+      this.query(
         getAuctionsForIdentifierSortByPrice(
           identifier,
           queryRequest.limit,
           queryRequest.offset,
         ),
       ),
-      this.auctionsRepository.query(
-        getAuctionsForIdentifierSortByPriceCount(identifier),
-      ),
+      this.query(getAuctionsForIdentifierSortByPriceCount(identifier)),
       this.getMinMaxForQuery(queryRequest),
     ]);
     return [auctions, count[0]?.Count, priceRange];
@@ -485,11 +540,9 @@ export class AuctionsServiceDb {
     const runningAuction = auctions.filter((a) => a.status === 'Running');
 
     if (runningAuction.length > 0) {
-      const deleteAuction = await this.auctionsRepository.delete(
-        runningAuction.map((a) => a.id),
-      );
+      const deleteAuction = await this.delete(runningAuction.map((a) => a.id));
       if (deleteAuction) {
-        await this.ordersService.deleteOrdersByAuctionId(
+        await this.persistenceService.deleteOrdersByAuctionId(
           runningAuction.map((a) => a.id),
         );
       }
@@ -514,7 +567,7 @@ export class AuctionsServiceDb {
       auction.identifier,
       auction.ownerAddress,
     );
-    return await this.auctionsRepository.save(auction);
+    return await this.save(auction);
   }
 
   async updateAuctionStatus(
@@ -531,7 +584,7 @@ export class AuctionsServiceDb {
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
-      return await this.auctionsRepository.save(auction);
+      return await this.save(auction);
     }
     return null;
   }
@@ -551,7 +604,7 @@ export class AuctionsServiceDb {
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
-      return await this.auctionsRepository.save(auction);
+      return await this.save(auction);
     }
     return null;
   }
@@ -563,7 +616,7 @@ export class AuctionsServiceDb {
         auction.ownerAddress,
       );
     }
-    return await this.auctionsRepository.save(auctions);
+    return await this.save(auctions);
   }
 
   private async triggerCacheInvalidation(

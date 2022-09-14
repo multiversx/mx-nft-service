@@ -1,13 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import '../../utils/extentions';
 import { Campaign } from './models';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
 import * as Redis from 'ioredis';
 import { CampaignEntity } from 'src/db/campaigns';
-import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
-import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
@@ -16,6 +11,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class CampaignsService {
@@ -23,8 +19,7 @@ export class CampaignsService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
-    private campaignsRepository: CampaignsRepository,
-    private tierRepository: TiersRepository,
+    private persistenceService: PersistenceService,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -87,7 +82,7 @@ export class CampaignsService {
 
   async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
     let [campaigns, count]: [CampaignEntity[], number] =
-      await this.campaignsRepository.getCampaigns();
+      await this.persistenceService.getCampaigns();
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
@@ -102,7 +97,7 @@ export class CampaignsService {
     );
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
-      const savedCampaign = await this.campaignsRepository.saveCampaign(
+      const savedCampaign = await this.persistenceService.saveCampaign(
         campaign,
       );
       const tiers = campaign.tiers.map((tier) => ({
@@ -110,7 +105,7 @@ export class CampaignsService {
         campaignId: savedCampaign?.id,
       }));
       savedCampaigns = [...savedCampaigns, savedCampaign];
-      await this.tierRepository.save(tiers);
+      await this.persistenceService.saveTiers(tiers);
     }
 
     return savedCampaigns.map((campaign) => Campaign.fromEntity(campaign));
@@ -122,13 +117,13 @@ export class CampaignsService {
     tier: string,
     nftsBought: string,
   ) {
-    const campaign = await this.campaignsRepository.getCampaign(
+    const campaign = await this.persistenceService.getCampaign(
       campaignId,
       address,
     );
-    const tierEntity = await this.tierRepository.getTier(campaign.id, tier);
+    const tierEntity = await this.persistenceService.getTier(campaign.id, tier);
     tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
-    return await this.tierRepository.save(tierEntity);
+    return await this.persistenceService.saveTier(tierEntity);
   }
 
   public async invalidateKey() {

@@ -1,15 +1,17 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
-import { OrderEntity } from '../../../db/orders/order.entity';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { LastOrderRedisHandler } from './last-order.redis-handler';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class LastOrdersProvider extends BaseProvider<number> {
-  constructor(lastOrder: LastOrderRedisHandler) {
+  constructor(
+    lastOrder: LastOrderRedisHandler,
+    private persistenceService: PersistenceService,
+  ) {
     super(
       lastOrder,
       new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
@@ -17,16 +19,9 @@ export class LastOrdersProvider extends BaseProvider<number> {
   }
 
   async getData(auctionIds: number[]) {
-    const orders = await getRepository(OrderEntity)
-      .createQueryBuilder('orders')
-      .orderBy('priceAmountDenominated', 'DESC')
-      .where(
-        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
-        {
-          auctionIds: auctionIds,
-        },
-      )
-      .getMany();
+    const orders = await this.persistenceService.getLastOrdersByAuctionIds(
+      auctionIds,
+    );
 
     return orders?.groupBy((asset) => asset.auctionId);
   }
