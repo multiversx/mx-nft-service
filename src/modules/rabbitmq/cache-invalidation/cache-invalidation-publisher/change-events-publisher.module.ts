@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { rabbitExchanges } from '../../rabbit-config';
 import { CommonRabbitModule } from '../common-rabbitmq.module';
 import { CacheEventsPublisherService } from './change-events-publisher.service';
 
+@Global()
 @Module({
   imports: [
     CommonRabbitModule.register(() => {

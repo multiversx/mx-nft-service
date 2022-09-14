@@ -66,16 +66,14 @@ export class OrdersRepository extends Repository<OrderEntity> {
       .getMany();
   }
 
-  async getOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
-    return await this.createQueryBuilder('orders')
-      .orderBy('priceAmountDenominated', 'DESC')
-      .where(
-        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
-        {
-          auctionIds: auctionIds,
-        },
-      )
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    const orders = await this.createQueryBuilder('orders')
+      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+        auctionIds: auctionIds,
+      })
       .getMany();
+
+    return orders?.groupBy((asset) => asset.auctionId);
   }
 
   async getOrders(

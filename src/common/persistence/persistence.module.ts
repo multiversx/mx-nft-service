@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
@@ -36,12 +37,13 @@ import { PersistenceService } from './persistence.service';
     TypeOrmModule.forFeature([NftRarityRepository]),
     TypeOrmModule.forFeature([NotificationsRepository]),
     TypeOrmModule.forFeature([OrdersRepository]),
-    TypeOrmModule.forFeature([AuctionsRepository]),
+    TypeOrmModule.forFeature([AuctionEntity]),
   ],
   providers: [
     PersistenceService,
     AccountStatsRepository,
     CollectionStatsRepository,
+    AuctionsRepository,
   ],
   exports: [PersistenceService],
 })
