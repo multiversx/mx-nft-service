@@ -266,7 +266,6 @@ export class NotificationsService {
       addreses = [...addreses, orders[orderGroup][0].ownerAddress];
     }
     const uniqueAddresses = [...new Set(addreses)];
-    console.log(1111111111111111, this.cacheEventsPublisher);
     this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: uniqueAddresses,

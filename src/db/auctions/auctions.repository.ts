@@ -649,7 +649,6 @@ export class AuctionsRepository {
     identifier: string,
     ownerAddress: string,
   ) {
-    console.log(11111111111111111, this.cacheEventsPublisherService);
     await this.cacheEventsPublisherService.publish(
       new ChangedEvent({
         id: identifier,
