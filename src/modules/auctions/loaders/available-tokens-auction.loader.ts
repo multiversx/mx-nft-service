@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AvailableTokensForAuctionRedisHandler } from './available-tokens-auctions.redis-handler';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
   constructor(
     availableTokensForAuctionRedisHandler: AvailableTokensForAuctionRedisHandler,
-    private auctionsServiceDb: AuctionsServiceDb,
+    private persistenceService: PersistenceService,
   ) {
     super(
       availableTokensForAuctionRedisHandler,
@@ -20,7 +20,7 @@ export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
 
   async getData(auctionIds: number[]) {
     const auctions =
-      await this.auctionsServiceDb.getAvailableTokensForAuctionIds(auctionIds);
+      await this.persistenceService.getAvailableTokensForAuctionIds(auctionIds);
     return auctions?.groupBy(
       (auction: { auctionId: any }) => auction.auctionId,
     );

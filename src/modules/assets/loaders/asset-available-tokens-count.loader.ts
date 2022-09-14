@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { AssetAvailableTokensCountRedisHandler } from './asset-available-tokens-count.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 export class AssetAvailableTokensCountProvider extends BaseProvider<string> {
   constructor(
     assetsAvailableRedisHandler: AssetAvailableTokensCountRedisHandler,
-    private auctionsServiceDb: AuctionsServiceDb,
+    private persistenceService: PersistenceService,
   ) {
     super(
       assetsAvailableRedisHandler,
@@ -20,7 +20,7 @@ export class AssetAvailableTokensCountProvider extends BaseProvider<string> {
 
   async getData(identifiers: string[]) {
     const availableTokens =
-      await this.auctionsServiceDb.getAvailableTokensForIdentifiers(
+      await this.persistenceService.getAvailableTokensForIdentifiers(
         identifiers,
       );
     return availableTokens?.groupBy(

@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
-import { OrdersModuleDb } from 'src/db/orders/orders.module.db';
 import { ElrondCommunicationModule } from 'src/common';
 import { AuctionProvider, AuctionsRedisHandler } from '../auctions';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
@@ -12,7 +11,6 @@ import { LastOrderRedisHandler } from './loaders/last-order.redis-handler';
 import { LastOrdersProvider } from './loaders/last-order.loader';
 import { OrdersRedisHandler } from './loaders/orders.redis-handler';
 import { OrdersProvider } from './loaders/orders.loader';
-import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { OrdersCachingModule } from './caching/orders-caching.module';
@@ -34,10 +32,8 @@ import { NotificationsModuleGraph } from '../notifications/notifications.module'
   ],
   imports: [
     ElrondCommunicationModule,
-    OrdersModuleDb,
     OrdersCachingModule,
     forwardRef(() => AccountsStatsModuleGraph),
-    forwardRef(() => AuctionsModuleDb),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
     CacheEventsPublisherModule,

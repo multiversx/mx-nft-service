@@ -8,7 +8,6 @@ import { QueryRequest } from '../common/filters/QueryRequest';
 import { NotificationEntity } from 'src/db/notifications';
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
 import { NotificationStatusEnum } from '../notifications/models';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
@@ -23,7 +22,6 @@ import { PersistenceService } from 'src/common/persistance/persistance.service';
 export class OrdersService {
   constructor(
     private persistenceService: PersistenceService,
-    private auctionsService: AuctionsServiceDb,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private ordersCachingService: OrdersCachingService,
     private notificationsService: NotificationsService,
@@ -77,7 +75,7 @@ export class OrdersService {
     createOrderArgs: CreateOrderArgs,
     activeOrder: OrderEntity,
   ) {
-    const auction = await this.auctionsService.getAuction(
+    const auction = await this.persistenceService.getAuction(
       createOrderArgs.auctionId,
     );
     const asset = await this.assetByIdentifierService.getAsset(

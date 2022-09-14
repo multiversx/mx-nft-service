@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AuctionsForAssetRedisHandler } from './asset-auctions.redis-handler';
-import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
+import { PersistenceService } from 'src/common/persistance/persistance.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { AuctionsServiceDb } from 'src/db/auctions/auctions.service.db';
 export class AuctionsForAssetProvider extends BaseProvider<string> {
   constructor(
     auctionsForAssetRedisHandler: AuctionsForAssetRedisHandler,
-    private auctionsServiceDb: AuctionsServiceDb,
+    private persistenceService: PersistenceService,
   ) {
     super(
       auctionsForAssetRedisHandler,
@@ -19,7 +19,7 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const auctions = await this.auctionsServiceDb.getAuctionsForIdentifiers(
+    const auctions = await this.persistenceService.getAuctionsForIdentifiers(
       identifiers,
     );
     return auctions?.groupBy((auction) => auction.batchKey);

@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
+import { AuctionEntity } from 'src/db/auctions';
+import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
+import { PriceRange } from 'src/db/auctions/price-range';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { CampaignEntity } from 'src/db/campaigns/campaign.entity';
@@ -31,6 +34,7 @@ import {
 } from 'src/db/notifications';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
+import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { OrderStatusEnum } from 'src/modules/orders/models';
@@ -55,6 +59,7 @@ export class PersistenceService {
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
+    private readonly auctionsRepository: AuctionsRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -599,6 +604,266 @@ export class PersistenceService {
     return await this.execute(
       'deleteOrdersByAuctionId',
       this.ordersRepository.deleteOrdersByAuctionId(auctionIds),
+    );
+  }
+
+  async getAuctions(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    return await this.execute(
+      'getAuctions',
+      this.auctionsRepository.getAuctions(queryRequest),
+    );
+  }
+
+  async getAuctionsGroupBy(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    return await this.execute(
+      'getAuctionsGroupBy',
+      this.auctionsRepository.getAuctionsGroupBy(queryRequest),
+    );
+  }
+
+  async getAuctionsForIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    return await this.execute(
+      'getAuctionsForIdentifier',
+      this.auctionsRepository.getAuctionsForIdentifier(queryRequest),
+    );
+  }
+
+  async getAuctionsForHash(blockHash: string): Promise<AuctionEntity[]> {
+    return await this.execute(
+      'getAuctionsForHash',
+      this.auctionsRepository.getAuctionsForHash(blockHash),
+    );
+  }
+
+  async getClaimableAuctions(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+  ): Promise<[AuctionEntity[], number]> {
+    return await this.execute(
+      'getClaimableAuctions',
+      this.auctionsRepository.getClaimableAuctions(limit, offset, address),
+    );
+  }
+
+  async getClaimableAuctionsForMarketplaceKey(
+    limit: number = 10,
+    offset: number = 0,
+    address: string,
+    marketplaceKey: string,
+  ): Promise<[AuctionEntity[], number]> {
+    return await this.execute(
+      'getClaimableAuctions',
+      this.auctionsRepository.getClaimableAuctionsForMarketplaceKey(
+        limit,
+        offset,
+        address,
+        marketplaceKey,
+      ),
+    );
+  }
+
+  async getAuctionsOrderByOrdersCountGroupByIdentifier(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    return await this.execute(
+      'getAuctionsOrderByOrdersCountGroupByIdentifier',
+      this.auctionsRepository.getAuctionsOrderByOrdersCountGroupByIdentifier(
+        queryRequest,
+      ),
+    );
+  }
+
+  async getAuctionsOrderByOrdersCount(
+    queryRequest: QueryRequest,
+  ): Promise<[AuctionEntity[], number, PriceRange]> {
+    return await this.execute(
+      'getAuctionsOrderByOrdersCount',
+      this.auctionsRepository.getAuctionsOrderByOrdersCount(queryRequest),
+    );
+  }
+
+  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
+    return await this.execute(
+      'getAuctionsEndingBefore',
+      this.auctionsRepository.getAuctionsEndingBefore(endDate),
+    );
+  }
+
+  async getAuctionsForMarketplace(
+    startDate: number,
+  ): Promise<[any[], PriceRange]> {
+    return await this.execute(
+      'getAuctionsForMarketplace',
+      this.auctionsRepository.getAuctionsForMarketplace(startDate),
+    );
+  }
+
+  async getMinMax(token: string): Promise<PriceRange> {
+    return await this.execute(
+      'getMinMax',
+      this.auctionsRepository.getMinMax(token),
+    );
+  }
+
+  async getAuction(id: number): Promise<AuctionEntity> {
+    return await this.execute(
+      'getAuction',
+      this.auctionsRepository.getAuction(id),
+    );
+  }
+
+  async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
+    return await this.execute(
+      'getBulkAuctions',
+      this.auctionsRepository.getBulkAuctions(auctionsIds),
+    );
+  }
+
+  async getAuctionByMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.execute(
+      'getAuctionByMarketplace',
+      this.auctionsRepository.getAuctionByMarketplace(id, marketplaceKey),
+    );
+  }
+
+  async getAuctionCountForIdentifiers(
+    identifiers: string[],
+  ): Promise<AuctionEntity[]> {
+    return await this.execute(
+      'getAuctionCountForIdentifiers',
+      this.auctionsRepository.getAuctionCountForIdentifiers(identifiers),
+    );
+  }
+
+  async getAuctionsForIdentifiers(identifiers: string[]): Promise<any[]> {
+    return await this.execute(
+      'getAuctionsForIdentifiers',
+      this.auctionsRepository.getAuctionsForIdentifiers(identifiers),
+    );
+  }
+
+  async getAvailableTokensForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.execute(
+      'getAvailableTokensForIdentifiers',
+      this.auctionsRepository.getAvailableTokensForIdentifiers(identifiers),
+    );
+  }
+
+  async getAvailableTokensForAuctionIds(auctionIds: number[]): Promise<any> {
+    return await this.execute(
+      'getAvailableTokensForAuctionIds',
+      this.auctionsRepository.getAvailableTokensForAuctionIds(auctionIds),
+    );
+  }
+
+  async getLowestAuctionForIdentifiers(identifiers: string[]): Promise<any> {
+    return await this.execute(
+      'getLowestAuctionForIdentifiers',
+      this.auctionsRepository.getLowestAuctionForIdentifiers(identifiers),
+    );
+  }
+
+  async getLowestAuctionForIdentifiersAndMarketplace(
+    identifiers: string[],
+  ): Promise<any> {
+    return await this.execute(
+      'getLowestAuctionForIdentifiersAndMarketplace',
+      this.auctionsRepository.getLowestAuctionForIdentifiersAndMarketplace(
+        identifiers,
+      ),
+    );
+  }
+
+  async getAvailableTokensForSpecificMarketplace(
+    id: number,
+    marketplaceKey: string,
+  ): Promise<any> {
+    return await this.execute(
+      'getAvailableTokensForSpecificMarketplace',
+      this.auctionsRepository.getAvailableTokensForSpecificMarketplace(
+        id,
+        marketplaceKey,
+      ),
+    );
+  }
+
+  async getOnSaleAssetCountForCollections(identifiers: string[]): Promise<any> {
+    return await this.execute(
+      'getOnSaleAssetCountForCollections',
+      this.auctionsRepository.getOnSaleAssetCountForCollections(identifiers),
+    );
+  }
+
+  async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
+    return await this.execute(
+      'getAuctionsThatReachedDeadline',
+      this.auctionsRepository.getAuctionsThatReachedDeadline(),
+    );
+  }
+
+  async insertAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+    return await this.execute(
+      'insertAuction',
+      this.auctionsRepository.insertAuction(auction),
+    );
+  }
+
+  async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
+    return await this.execute(
+      'rollbackAuctionAndOrdersByHash',
+      this.auctionsRepository.rollbackAuctionAndOrdersByHash(blockHash),
+    );
+  }
+
+  async updateAuction(auction: AuctionEntity): Promise<AuctionEntity> {
+    return await this.execute(
+      'updateAuction',
+      this.auctionsRepository.updateAuction(auction),
+    );
+  }
+
+  async updateAuctionStatus(
+    auctionId: number,
+    status: AuctionStatusEnum,
+    hash: string,
+  ): Promise<AuctionEntity> {
+    return await this.execute(
+      'updateAuctionStatus',
+      this.auctionsRepository.updateAuctionStatus(auctionId, status, hash),
+    );
+  }
+
+  async updateAuctionByMarketplace(
+    auctionId: number,
+    marketplaceKey: string,
+    status: AuctionStatusEnum,
+    hash: string,
+  ): Promise<AuctionEntity> {
+    return await this.execute(
+      'updateAuctionByMarketplace',
+      this.auctionsRepository.updateAuctionByMarketplace(
+        auctionId,
+        marketplaceKey,
+        status,
+        hash,
+      ),
+    );
+  }
+
+  async updateAuctions(auctions: AuctionEntity[]): Promise<any> {
+    return await this.execute(
+      'updateAuctions',
+      this.auctionsRepository.updateAuctions(auctions),
     );
   }
 }

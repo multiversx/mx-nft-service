@@ -12,7 +12,6 @@ import { IpfsModule } from '../ipfs/ipfs.module';
 import { S3Service } from '../s3/s3.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { ElrondCommunicationModule } from 'src/common';
-import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
@@ -90,7 +89,6 @@ import { PersistenceModule } from 'src/common/persistance/persistance.module';
   imports: [
     ElrondCommunicationModule,
     CommonModule,
-    forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
     PersistenceModule,
