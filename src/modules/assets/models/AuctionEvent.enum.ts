@@ -18,6 +18,7 @@ export enum ElrondNftsSwapAuctionEventEnum {
   NftSwap = 'nftSwap',
   WithdrawSwap = 'withdrawSwap',
   NftSwapUpdate = 'nftSwapUpdate',
+  NftSwapExtend = 'nftSwapExtend',
   Purchase = 'purchase',
   Bid = 'bid',
 }

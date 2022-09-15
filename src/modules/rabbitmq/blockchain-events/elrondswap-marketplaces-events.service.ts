@@ -168,6 +168,7 @@ export class ElrondSwapMarketplaceEventsService {
           }
           break;
         case ElrondNftsSwapAuctionEventEnum.NftSwapUpdate:
+        case ElrondNftsSwapAuctionEventEnum.NftSwapExtend:
           const updateEvent = new ElrondSwapUpdateEvent(event);
           const topicsUpdate = updateEvent.getTopics();
           const changePriceMarketplace: Marketplace =
