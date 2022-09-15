@@ -256,26 +256,6 @@ export class ElrondSwapMarketplaceEventsService {
     }
   }
 
-  private async getNewPrice(
-    updatePriceMarketplace: Marketplace,
-    topicsUpdatePrice: {
-      collection: string;
-      nonce: string;
-      auctionId: string;
-      newBid: string;
-    },
-  ) {
-    if (updatePriceMarketplace.key === DEADRARE_KEY) {
-      const [minBid] = await this.nftAbiService.getMinMaxAuction(
-        parseInt(topicsUpdatePrice.auctionId, 16),
-        updatePriceMarketplace,
-      );
-      return minBid.toFixed();
-    }
-
-    return topicsUpdatePrice.newBid;
-  }
-
   private updateAuctionPrice(
     changePriceAuction: AuctionEntity,
     topics: {
