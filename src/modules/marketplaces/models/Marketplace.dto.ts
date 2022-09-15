@@ -71,4 +71,25 @@ export class Marketplace {
         })
       : null;
   }
+
+  static fromEntityForElrondSwap(
+    entity: MarketplaceEntity,
+    collection: string,
+    marketplaceAuctionId: number,
+    nonce: number,
+  ) {
+    let url = marketplaceAuctionId
+      ? `${entity.url}${marketplaceAuctionId}/${collection}/${nonce}`
+      : entity.url;
+
+    return entity && Object.keys(entity).length > 0
+      ? new Marketplace({
+          address: entity.address,
+          name: entity.name,
+          url: url,
+          key: entity.key,
+          type: entity.type,
+        })
+      : null;
+  }
 }
