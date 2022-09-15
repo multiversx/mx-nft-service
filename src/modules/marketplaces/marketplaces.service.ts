@@ -153,6 +153,12 @@ export class MarketplacesService {
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 
+  async getMarketplaceByKey(key: string): Promise<Marketplace> {
+    let marketplace: MarketplaceEntity =
+      await this.persistenceService.getMarketplaceByKey(key);
+    return marketplace ? Marketplace.fromEntity(marketplace) : null;
+  }
+
   async getMarketplaceByCollectionFromDb(
     collection: string,
   ): Promise<Marketplace> {

@@ -4,6 +4,7 @@ import {
   AuctionAbi,
   ExternalAuctionAbi,
 } from 'src/modules/auctions/models';
+import { DateUtils } from 'src/utils/date-utils';
 import denominate, { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
@@ -196,6 +197,73 @@ export class AuctionEntity extends BaseEntity {
           identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
             parseInt(auction.auctioned_token_nonce.valueOf().toString()),
           )}`,
+          tags: tags ? `,${tags},` : '',
+          blockHash: hash,
+          marketplaceKey: marketplaceKey,
+        })
+      : null;
+  }
+
+  static fromWithdrawTopics(
+    topicsAuctionToken: {
+      originalOwner: string;
+      collection: string;
+      nonce: string;
+      auctionId: string;
+      nrAuctionTokens: string;
+      price: string;
+      paymentToken: string;
+      paymentTokenNonce: string;
+      auctionType: string;
+      deadline: number;
+    },
+    tags: string,
+    hash: string,
+    marketplaceKey: string,
+  ) {
+    return topicsAuctionToken
+      ? new AuctionEntity({
+          marketplaceAuctionId: parseInt(topicsAuctionToken.auctionId, 16),
+          collection: topicsAuctionToken.collection,
+          nonce: parseInt(topicsAuctionToken.nonce, 16),
+          nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
+          status: AuctionStatusEnum.Running,
+          type:
+            topicsAuctionToken.auctionType === '' ||
+            parseInt(topicsAuctionToken.auctionType) === 0
+              ? AuctionTypeEnum.Nft
+              : AuctionTypeEnum.SftOnePerPayment,
+          paymentToken: topicsAuctionToken.paymentToken,
+          paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
+          ownerAddress: topicsAuctionToken.originalOwner,
+          minBid: topicsAuctionToken.price,
+          // minBidDiff: auction.min_bid_diff.valueOf().toString(),
+          minBidDenominated: parseFloat(
+            denominate({
+              input: topicsAuctionToken.price?.toString(),
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }).replace(',', ''),
+          ),
+          maxBid:
+            parseInt(topicsAuctionToken.auctionType) === 2
+              ? topicsAuctionToken.price
+              : '0',
+          maxBidDenominated: parseFloat(
+            denominate({
+              input:
+                parseInt(topicsAuctionToken.auctionType) === 2
+                  ? topicsAuctionToken.price
+                  : '0',
+              denomination: 18,
+              decimals: 2,
+              showLastNonZeroDecimal: true,
+            }).replace(',', ''),
+          ),
+          startDate: DateUtils.getCurrentTimestamp(),
+          endDate: topicsAuctionToken.deadline,
+          identifier: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
           tags: tags ? `,${tags},` : '',
           blockHash: hash,
           marketplaceKey: marketplaceKey,

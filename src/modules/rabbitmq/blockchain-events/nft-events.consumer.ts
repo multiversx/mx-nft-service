@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
+import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
@@ -11,6 +13,7 @@ export class NftEventsConsumer {
   constructor(
     private readonly nftTransactionsService: NftEventsService,
     private readonly externalMarketplacesEventsService: ExternalMarketplaceEventsService,
+    private readonly elrondSwapMarketplacesEventsService: ElrondSwapMarketplaceEventsService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -28,6 +31,10 @@ export class NftEventsConsumer {
 
       const externalMarketplaces =
         await this.marketplaceService.getExternalMarketplacesAddreses();
+
+      const nftSwapMarketplace =
+        await this.marketplaceService.getMarketplaceByKey(ELRONDNFTSWAP_KEY);
+
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
@@ -52,6 +59,13 @@ export class NftEventsConsumer {
         nftAuctionEvents?.events?.filter(
           (e: { address: any }) =>
             externalMarketplaces.includes(e.address) === true,
+        ),
+        nftAuctionEvents.hash,
+      );
+
+      await this.elrondSwapMarketplacesEventsService.handleElrondNftSwapsAuctionEvents(
+        nftAuctionEvents?.events?.filter(
+          (e: { address: any }) => e.address === nftSwapMarketplace.address,
         ),
         nftAuctionEvents.hash,
       );
