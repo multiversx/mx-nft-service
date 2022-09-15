@@ -132,14 +132,10 @@ export class FeedEventsSenderService {
   }
 
   public async sendBuyEvent(
-    buySftTopics: {
-      currentWinner: string;
-      collection: string;
-      nonce: string;
-      auctionId: string;
-      bid: string;
-      boughtTokens: string;
-    },
+    currentWinner: string,
+    bid: string,
+    boughtTokens: string,
+
     orderSft: Order,
     buyAuction: AuctionEntity,
     buyMarketplace: Marketplace,
@@ -150,30 +146,27 @@ export class FeedEventsSenderService {
 
     let usdAmount: String;
     let tokenData: Token;
-    if (buyAuction.paymentToken && buySftTopics.bid) {
+    if (buyAuction.paymentToken && bid) {
       [tokenData, usdAmount] = await Promise.all([
         this.usdPriceLoader.getToken(buyAuction.paymentToken),
-        this.usdPriceLoader.getUsdAmountDenom(
-          buyAuction.paymentToken,
-          buySftTopics.bid,
-        ),
+        this.usdPriceLoader.getUsdAmountDenom(buyAuction.paymentToken, bid),
       ]);
     }
 
     await this.accountFeedService.addFeed(
       new Feed({
-        actor: buySftTopics.currentWinner,
+        actor: currentWinner,
         event: EventEnum.buy,
         reference: buyAuction.identifier,
         extraInfo: {
           orderId: orderSft.id,
           nftName: buySftNftData?.name,
           verified: buySftNftData?.verified ? true : false,
-          price: buySftTopics.bid,
+          price: bid,
           usdAmount: usdAmount ?? undefined,
           tokenData: tokenData ?? undefined,
           auctionId: buyAuction.id,
-          boughtTokens: buySftTopics.boughtTokens,
+          boughtTokens: boughtTokens,
           marketplaceKey: buyMarketplace.key,
         },
       }),

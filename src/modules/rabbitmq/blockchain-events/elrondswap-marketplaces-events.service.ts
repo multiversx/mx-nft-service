@@ -12,7 +12,6 @@ import {
 import {
   AuctionsSetterService,
   AuctionsGetterService,
-  NftMarketplaceAbiService,
 } from 'src/modules/auctions';
 import {
   AuctionStatusEnum,
@@ -25,15 +24,12 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
-import { DEADRARE_KEY, XOXNO_KEY } from 'src/utils/constants';
 import denominate from 'src/utils/formatters';
-import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
-import { ChangePriceEvent } from '../entities/auction/changePrice.event';
 import { ElrondSwapAuctionEvent } from '../entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ElrondSwapBidEvent } from '../entities/auction/elrondnftswap/elrondswap-bid.event';
+import { ElrondSwapBuyEvent } from '../entities/auction/elrondnftswap/elrondswap-buy.event';
 import { ElrondSwapUpdateEvent } from '../entities/auction/elrondnftswap/elrondswap-updateAuction.event';
 import { ElrondSwapWithdrawEvent } from '../entities/auction/elrondnftswap/elrondswap-withdraw.event';
-import { UpdatePriceEvent } from '../entities/auction/updatePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
@@ -46,7 +42,6 @@ export class ElrondSwapMarketplaceEventsService {
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
-    private nftAbiService: NftMarketplaceAbiService,
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly marketplaceService: MarketplacesService,
@@ -189,7 +184,7 @@ export class ElrondSwapMarketplaceEventsService {
 
             this.auctionsService.updateAuction(
               changePriceAuction,
-              ExternalAuctionEventEnum.ChangePrice,
+              ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
             );
           }
           break;
@@ -223,35 +218,60 @@ export class ElrondSwapMarketplaceEventsService {
           }
           break;
 
-        case ExternalAuctionEventEnum.AcceptOffer:
-          const acceptOfferEvent = new AcceptOfferEvent(event);
-          const topicsAcceptOffer = acceptOfferEvent.getTopics();
-          const acceptOfferMarketplace: Marketplace =
+        case ElrondNftsSwapAuctionEventEnum.Purchase:
+          const buySftEvent = new ElrondSwapBuyEvent(event);
+          const buySftTopics = buySftEvent.getTopics();
+          const buyMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByAddress(
-              acceptOfferEvent.getAddress(),
+              buySftEvent.getAddress(),
             );
           this.logger.log(
-            `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
+            `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
           );
-          if (
-            acceptOfferMarketplace.key === XOXNO_KEY &&
-            topicsAcceptOffer.auctionId > 0
-          ) {
-            let updatePriceAuction =
-              await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-                topicsAcceptOffer.auctionId,
-                acceptOfferMarketplace.key,
-              );
-            updatePriceAuction.status = AuctionStatusEnum.Closed;
-            updatePriceAuction.modifiedDate = new Date(
-              new Date().toUTCString(),
+          const buyAuction =
+            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+              parseInt(buySftTopics.auctionId, 16),
+              buyMarketplace.key,
             );
-            this.auctionsService.updateAuction(
-              updatePriceAuction,
-              ExternalAuctionEventEnum.AcceptOffer,
+          if (buyAuction) {
+            const result = await this.auctionsGetterService.getAvailableTokens(
+              buyAuction.id,
+              buyMarketplace.key,
+            );
+            const totalRemaining = result
+              ? result[0]?.availableTokens -
+                parseFloat(buySftTopics.nrAuctionTokens)
+              : 0;
+            if (totalRemaining <= 0) {
+              this.auctionsService.updateAuctionStatus(
+                buyAuction.id,
+                AuctionStatusEnum.Ended,
+                hash,
+                AuctionStatusEnum.Ended,
+              );
+            }
+            const orderSft = await this.ordersService.createOrderForSft(
+              new CreateOrderArgs({
+                ownerAddress: buySftTopics.currentWinner,
+                auctionId: buyAuction.id,
+                priceToken: buyAuction.paymentToken,
+                priceAmount: buySftTopics.currentBid,
+                priceNonce: buyAuction.paymentNonce,
+                blockHash: hash,
+                status: OrderStatusEnum.Bought,
+                boughtTokens: buySftTopics.nrAuctionTokens,
+                marketplaceKey: buyMarketplace.key,
+              }),
+            );
+            await this.feedEventsSenderService.sendBuyEvent(
+              buySftTopics.currentBid,
+              buySftTopics.currentWinner,
+              buySftTopics.nrAuctionTokens,
+              orderSft,
+              buyAuction,
+              buyMarketplace,
             );
           }
-
           break;
       }
     }
