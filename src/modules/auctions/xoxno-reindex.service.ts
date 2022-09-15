@@ -10,12 +10,12 @@ export class XoxnoReindexService {
 
   async handleReindexXoxno() {
     try {
-      const maxId = 291900;
-      for (let index = 291000; index < maxId; index++) {
+      const maxId = 200;
+      for (let index = 0; index < maxId; index++) {
         const auction = await this.auctionService.saveAuctionXoxno(
           index + 1,
-          'xoxno',
-          'erd1qqqqqqqqqqqqqpgq6wegs2xkypfpync8mn2sa5cmpqjlvrhwz5nqgepyg8',
+          'elrondnftswap',
+          'erd1qqqqqqqqqqqqqpgq8xwzu82v8ex3h4ayl5lsvxqxnhecpwyvwe0sf2qj4e',
         );
       }
     } catch (error) {

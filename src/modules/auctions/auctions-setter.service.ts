@@ -4,6 +4,7 @@ import {
   AuctionAbi,
   AuctionStatusEnum,
   ExternalAuctionAbi,
+  SwapAbi,
 } from './models';
 import '../../utils/extentions';
 import { AuctionEntity } from 'src/db/auctions';
@@ -18,15 +19,19 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
 import { MarketplaceUtils } from './marketplaceUtils';
 import { nominateVal } from 'src/utils';
 import { CreateOrderArgs, OrderStatusEnum } from '../orders/models';
-import { OrdersService } from '../orders/order.service';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { OrderEntity } from 'src/db/orders';
+import { ElrondNftSwapMarketplaceAbiService } from './elrondnftswap-marketplace.abi.service';
+import { OrdersService } from '../orders/order.service';
 
 @Injectable()
 export class AuctionsSetterService {
   constructor(
     private nftAbiService: NftMarketplaceAbiService,
+    private elrondNftSwapAbiService: ElrondNftSwapMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
+    private ordersService: OrdersService,
     private persistenceService: PersistenceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
@@ -76,6 +81,92 @@ export class AuctionsSetterService {
           }
 
           await this.persistenceService.saveTags(tags);
+        }
+        return savedAuction;
+      }
+      return;
+    } catch (error) {
+      this.logger.error('An error occurred while savind an auction', error, {
+        path: 'AuctionsService.saveAuction',
+        auctionId,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        AuctionEventEnum.AuctionTokenEvent,
+        profiler.duration,
+      );
+    }
+  }
+  async saveAuctionXoxno(
+    auctionId: number,
+    marketplaceKey: string,
+    marketplaceAddress: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      const auctionData = await this.elrondNftSwapAbiService.getAuctionQuery(
+        auctionId,
+      );
+      if (auctionData) {
+        const xoxnoAuction = auctionData as SwapAbi;
+
+        if (xoxnoAuction.swap_type.name.toString() === 'Swap') {
+          return;
+        }
+        const identifier = `${auctionData.token.token_type.toString()}-${nominateVal(
+          parseInt(auctionData.token.nonce.toString()),
+        )}`;
+        const asset = await this.assetByIdentifierService.getAsset(identifier);
+        const auctionEntity = AuctionEntity.fromSwapAbi(
+          auctionId,
+          xoxnoAuction,
+          asset?.tags?.toString(),
+          '',
+          marketplaceKey,
+        );
+
+        const savedAuction = await this.persistenceService.insertAuction(
+          auctionEntity,
+        );
+
+        if (asset?.tags) {
+          let tags: TagEntity[] = [];
+          for (const tag of asset?.tags) {
+            tags = [
+              ...tags,
+              new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
+            ];
+          }
+
+          await this.persistenceService.saveTags(tags);
+        }
+
+        console.log(auctionId, xoxnoAuction);
+        if (xoxnoAuction.swap_type.name.toString() === 'Auction') {
+          const topBidderAddress =
+            await this.elrondNftSwapAbiService.getOfferAddressesById(auctionId);
+          if (topBidderAddress && topBidderAddress.length > 0) {
+            const offer = await this.elrondNftSwapAbiService.getOffersAddress(
+              topBidderAddress[0],
+              auctionId,
+            );
+
+            if (offer && offer.length > 0) {
+              this.ordersService.createOrder(
+                new CreateOrderArgs({
+                  auctionId: savedAuction.id,
+                  marketplaceKey: marketplaceKey,
+                  ownerAddress: offer[0].original_owner.valueOf().toString(),
+                  priceAmount: offer[0].nr_tokens.valueOf().toString(),
+                  priceToken: savedAuction.paymentToken,
+                  priceNonce: savedAuction.paymentNonce,
+                  status: OrderStatusEnum.Active,
+                }),
+              );
+            }
+          }
         }
         return savedAuction;
       }

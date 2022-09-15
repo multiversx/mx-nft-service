@@ -30,6 +30,7 @@ import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
 import { CachingService } from 'src/common/services/caching/caching.service';
+import { ElrondNftSwapMarketplaceAbiService } from './elrondnftswap-marketplace.abi.service';
 import { OrdersModuleGraph } from '../orders/orders.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { OrdersModuleGraph } from '../orders/orders.module';
     AuctionsMutationsResolver,
     AuctionOrdersResolver,
     NftMarketplaceAbiService,
+    ElrondNftSwapMarketplaceAbiService,
     AuctionsForAssetProvider,
     AvailableTokensForAuctionRedisHandler,
     AvailableTokensForAuctionProvider,
@@ -64,6 +66,7 @@ import { OrdersModuleGraph } from '../orders/orders.module';
     CommonModule,
     forwardRef(() => AuctionsCachingModule),
     forwardRef(() => AssetsModuleGraph),
+    forwardRef(() => OrdersModuleGraph),
     forwardRef(() => AccountsStatsModuleGraph),
   ],
   exports: [

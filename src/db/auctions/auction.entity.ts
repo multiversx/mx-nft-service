@@ -4,6 +4,7 @@ import {
   AuctionAbi,
   ExternalAuctionAbi,
   ElrondSwapAuctionTypeEnum,
+  SwapAbi,
 } from 'src/modules/auctions/models';
 import { DateUtils } from 'src/utils/date-utils';
 import denominate, { nominateVal } from 'src/utils/formatters';
@@ -197,6 +198,63 @@ export class AuctionEntity extends BaseEntity {
       identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
         parseInt(auction.auctioned_token_nonce.valueOf().toString()),
       )}`,
+      tags: tags ? `,${tags},` : '',
+      blockHash: hash,
+      marketplaceKey: marketplaceKey,
+    });
+  }
+
+  static fromSwapAbi(
+    auctionId: number,
+    auction: SwapAbi,
+    tags: string,
+    hash: string,
+    marketplaceKey: string,
+  ) {
+    if (!auction) return null;
+    return new AuctionEntity({
+      marketplaceAuctionId: auctionId,
+      collection: auction.token.token_type.toString(),
+      nonce: parseInt(auction.token.nonce.valueOf().toString()),
+      nrAuctionedTokens: parseInt(auction.nr_tokens.valueOf().toString()),
+      status: AuctionStatusEnum.Running,
+      type:
+        parseInt(auction.swap_type) === ElrondSwapAuctionTypeEnum.Auction
+          ? AuctionTypeEnum.Nft
+          : AuctionTypeEnum.SftOnePerPayment,
+      paymentToken: auction.payment_token.token_type.toString(),
+      paymentNonce: parseInt(auction.payment_token.nonce.valueOf().toString()),
+      ownerAddress: auction.original_owner.valueOf().toString(),
+      minBid: auction.min_bid.valueOf().toString(),
+      // minBidDiff: auction.min_bid_diff.valueOf().toString(),
+      minBidDenominated: parseFloat(
+        denominate({
+          input: auction.min_bid.valueOf()?.toString(),
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      maxBid:
+        parseInt(auction.swap_type) === ElrondSwapAuctionTypeEnum.Buy
+          ? auction.swap_type.price
+          : '0',
+      maxBidDenominated: parseFloat(
+        denominate({
+          input:
+            parseInt(auction.swap_type) === ElrondSwapAuctionTypeEnum.Buy
+              ? auction.swap_type.price
+              : '0',
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      startDate: DateUtils.getCurrentTimestamp(),
+      endDate: parseInt(auction.deadline.valueOf().toString()),
+      identifier: `${auction.token.token_type.toString()}-${
+        auction.token.nonce
+      }`,
       tags: tags ? `,${tags},` : '',
       blockHash: hash,
       marketplaceKey: marketplaceKey,

@@ -5,6 +5,7 @@ import {
   TokenIdentifierValue,
   U64Value,
 } from '@elrondnetwork/erdjs';
+import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionStatusEnum } from '.';
 
 export interface GeneralAuctionAbi {
@@ -34,6 +35,27 @@ export interface ExternalAuctionAbi extends GeneralAuctionAbi {
   auctioned_token_type: TokenIdentifierValue;
   auctioned_token_nonce: U64Value;
   nr_auctioned_tokens: BigUIntValue;
+}
+
+export interface SwapAbi {
+  token: EsdtToken;
+  nr_tokens: BigUIntValue;
+  min_bid: BigUIntValue;
+  swap_type: any;
+  deadline: U64Value;
+  payment_token: EsdtToken;
+  original_owner: AddressValue;
+}
+
+export interface OfferAbi {
+  token: EsdtToken;
+  nr_tokens: BigUIntValue;
+  original_owner: AddressValue;
+}
+
+export interface EsdtToken {
+  token_type: TokenIdentifierValue;
+  nonce: U64Value;
 }
 
 export interface EsdtTokenPayment {
