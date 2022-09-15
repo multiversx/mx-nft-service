@@ -7,6 +7,7 @@ import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplacesService {
@@ -77,7 +78,18 @@ export class MarketplacesService {
     let allMarketplaces = await this.getAllMarketplaces();
 
     const externalMarketplaces = allMarketplaces?.items?.filter(
-      (m) => m.type === MarketplaceTypeEnum.External,
+      (m) =>
+        m.type === MarketplaceTypeEnum.External && m.key !== ELRONDNFTSWAP_KEY,
+    );
+
+    return externalMarketplaces.map((m) => m.address);
+  }
+
+  async getMarketplaceByKey(marketplaceKey: string): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const externalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.key === marketplaceKey,
     );
 
     return externalMarketplaces.map((m) => m.address);
@@ -150,12 +162,6 @@ export class MarketplacesService {
   async getMarketplaceByAddress(address: string): Promise<Marketplace> {
     let marketplace: MarketplaceEntity =
       await this.persistenceService.getMarketplaceByAddress(address);
-    return marketplace ? Marketplace.fromEntity(marketplace) : null;
-  }
-
-  async getMarketplaceByKey(key: string): Promise<Marketplace> {
-    let marketplace: MarketplaceEntity =
-      await this.persistenceService.getMarketplaceByKey(key);
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 

@@ -65,7 +65,8 @@ export class NftEventsConsumer {
 
       await this.elrondSwapMarketplacesEventsService.handleElrondNftSwapsAuctionEvents(
         nftAuctionEvents?.events?.filter(
-          (e: { address: any }) => e.address === nftSwapMarketplace.address,
+          (e: { address: any }) =>
+            nftSwapMarketplace.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
       );

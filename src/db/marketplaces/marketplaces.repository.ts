@@ -15,14 +15,6 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
     });
   }
 
-  async getMarketplaceByKey(key: string): Promise<MarketplaceEntity> {
-    return await this.findOne({
-      where: {
-        key,
-      },
-    });
-  }
-
   async getMarketplacesByKeys(
     marketplaceKeys: string[],
   ): Promise<MarketplaceEntity[]> {
