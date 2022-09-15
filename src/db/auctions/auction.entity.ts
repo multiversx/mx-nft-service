@@ -3,6 +3,7 @@ import {
   AuctionStatusEnum,
   AuctionAbi,
   ExternalAuctionAbi,
+  ElrondSwapAuctionTypeEnum,
 } from 'src/modules/auctions/models';
 import { DateUtils } from 'src/utils/date-utils';
 import denominate, { nominateVal } from 'src/utils/formatters';
@@ -230,7 +231,8 @@ export class AuctionEntity extends BaseEntity {
           status: AuctionStatusEnum.Running,
           type:
             topicsAuctionToken.auctionType === '' ||
-            parseInt(topicsAuctionToken.auctionType) === 0
+            parseInt(topicsAuctionToken.auctionType) ===
+              ElrondSwapAuctionTypeEnum.Auction
               ? AuctionTypeEnum.Nft
               : AuctionTypeEnum.SftOnePerPayment,
           paymentToken: topicsAuctionToken.paymentToken,
@@ -247,13 +249,15 @@ export class AuctionEntity extends BaseEntity {
             }).replace(',', ''),
           ),
           maxBid:
-            parseInt(topicsAuctionToken.auctionType) === 2
+            parseInt(topicsAuctionToken.auctionType) ===
+            ElrondSwapAuctionTypeEnum.Buy
               ? topicsAuctionToken.price
               : '0',
           maxBidDenominated: parseFloat(
             denominate({
               input:
-                parseInt(topicsAuctionToken.auctionType) === 2
+                parseInt(topicsAuctionToken.auctionType) ===
+                ElrondSwapAuctionTypeEnum.Buy
                   ? topicsAuctionToken.price
                   : '0',
               denomination: 18,
