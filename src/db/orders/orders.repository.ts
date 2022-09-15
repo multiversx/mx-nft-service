@@ -4,19 +4,10 @@ import { OrderEntity } from '.';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
-import { OrdersRedisHandler } from 'src/modules/orders/loaders/orders.redis-handler';
-import { LastOrderRedisHandler } from 'src/modules/orders/loaders/last-order.redis-handler';
 import { getOrdersForAuctions } from '../auctions/sql.queries';
 
 @EntityRepository(OrderEntity)
 export class OrdersRepository extends Repository<OrderEntity> {
-  constructor(
-    private ordersRedisHandler: OrdersRedisHandler,
-    private lastOrderRedisHandler: LastOrderRedisHandler,
-  ) {
-    super();
-  }
-
   async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
     return await this.createQueryBuilder('order')
       .where(`order.auctionId = :id and order.status='active'`, {
@@ -66,16 +57,14 @@ export class OrdersRepository extends Repository<OrderEntity> {
       .getMany();
   }
 
-  async getOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
-    return await this.createQueryBuilder('orders')
-      .orderBy('priceAmountDenominated', 'DESC')
-      .where(
-        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
-        {
-          auctionIds: auctionIds,
-        },
-      )
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    const orders = await this.createQueryBuilder('orders')
+      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+        auctionIds: auctionIds,
+      })
       .getMany();
+
+    return orders?.groupBy((asset) => asset.auctionId);
   }
 
   async getOrders(
@@ -128,11 +117,6 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
-    auctionIds.forEach((auctionId) => {
-      this.ordersRedisHandler.clearKeyByPattern(auctionId);
-      this.lastOrderRedisHandler.clearKey(auctionId);
-    });
-
     return await this.createQueryBuilder()
       .delete()
       .from(OrderEntity)

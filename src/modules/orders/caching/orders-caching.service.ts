@@ -46,6 +46,7 @@ export class OrdersCachingService {
   ): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKey(auctionId);
+    await this.ordersRedisHandler.clearKeyByPattern(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
     return this.redisCacheService.flushDb(this.redisClient);

@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
+import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
@@ -18,6 +19,7 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
+import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
 
 @Global()
@@ -36,12 +38,14 @@ import { PersistenceService } from './persistence.service';
     TypeOrmModule.forFeature([NftRarityRepository]),
     TypeOrmModule.forFeature([NotificationsRepository]),
     TypeOrmModule.forFeature([OrdersRepository]),
-    TypeOrmModule.forFeature([AuctionsRepository]),
+    TypeOrmModule.forFeature([AuctionEntity]),
+    CacheEventsPublisherModule,
   ],
   providers: [
     PersistenceService,
     AccountStatsRepository,
     CollectionStatsRepository,
+    AuctionsRepository,
   ],
   exports: [PersistenceService],
 })
