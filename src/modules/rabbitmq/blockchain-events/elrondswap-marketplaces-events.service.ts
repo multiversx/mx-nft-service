@@ -153,7 +153,7 @@ export class ElrondSwapMarketplaceEventsService {
           const startAuction = await this.auctionsService.saveAuctionEntity(
             AuctionEntity.fromWithdrawTopics(
               topicsAuctionToken,
-              asset.tags.toString(),
+              asset.tags?.toString(),
               hash,
               auctionTokenMarketplace.key,
             ),
