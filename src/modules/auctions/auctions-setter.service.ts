@@ -92,6 +92,43 @@ export class AuctionsSetterService {
     }
   }
 
+  async saveAuctionEntity(
+    auctionEntity: AuctionEntity,
+    assetTags: string[],
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      const savedAuction = await this.persistenceService.insertAuction(
+        auctionEntity,
+      );
+
+      if (assetTags) {
+        let tags: TagEntity[] = [];
+        for (const tag of assetTags) {
+          tags = [
+            ...tags,
+            new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
+          ];
+        }
+
+        await this.persistenceService.saveTags(tags);
+      }
+      return savedAuction;
+    } catch (error) {
+      this.logger.error('An error occurred while saving an auction', error, {
+        path: 'AuctionsService.saveAuction',
+        auctionEntity,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        AuctionEventEnum.AuctionTokenEvent,
+        profiler.duration,
+      );
+    }
+  }
+
   async rollbackAuctionByHash(blockHash: string): Promise<boolean> {
     try {
       return await this.persistenceService.rollbackAuctionAndOrdersByHash(

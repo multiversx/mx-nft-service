@@ -27,6 +27,7 @@ import { ExternalMarketplaceEventsService } from './external-marketplaces-events
 import { FeedEventsSenderService } from './feed-events.service';
 import { UsdAmountModuleGraph } from 'src/modules/usdAmount/usd-amount.module';
 import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
+import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
     NftEventsConsumer,
     NftEventsService,
     ExternalMarketplaceEventsService,
+    ElrondSwapMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
