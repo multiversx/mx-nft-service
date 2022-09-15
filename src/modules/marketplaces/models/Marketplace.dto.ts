@@ -38,16 +38,16 @@ export class Marketplace {
     if (entity.type === MarketplaceTypeEnum.Internal) {
       url = identifier && id ? `${url}/auction/${id}` : url;
     }
-
-    return entity && Object.keys(entity).length > 0
-      ? new Marketplace({
-          address: entity.address,
-          name: entity.name,
-          url: url,
-          key: entity.key,
-          type: entity.type,
-        })
-      : null;
+    if (!entity || Object.keys(entity).length <= 0) {
+      return null;
+    }
+    return new Marketplace({
+      address: entity.address,
+      name: entity.name,
+      url: url,
+      key: entity.key,
+      type: entity.type,
+    });
   }
 
   static fromEntityForXoxno(
@@ -61,15 +61,16 @@ export class Marketplace {
     if (marketplaceAuctionId && nftType === NftTypeEnum.SemiFungibleESDT) {
       url = marketplaceAuctionId ? `${url}-${marketplaceAuctionId}` : url;
     }
-    return entity && Object.keys(entity).length > 0
-      ? new Marketplace({
-          address: entity.address,
-          name: entity.name,
-          url: url,
-          key: entity.key,
-          type: entity.type,
-        })
-      : null;
+    if (!entity || Object.keys(entity).length <= 0) {
+      return null;
+    }
+    return new Marketplace({
+      address: entity.address,
+      name: entity.name,
+      url: url,
+      key: entity.key,
+      type: entity.type,
+    });
   }
 
   static fromEntityForElrondSwap(
@@ -81,15 +82,15 @@ export class Marketplace {
     let url = marketplaceAuctionId
       ? `${entity.url}${marketplaceAuctionId}/${collection}/${nonce}`
       : entity.url;
-
-    return entity && Object.keys(entity).length > 0
-      ? new Marketplace({
-          address: entity.address,
-          name: entity.name,
-          url: url,
-          key: entity.key,
-          type: entity.type,
-        })
-      : null;
+    if (!entity || Object.keys(entity).length <= 0) {
+      return null;
+    }
+    return new Marketplace({
+      address: entity.address,
+      name: entity.name,
+      url: url,
+      key: entity.key,
+      type: entity.type,
+    });
   }
 }
