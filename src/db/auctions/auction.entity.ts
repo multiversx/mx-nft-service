@@ -252,9 +252,9 @@ export class AuctionEntity extends BaseEntity {
       ),
       startDate: DateUtils.getCurrentTimestamp(),
       endDate: parseInt(auction.deadline.valueOf().toString()),
-      identifier: `${auction.token.token_type.toString()}-${
-        auction.token.nonce
-      }`,
+      identifier: `${auction.token.token_type.toString()}-${nominateVal(
+        parseInt(auction.token.nonce.valueOf().toString()),
+      )}`,
       tags: tags ? `,${tags},` : '',
       blockHash: hash,
       marketplaceKey: marketplaceKey,
