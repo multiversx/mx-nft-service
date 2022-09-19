@@ -426,10 +426,10 @@ export class PersistenceService {
     );
   }
 
-  async updateFlag(identifier: string, flag: NftFlagsEntity): Promise<any> {
+  async updateFlag(flag: NftFlagsEntity): Promise<any> {
     return await this.execute(
       this.updateFlag.name,
-      this.nftsFlagsRepository.update(identifier, flag),
+      this.nftsFlagsRepository.updateFlag(flag),
     );
   }
 
