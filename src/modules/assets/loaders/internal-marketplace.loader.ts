@@ -1,15 +1,17 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { InternalMarketplaceRedisHandler } from './internal-marketplace.redis-handler';
-import { MarketplaceCollectionEntity } from 'src/db/marketplaces';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class InternalMarketplaceProvider extends BaseProvider<string> {
-  constructor(subdomainRedisHandler: InternalMarketplaceRedisHandler) {
+  constructor(
+    subdomainRedisHandler: InternalMarketplaceRedisHandler,
+    private persistenceService: PersistenceService,
+  ) {
     super(
       subdomainRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
@@ -17,20 +19,8 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(collections: string[]) {
-    const marketplace = await getRepository(MarketplaceCollectionEntity)
-      .createQueryBuilder('mc')
-      .select('mc.collectionIdentifier as collectionIdentifier')
-      .addSelect('m.name as name')
-      .addSelect('m.url as url')
-      .addSelect('m.address as address')
-      .addSelect('m.key as `key`')
-      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
-      .where(
-        `mc.collectionIdentifier IN(${collections.map(
-          (value) => `'${value}'`,
-        )})`,
-      )
-      .execute();
+    const marketplace =
+      await this.persistenceService.getMarketplaceByCollections(collections);
     return marketplace?.groupBy(
       (subdomainCollection: { collectionIdentifier: any }) =>
         subdomainCollection.collectionIdentifier,

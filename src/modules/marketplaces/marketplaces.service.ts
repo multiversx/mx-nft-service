@@ -1,22 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extentions';
 import { CollectionType } from '../assets/models/Collection.type';
-import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
-import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
-import { InjectRepository } from '@nestjs/typeorm';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplacesService {
   constructor(
-    @InjectRepository(MarketplaceRepository)
-    private marketplacesRepository: MarketplaceRepository,
-    @InjectRepository(MarketplaceCollectionsRepository)
-    private marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
+    private persistenceService: PersistenceService,
     private cacheService: MarketplacesCachingService,
   ) {}
 
@@ -82,7 +78,18 @@ export class MarketplacesService {
     let allMarketplaces = await this.getAllMarketplaces();
 
     const externalMarketplaces = allMarketplaces?.items?.filter(
-      (m) => m.type === MarketplaceTypeEnum.External,
+      (m) =>
+        m.type === MarketplaceTypeEnum.External && m.key !== ELRONDNFTSWAP_KEY,
+    );
+
+    return externalMarketplaces.map((m) => m.address);
+  }
+
+  async getMarketplaceByKey(marketplaceKey: string): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const externalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.key === marketplaceKey,
     );
 
     return externalMarketplaces.map((m) => m.address);
@@ -131,7 +138,7 @@ export class MarketplacesService {
 
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
     let [campaigns, count]: [MarketplaceEntity[], number] =
-      await this.marketplacesRepository.getMarketplaces();
+      await this.persistenceService.getMarketplaces();
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
@@ -143,7 +150,7 @@ export class MarketplacesService {
     address: string,
   ): Promise<Marketplace> {
     let marketplace: MarketplaceEntity[] =
-      await this.marketplaceCollectionsRepository.getMarketplaceByAddressAndCollection(
+      await this.persistenceService.getMarketplaceByAddressAndCollection(
         collection,
         address,
       );
@@ -154,7 +161,7 @@ export class MarketplacesService {
 
   async getMarketplaceByAddress(address: string): Promise<Marketplace> {
     let marketplace: MarketplaceEntity =
-      await this.marketplacesRepository.getMarketplaceByAddress(address);
+      await this.persistenceService.getMarketplaceByAddress(address);
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 
@@ -162,9 +169,7 @@ export class MarketplacesService {
     collection: string,
   ): Promise<Marketplace> {
     let marketplace: MarketplaceEntity[] =
-      await this.marketplaceCollectionsRepository.getMarketplaceByCollection(
-        collection,
-      );
+      await this.persistenceService.getMarketplaceByCollection(collection);
     return marketplace?.length > 0
       ? Marketplace.fromEntity(marketplace[0])
       : null;
@@ -174,15 +179,12 @@ export class MarketplacesService {
     marketplaceKey: string,
   ): Promise<string[]> {
     const collections =
-      await this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
-        marketplaceKey,
-      );
+      await this.persistenceService.getCollectionsByMarketplace(marketplaceKey);
     return collections.map((c) => c.collectionIdentifier);
   }
 
   async getAllCollectionsIdentifiersFromDb(): Promise<string[]> {
-    const collections =
-      await this.marketplaceCollectionsRepository.getAllCollections();
+    const collections = await this.persistenceService.getAllCollections();
     return collections.map((c) => c.collectionIdentifier);
   }
 }

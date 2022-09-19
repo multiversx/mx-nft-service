@@ -1,11 +1,8 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
-import { getLowestAuctionForIdentifiersAndMarketplace } from 'src/db/auctions/sql.queries';
-import { DateUtils } from 'src/utils/date-utils';
 import { Injectable, Scope } from '@nestjs/common';
 import { BaseProvider } from 'src/modules/common/base.loader';
-import { AuctionEntity } from 'src/db/auctions';
 import { LowestAuctionForMarketplaceRedisHandler } from './lowest-auctions-for-marketplace.redis-handler';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -13,6 +10,7 @@ import { LowestAuctionForMarketplaceRedisHandler } from './lowest-auctions-for-m
 export class LowestAuctionForMarketplaceProvider extends BaseProvider<string> {
   constructor(
     lowestAuctionProviderRedisHandler: LowestAuctionForMarketplaceRedisHandler,
+    private persistenceService: PersistenceService,
   ) {
     super(
       lowestAuctionProviderRedisHandler,
@@ -21,15 +19,12 @@ export class LowestAuctionForMarketplaceProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
-    const auctions = await getRepository(AuctionEntity).query(
-      getLowestAuctionForIdentifiersAndMarketplace(
-        endDate,
-        identifiers.map((value) => value.split('_')[0]),
-        identifiers[0].split('_')[1],
-      ),
+    const auctions =
+      await this.persistenceService.getLowestAuctionForIdentifiersAndMarketplace(
+        identifiers,
+      );
+    return auctions?.groupBy(
+      (auction: { identifierKey: any }) => auction.identifierKey,
     );
-
-    return auctions?.groupBy((auction) => auction.identifierKey);
   }
 }

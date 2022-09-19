@@ -6,7 +6,6 @@ import { AssetByIdentifierService } from 'src/modules/assets';
 import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { DeleteResult } from 'typeorm';
 import { MintEvent } from '../entities/auction/mint.event';
 import * as Redis from 'ioredis';
 
@@ -72,7 +71,7 @@ export class ElasticUpdatesEventsService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    const deletes: Promise<DeleteResult>[] = nftsToDelete.map((n) => {
+    const deletes: Promise<any>[] = nftsToDelete.map((n) => {
       return this.nftRarityService.deleteNftRarity(n);
     });
 

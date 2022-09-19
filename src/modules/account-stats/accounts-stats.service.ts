@@ -1,17 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ElrondApiService } from 'src/common';
-import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AccountsStatsService {
   constructor(
-    private accountsStatsRepository: AccountStatsRepository,
+    private persistenceService: PersistenceService,
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
@@ -35,10 +35,7 @@ export class AccountsStatsService {
     try {
       const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
       return this.accountStatsCachingService.getPublicStats(key, () =>
-        this.accountsStatsRepository.getPublicAccountStats(
-          address,
-          marketplaceKey,
-        ),
+        this.persistenceService.getPublicAccountStats(address, marketplaceKey),
       );
     } catch (err) {
       this.logger.error(
@@ -60,10 +57,7 @@ export class AccountsStatsService {
     try {
       const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
       return this.accountStatsCachingService.getStatsForOwner(key, () =>
-        this.accountsStatsRepository.getOnwerAccountStats(
-          address,
-          marketplaceKey,
-        ),
+        this.persistenceService.getOnwerAccountStats(address, marketplaceKey),
       );
     } catch (err) {
       this.logger.error(
@@ -86,7 +80,7 @@ export class AccountsStatsService {
     try {
       const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
       return this.accountStatsCachingService.getClaimableCount(key, () =>
-        this.accountsStatsRepository.getAccountClaimableCount(
+        this.persistenceService.getAccountClaimableCount(
           address,
           marketplaceKey,
         ),

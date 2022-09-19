@@ -20,6 +20,7 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
+import { DEADRARE_KEY, XOXNO_KEY } from 'src/utils/constants';
 import denominate from 'src/utils/formatters';
 import {
   BidEvent,
@@ -28,6 +29,7 @@ import {
   EndAuctionEvent,
   AuctionTokenEvent,
 } from '../entities/auction';
+import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
 import { ChangePriceEvent } from '../entities/auction/changePrice.event';
 import { UpdatePriceEvent } from '../entities/auction/updatePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
@@ -145,7 +147,9 @@ export class ExternalMarketplaceEventsService {
               }),
             );
             await this.feedEventsSenderService.sendBuyEvent(
-              buySftTopics,
+              buySftTopics.bid,
+              buySftTopics.currentWinner,
+              buySftTopics.boughtTokens,
               orderSft,
               buyAuction,
               buyMarketplace,
@@ -280,12 +284,12 @@ export class ExternalMarketplaceEventsService {
               parseInt(topicsUpdatePrice.auctionId, 16),
               updatePriceMarketplace.key,
             );
-          const [minBid] = await this.nftAbiService.getMinMaxAuction(
-            parseInt(topicsUpdatePrice.auctionId, 16),
+          let newPrice: string = await this.getNewPrice(
             updatePriceMarketplace,
+            topicsUpdatePrice,
           );
-          if (updatePriceAuction && minBid) {
-            this.updateAuctionPrice(updatePriceAuction, minBid.toFixed(), hash);
+          if (updatePriceAuction && newPrice) {
+            this.updateAuctionPrice(updatePriceAuction, newPrice, hash);
 
             this.auctionsService.updateAuction(
               updatePriceAuction,
@@ -293,8 +297,59 @@ export class ExternalMarketplaceEventsService {
             );
           }
           break;
+
+        case ExternalAuctionEventEnum.AcceptOffer:
+          const acceptOfferEvent = new AcceptOfferEvent(event);
+          const topicsAcceptOffer = acceptOfferEvent.getTopics();
+          const acceptOfferMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByAddress(
+              acceptOfferEvent.getAddress(),
+            );
+          this.logger.log(
+            `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
+          );
+          if (
+            acceptOfferMarketplace.key === XOXNO_KEY &&
+            topicsAcceptOffer.auctionId > 0
+          ) {
+            let updatePriceAuction =
+              await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+                topicsAcceptOffer.auctionId,
+                acceptOfferMarketplace.key,
+              );
+            updatePriceAuction.status = AuctionStatusEnum.Closed;
+            updatePriceAuction.modifiedDate = new Date(
+              new Date().toUTCString(),
+            );
+            this.auctionsService.updateAuction(
+              updatePriceAuction,
+              ExternalAuctionEventEnum.AcceptOffer,
+            );
+          }
+
+          break;
       }
     }
+  }
+
+  private async getNewPrice(
+    updatePriceMarketplace: Marketplace,
+    topicsUpdatePrice: {
+      collection: string;
+      nonce: string;
+      auctionId: string;
+      newBid: string;
+    },
+  ) {
+    if (updatePriceMarketplace.key === DEADRARE_KEY) {
+      const [minBid] = await this.nftAbiService.getMinMaxAuction(
+        parseInt(topicsUpdatePrice.auctionId, 16),
+        updatePriceMarketplace,
+      );
+      return minBid.toFixed();
+    }
+
+    return topicsUpdatePrice.newBid;
   }
 
   private updateAuctionPrice(

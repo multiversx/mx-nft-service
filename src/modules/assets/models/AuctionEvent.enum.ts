@@ -11,6 +11,16 @@ export enum ExternalAuctionEventEnum {
   Buy = 'buy',
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
+  AcceptOffer = 'acceptOffer',
+}
+
+export enum ElrondNftsSwapAuctionEventEnum {
+  NftSwap = 'nftSwap',
+  WithdrawSwap = 'withdrawSwap',
+  NftSwapUpdate = 'nftSwapUpdate',
+  NftSwapExtend = 'nftSwapExtend',
+  Purchase = 'purchase',
+  Bid = 'bid',
 }
 
 export enum NftEventEnum {

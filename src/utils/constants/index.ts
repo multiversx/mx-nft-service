@@ -10,3 +10,7 @@ export const NUMERIC_RGX = '^[0-9]*$';
 export const NUMERIC_ERROR = 'should contain only numeric characters';
 
 export const MYSQL_ALREADY_EXISTS = 1062;
+
+export const XOXNO_KEY = 'xoxno';
+export const DEADRARE_KEY = 'deadrare';
+export const ELRONDNFTSWAP_KEY = 'elrondnftswap';

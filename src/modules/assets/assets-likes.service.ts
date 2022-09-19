@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extentions';
-import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
+import { AssetLikeEntity } from 'src/db/assets';
 import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -13,13 +13,14 @@ import {
   Feed,
 } from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class AssetsLikesService {
   private redisClient: Redis.Redis;
   private readonly ttl = 6 * TimeConstants.oneHour;
   constructor(
-    private assetsLikesRepository: AssetsLikesRepository,
+    private persistenceService: PersistenceService,
     private isAssetLikedLikeProvider: IsAssetLikedProvider,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly logger: Logger,
@@ -39,7 +40,7 @@ export class AssetsLikesService {
     try {
       const cacheKey = this.getAssetLikedByCacheKey(address);
       const getAssetLiked = () =>
-        this.assetsLikesRepository.getAssetsLiked(limit, offset, address);
+        this.persistenceService.getAssetsLiked(limit, offset, address);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -61,7 +62,7 @@ export class AssetsLikesService {
     authorization?: string,
   ): Promise<boolean> {
     try {
-      const isLiked = await this.assetsLikesRepository.isAssetLiked(
+      const isLiked = await this.persistenceService.isAssetLiked(
         identifier,
         address,
       );
@@ -95,7 +96,7 @@ export class AssetsLikesService {
         address,
         exception: err,
       });
-      return await this.assetsLikesRepository.isAssetLiked(identifier, address);
+      return await this.persistenceService.isAssetLiked(identifier, address);
     }
   }
 
@@ -105,7 +106,7 @@ export class AssetsLikesService {
     authorization?: string,
   ): Promise<boolean> {
     try {
-      const deleteResults = await this.assetsLikesRepository.removeLike(
+      const deleteResults = await this.persistenceService.removeLike(
         identifier,
         address,
       );
@@ -153,7 +154,7 @@ export class AssetsLikesService {
     return await this.redisCacheService.getOrSet(
       this.redisClient,
       this.getAssetLikesCountCacheKey(identifier),
-      () => this.assetsLikesRepository.getAssetLikesCount(identifier),
+      () => this.persistenceService.getAssetLikesCount(identifier),
       this.ttl,
     );
   }
@@ -198,7 +199,7 @@ export class AssetsLikesService {
   ): Promise<any> {
     try {
       const assetLikeEntity = this.buildAssetLikeEntity(identifier, address);
-      return await this.assetsLikesRepository.addLike(assetLikeEntity);
+      return await this.persistenceService.addLike(assetLikeEntity);
     } catch (error) {
       await this.decrementLikesCount(identifier);
       throw error;

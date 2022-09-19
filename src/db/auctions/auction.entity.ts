@@ -3,7 +3,9 @@ import {
   AuctionStatusEnum,
   AuctionAbi,
   ExternalAuctionAbi,
+  ElrondSwapAuctionTypeEnum,
 } from 'src/modules/auctions/models';
+import { DateUtils } from 'src/utils/date-utils';
 import denominate, { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
@@ -100,54 +102,55 @@ export class AuctionEntity extends BaseEntity {
     hash: string,
     marketplaceKey: string,
   ) {
-    return auction
-      ? new AuctionEntity({
-          marketplaceAuctionId: auctionId,
-          collection: auction.auctioned_tokens.token_identifier
-            .valueOf()
-            .toString(),
-          nonce: parseInt(
-            auction.auctioned_tokens.token_nonce.valueOf().toString(),
-          ),
-          nrAuctionedTokens: parseInt(
-            auction.auctioned_tokens.amount.valueOf().toString(),
-          ),
-          status: AuctionStatusEnum.Running,
-          type: AuctionTypeEnum[auction.auction_type.valueOf().name],
-          paymentToken: auction.payment_token.valueOf().toString(),
-          paymentNonce: parseInt(auction.payment_nonce.valueOf().toString()),
-          ownerAddress: auction.original_owner.valueOf().toString(),
-          minBid: auction.min_bid.valueOf().toString(),
-          minBidDiff: auction.min_bid_diff.valueOf().toString(),
-          minBidDenominated: parseFloat(
-            denominate({
-              input: auction.min_bid.valueOf()?.toString(),
-              denomination: 18,
-              decimals: 2,
-              showLastNonZeroDecimal: true,
-            }).replace(',', ''),
-          ),
-          maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-          maxBidDenominated: parseFloat(
-            denominate({
-              input: auction?.max_bid?.valueOf()?.toString() || '0',
-              denomination: 18,
-              decimals: 2,
-              showLastNonZeroDecimal: true,
-            }).replace(',', ''),
-          ),
-          startDate: parseInt(auction.start_time.valueOf().toString()),
-          endDate: parseInt(auction.deadline.valueOf().toString()),
-          identifier: `${auction.auctioned_tokens.token_identifier
-            .valueOf()
-            .toString()}-${nominateVal(
-            parseInt(auction.auctioned_tokens.token_nonce.valueOf().toString()),
-          )}`,
-          tags: tags ? `,${tags},` : '',
-          blockHash: hash,
-          marketplaceKey: marketplaceKey,
-        })
-      : null;
+    if (!auction) {
+      return null;
+    }
+    return new AuctionEntity({
+      marketplaceAuctionId: auctionId,
+      collection: auction.auctioned_tokens.token_identifier
+        .valueOf()
+        .toString(),
+      nonce: parseInt(
+        auction.auctioned_tokens.token_nonce.valueOf().toString(),
+      ),
+      nrAuctionedTokens: parseInt(
+        auction.auctioned_tokens.amount.valueOf().toString(),
+      ),
+      status: AuctionStatusEnum.Running,
+      type: AuctionTypeEnum[auction.auction_type.valueOf().name],
+      paymentToken: auction.payment_token.valueOf().toString(),
+      paymentNonce: parseInt(auction.payment_nonce.valueOf().toString()),
+      ownerAddress: auction.original_owner.valueOf().toString(),
+      minBid: auction.min_bid.valueOf().toString(),
+      minBidDiff: auction.min_bid_diff.valueOf().toString(),
+      minBidDenominated: parseFloat(
+        denominate({
+          input: auction.min_bid.valueOf()?.toString(),
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      maxBid: auction.max_bid?.valueOf()?.toString() || '0',
+      maxBidDenominated: parseFloat(
+        denominate({
+          input: auction?.max_bid?.valueOf()?.toString() || '0',
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      startDate: parseInt(auction.start_time.valueOf().toString()),
+      endDate: parseInt(auction.deadline.valueOf().toString()),
+      identifier: `${auction.auctioned_tokens.token_identifier
+        .valueOf()
+        .toString()}-${nominateVal(
+        parseInt(auction.auctioned_tokens.token_nonce.valueOf().toString()),
+      )}`,
+      tags: tags ? `,${tags},` : '',
+      blockHash: hash,
+      marketplaceKey: marketplaceKey,
+    });
   }
 
   static fromExternalAuctionAbi(
@@ -157,49 +160,117 @@ export class AuctionEntity extends BaseEntity {
     hash: string,
     marketplaceKey: string,
   ) {
-    return auction
-      ? new AuctionEntity({
-          marketplaceAuctionId: auctionId,
-          collection: auction.auctioned_token_type.toString(),
-          nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
-          nrAuctionedTokens: parseInt(
-            auction.nr_auctioned_tokens.valueOf().toString(),
-          ),
-          status: AuctionStatusEnum.Running,
-          type: AuctionTypeEnum[auction.auction_type.valueOf().name],
-          paymentToken: auction.payment_token_type.toString(),
-          paymentNonce: parseInt(
-            auction.payment_token_nonce.valueOf().toString(),
-          ),
-          ownerAddress: auction.original_owner.valueOf().toString(),
-          minBid: auction.min_bid.valueOf().toString(),
-          // minBidDiff: auction.min_bid_diff.valueOf().toString(),
-          minBidDenominated: parseFloat(
-            denominate({
-              input: auction.min_bid.valueOf()?.toString(),
-              denomination: 18,
-              decimals: 2,
-              showLastNonZeroDecimal: true,
-            }).replace(',', ''),
-          ),
-          maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-          maxBidDenominated: parseFloat(
-            denominate({
-              input: auction?.max_bid?.valueOf()?.toString() || '0',
-              denomination: 18,
-              decimals: 2,
-              showLastNonZeroDecimal: true,
-            }).replace(',', ''),
-          ),
-          startDate: parseInt(auction.start_time.valueOf().toString()),
-          endDate: parseInt(auction.deadline.valueOf().toString()),
-          identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
-            parseInt(auction.auctioned_token_nonce.valueOf().toString()),
-          )}`,
-          tags: tags ? `,${tags},` : '',
-          blockHash: hash,
-          marketplaceKey: marketplaceKey,
-        })
-      : null;
+    if (!auction) return null;
+    return new AuctionEntity({
+      marketplaceAuctionId: auctionId,
+      collection: auction.auctioned_token_type.toString(),
+      nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
+      nrAuctionedTokens: parseInt(
+        auction.nr_auctioned_tokens.valueOf().toString(),
+      ),
+      status: AuctionStatusEnum.Running,
+      type: AuctionTypeEnum[auction.auction_type.valueOf().name],
+      paymentToken: auction.payment_token_type.toString(),
+      paymentNonce: parseInt(auction.payment_token_nonce.valueOf().toString()),
+      ownerAddress: auction.original_owner.valueOf().toString(),
+      minBid: auction.min_bid.valueOf().toString(),
+      // minBidDiff: auction.min_bid_diff.valueOf().toString(),
+      minBidDenominated: parseFloat(
+        denominate({
+          input: auction.min_bid.valueOf()?.toString(),
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      maxBid: auction.max_bid?.valueOf()?.toString() || '0',
+      maxBidDenominated: parseFloat(
+        denominate({
+          input: auction?.max_bid?.valueOf()?.toString() || '0',
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      startDate: parseInt(auction.start_time.valueOf().toString()),
+      endDate: parseInt(auction.deadline.valueOf().toString()),
+      identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
+        parseInt(auction.auctioned_token_nonce.valueOf().toString()),
+      )}`,
+      tags: tags ? `,${tags},` : '',
+      blockHash: hash,
+      marketplaceKey: marketplaceKey,
+    });
+  }
+
+  static fromWithdrawTopics(
+    topicsAuctionToken: {
+      originalOwner: string;
+      collection: string;
+      nonce: string;
+      auctionId: string;
+      nrAuctionTokens: string;
+      price: string;
+      paymentToken: string;
+      paymentTokenNonce: string;
+      auctionType: string;
+      deadline: number;
+    },
+    tags: string,
+    hash: string,
+    marketplaceKey: string,
+  ) {
+    if (!topicsAuctionToken) {
+      return null;
+    }
+    return new AuctionEntity({
+      marketplaceAuctionId: parseInt(topicsAuctionToken.auctionId, 16),
+      collection: topicsAuctionToken.collection,
+      nonce: parseInt(topicsAuctionToken.nonce, 16),
+      nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
+      status: AuctionStatusEnum.Running,
+      type:
+        topicsAuctionToken.auctionType === '' ||
+        parseInt(topicsAuctionToken.auctionType) ===
+          ElrondSwapAuctionTypeEnum.Auction
+          ? AuctionTypeEnum.Nft
+          : AuctionTypeEnum.SftOnePerPayment,
+      paymentToken: topicsAuctionToken.paymentToken,
+      paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
+      ownerAddress: topicsAuctionToken.originalOwner,
+      minBid: topicsAuctionToken.price,
+      // minBidDiff: auction.min_bid_diff.valueOf().toString(),
+      minBidDenominated: parseFloat(
+        denominate({
+          input: topicsAuctionToken.price?.toString(),
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      maxBid:
+        parseInt(topicsAuctionToken.auctionType) ===
+        ElrondSwapAuctionTypeEnum.Buy
+          ? topicsAuctionToken.price
+          : '0',
+      maxBidDenominated: parseFloat(
+        denominate({
+          input:
+            parseInt(topicsAuctionToken.auctionType) ===
+            ElrondSwapAuctionTypeEnum.Buy
+              ? topicsAuctionToken.price
+              : '0',
+          denomination: 18,
+          decimals: 2,
+          showLastNonZeroDecimal: true,
+        }).replace(',', ''),
+      ),
+      startDate: DateUtils.getCurrentTimestamp(),
+      endDate: topicsAuctionToken.deadline,
+      identifier: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+      tags: tags ? `,${tags},` : '',
+      blockHash: hash,
+      marketplaceKey: marketplaceKey,
+    });
   }
 }

@@ -17,7 +17,7 @@ import { AccountsStatsCachingService } from '../accounts-stats.caching.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplacesServiceMock } from 'src/modules/marketplaces/marketplaces.service.mock';
 
-describe('AccountsStatsService', () => {
+describe.skip('AccountsStatsService', () => {
   let service: AccountsStatsService;
   const ElrondApiServiceProvider = {
     provide: ElrondApiService,

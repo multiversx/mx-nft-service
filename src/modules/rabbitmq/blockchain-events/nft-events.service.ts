@@ -146,7 +146,9 @@ export class NftEventsService {
               }),
             );
             await this.feedEventsSenderService.sendBuyEvent(
-              buySftTopics,
+              buySftTopics.bid,
+              buySftTopics.currentWinner,
+              buySftTopics.boughtTokens,
               orderSft,
               buyAuction,
               buyMarketplace,

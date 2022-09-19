@@ -1,16 +1,17 @@
 import DataLoader = require('dataloader');
-import { getRepository } from 'typeorm';
-import '../../../utils/extentions';
-import { AssetLikeEntity } from 'src/db/assets';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetLikesProviderRedisHandler } from './asset-likes-count.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class AssetLikesProvider extends BaseProvider<string> {
-  constructor(assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler) {
+  constructor(
+    assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler,
+    private persistenceService: PersistenceService,
+  ) {
     super(
       assetLikesProviderRedisHandler,
       new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
@@ -18,15 +19,11 @@ export class AssetLikesProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const assetsLike = await getRepository(AssetLikeEntity)
-      .createQueryBuilder('al')
-      .select('al.identifier as identifier')
-      .addSelect('COUNT(al.identifier) as likesCount')
-      .where(`al.identifier IN(${identifiers.map((value) => `'${value}'`)})`, {
-        identifiers: identifiers,
-      })
-      .groupBy('al.identifier')
-      .execute();
-    return assetsLike?.groupBy((asset) => asset.identifier);
+    const assetsLike = await this.persistenceService.getBulkAssetLikesCount(
+      identifiers,
+    );
+    return assetsLike?.groupBy(
+      (asset: { identifier: any }) => asset.identifier,
+    );
   }
 }

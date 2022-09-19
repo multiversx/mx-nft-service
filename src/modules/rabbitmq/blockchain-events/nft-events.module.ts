@@ -5,9 +5,6 @@ import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
 import { ElrondCommunicationModule } from 'src/common';
 import { MinterEventsService } from './minter-events.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
-import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { CommonModule } from 'src/common.module';
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
@@ -30,6 +27,7 @@ import { ExternalMarketplaceEventsService } from './external-marketplaces-events
 import { FeedEventsSenderService } from './feed-events.service';
 import { UsdAmountModuleGraph } from 'src/modules/usdAmount/usd-amount.module';
 import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
+import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 
 @Module({
   imports: [
@@ -42,14 +40,13 @@ import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
-    TypeOrmModule.forFeature([NftsFlagsRepository]),
-    TypeOrmModule.forFeature([NftRarityRepository]),
     UsdAmountModuleGraph,
   ],
   providers: [
     NftEventsConsumer,
     NftEventsService,
     ExternalMarketplaceEventsService,
+    ElrondSwapMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,

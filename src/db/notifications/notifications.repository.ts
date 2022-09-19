@@ -1,22 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { NotificationEntity } from '.';
 import { NotificationStatusEnum } from 'src/modules/notifications/models';
 
-@Injectable()
-export class NotificationsServiceDb {
-  constructor(
-    @InjectRepository(NotificationEntity)
-    private notificationsRepository: Repository<NotificationEntity>,
-  ) {}
-
+@EntityRepository(NotificationEntity)
+export class NotificationsRepository extends Repository<NotificationEntity> {
   async getNotificationsForAddress(
     address: string,
   ): Promise<[NotificationEntity[], number]> {
     const defaultSize = 100;
-    return await this.notificationsRepository
-      .createQueryBuilder('not')
+    return await this.createQueryBuilder('not')
       .where(`not.ownerAddress = :address and not.status='active'`, {
         address: address,
       })
@@ -30,8 +22,7 @@ export class NotificationsServiceDb {
     merketplaceKey: string,
   ): Promise<[NotificationEntity[], number]> {
     const defaultSize = 100;
-    return await this.notificationsRepository
-      .createQueryBuilder('not')
+    return await this.createQueryBuilder('not')
       .where(
         `not.ownerAddress = :address AND not.status='active' AND not.marketplaceKey = :marketplaceKey`,
         {
@@ -47,8 +38,7 @@ export class NotificationsServiceDb {
   async getNotificationsByAuctionIds(
     auctionIds: number[],
   ): Promise<NotificationEntity[]> {
-    return await this.notificationsRepository
-      .createQueryBuilder('n')
+    return await this.createQueryBuilder('n')
       .where(`n.auctionId in (:...ids) and n.status='active'`, {
         ids: auctionIds,
       })
@@ -59,8 +49,7 @@ export class NotificationsServiceDb {
     auctionId: number,
     ownerAddress: string,
   ): Promise<NotificationEntity> {
-    return await this.notificationsRepository
-      .createQueryBuilder('n')
+    return await this.createQueryBuilder('n')
       .where(
         `n.auctionId =:id and n.status='active' and n.ownerAddress=:ownerAddress`,
         {
@@ -72,16 +61,16 @@ export class NotificationsServiceDb {
   }
 
   async saveNotification(notification: NotificationEntity) {
-    return await this.notificationsRepository.save(notification);
+    return await this.save(notification);
   }
 
   async saveNotifications(notifications: NotificationEntity[]) {
-    return await this.notificationsRepository.save(notifications);
+    return await this.save(notifications);
   }
 
   async updateNotification(notification: NotificationEntity) {
     notification.status = NotificationStatusEnum.Inactive;
     notification.modifiedDate = new Date(new Date().toUTCString());
-    return await this.notificationsRepository.save(notification);
+    return await this.save(notification);
   }
 }

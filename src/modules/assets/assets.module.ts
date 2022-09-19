@@ -9,12 +9,9 @@ import {
   AssetsProvider,
 } from '.';
 import { IpfsModule } from '../ipfs/ipfs.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AssetsLikesRepository } from 'src/db/assets';
 import { S3Service } from '../s3/s3.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { ElrondCommunicationModule } from 'src/common';
-import { AuctionsModuleDb } from 'src/db/auctions/auctions.module.db';
 import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
@@ -46,6 +43,7 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
+import { PersistenceModule } from 'src/common/persistence/persistence.module';
 
 @Module({
   providers: [
@@ -91,10 +89,9 @@ import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-
   imports: [
     ElrondCommunicationModule,
     CommonModule,
-    forwardRef(() => AuctionsModuleDb),
     forwardRef(() => AuctionsModuleGraph),
     IpfsModule,
-    TypeOrmModule.forFeature([AssetsLikesRepository]),
+    PersistenceModule,
   ],
   exports: [
     AssetsTransactionService,

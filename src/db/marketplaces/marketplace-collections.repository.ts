@@ -38,13 +38,31 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceColl
       .execute();
   }
 
+  async getMarketplaceByCollections(
+    collectionIdentifiers: string[],
+  ): Promise<any[]> {
+    return await this.createQueryBuilder('mc')
+      .select('mc.collectionIdentifier as collectionIdentifier')
+      .addSelect('m.name as name')
+      .addSelect('m.url as url')
+      .addSelect('m.address as address')
+      .addSelect('m.key as `key`')
+      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .where('mc.collectionIdentifier IN(:...collectionIdentifiers)', {
+        collectionIdentifiers: collectionIdentifiers,
+      })
+      .execute();
+  }
+
   async getCollectionsByMarketplace(
     marketplaceKey: string,
   ): Promise<MarketplaceCollectionEntity[]> {
     return await this.createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
-      .where(`m.key = '${marketplaceKey}'`)
+      .where(`m.key = :marketplaceKey`, {
+        marketplaceKey: marketplaceKey,
+      })
       .execute();
   }
 }

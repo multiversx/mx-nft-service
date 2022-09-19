@@ -8,6 +8,12 @@ export enum AuctionTypeEnum {
   SftOnePerPayment = 'SftOnePerPayment',
 }
 
+export enum ElrondSwapAuctionTypeEnum {
+  Auction,
+  Swap,
+  Buy,
+}
+
 registerEnumType(AuctionTypeEnum, {
   name: 'AuctionTypeEnum',
 });
