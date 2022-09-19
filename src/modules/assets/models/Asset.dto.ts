@@ -25,6 +25,8 @@ export class Asset {
   creatorAddress: string;
   @Field(() => Account, { nullable: true })
   creator: Account;
+  @Field(() => Account, { nullable: true })
+  artist: Account;
   @Field(() => String, { nullable: true })
   ownerAddress: string;
   @Field(() => Account, { nullable: true })
