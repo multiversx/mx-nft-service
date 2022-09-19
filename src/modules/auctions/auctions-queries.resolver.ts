@@ -34,7 +34,7 @@ import { Marketplace } from '../marketplaces/models';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 import { TokenFilter } from './models/Token.Filter';
 import { elrondConfig } from 'src/config';
-import { ELRONDNFTSWAP_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { XOXNO_KEY } from 'src/utils/constants';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -240,42 +240,25 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
 
   @ResolveField('marketplace', () => Marketplace)
   async marketplace(@Parent() auction: Auction) {
-    const {
-      marketplaceKey,
-      identifier,
-      collection,
-      nonce,
-      id,
-      marketplaceAuctionId,
-    } = auction;
+    const { marketplaceKey, identifier, id, marketplaceAuctionId } = auction;
+    let asset: Asset;
 
     if (!marketplaceKey) return null;
     const marketplace = await this.marketplaceProvider.load(marketplaceKey);
     const marketplaceValue = marketplace?.value;
     if (marketplaceValue?.length > 0 && marketplaceValue[0].key === XOXNO_KEY) {
-      const asset = await this.assetsProvider.load(identifier);
-      const assetValue = asset?.value;
-      return Marketplace.fromEntityForXoxno(
-        marketplaceValue[0],
-        identifier,
-        marketplaceAuctionId,
-        assetValue.type,
-      );
+      const assetResponse = await this.assetsProvider.load(identifier);
+      asset = assetResponse?.value;
     }
 
-    if (
-      marketplaceValue?.length > 0 &&
-      marketplaceValue[0].key === ELRONDNFTSWAP_KEY
-    ) {
-      return Marketplace.fromEntityForElrondSwap(
-        marketplaceValue[0],
-        collection,
-        marketplaceAuctionId,
-        nonce,
-      );
-    }
     return marketplaceValue?.length > 0
-      ? Marketplace.fromEntity(marketplaceValue[0], identifier, id)
+      ? Marketplace.fromEntity(
+          marketplaceValue[0],
+          identifier,
+          id,
+          marketplaceAuctionId,
+          asset?.type,
+        )
       : null;
   }
 
