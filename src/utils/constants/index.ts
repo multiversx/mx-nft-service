@@ -14,3 +14,4 @@ export const MYSQL_ALREADY_EXISTS = 1062;
 export const XOXNO_KEY = 'xoxno';
 export const DEADRARE_KEY = 'deadrare';
 export const ELRONDNFTSWAP_KEY = 'elrondnftswap';
+export const FRAMEIT_KEY = 'frameit';

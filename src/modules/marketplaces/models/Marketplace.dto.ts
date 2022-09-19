@@ -1,6 +1,13 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
+import {
+  DEADRARE_KEY,
+  ELRONDNFTSWAP_KEY,
+  FRAMEIT_KEY,
+  XOXNO_KEY,
+} from 'src/utils/constants';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
 export class Marketplace {
@@ -33,21 +40,68 @@ export class Marketplace {
     entity: MarketplaceEntity,
     identifier?: string,
     id?: number,
+    marketplaceAuctionId?: number,
+    nftType?: NftTypeEnum,
   ) {
-    let url = identifier ? `${entity.url}${identifier}` : entity.url;
-    if (entity.type === MarketplaceTypeEnum.Internal) {
-      url = identifier && id ? `${url}/auction/${id}` : url;
-    }
     if (!entity || Object.keys(entity).length <= 0) {
       return null;
     }
     return new Marketplace({
       address: entity.address,
       name: entity.name,
-      url: url,
+      url: Marketplace.getMarketplaceUrl(
+        identifier,
+        entity,
+        id,
+        marketplaceAuctionId,
+        nftType,
+      ),
       key: entity.key,
       type: entity.type,
     });
+  }
+
+  private static getMarketplaceUrl(
+    identifier: string,
+    entity: MarketplaceEntity,
+    id: number,
+    marketplaceAuctionId: number,
+    nftType?: NftTypeEnum,
+  ) {
+    if (identifier) {
+      switch (entity.key) {
+        case XOXNO_KEY:
+          return marketplaceAuctionId &&
+            nftType === NftTypeEnum.SemiFungibleESDT
+            ? `${entity.url}${identifier}-${marketplaceAuctionId}`
+            : `${entity.url}${identifier}`;
+
+        case ELRONDNFTSWAP_KEY:
+          const { collection, nonce } =
+            getCollectionAndNonceFromIdentifier(identifier);
+          return marketplaceAuctionId
+            ? `${entity.url}${marketplaceAuctionId}/${collection}/${parseInt(
+                nonce,
+              )}`
+            : `${entity.url}${identifier}`;
+
+        case FRAMEIT_KEY:
+          return marketplaceAuctionId
+            ? `${entity.url}${identifier}/${marketplaceAuctionId}`
+            : entity.url;
+
+        case DEADRARE_KEY:
+          return `${entity.url}${identifier}`;
+        default:
+          let url = identifier ? `${entity.url}${identifier}` : entity.url;
+          if (entity.type === MarketplaceTypeEnum.Internal) {
+            url = identifier && id ? `${url}/auction/${id}` : url;
+          }
+          return url;
+      }
+    }
+
+    return entity.url;
   }
 
   static fromEntityForXoxno(
