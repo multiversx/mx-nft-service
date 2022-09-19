@@ -60,6 +60,9 @@ export class FlagNftService {
     value: number,
   ) {
     try {
+      this.logger.log(
+        `Setting nsfw for collection '${collection}' with value ${value}`,
+      );
       const query = ElasticQuery.create()
         .withMustExistCondition('identifier')
         .withMustCondition(
@@ -181,8 +184,8 @@ export class FlagNftService {
 
   public async updateNftNSFWByAdmin(identifier: string, value) {
     try {
+      this.logger.log(`Setting nsfw for '${identifier}' with value ${value}`);
       await this.persistenceService.updateFlag(
-        identifier,
         new NftFlagsEntity({
           identifier: identifier,
           nsfw: value.toRounded(2),

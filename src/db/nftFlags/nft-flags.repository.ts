@@ -31,7 +31,7 @@ export class NftsFlagsRepository extends Repository<NftFlagsEntity> {
     await this.upsert(entities, { conflictPaths: ['identifier'] });
   }
 
-  async updateFlag(identifier: string, flag: NftFlagsEntity): Promise<any> {
-    await this.update({ identifier: identifier }, flag);
+  async updateFlag(flag: NftFlagsEntity): Promise<any> {
+    await this.upsert(flag, { conflictPaths: ['identifier'] });
   }
 }
