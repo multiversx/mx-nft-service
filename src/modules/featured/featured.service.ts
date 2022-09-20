@@ -9,6 +9,8 @@ import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { FeaturedCollectionsFilter } from './Featured-Collections.Filter';
+import { FeaturedCollectionTypeEnum } from './FeatureCollectionType.enum';
 
 @Injectable()
 export class FeaturedService {
@@ -57,18 +59,24 @@ export class FeaturedService {
   async getFeaturedCollections(
     limit: number = 10,
     offset: number,
+    filters: FeaturedCollectionsFilter,
   ): Promise<[Collection[], number]> {
     try {
       const cacheKey = this.getFeaturedCollectionsCacheKey(limit, offset);
       const getFeaturedCollections = () =>
         this.persistenceService.getFeaturedCollections(limit, offset);
-      const [featuredCollections, count] =
-        await this.redisCacheService.getOrSet(
-          this.redisClient,
-          cacheKey,
-          getFeaturedCollections,
-          30 * TimeConstants.oneMinute,
+      let [featuredCollections, count] = await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getFeaturedCollections,
+        30 * TimeConstants.oneMinute,
+      );
+      if (filters && filters.type) {
+        featuredCollections = featuredCollections.filter(
+          (x: { type: FeaturedCollectionTypeEnum }) => x.type === filters.type,
         );
+        count = featuredCollections?.length;
+      }
       const collections = await this.apiService.getCollectionsByIdentifiers(
         featuredCollections?.map((x) => x.identifier),
       );

@@ -488,6 +488,15 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+enum FeaturedCollectionTypeEnum {
+  Featured
+  Hero
+}
+
+input FeaturedCollectionsFilter {
+  type: FeaturedCollectionTypeEnum!
+}
+
 input Filter {
   field: String!
   op: Operation!
@@ -842,7 +851,7 @@ type Query {
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   contractInfo: ContractInfo!
-  featuredCollections(pagination: ConnectionArgs): CollectionResponse!
+  featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
