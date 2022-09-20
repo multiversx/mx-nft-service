@@ -14,7 +14,10 @@ import { TierEntity } from 'src/db/campaigns/tiers.entity';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
-import { FeaturedNftEntity } from 'src/db/featuredNfts/featured.entity';
+import {
+  FeaturedCollectionEntity,
+  FeaturedNftEntity,
+} from 'src/db/featuredNfts/featured.entity';
 import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
@@ -282,7 +285,7 @@ export class PersistenceService {
   async getFeaturedCollections(
     limit: number = 20,
     offset: number = 0,
-  ): Promise<[FeaturedNftEntity[], number]> {
+  ): Promise<[FeaturedCollectionEntity[], number]> {
     return await this.execute(
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),

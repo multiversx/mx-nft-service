@@ -19,8 +19,8 @@ import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
 import { SmartContractOwnerProvider } from '../assets/loaders/artists.loader';
 import { SmartContractOwnerRedisHandler } from '../assets/loaders/artists.redis-handler';
-import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
+import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 
 @Module({
   providers: [
