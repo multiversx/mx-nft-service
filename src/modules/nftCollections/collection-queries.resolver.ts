@@ -16,12 +16,15 @@ import { CollectionsFilter } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
+import { Address } from '@elrondnetwork/erdjs/out';
+import { SmartContractOwnerProvider } from '../assets/loaders/artists.loader';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
     private accountsProvider: AccountsProvider,
+    private smartContractOwnerProvider: SmartContractOwnerProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
     super();
@@ -57,6 +60,26 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account?.value ?? null, ownerAddress);
+  }
+
+  @ResolveField('artist', () => Account)
+  async artist(@Parent() auction: Collection) {
+    const { ownerAddress } = auction;
+
+    const address = new Address(ownerAddress);
+    let artistAddress: string = ownerAddress;
+
+    if (!ownerAddress) return null;
+
+    if (address.isContractAddress()) {
+      const response = await this.smartContractOwnerProvider.load(ownerAddress);
+      artistAddress = response?.value
+        ? response?.value?.ownerAddress
+        : ownerAddress;
+    }
+
+    const account = await this.accountsProvider.load(artistAddress);
+    return Account.fromEntity(account?.value, artistAddress);
   }
 
   @ResolveField('onSaleAssetsCount', () => Int)
