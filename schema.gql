@@ -35,6 +35,7 @@ input AddLikeArgs {
 }
 
 type Asset {
+  artist: Account
   attributes: String!
 
   """This will return only the running query!"""
@@ -338,6 +339,7 @@ input ChildFilter {
 }
 
 type Collection {
+  artist: Account
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean

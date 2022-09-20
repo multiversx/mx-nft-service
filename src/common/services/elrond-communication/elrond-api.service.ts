@@ -12,6 +12,7 @@ import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
 import { BatchUtils } from '@elrondnetwork/erdnest';
+import { Address } from '@elrondnetwork/erdjs/out';
 
 @Injectable()
 export class ElrondApiService {
@@ -466,6 +467,20 @@ export class ElrondApiService {
           symbol: token.ticker,
         })
       : undefined;
+  }
+
+  async getSmartContractOwner(
+    address: string,
+  ): Promise<{ address: string; ownerAddress: string }> {
+    let scAddress = new Address(address);
+    while (scAddress.isContractAddress()) {
+      const { ownerAddress } = await this.doGetGeneric(
+        this.getSmartContractOwner.name,
+        `accounts/${scAddress.bech32()}?fields=ownerAddress`,
+      );
+      scAddress = new Address(ownerAddress);
+    }
+    return { address, ownerAddress: scAddress.bech32() };
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
