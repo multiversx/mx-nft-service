@@ -340,6 +340,9 @@ input ChildFilter {
 
 type Collection {
   artist: Account
+
+  """This will return only the first 10 assets"""
+  assets: [Asset]
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
