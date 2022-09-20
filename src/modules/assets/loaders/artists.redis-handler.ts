@@ -12,13 +12,13 @@ export class SmartContractOwnerRedisHandler extends RedisKeyValueDataloaderHandl
 
   mapValues(
     returnValues: { key: string; value: any }[],
-    accountsAddreses: { [key: string]: any[] },
+    accountsAddresses: { [key: string]: any[] },
   ) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = accountsAddreses[item.key]
-          ? accountsAddreses[item.key][0]
+        item.value = accountsAddresses[item.key]
+          ? accountsAddresses[item.key][0]
           : null;
         redisValues.push(item);
       }
