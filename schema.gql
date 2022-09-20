@@ -38,7 +38,9 @@ type Asset {
   artist: Account
   attributes: String!
 
-  """This will return only the running query!"""
+  """
+  This will return only the running query!
+  """
   auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
   collection: ID!
@@ -65,12 +67,14 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
+  thumbnailUrl: String
+    @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String @deprecated(reason: "This field will be removed in the next version")
+  url: String
+    @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
   viewsCount: Int
 }
@@ -134,7 +138,9 @@ type AssetPageInfo {
 input AssetsFilter {
   collection: String
 
-  """This will work only with an owner address"""
+  """
+  This will work only with an owner address
+  """
   collections: [String!]
   creatorAddress: String
   identifier: String
@@ -245,10 +251,14 @@ input BidActionArgs {
 }
 
 input BuyRandomNftActionArgs {
-  """The campaign id where the user wants to buy the nft/s"""
+  """
+  The campaign id where the user wants to buy the nft/s
+  """
   campaignId: String!
 
-  """The smart contract address of the campaign"""
+  """
+  The smart contract address of the campaign
+  """
   minterAddress: String!
 
   """
@@ -256,10 +266,14 @@ input BuyRandomNftActionArgs {
   """
   price: String!
 
-  """The number of nfts the user wants to buy"""
+  """
+  The number of nfts the user wants to buy
+  """
   quantity: String
 
-  """The tier name on which the user wants to buy the nft"""
+  """
+  The tier name on which the user wants to buy the nft
+  """
   tier: String!
 }
 
@@ -286,7 +300,9 @@ type Campaign {
   totalNfts: Int!
   verified: Boolean!
 
-  """This is the timestamp when the whitelist period expires"""
+  """
+  This is the timestamp when the whitelist period expires
+  """
   whitelistExpire: Int!
 }
 
@@ -340,6 +356,7 @@ input ChildFilter {
 
 type Collection {
   artist: Account
+  assets: [Asset]
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -431,31 +448,47 @@ input CollectionStatsFilter {
 }
 
 input CollectionsFilter {
-  """Flag for can create or not on collection"""
+  """
+  Flag for can create or not on collection
+  """
   canCreate: Boolean
 
-  """Collection identifier"""
+  """
+  Collection identifier
+  """
   collection: String
 
-  """The user that has create role"""
+  """
+  The user that has create role
+  """
   creatorAddress: String
 
-  """The owner of the collection"""
+  """
+  The owner of the collection
+  """
   ownerAddress: String
   type: NftTypeEnum
 }
 
 input ConnectionArgs {
-  """Paginate after opaque cursor"""
+  """
+  Paginate after opaque cursor
+  """
   after: String
 
-  """Paginate before opaque cursor"""
+  """
+  Paginate before opaque cursor
+  """
   before: String
 
-  """Paginate first"""
+  """
+  Paginate first
+  """
   first: Int = 10
 
-  """Paginate last"""
+  """
+  Paginate last
+  """
   last: Int
 }
 
@@ -522,10 +555,14 @@ input HandleQuantityArgs {
 }
 
 input HistoryPagination {
-  """Paginate first"""
+  """
+  Paginate first
+  """
   first: Int = 10
 
-  """Timestamp from where to start"""
+  """
+  Timestamp from where to start
+  """
   timestamp: Int
 }
 
@@ -625,9 +662,12 @@ enum MediaTypeEnum {
 type Metadata {
   attributes: [AttributeType!]
   description: String
-  fileName: String @deprecated(reason: "This field will be removed in the next version")
-  fileType: String @deprecated(reason: "This field will be removed in the next version")
-  fileUri: String @deprecated(reason: "This field will be removed in the next version")
+  fileName: String
+    @deprecated(reason: "This field will be removed in the next version")
+  fileType: String
+    @deprecated(reason: "This field will be removed in the next version")
+  fileUri: String
+    @deprecated(reason: "This field will be removed in the next version")
 }
 
 type MintPrice {
@@ -817,7 +857,10 @@ enum Privacy {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
-  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
+  assetHistory(
+    filters: AssetHistoryFilter!
+    pagination: HistoryPagination
+  ): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(
     customFilters: [AuctionCustomFilter]
@@ -834,17 +877,40 @@ type Query {
     """
     sorting: [Sorting!]
   ): AuctionResponse!
-  auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
-  campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
+  auctionsSortByBids(
+    filters: FiltersExpression
+    grouping: Grouping
+    pagination: ConnectionArgs
+  ): AuctionResponse!
+  campaigns(
+    filters: CampaignsFilter
+    pagination: ConnectionArgs
+  ): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
-  collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  collections(
+    filters: CollectionsFilter
+    pagination: ConnectionArgs
+  ): CollectionResponse!
   contractInfo: ContractInfo!
   featuredCollections(pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
-  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
-  notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
-  orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
+  marketplaces(
+    filters: MarketplaceFilters
+    pagination: ConnectionArgs
+  ): MarketplacesResponse!
+  myClaimableAuctions(
+    filters: MyClaimableAuctionsFilters
+    pagination: ConnectionArgs
+  ): AuctionResponse!
+  notifications(
+    filters: NotificationsFilters
+    pagination: ConnectionArgs
+  ): NotificationsResponse!
+  orders(
+    filters: FiltersExpression
+    pagination: ConnectionArgs
+    sorting: [Sorting!]
+  ): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange(filters: TokenFilter): PriceRange!
   search(filters: SearchFilter!): SearchResponse!
@@ -1026,5 +1092,7 @@ type TrendingCollection {
   volume: Price
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
