@@ -18,6 +18,8 @@ import PageResponse from '../common/PageResponse';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractOwnerProvider } from '../assets/loaders/artists.loader';
+import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
+import { Asset } from '../assets/models';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -25,6 +27,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     private collectionsService: CollectionsService,
     private accountsProvider: AccountsProvider,
     private smartContractOwnerProvider: SmartContractOwnerProvider,
+    private assetProvider: AssetsCollectionsProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
     super();
@@ -100,5 +103,14 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     return new CollectionAsset({
       collectionIdentifer: collection,
     });
+  }
+
+  @ResolveField('assets', () => [Asset])
+  async assets(@Parent() collectionResponse: Collection): Promise<Asset[]> {
+    const { collection } = collectionResponse;
+
+    if (!collection) return null;
+    const assets = await this.assetProvider.load(collection);
+    return assets?.value;
   }
 }
