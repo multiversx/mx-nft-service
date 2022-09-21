@@ -29,6 +29,10 @@ export class OrdersService {
     private readonly rabbitPublisherService: CacheEventsPublisherService,
   ) {}
 
+  async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
+    return await this.persistenceService.getActiveOrderForAuction(auctionId);
+  }
+
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
       console.log({ createOrderArgs });
