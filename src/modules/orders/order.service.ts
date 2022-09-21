@@ -31,11 +31,12 @@ export class OrdersService {
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
+      console.log({ createOrderArgs });
       const activeOrder =
         await this.persistenceService.getActiveOrderForAuction(
           createOrderArgs.auctionId,
         );
-
+      console.log({ activeOrder });
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
