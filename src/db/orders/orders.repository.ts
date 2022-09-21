@@ -84,10 +84,12 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async saveOrder(order: OrderEntity) {
+    console.log('saveOrder', { order });
     return await this.save(order);
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
+    console.log('updateOrderWithStatus', { order });
     order.status = status;
     order.modifiedDate = new Date(new Date().toUTCString());
     return await this.save(order);
