@@ -77,7 +77,7 @@ export class ExternalMarketplaceEventsService {
             if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
               break;
             }
-            const order = await this.ordersService.createOrder(
+            const order = await this.ordersService.updateAuctionOrders(
               new CreateOrderArgs({
                 ownerAddress: topics.currentWinner,
                 auctionId: auction.id,
@@ -88,6 +88,7 @@ export class ExternalMarketplaceEventsService {
                 status: OrderStatusEnum.Active,
                 marketplaceKey: bidMarketplace.key,
               }),
+              activeOrder,
             );
 
             await this.feedEventsSenderService.sendBidEvent(
