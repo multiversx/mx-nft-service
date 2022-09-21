@@ -25,7 +25,7 @@ export class FeaturedCollectionsRepository extends Repository<FeaturedCollection
   async getFeaturedCollections(
     limit: number = 20,
     offset: number = 0,
-  ): Promise<[FeaturedNftEntity[], number]> {
+  ): Promise<[FeaturedCollectionEntity[], number]> {
     const featuredCollections = await this.createQueryBuilder(
       'featuredCollections',
     )

@@ -1,3 +1,4 @@
+import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('featured_nfts')
@@ -20,6 +21,9 @@ export class FeaturedCollectionEntity {
   @Column({ length: 25 })
   @Index()
   identifier: string;
+  @Column({ length: 25 })
+  @Index()
+  type: FeaturedCollectionTypeEnum;
 
   constructor(init?: Partial<FeaturedCollectionEntity>) {
     Object.assign(this, init);
