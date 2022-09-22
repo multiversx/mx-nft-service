@@ -9,15 +9,6 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { DateUtils } from 'src/utils/date-utils';
-import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
-import {
-  Filter,
-  FiltersExpression,
-  GroupBy,
-  Grouping,
-  Operation,
-  Operator,
-} from 'src/modules/common/filters/filtersTypes';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
@@ -58,10 +49,14 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Featured collection auctions',
       async () => {
-        const collections = await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
+        const collections =
+          await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
 
         for (const collection of collections) {
-          const auctionResult = await this.auctionsGetterService.getAuctionsByCollection(collection);
+          const auctionResult =
+            await this.auctionsGetterService.getAuctionsByCollection(
+              collection,
+            );
 
           await this.invalidateKey(
             `collectionAuctions:${collection}`,
@@ -79,7 +74,8 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Active auctions',
       async () => {
-        const auctionResult = await this.auctionsGetterService.getActiveAuctions();
+        const auctionResult =
+          await this.auctionsGetterService.getActiveAuctions();
 
         await this.invalidateKey(
           CacheInfo.ActiveAuctions.key,
@@ -96,7 +92,8 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Top auctions order by number of bids',
       async () => {
-        const result = await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
+        const result =
+          await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
 
         await this.invalidateKey(
           CacheInfo.TopAuctionsOrderByNoBids.key,

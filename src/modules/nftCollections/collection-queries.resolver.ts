@@ -57,6 +57,24 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     );
   }
 
+  @Query(() => CollectionResponse)
+  async trendingCollectionsQuery(
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ): Promise<CollectionResponse> {
+    const { limit, offset } = pagination.pagingParams();
+    const [collections, count] =
+      await this.collectionsService.getTrendingCollections(offset, limit);
+
+    return PageResponse.mapResponse<Collection>(
+      collections || [],
+      pagination,
+      count || 0,
+      offset,
+      limit,
+    );
+  }
+
   @ResolveField('owner', () => Account)
   async owner(@Parent() auction: Collection) {
     const { ownerAddress } = auction;

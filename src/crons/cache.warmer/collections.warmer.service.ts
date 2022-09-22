@@ -38,6 +38,23 @@ export class CollectionsWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async handleCollectionsOrderByNoBids() {
+    await Locker.lock(
+      'Trending collections order by number of running auctions',
+      async () => {
+        const result =
+          await this.collectionsService.getAllTrendingCollections();
+        await this.invalidateKey(
+          CacheInfo.trendingCollections.key,
+          result,
+          CacheInfo.trendingCollections.ttl,
+        );
+      },
+      true,
+    );
+  }
+
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
     await this.refreshCacheKey(key, ttl);

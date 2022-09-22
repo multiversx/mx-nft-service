@@ -863,6 +863,7 @@ type Query {
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
   trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
+  trendingCollectionsQuery(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {

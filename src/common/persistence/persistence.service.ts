@@ -692,6 +692,20 @@ export class PersistenceService {
     );
   }
 
+  async getTrendingCollections(): Promise<any[]> {
+    return await this.execute(
+      this.getTrendingCollections.name,
+      this.auctionsRepository.getTrendingCollections(),
+    );
+  }
+
+  async getTrendingCollectionsCount(): Promise<number> {
+    return await this.execute(
+      this.getTrendingCollectionsCount.name,
+      this.auctionsRepository.getTrendingCollectionsCount(),
+    );
+  }
+
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {

@@ -27,12 +27,14 @@ import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class CollectionsService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
     private cacheService: CachingService,
@@ -127,6 +129,32 @@ export class CollectionsService {
       return await this.getAllCollections(filters, apiQuery);
     }
     return await this.getFilteredCollections(offset, limit, filters);
+  }
+
+  async getTrendingCollections(
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[Collection[], number]> {
+    let [collections, count] = await this.getAllTrendingCollections();
+
+    collections = collections?.slice(offset, offset + limit);
+
+    return [collections, count];
+  }
+
+  async getAllTrendingCollections(): Promise<[Collection[], number]> {
+    const [trendingCollections] = await Promise.all([
+      this.persistenceService.getTrendingCollections(),
+      this.persistenceService.getTrendingCollectionsCount(),
+    ]);
+    const mappedCollections = [];
+    const [collections] = await this.getFullCollections();
+    for (const trendingCollection of trendingCollections) {
+      mappedCollections.push(
+        collections.find((c) => c.collection === trendingCollection.collection),
+      );
+    }
+    return [mappedCollections, mappedCollections.length];
   }
 
   private async getAllCollections(
