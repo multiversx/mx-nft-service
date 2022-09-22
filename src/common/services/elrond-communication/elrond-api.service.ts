@@ -216,6 +216,16 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsCount.name, url);
   }
 
+  async getNftsAndCount(
+    nftsQuery: string = '',
+    nftsCountQuery = '',
+  ): Promise<[Nft[], number]> {
+    return [
+      await this.getAllNfts(nftsQuery),
+      await this.getNftsCount(nftsCountQuery),
+    ];
+  }
+
   async getNftsCountForCollection(
     query: string = '',
     collection,
