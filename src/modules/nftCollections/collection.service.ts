@@ -242,9 +242,15 @@ export class CollectionsService {
     const collections = await this.apiService.getCollections(
       new CollectionQuery().addPageSize(page, size).build(),
     );
-    return collections?.map((collection) =>
-      Collection.fromCollectionApi(collection),
-    );
+    return collections?.map((collection) => this.mapCollection(collection));
+  }
+
+  private mapCollection(collection: CollectionApi): Collection {
+    const ownerAddress = new Address(collection.owner);
+    const artistAddress = !ownerAddress.isContractAddress()
+      ? collection.owner
+      : '';
+    return Collection.fromCollectionApi(collection, artistAddress);
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
@@ -274,6 +280,7 @@ export class CollectionsService {
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
         if (collection.collection == collectionNftsCount.key) {
+          collection.nftsCount = collectionNftsCount.value;
           collection.collectionAsset = new CollectionAsset({
             collectionIdentifer: collectionNftsCount.key,
             totalCount: collectionNftsCount.value,

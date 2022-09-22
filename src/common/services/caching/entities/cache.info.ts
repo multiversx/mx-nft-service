@@ -54,6 +54,16 @@ export class CacheInfo {
     ttl: 5 * TimeConstants.oneMinute,
   };
 
+  static ActualArtist: CacheInfo = {
+    key: 'actual_artist',
+    ttl: 5 * TimeConstants.oneMinute,
+  };
+
+  static XoxnoScCount: CacheInfo = {
+    key: 'xoxno_sc_count',
+    ttl: 5 * TimeConstants.oneMinute,
+  };
+
   static NftTags: CacheInfo = {
     key: 'nftTags',
     ttl: 5 * TimeConstants.oneMinute,

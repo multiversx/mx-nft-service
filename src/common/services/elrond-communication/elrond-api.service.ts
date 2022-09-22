@@ -8,11 +8,16 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { constants, elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
-import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
+import {
+  ApiNetworkProvider,
+  TransactionOnNetwork,
+} from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
 import { BatchUtils } from '@elrondnetwork/erdnest';
-import { Address } from '@elrondnetwork/erdjs/out';
+import { Address, Transaction } from '@elrondnetwork/erdjs/out';
+import { SmartContractApi } from './models/smart-contract.api';
+import { Strings } from 'aws-sdk/clients/opsworks';
 
 @Injectable()
 export class ElrondApiService {
@@ -125,6 +130,23 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getAddressUsername.name,
       `accounts/${address}?fields=username`,
+    );
+  }
+
+  async getAccountSmartContracts(
+    address: string,
+    size: number,
+  ): Promise<SmartContractApi[]> {
+    return await this.doGetGeneric(
+      this.getAccountSmartContracts.name,
+      `accounts/${address}/contracts?size=${size}`,
+    );
+  }
+
+  async getAccountSmartContractsCount(address: string): Promise<number> {
+    return await this.doGetGeneric(
+      this.getAccountSmartContracts.name,
+      `accounts/${address}/contracts/count`,
     );
   }
 
@@ -491,6 +513,10 @@ export class ElrondApiService {
       scAddress = new Address(ownerAddress);
     }
     return { address, ownerAddress: scAddress.bech32() };
+  }
+
+  async getTransactionByHash(txHash: string): Promise<TransactionOnNetwork> {
+    return await this.apiProvider.getTransaction(txHash);
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
