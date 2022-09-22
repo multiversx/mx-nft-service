@@ -119,7 +119,6 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     const assets = await this.assetProvider.load(
       `${collection}_${offset}_${limit}`,
     );
-    console.log(assets);
     const assetsValue = assets?.value;
     return PageResponse.mapResponse<Asset>(
       assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)),
