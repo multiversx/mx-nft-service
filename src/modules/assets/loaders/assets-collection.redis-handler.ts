@@ -20,7 +20,7 @@ export class AssetsCollectionRedisHandler extends RedisKeyValueDataloaderHandler
     for (const item of returnValues) {
       if (item.value === null) {
         item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key]?.map((n) => Asset.fromNft(n))
+          ? assetsIdentifiers[item.key]
           : null;
 
         finalNfts.push(item);

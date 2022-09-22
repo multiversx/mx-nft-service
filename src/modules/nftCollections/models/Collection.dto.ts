@@ -1,7 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
-import { Asset } from 'src/modules/assets/models';
+import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
@@ -22,11 +22,11 @@ export class Collection {
   artist: Account;
   @Field(() => CollectionAsset, { nullable: true })
   collectionAsset: CollectionAsset;
-  @Field(() => [Asset], {
-    nullable: 'itemsAndList',
+  @Field(() => AssetsResponse, {
+    nullable: true,
     description: 'This will return only the first 10 assets',
   })
-  assets: Asset[];
+  assets: AssetsResponse;
   @Field()
   name: string;
   @Field(() => Int)

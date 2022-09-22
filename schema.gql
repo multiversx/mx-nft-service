@@ -342,7 +342,7 @@ type Collection {
   artist: Account
 
   """This will return only the first 10 assets"""
-  assets: [Asset]
+  assets(pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
