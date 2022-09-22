@@ -19,7 +19,8 @@ import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractOwnerProvider } from '../assets/loaders/artists.loader';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
-import { Asset } from '../assets/models';
+import { Asset, AssetsResponse } from '../assets/models';
+import { Nft } from 'src/common';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -105,12 +106,27 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     });
   }
 
-  @ResolveField('assets', () => [Asset])
-  async assets(@Parent() collectionResponse: Collection): Promise<Asset[]> {
+  @ResolveField('assets', () => AssetsResponse)
+  async assets(
+    @Parent() collectionResponse: Collection,
+    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    pagination: ConnectionArgs,
+  ): Promise<AssetsResponse> {
     const { collection } = collectionResponse;
+    const { limit, offset } = pagination.pagingParams();
 
     if (!collection) return null;
-    const assets = await this.assetProvider.load(collection);
-    return assets?.value;
+    const assets = await this.assetProvider.load(
+      `${collection}_${offset}_${limit}`,
+    );
+    console.log(assets);
+    const assetsValue = assets?.value;
+    return PageResponse.mapResponse<Asset>(
+      assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)),
+      pagination,
+      assetsValue?.count ?? 0,
+      offset,
+      limit,
+    );
   }
 }
