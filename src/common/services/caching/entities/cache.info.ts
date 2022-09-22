@@ -29,6 +29,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneMinute * 10,
   };
 
+  static trendingCollections: CacheInfo = {
+    key: 'trendingCollections',
+    ttl: TimeConstants.oneHour,
+  };
+
   static AuctionsEndingInAMonth: CacheInfo = {
     key: 'auctionsEndingInAMonth',
     ttl: TimeConstants.oneHour,
