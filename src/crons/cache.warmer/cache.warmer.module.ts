@@ -11,6 +11,7 @@ import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { TokensWarmerService } from './tokens.warmer.service';
+import { XoxnoArtistsWarmerService } from './xoxno-minter-owners.warmer.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TokensWarmerService } from './tokens.warmer.service';
     CollectionsWarmerService,
     AuctionsWarmerService,
     TokensWarmerService,
+    XoxnoArtistsWarmerService,
   ],
   exports: [CommonModule],
 })
