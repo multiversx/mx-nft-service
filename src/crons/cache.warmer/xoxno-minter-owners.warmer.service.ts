@@ -23,7 +23,7 @@ export class XoxnoArtistsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handleArtistMappingForXoxno() {
     await Locker.lock(
       'Xoxno Minter invalidations',
@@ -35,7 +35,7 @@ export class XoxnoArtistsWarmerService {
           async (scOwner) =>
             await this.invalidateKey(
               `${CacheInfo.Artist.key}_${scOwner.address}`,
-              scOwner,
+              { key: scOwner.address, value: scOwner },
               5 * TimeConstants.oneHour,
             ),
         );
@@ -64,7 +64,6 @@ export class XoxnoArtistsWarmerService {
         address: contract.address,
         owner: transaction.sender.bech32(),
       });
-      console.log(contract.address);
     }
 
     return response;

@@ -95,9 +95,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
     if (address.isContractAddress()) {
       const response = await this.artistAddressProvider.load(ownerAddress);
-      artistAddress = response?.value
-        ? response?.value?.ownerAddress
-        : ownerAddress;
+      artistAddress = response?.value ? response?.value?.owner : ownerAddress;
     }
 
     const account = await this.accountsProvider.load(artistAddress);

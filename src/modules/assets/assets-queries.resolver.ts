@@ -192,11 +192,8 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
     if (address.isContractAddress()) {
       const response = await this.artistAddressProvider.load(creatorAddress);
-      artistAddress = response?.value
-        ? response?.value?.ownerAddress
-        : creatorAddress;
+      artistAddress = response?.value ? response?.value?.owner : creatorAddress;
     }
-
     const account = await this.accountsProvider.load(artistAddress);
     return Account.fromEntity(account?.value, artistAddress);
   }
