@@ -22,7 +22,7 @@ export class CollectionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCollectionsInvalidations() {
     await Locker.lock(
       'Collections tokens invalidations',
@@ -38,7 +38,7 @@ export class CollectionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCollectionsOrderByNoBids() {
     await Locker.lock(
       'Trending collections order by number of running auctions',

@@ -22,6 +22,6 @@ export class AuctionsOrdersProvider extends BaseProvider<string> {
     const orders = await this.persistenceService.getOrdersByComposedKeys(
       auctionIds,
     );
-    return orders?.groupBy((orders) => orders.batchKey);
+    return orders?.groupBy((orders) => orders.batchKey, false);
   }
 }

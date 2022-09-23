@@ -21,6 +21,7 @@ import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
+import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 
 @Module({
   providers: [
@@ -44,6 +45,7 @@ import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
     ArtistAddressRedisHandler,
     AssetsCollectionsProvider,
     AssetsCollectionRedisHandler,
+    SmartContractArtistsService,
   ],
   imports: [
     forwardRef(() => ElrondCommunicationModule),

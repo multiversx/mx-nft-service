@@ -80,6 +80,7 @@ export class Collection {
       ? null
       : new Collection({
           collection: collectionApi.collection,
+          artistAddress: artistAddress,
           type: NftTypeEnum[collectionApi.type],
           ticker: collectionApi.ticker,
           ownerAddress: collectionApi.owner,

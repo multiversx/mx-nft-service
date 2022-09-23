@@ -39,7 +39,7 @@ export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedis
     );
 
     const nftsCountResponse = await Promise.all(getCountPromises);
-    return nftsCountResponse?.groupBy((item) => item.key);
+    return nftsCountResponse?.groupBy((item) => item.key, false);
   }
 
   private getQueryForCollection(identifier: string): string {

@@ -1,6 +1,6 @@
 declare global {
   interface Array<T> {
-    groupBy(predicate: (item: T) => any): any;
+    groupBy(predicate: (item: T) => any, asArray: boolean): any;
     remove(element: T): number;
     sorted(predicate?: (element: T) => number): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
@@ -12,7 +12,9 @@ declare global {
   }
 }
 
-Array.prototype.distinct = function <TCollection, TResult>(predicate?: (element: TCollection) => TResult): TCollection[] {
+Array.prototype.distinct = function <TCollection, TResult>(
+  predicate?: (element: TCollection) => TResult,
+): TCollection[] {
   if (!predicate) {
     // @ts-ignore
     return [...new Set(this)];

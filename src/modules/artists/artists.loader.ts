@@ -25,6 +25,6 @@ export class ArtistAddressProvider extends BaseProvider<string> {
     );
 
     const accountResponse = await Promise.all(accountsPromises);
-    return accountResponse?.groupBy((item) => item.address);
+    return accountResponse?.groupBy((item) => item.address, false);
   };
 }

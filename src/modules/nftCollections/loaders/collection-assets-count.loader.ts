@@ -28,12 +28,10 @@ export class CollectionAssetsCountProvider extends BaseProvider<string> {
     );
 
     const nftsCountResponse = await Promise.all(getCountPromises);
-    return nftsCountResponse?.groupBy((item) => item.key);
+    return nftsCountResponse?.groupBy((item) => item.key, false);
   }
 
   private getQueryForCollection(identifier: string): string {
-    return new AssetsQuery()
-      .addCollection(identifier)
-      .build();
+    return new AssetsQuery().addCollection(identifier).build();
   }
 }
