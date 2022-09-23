@@ -12,6 +12,18 @@ type Account {
   socialLinks: [SocialLink!]
 }
 
+type AccountEdge {
+  cursor: String
+  node: Account
+}
+
+type AccountPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 type AccountStats {
   address: ID
   auctions: String
@@ -32,6 +44,22 @@ input AccountStatsFilter {
 
 input AddLikeArgs {
   identifier: String!
+}
+
+input ArtistFilters {
+  sorting: ArtistSortingEnum!
+}
+
+type ArtistResponse {
+  edges: [AccountEdge!]
+  pageData: PageData
+  pageInfo: AccountPageInfo
+}
+
+enum ArtistSortingEnum {
+  MostActive
+  MostFollowed
+  Trending
 }
 
 type Asset {
@@ -829,6 +857,7 @@ enum Privacy {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
+  artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(
