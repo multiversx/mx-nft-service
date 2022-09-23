@@ -44,8 +44,8 @@ import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 import { PersistenceModule } from 'src/common/persistence/persistence.module';
-import { SmartContractOwnerProvider } from './loaders/artists.loader';
-import { SmartContractOwnerRedisHandler } from './loaders/artists.redis-handler';
+import { ArtistAddressProvider } from '../artists/artists.loader';
+import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 
 @Module({
   providers: [
@@ -78,8 +78,8 @@ import { SmartContractOwnerRedisHandler } from './loaders/artists.redis-handler'
     AssetsQueriesResolver,
     AssetsMutationsResolver,
     AssetAuctionResolver,
-    SmartContractOwnerProvider,
-    SmartContractOwnerRedisHandler,
+    ArtistAddressProvider,
+    ArtistAddressRedisHandler,
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,

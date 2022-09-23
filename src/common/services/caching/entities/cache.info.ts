@@ -54,9 +54,9 @@ export class CacheInfo {
     ttl: 5 * TimeConstants.oneMinute,
   };
 
-  static ActualArtist: CacheInfo = {
-    key: 'actual_artist',
-    ttl: 5 * TimeConstants.oneMinute,
+  static Artist: CacheInfo = {
+    key: 'artist',
+    ttl: 12 * TimeConstants.oneHour,
   };
 
   static XoxnoScCount: CacheInfo = {

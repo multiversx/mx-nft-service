@@ -1,16 +1,16 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
 import { ElrondApiService } from 'src/common';
-import { BaseProvider } from '../../common/base.loader';
-import { SmartContractOwnerRedisHandler } from './artists.redis-handler';
+import { BaseProvider } from '../common/base.loader';
+import { ArtistAddressRedisHandler } from './artists.redis-handler';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
-export class SmartContractOwnerProvider extends BaseProvider<string> {
+export class ArtistAddressProvider extends BaseProvider<string> {
   constructor(
     private elrondApiService: ElrondApiService,
-    accountsRedisHandler: SmartContractOwnerRedisHandler,
+    accountsRedisHandler: ArtistAddressRedisHandler,
   ) {
     super(
       accountsRedisHandler,

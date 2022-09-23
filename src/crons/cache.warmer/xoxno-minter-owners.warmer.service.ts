@@ -34,7 +34,7 @@ export class XoxnoArtistsWarmerService {
         scOwners?.map(
           async (scOwner) =>
             await this.invalidateKey(
-              `${CacheInfo.ActualArtist.key}_${scOwner.address}`,
+              `${CacheInfo.Artist.key}_${scOwner.address}`,
               scOwner,
               5 * TimeConstants.oneHour,
             ),
@@ -45,36 +45,51 @@ export class XoxnoArtistsWarmerService {
   }
 
   private async getActualOwnerForXoxno(address: string) {
-    const cachedScCount = await this.getXoxnoScCount(address);
-    const smartContractsCount = await this.getXoxnoScCount(address);
-    console.log({ cachedScCount, smartContractsCount });
-    if (cachedScCount !== smartContractsCount) {
-      const smartContracts = await this.elrondApi.getAccountSmartContracts(
-        address,
-        smartContractsCount,
+    const cachedScCount = await this.getCachedXoxnoScCount();
+    const smartContractsCount = await this.getOrSetXoxnoScCount(address);
+    if (cachedScCount || cachedScCount === smartContractsCount) return;
+    const smartContracts = await this.elrondApi.getAccountSmartContracts(
+      address,
+      smartContractsCount,
+    );
+
+    const response = [];
+    for (const contract of smartContracts) {
+      const cachedArtist = await this.getArtistAddress(contract.address);
+      if (cachedArtist) continue;
+      const transaction = await this.elrondApi.getTransactionByHash(
+        contract.deployTxHash,
       );
-
-      const response = [];
-      for (const contract of smartContracts) {
-        const transaction = await this.elrondApi.getTransactionByHash(
-          contract.deployTxHash,
-        );
-        response.push({
-          address: contract.address,
-          owner: transaction.sender.bech32(),
-        });
-      }
-
-      return response;
+      response.push({
+        address: contract.address,
+        owner: transaction.sender.bech32(),
+      });
+      console.log(contract.address);
     }
+
+    return response;
   }
 
-  private async getXoxnoScCount(address: string) {
+  private async getOrSetXoxnoScCount(address: string) {
     return this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.XoxnoScCount.key,
       async () => this.elrondApi.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,
+    );
+  }
+
+  private async getArtistAddress(address: string) {
+    return this.cacheService.getCache(
+      this.redisClient,
+      `${CacheInfo.Artist.key}_${address}`,
+    );
+  }
+
+  private async getCachedXoxnoScCount() {
+    return this.cacheService.getCache(
+      this.redisClient,
+      CacheInfo.XoxnoScCount.key,
     );
   }
 
