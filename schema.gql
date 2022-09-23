@@ -862,8 +862,7 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
-  trendingCollectionsQuery(pagination: ConnectionArgs): CollectionResponse!
+  trendingCollections(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {
@@ -1027,16 +1026,6 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
-}
-
-type TrendingCollection {
-  floorPrice: Price
-  identifier: ID!
-  imageUrl: String
-  name: String
-  percentage: String
-  verified: Boolean!
-  volume: Price
 }
 
 """The `Upload` scalar type represents a file upload."""

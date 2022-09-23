@@ -58,7 +58,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @Query(() => CollectionResponse)
-  async trendingCollectionsQuery(
+  async trendingCollections(
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
