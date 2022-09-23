@@ -503,7 +503,7 @@ export class ElrondApiService {
 
   async getSmartContractOwner(
     address: string,
-  ): Promise<{ address: string; ownerAddress: string }> {
+  ): Promise<{ address: string; owner: string }> {
     let scAddress = new Address(address);
     while (scAddress.isContractAddress()) {
       const { ownerAddress } = await this.doGetGeneric(
@@ -512,7 +512,7 @@ export class ElrondApiService {
       );
       scAddress = new Address(ownerAddress);
     }
-    return { address, ownerAddress: scAddress.bech32() };
+    return { address, owner: scAddress.bech32() };
   }
 
   async getTransactionByHash(txHash: string): Promise<TransactionOnNetwork> {
