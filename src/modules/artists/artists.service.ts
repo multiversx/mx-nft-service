@@ -17,14 +17,16 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    if (filters.sorting === ArtistSortingEnum.MostFollowed)
+    if (filters.sorting === ArtistSortingEnum.MostFollowed) {
       return await this.getMostFollowed(page, size);
-    if (filters.sorting === ArtistSortingEnum.MostActive)
+    }
+    if (filters.sorting === ArtistSortingEnum.MostActive) {
       return await this.getMostActive(page, size);
+    }
     return await this.getTrending(page, size);
   }
 
-  async getMostFollowed(
+  private async getMostFollowed(
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
@@ -32,20 +34,20 @@ export class ArtistsService {
     return [accounts?.map((account) => Account.fromEntity(account)), 1000];
   }
 
-  async getMostActive(
+  private async getMostActive(
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
     const [collections] = await this.collectionsService.getFullCollections();
     let grouped = collections
       .groupBy((x) => x.artistAddress, true)
-      .map((group) => ({
+      .map((group: { key: any; values: any[] }) => ({
         artist: group.key,
         nfts: group.values.reduce((sum: any, value: { nftsCount: any }) => {
           return sum + value.nftsCount;
         }, 0),
       }))
-      .sortedDescending((x) => x.nfts);
+      .sortedDescending((x: { nfts: any }) => x.nfts);
 
     const count = grouped.length;
     grouped = grouped?.slice(page, page + size);
@@ -58,7 +60,7 @@ export class ArtistsService {
     ];
   }
 
-  async getTrending(
+  private async getTrending(
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
