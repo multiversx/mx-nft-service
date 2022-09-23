@@ -20,11 +20,11 @@ export class ArtistAddressProvider extends BaseProvider<string> {
 
   getData = async (keys: string[]): Promise<any[]> => {
     const uniqueAddresses = [...new Set(keys)];
-    const accountsPromises = uniqueAddresses.map((address) =>
+    const scPromises = uniqueAddresses.map((address) =>
       this.elrondApiService.getSmartContractOwner(address),
     );
 
-    const accountResponse = await Promise.all(accountsPromises);
-    return accountResponse?.groupBy((item) => item.address, false);
+    const smartContractsResponse = await Promise.all(scPromises);
+    return smartContractsResponse?.groupBy((item) => item.address, false);
   };
 }

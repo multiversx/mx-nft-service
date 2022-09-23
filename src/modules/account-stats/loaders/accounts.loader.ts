@@ -33,12 +33,9 @@ export class AccountsProvider extends BaseProvider<string> {
   }
 
   private async getSingleAccountQuery(keys: string[]): Promise<any[]> {
-    const uniqueAddresses = [...new Set(keys)];
-    const accountsPromises = uniqueAddresses.map((address) =>
-      this.accountsService.getProfile(address),
+    const accountResponse = await this.accountsService.getAccountsForAddresses(
+      keys,
     );
-
-    const accountResponse = await Promise.all(accountsPromises);
     return accountResponse?.groupBy((item) => item.address, false);
   }
 }
