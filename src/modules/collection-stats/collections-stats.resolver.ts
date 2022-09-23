@@ -8,12 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { CollectionsStatsService } from './collections-stats.service';
 import { CollectionStats } from './models';
-import { TrendingCollection } from './models/Collection-Trending.dto';
 import { CollectionStatsFilter } from './models/Collection-Stats.Filter';
-import { Price } from '../assets/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
-import { elrondConfig } from 'src/config';
-import { DateUtils } from 'src/utils/date-utils';
 
 @Resolver(() => CollectionStats)
 export class CollectionsStatsResolver {
@@ -37,98 +32,5 @@ export class CollectionsStatsResolver {
       identifier,
     );
     return nftsCount.value || 0;
-  }
-
-  @Query(() => [TrendingCollection])
-  async trendingCollections(
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
-    pagination: ConnectionArgs,
-  ): Promise<TrendingCollection[]> {
-    return [
-      new TrendingCollection({
-        name: 'YOURSELF',
-        identifier: 'YOURSELF-3df278',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          timestamp: DateUtils.getCurrentTimestamp(),
-          token: elrondConfig.egld,
-          nonce: 0,
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/YOURSELF-3df278-350c6c6d',
-      }),
-      new TrendingCollection({
-        name: 'EVIDENCE',
-        identifier: 'EVIDENCE-2a8a14',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          token: elrondConfig.egld,
-          timestamp: DateUtils.getCurrentTimestamp(),
-          nonce: 0,
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/EVIDENCE-2a8a14-06',
-      }),
-      new TrendingCollection({
-        name: 'COL1',
-        identifier: 'COL1-32b368',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          timestamp: DateUtils.getCurrentTimestamp(),
-          token: elrondConfig.egld,
-          nonce: 0,
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/COL1-32b368-02',
-      }),
-      new TrendingCollection({
-        name: 'YOURSELF',
-        identifier: 'YOURSELF-3df278',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          token: elrondConfig.egld,
-          timestamp: DateUtils.getCurrentTimestamp(),
-          nonce: 0,
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/YOURSELF-3df278-350c6c6d',
-      }),
-      new TrendingCollection({
-        name: 'COL1',
-        identifier: 'COL1-32b368',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          token: elrondConfig.egld,
-          timestamp: DateUtils.getCurrentTimestamp(),
-          nonce: 0,
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/COL1-32b368-02',
-      }),
-      new TrendingCollection({
-        name: 'COL1',
-        identifier: 'COL1-32b368',
-        floorPrice: new Price({
-          amount: '10000000000000000',
-          token: elrondConfig.egld,
-          nonce: 0,
-          timestamp: DateUtils.getCurrentTimestamp(),
-        }),
-        percentage: '30.3',
-        verified: true,
-        imageUrl:
-          'https://devnet-media.elrond.com/nfts/thumbnail/COL1-32b368-02',
-      }),
-    ];
   }
 }
