@@ -23,6 +23,6 @@ export class LastOrdersProvider extends BaseProvider<number> {
       auctionIds,
     );
 
-    return orders?.groupBy((asset) => asset.auctionId);
+    return orders?.groupBy((asset) => asset.auctionId, false);
   }
 }

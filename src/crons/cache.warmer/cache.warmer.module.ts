@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { TokensWarmerService } from './tokens.warmer.service';
 import { XoxnoArtistsWarmerService } from './xoxno-minter-owners.warmer.service';
+import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-artist.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { XoxnoArtistsWarmerService } from './xoxno-minter-owners.warmer.service'
     CollectionsNftsCountRedisHandler,
     CollectionsNftsRedisHandler,
     CollectionsWarmerService,
+    SmartContractArtistsService,
     AuctionsWarmerService,
     TokensWarmerService,
     XoxnoArtistsWarmerService,

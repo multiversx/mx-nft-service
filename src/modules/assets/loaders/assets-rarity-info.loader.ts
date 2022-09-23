@@ -22,7 +22,7 @@ export class AssetRarityInfoProvider extends BaseProvider<string> {
     const nftRarities = await this.persistenceService.getBulkRarities(
       identifiers,
     );
-    return nftRarities?.groupBy((rarity) => rarity.identifier);
+    return nftRarities?.groupBy((rarity) => rarity.identifier, false);
   }
 
   public batchRarity = async (identifiers: string[], data: any) => {

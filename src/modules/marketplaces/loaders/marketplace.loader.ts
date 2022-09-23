@@ -22,6 +22,6 @@ export class MarketplaceProvider extends BaseProvider<string> {
     const marketplaces = await this.persistenceService.getMarketplacesByKeys(
       marketplaceKeys,
     );
-    return marketplaces?.groupBy((marketplace) => marketplace.key);
+    return marketplaces?.groupBy((marketplace) => marketplace.key, false);
   }
 }

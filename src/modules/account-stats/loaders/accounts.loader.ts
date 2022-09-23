@@ -27,7 +27,7 @@ export class AccountsProvider extends BaseProvider<string> {
 
   private async getBatchAccountsQuery(keys: string[]) {
     const accounts = await this.accountsService.getProfiles(keys);
-    const accountsAddreses = accounts?.groupBy((a) => a.address);
+    const accountsAddreses = accounts?.groupBy((a) => a.address, false);
 
     return accountsAddreses;
   }
@@ -39,6 +39,6 @@ export class AccountsProvider extends BaseProvider<string> {
     );
 
     const accountResponse = await Promise.all(accountsPromises);
-    return accountResponse?.groupBy((item) => item.address);
+    return accountResponse?.groupBy((item) => item.address, false);
   }
 }

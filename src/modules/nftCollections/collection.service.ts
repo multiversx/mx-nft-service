@@ -28,12 +28,14 @@ import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 
 @Injectable()
 export class CollectionsService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private smartContractArtistService: SmartContractArtistsService,
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
@@ -195,7 +197,6 @@ export class CollectionsService {
     }
 
     collections = collections?.slice(offset, offset + limit);
-
     return [collections, count];
   }
 
@@ -238,18 +239,28 @@ export class CollectionsService {
     return [uniqueCollections, uniqueCollections?.length];
   }
 
-  private async getMappedCollections(page: number, size: number) {
+  private async getMappedCollections(
+    page: number,
+    size: number,
+  ): Promise<Collection[]> {
     const collections = await this.apiService.getCollections(
       new CollectionQuery().addPageSize(page, size).build(),
     );
-    return collections?.map((collection) => this.mapCollection(collection));
+    const promisesCollections = collections?.map(
+      (collection): Promise<Collection> => this.mapCollection(collection),
+    );
+    return await Promise.all(promisesCollections);
   }
 
-  private mapCollection(collection: CollectionApi): Collection {
+  private async mapCollection(collection: CollectionApi): Promise<Collection> {
     const ownerAddress = new Address(collection.owner);
     const artistAddress = !ownerAddress.isContractAddress()
       ? collection.owner
-      : '';
+      : (
+          await this.smartContractArtistService.getOrSetArtistForScAddress(
+            collection.owner,
+          )
+        ).owner;
     return Collection.fromCollectionApi(collection, artistAddress);
   }
 

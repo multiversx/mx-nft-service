@@ -15,9 +15,9 @@ import {
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
 import { BatchUtils } from '@elrondnetwork/erdnest';
-import { Address, Transaction } from '@elrondnetwork/erdjs/out';
+import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
-import { Strings } from 'aws-sdk/clients/opsworks';
+import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
 export class ElrondApiService {
@@ -505,7 +505,10 @@ export class ElrondApiService {
     address: string,
   ): Promise<{ address: string; owner: string }> {
     let scAddress = new Address(address);
-    while (scAddress.isContractAddress()) {
+    while (
+      scAddress.isContractAddress() &&
+      scAddress.bech32() !== XOXNO_MINTING_MANAGER
+    ) {
       const { ownerAddress } = await this.doGetGeneric(
         this.getSmartContractOwner.name,
         `accounts/${scAddress.bech32()}?fields=ownerAddress`,
