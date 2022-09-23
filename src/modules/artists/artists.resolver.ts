@@ -18,7 +18,7 @@ export class ArtistsResolver {
     pagination: ConnectionArgs,
   ): Promise<ArtistResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const accounts = await this.artistsService.getArtists(
+    const [accounts, count] = await this.artistsService.getArtists(
       filters,
       offset,
       limit,
@@ -26,7 +26,7 @@ export class ArtistsResolver {
     return PageResponse.mapResponse<Account>(
       accounts || [],
       pagination,
-      accounts.length || 0,
+      count || 0,
       offset,
       limit,
     );
