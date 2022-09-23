@@ -42,6 +42,33 @@ export class ElrondIdentityService {
     }
   }
 
+  async getMostFollowed(page: number): Promise<AccountIdentity[]> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/users/most-followed?page=${page}`;
+
+    try {
+      let response = await this.apiService.get(url);
+
+      const accounts = response.data;
+      const accountsPromises = accounts.map((a: { address: any }) =>
+        this.getProfile(a.address),
+      );
+      const accountResponse = await Promise.all(accountsPromises);
+      return accountResponse;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
+        {
+          path: this.getMostFollowed.name,
+          page,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
+
   async getProfile(address): Promise<AccountIdentity> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/${address}`;
 
