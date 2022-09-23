@@ -61,7 +61,7 @@ export class CacheInfo {
 
   static XoxnoScCount: CacheInfo = {
     key: 'xoxno_sc_count',
-    ttl: 5 * TimeConstants.oneMinute,
+    ttl: 12 * TimeConstants.oneHour,
   };
 
   static NftTags: CacheInfo = {

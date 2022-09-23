@@ -62,22 +62,12 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const [trendingCollections] =
+    const [trendingCollections, count] =
       await this.collectionsService.getAllTrendingCollections();
-    console.log(trendingCollections);
-    let grouped = trendingCollections
-      .groupBy((x) => x?.artistAddress, true)
-      .map((group) => ({
-        artist: group.key,
-        nfts: group.values.reduce((sum: any, value: { nftsCount: any }) => {
-          return sum + value?.nftsCount;
-        }, 0),
-      }))
-      .sortedDescending((x) => x.nfts);
-    const count = grouped.length;
-    grouped = grouped?.slice(page, page + size);
+
+    const trendingCreators = trendingCollections?.slice(page, page + size);
     const mappedAccounts = await this.idService.getAccountsForAddresses(
-      grouped.map((x: { artist: any }) => x.artist),
+      trendingCreators.map((x: { artistAddress: any }) => x.artistAddress),
     );
     return [
       mappedAccounts?.map((account) => Account.fromEntity(account)),
