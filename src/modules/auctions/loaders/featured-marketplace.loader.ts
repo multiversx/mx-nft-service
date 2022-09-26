@@ -21,6 +21,6 @@ export class FeaturedMarketplaceProvider extends BaseProvider<string> {
   async getData(addresses: string[]) {
     const featuredMarketplace =
       await this.persistenceService.getMarketplacesByAddresses(addresses);
-    return featuredMarketplace?.groupBy((asset) => asset.address);
+    return featuredMarketplace?.groupBy((asset) => asset.address, false);
   }
 }

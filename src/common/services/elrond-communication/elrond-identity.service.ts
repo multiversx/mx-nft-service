@@ -157,4 +157,14 @@ export class ElrondIdentityService {
       return;
     }
   }
+
+  async getAccountsForAddresses(keys: string[]): Promise<any[]> {
+    const uniqueAddresses = [...new Set(keys)];
+    const accountsPromises = uniqueAddresses.map((address) =>
+      this.getProfile(address),
+    );
+
+    const accountResponse = await Promise.all(accountsPromises);
+    return accountResponse;
+  }
 }

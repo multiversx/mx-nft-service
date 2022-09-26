@@ -24,7 +24,7 @@ export class AssetsSupplyLoader extends BaseProvider<string> {
       0,
       'withSupply=true&fields=identifier,supply',
     );
-    return nfts?.groupBy((asset) => asset.identifier);
+    return nfts?.groupBy((asset) => asset.identifier, false);
   }
 
   public batchSupplyInfo = async (identifiers: string[], data: any) => {

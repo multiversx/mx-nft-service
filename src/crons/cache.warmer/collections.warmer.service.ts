@@ -39,7 +39,7 @@ export class CollectionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_30_MINUTES)
-  async handleCollectionsOrderByNoBids() {
+  async handleTrendingCollection() {
     await Locker.lock(
       'Trending collections order by number of running auctions',
       async () => {

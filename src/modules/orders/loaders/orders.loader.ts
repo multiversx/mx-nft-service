@@ -26,6 +26,6 @@ export class OrdersProvider extends BaseProvider<number> {
         auctionIds,
       );
 
-    return orders?.groupBy((auction) => auction.auctionId);
+    return orders?.groupBy((auction) => auction.auctionId, false);
   }
 }
