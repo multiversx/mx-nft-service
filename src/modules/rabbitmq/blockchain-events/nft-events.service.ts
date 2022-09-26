@@ -117,8 +117,7 @@ export class NftEventsService {
             );
           if (buyAuction) {
             const result = await this.auctionsGetterService.getAvailableTokens(
-              buyAuction.marketplaceAuctionId,
-              buyMarketplace.key,
+              buyAuction.id,
             );
             const totalRemaining = result
               ? result[0]?.availableTokens -

@@ -194,14 +194,8 @@ export class AuctionsGetterService {
     );
   }
 
-  async getAvailableTokens(
-    marketplaceAuctionId: number,
-    marketplaceKey: string,
-  ): Promise<number> {
-    return await this.persistenceService.getAvailableTokensForSpecificMarketplace(
-      marketplaceAuctionId,
-      marketplaceKey,
-    );
+  async getAvailableTokens(id: number): Promise<number> {
+    return await this.persistenceService.getAvailableTokensByAuctionId(id);
   }
 
   async getMinMaxPrice(

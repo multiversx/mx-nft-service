@@ -222,23 +222,6 @@ WHERE
 	a.id = ${id}`;
 }
 
-export function getAvailableTokensbyAuctionIdForMarketplace(
-  marketplaceAuctionId: number,
-  marketplaceKey: string,
-) {
-  return `SELECT
-	if(o.auctionId,
-	a.nrAuctionedTokens - sum(if(boughtTokensNo, boughtTokensNo, 1)),
-	a.nrAuctionedTokens) as availableTokens
-from
-	auctions a
-left join orders o on
-	a.id = o.auctionId
-WHERE
-	a.marketplaceAuctionId = ${marketplaceAuctionId} AND a.marketplaceKey = '${marketplaceKey}'
-  GROUP by a.id`;
-}
-
 export function getAuctionsForIdentifierSortByPrice(
   identifier: string,
   limit: number = 10,
