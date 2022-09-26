@@ -27,7 +27,7 @@ export class SmartContractArtistsService {
     );
   }
 
-  private async getArtistForScAddress(
+  public async getArtistForScAddress(
     scAddress: string,
   ): Promise<{ address: string; owner: string }> {
     const account = await this.elrondApi.getSmartContractOwner(scAddress);

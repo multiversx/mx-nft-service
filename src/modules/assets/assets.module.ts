@@ -46,6 +46,7 @@ import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-
 import { PersistenceModule } from 'src/common/persistence/persistence.module';
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
+import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 
 @Module({
   providers: [
@@ -80,6 +81,7 @@ import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
     AssetAuctionResolver,
     ArtistAddressProvider,
     ArtistAddressRedisHandler,
+    SmartContractArtistsService,
     S3Service,
     AccountsProvider,
     AccountsRedisHandler,

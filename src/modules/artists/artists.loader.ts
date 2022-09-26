@@ -1,15 +1,15 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader = require('dataloader');
-import { ElrondApiService } from 'src/common';
 import { BaseProvider } from '../common/base.loader';
 import { ArtistAddressRedisHandler } from './artists.redis-handler';
+import { SmartContractArtistsService } from './smart-contract-artist.service';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class ArtistAddressProvider extends BaseProvider<string> {
   constructor(
-    private elrondApiService: ElrondApiService,
+    private smartContractArtistService: SmartContractArtistsService,
     accountsRedisHandler: ArtistAddressRedisHandler,
   ) {
     super(
@@ -21,7 +21,7 @@ export class ArtistAddressProvider extends BaseProvider<string> {
   getData = async (keys: string[]): Promise<any[]> => {
     const uniqueAddresses = [...new Set(keys)];
     const scPromises = uniqueAddresses.map((address) =>
-      this.elrondApiService.getSmartContractOwner(address),
+      this.smartContractArtistService.getArtistForScAddress(address),
     );
 
     const smartContractsResponse = await Promise.all(scPromises);
