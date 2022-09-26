@@ -59,6 +59,11 @@ export class CacheInfo {
     ttl: 12 * TimeConstants.oneHour,
   };
 
+  static Account: CacheInfo = {
+    key: 'account',
+    ttl: TimeConstants.oneMinute,
+  };
+
   static XoxnoScCount: CacheInfo = {
     key: 'xoxno_sc_count',
     ttl: 12 * TimeConstants.oneHour,
