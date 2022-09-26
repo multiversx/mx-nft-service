@@ -811,13 +811,13 @@ export class PersistenceService {
   }
 
   async getAvailableTokensForSpecificMarketplace(
-    id: number,
+    marketplaceAuctionId: number,
     marketplaceKey: string,
   ): Promise<any> {
     return await this.execute(
       this.getAvailableTokensForSpecificMarketplace.name,
       this.auctionsRepository.getAvailableTokensForSpecificMarketplace(
-        id,
+        marketplaceAuctionId,
         marketplaceKey,
       ),
     );
