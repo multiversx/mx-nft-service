@@ -67,6 +67,8 @@ export class Collection {
   nftsCount: number;
   @Field(() => String)
   artistAddress: string;
+  @Field(() => Int)
+  artistFollowersCount: number;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -75,6 +77,7 @@ export class Collection {
   static fromCollectionApi(
     collectionApi: CollectionApi,
     artistAddress?: string,
+    followersCount?: number,
   ) {
     return !collectionApi
       ? null
@@ -105,6 +108,7 @@ export class Collection {
           collectionAsset: new CollectionAsset({
             collectionIdentifer: collectionApi.collection,
           }),
+          artistFollowersCount: followersCount,
         });
   }
 }

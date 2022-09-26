@@ -12,7 +12,12 @@ import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
+import {
+  CollectionApi,
+  ElrondApiService,
+  ElrondIdentityService,
+  getSmartContract,
+} from 'src/common';
 import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
@@ -35,6 +40,7 @@ export class CollectionsService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private idService: ElrondIdentityService,
     private smartContractArtistService: SmartContractArtistsService,
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
@@ -259,7 +265,14 @@ export class CollectionsService {
         await this.smartContractArtistService.getOrSetArtistForScAddress(
           collection.owner,
         );
-      return Collection.fromCollectionApi(collection, artist?.owner);
+      const followersCount = await this.idService.getFollowersCount(
+        artist.owner,
+      );
+      return Collection.fromCollectionApi(
+        collection,
+        artist?.owner,
+        followersCount.count,
+      );
     }
     return Collection.fromCollectionApi(collection, collection.owner);
   }
