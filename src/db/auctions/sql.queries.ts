@@ -223,7 +223,7 @@ WHERE
 }
 
 export function getAvailableTokensbyAuctionIdForMarketplace(
-  id: number,
+  marketplaceAuctionId: number,
   marketplaceKey: string,
 ) {
   return `SELECT
@@ -235,7 +235,8 @@ from
 left join orders o on
 	a.id = o.auctionId
 WHERE
-	a.marketplaceAuctionId = ${id} AND a.marketplaceKey = '${marketplaceKey}'`;
+	a.marketplaceAuctionId = ${marketplaceAuctionId} AND a.marketplaceKey = '${marketplaceKey}'
+  GROUP by a.id`;
 }
 
 export function getAuctionsForIdentifierSortByPrice(

@@ -195,11 +195,11 @@ export class AuctionsGetterService {
   }
 
   async getAvailableTokens(
-    id: number,
+    marketplaceAuctionId: number,
     marketplaceKey: string,
   ): Promise<number> {
     return await this.persistenceService.getAvailableTokensForSpecificMarketplace(
-      id,
+      marketplaceAuctionId,
       marketplaceKey,
     );
   }

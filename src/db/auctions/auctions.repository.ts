@@ -487,11 +487,11 @@ export class AuctionsRepository {
   }
 
   async getAvailableTokensForSpecificMarketplace(
-    id: number,
+    marketplaceAuctionId: number,
     marketplaceKey: string,
   ): Promise<any> {
     return await this.auctionsRepository.query(
-      getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
+      getAvailableTokensbyAuctionIdForMarketplace(marketplaceAuctionId, marketplaceKey),
     );
   }
 
