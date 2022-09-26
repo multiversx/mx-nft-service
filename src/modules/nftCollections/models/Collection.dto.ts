@@ -79,40 +79,36 @@ export class Collection {
     artistAddress?: string,
     followersCount?: number,
   ) {
-    if (!artistAddress) {
-      console.log(collectionApi.ticker, collectionApi.owner);
-    }
-    return !collectionApi
-      ? null
-      : new Collection({
-          collection: collectionApi.collection,
-          artistAddress: artistAddress,
-          type: NftTypeEnum[collectionApi.type],
-          ticker: collectionApi.ticker,
-          ownerAddress: collectionApi.owner,
-          creationDate: collectionApi.timestamp,
-          name: collectionApi.name,
-          canTransferRole: collectionApi.canTransferRole,
-          canPause: collectionApi.canPause,
-          canBurn: collectionApi.canBurn,
-          canFreeze: collectionApi.canFreeze,
-          canWipe: collectionApi.canWipe,
-          canAddQuantity: collectionApi.canAddQuantity,
-          canCreate: collectionApi.canCreate,
-          roles: collectionApi.roles?.map((role) =>
-            CollectionRole.fromRoleApi(role),
-          ),
-          verified: !!collectionApi.assets ?? false,
-          description: collectionApi.assets?.description,
-          website: collectionApi.assets?.website,
-          pngUrl: collectionApi.assets?.pngUrl,
-          svgUrl: collectionApi.assets?.svgUrl,
-          social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
-          collectionAsset: new CollectionAsset({
-            collectionIdentifer: collectionApi.collection,
-          }),
-          artistFollowersCount: followersCount,
-        });
+    if (!collectionApi) return null;
+    return new Collection({
+      collection: collectionApi.collection,
+      artistAddress: artistAddress,
+      type: NftTypeEnum[collectionApi.type],
+      ticker: collectionApi.ticker,
+      ownerAddress: collectionApi.owner,
+      creationDate: collectionApi.timestamp,
+      name: collectionApi.name,
+      canTransferRole: collectionApi.canTransferRole,
+      canPause: collectionApi.canPause,
+      canBurn: collectionApi.canBurn,
+      canFreeze: collectionApi.canFreeze,
+      canWipe: collectionApi.canWipe,
+      canAddQuantity: collectionApi.canAddQuantity,
+      canCreate: collectionApi.canCreate,
+      roles: collectionApi.roles?.map((role) =>
+        CollectionRole.fromRoleApi(role),
+      ),
+      verified: !!collectionApi.assets ?? false,
+      description: collectionApi.assets?.description,
+      website: collectionApi.assets?.website,
+      pngUrl: collectionApi.assets?.pngUrl,
+      svgUrl: collectionApi.assets?.svgUrl,
+      social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
+      collectionAsset: new CollectionAsset({
+        collectionIdentifer: collectionApi.collection,
+      }),
+      artistFollowersCount: followersCount,
+    });
   }
 }
 
