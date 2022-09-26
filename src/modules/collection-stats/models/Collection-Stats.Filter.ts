@@ -12,6 +12,9 @@ export class CollectionStatsFilter {
     message: COLLECTION_IDENTIFIER_ERROR,
   })
   identifier: string;
+  @Field(() => String, { nullable: true })
+  marketplaceKey: string;
+
   constructor(init?: Partial<CollectionStatsFilter>) {
     Object.assign(this, init);
   }
