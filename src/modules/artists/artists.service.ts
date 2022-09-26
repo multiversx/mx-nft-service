@@ -30,8 +30,24 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const accounts = await this.idService.getMostFollowed(1);
-    return [accounts?.map((account) => Account.fromEntity(account)), 1000];
+    const [collections] = await this.collectionsService.getFullCollections();
+    let grouped = collections
+      .groupBy((x) => x.artistAddress, true)
+      .map((group: { key: any; values: any[] }) => ({
+        artist: group.key,
+        followersCount: group.values[0].artistFollowersCount,
+      }))
+      .sortedDescending((x: { followersCount: any }) => x.followersCount);
+
+    const count = grouped.length;
+    grouped = grouped?.slice(page, page + size);
+    const mappedAccounts = await this.idService.getAccountsForAddresses(
+      grouped.map((x: { artist: any }) => x.artist),
+    );
+    return [
+      mappedAccounts?.map((account) => Account.fromEntity(account)),
+      count,
+    ];
   }
 
   private async getMostActive(
