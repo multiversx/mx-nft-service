@@ -254,14 +254,14 @@ export class CollectionsService {
 
   private async mapCollection(collection: CollectionApi): Promise<Collection> {
     const ownerAddress = new Address(collection.owner);
-    const artistAddress = !ownerAddress.isContractAddress()
-      ? collection.owner
-      : (
-          await this.smartContractArtistService.getOrSetArtistForScAddress(
-            collection.owner,
-          )
-        ).owner;
-    return Collection.fromCollectionApi(collection, artistAddress);
+    if (ownerAddress.isContractAddress()) {
+      const artist =
+        await this.smartContractArtistService.getOrSetArtistForScAddress(
+          collection.owner,
+        );
+      return Collection.fromCollectionApi(collection, artist?.owner);
+    }
+    return Collection.fromCollectionApi(collection, collection.owner);
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
