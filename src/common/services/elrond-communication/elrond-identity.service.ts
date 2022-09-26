@@ -99,6 +99,29 @@ export class ElrondIdentityService {
     }
   }
 
+  async getFollowersCount(
+    address: string,
+  ): Promise<{ address: string; count: number }> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/followers/${address}/count`;
+
+    try {
+      let response = await this.apiService.get(url);
+      return response?.data;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
+        {
+          path: 'ElrondIdentityService.getFollowersCount',
+          address: address,
+          exception: error,
+        },
+      );
+      return;
+    }
+  }
+
   async getAcountsByHerotag(searchTerm: string): Promise<any> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/herotags/search?criteria=${searchTerm}`;
 
@@ -162,6 +185,16 @@ export class ElrondIdentityService {
     const uniqueAddresses = [...new Set(keys)];
     const accountsPromises = uniqueAddresses.map((address) =>
       this.getProfile(address),
+    );
+
+    const accountResponse = await Promise.all(accountsPromises);
+    return accountResponse;
+  }
+
+  async getFollowersCountForAddresses(keys: string[]): Promise<any[]> {
+    const uniqueAddresses = [...new Set(keys)];
+    const accountsPromises = uniqueAddresses.map((address) =>
+      this.getFollowersCount(address),
     );
 
     const accountResponse = await Promise.all(accountsPromises);
