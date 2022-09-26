@@ -810,16 +810,10 @@ export class PersistenceService {
     );
   }
 
-  async getAvailableTokensForSpecificMarketplace(
-    id: number,
-    marketplaceKey: string,
-  ): Promise<any> {
+  async getAvailableTokensByAuctionId(id: number): Promise<any> {
     return await this.execute(
-      this.getAvailableTokensForSpecificMarketplace.name,
-      this.auctionsRepository.getAvailableTokensForSpecificMarketplace(
-        id,
-        marketplaceKey,
-      ),
+      this.getAvailableTokensByAuctionId.name,
+      this.auctionsRepository.getAvailableTokensByAuctionId(id),
     );
   }
 

@@ -29,7 +29,6 @@ import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
   getAvailableTokensbyAuctionId,
-  getAvailableTokensbyAuctionIdForMarketplace,
   getAvailableTokensbyAuctionIds,
   getAvailableTokensScriptsByIdentifiers,
   getDefaultAuctionsForIdentifierQuery,
@@ -451,7 +450,7 @@ export class AuctionsRepository {
     );
   }
 
-  async getAvailableTokens(id: number): Promise<any> {
+  async getAvailableTokensByAuctionId(id: number): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionId(id),
     );
@@ -483,15 +482,6 @@ export class AuctionsRepository {
         identifiers.map((value) => value.split('_')[0]),
         identifiers[0].split('_')[1],
       ),
-    );
-  }
-
-  async getAvailableTokensForSpecificMarketplace(
-    id: number,
-    marketplaceKey: string,
-  ): Promise<any> {
-    return await this.auctionsRepository.query(
-      getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
     );
   }
 
