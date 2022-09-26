@@ -65,7 +65,7 @@ export class Collection {
   onSaleAssetsCount: number;
   @Field(() => Int)
   nftsCount: number;
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
