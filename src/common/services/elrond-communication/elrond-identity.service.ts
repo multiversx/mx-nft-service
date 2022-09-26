@@ -33,7 +33,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getProfiles',
+          path: this.getProfiles.name,
           addresses: addresses,
           exception: error,
         },
@@ -42,34 +42,7 @@ export class ElrondIdentityService {
     }
   }
 
-  async getMostFollowed(page: number): Promise<AccountIdentity[]> {
-    const url = `${process.env.ELROND_IDENTITY}api/v1/users/most-followed?page=${page}`;
-
-    try {
-      let response = await this.apiService.get(url);
-
-      const accounts = response.data;
-      const accountsPromises = accounts.map((a: { address: any }) =>
-        this.getProfile(a.address),
-      );
-      const accountResponse = await Promise.all(accountsPromises);
-      return accountResponse;
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getMostFollowed.name,
-          page,
-          exception: error,
-        },
-      );
-      return;
-    }
-  }
-
-  async getProfile(address): Promise<AccountIdentity> {
+  async getProfile(address: string): Promise<AccountIdentity> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/${address}`;
 
     try {
@@ -90,7 +63,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getProfile',
+          path: this.getProfile.name,
           address: address,
           exception: error,
         },
@@ -113,7 +86,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getFollowersCount',
+          path: this.getFollowersCount.name,
           address: address,
           exception: error,
         },
@@ -141,7 +114,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getAcountsByHerotag',
+          path: this.getAcountsByHerotag.name,
           address: searchTerm,
           exception: error,
         },
@@ -172,7 +145,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getAddressByHerotag',
+          path: this.getAddressByHerotag.name,
           herotag: herotag,
           exception: error,
         },
