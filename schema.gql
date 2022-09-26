@@ -368,7 +368,8 @@ input ChildFilter {
 
 type Collection {
   artist: Account
-  artistAddress: String!
+  artistAddress: String
+  artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
   assets(pagination: ConnectionArgs): AssetsResponse

@@ -65,7 +65,7 @@ export class Collection {
   onSaleAssetsCount: number;
   @Field(() => Int)
   nftsCount: number;
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
@@ -79,6 +79,9 @@ export class Collection {
     artistAddress?: string,
     followersCount?: number,
   ) {
+    if (!artistAddress) {
+      console.log(collectionApi.ticker, collectionApi.owner);
+    }
     return !collectionApi
       ? null
       : new Collection({

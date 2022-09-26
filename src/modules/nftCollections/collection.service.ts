@@ -271,10 +271,17 @@ export class CollectionsService {
       return Collection.fromCollectionApi(
         collection,
         artist?.owner,
-        followersCount.count,
+        followersCount?.count,
       );
     }
-    return Collection.fromCollectionApi(collection, collection.owner);
+    const followersCount = await this.idService.getFollowersCount(
+      collection.owner,
+    );
+    return Collection.fromCollectionApi(
+      collection,
+      collection.owner,
+      followersCount?.count,
+    );
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {

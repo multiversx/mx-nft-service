@@ -118,7 +118,7 @@ export class ElrondIdentityService {
           exception: error,
         },
       );
-      return;
+      return { address, count: 0 };
     }
   }
 
@@ -185,16 +185,6 @@ export class ElrondIdentityService {
     const uniqueAddresses = [...new Set(keys)];
     const accountsPromises = uniqueAddresses.map((address) =>
       this.getProfile(address),
-    );
-
-    const accountResponse = await Promise.all(accountsPromises);
-    return accountResponse;
-  }
-
-  async getFollowersCountForAddresses(keys: string[]): Promise<any[]> {
-    const uniqueAddresses = [...new Set(keys)];
-    const accountsPromises = uniqueAddresses.map((address) =>
-      this.getFollowersCount(address),
     );
 
     const accountResponse = await Promise.all(accountsPromises);
