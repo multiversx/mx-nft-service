@@ -205,10 +205,13 @@ export class PersistenceService {
     );
   }
 
-  async getStats(identifier: string): Promise<CollectionStatsEntity> {
+  async getStats(
+    identifier: string,
+    marketplaceKey: string = undefined,
+  ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getStats.name,
-      this.collectionStatsRepository.getStats(identifier),
+      this.collectionStatsRepository.getStats(identifier, marketplaceKey),
     );
   }
 
