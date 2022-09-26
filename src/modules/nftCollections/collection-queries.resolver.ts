@@ -17,7 +17,7 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
-import { SmartContractOwnerProvider } from '../assets/loaders/artists.loader';
+import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { Asset, AssetsResponse } from '../assets/models';
 import { Nft } from 'src/common';
@@ -27,7 +27,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   constructor(
     private collectionsService: CollectionsService,
     private accountsProvider: AccountsProvider,
-    private smartContractOwnerProvider: SmartContractOwnerProvider,
+    private artistAddressProvider: ArtistAddressProvider,
     private assetProvider: AssetsCollectionsProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
@@ -94,10 +94,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     if (!ownerAddress) return null;
 
     if (address.isContractAddress()) {
-      const response = await this.smartContractOwnerProvider.load(ownerAddress);
-      artistAddress = response?.value
-        ? response?.value?.ownerAddress
-        : ownerAddress;
+      const response = await this.artistAddressProvider.load(ownerAddress);
+      artistAddress = response?.value ? response?.value?.owner : ownerAddress;
     }
 
     const account = await this.accountsProvider.load(artistAddress);

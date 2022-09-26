@@ -63,16 +63,24 @@ export class Collection {
   social: CollectionSocial;
   @Field(() => Int)
   onSaleAssetsCount: number;
+  @Field(() => Int)
+  nftsCount: number;
+  @Field(() => String)
+  artistAddress: string;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
   }
 
-  static fromCollectionApi(collectionApi: CollectionApi) {
+  static fromCollectionApi(
+    collectionApi: CollectionApi,
+    artistAddress?: string,
+  ) {
     return !collectionApi
       ? null
       : new Collection({
           collection: collectionApi.collection,
+          artistAddress: artistAddress,
           type: NftTypeEnum[collectionApi.type],
           ticker: collectionApi.ticker,
           ownerAddress: collectionApi.owner,

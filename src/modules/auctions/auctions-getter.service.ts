@@ -163,7 +163,7 @@ export class AuctionsGetterService {
     auctions = auctions?.map((item) => new AuctionWithStartBid(item));
 
     const group: { key: string; value: AuctionWithBidsCount[] } =
-      auctions?.groupBy((a) => a.identifier);
+      auctions?.groupBy((a) => a.identifier, false);
     let groupedAuctions = [];
     for (const key in group) {
       groupedAuctions = [
