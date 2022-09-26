@@ -21,9 +21,9 @@ export class SmartContractArtistsService {
   async getOrSetArtistForScAddress(address: string) {
     return this.cachingService.getOrSetCache(
       this.redisClient,
-      CacheInfo.XoxnoScCount.key,
+      CacheInfo.Artist.key,
       async () => this.getArtistForScAddress(address),
-      CacheInfo.XoxnoScCount.ttl,
+      CacheInfo.Artist.ttl,
     );
   }
 
