@@ -1,16 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondIdentityService } from 'src/common';
+import * as Redis from 'ioredis';
+import { CachingService } from 'src/common/services/caching/caching.service';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
 import { CollectionsService } from '../nftCollections/collection.service';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';
 import { ArtistFilters } from './models/Artists.Filter';
+import { cacheConfig } from 'src/config';
 
 @Injectable()
 export class ArtistsService {
+  private redisClient: Redis.Redis;
   constructor(
     private idService: ElrondIdentityService,
+    private cachingService: CachingService,
     private collectionsService: CollectionsService,
-  ) {}
+  ) {
+    this.redisClient = this.cachingService.getClient(
+      cacheConfig.persistentRedisClientName,
+    );
+  }
 
   async getArtists(
     filters: ArtistFilters,
@@ -41,11 +51,11 @@ export class ArtistsService {
 
     const count = grouped.length;
     grouped = grouped?.slice(page, page + size);
-    const mappedAccounts = await this.idService.getAccountsForAddresses(
+    const mappedAccounts = await this.getAccountsInfo(
       grouped.map((x: { artist: any }) => x.artist),
     );
     return [
-      mappedAccounts?.map((account) => Account.fromEntity(account)),
+      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
       count,
     ];
   }
@@ -67,11 +77,11 @@ export class ArtistsService {
 
     const count = grouped.length;
     grouped = grouped?.slice(page, page + size);
-    const mappedAccounts = await this.idService.getAccountsForAddresses(
+    const mappedAccounts = await this.getAccountsInfo(
       grouped.map((x: { artist: any }) => x.artist),
     );
     return [
-      mappedAccounts?.map((account) => Account.fromEntity(account)),
+      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
       count,
     ];
   }
@@ -84,12 +94,33 @@ export class ArtistsService {
       await this.collectionsService.getAllTrendingCollections();
 
     const trendingCreators = trendingCollections?.slice(page, page + size);
-    const mappedAccounts = await this.idService.getAccountsForAddresses(
+    const mappedAccounts = await this.getAccountsInfo(
       trendingCreators.map((x: { artistAddress: any }) => x.artistAddress),
     );
     return [
-      mappedAccounts?.map((account) => Account.fromEntity(account)),
+      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
       count,
     ];
+  }
+
+  private async getAccountsInfo(addresses: string[]) {
+    const accountsPromises = addresses.map((address) =>
+      this.getOrSetAccount(address),
+    );
+    return await Promise.all(accountsPromises);
+  }
+
+  async getOrSetAccount(address: string) {
+    return this.cachingService.getOrSetCache(
+      this.redisClient,
+      `${CacheInfo.Account.key}_${address}`,
+      async () => this.getMappedAccountForRedis(address),
+      CacheInfo.Account.ttl,
+    );
+  }
+
+  async getMappedAccountForRedis(address: string) {
+    const account = await this.idService.getProfile(address);
+    return { key: address, value: account };
   }
 }

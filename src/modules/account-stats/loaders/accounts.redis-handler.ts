@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
-import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AccountsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'account');
+    super(redisCacheService, CacheInfo.Account.key);
   }
 
   mapValues(
@@ -27,7 +27,7 @@ export class AccountsRedisHandler extends RedisKeyValueDataloaderHandler<string>
     return [
       new RedisValue({
         values: redisValues,
-        ttl: 15 * TimeConstants.oneSecond,
+        ttl: CacheInfo.Account.ttl,
       }),
     ];
   }
