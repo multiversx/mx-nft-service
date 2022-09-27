@@ -15,7 +15,7 @@ import {
   SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
-import { CollectionsService } from '../nftCollections/collection.service';
+import { CollectionsService } from '../nftCollections/collections.service';
 
 @Injectable()
 export class SearchService {

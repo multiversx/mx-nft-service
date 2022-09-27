@@ -8,7 +8,7 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Collection, CollectionAsset } from './models';
-import { CollectionsService } from './collection.service';
+import { CollectionsService } from './collections.service';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
