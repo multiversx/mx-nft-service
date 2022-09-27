@@ -6,7 +6,17 @@ export class CacheInfo {
 
   static AllCollections: CacheInfo = {
     key: 'allCollections',
-    ttl: TimeConstants.oneHour,
+    ttl: TimeConstants.oneDay,
+  };
+
+  static CollectionsMostActive: CacheInfo = {
+    key: 'collectionsMostActive',
+    ttl: TimeConstants.oneDay,
+  };
+
+  static CollectionsMostFollowed: CacheInfo = {
+    key: 'collectionsMostFollowed',
+    ttl: TimeConstants.oneDay,
   };
 
   static AllMarketplaces: CacheInfo = {
@@ -57,6 +67,11 @@ export class CacheInfo {
   static Artist: CacheInfo = {
     key: 'artist',
     ttl: 12 * TimeConstants.oneHour,
+  };
+
+  static Account: CacheInfo = {
+    key: 'account',
+    ttl: TimeConstants.oneMinute,
   };
 
   static XoxnoScCount: CacheInfo = {

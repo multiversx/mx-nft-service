@@ -9,9 +9,12 @@ import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 
+const EVERY_15_MINUTES = '0 */15 * * * *';
+
 @Injectable()
 export class CollectionsWarmerService {
   private redisClient: Redis.Redis;
+
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private collectionsService: CollectionsService,
@@ -32,6 +35,39 @@ export class CollectionsWarmerService {
           CacheInfo.AllCollections.key,
           tokens,
           TimeConstants.oneHour,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(EVERY_15_MINUTES)
+  async handleCollectionsMostActive() {
+    await Locker.lock(
+      'Collections Most Active tokens invalidations',
+      async () => {
+        const tokens = await this.collectionsService.getMostActiveCollections();
+        await this.invalidateKey(
+          CacheInfo.CollectionsMostActive.key,
+          tokens,
+          CacheInfo.CollectionsMostActive.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(EVERY_15_MINUTES)
+  async handleCollectionsMostFollowed() {
+    await Locker.lock(
+      'Collections Most Followed tokens invalidations',
+      async () => {
+        const tokens =
+          await this.collectionsService.getMostFollowedCollections();
+        await this.invalidateKey(
+          CacheInfo.CollectionsMostFollowed.key,
+          tokens,
+          CacheInfo.CollectionsMostFollowed.ttl,
         );
       },
       true,
@@ -61,7 +97,7 @@ export class CollectionsWarmerService {
   }
 
   private async refreshCacheKey(key: string, ttl: number) {
-    await this.clientProxy.emit<{
+    this.clientProxy.emit<{
       redisClient: Redis.Redis;
       key: string;
       ttl: number;
