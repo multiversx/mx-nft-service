@@ -254,7 +254,7 @@ export function getAuctionsOrderByNoBidsQuery() {
 
 export function getCurrentAuctionsTokens(marketplaceKey: string = undefined) {
   const filter = marketplaceKey
-    ? `AND marketplaceKey = '${marketplaceKey}'`
+    ? `AND a.marketplaceKey = '${marketplaceKey}'`
     : '';
   return `select DISTINCT paymentToken from auctions a WHERE a.status = 'RUNNING' ${filter}`;
 }
