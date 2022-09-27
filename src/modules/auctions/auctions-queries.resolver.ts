@@ -273,7 +273,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     })
     marketplaceKey,
   ): Promise<Token[]> {
-    return await this.auctionsGetterService.getCurrentAuctionsPaymentTokens(
+    return await this.auctionsGetterService.getCurrentPaymentTokens(
       marketplaceKey,
     );
   }

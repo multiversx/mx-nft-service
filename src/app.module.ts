@@ -15,7 +15,7 @@ import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.m
 import { FeaturedModuleGraph } from './modules/featured/featured.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
-import { UsdPriceModuleGraph } from './modules/usdAmount/usd-price.module';
+import { UsdPriceModuleGraph } from './modules/usdPrice/usd-price.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
 import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';

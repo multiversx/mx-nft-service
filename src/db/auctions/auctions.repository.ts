@@ -31,7 +31,7 @@ import {
   getAvailableTokensbyAuctionId,
   getAvailableTokensbyAuctionIds,
   getAvailableTokensScriptsByIdentifiers,
-  getCurrentAuctionsPaymentTokens,
+  getCurrentPaymentTokens,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -704,11 +704,11 @@ export class AuctionsRepository {
       queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
   }
 
-  async getCurrentAuctionsPaymentTokenIds(
+  async getCurrentPaymentTokenIds(
     marketplaceKey: string = undefined,
   ): Promise<string[]> {
     const paymentTokens = await this.auctionsRepository.query(
-      getCurrentAuctionsPaymentTokens(marketplaceKey),
+      getCurrentPaymentTokens(marketplaceKey),
     );
     return paymentTokens.map((r) => r.paymentToken);
   }
