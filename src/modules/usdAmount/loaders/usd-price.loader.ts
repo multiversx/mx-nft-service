@@ -22,7 +22,7 @@ export class UsdPriceLoader {
     );
   }
 
-  private async getCachedMexTokensWithDecimals(): Promise<Token[]> {
+  public async getCachedMexTokensWithDecimals(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,

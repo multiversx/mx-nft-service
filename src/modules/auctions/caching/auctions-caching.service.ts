@@ -19,6 +19,8 @@ import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import * as hash from 'object-hash';
 import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
+import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Injectable()
 export class AuctionsCachingService {
@@ -27,6 +29,7 @@ export class AuctionsCachingService {
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
+    private usdPriceLoader: UsdPriceLoader,
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private accountStatsCachingService: AccountsStatsCachingService,
@@ -126,6 +129,18 @@ export class AuctionsCachingService {
     );
   }
 
+  public async getCurrentAuctionsTokens(
+    marketplaceKey: string = undefined,
+    getData: () => any,
+  ): Promise<Token[]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getCurrentAuctionsTokensCacheKey(marketplaceKey),
+      () => getData(),
+      CacheInfo.CurrentAuctionsTokens.ttl,
+    );
+  }
+
   private getAuctionsCacheKey(request: any) {
     return generateCacheKeyFromParams('auctions', hash(request));
   }
@@ -140,6 +155,13 @@ export class AuctionsCachingService {
       address,
       limit,
       offset,
+    );
+  }
+
+  public getCurrentAuctionsTokensCacheKey(marketplaceKey: string = undefined) {
+    return generateCacheKeyFromParams(
+      CacheInfo.CurrentAuctionsTokens.key,
+      marketplaceKey,
     );
   }
 }

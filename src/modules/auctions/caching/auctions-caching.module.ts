@@ -9,6 +9,7 @@ import { AssetAuctionsCountRedisHandler } from '../../assets/loaders/asset-aucti
 import { AssetAvailableTokensCountRedisHandler } from '../../assets/loaders/asset-available-tokens-count.redis-handler';
 import { OnSaleAssetsCountForCollectionRedisHandler } from '../../nftCollections/loaders/onsale-assets-count.redis-handler';
 import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
+import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
 
 @Module({
   providers: [
@@ -20,6 +21,7 @@ import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/inte
     AssetAvailableTokensCountRedisHandler,
     AccountsStatsCachingService,
     InternalMarketplaceRedisHandler,
+    UsdPriceLoader,
   ],
   imports: [CachingModule, CommonModule],
   exports: [

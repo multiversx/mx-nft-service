@@ -886,4 +886,13 @@ export class PersistenceService {
       this.auctionsRepository.updateAuctions(auctions),
     );
   }
+
+  async getCurrentAuctionsTokenIds(
+    marketplaceKey: string = undefined,
+  ): Promise<string[]> {
+    return await this.execute(
+      this.getCurrentAuctionsTokenIds.name,
+      this.auctionsRepository.getCurrentAuctionsTokenIds(marketplaceKey),
+    );
+  }
 }

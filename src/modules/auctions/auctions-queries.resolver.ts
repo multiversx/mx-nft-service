@@ -35,11 +35,12 @@ import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader'
 import { TokenFilter } from './models/Token.Filter';
 import { elrondConfig } from 'src/config';
 import { XOXNO_KEY } from 'src/utils/constants';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   constructor(
-    private auctionsService: AuctionsGetterService,
+    private auctionsGetterService: AuctionsGetterService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private lastOrderProvider: LastOrdersProvider,
@@ -80,7 +81,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [auctions, count, priceRange] =
-      await this.auctionsService.getAuctions(
+      await this.auctionsGetterService.getAuctions(
         new QueryRequest({
           limit,
           offset,
@@ -117,7 +118,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     const { limit, offset } = pagination.pagingParams();
 
     const [auctions, count, priceRange] =
-      await this.auctionsService.getAuctionsOrderByNoBids(
+      await this.auctionsGetterService.getAuctionsOrderByNoBids(
         new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
       );
     return {
@@ -143,7 +144,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     })
     filters: TokenFilter,
   ) {
-    const { minBid, maxBid } = await this.auctionsService.getMinMaxPrice(
+    const { minBid, maxBid } = await this.auctionsGetterService.getMinMaxPrice(
       filters?.token ?? elrondConfig.egld,
     );
     return PriceRange.fromEntity(minBid, maxBid);
@@ -163,12 +164,13 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] = await this.auctionsService.getClaimableAuctions(
-      limit,
-      offset,
-      user.publicKey,
-      filters?.marketplaceKey,
-    );
+    const [auctions, count] =
+      await this.auctionsGetterService.getClaimableAuctions(
+        limit,
+        offset,
+        user.publicKey,
+        filters?.marketplaceKey,
+      );
     return PageResponse.mapResponse<Auction>(
       auctions,
       pagination,
@@ -260,6 +262,20 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
           asset?.type,
         )
       : null;
+  }
+
+  @Query(() => [Token])
+  async currentAuctionsTokens(
+    @Args({
+      name: 'marketplaceKey',
+      type: () => String,
+      nullable: true,
+    })
+    marketplaceKey,
+  ): Promise<Token[]> {
+    return await this.auctionsGetterService.getCurrentAuctionsTokens(
+      marketplaceKey,
+    );
   }
 
   private hasToResolveAsset(fields: string[]) {
