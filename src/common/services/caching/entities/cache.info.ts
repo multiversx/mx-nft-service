@@ -94,8 +94,8 @@ export class CacheInfo {
     ttl: 10 * TimeConstants.oneMinute,
   };
 
-  static CurrentAuctionsTokens: CacheInfo = {
-    key: 'currentAuctionsPaymentTokens',
+  static CurrentTokens: CacheInfo = {
+    key: 'currentPaymentTokens',
     ttl: 30 * TimeConstants.oneMinute,
   };
 }
