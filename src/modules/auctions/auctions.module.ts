@@ -30,7 +30,7 @@ import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { UsdPriceLoader } from '../usdAmount/loaders/usd-price.loader';
+import { UsdPriceService } from '../usdAmount/loaders/usd-price.service';
 
 @Module({
   providers: [
@@ -57,7 +57,7 @@ import { UsdPriceLoader } from '../usdAmount/loaders/usd-price.loader';
     MarketplaceProvider,
     MarketplaceRedisHandler,
     CachingService,
-    UsdPriceLoader,
+    UsdPriceService,
   ],
   imports: [
     ElrondCommunicationModule,

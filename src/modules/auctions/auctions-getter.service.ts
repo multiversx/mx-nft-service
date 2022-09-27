@@ -31,7 +31,7 @@ import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
-import { UsdPriceLoader } from '../usdAmount/loaders/usd-price.loader';
+import { UsdPriceService } from '../usdAmount/loaders/usd-price.service';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -40,7 +40,7 @@ export class AuctionsGetterService {
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
-    private readonly usdPriceLoader: UsdPriceLoader,
+    private readonly UsdPriceService: UsdPriceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -752,8 +752,8 @@ export class AuctionsGetterService {
     const [currentAuctionsTokenIds, allMexTokens, egldToken] =
       await Promise.all([
         this.persistenceService.getCurrentAuctionsTokenIds(marketplaceKey),
-        this.usdPriceLoader.getCachedMexTokensWithDecimals(),
-        this.usdPriceLoader.getToken(elrondConfig.egld),
+        this.UsdPriceService.getCachedMexTokensWithDecimals(),
+        this.UsdPriceService.getToken(elrondConfig.egld),
       ]);
 
     const allTokens: Token[] = allMexTokens.concat(egldToken);
