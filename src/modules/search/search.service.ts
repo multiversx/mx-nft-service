@@ -142,25 +142,37 @@ export class SearchService {
   private async getMappedCollections(
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
-    const [collections, count] = await this.collectionsService.getFullCollections();
-    let allResults = collections.filter(x => 
-      x.verified && 
-      (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase()))
-    ).slice(0, 5);
-    
+    const [collections, count] =
+      await this.collectionsService.getOrSetFullCollections();
+    let allResults = collections
+      .filter(
+        (x) =>
+          x.verified &&
+          (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+            x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
+      )
+      .slice(0, 5);
+
     if (allResults.length < 5) {
-      const nonVerifiedResults = collections.filter(x => 
-        !x.verified && 
-        (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase()))
-      ).slice(0, 5 - allResults.length);
+      const nonVerifiedResults = collections
+        .filter(
+          (x) =>
+            !x.verified &&
+            (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+              x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
+        )
+        .slice(0, 5 - allResults.length);
       allResults.push(...nonVerifiedResults);
     }
 
-    const result = allResults.map(result => new SearchNftCollectionResponse({
-      identifier: result.collection,
-      name: result.name,
-      verified: result.verified
-    }));
+    const result = allResults.map(
+      (result) =>
+        new SearchNftCollectionResponse({
+          identifier: result.collection,
+          name: result.name,
+          verified: result.verified,
+        }),
+    );
 
     return result;
   }
