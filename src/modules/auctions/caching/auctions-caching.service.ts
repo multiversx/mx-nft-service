@@ -137,7 +137,7 @@ export class AuctionsCachingService {
       this.redisClient,
       this.getCurrentTokensCacheKey(marketplaceKey),
       () => getData(),
-      CacheInfo.CurrentAuctionsTokens.ttl,
+      CacheInfo.CurrentTokens.ttl,
     );
   }
 
@@ -160,7 +160,7 @@ export class AuctionsCachingService {
 
   public getCurrentTokensCacheKey(marketplaceKey: string = undefined) {
     return generateCacheKeyFromParams(
-      CacheInfo.CurrentAuctionsTokens.key,
+      CacheInfo.CurrentTokens.key,
       marketplaceKey,
     );
   }
