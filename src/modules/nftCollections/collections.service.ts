@@ -116,8 +116,8 @@ export class CollectionsService {
   async getCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
-    sorting: CollectionsSortingEnum,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
       .addCreator(filters?.creatorAddress)
@@ -194,8 +194,8 @@ export class CollectionsService {
   private async getFilteredCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
-    sorting: CollectionsSortingEnum,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getOrSetFullCollections();
 
