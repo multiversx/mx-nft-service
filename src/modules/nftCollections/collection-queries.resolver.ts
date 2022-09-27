@@ -96,20 +96,24 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
   @ResolveField('artist', () => Account)
   async artist(@Parent() auction: Collection) {
-    const { ownerAddress } = auction;
+    const { ownerAddress, artistAddress } = auction;
 
-    const address = new Address(ownerAddress);
-    let artistAddress: string = ownerAddress;
+    if (artistAddress) {
+      const account = await this.accountsProvider.load(artistAddress);
+      return Account.fromEntity(account?.value, artistAddress);
+    }
 
     if (!ownerAddress) return null;
 
+    const address = new Address(ownerAddress);
+    let artist: string = ownerAddress;
     if (address.isContractAddress()) {
       const response = await this.artistAddressProvider.load(ownerAddress);
-      artistAddress = response?.value ? response?.value?.owner : ownerAddress;
+      artist = response?.value ? response?.value?.owner : ownerAddress;
     }
 
-    const account = await this.accountsProvider.load(artistAddress);
-    return Account.fromEntity(account?.value, artistAddress);
+    const account = await this.accountsProvider.load(artist);
+    return Account.fromEntity(account?.value, artist);
   }
 
   @ResolveField('onSaleAssetsCount', () => Int)
