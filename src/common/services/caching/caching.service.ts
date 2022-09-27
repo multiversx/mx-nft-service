@@ -63,6 +63,18 @@ export class CachingService {
     return value;
   }
 
+  public async getCache<T>(
+    client: Redis.Redis,
+    key: string,
+  ): Promise<T | undefined> {
+    const value = await this.localCacheService.getCacheValue<T>(key);
+    if (value) {
+      return value;
+    }
+
+    return await this.redisCacheService.get(client, key);
+  }
+
   public async setCache<T>(
     client: Redis.Redis,
     key: string,

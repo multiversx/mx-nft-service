@@ -20,6 +20,6 @@ export class AuctionProvider extends BaseProvider<number> {
 
   async getData(auctionsIds: number[]) {
     const auctions = await this.persistenceService.getBulkAuctions(auctionsIds);
-    return auctions?.groupBy((auction) => auction.id);
+    return auctions?.groupBy((auction) => auction.id, false);
   }
 }

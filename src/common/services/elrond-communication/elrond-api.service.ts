@@ -8,10 +8,16 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { constants, elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
-import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
+import {
+  ApiNetworkProvider,
+  TransactionOnNetwork,
+} from '@elrondnetwork/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
 import { BatchUtils } from '@elrondnetwork/erdnest';
+import { Address } from '@elrondnetwork/erdjs/out';
+import { SmartContractApi } from './models/smart-contract.api';
+import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
 export class ElrondApiService {
@@ -127,6 +133,23 @@ export class ElrondApiService {
     );
   }
 
+  async getAccountSmartContracts(
+    address: string,
+    size: number,
+  ): Promise<SmartContractApi[]> {
+    return await this.doGetGeneric(
+      this.getAccountSmartContracts.name,
+      `accounts/${address}/contracts?size=${size}`,
+    );
+  }
+
+  async getAccountSmartContractsCount(address: string): Promise<number> {
+    return await this.doGetGeneric(
+      this.getAccountSmartContracts.name,
+      `accounts/${address}/contracts/count`,
+    );
+  }
+
   async getTokensForUser(address: string): Promise<Nft[]> {
     return await this.doGetGeneric(
       this.getTokensForUser.name,
@@ -213,6 +236,16 @@ export class ElrondApiService {
   async getNftsCount(query: string = ''): Promise<number> {
     const url = `nfts/count${new AssetsQuery(query).withNsfwFlag().build()}`;
     return await this.doGetGeneric(this.getNftsCount.name, url);
+  }
+
+  async getNftsAndCount(
+    nftsQuery: string = '',
+    nftsCountQuery = '',
+  ): Promise<[Nft[], number]> {
+    return [
+      await this.getAllNfts(nftsQuery),
+      await this.getNftsCount(nftsCountQuery),
+    ];
   }
 
   async getNftsCountForCollection(
@@ -466,6 +499,27 @@ export class ElrondApiService {
           symbol: token.ticker,
         })
       : undefined;
+  }
+
+  async getSmartContractOwner(
+    address: string,
+  ): Promise<{ address: string; owner: string }> {
+    let scAddress = new Address(address);
+    while (
+      scAddress.isContractAddress() &&
+      scAddress.bech32() !== XOXNO_MINTING_MANAGER
+    ) {
+      const { ownerAddress } = await this.doGetGeneric(
+        this.getSmartContractOwner.name,
+        `accounts/${scAddress.bech32()}?fields=ownerAddress`,
+      );
+      scAddress = new Address(ownerAddress);
+    }
+    return { address, owner: scAddress.bech32() };
+  }
+
+  async getTransactionByHash(txHash: string): Promise<TransactionOnNetwork> {
+    return await this.apiProvider.getTransaction(txHash);
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

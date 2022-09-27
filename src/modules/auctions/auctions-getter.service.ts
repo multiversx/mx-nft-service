@@ -163,7 +163,7 @@ export class AuctionsGetterService {
     auctions = auctions?.map((item) => new AuctionWithStartBid(item));
 
     const group: { key: string; value: AuctionWithBidsCount[] } =
-      auctions?.groupBy((a) => a.identifier);
+      auctions?.groupBy((a) => a.identifier, false);
     let groupedAuctions = [];
     for (const key in group) {
       groupedAuctions = [
@@ -194,14 +194,8 @@ export class AuctionsGetterService {
     );
   }
 
-  async getAvailableTokens(
-    id: number,
-    marketplaceKey: string,
-  ): Promise<number> {
-    return await this.persistenceService.getAvailableTokensForSpecificMarketplace(
-      id,
-      marketplaceKey,
-    );
+  async getAvailableTokens(id: number): Promise<number> {
+    return await this.persistenceService.getAvailableTokensByAuctionId(id);
   }
 
   async getMinMaxPrice(

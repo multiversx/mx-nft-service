@@ -1,9 +1,10 @@
 declare global {
   interface Array<T> {
-    groupBy(predicate: (item: T) => any): any;
+    groupBy(predicate: (item: T) => any, asArray: boolean): any;
     remove(element: T): number;
     sorted(predicate?: (element: T) => number): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
+    sum(predicate?: (item: T) => number): number;
     toRecord<TOUT>(
       keyPredicate: (item: T) => string,
       valuePredicate?: (item: T) => TOUT,
@@ -12,7 +13,9 @@ declare global {
   }
 }
 
-Array.prototype.distinct = function <TCollection, TResult>(predicate?: (element: TCollection) => TResult): TCollection[] {
+Array.prototype.distinct = function <TCollection, TResult>(
+  predicate?: (element: TCollection) => TResult,
+): TCollection[] {
   if (!predicate) {
     // @ts-ignore
     return [...new Set(this)];
@@ -79,6 +82,14 @@ Array.prototype.sortedDescending = function <T>(
   sorted.reverse();
 
   return sorted;
+};
+
+Array.prototype.sum = function <T>(predicate?: (item: T) => number): number {
+  if (predicate) {
+    return this.map(predicate).reduce((a, b) => a + b);
+  }
+
+  return this.reduce((a, b) => a + b);
 };
 
 Array.prototype.toRecord = function <TIN, TOUT>(

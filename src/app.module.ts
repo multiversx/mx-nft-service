@@ -29,6 +29,7 @@ import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.m
 import * as ormconfig from './ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
+import { ArtistsModuleGraph } from './modules/artists/artists.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.mod
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
     MarketplacesModuleGraph,
+    ArtistsModuleGraph,
   ],
 })
 export class AppModule {}

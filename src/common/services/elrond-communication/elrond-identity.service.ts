@@ -33,7 +33,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getProfiles',
+          path: this.getProfiles.name,
           addresses: addresses,
           exception: error,
         },
@@ -42,7 +42,7 @@ export class ElrondIdentityService {
     }
   }
 
-  async getProfile(address): Promise<AccountIdentity> {
+  async getProfile(address: string): Promise<AccountIdentity> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/${address}`;
 
     try {
@@ -63,12 +63,35 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getProfile',
+          path: this.getProfile.name,
           address: address,
           exception: error,
         },
       );
       return;
+    }
+  }
+
+  async getFollowersCount(
+    address: string,
+  ): Promise<{ address: string; count: number }> {
+    const url = `${process.env.ELROND_IDENTITY}api/v1/followers/${address}/count`;
+
+    try {
+      let response = await this.apiService.get(url);
+      return response?.data;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+          url,
+        )}`,
+        {
+          path: this.getFollowersCount.name,
+          address: address,
+          exception: error,
+        },
+      );
+      return { address, count: 0 };
     }
   }
 
@@ -91,7 +114,7 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getAcountsByHerotag',
+          path: this.getAcountsByHerotag.name,
           address: searchTerm,
           exception: error,
         },
@@ -122,12 +145,22 @@ export class ElrondIdentityService {
           url,
         )}`,
         {
-          path: 'ElrondIdentityService.getAddressByHerotag',
+          path: this.getAddressByHerotag.name,
           herotag: herotag,
           exception: error,
         },
       );
       return;
     }
+  }
+
+  async getAccountsForAddresses(keys: string[]): Promise<any[]> {
+    const uniqueAddresses = [...new Set(keys)];
+    const accountsPromises = uniqueAddresses.map((address) =>
+      this.getProfile(address),
+    );
+
+    const accountResponse = await Promise.all(accountsPromises);
+    return accountResponse;
   }
 }

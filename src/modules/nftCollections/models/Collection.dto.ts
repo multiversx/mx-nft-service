@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
+import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
@@ -17,8 +18,15 @@ export class Collection {
   ownerAddress: string;
   @Field({ nullable: true })
   owner: Account;
+  @Field({ nullable: true })
+  artist: Account;
   @Field(() => CollectionAsset, { nullable: true })
   collectionAsset: CollectionAsset;
+  @Field(() => AssetsResponse, {
+    nullable: true,
+    description: 'This will return only the first 10 assets',
+  })
+  assets: AssetsResponse;
   @Field()
   name: string;
   @Field(() => Int)
@@ -55,41 +63,52 @@ export class Collection {
   social: CollectionSocial;
   @Field(() => Int)
   onSaleAssetsCount: number;
+  @Field(() => Int)
+  nftsCount: number;
+  @Field(() => String)
+  artistAddress: string;
+  @Field(() => Int)
+  artistFollowersCount: number;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
   }
 
-  static fromCollectionApi(collectionApi: CollectionApi) {
-    return !collectionApi
-      ? null
-      : new Collection({
-          collection: collectionApi.collection,
-          type: NftTypeEnum[collectionApi.type],
-          ticker: collectionApi.ticker,
-          ownerAddress: collectionApi.owner,
-          creationDate: collectionApi.timestamp,
-          name: collectionApi.name,
-          canTransferRole: collectionApi.canTransferRole,
-          canPause: collectionApi.canPause,
-          canBurn: collectionApi.canBurn,
-          canFreeze: collectionApi.canFreeze,
-          canWipe: collectionApi.canWipe,
-          canAddQuantity: collectionApi.canAddQuantity,
-          canCreate: collectionApi.canCreate,
-          roles: collectionApi.roles?.map((role) =>
-            CollectionRole.fromRoleApi(role),
-          ),
-          verified: !!collectionApi.assets ?? false,
-          description: collectionApi.assets?.description,
-          website: collectionApi.assets?.website,
-          pngUrl: collectionApi.assets?.pngUrl,
-          svgUrl: collectionApi.assets?.svgUrl,
-          social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
-          collectionAsset: new CollectionAsset({
-            collectionIdentifer: collectionApi.collection,
-          }),
-        });
+  static fromCollectionApi(
+    collectionApi: CollectionApi,
+    artistAddress?: string,
+    followersCount?: number,
+  ) {
+    if (!collectionApi) return null;
+    return new Collection({
+      collection: collectionApi.collection,
+      artistAddress: artistAddress,
+      type: NftTypeEnum[collectionApi.type],
+      ticker: collectionApi.ticker,
+      ownerAddress: collectionApi.owner,
+      creationDate: collectionApi.timestamp,
+      name: collectionApi.name,
+      canTransferRole: collectionApi.canTransferRole,
+      canPause: collectionApi.canPause,
+      canBurn: collectionApi.canBurn,
+      canFreeze: collectionApi.canFreeze,
+      canWipe: collectionApi.canWipe,
+      canAddQuantity: collectionApi.canAddQuantity,
+      canCreate: collectionApi.canCreate,
+      roles: collectionApi.roles?.map((role) =>
+        CollectionRole.fromRoleApi(role),
+      ),
+      verified: !!collectionApi.assets ?? false,
+      description: collectionApi.assets?.description,
+      website: collectionApi.assets?.website,
+      pngUrl: collectionApi.assets?.pngUrl,
+      svgUrl: collectionApi.assets?.svgUrl,
+      social: CollectionSocial.fromSocialApi(collectionApi.assets?.social),
+      collectionAsset: new CollectionAsset({
+        collectionIdentifer: collectionApi.collection,
+      }),
+      artistFollowersCount: followersCount,
+    });
   }
 }
 

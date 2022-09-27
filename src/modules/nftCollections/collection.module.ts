@@ -17,6 +17,11 @@ import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-
 import { ElrondCommunicationModule } from 'src/common/services/elrond-communication/elrond-communication.module';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
+import { ArtistAddressProvider } from '../artists/artists.loader';
+import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
+import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
+import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
+import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 
 @Module({
   providers: [
@@ -36,6 +41,11 @@ import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-ass
     LocalCacheService,
     CollectionsNftsRedisHandler,
     CollectionsNftsCountRedisHandler,
+    ArtistAddressProvider,
+    ArtistAddressRedisHandler,
+    AssetsCollectionsProvider,
+    AssetsCollectionRedisHandler,
+    SmartContractArtistsService,
   ],
   imports: [
     forwardRef(() => ElrondCommunicationModule),

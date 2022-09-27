@@ -64,7 +64,7 @@ export class OrdersRepository extends Repository<OrderEntity> {
       })
       .getMany();
 
-    return orders?.groupBy((asset) => asset.auctionId);
+    return orders?.groupBy((asset) => asset.auctionId, false);
   }
 
   async getOrders(

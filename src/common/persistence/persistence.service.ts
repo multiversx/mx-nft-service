@@ -14,7 +14,10 @@ import { TierEntity } from 'src/db/campaigns/tiers.entity';
 import { TiersRepository } from 'src/db/campaigns/tiers.repository';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
-import { FeaturedNftEntity } from 'src/db/featuredNfts/featured.entity';
+import {
+  FeaturedCollectionEntity,
+  FeaturedNftEntity,
+} from 'src/db/featuredNfts/featured.entity';
 import {
   FeaturedCollectionsRepository,
   FeaturedNftsRepository,
@@ -202,10 +205,13 @@ export class PersistenceService {
     );
   }
 
-  async getStats(identifier: string): Promise<CollectionStatsEntity> {
+  async getStats(
+    identifier: string,
+    marketplaceKey: string = undefined,
+  ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getStats.name,
-      this.collectionStatsRepository.getStats(identifier),
+      this.collectionStatsRepository.getStats(identifier, marketplaceKey),
     );
   }
 
@@ -282,7 +288,7 @@ export class PersistenceService {
   async getFeaturedCollections(
     limit: number = 20,
     offset: number = 0,
-  ): Promise<[FeaturedNftEntity[], number]> {
+  ): Promise<[FeaturedCollectionEntity[], number]> {
     return await this.execute(
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
@@ -426,10 +432,10 @@ export class PersistenceService {
     );
   }
 
-  async updateFlag(identifier: string, flag: NftFlagsEntity): Promise<any> {
+  async updateFlag(flag: NftFlagsEntity): Promise<any> {
     return await this.execute(
       this.updateFlag.name,
-      this.nftsFlagsRepository.update(identifier, flag),
+      this.nftsFlagsRepository.updateFlag(flag),
     );
   }
 
@@ -689,6 +695,20 @@ export class PersistenceService {
     );
   }
 
+  async getTrendingCollections(): Promise<any[]> {
+    return await this.execute(
+      this.getTrendingCollections.name,
+      this.auctionsRepository.getTrendingCollections(),
+    );
+  }
+
+  async getTrendingCollectionsCount(): Promise<number> {
+    return await this.execute(
+      this.getTrendingCollectionsCount.name,
+      this.auctionsRepository.getTrendingCollectionsCount(),
+    );
+  }
+
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
@@ -793,16 +813,10 @@ export class PersistenceService {
     );
   }
 
-  async getAvailableTokensForSpecificMarketplace(
-    id: number,
-    marketplaceKey: string,
-  ): Promise<any> {
+  async getAvailableTokensByAuctionId(id: number): Promise<any> {
     return await this.execute(
-      this.getAvailableTokensForSpecificMarketplace.name,
-      this.auctionsRepository.getAvailableTokensForSpecificMarketplace(
-        id,
-        marketplaceKey,
-      ),
+      this.getAvailableTokensByAuctionId.name,
+      this.auctionsRepository.getAvailableTokensByAuctionId(id),
     );
   }
 

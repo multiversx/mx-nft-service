@@ -29,7 +29,6 @@ import {
   getAuctionsForIdentifierSortByPrice,
   getAuctionsForIdentifierSortByPriceCount,
   getAvailableTokensbyAuctionId,
-  getAvailableTokensbyAuctionIdForMarketplace,
   getAvailableTokensbyAuctionIds,
   getAvailableTokensScriptsByIdentifiers,
   getDefaultAuctionsForIdentifierQuery,
@@ -291,6 +290,29 @@ export class AuctionsRepository {
     return [...auctions, priceRange];
   }
 
+  async getTrendingCollections(): Promise<any[]> {
+    return this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.collection as collection')
+      .addSelect('COUNT(a.collection) as auctionsCount')
+      .where({ status: AuctionStatusEnum.Running })
+      .groupBy('a.collection')
+      .orderBy('COUNT(a.collection)', 'DESC')
+      .offset(0)
+      .limit(1000)
+      .execute();
+  }
+
+  async getTrendingCollectionsCount(): Promise<number> {
+    const { count } = await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('COUNT(DISTINCT(a.collection)) as count')
+      .where({ status: AuctionStatusEnum.Running })
+      .execute();
+
+    return count;
+  }
+
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     const getAuctions = this.auctionsRepository
       .createQueryBuilder('a')
@@ -428,7 +450,7 @@ export class AuctionsRepository {
     );
   }
 
-  async getAvailableTokens(id: number): Promise<any> {
+  async getAvailableTokensByAuctionId(id: number): Promise<any> {
     return await this.auctionsRepository.query(
       getAvailableTokensbyAuctionId(id),
     );
@@ -460,15 +482,6 @@ export class AuctionsRepository {
         identifiers.map((value) => value.split('_')[0]),
         identifiers[0].split('_')[1],
       ),
-    );
-  }
-
-  async getAvailableTokensForSpecificMarketplace(
-    id: number,
-    marketplaceKey: string,
-  ): Promise<any> {
-    return await this.auctionsRepository.query(
-      getAvailableTokensbyAuctionIdForMarketplace(id, marketplaceKey),
     );
   }
 

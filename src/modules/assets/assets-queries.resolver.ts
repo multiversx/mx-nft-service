@@ -32,12 +32,14 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { Marketplace } from '../marketplaces/models';
 import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
+import { ArtistAddressProvider } from '../artists/artists.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
   constructor(
     private assetsService: AssetsGetterService,
     private accountsProvider: AccountsProvider,
+    private artistAddressProvider: ArtistAddressProvider,
     private assetsLikeProvider: AssetLikesProvider,
     private assetsViewsProvider: AssetsViewsLoader,
     private isAssetLikedProvider: IsAssetLikedProvider,
@@ -177,6 +179,23 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     if (!creatorAddress) return null;
     const account = await this.accountsProvider.load(creatorAddress);
     return Account.fromEntity(account?.value, creatorAddress);
+  }
+
+  @ResolveField('artist', () => Account)
+  async artist(@Parent() asset: Asset) {
+    const { creatorAddress } = asset;
+
+    const address = new Address(creatorAddress);
+    let artistAddress: string = creatorAddress;
+
+    if (!creatorAddress) return null;
+
+    if (address.isContractAddress()) {
+      const response = await this.artistAddressProvider.load(creatorAddress);
+      artistAddress = response?.value ? response?.value?.owner : creatorAddress;
+    }
+    const account = await this.accountsProvider.load(artistAddress);
+    return Account.fromEntity(account?.value, artistAddress);
   }
 
   @ResolveField(() => Account)

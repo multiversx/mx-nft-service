@@ -12,6 +12,18 @@ type Account {
   socialLinks: [SocialLink!]
 }
 
+type AccountEdge {
+  cursor: String
+  node: Account
+}
+
+type AccountPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 type AccountStats {
   address: ID
   auctions: String
@@ -34,7 +46,24 @@ input AddLikeArgs {
   identifier: String!
 }
 
+input ArtistFilters {
+  sorting: ArtistSortingEnum!
+}
+
+type ArtistResponse {
+  edges: [AccountEdge!]
+  pageData: PageData
+  pageInfo: AccountPageInfo
+}
+
+enum ArtistSortingEnum {
+  MostActive
+  MostFollowed
+  Trending
+}
+
 type Asset {
+  artist: Account
   attributes: String!
 
   """This will return only the running query!"""
@@ -338,6 +367,12 @@ input ChildFilter {
 }
 
 type Collection {
+  artist: Account
+  artistAddress: String!
+  artistFollowersCount: Int!
+
+  """This will return only the first 10 assets"""
+  assets(pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -350,6 +385,7 @@ type Collection {
   creationDate: Int!
   description: String
   name: String!
+  nftsCount: Int!
   onSaleAssetsCount: Int!
   owner: Account
   ownerAddress: String
@@ -481,6 +517,15 @@ input CreateNftArgs {
   name: String!
   quantity: String = "1"
   royalties: String = "0"
+}
+
+enum FeaturedCollectionTypeEnum {
+  Featured
+  Hero
+}
+
+input FeaturedCollectionsFilter {
+  type: FeaturedCollectionTypeEnum!
 }
 
 input Filter {
@@ -815,6 +860,7 @@ enum Privacy {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
+  artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
   auctions(
@@ -837,7 +883,7 @@ type Query {
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   contractInfo: ContractInfo!
-  featuredCollections(pagination: ConnectionArgs): CollectionResponse!
+  featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
@@ -848,7 +894,7 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  trendingCollections(pagination: ConnectionArgs): [TrendingCollection!]!
+  trendingCollections(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {
@@ -1012,16 +1058,6 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
-}
-
-type TrendingCollection {
-  floorPrice: Price
-  identifier: ID!
-  imageUrl: String
-  name: String
-  percentage: String
-  verified: Boolean!
-  volume: Price
 }
 
 """The `Upload` scalar type represents a file upload."""

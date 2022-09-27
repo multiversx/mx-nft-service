@@ -6,7 +6,17 @@ export class CacheInfo {
 
   static AllCollections: CacheInfo = {
     key: 'allCollections',
-    ttl: TimeConstants.oneHour,
+    ttl: TimeConstants.oneDay,
+  };
+
+  static CollectionsMostActive: CacheInfo = {
+    key: 'collectionsMostActive',
+    ttl: TimeConstants.oneDay,
+  };
+
+  static CollectionsMostFollowed: CacheInfo = {
+    key: 'collectionsMostFollowed',
+    ttl: TimeConstants.oneDay,
   };
 
   static AllMarketplaces: CacheInfo = {
@@ -29,6 +39,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneMinute * 10,
   };
 
+  static trendingCollections: CacheInfo = {
+    key: 'trendingCollections',
+    ttl: TimeConstants.oneHour,
+  };
+
   static AuctionsEndingInAMonth: CacheInfo = {
     key: 'auctionsEndingInAMonth',
     ttl: TimeConstants.oneHour,
@@ -47,6 +62,21 @@ export class CacheInfo {
   static AuctionTags: CacheInfo = {
     key: 'auctionTags',
     ttl: 5 * TimeConstants.oneMinute,
+  };
+
+  static Artist: CacheInfo = {
+    key: 'artist',
+    ttl: 12 * TimeConstants.oneHour,
+  };
+
+  static Account: CacheInfo = {
+    key: 'account',
+    ttl: TimeConstants.oneMinute,
+  };
+
+  static XoxnoScCount: CacheInfo = {
+    key: 'xoxno_sc_count',
+    ttl: 12 * TimeConstants.oneHour,
   };
 
   static NftTags: CacheInfo = {

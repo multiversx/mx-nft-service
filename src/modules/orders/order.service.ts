@@ -29,13 +29,16 @@ export class OrdersService {
     private readonly rabbitPublisherService: CacheEventsPublisherService,
   ) {}
 
+  async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
+    return await this.persistenceService.getActiveOrderForAuction(auctionId);
+  }
+
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
       const activeOrder =
         await this.persistenceService.getActiveOrderForAuction(
           createOrderArgs.auctionId,
         );
-
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
@@ -54,6 +57,35 @@ export class OrdersService {
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
         path: 'OrdersService.createOrder',
+        createOrderArgs,
+        exception: error,
+      });
+    }
+  }
+
+  async updateAuctionOrders(
+    createOrderArgs: CreateOrderArgs,
+    activeOrder: OrderEntity,
+  ): Promise<OrderEntity> {
+    try {
+      await this.triggerCacheInvalidation(
+        createOrderArgs.auctionId,
+        createOrderArgs.ownerAddress,
+      );
+      const orderEntity = await this.persistenceService.saveOrder(
+        CreateOrderArgs.toEntity(createOrderArgs),
+      );
+      if (orderEntity && activeOrder) {
+        await this.handleNotifications(createOrderArgs, activeOrder);
+        await this.persistenceService.updateOrderWithStatus(
+          activeOrder,
+          OrderStatusEnum.Inactive,
+        );
+      }
+      return orderEntity;
+    } catch (error) {
+      this.logger.error('An error occurred while creating an order', {
+        path: 'OrdersService.updateAuctionOrders',
         createOrderArgs,
         exception: error,
       });
