@@ -129,12 +129,12 @@ export class AuctionsCachingService {
 
   public async getCurrentPaymentTokens(
     marketplaceKey: string = undefined,
-    getData: () => any,
+    getCurrentPaymentTokensFunction: () => any,
   ): Promise<Token[]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
       this.getCurrentPaymentTokensCacheKey(marketplaceKey),
-      () => getData(),
+      () => getCurrentPaymentTokensFunction(),
       CacheInfo.CurrentPaymentTokens.ttl,
     );
   }
