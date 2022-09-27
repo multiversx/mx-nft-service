@@ -21,7 +21,7 @@ export class NftRarityService {
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
   ) {
-    //this.setElasticRarityMappings();
+    this.setElasticRarityMappings();
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {
@@ -33,7 +33,7 @@ export class NftRarityService {
     const [elasticChecksum, dbChecksum] = await Promise.all([
       this.getNftRarityChecksum(elasticNfts),
       this.getNftRarityChecksum(dbNfts),
-    ]);
+  ]);
 
     if (
       !this.isIdenticalChecksum(

@@ -31,7 +31,7 @@ import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
-import { UsdPriceService } from '../usdAmount/usd-price.service';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -729,17 +729,17 @@ export class AuctionsGetterService {
     ];
   }
 
-  async getCurrentAuctionsPaymentTokens(
+  async getCurrentPaymentTokens(
     marketplaceKey: string = undefined,
   ): Promise<Token[]> {
     try {
-      return await this.auctionCachingService.getCurrentAuctionsPaymentTokens(
+      return await this.auctionCachingService.getCurrentPaymentTokens(
         marketplaceKey,
         () => this.getMappedCurrentAuctionsTokens(marketplaceKey),
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
-        path: 'AuctionsService.getCurrentAuctionsTokens',
+        path: 'AuctionsService.getCurrentPaymentTokens',
         marketplaceKey,
         exception: error,
       });
@@ -751,7 +751,7 @@ export class AuctionsGetterService {
   ): Promise<Token[]> {
     const [currentAuctionsTokenIds, allMexTokens, egldToken] =
       await Promise.all([
-        this.persistenceService.getCurrentAuctionsPaymentTokenIds(
+        this.persistenceService.getCurrentPaymentTokenIds(
           marketplaceKey,
         ),
         this.UsdPriceService.getCachedMexTokensWithDecimals(),
