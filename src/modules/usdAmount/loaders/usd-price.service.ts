@@ -10,7 +10,7 @@ import denominate from 'src/utils/formatters';
 import { computeUsdAmount } from 'src/utils/helpers';
 
 @Injectable()
-export class UsdPriceLoader {
+export class UsdPriceService {
   private readonly persistentRedisClient: Redis.Redis;
 
   constructor(
