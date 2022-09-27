@@ -261,9 +261,7 @@ export class CollectionsService {
       .groupBy((x) => x.artistAddress, true)
       .map((group: { key: any; values: any[] }) => ({
         artist: group.key,
-        nfts: group.values.reduce((sum: any, value: { nftsCount: any }) => {
-          return sum + value.nftsCount;
-        }, 0),
+        nfts: group.values.sum((x) => x.nftsCount),
       }))
       .sortedDescending((x: { nfts: any }) => x.nfts);
 

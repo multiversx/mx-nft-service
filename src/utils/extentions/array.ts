@@ -4,6 +4,7 @@ declare global {
     remove(element: T): number;
     sorted(predicate?: (element: T) => number): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
+    sum(predicate?: (item: T) => number): number;
     toRecord<TOUT>(
       keyPredicate: (item: T) => string,
       valuePredicate?: (item: T) => TOUT,
@@ -81,6 +82,14 @@ Array.prototype.sortedDescending = function <T>(
   sorted.reverse();
 
   return sorted;
+};
+
+Array.prototype.sum = function <T>(predicate?: (item: T) => number): number {
+  if (predicate) {
+    return this.map(predicate).reduce((a, b) => a + b);
+  }
+
+  return this.reduce((a, b) => a + b);
 };
 
 Array.prototype.toRecord = function <TIN, TOUT>(
