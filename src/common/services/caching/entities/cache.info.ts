@@ -86,7 +86,7 @@ export class CacheInfo {
 
   static AllTokens: CacheInfo = {
     key: 'allTokens',
-    ttl: 30 * TimeConstants.oneMinute,
+    ttl: 10 * TimeConstants.oneMinute,
   };
 
   static EgldToken: CacheInfo = {
