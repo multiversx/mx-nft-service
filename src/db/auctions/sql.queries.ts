@@ -251,3 +251,10 @@ export function getAuctionsOrderByNoBidsQuery() {
 		  GROUP BY a.id
 		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
 }
+
+export function getCurrentAuctionsTokens(marketplaceKey: string = undefined) {
+  const filter = marketplaceKey
+    ? `AND marketplaceKey = '${marketplaceKey}'`
+    : '';
+  return `select DISTINCT paymentToken from auctions a WHERE a.status = 'RUNNING' ${filter}`;
+}

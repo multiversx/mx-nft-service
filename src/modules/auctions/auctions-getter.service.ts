@@ -30,6 +30,8 @@ import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { UsdPriceLoader } from '../usdAmount/loaders/usd-price.loader';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -38,6 +40,7 @@ export class AuctionsGetterService {
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
+    private readonly usdPriceLoader: UsdPriceLoader,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -724,5 +727,40 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  async getCurrentAuctionsTokens(
+    marketplaceKey: string = undefined,
+  ): Promise<Token[]> {
+    try {
+      return await this.auctionCachingService.getCurrentAuctionsTokens(
+        marketplaceKey,
+        () => this.getMappedCurrentAuctionsTokens(marketplaceKey),
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', {
+        path: 'AuctionsService.getCurrentAuctionsTokens',
+        marketplaceKey,
+        exception: error,
+      });
+    }
+  }
+
+  private async getMappedCurrentAuctionsTokens(
+    marketplaceKey: string = undefined,
+  ): Promise<Token[]> {
+    const [currentAuctionsTokenIds, allMexTokens, egldToken] =
+      await Promise.all([
+        this.persistenceService.getCurrentAuctionsTokenIds(marketplaceKey),
+        this.usdPriceLoader.getCachedMexTokensWithDecimals(),
+        this.usdPriceLoader.getToken(elrondConfig.egld),
+      ]);
+
+    const allTokens: Token[] = allMexTokens.concat(egldToken);
+
+    return allTokens.filter(
+      (t) =>
+        currentAuctionsTokenIds.find((id) => id === t.identifier) !== undefined,
+    );
   }
 }

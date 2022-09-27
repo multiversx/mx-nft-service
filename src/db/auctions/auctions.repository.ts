@@ -31,6 +31,7 @@ import {
   getAvailableTokensbyAuctionId,
   getAvailableTokensbyAuctionIds,
   getAvailableTokensScriptsByIdentifiers,
+  getCurrentAuctionsTokens,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -701,5 +702,14 @@ export class AuctionsRepository {
       Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
     ),
       queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+  }
+
+  async getCurrentAuctionsTokenIds(
+    marketplaceKey: string = undefined,
+  ): Promise<string[]> {
+    const rows = await this.auctionsRepository.query(
+      getCurrentAuctionsTokens(marketplaceKey),
+    );
+    return rows.map((r) => r.paymentToken);
   }
 }

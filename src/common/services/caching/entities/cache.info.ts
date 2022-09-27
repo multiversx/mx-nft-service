@@ -86,11 +86,16 @@ export class CacheInfo {
 
   static AllTokens: CacheInfo = {
     key: 'allTokens',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: 30 * TimeConstants.oneMinute,
   };
 
   static EgldToken: CacheInfo = {
     key: 'egldToken',
     ttl: 10 * TimeConstants.oneMinute,
+  };
+
+  static CurrentAuctionsTokens: CacheInfo = {
+    key: 'currentAuctionsTokens',
+    ttl: 30 * TimeConstants.oneMinute,
   };
 }
