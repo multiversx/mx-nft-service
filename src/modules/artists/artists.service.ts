@@ -40,19 +40,12 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const [collections] = await this.collectionsService.getFullCollections();
-    let grouped = collections
-      .groupBy((x) => x.artistAddress, true)
-      .map((group: { key: any; values: any[] }) => ({
-        artist: group.key,
-        followersCount: group.values[0].artistFollowersCount,
-      }))
-      .sortedDescending((x: { followersCount: any }) => x.followersCount);
+    const [collections, count] =
+      await this.collectionsService.getOrSetMostFollowedCollections();
 
-    const count = grouped.length;
-    grouped = grouped?.slice(page, page + size);
+    const selectedCollections = collections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(
-      grouped.map((x: { artist: any }) => x.artist),
+      selectedCollections.map((x: { artist: any }) => x.artist),
     );
     return [
       mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
@@ -64,21 +57,12 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const [collections] = await this.collectionsService.getFullCollections();
-    let grouped = collections
-      .groupBy((x) => x.artistAddress, true)
-      .map((group: { key: any; values: any[] }) => ({
-        artist: group.key,
-        nfts: group.values.reduce((sum: any, value: { nftsCount: any }) => {
-          return sum + value.nftsCount;
-        }, 0),
-      }))
-      .sortedDescending((x: { nfts: any }) => x.nfts);
+    const [collections, count] =
+      await this.collectionsService.getOrSetMostActiveCollections();
 
-    const count = grouped.length;
-    grouped = grouped?.slice(page, page + size);
+    const selectedCollections = collections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(
-      grouped.map((x: { artist: any }) => x.artist),
+      selectedCollections.map((x: { artist: any }) => x.artist),
     );
     return [
       mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
