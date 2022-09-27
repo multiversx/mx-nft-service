@@ -207,7 +207,11 @@ export class CollectionsService {
     }
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
-      collections = collections.sortedDescending((x) => x.creationDate);
+      collections = orderBy(
+        collections,
+        ['creationDate', 'verified'],
+        ['desc', 'desc'],
+      );
     }
 
     collections = collections?.slice(offset, offset + limit);
