@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
-import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
+import { CollectionsModuleGraph } from './modules/nftCollections/collections.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
@@ -56,7 +56,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
       },
     }),
     CommonModule,
-    CollectionModuleGraph,
+    CollectionsModuleGraph,
     AssetsModuleGraph,
     AssetHistoryModuleGraph,
     AuctionsModuleGraph,
