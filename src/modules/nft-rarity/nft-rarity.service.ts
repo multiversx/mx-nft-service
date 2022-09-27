@@ -21,7 +21,7 @@ export class NftRarityService {
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
     private readonly logger: Logger,
   ) {
-    this.setElasticRarityMappings();
+    //this.setElasticRarityMappings();
   }
 
   async validateRarities(collectionTicker: string): Promise<boolean> {

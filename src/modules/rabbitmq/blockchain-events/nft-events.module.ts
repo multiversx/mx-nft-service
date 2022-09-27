@@ -25,8 +25,8 @@ import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
 import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { FeedEventsSenderService } from './feed-events.service';
-import { UsdAmountModuleGraph } from 'src/modules/usdAmount/usd-amount.module';
-import { UsdPriceService } from 'src/modules/usdAmount/loaders/usd-price.service';
+import { UsdPriceModuleGraph } from 'src/modules/usdAmount/usd-price.module';
+import { UsdPriceService } from 'src/modules/usdAmount/usd-price.service';
 import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 
 @Module({
@@ -40,7 +40,7 @@ import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-ev
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
-    UsdAmountModuleGraph,
+    UsdPriceModuleGraph,
   ],
   providers: [
     NftEventsConsumer,
