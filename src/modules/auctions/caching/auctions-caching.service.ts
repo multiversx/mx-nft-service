@@ -135,9 +135,9 @@ export class AuctionsCachingService {
   ): Promise<Token[]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getCurrentTokensCacheKey(marketplaceKey),
+      this.getCurrentPaymentTokensCacheKey(marketplaceKey),
       () => getData(),
-      CacheInfo.CurrentTokens.ttl,
+      CacheInfo.CurrentPaymentTokens.ttl,
     );
   }
 
@@ -158,9 +158,9 @@ export class AuctionsCachingService {
     );
   }
 
-  public getCurrentTokensCacheKey(marketplaceKey: string = undefined) {
+  public getCurrentPaymentTokensCacheKey(marketplaceKey: string = undefined) {
     return generateCacheKeyFromParams(
-      CacheInfo.CurrentTokens.key,
+      CacheInfo.CurrentPaymentTokens.key,
       marketplaceKey,
     );
   }

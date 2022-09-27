@@ -735,7 +735,7 @@ export class AuctionsGetterService {
     try {
       return await this.auctionCachingService.getCurrentPaymentTokens(
         marketplaceKey,
-        () => this.getMappedCurrentTokens(marketplaceKey),
+        () => this.getMappedCurrentPaymentTokens(marketplaceKey),
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
@@ -746,23 +746,22 @@ export class AuctionsGetterService {
     }
   }
 
-  private async getMappedCurrentTokens(
+  private async getMappedCurrentPaymentTokens(
     marketplaceKey: string = undefined,
   ): Promise<Token[]> {
-    const [CurrentTokenIds, allMexTokens, egldToken] =
-      await Promise.all([
-        this.persistenceService.getCurrentPaymentTokenIds(
-          marketplaceKey,
-        ),
+    const [currentPaymentTokenIds, allMexTokens, egldToken] = await Promise.all(
+      [
+        this.persistenceService.getCurrentPaymentTokenIds(marketplaceKey),
         this.UsdPriceService.getCachedMexTokensWithDecimals(),
         this.UsdPriceService.getToken(elrondConfig.egld),
-      ]);
+      ],
+    );
 
     const allTokens: Token[] = allMexTokens.concat(egldToken);
 
     return allTokens.filter(
       (t) =>
-        CurrentTokenIds.find((id) => id === t.identifier) !== undefined,
+        currentPaymentTokenIds.find((id) => id === t.identifier) !== undefined,
     );
   }
 }
