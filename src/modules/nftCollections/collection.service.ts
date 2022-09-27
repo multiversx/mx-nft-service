@@ -12,7 +12,12 @@ import { cacheConfig, elrondConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import { CollectionApi, ElrondApiService, getSmartContract } from 'src/common';
+import {
+  CollectionApi,
+  ElrondApiService,
+  ElrondIdentityService,
+  getSmartContract,
+} from 'src/common';
 import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
 import { CollectionsFilter } from '../common/filters/filtersTypes';
@@ -35,6 +40,7 @@ export class CollectionsService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private idService: ElrondIdentityService,
     private smartContractArtistService: SmartContractArtistsService,
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
@@ -150,7 +156,7 @@ export class CollectionsService {
       this.persistenceService.getTrendingCollectionsCount(),
     ]);
     const mappedCollections = [];
-    const [collections] = await this.getFullCollections();
+    const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of trendingCollections) {
       mappedCollections.push(
         collections.find((c) => c.collection === trendingCollection.collection),
@@ -187,7 +193,7 @@ export class CollectionsService {
     limit: number = 10,
     filters: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [collections, count] = await this.getFullCollections();
+    let [collections, count] = await this.getOrSetFullCollections();
 
     if (filters?.collection) {
       collections = collections.filter(
@@ -200,12 +206,12 @@ export class CollectionsService {
     return [collections, count];
   }
 
-  async getFullCollections(): Promise<[Collection[], number]> {
+  async getOrSetFullCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
-      TimeConstants.oneHour,
+      CacheInfo.AllCollections.ttl,
     );
   }
 
@@ -236,7 +242,52 @@ export class CollectionsService {
       ['verified', 'creationDate'],
       ['desc', 'desc'],
     );
+
     return [uniqueCollections, uniqueCollections?.length];
+  }
+
+  async getOrSetMostActiveCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.CollectionsMostActive.key,
+      async () => await this.getMostActiveCollections(),
+      CacheInfo.CollectionsMostActive.ttl,
+    );
+  }
+
+  public async getMostActiveCollections(): Promise<[Collection[], number]> {
+    const [collections] = await this.getOrSetFullCollections();
+    let groupedCollections = collections
+      .groupBy((x) => x.artistAddress, true)
+      .map((group: { key: any; values: any[] }) => ({
+        artist: group.key,
+        nfts: group.values.sum((x) => x.nftsCount),
+      }))
+      .sortedDescending((x: { nfts: any }) => x.nfts);
+
+    return [groupedCollections, groupedCollections.length];
+  }
+
+  async getOrSetMostFollowedCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.CollectionsMostFollowed.key,
+      async () => await this.getMostFollowedCollections(),
+      CacheInfo.CollectionsMostFollowed.ttl,
+    );
+  }
+
+  public async getMostFollowedCollections(): Promise<[Collection[], number]> {
+    const [collections] = await this.getOrSetFullCollections();
+    let groupedCollections = collections
+      .groupBy((x) => x.artistAddress, true)
+      .map((group: { key: any; values: any[] }) => ({
+        artist: group.key,
+        followersCount: group.values[0].artistFollowersCount,
+      }))
+      .sortedDescending((x: { followersCount: any }) => x.followersCount);
+
+    return [groupedCollections, groupedCollections.length];
   }
 
   private async getMappedCollections(
@@ -259,9 +310,23 @@ export class CollectionsService {
         await this.smartContractArtistService.getOrSetArtistForScAddress(
           collection.owner,
         );
-      return Collection.fromCollectionApi(collection, artist?.owner);
+      const followersCount = await this.idService.getFollowersCount(
+        artist.owner,
+      );
+      return Collection.fromCollectionApi(
+        collection,
+        artist?.owner,
+        followersCount?.count,
+      );
     }
-    return Collection.fromCollectionApi(collection, collection.owner);
+    const followersCount = await this.idService.getFollowersCount(
+      collection.owner,
+    );
+    return Collection.fromCollectionApi(
+      collection,
+      collection.owner,
+      followersCount?.count,
+    );
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
