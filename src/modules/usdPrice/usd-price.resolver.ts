@@ -6,7 +6,7 @@ import { Token } from 'src/common/services/elrond-communication/models/Token.mod
 
 @Resolver(() => Price)
 export class UsdPriceResolver extends BaseResolver(Price) {
-  constructor(private readonly UsdPriceService: UsdPriceService) {
+  constructor(private readonly usdPriceService: UsdPriceService) {
     super();
   }
 

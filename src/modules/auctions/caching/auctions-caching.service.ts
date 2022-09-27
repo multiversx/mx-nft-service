@@ -19,7 +19,6 @@ import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import * as hash from 'object-hash';
 import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
-import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Injectable()
@@ -29,7 +28,6 @@ export class AuctionsCachingService {
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
     private assetsAuctionsCountLoader: AssetAuctionsCountRedisHandler,
-    private UsdPriceService: UsdPriceService,
     private onSaleAssetsCount: OnSaleAssetsCountForCollectionRedisHandler,
     private availableTokensCountHandler: AssetAvailableTokensCountRedisHandler,
     private accountStatsCachingService: AccountsStatsCachingService,
