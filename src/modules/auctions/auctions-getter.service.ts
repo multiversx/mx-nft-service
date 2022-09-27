@@ -40,7 +40,7 @@ export class AuctionsGetterService {
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
-    private readonly UsdPriceService: UsdPriceService,
+    private readonly usdPriceService: UsdPriceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -752,8 +752,8 @@ export class AuctionsGetterService {
     const [currentPaymentTokenIds, allMexTokens, egldToken] = await Promise.all(
       [
         this.persistenceService.getCurrentPaymentTokenIds(marketplaceKey),
-        this.UsdPriceService.getCachedMexTokensWithDecimals(),
-        this.UsdPriceService.getToken(elrondConfig.egld),
+        this.usdPriceService.getCachedMexTokensWithDecimals(),
+        this.usdPriceService.getToken(elrondConfig.egld),
       ],
     );
 
