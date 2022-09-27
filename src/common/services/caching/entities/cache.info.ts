@@ -93,4 +93,9 @@ export class CacheInfo {
     key: 'egldToken',
     ttl: 10 * TimeConstants.oneMinute,
   };
+
+  static CurrentPaymentTokens: CacheInfo = {
+    key: 'currentPaymentTokens',
+    ttl: 30 * TimeConstants.oneMinute,
+  };
 }

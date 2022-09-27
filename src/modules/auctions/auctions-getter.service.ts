@@ -30,6 +30,8 @@ import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -38,6 +40,7 @@ export class AuctionsGetterService {
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
+    private readonly usdPriceService: UsdPriceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -724,5 +727,41 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  async getCurrentPaymentTokens(
+    marketplaceKey: string = undefined,
+  ): Promise<Token[]> {
+    try {
+      return await this.auctionCachingService.getCurrentPaymentTokens(
+        marketplaceKey,
+        () => this.getMappedCurrentPaymentTokens(marketplaceKey),
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', {
+        path: 'AuctionsService.getCurrentPaymentTokens',
+        marketplaceKey,
+        exception: error,
+      });
+    }
+  }
+
+  private async getMappedCurrentPaymentTokens(
+    marketplaceKey: string = undefined,
+  ): Promise<Token[]> {
+    const [currentPaymentTokenIds, allMexTokens, egldToken] = await Promise.all(
+      [
+        this.persistenceService.getCurrentPaymentTokenIds(marketplaceKey),
+        this.usdPriceService.getCachedMexTokensWithDecimals(),
+        this.usdPriceService.getToken(elrondConfig.egld),
+      ],
+    );
+
+    const allTokens: Token[] = allMexTokens.concat(egldToken);
+
+    return allTokens.filter(
+      (t) =>
+        currentPaymentTokenIds.find((id) => id === t.identifier) !== undefined,
+    );
   }
 }

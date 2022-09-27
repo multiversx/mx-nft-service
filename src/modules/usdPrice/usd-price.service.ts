@@ -10,7 +10,7 @@ import denominate from 'src/utils/formatters';
 import { computeUsdAmount } from 'src/utils/helpers';
 
 @Injectable()
-export class UsdPriceLoader {
+export class UsdPriceService {
   private readonly persistentRedisClient: Redis.Redis;
 
   constructor(
@@ -22,7 +22,7 @@ export class UsdPriceLoader {
     );
   }
 
-  private async getCachedMexTokensWithDecimals(): Promise<Token[]> {
+  public async getCachedMexTokensWithDecimals(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,

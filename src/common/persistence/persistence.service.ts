@@ -889,4 +889,13 @@ export class PersistenceService {
       this.auctionsRepository.updateAuctions(auctions),
     );
   }
+
+  async getCurrentPaymentTokenIds(
+    marketplaceKey: string = undefined,
+  ): Promise<string[]> {
+    return await this.execute(
+      this.getCurrentPaymentTokenIds.name,
+      this.auctionsRepository.getCurrentPaymentTokenIds(marketplaceKey),
+    );
+  }
 }

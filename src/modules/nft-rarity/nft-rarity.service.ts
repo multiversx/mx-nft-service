@@ -33,7 +33,7 @@ export class NftRarityService {
     const [elasticChecksum, dbChecksum] = await Promise.all([
       this.getNftRarityChecksum(elasticNfts),
       this.getNftRarityChecksum(dbNfts),
-    ]);
+  ]);
 
     if (
       !this.isIdenticalChecksum(

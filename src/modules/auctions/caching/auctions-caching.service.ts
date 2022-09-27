@@ -19,6 +19,7 @@ import { Auction } from '../models';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import * as hash from 'object-hash';
 import { InternalMarketplaceRedisHandler } from 'src/modules/assets/loaders/internal-marketplace.redis-handler';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Injectable()
 export class AuctionsCachingService {
@@ -126,6 +127,18 @@ export class AuctionsCachingService {
     );
   }
 
+  public async getCurrentPaymentTokens(
+    marketplaceKey: string = undefined,
+    getCurrentPaymentTokensFunction: () => any,
+  ): Promise<Token[]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getCurrentPaymentTokensCacheKey(marketplaceKey),
+      () => getCurrentPaymentTokensFunction(),
+      CacheInfo.CurrentPaymentTokens.ttl,
+    );
+  }
+
   private getAuctionsCacheKey(request: any) {
     return generateCacheKeyFromParams('auctions', hash(request));
   }
@@ -140,6 +153,13 @@ export class AuctionsCachingService {
       address,
       limit,
       offset,
+    );
+  }
+
+  public getCurrentPaymentTokensCacheKey(marketplaceKey: string = undefined) {
+    return generateCacheKeyFromParams(
+      CacheInfo.CurrentPaymentTokens.key,
+      marketplaceKey,
     );
   }
 }
