@@ -7,7 +7,7 @@ import {
   IssueCollectionArgs,
   SetNftRolesArgs,
 } from './models';
-import { CollectionsService } from './collection.service';
+import { CollectionsService } from './collections.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';

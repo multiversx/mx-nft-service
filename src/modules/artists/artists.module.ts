@@ -4,7 +4,7 @@ import { ArtistsResolver } from './artists.resolver';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
 import { ArtistsService } from './artists.service';
-import { CollectionModuleGraph } from '../nftCollections/collection.module';
+import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 
 @Module({
   providers: [
@@ -13,7 +13,7 @@ import { CollectionModuleGraph } from '../nftCollections/collection.module';
     MarketplacesService,
     MarketplacesCachingService,
   ],
-  imports: [ElrondCommunicationModule, CollectionModuleGraph],
+  imports: [ElrondCommunicationModule, CollectionsModuleGraph],
   exports: [ArtistsService],
 })
 export class ArtistsModuleGraph {}
