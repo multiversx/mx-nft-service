@@ -5,8 +5,13 @@ import { getCollectionStats } from './collection-stats.querries';
 @EntityRepository()
 export class CollectionStatsRepository {
   constructor(public readonly manager: EntityManager) {}
-  async getStats(identifier: string): Promise<CollectionStatsEntity> {
-    const response = await this.manager.query(getCollectionStats(identifier));
+  async getStats(
+    identifier: string,
+    marketplaceKey: string = undefined,
+  ): Promise<CollectionStatsEntity> {
+    const response = await this.manager.query(
+      getCollectionStats(identifier, marketplaceKey),
+    );
     return response?.length > 0 ? response[0] : new CollectionStatsEntity();
   }
 }

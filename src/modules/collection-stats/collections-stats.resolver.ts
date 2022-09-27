@@ -21,6 +21,7 @@ export class CollectionsStatsResolver {
   ): Promise<CollectionStats> {
     const collection = await this.collectionsStatsService.getStats(
       filters.identifier,
+      filters.marketplaceKey,
     );
     return CollectionStats.fromEntity(collection, filters?.identifier);
   }

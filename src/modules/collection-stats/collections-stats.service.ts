@@ -24,11 +24,14 @@ export class CollectionsStatsService {
     );
   }
 
-  async getStats(identifier: string): Promise<CollectionStatsEntity> {
+  async getStats(
+    identifier: string,
+    marketplaceKey: string = undefined,
+  ): Promise<CollectionStatsEntity> {
     try {
-      const cacheKey = this.getStatsCacheKey(identifier);
+      const cacheKey = this.getStatsCacheKey(identifier, marketplaceKey);
       const getCollectionStats = () =>
-        this.persistenceService.getStats(identifier);
+        this.persistenceService.getStats(identifier, marketplaceKey);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -41,6 +44,7 @@ export class CollectionsStatsService {
         {
           path: 'CollectionsStatsService.getStats',
           identifier,
+          marketplaceKey,
           exception: err?.message,
         },
       );
@@ -48,8 +52,15 @@ export class CollectionsStatsService {
     }
   }
 
-  private getStatsCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('collection_stats', identifier);
+  private getStatsCacheKey(
+    identifier: string,
+    marketplaceKey: string = undefined,
+  ) {
+    return generateCacheKeyFromParams(
+      'collection_stats',
+      identifier,
+      marketplaceKey ?? '',
+    );
   }
 
   async getItemsCount(
@@ -81,8 +92,15 @@ export class CollectionsStatsService {
     }
   }
 
-  private getCollectionNftsCacheKey(key: string) {
-    return generateCacheKeyFromParams('collectionAssetsCount', key);
+  private getCollectionNftsCacheKey(
+    key: string,
+    marketplaceKey: string = undefined,
+  ) {
+    return generateCacheKeyFromParams(
+      'collectionAssetsCount',
+      key,
+      marketplaceKey,
+    );
   }
 
   private getQueryForCollection(identifier: string): string {
