@@ -252,7 +252,7 @@ export function getAuctionsOrderByNoBidsQuery() {
 		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
 }
 
-export function getCurrentAuctionsTokens(marketplaceKey: string = undefined) {
+export function getCurrentAuctionsPaymentTokens(marketplaceKey: string = undefined) {
   const filter = marketplaceKey
     ? `AND a.marketplaceKey = '${marketplaceKey}'`
     : '';

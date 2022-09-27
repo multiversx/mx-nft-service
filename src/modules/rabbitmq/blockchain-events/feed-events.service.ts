@@ -10,7 +10,7 @@ import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
-import { UsdPriceService } from 'src/modules/usdAmount/loaders/usd-price.service';
+import { UsdPriceService } from 'src/modules/usdAmount/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 

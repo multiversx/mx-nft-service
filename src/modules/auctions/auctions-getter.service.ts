@@ -31,7 +31,7 @@ import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
-import { UsdPriceService } from '../usdAmount/loaders/usd-price.service';
+import { UsdPriceService } from '../usdAmount/usd-price.service';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -729,11 +729,11 @@ export class AuctionsGetterService {
     ];
   }
 
-  async getCurrentAuctionsTokens(
+  async getCurrentAuctionsPaymentTokens(
     marketplaceKey: string = undefined,
   ): Promise<Token[]> {
     try {
-      return await this.auctionCachingService.getCurrentAuctionsTokens(
+      return await this.auctionCachingService.getCurrentAuctionsPaymentTokens(
         marketplaceKey,
         () => this.getMappedCurrentAuctionsTokens(marketplaceKey),
       );
@@ -751,7 +751,9 @@ export class AuctionsGetterService {
   ): Promise<Token[]> {
     const [currentAuctionsTokenIds, allMexTokens, egldToken] =
       await Promise.all([
-        this.persistenceService.getCurrentAuctionsTokenIds(marketplaceKey),
+        this.persistenceService.getCurrentAuctionsPaymentTokenIds(
+          marketplaceKey,
+        ),
         this.UsdPriceService.getCachedMexTokensWithDecimals(),
         this.UsdPriceService.getToken(elrondConfig.egld),
       ]);

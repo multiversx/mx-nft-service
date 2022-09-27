@@ -265,7 +265,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   }
 
   @Query(() => [Token])
-  async currentAuctionsTokens(
+  async currentPaymentTokens(
     @Args({
       name: 'marketplaceKey',
       type: () => String,
@@ -273,7 +273,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     })
     marketplaceKey,
   ): Promise<Token[]> {
-    return await this.auctionsGetterService.getCurrentAuctionsTokens(
+    return await this.auctionsGetterService.getCurrentAuctionsPaymentTokens(
       marketplaceKey,
     );
   }
