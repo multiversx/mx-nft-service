@@ -314,6 +314,37 @@ export class AuctionsRepository {
     return count;
   }
 
+  async getActiveCollectionsFromLast30Days(): Promise<any[]> {
+    return this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.collection as collection')
+      .addSelect('COUNT(a.collection) as auctionsCount')
+      .where(
+        `a.endDate BETWEEN '${DateUtils.getCurrentTimestampPlusDays(
+          -30,
+        )}' AND '${DateUtils.getCurrentTimestamp()}'`,
+      )
+      .groupBy('a.collection')
+      .orderBy('COUNT(a.collection)', 'DESC')
+      .offset(0)
+      .limit(1000)
+      .execute();
+  }
+
+  async getCollectionsActiveFromLast30DaysCount(): Promise<number> {
+    const { count } = await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('COUNT(DISTINCT(a.collection)) as count')
+      .where(
+        `a.endDate BETWEEN '${DateUtils.getCurrentTimestampPlusDays(
+          -30,
+        )}' AND '${DateUtils.getCurrentTimestamp()}'`,
+      )
+      .execute();
+
+    return count;
+  }
+
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     const getAuctions = this.auctionsRepository
       .createQueryBuilder('a')
