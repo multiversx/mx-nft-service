@@ -709,6 +709,20 @@ export class PersistenceService {
     );
   }
 
+  async getActiveCollectionsLast30Days(): Promise<any[]> {
+    return await this.execute(
+      this.getActiveCollectionsLast30Days.name,
+      this.auctionsRepository.getActiveCollectionsFromLast30Days(),
+    );
+  }
+
+  async getActiveCollectionsLast30DaysCount(): Promise<number> {
+    return await this.execute(
+      this.getActiveCollectionsLast30DaysCount.name,
+      this.auctionsRepository.getCollectionsActiveFromLast30DaysCount(),
+    );
+  }
+
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {

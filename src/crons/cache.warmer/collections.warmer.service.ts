@@ -91,6 +91,23 @@ export class CollectionsWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_HOUR)
+  async handleActiveCollectionsFromLast30Days() {
+    await Locker.lock(
+      'Active collections from last 30 days order by number auctions',
+      async () => {
+        const result =
+          await this.collectionsService.getActiveCollectionsFromLast30Days();
+        await this.invalidateKey(
+          CacheInfo.activeCollectionLast30Days.key,
+          result,
+          CacheInfo.activeCollectionLast30Days.ttl,
+        );
+      },
+      true,
+    );
+  }
+
   private async invalidateKey(key: string, data: any, ttl: number) {
     await this.cacheService.setCache(this.redisClient, key, data, ttl);
     await this.refreshCacheKey(key, ttl);
