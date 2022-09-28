@@ -908,7 +908,6 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  trendingCollections(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {
