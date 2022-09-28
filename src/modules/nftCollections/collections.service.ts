@@ -126,7 +126,7 @@ export class CollectionsService {
       .addPageSize(offset, limit)
       .build();
 
-    if (filters.ownerAddress) {
+    if (filters?.ownerAddress) {
       const [collections, count] = await this.getCollectionsForUser(
         filters,
         apiQuery,
