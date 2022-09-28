@@ -68,16 +68,6 @@ export class Asset {
   viewsCount: number;
   @Field(() => Boolean, { nullable: true })
   isLiked: boolean;
-  @Field(() => String, {
-    nullable: true,
-    deprecationReason: 'This field will be removed in the next version',
-  })
-  url: string;
-  @Field(() => String, {
-    nullable: true,
-    deprecationReason: 'This field will be removed in the next version',
-  })
-  thumbnailUrl: string;
   @Field(() => Metadata, { nullable: true })
   metadata: Metadata;
   @Field(() => ScamInfo, { nullable: true })

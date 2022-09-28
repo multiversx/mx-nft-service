@@ -25,7 +25,6 @@ import { TagsModuleGraph } from './modules/tags/tags.module';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
-import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
 import * as ormconfig from './ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
@@ -71,7 +70,6 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
     CampaignsModuleGraph,
     IpfsModule,
     SearchModuleGraph,
-    ContractInfoModuleGraph,
     TagsModuleGraph,
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
