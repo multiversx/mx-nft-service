@@ -70,23 +70,7 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     let [trendingCollections, count] = await this.getAllTrendingCollections();
-    if (this.hasVerifiedFilter(filters)) {
-      trendingCollections = trendingCollections.filter(
-        (token) => token.verified === filters?.verified,
-      );
-    }
-
-    if (filters?.creatorAddress) {
-      trendingCollections = trendingCollections.filter(
-        (token) => token.artistAddress === filters?.creatorAddress,
-      );
-    }
-
-    if (filters?.type) {
-      trendingCollections = trendingCollections.filter(
-        (token) => token.type === filters?.type,
-      );
-    }
+    trendingCollections = this.applyFilters(filters, trendingCollections);
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
 
     return [trendingCollections, count];
@@ -130,30 +114,37 @@ export class CollectionsGetterService {
   ): Promise<[Collection[], number]> {
     let [activeCollections, count] =
       await this.getActiveCollectionsFromLast30Days();
+    activeCollections = this.applyFilters(filters, activeCollections);
+
+    if (sorting && sorting === CollectionsSortingEnum.Newest) {
+      activeCollections = orderBy(
+        activeCollections,
+        ['creationDate', 'verified'],
+        ['desc', 'desc'],
+      );
+    }
+    count = activeCollections.length;
+    activeCollections = activeCollections?.slice(offset, offset + limit);
+    return [activeCollections, count];
+  }
+
+  private applyFilters(filters: CollectionsFilter, collections: Collection[]) {
     if (this.hasVerifiedFilter(filters)) {
-      activeCollections = activeCollections.filter(
+      collections = collections.filter(
         (token) => token.verified === filters?.verified,
       );
     }
 
     if (filters?.creatorAddress) {
-      activeCollections = activeCollections.filter(
+      collections = collections.filter(
         (token) => token.artistAddress === filters?.creatorAddress,
       );
     }
 
     if (filters?.type) {
-      activeCollections = activeCollections.filter(
-        (token) => token.type === filters?.type,
-      );
+      collections = collections.filter((token) => token.type === filters?.type);
     }
-
-    if (sorting && sorting === CollectionsSortingEnum.Newest) {
-      count = orderBy(count, ['creationDate', 'verified'], ['desc', 'desc']);
-    }
-    count = activeCollections.length;
-    activeCollections = activeCollections?.slice(offset, offset + limit);
-    return [activeCollections, count];
+    return collections;
   }
 
   private async getFilteredCollections(
@@ -170,22 +161,7 @@ export class CollectionsGetterService {
         1,
       ];
     }
-
-    if (this.hasVerifiedFilter(filters)) {
-      collections = collections.filter(
-        (token) => token.verified === filters?.verified,
-      );
-    }
-
-    if (filters?.creatorAddress) {
-      collections = collections.filter(
-        (token) => token.artistAddress === filters?.creatorAddress,
-      );
-    }
-
-    if (filters?.type) {
-      collections = collections.filter((token) => token.type === filters?.type);
-    }
+    collections = this.applyFilters(filters, collections);
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
       collections = orderBy(
