@@ -41,7 +41,12 @@ export class CacheInfo {
 
   static trendingCollections: CacheInfo = {
     key: 'trendingCollections',
-    ttl: TimeConstants.oneHour,
+    ttl: TimeConstants.oneDay,
+  };
+
+  static activeCollectionLast30Days: CacheInfo = {
+    key: 'activeCollectionLast30Days',
+    ttl: TimeConstants.oneDay,
   };
 
   static AuctionsEndingInAMonth: CacheInfo = {
