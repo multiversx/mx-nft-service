@@ -60,6 +60,7 @@ export class CollectionsFilter {
 export enum CollectionsSortingEnum {
   Verified = 'Verified',
   Newest = 'Newest',
+  Trending = 'Trending',
 }
 
 registerEnumType(CollectionsSortingEnum, {
