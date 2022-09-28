@@ -4,7 +4,7 @@ import * as Redis from 'ioredis';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
-import { CollectionsService } from '../nftCollections/collection.service';
+import { CollectionsService } from '../nftCollections/collections.service';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';
 import { ArtistFilters } from './models/Artists.Filter';
 import { cacheConfig } from 'src/config';

@@ -462,6 +462,7 @@ type CollectionStats {
 
 input CollectionStatsFilter {
   identifier: String!
+  marketplaceKey: String
 }
 
 input CollectionsFilter {
@@ -477,6 +478,11 @@ input CollectionsFilter {
   """The owner of the collection"""
   ownerAddress: String
   type: NftTypeEnum
+}
+
+enum CollectionsSortingEnum {
+  Newest
+  Verified
 }
 
 input ConnectionArgs {
@@ -881,7 +887,7 @@ type Query {
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
-  collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
   contractInfo: ContractInfo!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!

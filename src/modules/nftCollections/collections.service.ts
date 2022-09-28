@@ -20,7 +20,6 @@ import {
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { TransactionNode } from '../common/transaction';
-import { CollectionsFilter } from '../common/filters/filtersTypes';
 import {
   IssueCollectionRequest,
   StopNftCreateRequest,
@@ -30,10 +29,13 @@ import {
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import {
+  CollectionsFilter,
+  CollectionsSortingEnum,
+} from './models/Collections-Filters';
 
 @Injectable()
 export class CollectionsService {
@@ -114,7 +116,8 @@ export class CollectionsService {
   async getCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     const apiQuery = new CollectionQuery()
       .addCreator(filters?.creatorAddress)
@@ -136,7 +139,7 @@ export class CollectionsService {
       }
       return await this.getAllCollections(filters, apiQuery);
     }
-    return await this.getFilteredCollections(offset, limit, filters);
+    return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
   async getTrendingCollections(
@@ -191,7 +194,8 @@ export class CollectionsService {
   private async getFilteredCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getOrSetFullCollections();
 
@@ -200,6 +204,14 @@ export class CollectionsService {
         (token) => token.collection === filters.collection,
       );
       count = 1;
+    }
+
+    if (sorting && sorting === CollectionsSortingEnum.Newest) {
+      collections = orderBy(
+        collections,
+        ['creationDate', 'verified'],
+        ['desc', 'desc'],
+      );
     }
 
     collections = collections?.slice(offset, offset + limit);
