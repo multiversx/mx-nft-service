@@ -43,6 +43,18 @@ export class CollectionsFilter {
   collection: string;
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Flag for verified collections',
+  })
+  verified: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Flag for active last 30 days',
+  })
+  activeLast30Days: boolean;
 }
 
 export enum CollectionsSortingEnum {

@@ -466,6 +466,9 @@ input CollectionStatsFilter {
 }
 
 input CollectionsFilter {
+  """Flag for active last 30 days"""
+  activeLast30Days: Boolean
+
   """Flag for can create or not on collection"""
   canCreate: Boolean
 
@@ -478,6 +481,9 @@ input CollectionsFilter {
   """The owner of the collection"""
   ownerAddress: String
   type: NftTypeEnum
+
+  """Flag for verified collections"""
+  verified: Boolean
 }
 
 enum CollectionsSortingEnum {
@@ -889,6 +895,7 @@ type Query {
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
   contractInfo: ContractInfo!
+  currentPaymentTokens(marketplaceKey: String): [Token!]!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
