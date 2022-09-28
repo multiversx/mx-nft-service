@@ -10,22 +10,6 @@ export class Metadata {
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
 
-  @Field(() => String, {
-    nullable: true,
-    deprecationReason: 'This field will be removed in the next version',
-  })
-  fileType: string;
-  @Field(() => String, {
-    nullable: true,
-    deprecationReason: 'This field will be removed in the next version',
-  })
-  fileUri: string;
-  @Field(() => String, {
-    nullable: true,
-    deprecationReason: 'This field will be removed in the next version',
-  })
-  fileName: string;
-
   constructor(init?: Partial<Metadata>) {
     Object.assign(this, init);
   }
