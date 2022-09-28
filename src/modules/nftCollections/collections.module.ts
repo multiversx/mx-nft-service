@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CollectionsQueriesResolver } from './collections-queries.resolver';
-import { CollectionsService } from './collections.service';
+import { CollectionsTransactionsService } from './collections-transactions.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
@@ -22,10 +22,12 @@ import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collectio
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import { CollectionsGetterService } from './collections-getter.service';
 
 @Module({
   providers: [
-    CollectionsService,
+    CollectionsTransactionsService,
+    CollectionsGetterService,
     CollectionAssetsResolver,
     CollectionAssetsProvider,
     CollectionAssetsRedisHandler,
@@ -51,6 +53,10 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
     forwardRef(() => ElrondCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
   ],
-  exports: [CollectionsService, LocalCacheService],
+  exports: [
+    CollectionsTransactionsService,
+    CollectionsGetterService,
+    LocalCacheService,
+  ],
 })
 export class CollectionsModuleGraph {}

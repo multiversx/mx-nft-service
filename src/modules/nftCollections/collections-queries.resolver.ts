@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Collection, CollectionAsset } from './models';
-import { CollectionsService } from './collections.service';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
@@ -24,11 +23,12 @@ import {
   CollectionsFilter,
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
+import { CollectionsGetterService } from './collections-getter.service';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   constructor(
-    private collectionsService: CollectionsService,
+    private collectionsGetterService: CollectionsGetterService,
     private accountsProvider: AccountsProvider,
     private artistAddressProvider: ArtistAddressProvider,
     private assetProvider: AssetsCollectionsProvider,
@@ -51,12 +51,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] = await this.collectionsService.getCollections(
-      offset,
-      limit,
-      filters,
-      sorting,
-    );
+    const [collections, count] =
+      await this.collectionsGetterService.getCollections(
+        offset,
+        limit,
+        filters,
+        sorting,
+      );
 
     return PageResponse.mapResponse<Collection>(
       collections || [],
@@ -74,7 +75,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   ): Promise<CollectionResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] =
-      await this.collectionsService.getTrendingCollections(offset, limit);
+      await this.collectionsGetterService.getTrendingCollections(offset, limit);
 
     return PageResponse.mapResponse<Collection>(
       collections || [],
