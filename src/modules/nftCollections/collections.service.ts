@@ -126,19 +126,17 @@ export class CollectionsService {
       .addPageSize(offset, limit)
       .build();
 
-    if (filters && Object.keys(filters).length > 0) {
-      if (filters.ownerAddress) {
-        const [collections, count] = await this.getCollectionsForUser(
-          filters,
-          apiQuery,
-        );
-        return [
-          collections?.map((element) => Collection.fromCollectionApi(element)),
-          count,
-        ];
-      }
-      return await this.getAllCollections(filters, apiQuery);
+    if (filters?.ownerAddress) {
+      const [collections, count] = await this.getCollectionsForUser(
+        filters,
+        apiQuery,
+      );
+      return [
+        collections?.map((element) => Collection.fromCollectionApi(element)),
+        count,
+      ];
     }
+
     return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
@@ -200,10 +198,26 @@ export class CollectionsService {
     let [collections, count] = await this.getOrSetFullCollections();
 
     if (filters?.collection) {
+      return [
+        collections.filter((token) => token.collection === filters.collection),
+        1,
+      ];
+    }
+
+    if (filters?.verified !== null && filters?.verified !== undefined) {
       collections = collections.filter(
-        (token) => token.collection === filters.collection,
+        (token) => token.verified === filters?.verified,
       );
-      count = 1;
+    }
+
+    if (filters?.creatorAddress) {
+      collections = collections.filter(
+        (token) => token.artistAddress === filters?.creatorAddress,
+      );
+    }
+
+    if (filters?.type) {
+      collections = collections.filter((token) => token.type === filters?.type);
     }
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
@@ -213,7 +227,7 @@ export class CollectionsService {
         ['desc', 'desc'],
       );
     }
-
+    count = collections.length;
     collections = collections?.slice(offset, offset + limit);
     return [collections, count];
   }
