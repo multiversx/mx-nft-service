@@ -1,31 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  TokenPayment,
-  TypedValue,
-} from '@elrondnetwork/erdjs';
-import { cacheConfig, elrondConfig, gas } from 'src/config';
-import { SetNftRolesArgs } from './models/SetNftRolesArgs';
+import { Address } from '@elrondnetwork/erdjs';
+import { cacheConfig } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import {
   CollectionApi,
   ElrondApiService,
   ElrondIdentityService,
-  getSmartContract,
 } from 'src/common';
 import * as Redis from 'ioredis';
-import { TransactionNode } from '../common/transaction';
-import {
-  IssueCollectionRequest,
-  StopNftCreateRequest,
-  TransferNftCreateRoleRequest,
-  SetNftRolesRequest,
-} from './models/requests';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
@@ -60,22 +44,12 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
-    const apiQuery = new CollectionQuery()
-      .addCreator(filters?.creatorAddress)
-      .addType(filters?.type)
-      .addCanCreate(filters?.canCreate)
-      .addPageSize(offset, limit)
-      .build();
+    if (sorting === CollectionsSortingEnum.Trending) {
+      return this.getTrendingCollections(offset, limit, filters);
+    }
 
     if (filters?.ownerAddress) {
-      const [collections, count] = await this.getCollectionsForUser(
-        filters,
-        apiQuery,
-      );
-      return [
-        collections?.map((element) => Collection.fromCollectionApi(element)),
-        count,
-      ];
+      return await this.getCollectionsForUser(offset, limit, filters);
     }
 
     if (filters?.activeLast30Days) {
@@ -93,12 +67,29 @@ export class CollectionsGetterService {
   async getTrendingCollections(
     offset: number = 0,
     limit: number = 10,
+    filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [collections, count] = await this.getAllTrendingCollections();
+    let [trendingCollections, count] = await this.getAllTrendingCollections();
+    if (this.hasVerifiedFilter(filters)) {
+      trendingCollections = trendingCollections.filter(
+        (token) => token.verified === filters?.verified,
+      );
+    }
 
-    collections = collections?.slice(offset, offset + limit);
+    if (filters?.creatorAddress) {
+      trendingCollections = trendingCollections.filter(
+        (token) => token.artistAddress === filters?.creatorAddress,
+      );
+    }
 
-    return [collections, count];
+    if (filters?.type) {
+      trendingCollections = trendingCollections.filter(
+        (token) => token.type === filters?.type,
+      );
+    }
+    trendingCollections = trendingCollections?.slice(offset, offset + limit);
+
+    return [trendingCollections, count];
   }
 
   async getAllTrendingCollections(): Promise<[Collection[], number]> {
@@ -139,7 +130,6 @@ export class CollectionsGetterService {
   ): Promise<[Collection[], number]> {
     let [activeCollections, count] =
       await this.getActiveCollectionsFromLast30Days();
-    console.log(filters?.verified !== null, filters?.verified);
     if (this.hasVerifiedFilter(filters)) {
       activeCollections = activeCollections.filter(
         (token) => token.verified === filters?.verified,
@@ -378,16 +368,23 @@ export class CollectionsGetterService {
   }
 
   private async getCollectionsForUser(
-    filters: CollectionsFilter,
-    query: string = '',
-  ): Promise<[CollectionApi[], number]> {
+    offset: number = 0,
+    limit: number = 10,
+    filters?: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    const query = new CollectionQuery()
+      .addCreator(filters?.creatorAddress)
+      .addType(filters?.type)
+      .addCanCreate(filters?.canCreate)
+      .addPageSize(offset, limit)
+      .build();
     if (filters?.collection) {
       const collection =
         await this.apiService.getCollectionForOwnerAndIdentifier(
           filters.ownerAddress,
           filters.collection,
         );
-      return [[collection], collection ? 1 : 0];
+      return [[Collection.fromCollectionApi(collection)], collection ? 1 : 0];
     }
     const [collectionsApi, count] = await Promise.all([
       this.apiService.getCollectionsForAddress(filters.ownerAddress, query),
@@ -396,6 +393,9 @@ export class CollectionsGetterService {
         query,
       ),
     ]);
-    return [collectionsApi, count];
+    return [
+      collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
+      count,
+    ];
   }
 }

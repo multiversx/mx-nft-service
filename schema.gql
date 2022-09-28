@@ -488,6 +488,7 @@ input CollectionsFilter {
 
 enum CollectionsSortingEnum {
   Newest
+  Trending
   Verified
 }
 
