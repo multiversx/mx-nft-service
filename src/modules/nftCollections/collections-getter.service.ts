@@ -38,7 +38,7 @@ import {
 } from './models/Collections-Filters';
 
 @Injectable()
-export class CollectionsService {
+export class CollectionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,

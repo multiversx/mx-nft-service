@@ -3,7 +3,6 @@ import { CommonModule } from 'src/common.module';
 import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
 import { CollectionsNftsCountRedisHandler } from 'src/modules/nftCollections/collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from 'src/modules/nftCollections/collection-nfts.redis-handler';
-import { CollectionsService } from 'src/modules/nftCollections/collections.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { AuctionsWarmerService } from './auctions.warmer.service';
 import { CollectionsWarmerService } from './collections.warmer.service';
@@ -13,6 +12,7 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
 import { TokensWarmerService } from './tokens.warmer.service';
 import { XoxnoArtistsWarmerService } from './xoxno-minter-owners.warmer.service';
 import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-artist.service';
+import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-
     MarketplacesModuleGraph,
   ],
   providers: [
-    CollectionsService,
+    CollectionsGetterService,
     CollectionsNftsCountRedisHandler,
     CollectionsNftsRedisHandler,
     CollectionsWarmerService,
