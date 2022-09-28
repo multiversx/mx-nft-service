@@ -204,7 +204,7 @@ export class CollectionsService {
       ];
     }
 
-    if (filters?.verified !== null) {
+    if (filters?.verified !== null && filters?.verified !== undefined) {
       collections = collections.filter(
         (token) => token.verified === filters?.verified,
       );
