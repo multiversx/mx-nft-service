@@ -33,6 +33,31 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 
+export const runningAuctionRequest = new QueryRequest({
+  customFilters: [],
+  offset: 0,
+  limit: 10000,
+  filters: new FiltersExpression({
+    filters: [
+      new Filter({
+        field: 'status',
+        values: ['Running'],
+        op: Operation.EQ,
+      }),
+      new Filter({
+        field: 'startDate',
+        values: [Math.round(new Date().getTime() / 1000).toString()],
+        op: Operation.LE,
+      }),
+    ],
+    operator: Operator.AND,
+  }),
+  groupByOption: new Grouping({
+    groupBy: GroupBy.IDENTIFIER,
+  }),
+  sorting: [],
+});
+
 @Injectable()
 export class AuctionsGetterService {
   private redisClient: Redis.Redis;
@@ -470,6 +495,7 @@ export class AuctionsGetterService {
     );
     const statusFilter = queryRequest.getFilter('status');
     const startDateFilter = queryRequest.getFilter('startDate');
+    const buyNowFilter = queryRequest.getFilter('maxBid');
     const sort = queryRequest.getSort();
     const allFilters = queryRequest.getAllFilters();
 
@@ -514,9 +540,13 @@ export class AuctionsGetterService {
     }
 
     if (
-      Object.keys(allFilters).length === 2 &&
-      statusFilter &&
-      startDateFilter
+      (Object.keys(allFilters).length === 2 &&
+        statusFilter &&
+        startDateFilter) ||
+      (Object.keys(allFilters).length === 3 &&
+        statusFilter &&
+        startDateFilter &&
+        buyNowFilter)
     ) {
       let [allAuctions, _totalCount, priceRange] =
         await this.cacheService.getOrSetCache(
@@ -623,30 +653,7 @@ export class AuctionsGetterService {
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 10000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
+    const queryRequest = runningAuctionRequest;
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }

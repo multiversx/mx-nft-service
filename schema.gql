@@ -524,6 +524,18 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+type ExploreCollectionsStats {
+  activeLast30DaysCount: Int!
+  allCollectionsCount: Int!
+  verifiedCount: Int!
+}
+
+type ExploreNftsStats {
+  allNftsCount: Int!
+  buyNowCount: Int!
+  liveAuctionsCount: Int!
+}
+
 type ExploreStats {
   artists: Int!
   collections: Int!
@@ -891,6 +903,8 @@ type Query {
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
   currentPaymentTokens(marketplaceKey: String): [Token!]!
+  exploreCollectionsStats: ExploreCollectionsStats!
+  exploreNftsStats: ExploreNftsStats!
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
