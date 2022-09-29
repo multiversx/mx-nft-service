@@ -26,7 +26,7 @@ export class LikesWarmerService {
     console.log('updateTokens');
 
     await Locker.lock(
-      'MEX Tokens invalidations',
+      'Most liked assets invalidation',
       async () => {
         const assets = await this.assetsLikesService.getMostLikedAssets();
         await this.invalidateKey(
