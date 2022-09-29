@@ -63,5 +63,16 @@
     "getNftsFromApiBatchSize": 250,
     "bulkUpdateElasticBatchSize": 100,
     "getTokensFromApiBatchSize": 100
+  },
+  "genericDescriptions": {
+    "forBigCollections": [
+      "A collection of {size} uniquely inspiring NFTs.",
+      "A collection of {size} beautifully designed & minted NFTs.",
+      "A {size} piece, exquisitely crafted NFTs collection.",
+      "{size} magnificently designed and truly inspiring NFTs.",
+      "An alluring collection of {size} wonderfully minted NFTs."
+    ],
+    "forSmallCollections": [""],
+    "forAssets": [""]
   }
 }
