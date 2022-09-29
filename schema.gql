@@ -524,6 +524,12 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+type ExploreStats {
+  artists: Int!
+  collections: Int!
+  nfts: Int!
+}
+
 enum FeaturedCollectionTypeEnum {
   Featured
   Hero
@@ -885,6 +891,7 @@ type Query {
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
   currentPaymentTokens(marketplaceKey: String): [Token!]!
+  exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!

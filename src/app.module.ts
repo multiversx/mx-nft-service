@@ -29,6 +29,7 @@ import * as ormconfig from './ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
+import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
     NotificationsModuleGraph,
     MarketplacesModuleGraph,
     ArtistsModuleGraph,
+    ExploreStatsModuleGraph,
   ],
 })
 export class AppModule {}
