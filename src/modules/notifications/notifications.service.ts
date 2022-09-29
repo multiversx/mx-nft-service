@@ -12,7 +12,7 @@ import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cach
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()

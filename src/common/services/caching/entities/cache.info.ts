@@ -113,4 +113,9 @@ export class CacheInfo {
     key: 'currentPaymentTokens',
     ttl: 30 * TimeConstants.oneMinute,
   };
+
+  static MostLikedAssets: CacheInfo = {
+    key: 'mostLikedAssets',
+    ttl: TimeConstants.oneDay,
+  };
 }

@@ -11,7 +11,7 @@ import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cach
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 type NsfwType = {
   identifier: string;
   nsfw: any;
