@@ -74,7 +74,7 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const trendingCollections =
+    const [trendingCollections, count] =
       await this.collectionsGetterService.getAllTrendingCollections();
 
     const trendingCreators = trendingCollections?.slice(page, page + size);
@@ -83,7 +83,7 @@ export class ArtistsService {
     );
     return [
       mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
-      mappedAccounts.length,
+      count,
     ];
   }
 
