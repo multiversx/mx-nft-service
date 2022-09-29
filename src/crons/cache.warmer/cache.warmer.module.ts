@@ -13,6 +13,8 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
 import { TokensWarmerService } from './tokens.warmer.service';
 import { XoxnoArtistsWarmerService } from './xoxno-minter-owners.warmer.service';
 import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-artist.service';
+import { LikesWarmerService } from './likes.warmer.service';
+import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-
     forwardRef(() => AuctionsModuleGraph),
     PubSubListenerModule,
     MarketplacesModuleGraph,
+    AssetsModuleGraph,
   ],
   providers: [
     CollectionsService,
@@ -31,6 +34,7 @@ import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-
     AuctionsWarmerService,
     TokensWarmerService,
     XoxnoArtistsWarmerService,
+    LikesWarmerService,
   ],
   exports: [CommonModule],
 })
