@@ -13,3 +13,31 @@ export class ExploreStats {
     Object.assign(this, init);
   }
 }
+
+@ObjectType()
+export class ExploreCollectionsStats {
+  @Field(() => Int)
+  allCollectionsCount: number;
+  @Field(() => Int)
+  verifiedCount: number;
+  @Field(() => Int)
+  activeLast30DaysCount: number;
+
+  constructor(init?: Partial<ExploreCollectionsStats>) {
+    Object.assign(this, init);
+  }
+}
+
+@ObjectType()
+export class ExploreNftsStats {
+  @Field(() => Int)
+  allNftsCount: number;
+  @Field(() => Int)
+  liveAuctionsCount: number;
+  @Field(() => Int)
+  buyNowCount: number;
+
+  constructor(init?: Partial<ExploreNftsStats>) {
+    Object.assign(this, init);
+  }
+}
