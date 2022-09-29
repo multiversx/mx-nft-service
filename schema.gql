@@ -93,12 +93,10 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
   viewsCount: Int
 }
@@ -177,6 +175,10 @@ type AssetsResponse {
   edges: [AssetEdge!]
   pageData: PageData
   pageInfo: AssetPageInfo
+}
+
+enum AssetsSortingEnum {
+  MostLikes
 }
 
 input AttributeInput {
@@ -488,6 +490,7 @@ input CollectionsFilter {
 
 enum CollectionsSortingEnum {
   Newest
+  Trending
   Verified
 }
 
@@ -503,12 +506,6 @@ input ConnectionArgs {
 
   """Paginate last"""
   last: Int
-}
-
-type ContractInfo {
-  address: ID
-  isPaused: Boolean
-  marketplaceCutPercentage: String
 }
 
 input CreateAuctionArgs {
@@ -680,9 +677,6 @@ enum MediaTypeEnum {
 type Metadata {
   attributes: [AttributeType!]
   description: String
-  fileName: String @deprecated(reason: "This field will be removed in the next version")
-  fileType: String @deprecated(reason: "This field will be removed in the next version")
-  fileUri: String @deprecated(reason: "This field will be removed in the next version")
 }
 
 type MintPrice {
@@ -874,7 +868,7 @@ type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
   artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
-  assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
+  assets(filters: AssetsFilter, pagination: ConnectionArgs, sorting: AssetsSortingEnum): AssetsResponse!
   auctions(
     customFilters: [AuctionCustomFilter]
 
@@ -894,7 +888,6 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
-  contractInfo: ContractInfo!
   currentPaymentTokens(marketplaceKey: String): [Token!]!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
@@ -907,7 +900,6 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  trendingCollections(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {
