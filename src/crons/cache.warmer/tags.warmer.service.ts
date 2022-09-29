@@ -31,7 +31,7 @@ export class TagsWarmerService {
         await this.invalidateKey(
           CacheInfo.AuctionTags.key,
           tokens,
-          5 * TimeConstants.oneMinute,
+          CacheInfo.AuctionTags.ttl,
         );
       },
       true,
