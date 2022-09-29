@@ -7,7 +7,7 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import { Asset, AssetsResponse, NftTypeEnum } from './models';
+import { Asset, AssetsResponse, Metadata, NftTypeEnum } from './models';
 import { Auction } from '../auctions/models';
 import { Account } from '../account-stats/models/Account.dto';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
@@ -23,7 +23,7 @@ import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
-import { elrondConfig } from 'src/config';
+import { genericDescriptions, elrondConfig } from 'src/config';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
@@ -33,6 +33,7 @@ import { Marketplace } from '../marketplaces/models';
 import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 import { ArtistAddressProvider } from '../artists/artists.loader';
+import { randomBetween } from 'src/utils/helpers';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -217,6 +218,19 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return this.getMarketplaceForSft(collection, identifier);
     }
     return null;
+  }
+
+  @ResolveField(() => Metadata)
+  metadata(@Parent() asset: Asset) {
+    if (!asset?.metadata) {
+      asset.metadata = new Metadata();
+    }
+    if (!asset?.metadata?.description) {
+      const descriptions = genericDescriptions.forAssets;
+      const randomIdx = randomBetween(0, descriptions.length);
+      asset.metadata.description = descriptions[randomIdx];
+    }
+    return asset.metadata;
   }
 
   private async getMarketplaceForNft(
