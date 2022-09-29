@@ -109,6 +109,7 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case ExternalAuctionEventEnum.Buy:
+        case ExternalAuctionEventEnum.BulkBuy:
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
           const buyMarketplace: Marketplace =
