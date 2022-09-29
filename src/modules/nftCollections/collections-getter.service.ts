@@ -69,14 +69,13 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections, count] = await this.getAllTrendingCollections();
+    let trendingCollections = await this.getAllTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
-
-    return [trendingCollections, count];
+    return [trendingCollections, trendingCollections.length];
   }
 
-  async getAllTrendingCollections(): Promise<[Collection[], number]> {
+  async getAllTrendingCollections(): Promise<Collection[]> {
     const [trendingCollections] = await Promise.all([
       this.persistenceService.getTrendingCollections(),
       this.persistenceService.getTrendingCollectionsCount(),
@@ -88,7 +87,7 @@ export class CollectionsGetterService {
         collections.find((c) => c.collection === trendingCollection.collection),
       );
     }
-    return [mappedCollections, mappedCollections.length];
+    return mappedCollections;
   }
 
   async getActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
