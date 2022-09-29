@@ -71,8 +71,9 @@ export class CollectionsGetterService {
   ): Promise<[Collection[], number]> {
     let trendingCollections = await this.getAllTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
-    return [trendingCollections, trendingCollections.length];
+    return [trendingCollections, count];
   }
 
   async getAllTrendingCollections(): Promise<Collection[]> {
