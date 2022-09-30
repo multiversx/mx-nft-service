@@ -93,7 +93,7 @@ export class AuctionsWarmerService {
       'Buy now auctions',
       async () => {
         const auctionResult =
-          await this.auctionsGetterService.getActiveAuctions();
+          await this.auctionsGetterService.getBuyNowAuctions();
 
         await this.invalidateKey(
           CacheInfo.BuyNowAuctions.key,
