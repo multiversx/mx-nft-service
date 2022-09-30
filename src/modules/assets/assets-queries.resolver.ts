@@ -230,8 +230,8 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       return asset.metadata;
     }
 
-    if (asset.assets?.description) {
-      asset.metadata.description = asset.assets.description;
+    if (asset.branding?.description) {
+      asset.metadata.description = asset.branding.description;
       return asset.metadata;
     }
 
