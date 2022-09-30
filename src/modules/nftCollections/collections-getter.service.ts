@@ -401,17 +401,32 @@ export class CollectionsGetterService {
         );
       return [[Collection.fromCollectionApi(collection)], collection ? 1 : 0];
     }
-    const [collectionsApi, count] = await Promise.all([
+
+    const [collectionsApi, count, [fullCollections]] = await Promise.all([
       this.apiService.getCollectionsForAddress(filters.ownerAddress, query),
       this.apiService.getCollectionsForAddressCount(
         filters.ownerAddress,
         query,
       ),
+      this.getOrSetFullCollections(),
     ]);
-    return [
-      collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
-      count,
-    ];
+
+    let collections: Collection[] = [];
+
+    let promises: Promise<Collection>[] = [];
+    for (const collection of collectionsApi) {
+      const newCollection = fullCollections.find(
+        (c) => c.ticker === collection.ticker,
+      );
+      if (newCollection) {
+        collections.push(newCollection);
+      } else {
+        promises.push(this.getFullCollectionRaw(collection.ticker));
+      }
+    }
+    collections = collections.concat(await Promise.all(promises));
+
+    return [collections, count];
   }
 
   async getRandomCollectionDescription(node: Collection): Promise<string> {
