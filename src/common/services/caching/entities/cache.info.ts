@@ -14,6 +14,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneDay,
   };
 
+  static NftsCount: CacheInfo = {
+    key: 'nftsCount',
+    ttl: TimeConstants.oneDay,
+  };
+
   static CollectionsMostFollowed: CacheInfo = {
     key: 'collectionsMostFollowed',
     ttl: TimeConstants.oneDay,
@@ -31,6 +36,11 @@ export class CacheInfo {
 
   static ActiveAuctions: CacheInfo = {
     key: 'activeAuctions',
+    ttl: TimeConstants.oneMinute * 10,
+  };
+
+  static BuyNowAuctions: CacheInfo = {
+    key: 'buyNowAuctions',
     ttl: TimeConstants.oneMinute * 10,
   };
 
@@ -66,7 +76,7 @@ export class CacheInfo {
 
   static AuctionTags: CacheInfo = {
     key: 'auctionTags',
-    ttl: 5 * TimeConstants.oneMinute,
+    ttl: 5 * TimeConstants.oneHour,
   };
 
   static Artist: CacheInfo = {
