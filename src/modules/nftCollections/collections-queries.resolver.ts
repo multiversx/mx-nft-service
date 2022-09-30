@@ -141,4 +141,14 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
       limit,
     );
   }
+
+  @ResolveField('description')
+  description(@Parent() node: Collection): string {
+    return (
+      node.description ??
+      this.collectionsGetterService.getRandomCollectionDescription(
+        node.nftsCount,
+      )
+    );
+  }
 }
