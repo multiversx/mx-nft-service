@@ -69,10 +69,10 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections, count] = await this.getAllTrendingCollections();
+    let [trendingCollections] = await this.getAllTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
-
     return [trendingCollections, count];
   }
 
