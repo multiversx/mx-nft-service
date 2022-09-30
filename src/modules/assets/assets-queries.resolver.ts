@@ -225,11 +225,19 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     if (!asset?.metadata) {
       asset.metadata = new Metadata();
     }
-    if (!asset?.metadata?.description) {
-      const descriptions = genericDescriptions.forAssets;
-      const randomIdx = randomBetween(0, descriptions.length);
-      asset.metadata.description = descriptions[randomIdx];
+
+    if (asset.metadata?.description) {
+      return asset.metadata;
     }
+
+    if (asset.assets?.description) {
+      asset.metadata.description = asset.assets.description;
+      return asset.metadata;
+    }
+
+    const descriptions = genericDescriptions.forAssets;
+    const randomIdx = randomBetween(0, descriptions.length);
+    asset.metadata.description = descriptions[randomIdx];
     return asset.metadata;
   }
 
