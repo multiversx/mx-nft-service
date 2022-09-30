@@ -20,3 +20,5 @@ export const gas = config.get('gas');
 export const cronJobs = config.get('cronJobs');
 
 export const constants = config.get('constants');
+
+export const genericDescriptions = config.get('genericDescriptions');

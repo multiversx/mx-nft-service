@@ -69,6 +69,7 @@ type Asset {
   """This will return only the running query!"""
   auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
+  branding: CollectionBranding
   collection: ID!
   creationDate: Int
   creator: Account
@@ -414,6 +415,15 @@ type CollectionAssetModel {
 
 input CollectionAssetsRetriveCount {
   size: Int = 4
+}
+
+type CollectionBranding {
+  description: String
+  pngUrl: String
+  social: CollectionSocial
+  status: String
+  svgUrl: String
+  website: String
 }
 
 type CollectionEdge {

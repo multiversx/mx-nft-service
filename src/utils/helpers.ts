@@ -66,3 +66,9 @@ export const computeUsdAmount = (
     .dividedBy(Math.pow(10, tokenDecimals));
   return amountUsd.toString();
 };
+
+export const randomBetween = (min: number, max: number): number => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min);
+};

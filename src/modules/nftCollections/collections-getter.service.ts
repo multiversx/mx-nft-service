@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
 import { Address } from '@elrondnetwork/erdjs';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import {
@@ -20,6 +20,7 @@ import {
   CollectionsFilter,
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
+import { randomBetween } from 'src/utils/helpers';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -69,10 +70,10 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections, count] = await this.getAllTrendingCollections();
+    let [trendingCollections] = await this.getAllTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
-
     return [trendingCollections, count];
   }
 
@@ -373,5 +374,14 @@ export class CollectionsGetterService {
       collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
       count,
     ];
+  }
+
+  getRandomCollectionDescription(size: number): string {
+    const descriptions =
+      size > 100
+        ? genericDescriptions.forBigCollections
+        : genericDescriptions.forSmallCollections;
+    const randomIdx = randomBetween(0, descriptions.length);
+    return descriptions[randomIdx].replace('{size}', size.toString());
   }
 }
