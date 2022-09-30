@@ -1,29 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { CollectionAssetApi, CollectionAssetSocialApi } from 'src/common';
-
-@ObjectType()
-export class CollectionSocial {
-  @Field(() => String, { nullable: true })
-  email: string;
-  @Field(() => String, { nullable: true })
-  blog: string;
-  @Field(() => String, { nullable: true })
-  twiter: string;
-
-  constructor(init?: Partial<CollectionSocial>) {
-    Object.assign(this, init);
-  }
-
-  static fromCollectionAssetSocialApi(social: CollectionAssetSocialApi) {
-    return social
-      ? new CollectionSocial({
-          email: social.email,
-          blog: social.blog,
-          twiter: social.twiter,
-        })
-      : null;
-  }
-}
+import { CollectionSocial } from 'src/modules/nftCollections/models';
 
 @ObjectType()
 export class CollectionBranding {
@@ -52,7 +29,7 @@ export class CollectionBranding {
           status: assets.status,
           pngUrl: assets.pngUrl,
           svgUrl: assets.svgUrl,
-          social: CollectionSocial.fromCollectionAssetSocialApi(assets.social),
+          social: CollectionSocial.fromSocialApi(assets.social),
         })
       : null;
   }
