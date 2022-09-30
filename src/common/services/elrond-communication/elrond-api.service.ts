@@ -522,6 +522,13 @@ export class ElrondApiService {
     return await this.apiProvider.getTransaction(txHash);
   }
 
+  async getCollectionNftsCount(ticker: string): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsCount.name,
+      `collections/${ticker}/nfts/count`,
+    );
+  }
+
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
     return nfts.distinct((nft) => nft.nonce);
   }
