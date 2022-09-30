@@ -376,7 +376,11 @@ export class CollectionsGetterService {
     ];
   }
 
-  getRandomCollectionDescription(size: number): string {
+  async getRandomCollectionDescription(node: Collection): Promise<string> {
+    const size =
+      node.nftsCount ??
+      (await this.apiService.getCollectionNftsCount(node.ticker));
+
     const descriptions =
       size > 100
         ? genericDescriptions.forBigCollections
