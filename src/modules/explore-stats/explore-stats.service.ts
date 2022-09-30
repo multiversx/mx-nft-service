@@ -10,7 +10,11 @@ import {
   ExploreStats,
 } from './models/Explore-Stats.dto';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { AuctionsGetterService, runningAuctionRequest } from '../auctions';
+import { AuctionsGetterService } from '../auctions';
+import {
+  buyNowAuctionRequest,
+  runningAuctionRequest,
+} from '../auctions/auctionsRequest';
 
 @Injectable()
 export class ExploreStatsService {
@@ -55,7 +59,7 @@ export class ExploreStatsService {
 
     const [, buyNowCount] =
       await this.auctionsService.getAuctionsGroupByIdentifier(
-        runningAuctionRequest,
+        buyNowAuctionRequest,
       );
 
     const [, liveAuctionsCount] =

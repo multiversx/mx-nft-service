@@ -64,12 +64,12 @@ export function getDefaultAuctionsQuery(
 ) {
   let supplementalFilters = '';
 
-  const collection = queryRequest.getFilter('collection');
+  const collection = queryRequest.getFilterName('collection');
   if (collection) {
     supplementalFilters += ` AND a.collection = '${collection}'`;
   }
 
-  const marketplaceKey = queryRequest.getFilter('marketplaceKey');
+  const marketplaceKey = queryRequest.getFilterName('marketplaceKey');
   if (marketplaceKey) {
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
   }

@@ -32,31 +32,12 @@ import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
-
-export const runningAuctionRequest = new QueryRequest({
-  customFilters: [],
-  offset: 0,
-  limit: 10000,
-  filters: new FiltersExpression({
-    filters: [
-      new Filter({
-        field: 'status',
-        values: ['Running'],
-        op: Operation.EQ,
-      }),
-      new Filter({
-        field: 'startDate',
-        values: [Math.round(new Date().getTime() / 1000).toString()],
-        op: Operation.LE,
-      }),
-    ],
-    operator: Operator.AND,
-  }),
-  groupByOption: new Grouping({
-    groupBy: GroupBy.IDENTIFIER,
-  }),
-  sorting: [],
-});
+import {
+  auctionsByNoBidsRequest,
+  buyNowAuctionRequest,
+  getAuctionsForCollectionRequest,
+  runningAuctionRequest,
+} from './auctionsRequest';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -98,7 +79,7 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      const tags = queryRequest.getFilter('tags');
+      const tags = queryRequest.getFilterName('tags');
       if (tags && tags.length > 0 && tags[0]) {
         return this.getMappedAuctionsOrderBids(queryRequest);
       }
@@ -489,13 +470,10 @@ export class AuctionsGetterService {
   async getAuctionsGroupByIdentifier(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
-    const collectionFilter = queryRequest.getFilter('collection');
+    const collectionFilter = queryRequest.getFilterName('collection');
     const currentPriceFilter = queryRequest.getRange(
       AuctionCustomEnum.CURRENTPRICE,
     );
-    const statusFilter = queryRequest.getFilter('status');
-    const startDateFilter = queryRequest.getFilter('startDate');
-    const buyNowFilter = queryRequest.getFilter('maxBid');
     const sort = queryRequest.getSort();
     const allFilters = queryRequest.getAllFilters();
 
@@ -505,72 +483,19 @@ export class AuctionsGetterService {
         currentPriceFilter.endPrice !== '0000000000000000000');
 
     if (collectionFilter && !hasCurrentPriceFilter) {
-      let [allAuctions, _totalCount, priceRange] =
-        await this.cacheService.getOrSetCache(
-          this.redisClient,
-          `collectionAuctions:${collectionFilter}`,
-          async () => await this.getAuctionsByCollection(collectionFilter),
-          Constants.oneMinute() * 10,
-          Constants.oneSecond() * 30,
-        );
-
-      const marketplaceFilter = queryRequest.getFilter('marketplaceKey');
-      if (marketplaceFilter) {
-        allAuctions = allAuctions.filter(
-          (x) => x.marketplaceKey === marketplaceFilter,
-        );
-
-        priceRange = this.computePriceRange(allAuctions);
-      }
-
-      if (sort) {
-        if (sort.direction === Sort.ASC) {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
-        } else {
-          allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
-        }
-      }
-
-      const auctions = allAuctions.slice(
-        queryRequest.offset,
-        queryRequest.offset + queryRequest.limit,
+      return await this.retriveCollectionAuctions(
+        collectionFilter,
+        queryRequest,
+        sort,
       );
-
-      return [auctions, allAuctions.length, priceRange];
     }
 
-    if (
-      (Object.keys(allFilters).length === 2 &&
-        statusFilter &&
-        startDateFilter) ||
-      (Object.keys(allFilters).length === 3 &&
-        statusFilter &&
-        startDateFilter &&
-        buyNowFilter)
-    ) {
-      let [allAuctions, _totalCount, priceRange] =
-        await this.cacheService.getOrSetCache(
-          this.redisClient,
-          CacheInfo.ActiveAuctions.key,
-          async () => await this.getActiveAuctions(),
-          CacheInfo.ActiveAuctions.ttl,
-          Constants.oneSecond() * 30,
-        );
+    if (this.requestForRunningAuctions(allFilters, queryRequest)) {
+      return await this.retrieveRunningAuctions(sort, queryRequest);
+    }
 
-      if (sort) {
-        if (sort.direction === Sort.ASC) {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
-        } else {
-          allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
-        }
-      }
-
-      const auctions = allAuctions.slice(
-        queryRequest.offset,
-        queryRequest.offset + queryRequest.limit,
-      );
-
-      return [auctions, allAuctions.length, priceRange];
+    if (this.requestForBuyNowAuctions(allFilters, queryRequest)) {
+      return await this.retrieveBuyNowAuctions(sort, queryRequest);
     }
 
     const [auctions, count, priceRange] =
@@ -581,6 +506,133 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  private async retriveCollectionAuctions(
+    collectionFilter: string,
+    queryRequest: QueryRequest,
+    sort: { field: string; direction: Sort },
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.redisClient,
+        `collectionAuctions:${collectionFilter}`,
+        async () => await this.getAuctionsByCollection(collectionFilter),
+        Constants.oneMinute() * 10,
+        Constants.oneSecond() * 30,
+      );
+
+    const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
+    if (marketplaceFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.marketplaceKey === marketplaceFilter,
+      );
+
+      priceRange = this.computePriceRange(allAuctions);
+    }
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retrieveRunningAuctions(
+    sort: { field: string; direction: Sort },
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.ActiveAuctions.key,
+        async () => await this.getActiveAuctions(),
+        CacheInfo.ActiveAuctions.ttl,
+        Constants.oneSecond() * 30,
+      );
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retrieveBuyNowAuctions(
+    sort: { field: string; direction: Sort },
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.ActiveAuctions.key,
+        async () => await this.getBuyNowAuctions(),
+        CacheInfo.ActiveAuctions.ttl,
+        Constants.oneSecond() * 30,
+      );
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private requestForRunningAuctions(
+    allFilters: Record<string, string>,
+    queryRequest: QueryRequest,
+  ) {
+    const statusFilter = queryRequest.getFilterName('status');
+    const startDateFilter = queryRequest.getFilterName('startDate');
+    return (
+      Object.keys(allFilters).length === 2 && statusFilter && startDateFilter
+    );
+  }
+
+  private requestForBuyNowAuctions(
+    allFilters: Record<string, string>,
+    queryRequest: QueryRequest,
+  ) {
+    const statusFilter = queryRequest.getFilterName('status');
+    const startDateFilter = queryRequest.getFilterName('startDate');
+    const buyNowFilter = queryRequest.getFilter('maxBid');
+    return (
+      Object.keys(allFilters).length === 3 &&
+      statusFilter &&
+      startDateFilter &&
+      buyNowFilter &&
+      buyNowFilter.op === Operation.GE
+    );
   }
 
   private computePriceRange(auctions: Auction[]): PriceRange {
@@ -618,84 +670,24 @@ export class AuctionsGetterService {
   async getTopAuctionsOrderByNoBids(): Promise<
     [Auction[], number, PriceRange]
   > {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 1000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'tags',
-            values: [null],
-            op: Operation.LIKE,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
+    return this.getMappedAuctionsOrderBids(auctionsByNoBidsRequest);
+  }
 
-    return this.getMappedAuctionsOrderBids(queryRequest);
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
+  async getBuyNowAuctions(): Promise<[Auction[], number, PriceRange]> {
+    return await this.getAuctionsGroupByIdentifierRaw(buyNowAuctionRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = runningAuctionRequest;
-
-    return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(runningAuctionRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getAuctionsByCollection(
     collection: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 10000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'tags',
-            values: [null],
-            op: Operation.LIKE,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-          new Filter({
-            field: 'collection',
-            values: [collection],
-            op: Operation.EQ,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
+    const queryRequest = getAuctionsForCollectionRequest(collection);
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
