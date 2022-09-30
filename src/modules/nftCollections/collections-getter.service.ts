@@ -157,10 +157,19 @@ export class CollectionsGetterService {
     let [collections, count] = await this.getOrSetFullCollections();
 
     if (filters?.collection) {
-      return [
-        collections.filter((token) => token.collection === filters.collection),
-        1,
-      ];
+      let collection = collections.find(
+        (token) => token.collection === filters.collection,
+      );
+
+      if (!collection) {
+        collection = await this.getFullCollectionRaw(filters.collection);
+        await this.setFullCollections(
+          collections.concat(collection),
+          count + 1,
+        );
+      }
+
+      return [[collection], 1];
     }
     collections = this.applyFilters(filters, collections);
 
@@ -185,6 +194,18 @@ export class CollectionsGetterService {
       this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
+      CacheInfo.AllCollections.ttl,
+    );
+  }
+
+  private async setFullCollections(
+    collections: Collection[],
+    count: number,
+  ): Promise<void> {
+    await this.cacheService.setCache(
+      this.redisClient,
+      CacheInfo.AllCollections.key,
+      [collections, count],
       CacheInfo.AllCollections.ttl,
     );
   }
@@ -218,6 +239,15 @@ export class CollectionsGetterService {
     );
 
     return [uniqueCollections, uniqueCollections?.length];
+  }
+
+  private async getFullCollectionRaw(ticker: string): Promise<Collection> {
+    let collection = Collection.fromCollectionApi(
+      await this.apiService.getCollectionByIdentifierForQuery(ticker),
+    );
+    [collection] = await this.mapCollectionNftsCount([collection], 0);
+    [collection] = await this.mapCollectionNfts([collection]);
+    return collection;
   }
 
   async getOrSetMostActiveCollections(): Promise<[Collection[], number]> {
@@ -322,7 +352,10 @@ export class CollectionsGetterService {
     return localCollections;
   }
 
-  private async mapCollectionNftsCount(localCollections: Collection[]) {
+  private async mapCollectionNftsCount(
+    localCollections: Collection[],
+    filterByNftsCountThresold: number = 4,
+  ) {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
@@ -338,9 +371,14 @@ export class CollectionsGetterService {
         }
       }
     }
-    localCollections = localCollections.filter(
-      (x) => parseInt(x.collectionAsset?.totalCount) >= 4,
-    );
+
+    if (filterByNftsCountThresold) {
+      localCollections = localCollections.filter(
+        (x) =>
+          parseInt(x.collectionAsset?.totalCount) >= filterByNftsCountThresold,
+      );
+    }
+
     return localCollections;
   }
 
