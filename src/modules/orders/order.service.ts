@@ -13,7 +13,7 @@ import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cach
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -213,7 +213,7 @@ export class OrdersService {
       new ChangedEvent({
         id: auctionId.toString(),
         type: CacheEventTypeEnum.UpdateOrder,
-        ownerAddress: ownerAddress,
+        address: ownerAddress,
       }),
     );
   }

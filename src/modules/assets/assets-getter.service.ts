@@ -14,6 +14,7 @@ import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
+import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 
 @Injectable()
 export class AssetsGetterService {
@@ -56,11 +57,20 @@ export class AssetsGetterService {
     offset: number = 0,
     limit: number = 10,
     filters: AssetsFilter,
+    sorting: AssetsSortingEnum,
   ): Promise<CollectionType<Asset>> {
     const apiQuery = filters?.ownerAddress
       ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
+
+    if (sorting === AssetsSortingEnum.MostLikes) {
+      const assets = await this.assetsLikedService.getMostLikedAssets();
+      return new CollectionType({
+        count: assets.length,
+        items: assets.slice(offset, offset + limit),
+      });
+    }
 
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
