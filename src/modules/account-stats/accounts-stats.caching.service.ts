@@ -51,6 +51,18 @@ export class AccountsStatsCachingService {
     );
   }
 
+  public async getLikesCount(
+    address: string,
+    getLikesCount: () => any,
+  ): Promise<number> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getLikesCacheKey(address),
+      () => getLikesCount(),
+      5 * TimeConstants.oneSecond,
+    );
+  }
+
   public async getCollectedCount(
     address: string,
     getCollectedCount: () => any,
@@ -112,5 +124,8 @@ export class AccountsStatsCachingService {
 
   private getClaimableCacheKey(address: string) {
     return generateCacheKeyFromParams('account_claimable_count', address);
+  }
+  private getLikesCacheKey(address: string) {
+    return generateCacheKeyFromParams('account_likes_count', address);
   }
 }

@@ -38,6 +38,14 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     });
   }
 
+  async getLikesCountForAddress(address: string): Promise<number> {
+    return await this.count({
+      where: {
+        address,
+      },
+    });
+  }
+
   async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
     return await this.createQueryBuilder('al')
       .select('al.identifier as identifier')

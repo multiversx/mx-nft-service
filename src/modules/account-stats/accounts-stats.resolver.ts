@@ -42,6 +42,13 @@ export class AccountsStatsResolver {
   }
 
   @ResolveField(() => Int)
+  async likes(@Parent() stats: AccountStats) {
+    const { address } = stats;
+    const likesCount = await this.accountsStatsService.getLikesCount(address);
+    return likesCount || 0;
+  }
+
+  @ResolveField(() => Int)
   async collected(@Parent() stats: AccountStats) {
     const { address, marketplaceKey } = stats;
     const collectedCount = await this.accountsStatsService.getCollectedCount(
