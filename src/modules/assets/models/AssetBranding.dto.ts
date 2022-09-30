@@ -2,7 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { CollectionAssetApi, CollectionAssetSocialApi } from 'src/common';
 
 @ObjectType()
-export class NftSocial {
+export class AssetSocial {
   @Field(() => String, { nullable: true })
   email: string;
   @Field(() => String, { nullable: true })
@@ -10,13 +10,13 @@ export class NftSocial {
   @Field(() => String, { nullable: true })
   twiter: string;
 
-  constructor(init?: Partial<NftSocial>) {
+  constructor(init?: Partial<AssetSocial>) {
     Object.assign(this, init);
   }
 
   static fromCollectionAssetSocialApi(social: CollectionAssetSocialApi) {
     return social
-      ? new NftSocial({
+      ? new AssetSocial({
           email: social.email,
           blog: social.blog,
           twiter: social.twiter,
@@ -26,7 +26,7 @@ export class NftSocial {
 }
 
 @ObjectType()
-export class NftAssets {
+export class AssetBranding {
   @Field(() => String, { nullable: true })
   website: string;
   @Field(() => String, { nullable: true })
@@ -37,22 +37,22 @@ export class NftAssets {
   pngUrl: string;
   @Field(() => String, { nullable: true })
   svgUrl: string;
-  @Field(() => NftSocial, { nullable: true })
-  social: NftSocial;
+  @Field(() => AssetSocial, { nullable: true })
+  social: AssetSocial;
 
-  constructor(init?: Partial<NftAssets>) {
+  constructor(init?: Partial<AssetBranding>) {
     Object.assign(this, init);
   }
 
   static fromNftAssets(assets: CollectionAssetApi) {
     return assets
-      ? new NftAssets({
+      ? new AssetBranding({
           website: assets.website,
           description: assets.description,
           status: assets.status,
           pngUrl: assets.pngUrl,
           svgUrl: assets.svgUrl,
-          social: NftSocial.fromCollectionAssetSocialApi(assets.social),
+          social: AssetSocial.fromCollectionAssetSocialApi(assets.social),
         })
       : null;
   }

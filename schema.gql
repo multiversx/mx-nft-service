@@ -69,6 +69,7 @@ type Asset {
   """This will return only the running query!"""
   auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
+  branding: AssetBranding
   collection: ID!
   creationDate: Int
   creator: Account
@@ -109,6 +110,15 @@ enum AssetActionEnum {
   EndedAuction
   Received
   StartedAuction
+}
+
+type AssetBranding {
+  description: String
+  pngUrl: String
+  social: AssetSocial
+  status: String
+  svgUrl: String
+  website: String
 }
 
 type AssetEdge {
@@ -155,6 +165,12 @@ type AssetPageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
+}
+
+type AssetSocial {
+  blog: String
+  email: String
+  twiter: String
 }
 
 input AssetsFilter {
