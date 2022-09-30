@@ -32,6 +32,7 @@ type AccountStats {
   collected: String
   collections: String
   creations: String
+  likes: String
   marketplaceKey: String
   orders: String
 }
