@@ -94,8 +94,8 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
   }
 
   async getMostLikedAssetsIdentifiers(
-    offset: number = undefined,
-    limit: number = undefined,
+    offset?: number,
+    limit?: number,
   ): Promise<AssetLikeEntity[]> {
     return await this.createQueryBuilder('al')
       .select('count(*) as cnt, al.identifier')

@@ -921,8 +921,8 @@ export class PersistenceService {
   }
 
   async getMostLikedAssetsIdentifiers(
-    offset: number = undefined,
-    limit: number = undefined,
+    offset?: number,
+    limit?: number,
   ): Promise<AssetLikeEntity[]> {
     return await this.execute(
       this.getMostLikedAssetsIdentifiers.name,
