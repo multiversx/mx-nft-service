@@ -18,7 +18,7 @@ import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalida
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
+} from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -698,7 +698,7 @@ export class AuctionsRepository {
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.UpdateAuction,
-        ownerAddress: ownerAddress,
+        address: ownerAddress,
       }),
     );
   }

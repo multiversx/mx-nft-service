@@ -919,4 +919,14 @@ export class PersistenceService {
       this.auctionsRepository.getCurrentPaymentTokenIds(marketplaceKey),
     );
   }
+
+  async getMostLikedAssetsIdentifiers(
+    offset?: number,
+    limit?: number,
+  ): Promise<AssetLikeEntity[]> {
+    return await this.execute(
+      this.getMostLikedAssetsIdentifiers.name,
+      this.assetsLikesRepository.getMostLikedAssetsIdentifiers(offset, limit),
+    );
+  }
 }

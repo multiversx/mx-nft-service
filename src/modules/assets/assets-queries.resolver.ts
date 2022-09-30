@@ -33,6 +33,7 @@ import { Marketplace } from '../marketplaces/models';
 import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 import { ArtistAddressProvider } from '../artists/artists.loader';
+import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { randomBetween } from 'src/utils/helpers';
 
 @Resolver(() => Asset)
@@ -63,9 +64,16 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     filters: AssetsFilter,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
+    @Args({ name: 'sorting', type: () => AssetsSortingEnum, nullable: true })
+    sorting: AssetsSortingEnum,
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const response = await this.assetsService.getAssets(offset, limit, filters);
+    const response = await this.assetsService.getAssets(
+      offset,
+      limit,
+      filters,
+      sorting,
+    );
 
     return PageResponse.mapResponse<Asset>(
       response?.items || [],

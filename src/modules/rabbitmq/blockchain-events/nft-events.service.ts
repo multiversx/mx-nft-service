@@ -30,7 +30,7 @@ import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalid
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../cache-invalidation/events/owner-changed.event';
+} from '../cache-invalidation/events/changed.event';
 import {
   BidEvent,
   BuySftEvent,

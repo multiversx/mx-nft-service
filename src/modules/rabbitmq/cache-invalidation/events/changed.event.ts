@@ -1,6 +1,6 @@
 export class ChangedEvent {
   id: any;
-  ownerAddress: string;
+  address: string;
   type: CacheEventTypeEnum;
   extraInfo: { [key: string]: string };
   constructor(init?: Partial<ChangedEvent>) {
@@ -16,4 +16,5 @@ export enum CacheEventTypeEnum {
   UpdateOrder,
   UpdateNotifications,
   UpdateOneNotification,
+  AssetLike,
 }

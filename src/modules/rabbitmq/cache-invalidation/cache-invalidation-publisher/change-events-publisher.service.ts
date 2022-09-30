@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { rabbitExchanges } from '../../rabbit-config';
 import { RabbitPublisherService } from '../../rabbit.publisher';
-import { ChangedEvent } from '../events/owner-changed.event';
+import { ChangedEvent } from '../events/changed.event';
 
 @Injectable()
 export class CacheEventsPublisherService {
