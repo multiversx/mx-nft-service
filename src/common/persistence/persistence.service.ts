@@ -102,6 +102,13 @@ export class PersistenceService {
     );
   }
 
+  async getLikesCountForAddress(address: string): Promise<number> {
+    return await this.execute(
+      this.getLikesCountForAddress.name,
+      this.assetsLikesRepository.getLikesCountForAddress(address),
+    );
+  }
+
   async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
     return await this.execute(
       this.getBulkAssetLikesCount.name,

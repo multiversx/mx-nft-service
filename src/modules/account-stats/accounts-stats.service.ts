@@ -98,6 +98,24 @@ export class AccountsStatsService {
     }
   }
 
+  async getLikesCount(address: string): Promise<number> {
+    try {
+      return this.accountStatsCachingService.getLikesCount(address, () =>
+        this.persistenceService.getLikesCountForAddress(address),
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting likes count for account',
+        {
+          path: this.getLikesCount.name,
+          address,
+          exception: err?.message,
+        },
+      );
+      return 0;
+    }
+  }
+
   async getCollectedCount(
     address: string,
     marketplaceKey: string = null,
