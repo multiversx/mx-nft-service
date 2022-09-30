@@ -8,7 +8,7 @@ import { Media } from './Media.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { Rarity } from './Rarity';
 import { Marketplace } from 'src/modules/marketplaces/models';
-import { AssetBranding } from './AssetBranding.dto';
+import { CollectionBranding } from './CollectionBranding.dto';
 
 @ObjectType()
 export class Asset {
@@ -83,8 +83,8 @@ export class Asset {
   marketplaces: [Marketplace];
   @Field(() => Rarity, { nullable: true })
   rarity: Rarity;
-  @Field(() => AssetBranding, { nullable: true })
-  branding: AssetBranding;
+  @Field(() => CollectionBranding, { nullable: true })
+  branding: CollectionBranding;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -115,7 +115,7 @@ export class Asset {
           scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
           media: nft.media?.map((m) => Media.fromNftMedia(m)),
           verified: !!nft.assets ?? false,
-          branding: AssetBranding.fromNftAssets(nft.assets),
+          branding: CollectionBranding.fromNftAssets(nft.assets),
         })
       : null;
   }
