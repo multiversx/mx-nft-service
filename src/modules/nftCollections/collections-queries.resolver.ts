@@ -143,12 +143,10 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('description')
-  description(@Parent() node: Collection): string {
+  async description(@Parent() node: Collection): Promise<string> {
     return (
       node.description ??
-      this.collectionsGetterService.getRandomCollectionDescription(
-        node.nftsCount,
-      )
+      (await this.collectionsGetterService.getRandomCollectionDescription(node))
     );
   }
 }
