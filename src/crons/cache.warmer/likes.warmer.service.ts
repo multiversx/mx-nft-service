@@ -22,9 +22,7 @@ export class LikesWarmerService {
   }
 
   @Cron(CronExpression.EVERY_HOUR)
-  async updateTokens() {
-    console.log('updateTokens');
-
+  async mostLikesAssets() {
     await Locker.lock(
       'Most liked assets invalidation',
       async () => {

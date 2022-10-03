@@ -256,5 +256,6 @@ export function getCurrentPaymentTokens(marketplaceKey: string = undefined) {
   const filter = marketplaceKey
     ? `AND a.marketplaceKey = '${marketplaceKey}'`
     : '';
-  return `select DISTINCT paymentToken from auctions a WHERE a.status = 'RUNNING' ${filter}`;
+  return `select DISTINCT paymentToken, count(a.paymentToken) AS count FROM auctions a 
+  WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken`;
 }
