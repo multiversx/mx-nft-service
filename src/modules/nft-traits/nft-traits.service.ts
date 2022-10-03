@@ -100,7 +100,6 @@ export class NftTraitsService {
         'nft_traitTypes',
         collection.traits,
       );
-      console.log(JSON.stringify(updateBody));
       await this.elasticService.setCustomValue(
         'tokens',
         collection.identifier,
