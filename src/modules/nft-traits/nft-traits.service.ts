@@ -152,7 +152,7 @@ export class NftTraitsService {
         collectionTicker,
         'identifier,nonce,metadata,score,rank,timestamp',
       );
-      return res.map((nft) => NftTraits.fromNft(nft));
+      return res.map(NftTraits.fromNft);
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
