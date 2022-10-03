@@ -24,64 +24,47 @@ export class NftTraitsService {
       return false;
     }
 
-    const [collectionTraits, nftsTraits] = this.getTraitsFromNfts(
+    const updateNftTraitsPromise = this.setNftsTraitsInElastic(allNfts);
+
+    const collectionTraits = this.getCollectionTraits(
       collectionTicker,
       allNfts,
     );
 
     await Promise.all([
       this.setCollectionTraitTypesInElastic(collectionTraits),
-      this.setNftsTraitsInElastic(nftsTraits),
+      updateNftTraitsPromise,
     ]);
 
     return true;
   }
 
-  private getTraitsFromNfts(
+  private getCollectionTraits(
     collectionTicker: string,
     nfts: NftTraits[],
-  ): [CollectionTraits, NftTraits[]] {
+  ): CollectionTraits {
     let collectionTraits: CollectionTraits = new CollectionTraits({
       identifier: collectionTicker,
       traits: [],
     });
-    let nftsTraits: NftTraits[] = [];
 
     for (const nft of nfts) {
-      let nftTraits: NftTraits = new NftTraits({
-        identifier: nft.identifier,
-        traits: [],
-      });
-
-      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-        if (value.trait_type === undefined || value.value === undefined) {
-          continue;
-        }
-
-        const traitName = String(value.trait_type);
-        const traitValue = String(value.value);
-
-        nftTraits.traits.push(
-          new NftTrait({
-            name: traitName,
-            value: traitValue,
-          }),
+      for (const trait of nft.traits) {
+        let collectionTrait: TraitType = collectionTraits.traits.find(
+          (t) => t.name === trait.name,
         );
 
-        let trait: TraitType = collectionTraits.traits.find(
-          (t) => t.name === traitName,
-        );
-
-        if (trait) {
-          trait.occurenceCount++;
-          trait.occurencePercentage =
-            (trait.occurenceCount / nfts.length) * 100;
-
-          let attribute = trait.attributes.find((a) => a.name === traitValue);
+        if (collectionTrait) {
+          collectionTrait.occurenceCount++;
+          collectionTrait.occurencePercentage =
+            (collectionTrait.occurenceCount / nfts.length) * 100;
+          let attribute = collectionTrait.attributes.find(
+            (a) => a.name === trait.value,
+          );
           if (!attribute) {
-            trait.attributes.push(
+            collectionTrait.attributes.push(
               new AttributeType({
-                name: traitValue,
+                name: trait.value,
                 occurenceCount: 1,
                 occurencePercentage: (1 / nfts.length) * 100,
               }),
@@ -94,10 +77,10 @@ export class NftTraitsService {
         } else {
           collectionTraits.traits.push(
             new TraitType({
-              name: traitName,
+              name: trait.name,
               attributes: [
                 new AttributeType({
-                  name: traitValue,
+                  name: trait.name,
                   occurenceCount: 1,
                   occurencePercentage: (1 / nfts.length) * 100,
                 }),
@@ -108,11 +91,9 @@ export class NftTraitsService {
           );
         }
       }
-
-      nftsTraits.push(nftTraits);
     }
 
-    return [collectionTraits, nftsTraits];
+    return collectionTraits;
   }
 
   private async setCollectionTraitTypesInElastic(
@@ -185,7 +166,6 @@ export class NftTraitsService {
         exception: error?.message,
         collection: collectionTicker,
       });
-      return [];
     }
   }
 }
