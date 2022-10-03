@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
-import { CollectionTraits, TraitType } from './models/collection-traits.model';
+import {
+  AttributeType,
+  CollectionTraits,
+  TraitType,
+} from './models/collection-traits.model';
 import { NftTrait, NftTraits } from './models/nft-traits.model';
 
 @Injectable()
@@ -69,15 +73,37 @@ export class NftTraitsService {
         );
 
         if (trait) {
-          let attribute = trait.values.find((a) => a === traitValue);
+          trait.occurenceCount++;
+          trait.occurencePercentage =
+            (trait.occurenceCount / nfts.length) * 100;
+
+          let attribute = trait.attributes.find((a) => a.name === traitValue);
           if (!attribute) {
-            trait.values.push(traitValue);
+            trait.attributes.push(
+              new AttributeType({
+                name: traitValue,
+                occurenceCount: 1,
+                occurencePercentage: (1 / nfts.length) * 100,
+              }),
+            );
+          } else {
+            attribute.occurenceCount++;
+            attribute.occurencePercentage =
+              (attribute.occurenceCount / nfts.length) * 100;
           }
         } else {
           collectionTraits.traits.push(
             new TraitType({
               name: traitName,
-              values: [traitValue],
+              attributes: [
+                new AttributeType({
+                  name: traitValue,
+                  occurenceCount: 1,
+                  occurencePercentage: (1 / nfts.length) * 100,
+                }),
+              ],
+              occurenceCount: 1,
+              occurencePercentage: (1 / nfts.length) * 100,
             }),
           );
         }
