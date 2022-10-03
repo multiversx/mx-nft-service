@@ -737,10 +737,16 @@ export class AuctionsRepository {
 
   async getCurrentPaymentTokenIds(
     marketplaceKey: string = undefined,
-  ): Promise<string[]> {
+  ): Promise<{ paymentToken: string; activeAuctions: number }[]> {
     const paymentTokens = await this.auctionsRepository.query(
       getCurrentPaymentTokens(marketplaceKey),
     );
-    return paymentTokens.map((r) => r.paymentToken);
+
+    return paymentTokens.map((r: { paymentToken: any; count: any }) => {
+      return {
+        paymentToken: r.paymentToken,
+        activeAuctions: r.count,
+      };
+    });
   }
 }
