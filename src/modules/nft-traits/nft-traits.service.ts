@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
-import {
-  CollectionTraits,
-  TraitTypeValues,
-} from './models/collection-traits.model';
+import { CollectionTraits, TraitType } from './models/collection-traits.model';
 import { NftTrait, NftTraits } from './models/nft-traits.model';
 
 @Injectable()
@@ -67,20 +64,20 @@ export class NftTraitsService {
           }),
         );
 
-        let traitTypeValues: TraitTypeValues = collectionTraits.traits.find(
+        let trait: TraitType = collectionTraits.traits.find(
           (t) => t.name === traitName,
         );
 
-        if (traitTypeValues) {
-          let value = traitTypeValues.values.find((v) => v === traitValue);
-          if (!value) {
-            traitTypeValues.values.push(traitValue);
+        if (trait) {
+          let attribute = trait.values.find((a) => a === traitValue);
+          if (!attribute) {
+            trait.values.push(traitValue);
           }
         } else {
           collectionTraits.traits.push(
-            new TraitTypeValues({
+            new TraitType({
               name: traitName,
-              values: [traitValue.toString()],
+              values: [traitValue],
             }),
           );
         }
@@ -96,7 +93,7 @@ export class NftTraitsService {
     collection: CollectionTraits,
   ): Promise<void> {
     try {
-      const updateBody = this.elasticService.buildUpdateBody<TraitTypeValues[]>(
+      const updateBody = this.elasticService.buildUpdateBody<TraitType[]>(
         'nft_traitTypes',
         collection.traits,
       );

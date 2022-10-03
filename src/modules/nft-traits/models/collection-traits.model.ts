@@ -1,16 +1,15 @@
-export class TraitTypeValues {
+export class TraitType {
   name: string;
   values: string[];
 
-  constructor(init?: Partial<TraitTypeValues>) {
-    this.values = [];
+  constructor(init?: Partial<TraitType>) {
     Object.assign(this, init);
   }
 }
 
 export class CollectionTraits {
   identifier: string;
-  traits: TraitTypeValues[];
+  traits: TraitType[];
 
   constructor(init?: Partial<CollectionTraits>) {
     Object.assign(this, init);
