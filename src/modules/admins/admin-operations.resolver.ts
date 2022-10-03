@@ -5,12 +5,14 @@ import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
+import { NftTraitsService } from '../nft-traits/nft-traits.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
   constructor(
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
+    private readonly nftTraitService: NftTraitsService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -57,6 +59,19 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async updateNftTraits(
+    @Args('collectionTicker')
+    collectionTicker: string,
+  ): Promise<boolean> {
+    try {
+      return await this.nftTraitService.updateTraits(collectionTicker);
     } catch (error) {
       throw new ApolloError(error);
     }
