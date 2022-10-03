@@ -1062,6 +1062,7 @@ enum TierStatusEnum {
 }
 
 type Token {
+  activeAuctions: Int
   decimals: Float
   identifier: String!
   name: String
