@@ -9,6 +9,7 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
 import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
+import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 
 @Module({
   providers: [
@@ -24,6 +25,7 @@ import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache
     CacheEventsPublisherModule,
     ElrondCommunicationModule,
     NftRarityModuleGraph,
+    NftTraitsModule,
   ],
   exports: [FlagNftService],
 })
