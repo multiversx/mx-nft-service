@@ -323,7 +323,7 @@ export class ElrondApiService {
   ): Promise<CollectionApi> {
     return await this.doGetGeneric(
       this.getCollectionForOwnerAndIdentifier.name,
-      `accounts/${address}/collections/${identifier}`,
+      `accounts/${address}/roles/collections/${identifier}`,
     );
   }
 
