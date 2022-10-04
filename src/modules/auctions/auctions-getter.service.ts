@@ -760,9 +760,10 @@ export class AuctionsGetterService {
 
     const allTokens: Token[] = allMexTokens.concat(egldToken);
     let mappedTokens = [];
-
     for (const payment of currentPaymentTokenIds) {
-      let token = allTokens.find((x) => (x.identifier = payment.paymentToken));
+      const token = allTokens.find(
+        (x) => x.identifier === payment.paymentToken,
+      );
       if (token) {
         mappedTokens.push({ ...token, activeAuctions: payment.activeAuctions });
       }
