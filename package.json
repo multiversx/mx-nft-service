@@ -67,6 +67,7 @@
     "graphql-tools": "^8.2.0",
     "graphql-upload": "^12.0.0",
     "helmet": "^4.4.1",
+    "json-diff": "^0.9.0",
     "jwks-rsa": "^2.0.3",
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
