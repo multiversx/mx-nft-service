@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Nft, NftTag } from './models/nft.dto';
+import { Nft, NftMetadata, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
@@ -193,6 +193,17 @@ export class ElrondApiService {
   ): Promise<Nft> {
     const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
     return await this.doGetGeneric(this.getNftByIdentifier.name, url);
+  }
+
+  async getNftMetadataByIdentifierForQuery(
+    identifier: string,
+    query: string = 'extract=metadata&withOwner=true&withSupply=true',
+  ): Promise<NftMetadata> {
+    const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
+    return await this.doGetGeneric(
+      this.getNftMetadataByIdentifierForQuery.name,
+      url,
+    );
   }
 
   async getOwnersForIdentifier(

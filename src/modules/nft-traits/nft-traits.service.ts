@@ -1,6 +1,7 @@
 import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
+import { getCollectionFromIdentifier as getCollectionTickerFromNftIdentifier } from 'src/utils/helpers';
 import { NftTypeEnum } from '../assets/models';
 import {
   AttributeType,
@@ -49,9 +50,79 @@ export class NftTraitsService {
         this.setCollectionTraitTypesInElastic(collectionTraits),
         this.setNftsTraitsInElastic(allNfts),
       ]);
+      return true;
     }
 
+    return false;
+  }
+
+  async updateNftTraits(identifier: string): Promise<boolean> {
+    const collectionTicker = getCollectionTickerFromNftIdentifier(identifier);
+    let collectionPromise =
+      this.getCollectionTraitsFromElastic(collectionTicker);
+
+    let [nftTraitsFromApi, nftTraitValuesFromElastic] = await Promise.all([
+      this.getCollectionNftMetadataFromAPI(identifier),
+      this.getNftValuesFromElastic(identifier),
+    ]);
+
+    if (nftTraitsFromApi && !nftTraitValuesFromElastic) {
+      return await this.mintCollectionNft(
+        new CollectionTraits({
+          identifier: collectionTicker,
+          traitTypes: await collectionPromise,
+        }),
+        nftTraitsFromApi,
+      );
+    } else if (!nftTraitsFromApi && nftTraitValuesFromElastic) {
+      return await this.burnCollectionNft(collectionTicker);
+    } else if (
+      nftTraitsFromApi &&
+      nftTraitValuesFromElastic &&
+      !this.areIdenticalTraits(
+        nftTraitsFromApi.traits,
+        nftTraitValuesFromElastic,
+      )
+    ) {
+      const collectionTicker = getCollectionTickerFromNftIdentifier(identifier);
+      const forceRefresh = true;
+      return await this.updateCollectionTraits(collectionTicker, forceRefresh);
+    }
+
+    return false;
+  }
+
+  async mintCollectionNft(
+    collection: CollectionTraits,
+    nftTraits: NftTraits,
+  ): Promise<boolean> {
+    collection = collection.addNftTraitsToCollection(nftTraits.traits);
+    await Promise.all([
+      this.setCollectionTraitTypesInElastic(collection),
+      this.setNftsTraitsInElastic([nftTraits]),
+    ]);
     return true;
+  }
+
+  async burnCollectionNft(collectionTicker: string): Promise<boolean> {
+    const forceRefresh = true;
+    return await this.updateCollectionTraits(collectionTicker, forceRefresh);
+  }
+
+  private areIdenticalTraits(
+    traits: NftTrait[],
+    traitValues: string[],
+  ): boolean {
+    let identicalTraitsCount = 0;
+    for (const trait of traits) {
+      if (traitValues.includes(`${trait.name}_${trait.value}`)) {
+        identicalTraitsCount++;
+      }
+    }
+    if (identicalTraitsCount === traitValues.length) {
+      return true;
+    }
+    return false;
   }
 
   private getCollectionTraits(
@@ -64,48 +135,10 @@ export class NftTraitsService {
     });
 
     for (const nft of nfts) {
-      for (const trait of nft.traits) {
-        let collectionTrait: TraitType = collectionTraits.traitTypes.find(
-          (t) => t.name === trait.name,
-        );
-
-        if (collectionTrait) {
-          collectionTrait.occurenceCount++;
-          collectionTrait.occurencePercentage =
-            (collectionTrait.occurenceCount / nfts.length) * 100;
-          let attribute = collectionTrait.attributes.find(
-            (a) => a.name === trait.value,
-          );
-          if (!attribute) {
-            collectionTrait.attributes.push(
-              new AttributeType({
-                name: trait.value,
-                occurenceCount: 1,
-                occurencePercentage: (1 / nfts.length) * 100,
-              }),
-            );
-          } else {
-            attribute.occurenceCount++;
-            attribute.occurencePercentage =
-              (attribute.occurenceCount / nfts.length) * 100;
-          }
-        } else {
-          collectionTraits.traitTypes.push(
-            new TraitType({
-              name: trait.name,
-              attributes: [
-                new AttributeType({
-                  name: trait.name,
-                  occurenceCount: 1,
-                  occurencePercentage: (1 / nfts.length) * 100,
-                }),
-              ],
-              occurenceCount: 1,
-              occurencePercentage: (1 / nfts.length) * 100,
-            }),
-          );
-        }
-      }
+      collectionTraits = collectionTraits.addNftTraitsToCollection(
+        nft.traits,
+        nfts.length,
+      );
     }
 
     return collectionTraits;
@@ -138,11 +171,11 @@ export class NftTraitsService {
     let updates: string[] = [];
     nfts.forEach((nft) => {
       updates.push(
-        this.elasticService.buildBulkUpdate<NftTrait[]>(
+        this.elasticService.buildBulkUpdate<string[]>(
           'tokens',
           nft.identifier,
-          'nft_traits',
-          nft.traits,
+          'nft_traitValues',
+          nft.traits.map((t) => `${t.name}_${t.value}`),
         ),
       );
     });
@@ -184,45 +217,26 @@ export class NftTraitsService {
     }
   }
 
-  // private async getAllCollectionNftsFromElastic(
-  //   collectionTicker: string,
-  // ): Promise<NftTraits[]> {
-  //   let nfts: NftTraits[] = [];
-
-  //   try {
-  //     const query = ElasticQuery.create()
-  //       .withMustExistCondition('nonce')
-  //       .withMustCondition(
-  //         QueryType.Match('token', collectionTicker, QueryOperator.AND),
-  //       )
-  //       .withMustCondition(
-  //         QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-  //       )
-  //       .withMustCondition(
-  //         QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-  //       )
-  //       .withFields(['nft_traits', 'nft_rarity_rank', 'nonce'])
-  //       .withPagination({ from: 0, size: 10000 });
-
-  //     await this.elasticService.getScrollableList(
-  //       'tokens',
-  //       'identifier',
-  //       query,
-  //       async (items) => {
-  //         nfts = nfts.concat(items.map((nft) => NftTraits.fromElasticNft(nft)));
-  //         return undefined;
-  //       },
-  //     );
-  //   } catch (error) {
-  //     this.logger.error(`Error when getting all collection NFTs from Elastic`, {
-  //       path: 'NftRarityService.getAllCollectionNftsFromElastic',
-  //       exception: error?.message,
-  //       collection: collectionTicker,
-  //     });
-  //   }
-
-  //   return nfts;
-  // }
+  private async getCollectionNftMetadataFromAPI(
+    identifier: string,
+  ): Promise<NftTraits> {
+    try {
+      const metadata = await this.apiService.getNftMetadataByIdentifierForQuery(
+        identifier,
+        'withOwner=true&withSupply=true&extract=metadata',
+      );
+      return new NftTraits({
+        identifier: identifier,
+        traits: metadata.attributes.map(NftTrait.fromNftMetadataAttribute),
+      });
+    } catch (error) {
+      this.logger.error(`Error when getting NFT from API`, {
+        path: 'NftRarityService.getCollectionNftFromAPI',
+        exception: error?.message,
+        identifier: identifier,
+      });
+    }
+  }
 
   private async getCollectionTraitsFromElastic(
     collectionTicker: string,
@@ -252,7 +266,7 @@ export class NftTraitsService {
               attributes: trait.attributes.map(
                 (attribute) =>
                   new AttributeType({
-                    name: attribute.name,
+                    value: attribute.value,
                     occurenceCount: attribute.occurenceCount,
                     occurencePercentage: attribute.occurencePercentage,
                   }),
@@ -266,5 +280,43 @@ export class NftTraitsService {
     );
 
     return traitTypes;
+  }
+
+  private async getNftValuesFromElastic(identifier: string): Promise<string[]> {
+    let nftValues: string[];
+
+    try {
+      const query = ElasticQuery.create()
+        .withMustExistCondition('nonce')
+        .withMustCondition(
+          QueryType.Match('identifier', identifier, QueryOperator.AND),
+        )
+        .withMustCondition(
+          QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+        )
+        .withMustCondition(
+          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+        )
+        .withFields(['nft_traitValues'])
+        .withPagination({ from: 0, size: 1 });
+
+      await this.elasticService.getScrollableList(
+        'tokens',
+        'identifier',
+        query,
+        async (items) => {
+          nftValues = items[0].nft_traitValues;
+          return undefined;
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Error when getting  NFT trait values from Elastic`, {
+        path: 'NftRarityService.getNftTraitsFromElastic',
+        exception: error?.message,
+        identifier: identifier,
+      });
+    }
+
+    return nftValues;
   }
 }

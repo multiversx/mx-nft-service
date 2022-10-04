@@ -7,6 +7,15 @@ export class NftTrait {
   constructor(init?: Partial<NftTrait>) {
     Object.assign(this, init);
   }
+
+  static fromNftMetadataAttribute(attribute: { [key: string]: string }) {
+    return attribute
+      ? new NftTrait({
+          name: attribute.trait_type,
+          value: attribute.value,
+        })
+      : null;
+  }
 }
 
 export class NftTraits {
@@ -40,7 +49,7 @@ export class NftTraits {
         }),
       );
     }
-    
+
     return newNft;
   }
 }
