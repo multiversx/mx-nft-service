@@ -3,12 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
 import { getCollectionFromIdentifier as getCollectionTickerFromNftIdentifier } from 'src/utils/helpers';
 import { NftTypeEnum } from '../assets/models';
-import {
-  AttributeType,
-  CollectionTraits,
-  TraitType,
-} from './models/collection-traits.model';
+import { CollectionTraits, TraitType } from './models/collection-traits.model';
 import { NftTrait, NftTraits } from './models/nft-traits.model';
+import * as JsonDiff from 'json-diff';
 
 @Injectable()
 export class NftTraitsService {
@@ -43,8 +40,7 @@ export class NftTraitsService {
 
     if (
       forceRefresh === true ||
-      JSON.stringify(collectionTraitsFromElastic) !==
-        JSON.stringify(collectionTraits.traitTypes)
+      JsonDiff.diff(collectionTraitsFromElastic, collectionTraits.traitTypes)
     ) {
       await Promise.all([
         this.setCollectionTraitTypesInElastic(collectionTraits),
@@ -259,22 +255,7 @@ export class NftTraitsService {
       'identifier',
       query,
       async (items) => {
-        traitTypes = items[0].nft_traitTypes.map(
-          (trait) =>
-            new TraitType({
-              name: trait.name,
-              attributes: trait.attributes.map(
-                (attribute) =>
-                  new AttributeType({
-                    value: attribute.value,
-                    occurenceCount: attribute.occurenceCount,
-                    occurencePercentage: attribute.occurencePercentage,
-                  }),
-              ),
-              occurenceCount: trait.occurenceCount,
-              occurencePercentage: trait.occurencePercentage,
-            }),
-        );
+        traitTypes = items[0].nft_traitTypes;
         return undefined;
       },
     );
