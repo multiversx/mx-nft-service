@@ -70,11 +70,6 @@ export class ElasticUpdatesEventsService {
 
     collectionsToUpdate = [...new Set(collectionsToUpdate)];
 
-    console.log(
-      'handleTraitsForNftMintBurnAndUpdateEvents ->',
-      collectionsToUpdate,
-    );
-
     await this.addCollectionsToTraitsQueue(collectionsToUpdate);
   }
 
