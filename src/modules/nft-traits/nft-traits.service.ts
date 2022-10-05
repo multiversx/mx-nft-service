@@ -49,10 +49,8 @@ export class NftTraitsService {
       forceRefresh === true ||
       JsonDiff.diff(collectionTraitsFromElastic, collectionTraits.traitTypes)
     ) {
-      await Promise.all([
-        this.setCollectionTraitTypesInElastic(collectionTraits),
-        this.setNftsTraitsInElastic(allNfts),
-      ]);
+      await this.setNftsTraitsInElastic(allNfts);
+      await this.setCollectionTraitTypesInElastic(collectionTraits);
       return true;
     }
 
