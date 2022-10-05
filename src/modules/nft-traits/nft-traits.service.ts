@@ -7,6 +7,7 @@ import { NftTrait, NftTraits } from './models/nft-traits.model';
 import * as JsonDiff from 'json-diff';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetsQuery } from '../assets';
+import { constants } from 'src/config';
 
 @Injectable()
 export class NftTraitsService {
@@ -300,7 +301,10 @@ export class NftTraitsService {
           QueryType.Nested('data', { 'data.whiteListedStorage': true }),
         )
         .withFields(['nft_traitValues'])
-        .withPagination({ from: 0, size: 100 });
+        .withPagination({
+          from: 0,
+          size: constants.getNftsFromElasticBatchSize,
+        });
 
       await this.elasticService.getScrollableList(
         'tokens',

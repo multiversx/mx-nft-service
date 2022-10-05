@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
@@ -42,7 +42,10 @@ export class TraitsUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 50,
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToValidate,
+              ),
             });
 
           const lastIndex = await this.getLastValidatedCollectionIndex();
@@ -98,7 +101,10 @@ export class TraitsUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: Math.min(100, maxCollectionsToUpdate),
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToUpdate,
+              ),
             });
 
           await this.elasticService.getScrollableList(

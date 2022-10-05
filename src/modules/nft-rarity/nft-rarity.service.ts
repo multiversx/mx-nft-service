@@ -9,6 +9,7 @@ import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-inf
 import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 import { NftRarityData } from './nft-rarity-data.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { constants } from 'src/config';
 
 @Injectable()
 export class NftRarityService {
@@ -33,7 +34,7 @@ export class NftRarityService {
     const [elasticChecksum, dbChecksum] = await Promise.all([
       this.getNftRarityChecksum(elasticNfts),
       this.getNftRarityChecksum(dbNfts),
-  ]);
+    ]);
 
     if (
       !this.isIdenticalChecksum(
@@ -432,7 +433,10 @@ export class NftRarityService {
           QueryType.Nested('data', { 'data.whiteListedStorage': true }),
         )
         .withFields(['nft_rarity_score', 'nft_rarity_rank', 'nonce'])
-        .withPagination({ from: 0, size: 10000 });
+        .withPagination({
+          from: 0,
+          size: constants.getNftsFromElasticBatchSize,
+        });
 
       await this.elasticService.getScrollableList(
         'tokens',
