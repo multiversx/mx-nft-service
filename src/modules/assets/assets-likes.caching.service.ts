@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import '../../utils/extensions';
+import { Inject, Injectable } from '@nestjs/common';
+import '../../utils/extentions';
 import { AssetLikeEntity } from 'src/db/assets';
 import { RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
@@ -16,6 +16,7 @@ export class AssetsLikesCachingService {
   private readonly ttl = 6 * TimeConstants.oneHour;
 
   constructor(
+    @Inject()
     private isAssetLikedRedisHandler: IsAssetLikedRedisHandler,
     private redisCacheService: RedisCacheService,
   ) {

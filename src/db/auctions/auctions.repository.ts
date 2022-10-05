@@ -444,6 +444,18 @@ export class AuctionsRepository {
     return null;
   }
 
+  async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    if (identifier !== undefined) {
+      return await this.auctionsRepository.findOne({
+        where: [{ identifier: identifier, marketplaceKey: marketplaceKey }],
+      });
+    }
+    return null;
+  }
+
   async getAuctionCountForIdentifiers(
     identifiers: string[],
   ): Promise<AuctionEntity[]> {

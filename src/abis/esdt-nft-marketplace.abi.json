@@ -10,7 +10,7 @@
     "contractCrate": {
       "name": "esdt-nft-marketplace",
       "version": "0.0.0",
-      "git_version": "e54d8c5"
+      "git_version": "6ccfdd9"
     },
     "framework": {
       "name": "elrond-wasm",
@@ -142,6 +142,102 @@
       "outputs": [
         {
           "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "sendOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "desired_nft_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "desired_nft_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "desired_amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "opt_auction_id",
+          "type": "optional<u64>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "withdrawOffer",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "acceptOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdrawAuctionAndAcceptOffer",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "auction_id",
+          "type": "u64"
+        },
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getFullOfferData",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "offer_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Offer"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidOfferId",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
         }
       ]
     },
@@ -346,6 +442,23 @@
         }
       ]
     },
+    "EgldOrEsdtTokenPayment": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_identifier",
+          "type": "EgldOrEsdtTokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ]
+    },
     "EsdtTokenPayment": {
       "type": "struct",
       "fields": [
@@ -360,6 +473,31 @@
         {
           "name": "amount",
           "type": "BigUint"
+        }
+      ]
+    },
+    "Offer": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "offer_token",
+          "type": "EsdtTokenPayment"
+        },
+        {
+          "name": "payment",
+          "type": "EgldOrEsdtTokenPayment"
+        },
+        {
+          "name": "start_time",
+          "type": "u64"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "offer_owner",
+          "type": "Address"
         }
       ]
     }

@@ -148,6 +148,16 @@ export class AuctionsGetterService {
     );
   }
 
+  async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.persistenceService.getAuctionByIdentifierAndMarketplace(
+      identifier,
+      marketplaceKey,
+    );
+  }
+
   async getAvailableTokens(id: number): Promise<number> {
     return await this.persistenceService.getAvailableTokensByAuctionId(id);
   }
