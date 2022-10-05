@@ -164,8 +164,7 @@ export class AssetsFilter {
     Object.assign(this, init);
   }
 
-  @IsOptional()
-  @Field(() => [NftTrait], { nullable: true })
+  @Field(() => [NftTrait], { nullable: 'itemsAndList' })
   traits: NftTrait[];
 }
 
