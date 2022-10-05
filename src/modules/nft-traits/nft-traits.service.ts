@@ -1,4 +1,4 @@
-import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryType, QueryOperator, BinaryUtils } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
@@ -250,20 +250,20 @@ export class NftTraitsService {
         exception: error?.message,
         collection: collection.identifier,
       });
+      this.logger.error(error);
     }
   }
 
   private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {
     let updates: string[] = [];
     nfts.forEach((nft) => {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string[]>(
-          'tokens',
-          nft.identifier,
-          'nft_traitValues',
-          nft.traits.map((t) => `${t.name}_${t.value}`),
-        ),
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        'tokens',
+        nft.identifier,
+        'nft_traitValues',
+        nft.traits.map((t) => BinaryUtils.base64Encode(`${t.name}_${t.value}`)),
       );
+      updates.push(payload);
     });
     return updates;
   }
