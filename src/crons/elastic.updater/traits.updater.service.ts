@@ -123,8 +123,6 @@ export class TraitsUpdaterService {
             maxCollectionsToUpdate,
           );
 
-          console.log(collectionsToUpdate);
-
           await this.updateCollectionTraits(collectionsToUpdate);
         },
         true,
