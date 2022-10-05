@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { IsAssetLikedRedisHandler } from 'src/modules/assets/loaders/asset-is-liked.redis-handler';
 import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
