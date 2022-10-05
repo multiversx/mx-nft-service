@@ -1,11 +1,13 @@
 import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService } from 'src/common';
+import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
 import { CollectionTraits, TraitType } from './models/collection-traits.model';
 import { NftTrait, NftTraits } from './models/nft-traits.model';
 import * as JsonDiff from 'json-diff';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { AssetsQuery } from '../assets';
+import { constants } from 'src/config';
 
 @Injectable()
 export class NftTraitsService {
@@ -13,7 +15,9 @@ export class NftTraitsService {
     private readonly apiService: ElrondApiService,
     private readonly elasticService: ElrondElasticService,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.setElasticTraitMappings();
+  }
 
   async updateCollectionTraits(
     collectionTicker: string,
@@ -104,6 +108,22 @@ export class NftTraitsService {
   async burnCollectionNft(collectionTicker: string): Promise<boolean> {
     const forceRefresh = true;
     return await this.updateCollectionTraits(collectionTicker, forceRefresh);
+  }
+
+  async getNftsByTraits(
+    collection: string,
+    traits: NftTrait[],
+    limit: number,
+    offset: number,
+  ): Promise<[Nft[], number]> {
+    return await this.apiService.getNftsAndCount(
+      new AssetsQuery()
+        .addCollection(collection)
+        .addTraits(traits)
+        .addPageSize(offset, limit)
+        .build(),
+      new AssetsQuery().addCollection(collection).addTraits(traits).build(),
+    );
   }
 
   private areIdenticalTraits(
@@ -281,7 +301,10 @@ export class NftTraitsService {
           QueryType.Nested('data', { 'data.whiteListedStorage': true }),
         )
         .withFields(['nft_traitValues'])
-        .withPagination({ from: 0, size: 1 });
+        .withPagination({
+          from: 0,
+          size: constants.getNftsFromElasticBatchSize,
+        });
 
       await this.elasticService.getScrollableList(
         'tokens',
@@ -301,5 +324,38 @@ export class NftTraitsService {
     }
 
     return nftValues;
+  }
+
+  async setElasticTraitMappings(): Promise<void> {
+    try {
+      await this.elasticService.putMappings(
+        'tokens',
+        this.elasticService.buildPutMultipleMappingsBody([
+          {
+            key: 'nft_traitTypes.attributes.occurencePercentage',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.attributes.occurenceCount',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.occurencePercentage',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.occurenceCount',
+            value: 'float',
+          },
+        ]),
+      );
+    } catch (error) {
+      this.logger.error(
+        'Error when trying to map Elastic types for trait variables',
+        {
+          path: 'NftTraitsService.setElasticTraitMappings',
+        },
+      );
+    }
   }
 }

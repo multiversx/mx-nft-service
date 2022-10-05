@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
@@ -42,7 +42,10 @@ export class TraitsUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 50,
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToValidate,
+              ),
             });
 
           const lastIndex = await this.getLastValidatedCollectionIndex();
@@ -85,26 +88,23 @@ export class TraitsUpdaterService {
   async handleSetTraitsWhereNotSet(maxCollectionsToUpdate: number) {
     try {
       await Locker.lock(
-        'handleUpdateTokenTraits',
+        'handleSetTraitsWhereNotSet',
         async () => {
           let collectionsToUpdate: string[] = [];
 
           const query = ElasticQuery.create()
-            .withMustExistCondition('nonce')
-            .withMustNotCondition(QueryType.Exists('nft_traitValues'))
-            .withMustCondition(
-              QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-            )
-            .withMustCondition(
-              QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-            )
+            .withMustNotExistCondition('nonce')
+            .withMustNotExistCondition('nft_traitTypes')
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
             .withPagination({
               from: 0,
-              size: 100,
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToUpdate,
+              ),
             });
 
           await this.elasticService.getScrollableList(
@@ -112,7 +112,7 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
+              const collections = items.map((i) => i.token);
               collectionsToUpdate = collectionsToUpdate.concat(
                 collections.filter(
                   (c) => collectionsToUpdate.indexOf(c) === -1,

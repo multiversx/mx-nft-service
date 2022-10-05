@@ -170,6 +170,7 @@ input AssetsFilter {
   likedByAddress: String
   ownerAddress: String
   tags: [String!]
+  traits: [NftTrait]
   type: NftTypeEnum
 }
 
@@ -744,6 +745,11 @@ type Mutation {
 
 input MyClaimableAuctionsFilters {
   marketplaceKey: String!
+}
+
+input NftTrait {
+  name: String!
+  value: String!
 }
 
 enum NftTypeEnum {

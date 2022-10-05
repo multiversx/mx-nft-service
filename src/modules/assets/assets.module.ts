@@ -48,6 +48,7 @@ import { ArtistAddressProvider } from '../artists/artists.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { AssetsLikesCachingService } from './assets-likes.caching.service';
+import { NftTraitsService } from '../nft-traits/nft-traits.service';
 
 @Module({
   providers: [
@@ -94,6 +95,7 @@ import { AssetsLikesCachingService } from './assets-likes.caching.service';
     FeaturedMarketplaceRedisHandler,
     InternalMarketplaceProvider,
     InternalMarketplaceRedisHandler,
+    NftTraitsService,
   ],
   imports: [
     ElrondCommunicationModule,
