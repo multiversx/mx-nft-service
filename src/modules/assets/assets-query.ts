@@ -1,3 +1,4 @@
+import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { NftTypeEnum } from './models/NftTypes.enum';
 
 export class AssetsQuery {
@@ -76,6 +77,19 @@ export class AssetsQuery {
 
   addBefore(timestamp: number): this {
     return this.addParamToQuery('before', timestamp);
+  }
+
+  addTraits(traits: NftTrait[]): this {
+    if (!traits || traits?.length === 0) {
+      return this;
+    }
+
+    let traitsQuery = '';
+    for (let i = 0; i < traits.length; i++) {
+      traitsQuery += `${traits[i].name}:${traits[i].value}`;
+      traitsQuery += i < traits.length - 1 ? ';' : '';
+    }
+    return this.addParamToQuery('traits', traitsQuery);
   }
 
   build(addDefaultQuery: boolean = true): string {

@@ -15,6 +15,8 @@ import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
+import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { NftTrait } from '../nft-traits/models/nft-traits.model';
 
 @Injectable()
 export class AssetsGetterService {
@@ -26,6 +28,7 @@ export class AssetsGetterService {
     private assetRarityLoader: AssetRarityInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
     private assetsLikedService: AssetsLikesService,
+    private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -72,6 +75,16 @@ export class AssetsGetterService {
       });
     }
 
+    if (filters?.traits) {
+      const response = await this.getAssetsByTraits(
+        filters.collection,
+        filters.traits,
+        limit,
+        offset,
+      );
+      this.addToCache(response);
+      return response;
+    }
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
         filters.likedByAddress,
@@ -221,6 +234,22 @@ export class AssetsGetterService {
         countQuery,
       );
     }
+  }
+
+  private async getAssetsByTraits(
+    collection: string,
+    traits: NftTrait[],
+    limit: number,
+    offset: number,
+  ): Promise<CollectionType<Asset>> {
+    const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
+      collection,
+      traits,
+      limit,
+      offset,
+    );
+    const assets = nfts?.map((nft) => Asset.fromNft(nft));
+    return new CollectionType({ items: assets, count: count });
   }
 
   private async getlikedByAssets(
