@@ -65,7 +65,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   async updateCollectionTraits(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -96,7 +96,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   updateAllCollectionTraits(): void {
     try {
       this.nftTraitService.updateAllCollections();
