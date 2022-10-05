@@ -8,6 +8,7 @@ import * as JsonDiff from 'json-diff';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetsQuery } from '../assets';
 import { constants } from 'src/config';
+import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class NftTraitsService {
@@ -49,14 +50,63 @@ export class NftTraitsService {
       forceRefresh === true ||
       JsonDiff.diff(collectionTraitsFromElastic, collectionTraits.traitTypes)
     ) {
-      await Promise.all([
-        this.setCollectionTraitTypesInElastic(collectionTraits),
-        this.setNftsTraitsInElastic(allNfts),
-      ]);
+      await this.setNftsTraitsInElastic(allNfts);
+      await this.setCollectionTraitTypesInElastic(collectionTraits);
       return true;
     }
 
     return false;
+  }
+
+  async updateAllCollections(): Promise<void> {
+    await Locker.lock(
+      'processTokenTraitsQueue: Update traits for all collections in the traits queue',
+      async () => {
+        let lastBatchSize: number;
+
+        const query: ElasticQuery = ElasticQuery.create()
+          .withMustExistCondition('token')
+          .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
+          //.withMustNotCondition(QueryType.Match('nft_hasTraitSummary', false))
+          // .withMustMultiShouldCondition(
+          //   [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+          //   (type) => QueryType.Match('type', type),
+          // )
+          .withPagination({
+            from: 0,
+            size: constants.getCollectionsFromElasticBatchSize,
+          });
+
+        do {
+          try {
+            let collections: string[] = [];
+
+            await this.elasticService.getScrollableList(
+              'tokens',
+              'token',
+              query,
+              async (items) => {
+                collections = collections.concat(
+                  [...new Set(items.map((i) => i.token))], //.filter(
+                );
+              },
+              constants.getCollectionsFromElasticBatchSize,
+            );
+
+            lastBatchSize = collections.length;
+            console.log(lastBatchSize);
+
+            for (const collection of collections) {
+              console.log(collection);
+              await this.updateCollectionTraits(collection);
+            }
+          } catch (error) {
+            console.log(error);
+          }
+        } while (lastBatchSize !== 0);
+      },
+      true,
+    );
   }
 
   async updateNftTraits(identifier: string): Promise<boolean> {
@@ -165,16 +215,35 @@ export class NftTraitsService {
     collection: CollectionTraits,
   ): Promise<void> {
     try {
-      const updateBody = this.elasticService.buildUpdateBody<TraitType[]>(
-        'nft_traitTypes',
-        collection.traitTypes,
-      );
-      await this.elasticService.setCustomValue(
-        'tokens',
-        collection.identifier,
-        updateBody,
-        '?retry_on_conflict=2&timeout=1m',
-      );
+      let updates: string[] = [];
+      if (collection.traitTypes?.length > 0) {
+        updates.push(
+          this.elasticService.buildBulkUpdate<boolean>(
+            'tokens',
+            collection.identifier,
+            'nft_hasTraitSummary',
+            true,
+          ),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<TraitType[]>(
+            'tokens',
+            collection.identifier,
+            'nft_traitSummary',
+            collection.traitTypes,
+          ),
+        );
+      } else {
+        updates.push(
+          this.elasticService.buildBulkUpdate<boolean>(
+            'tokens',
+            collection.identifier,
+            'nft_hasTraitSummary',
+            true,
+          ),
+        );
+      }
+      await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
     } catch (error) {
       this.logger.error('Error when setting collection trait types', {
         path: 'NftRarityService.setCollectionTraitTypesInElastic',
@@ -277,7 +346,7 @@ export class NftTraitsService {
       'identifier',
       query,
       async (items) => {
-        traitTypes = items[0].nft_traitTypes;
+        traitTypes = items[0].nft_traitSummary;
         return undefined;
       },
     );
@@ -332,20 +401,20 @@ export class NftTraitsService {
         'tokens',
         this.elasticService.buildPutMultipleMappingsBody([
           {
-            key: 'nft_traitTypes.attributes.occurencePercentage',
+            key: 'nft_traitSummary.attributes.occurencePercentage',
             value: 'float',
           },
           {
-            key: 'nft_traitTypes.attributes.occurenceCount',
+            key: 'nft_traitSummary.attributes.occurenceCount',
+            value: 'long',
+          },
+          {
+            key: 'nft_traitSummary.occurencePercentage',
             value: 'float',
           },
           {
-            key: 'nft_traitTypes.occurencePercentage',
-            value: 'float',
-          },
-          {
-            key: 'nft_traitTypes.occurenceCount',
-            value: 'float',
+            key: 'nft_traitSummary.occurenceCount',
+            value: 'long',
           },
         ]),
       );
