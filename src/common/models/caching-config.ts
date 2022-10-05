@@ -14,6 +14,8 @@ export class CachingConfig {
   collectionsRedisClientName: string;
   rarityQueueClientName: string;
   rarityQueueDbName: number;
+  traitsQueueClientName: string;
+  traitsQueueDbName: number;
 
   // network config and network status
   networkConfig: number;

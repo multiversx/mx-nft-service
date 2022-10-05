@@ -1,11 +1,11 @@
 import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
-import { getCollectionFromIdentifier as getCollectionTickerFromNftIdentifier } from 'src/utils/helpers';
 import { NftTypeEnum } from '../assets/models';
 import { CollectionTraits, TraitType } from './models/collection-traits.model';
 import { NftTrait, NftTraits } from './models/nft-traits.model';
 import * as JsonDiff from 'json-diff';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class NftTraitsService {
@@ -24,6 +24,9 @@ export class NftTraitsService {
     );
 
     if (allNfts?.length === 0) {
+      this.setCollectionTraitTypesInElastic(
+        new CollectionTraits({ identifier: collectionTicker, traitTypes: [] }),
+      );
       return false;
     }
 
@@ -53,9 +56,8 @@ export class NftTraitsService {
   }
 
   async updateNftTraits(identifier: string): Promise<boolean> {
-    const collectionTicker = getCollectionTickerFromNftIdentifier(identifier);
-    let collectionPromise =
-      this.getCollectionTraitsFromElastic(collectionTicker);
+    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
+    let collectionPromise = this.getCollectionTraitsFromElastic(collection);
 
     let [nftTraitsFromApi, nftTraitValuesFromElastic] = await Promise.all([
       this.getCollectionNftMetadataFromAPI(identifier),
@@ -65,13 +67,13 @@ export class NftTraitsService {
     if (nftTraitsFromApi && !nftTraitValuesFromElastic) {
       return await this.mintCollectionNft(
         new CollectionTraits({
-          identifier: collectionTicker,
+          identifier: collection,
           traitTypes: await collectionPromise,
         }),
         nftTraitsFromApi,
       );
     } else if (!nftTraitsFromApi && nftTraitValuesFromElastic) {
-      return await this.burnCollectionNft(collectionTicker);
+      return await this.burnCollectionNft(collection);
     } else if (
       nftTraitsFromApi &&
       nftTraitValuesFromElastic &&
@@ -80,9 +82,8 @@ export class NftTraitsService {
         nftTraitValuesFromElastic,
       )
     ) {
-      const collectionTicker = getCollectionTickerFromNftIdentifier(identifier);
       const forceRefresh = true;
-      return await this.updateCollectionTraits(collectionTicker, forceRefresh);
+      return await this.updateCollectionTraits(collection, forceRefresh);
     }
 
     return false;
@@ -203,7 +204,7 @@ export class NftTraitsService {
         collectionTicker,
         'identifier,nonce,metadata,score,rank,timestamp',
       );
-      return res.map(NftTraits.fromNft);
+      return res?.map(NftTraits.fromNft) ?? [];
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
@@ -223,7 +224,8 @@ export class NftTraitsService {
       );
       return new NftTraits({
         identifier: identifier,
-        traits: metadata.attributes.map(NftTrait.fromNftMetadataAttribute),
+        traits:
+          metadata?.attributes?.map(NftTrait.fromNftMetadataAttribute) ?? [],
       });
     } catch (error) {
       this.logger.error(`Error when getting NFT from API`, {

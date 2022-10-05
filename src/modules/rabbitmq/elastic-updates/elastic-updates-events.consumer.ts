@@ -15,7 +15,7 @@ export class ElasiticUpdatesConsumer {
     exchange: process.env.RABBITMQ_EXCHANGE,
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
-  async consumeMintEvents(mintEvents: any) {
+  async consumeMintBurnAndUpdateEvents(mintEvents: any) {
     if (mintEvents.events && process.env.ENABLE_ELASTIC_UPDATES === 'true') {
       await Promise.all([
         this.elasticUpdateService.handleNftMintEvents(
@@ -25,11 +25,20 @@ export class ElasiticUpdatesConsumer {
           ),
           mintEvents.hash,
         ),
-        this.elasticUpdateService.handleRaritiesForNftMintAndBurnEvents(
+        this.elasticUpdateService.handleTraitsForNftMintBurnAndUpdateEvents(
           mintEvents?.events?.filter(
             (e: { identifier: NftEventEnum }) =>
               e.identifier === NftEventEnum.ESDTNFTCreate ||
-              e.identifier === NftEventEnum.ESDTNFTBurn,
+              e.identifier === NftEventEnum.ESDTNFTBurn ||
+              e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
+          ),
+        ),
+        this.elasticUpdateService.handleRaritiesForNftMintBurnAndUpdateEvents(
+          mintEvents?.events?.filter(
+            (e: { identifier: NftEventEnum }) =>
+              e.identifier === NftEventEnum.ESDTNFTCreate ||
+              e.identifier === NftEventEnum.ESDTNFTBurn ||
+              e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
           ),
         ),
       ]);
