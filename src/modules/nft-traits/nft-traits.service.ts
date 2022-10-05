@@ -15,7 +15,7 @@ export class NftTraitsService {
     private readonly elasticService: ElrondElasticService,
     private readonly logger: Logger,
   ) {
-    this.setElasticTraitsMappings();
+    this.setElasticTraitMappings();
   }
 
   async updateCollectionTraits(
@@ -322,7 +322,7 @@ export class NftTraitsService {
     return nftValues;
   }
 
-  async setElasticTraitsMappings(): Promise<void> {
+  async setElasticTraitMappings(): Promise<void> {
     try {
       await this.elasticService.putMappings(
         'tokens',
@@ -349,7 +349,7 @@ export class NftTraitsService {
       this.logger.error(
         'Error when trying to map Elastic types for trait variables',
         {
-          path: 'NftTraitsService.setElasticTraitsMappings',
+          path: 'NftTraitsService.setElasticTraitMappings',
         },
       );
     }
