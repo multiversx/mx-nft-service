@@ -523,6 +523,12 @@ export class AuctionsGetterService {
       );
 
     const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
+    const typeFilter = queryRequest.getFilter('type');
+    if (typeFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        typeFilter.values.includes(x.type),
+      );
+    }
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
