@@ -65,7 +65,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  //@UseGuards(GqlAdminAuthGuard)
   async updateCollectionTraits(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -90,6 +90,16 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  //@UseGuards(GqlAdminAuthGuard)
+  updateAllCollectionTraits(): void {
+    try {
+      this.nftTraitService.updateAllCollections();
     } catch (error) {
       throw new ApolloError(error);
     }
