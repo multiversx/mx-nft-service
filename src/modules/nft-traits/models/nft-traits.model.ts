@@ -1,7 +1,11 @@
+import { Field, InputType } from '@nestjs/graphql';
 import { Nft } from 'src/common';
 
+@InputType()
 export class NftTrait {
+  @Field(() => String)
   name: string;
+  @Field(() => String)
   value: string;
 
   constructor(init?: Partial<NftTrait>) {

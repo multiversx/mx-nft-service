@@ -69,7 +69,9 @@
   "constants": {
     "getNftsFromApiBatchSize": 250,
     "bulkUpdateElasticBatchSize": 100,
-    "getTokensFromApiBatchSize": 100
+    "getTokensFromApiBatchSize": 100,
+    "getCollectionsFromElasticBatchSize": 100,
+    "getNftsFromElasticBatchSize": 100
   },
   "genericDescriptions": {
     "forBigCollections": [

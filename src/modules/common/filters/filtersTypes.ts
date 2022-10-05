@@ -1,5 +1,6 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
+import { NftTrait } from 'src/modules/nft-traits/models/nft-traits.model';
 import {
   ADDRESS_ERROR,
   ADDRESS_RGX,
@@ -162,6 +163,9 @@ export class AssetsFilter {
   constructor(init?: Partial<AssetsFilter>) {
     Object.assign(this, init);
   }
+
+  @Field(() => [NftTrait], { nullable: 'itemsAndList' })
+  traits: NftTrait[];
 }
 
 @InputType()
