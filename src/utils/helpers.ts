@@ -72,8 +72,3 @@ export const randomBetween = (min: number, max: number): number => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 };
-
-export const getCollectionFromIdentifier = (identifier: string): string => {
-  const lastIndex = identifier.lastIndexOf('-');
-  return identifier.slice(0, lastIndex);
-};

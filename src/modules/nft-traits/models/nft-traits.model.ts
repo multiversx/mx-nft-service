@@ -36,18 +36,20 @@ export class NftTraits {
       traits: [],
     });
 
-    for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-      if (value.trait_type === undefined || value.value === undefined) {
-        continue;
+    if (nft?.metadata?.attributes) {
+      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
+        if (value.trait_type === undefined || value.value === undefined) {
+          continue;
+        }
+        const traitName = String(value.trait_type);
+        const traitValue = String(value.value);
+        newNft.traits.push(
+          new NftTrait({
+            name: traitName,
+            value: traitValue,
+          }),
+        );
       }
-      const traitName = String(value.trait_type);
-      const traitValue = String(value.value);
-      newNft.traits.push(
-        new NftTrait({
-          name: traitName,
-          value: traitValue,
-        }),
-      );
     }
 
     return newNft;
