@@ -1,4 +1,9 @@
-import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
+import {
+  ElasticQuery,
+  QueryType,
+  QueryOperator,
+  BinaryUtils,
+} from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
@@ -215,55 +220,36 @@ export class NftTraitsService {
     collection: CollectionTraits,
   ): Promise<void> {
     try {
-      let updates: string[] = [];
-      if (collection.traitTypes?.length > 0) {
-        updates.push(
-          this.elasticService.buildBulkUpdate<boolean>(
-            'tokens',
-            collection.identifier,
-            'nft_hasTraitSummary',
-            true,
-          ),
-        );
-        updates.push(
-          this.elasticService.buildBulkUpdate<TraitType[]>(
-            'tokens',
-            collection.identifier,
-            'nft_traitSummary',
-            collection.traitTypes,
-          ),
-        );
-      } else {
-        updates.push(
-          this.elasticService.buildBulkUpdate<boolean>(
-            'tokens',
-            collection.identifier,
-            'nft_hasTraitSummary',
-            true,
-          ),
-        );
-      }
-      await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
+      const updateBody = this.elasticService.buildUpdateBody<TraitType[]>(
+        'nft_traitSummary',
+        collection.traitTypes,
+      );
+      await this.elasticService.setCustomValue(
+        'tokens',
+        collection.identifier,
+        updateBody,
+        '?retry_on_conflict=2&timeout=1m',
+      );
     } catch (error) {
       this.logger.error('Error when setting collection trait types', {
         path: 'NftRarityService.setCollectionTraitTypesInElastic',
         exception: error?.message,
         collection: collection.identifier,
       });
+      this.logger.error(error);
     }
   }
 
   private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {
     let updates: string[] = [];
     nfts.forEach((nft) => {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string[]>(
-          'tokens',
-          nft.identifier,
-          'nft_traitValues',
-          nft.traits.map((t) => `${t.name}_${t.value}`),
-        ),
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        'tokens',
+        nft.identifier,
+        'nft_traitValues',
+        nft.traits.map((t) => BinaryUtils.base64Encode(`${t.name}_${t.value}`)),
       );
+      updates.push(payload);
     });
     return updates;
   }
