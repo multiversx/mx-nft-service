@@ -36,7 +36,7 @@ export class TraitsUpdaterService {
           const query: ElasticQuery = ElasticQuery.create()
             .withMustExistCondition('token')
             .withMustNotExistCondition('nonce')
-            .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
+            .withMustCondition(QueryType.Match('nft_hasTraitSummary', true))
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
