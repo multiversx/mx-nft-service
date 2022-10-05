@@ -85,26 +85,20 @@ export class TraitsUpdaterService {
   async handleSetTraitsWhereNotSet(maxCollectionsToUpdate: number) {
     try {
       await Locker.lock(
-        'handleUpdateTokenTraits',
+        'handleSetTraitsWhereNotSet',
         async () => {
           let collectionsToUpdate: string[] = [];
 
           const query = ElasticQuery.create()
-            .withMustExistCondition('nonce')
-            .withMustNotCondition(QueryType.Exists('nft_traitValues'))
-            .withMustCondition(
-              QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-            )
-            .withMustCondition(
-              QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-            )
+            .withMustNotExistCondition('nonce')
+            .withMustNotExistCondition('nft_traitTypes')
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
             )
             .withPagination({
               from: 0,
-              size: 100,
+              size: Math.min(100, maxCollectionsToUpdate),
             });
 
           await this.elasticService.getScrollableList(
@@ -112,7 +106,7 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
+              const collections = items.map((i) => i.token);
               collectionsToUpdate = collectionsToUpdate.concat(
                 collections.filter(
                   (c) => collectionsToUpdate.indexOf(c) === -1,
@@ -128,6 +122,8 @@ export class TraitsUpdaterService {
             0,
             maxCollectionsToUpdate,
           );
+
+          console.log(collectionsToUpdate);
 
           await this.updateCollectionTraits(collectionsToUpdate);
         },
