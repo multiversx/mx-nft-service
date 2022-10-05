@@ -1,4 +1,9 @@
-import { ElasticQuery, QueryType, QueryOperator, BinaryUtils } from '@elrondnetwork/erdnest';
+import {
+  ElasticQuery,
+  QueryType,
+  QueryOperator,
+  BinaryUtils,
+} from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
