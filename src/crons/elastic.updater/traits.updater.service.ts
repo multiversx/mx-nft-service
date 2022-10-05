@@ -5,7 +5,7 @@ import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
 
@@ -35,7 +35,7 @@ export class TraitsUpdaterService {
         async () => {
           const query: ElasticQuery = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
-            .withMustExistCondition('nft_traitTypes')
+            .withMustExistCondition('nft_traitSummary')
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
@@ -94,7 +94,7 @@ export class TraitsUpdaterService {
 
           const query = ElasticQuery.create()
             .withMustNotExistCondition('nonce')
-            .withMustNotExistCondition('nft_traitTypes')
+            .withMustNotExistCondition('nft_traitSummary')
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),

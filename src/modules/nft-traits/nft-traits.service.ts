@@ -1,4 +1,4 @@
-import { ElasticQuery, QueryType, QueryOperator } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryType, QueryOperator, BinaryUtils } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
@@ -166,7 +166,7 @@ export class NftTraitsService {
   ): Promise<void> {
     try {
       const updateBody = this.elasticService.buildUpdateBody<TraitType[]>(
-        'nft_traitTypes',
+        'nft_traitSummary',
         collection.traitTypes,
       );
       await this.elasticService.setCustomValue(
@@ -181,20 +181,20 @@ export class NftTraitsService {
         exception: error?.message,
         collection: collection.identifier,
       });
+      this.logger.error(error);
     }
   }
 
   private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {
     let updates: string[] = [];
     nfts.forEach((nft) => {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string[]>(
-          'tokens',
-          nft.identifier,
-          'nft_traitValues',
-          nft.traits.map((t) => `${t.name}_${t.value}`),
-        ),
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        'tokens',
+        nft.identifier,
+        'nft_traitValues',
+        nft.traits.map((t) => BinaryUtils.base64Encode(`${t.name}_${t.value}`)),
       );
+      updates.push(payload);
     });
     return updates;
   }
@@ -277,7 +277,7 @@ export class NftTraitsService {
       'identifier',
       query,
       async (items) => {
-        traitTypes = items[0].nft_traitTypes;
+        traitTypes = items[0].nft_traitSummary;
         return undefined;
       },
     );
@@ -332,20 +332,20 @@ export class NftTraitsService {
         'tokens',
         this.elasticService.buildPutMultipleMappingsBody([
           {
-            key: 'nft_traitTypes.attributes.occurencePercentage',
+            key: 'nft_traitSummary.attributes.occurencePercentage',
             value: 'float',
           },
           {
-            key: 'nft_traitTypes.attributes.occurenceCount',
+            key: 'nft_traitSummary.attributes.occurenceCount',
+            value: 'long',
+          },
+          {
+            key: 'nft_traitSummary.occurencePercentage',
             value: 'float',
           },
           {
-            key: 'nft_traitTypes.occurencePercentage',
-            value: 'float',
-          },
-          {
-            key: 'nft_traitTypes.occurenceCount',
-            value: 'float',
+            key: 'nft_traitSummary.occurenceCount',
+            value: 'long',
           },
         ]),
       );
