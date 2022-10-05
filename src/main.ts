@@ -13,6 +13,7 @@ import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.u
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
+import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -63,6 +64,12 @@ async function bootstrap() {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
     await processorApp.listen(6013);
+  }
+
+  if (process.env.ENABLE_TRAITS_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticTraitsUpdaterModule);
+    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    await processorApp.listen(6014);
   }
 
   const logger = new Logger('Bootstrapper');

@@ -30,7 +30,9 @@
     "collectionsRedisClientName": "collections",
     "collectionsDbName": 6,
     "rarityQueueClientName": "rarityQueue",
-    "rarityQueueDbName": 7
+    "rarityQueueDbName": 7,
+    "traitsQueueClientName": "traitsQueue",
+    "traitsQueueDbName": 8
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
@@ -40,6 +42,7 @@
   },
   "gas": {
     "nftCreate": 3000000,
+
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
@@ -57,6 +60,10 @@
       "collectionRaritiesToValidateEvery30m": 10,
       "colectionRaritiesToUpdateEvery10s": 2,
       "collectionRarityFlagsToValidateEvery10m": 10
+    },
+    "traits": {
+      "collectionTraitsToSetEvery10s": 3,
+      "collectionTraitsToValidateEvery5m": 10
     }
   },
   "constants": {

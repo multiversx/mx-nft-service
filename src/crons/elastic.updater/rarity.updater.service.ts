@@ -89,16 +89,14 @@ export class RarityUpdaterService {
             lastIndex + maxCollectionsToValidate,
           );
 
-          if (collectionsToValidate.length < maxCollectionsToValidate) {
+          if (collectionsToValidate.length !== 0) {
+            await this.validateTokenRarities(collectionsToValidate);
+            await this.setLastValidatedCollectionIndex(
+              lastIndex + collectionsToValidate.length,
+            );
+          } else {
             await this.setLastValidatedCollectionIndex(0);
-            return;
           }
-
-          await this.validateTokenRarities(collectionsToValidate);
-
-          await this.setLastValidatedCollectionIndex(
-            lastIndex + collectionsToValidate.length,
-          );
         },
         true,
       );
@@ -170,16 +168,14 @@ export class RarityUpdaterService {
             lastIndex + maxCollectionsToValidate,
           );
 
-          if (collectionsToValidate.length < maxCollectionsToValidate) {
+          if (collectionsToValidate.length !== 0) {
+            await this.validateTokenRarityFlags(collectionsToValidate);
+            await this.setLastFlagValidatedCollectionIndex(
+              lastIndex + collectionsToValidate.length,
+            );
+          } else {
             await this.setLastFlagValidatedCollectionIndex(0);
-            return;
           }
-
-          await this.validateTokenRarityFlags(collectionsToValidate);
-
-          await this.setLastFlagValidatedCollectionIndex(
-            lastIndex + collectionsToValidate.length,
-          );
         },
         true,
       );
