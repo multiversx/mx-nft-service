@@ -786,6 +786,19 @@ export class PersistenceService {
     );
   }
 
+  async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.execute(
+      this.getAuctionByIdentifierAndMarketplace.name,
+      this.auctionsRepository.getAuctionByIdentifierAndMarketplace(
+        identifier,
+        marketplaceKey,
+      ),
+    );
+  }
+
   async getAuctionCountForIdentifiers(
     identifiers: string[],
   ): Promise<AuctionEntity[]> {
