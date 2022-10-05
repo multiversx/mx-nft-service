@@ -66,12 +66,12 @@ export class NftTraitsService {
 
         const query: ElasticQuery = ElasticQuery.create()
           .withMustExistCondition('token')
+          .withMustNotExistCondition('nonce')
           .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
-          //.withMustNotCondition(QueryType.Match('nft_hasTraitSummary', false))
-          // .withMustMultiShouldCondition(
-          //   [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-          //   (type) => QueryType.Match('type', type),
-          // )
+          .withMustMultiShouldCondition(
+            [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+            (type) => QueryType.Match('type', type),
+          )
           .withPagination({
             from: 0,
             size: constants.getCollectionsFromElasticBatchSize,
