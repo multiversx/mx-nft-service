@@ -14,7 +14,9 @@ export class NftTraitsService {
     private readonly apiService: ElrondApiService,
     private readonly elasticService: ElrondElasticService,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.setElasticTraitsMappings();
+  }
 
   async updateCollectionTraits(
     collectionTicker: string,
@@ -318,5 +320,38 @@ export class NftTraitsService {
     }
 
     return nftValues;
+  }
+
+  async setElasticTraitsMappings(): Promise<void> {
+    try {
+      await this.elasticService.putMappings(
+        'tokens',
+        this.elasticService.buildPutMultipleMappingsBody([
+          {
+            key: 'nft_traitTypes.attributes.occurencePercentage',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.attributes.occurenceCount',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.occurencePercentage',
+            value: 'float',
+          },
+          {
+            key: 'nft_traitTypes.occurenceCount',
+            value: 'float',
+          },
+        ]),
+      );
+    } catch (error) {
+      this.logger.error(
+        'Error when trying to map Elastic types for trait variables',
+        {
+          path: 'NftTraitsService.setElasticTraitsMappings',
+        },
+      );
+    }
   }
 }
