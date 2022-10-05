@@ -42,6 +42,7 @@ import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
+import { CreateOfferRequest } from '../offers/models';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -87,6 +88,37 @@ export class NftMarketplaceAbiService {
     }
   }
 
+  async createOffer(
+    ownerAddress: string,
+    request: CreateOfferRequest,
+  ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      request.identifier,
+    );
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(collection);
+    const auction =
+      await this.auctionsService.getAuctionByIdentifierAndMarketplace(
+        request.identifier,
+        marketplace.key,
+      );
+
+    const contract = await this.contract.getContract(marketplace.address);
+
+    let sendOffer = contract.call({
+      func: new ContractFunction('sendOffer'),
+      value: TokenPayment.egldFromBigInteger(request.paymentAmount),
+      args: [
+        BytesValue.fromUTF8(collection),
+        BytesValue.fromHex(nonce),
+        new U64Value(new BigNumber(request.deadline)),
+      ],
+      gasLimit: gas.bid,
+      chainID: elrondConfig.chainID,
+    });
+    return sendOffer.toPlainObject(new Address(ownerAddress));
+  }
+
   async bid(
     ownerAddress: string,
     request: BidRequest,
@@ -112,6 +144,24 @@ export class NftMarketplaceAbiService {
   }
 
   async withdraw(
+    ownerAddress: string,
+    auctionId: number,
+  ): Promise<TransactionNode> {
+    const { contract, auction } = await this.configureTransactionData(
+      auctionId,
+    );
+
+    let withdraw = contract.call({
+      func: new ContractFunction('withdraw'),
+      value: TokenPayment.egldFromAmount(0),
+      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
+      gasLimit: gas.withdraw,
+      chainID: elrondConfig.chainID,
+    });
+    return withdraw.toPlainObject(new Address(ownerAddress));
+  }
+
+  async withdrawOffer(
     ownerAddress: string,
     auctionId: number,
   ): Promise<TransactionNode> {

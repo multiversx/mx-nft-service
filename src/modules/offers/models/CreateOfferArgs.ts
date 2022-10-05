@@ -8,7 +8,7 @@ import {
 } from 'src/utils/constants';
 
 @InputType()
-export class CreateAuctionArgs {
+export class CreateOfferArgs {
   @Matches(RegExp(NFT_IDENTIFIER_RGX), {
     message: NFT_IDENTIFIER_ERROR,
   })
@@ -19,20 +19,6 @@ export class CreateAuctionArgs {
   @Field(() => String)
   quantity: string = '1';
 
-  @Matches(RegExp(NUMERIC_RGX), { message: `Min Bid ${NUMERIC_ERROR}` })
-  @Field()
-  minBid: string;
-
-  @IsOptional()
-  @Matches(RegExp(NUMERIC_RGX), { message: `Max bid ${NUMERIC_ERROR}` })
-  @Field({ nullable: true })
-  maxBid: string;
-
-  @IsOptional()
-  @Matches(RegExp(NUMERIC_RGX), { message: `Start Date ${NUMERIC_ERROR}` })
-  @Field({ nullable: true })
-  startDate: string;
-
   @IsOptional()
   @Matches(RegExp(NUMERIC_RGX), { message: `Deadline ${NUMERIC_ERROR}` })
   @Field()
@@ -41,9 +27,9 @@ export class CreateAuctionArgs {
   @Field()
   paymentToken: string;
 
-  @Field(() => Int, { nullable: true })
-  paymentTokenNonce: number;
+  @Field(() => Int)
+  paymentTokenNonce: number = 0;
 
-  @Field(() => Boolean, { nullable: true })
-  maxOneSftPerPayment: boolean;
+  @Field()
+  paymentAmount: string;
 }
