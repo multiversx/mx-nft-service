@@ -33,23 +33,13 @@ export class NftTraitsService {
       collectionTicker,
     );
 
-    if (allNfts?.length === 0) {
-      this.setCollectionTraitTypesInElastic(
-        new CollectionTraits({ identifier: collectionTicker, traitTypes: [] }),
-      );
-      return false;
-    }
-
-    const getTraitTypeFromElasticPromise =
-      this.getCollectionTraitsFromElastic(collectionTicker);
-
     const collectionTraits = this.getCollectionTraits(
       collectionTicker,
       allNfts,
     );
 
     const collectionTraitsFromElastic: TraitType[] =
-      await getTraitTypeFromElasticPromise;
+      await this.getCollectionTraitsFromElastic(collectionTicker);
 
     if (
       forceRefresh === true ||
@@ -57,7 +47,8 @@ export class NftTraitsService {
     ) {
       await this.setNftsTraitsInElastic(allNfts);
       await this.setCollectionTraitTypesInElastic(collectionTraits);
-      return true;
+    } else {
+      await this.setCollectionTraitTypesInElastic(collectionTraits);
     }
 
     return false;
@@ -222,15 +213,16 @@ export class NftTraitsService {
   ): Promise<void> {
     try {
       let updates: string[] = [];
+      updates.push(
+        this.elasticService.buildBulkUpdate<boolean>(
+          'tokens',
+          collection.identifier,
+          'nft_hasTraitSummary',
+          true,
+        ),
+      );
+
       if (collection.traitTypes?.length > 0) {
-        updates.push(
-          this.elasticService.buildBulkUpdate<boolean>(
-            'tokens',
-            collection.identifier,
-            'nft_hasTraitSummary',
-            true,
-          ),
-        );
         updates.push(
           this.elasticService.buildBulkUpdate<TraitType[]>(
             'tokens',
@@ -239,16 +231,8 @@ export class NftTraitsService {
             collection.traitTypes,
           ),
         );
-      } else {
-        updates.push(
-          this.elasticService.buildBulkUpdate<boolean>(
-            'tokens',
-            collection.identifier,
-            'nft_hasTraitSummary',
-            true,
-          ),
-        );
       }
+
       await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
     } catch (error) {
       this.logger.error('Error when setting collection trait types', {
