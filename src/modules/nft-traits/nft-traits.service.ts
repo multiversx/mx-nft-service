@@ -1,4 +1,9 @@
-import { ElasticQuery, QueryType, QueryOperator, BinaryUtils } from '@elrondnetwork/erdnest';
+import {
+  ElasticQuery,
+  QueryType,
+  QueryOperator,
+  BinaryUtils,
+} from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { NftTypeEnum } from '../assets/models';
@@ -86,22 +91,23 @@ export class NftTraitsService {
               'token',
               query,
               async (items) => {
-                collections = collections.concat(
-                  [...new Set(items.map((i) => i.token))], //.filter(
-                );
+                collections = collections.concat([
+                  ...new Set(items.map((i) => i.token)),
+                ]);
               },
               constants.getCollectionsFromElasticBatchSize,
             );
 
             lastBatchSize = collections.length;
-            console.log(lastBatchSize);
 
             for (const collection of collections) {
-              console.log(collection);
               await this.updateCollectionTraits(collection);
             }
           } catch (error) {
-            console.log(error);
+            this.logger.error('Error when updating all collections', {
+              path: 'NftRarityService.updateAllCollections',
+              exception: error?.message,
+            });
           }
         } while (lastBatchSize !== 0);
       },
@@ -250,7 +256,6 @@ export class NftTraitsService {
         exception: error?.message,
         collection: collection.identifier,
       });
-      this.logger.error(error);
     }
   }
 
