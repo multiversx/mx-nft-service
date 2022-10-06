@@ -267,7 +267,11 @@ export class AssetsGetterService {
       assetsLiked?.map((e) => e.identifier),
     );
 
-    return new CollectionType({ items: assets, count: assetsCount });
+    const returnAssets = [];
+    for (const asset of assetsLiked) {
+      returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
+    }
+    return new CollectionType({ items: returnAssets, count: assetsCount });
   }
 
   private getApiQuery(filters: AssetsFilter, offset: number, limit: number) {

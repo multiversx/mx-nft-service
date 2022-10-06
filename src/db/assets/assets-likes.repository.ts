@@ -13,6 +13,7 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
       .where({
         address: address,
       })
+      .orderBy('assetsLiked.id', 'DESC')
       .skip(offset)
       .take(limit)
       .getManyAndCount();
