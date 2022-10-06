@@ -223,7 +223,7 @@ export class NftTraitsService {
           'tokens',
           collection.identifier,
           'nft_hasTraitSummary',
-          collection.traitTypes?.length > 0 ? true : false,
+          true,
         ),
       );
 
