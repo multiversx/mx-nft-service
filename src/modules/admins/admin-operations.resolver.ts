@@ -94,4 +94,14 @@ export class AdminOperationsResolver {
       throw new ApolloError(error);
     }
   }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  updateAllCollectionTraits(): void {
+    try {
+      this.nftTraitService.updateAllCollections();
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
 }
