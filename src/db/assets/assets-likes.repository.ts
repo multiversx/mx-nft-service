@@ -101,7 +101,8 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     return await this.createQueryBuilder('al')
       .select('count(*) as cnt, al.identifier')
       .groupBy('al.identifier')
-      .addOrderBy('cnt', 'DESC')
+      .orderBy('cnt', 'DESC')
+      .addOrderBy('al.identifier', 'DESC')
       .offset(offset ?? 0)
       .limit(limit ?? 1000)
       .execute();
