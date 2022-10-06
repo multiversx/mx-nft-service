@@ -5,7 +5,7 @@ import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
 
@@ -34,8 +34,9 @@ export class TraitsUpdaterService {
         `handleValidateTokenTraits`,
         async () => {
           const query: ElasticQuery = ElasticQuery.create()
+            .withMustExistCondition('token')
             .withMustNotExistCondition('nonce')
-            .withMustExistCondition('nft_traitTypes')
+            .withMustCondition(QueryType.Match('nft_hasTraitSummary', true))
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
@@ -56,7 +57,9 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              collections = collections.concat(items.map((i) => i.token));
+              collections = collections.concat([
+                ...new Set(items.map((i) => i.token)),
+              ]);
             },
             lastIndex + maxCollectionsToValidate,
           );
@@ -93,8 +96,9 @@ export class TraitsUpdaterService {
           let collectionsToUpdate: string[] = [];
 
           const query = ElasticQuery.create()
+            .withMustExistCondition('token')
             .withMustNotExistCondition('nonce')
-            .withMustNotExistCondition('nft_traitTypes')
+            .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
@@ -112,16 +116,14 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const collections = items.map((i) => i.token);
+              const collections = [...new Set(items.map((i) => i.token))];
               collectionsToUpdate = collectionsToUpdate.concat(
                 collections.filter(
                   (c) => collectionsToUpdate.indexOf(c) === -1,
                 ),
               );
-              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
-                return false;
-              }
             },
+            maxCollectionsToUpdate,
           );
 
           collectionsToUpdate = collectionsToUpdate.slice(
