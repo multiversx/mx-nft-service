@@ -6,7 +6,6 @@ import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { TimeConstants } from 'src/utils/time-utils';
 import { ElrondApiService } from 'src/common';
 
 @Injectable()
