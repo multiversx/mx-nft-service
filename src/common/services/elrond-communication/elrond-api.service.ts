@@ -472,7 +472,7 @@ export class ElrondApiService {
       const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
       const tokensWithDecimals = await this.doGetGeneric(
         this.getAllMexTokensWithDecimals.name,
-        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
+        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals&size=${tokenChunk.length}`,
       );
 
       if (!tokensWithDecimals) {
