@@ -128,12 +128,16 @@ export class AuctionsCachingService {
   }
 
   public async getCurrentPaymentTokens(
-    marketplaceKey: string = undefined,
     getCurrentPaymentTokensFunction: () => any,
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
   ): Promise<Token[]> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
-      this.getCurrentPaymentTokensCacheKey(marketplaceKey),
+      this.getCurrentPaymentTokensCacheKey(
+        marketplaceKey,
+        collectionIdentifier,
+      ),
       () => getCurrentPaymentTokensFunction(),
       CacheInfo.CurrentPaymentTokens.ttl,
     );
@@ -156,10 +160,14 @@ export class AuctionsCachingService {
     );
   }
 
-  public getCurrentPaymentTokensCacheKey(marketplaceKey: string = undefined) {
+  public getCurrentPaymentTokensCacheKey(
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
+  ) {
     return generateCacheKeyFromParams(
       CacheInfo.CurrentPaymentTokens.key,
       marketplaceKey,
+      collectionIdentifier,
     );
   }
 }
