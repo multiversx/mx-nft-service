@@ -179,7 +179,7 @@ export class NftTraitsService {
   ): boolean {
     let identicalTraitsCount = 0;
     for (const trait of traits) {
-      if (traitValues.includes(`${trait.name}_${trait.value}`)) {
+      if (traitValues.includes(this.traitToBase64Encoded(trait))) {
         identicalTraitsCount++;
       }
     }
@@ -250,7 +250,7 @@ export class NftTraitsService {
         'tokens',
         nft.identifier,
         'nft_traitValues',
-        nft.traits.map((t) => BinaryUtils.base64Encode(`${t.name}_${t.value}`)),
+        nft.traits.map((t) => this.traitToBase64Encoded(t)),
       );
       updates.push(payload);
     });
@@ -415,5 +415,9 @@ export class NftTraitsService {
         },
       );
     }
+  }
+
+  traitToBase64Encoded(trait: NftTrait): string {
+    return BinaryUtils.base64Encode(`${trait.name}_${trait.value}`);
   }
 }
