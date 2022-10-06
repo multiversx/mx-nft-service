@@ -47,6 +47,7 @@ export class NftTraitsService {
     ) {
       await this.setNftsTraitsInElastic(allNfts);
       await this.setCollectionTraitTypesInElastic(collectionTraits);
+      return true;
     } else {
       await this.setCollectionTraitTypesInElastic(collectionTraits);
     }
@@ -115,7 +116,12 @@ export class NftTraitsService {
       this.getNftValuesFromElastic(identifier),
     ]);
 
-    if (nftTraitsFromApi && !nftTraitValuesFromElastic) {
+    const areIdenticalTraits = this.areIdenticalTraits(
+      nftTraitsFromApi.traits,
+      nftTraitValuesFromElastic,
+    );
+
+    if (nftTraitsFromApi && !areIdenticalTraits) {
       return await this.mintCollectionNft(
         new CollectionTraits({
           identifier: collection,
@@ -123,15 +129,12 @@ export class NftTraitsService {
         }),
         nftTraitsFromApi,
       );
-    } else if (!nftTraitsFromApi && nftTraitValuesFromElastic) {
+    } else if (!nftTraitsFromApi && !areIdenticalTraits) {
       return await this.burnCollectionNft(collection);
     } else if (
       nftTraitsFromApi &&
       nftTraitValuesFromElastic &&
-      !this.areIdenticalTraits(
-        nftTraitsFromApi.traits,
-        nftTraitValuesFromElastic,
-      )
+      !areIdenticalTraits
     ) {
       const forceRefresh = true;
       return await this.updateCollectionTraits(collection, forceRefresh);
@@ -144,10 +147,13 @@ export class NftTraitsService {
     collection: CollectionTraits,
     nftTraits: NftTraits,
   ): Promise<boolean> {
-    collection = collection.addNftTraitsToCollection(nftTraits.traits);
+    collection = collection.addNftTraitsToCollection(
+      nftTraits.traits,
+      nftTraits.traits.length,
+    );
     await Promise.all([
-      this.setCollectionTraitTypesInElastic(collection),
       this.setNftsTraitsInElastic([nftTraits]),
+      this.setCollectionTraitTypesInElastic(collection),
     ]);
     return true;
   }
@@ -177,16 +183,15 @@ export class NftTraitsService {
     traits: NftTrait[],
     traitValues: string[],
   ): boolean {
-    let identicalTraitsCount = 0;
+    if (traits.length !== traitValues.length) {
+      return false;
+    }
     for (const trait of traits) {
-      if (traitValues.includes(this.traitToBase64Encoded(trait))) {
-        identicalTraitsCount++;
+      if (!traitValues.includes(this.traitToBase64Encoded(trait))) {
+        return false;
       }
     }
-    if (identicalTraitsCount === traitValues.length) {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   private getCollectionTraits(
@@ -218,7 +223,7 @@ export class NftTraitsService {
           'tokens',
           collection.identifier,
           'nft_hasTraitSummary',
-          true,
+          collection.traitTypes?.length > 0 ? true : false,
         ),
       );
 
@@ -280,7 +285,7 @@ export class NftTraitsService {
     try {
       const res = await this.apiService.getAllNftsByCollection(
         collectionTicker,
-        'identifier,nonce,metadata,score,rank,timestamp',
+        'identifier,nonce,timestamp,metadata',
       );
       return res?.map(NftTraits.fromNft) ?? [];
     } catch (error) {
@@ -321,11 +326,6 @@ export class NftTraitsService {
 
     const query = ElasticQuery.create()
       .withMustNotExistCondition('nonce')
-      .withMustExistCondition('token')
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
       .withMustCondition(
         QueryType.Match('token', collectionTicker, QueryOperator.AND),
       );
@@ -335,7 +335,7 @@ export class NftTraitsService {
       'identifier',
       query,
       async (items) => {
-        traitTypes = items[0].nft_traitSummary;
+        traitTypes = items[0]?.nft_traitSummary ?? [];
         return undefined;
       },
     );
@@ -369,7 +369,7 @@ export class NftTraitsService {
         'identifier',
         query,
         async (items) => {
-          nftValues = items[0].nft_traitValues;
+          nftValues = items[0]?.nft_traitValues ?? [];
           return undefined;
         },
       );

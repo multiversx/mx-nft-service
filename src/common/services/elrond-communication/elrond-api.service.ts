@@ -372,7 +372,7 @@ export class ElrondApiService {
 
   async getAllNftsByCollection(
     collection: string,
-    fields: string = 'identifier,name',
+    fields: string = 'identifier,nonce,timestamp',
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
     let additionalBatchSize: number = 0;
@@ -382,7 +382,7 @@ export class ElrondApiService {
     let batch: Nft[] = [];
 
     let smallestTimestampInLastBatch: number = undefined;
-    let smallestNonceInLastBatch: number = undefined;
+    let biggestNonceInLastBatch: number = undefined;
 
     do {
       currentBatchExpectedSize = batchSize + additionalBatchSize;
@@ -391,7 +391,7 @@ export class ElrondApiService {
         .addCollection(collection)
         .addPageSize(0, currentBatchExpectedSize)
         .addQuery(`&fields=${fields}`);
-      if (smallestTimestampInLastBatch !== undefined) {
+      if (smallestTimestampInLastBatch) {
         query = query.addBefore(smallestTimestampInLastBatch);
       }
 
@@ -404,14 +404,14 @@ export class ElrondApiService {
 
         smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;
 
-        const smallestNonceInCurrentBatch: number = batch[0].nonce;
+        const biggestNonceInCurrentBatch: number = batch[0].nonce;
 
-        if (smallestNonceInLastBatch === smallestNonceInCurrentBatch) {
+        if (biggestNonceInLastBatch === biggestNonceInCurrentBatch) {
           additionalBatchSize += Math.max(batchSize / 2, 1);
         } else if (additionalBatchSize > 0) {
           additionalBatchSize = 0;
         } else {
-          smallestNonceInLastBatch = smallestNonceInCurrentBatch;
+          biggestNonceInLastBatch = biggestNonceInCurrentBatch;
         }
       }
     } while (batch?.length === currentBatchExpectedSize);
