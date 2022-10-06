@@ -60,8 +60,10 @@ export class TraitsUpdaterService {
               collections = collections.concat([
                 ...new Set(items.map((i) => i.token)),
               ]);
+              if (collections.length > lastIndex + maxCollectionsToValidate) {
+                return undefined;
+              }
             },
-            lastIndex + maxCollectionsToValidate,
           );
 
           const collectionsToValidate = collections.slice(

@@ -22,6 +22,15 @@ export class NftTrait {
   }
 }
 
+export class EncodedNftValues {
+  identifier: string;
+  encodedValues: string[];
+
+  constructor(init?: Partial<EncodedNftValues>) {
+    Object.assign(this, init);
+  }
+}
+
 export class NftTraits {
   identifier: string;
   traits: NftTrait[];

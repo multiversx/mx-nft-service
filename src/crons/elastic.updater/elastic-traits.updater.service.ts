@@ -13,7 +13,7 @@ export class ElasticTraitsUpdaterService {
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async handleValidateAllTokenTraits() {
-    await this.nftTraitsService.updateAllCollections();
+    await this.nftTraitsService.updateTraitsForAllCollections();
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)

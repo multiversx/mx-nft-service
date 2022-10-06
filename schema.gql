@@ -189,6 +189,12 @@ input AttributeInput {
   tags: [String!]!
 }
 
+type AttributeSummary {
+  occurenceCount: Float!
+  occurencePercentage: Float!
+  value: String!
+}
+
 type AttributeType {
   attribute: [KeyValueType!]!
 }
@@ -736,7 +742,7 @@ type Mutation {
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateAllCollectionTraits: Boolean!
-  updateCollectionTraits(collectionTicker: String!, forceRefresh: Boolean!): Boolean!
+  updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftRarities(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
   validateNftRarities(collectionTicker: String!): Boolean!

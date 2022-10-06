@@ -1,22 +1,32 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { NftTrait } from './nft-traits.model';
 
-export class AttributeType {
+@ObjectType()
+export class AttributeSummary {
+  @Field(() => String)
   value: string;
+  @Field(() => Number)
   occurenceCount: number;
+  @Field(() => Number)
   occurencePercentage: number;
 
-  constructor(init?: Partial<AttributeType>) {
+  constructor(init?: Partial<AttributeSummary>) {
     Object.assign(this, init);
   }
 }
 
-export class TraitType {
+@ObjectType()
+export class TraitSummary {
+  @Field(() => String)
   name: string;
-  attributes: AttributeType[];
+  @Field(() => [AttributeSummary])
+  attributes: AttributeSummary[];
+  @Field(() => Number)
   occurenceCount: number;
+  @Field(() => Number)
   occurencePercentage: number;
 
-  constructor(init?: Partial<TraitType>) {
+  constructor(init?: Partial<TraitSummary>) {
     Object.assign(this, init);
   }
 
@@ -25,7 +35,7 @@ export class TraitType {
 
     if (!attribute) {
       this.attributes.push(
-        new AttributeType({
+        new AttributeSummary({
           value: newTrait.value,
           occurenceCount: 1,
           occurencePercentage: (1 / collectionTotalSize) * 100,
@@ -68,11 +78,11 @@ export class TraitType {
   }
 }
 
-export class CollectionTraits {
+export class CollectionTraitSummary {
   identifier: string;
-  traitTypes: TraitType[];
+  traitTypes: TraitSummary[];
 
-  constructor(init?: Partial<CollectionTraits>) {
+  constructor(init?: Partial<CollectionTraitSummary>) {
     Object.assign(this, init);
   }
 
@@ -93,10 +103,10 @@ export class CollectionTraits {
         traitType.addTraitToAttributes(trait, collectionTotalSize);
       } else {
         this.traitTypes.push(
-          new TraitType({
+          new TraitSummary({
             name: trait.name,
             attributes: [
-              new AttributeType({
+              new AttributeSummary({
                 value: trait.value,
                 occurenceCount: 1,
                 occurencePercentage: (1 / collectionTotalSize) * 100,
