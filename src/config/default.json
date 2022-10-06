@@ -42,7 +42,6 @@
   },
   "gas": {
     "nftCreate": 3000000,
-
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
