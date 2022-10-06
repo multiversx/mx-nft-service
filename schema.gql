@@ -536,6 +536,11 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+input CurrentPaymentTokensFilters {
+  collectionIdentifier: String
+  marketplaceKey: String
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -922,7 +927,7 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
-  currentPaymentTokens(marketplaceKey: String): [Token!]!
+  currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
   exploreCollectionsStats: ExploreCollectionsStats!
   exploreNftsStats: ExploreNftsStats!
   exploreStats: ExploreStats!
