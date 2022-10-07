@@ -45,6 +45,16 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
+    if (filters?.collection) {
+      const collection = await this.apiService.getCollectionForIdentifier(
+        filters.collection,
+      );
+      return [
+        [Collection.fromCollectionApi(collection)],
+        Collection.fromCollectionApi(collection) ? 1 : 0,
+      ];
+    }
+
     if (sorting === CollectionsSortingEnum.Trending) {
       return this.getTrendingCollections(offset, limit, filters);
     }
@@ -156,21 +166,6 @@ export class CollectionsGetterService {
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getOrSetFullCollections();
 
-    if (filters?.collection) {
-      let collection = collections.find(
-        (token) => token.collection === filters.collection,
-      );
-
-      if (!collection) {
-        collection = await this.getFullCollectionRaw(filters.collection);
-        await this.setFullCollections(
-          collections.concat(collection),
-          count + 1,
-        );
-      }
-
-      return [[collection], 1];
-    }
     collections = this.applyFilters(filters, collections);
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
@@ -194,18 +189,6 @@ export class CollectionsGetterService {
       this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
-      CacheInfo.AllCollections.ttl,
-    );
-  }
-
-  private async setFullCollections(
-    collections: Collection[],
-    count: number,
-  ): Promise<void> {
-    await this.cacheService.setCache(
-      this.redisClient,
-      CacheInfo.AllCollections.key,
-      [collections, count],
       CacheInfo.AllCollections.ttl,
     );
   }

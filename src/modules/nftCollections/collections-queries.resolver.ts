@@ -24,6 +24,7 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
+import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -31,6 +32,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     private collectionsGetterService: CollectionsGetterService,
     private accountsProvider: AccountsProvider,
     private artistAddressProvider: ArtistAddressProvider,
+    private collectionAssetsCountProvider: CollectionAssetsCountProvider,
     private assetProvider: AssetsCollectionsProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
@@ -75,6 +77,17 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account?.value ?? null, ownerAddress);
+  }
+
+  @ResolveField('nftsCount', () => Account)
+  async nftsCount(@Parent() auction: Collection) {
+    const { nftsCount, collection } = auction;
+
+    if (nftsCount) return nftsCount;
+    const assetsCount = await this.collectionAssetsCountProvider.load(
+      collection,
+    );
+    return assetsCount?.value ?? 0;
   }
 
   @ResolveField('artist', () => Account)
