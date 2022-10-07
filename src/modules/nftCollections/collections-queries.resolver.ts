@@ -71,8 +71,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Collection) {
-    const { ownerAddress } = auction;
+  async owner(@Parent() collectionNode: Collection) {
+    const { ownerAddress } = collectionNode;
 
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
@@ -80,8 +80,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('nftsCount', () => Account)
-  async nftsCount(@Parent() auction: Collection) {
-    const { nftsCount, collection } = auction;
+  async nftsCount(@Parent() collectionNode: Collection) {
+    const { nftsCount, collection } = collectionNode;
 
     if (nftsCount) return nftsCount;
     const assetsCount = await this.collectionAssetsCountProvider.load(
@@ -91,8 +91,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('artist', () => Account)
-  async artist(@Parent() auction: Collection) {
-    const { ownerAddress, artistAddress } = auction;
+  async artist(@Parent() collectionNode: Collection) {
+    const { ownerAddress, artistAddress } = collectionNode;
 
     if (artistAddress) {
       const account = await this.accountsProvider.load(artistAddress);
