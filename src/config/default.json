@@ -61,7 +61,7 @@
       "collectionRarityFlagsToValidateEvery10m": 10
     },
     "traits": {
-      "collectionTraitsToSetEvery10s": 10,
+      "collectionTraitsToSetEvery1m": 10,
       "collectionTraitsToValidateEvery5m": 10
     }
   },

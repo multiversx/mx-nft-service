@@ -16,10 +16,10 @@ export class ElasticTraitsUpdaterService {
     await this.nftTraitsService.updateTraitsForAllCollections();
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleSetTraitsWhereNotSetCronJob() {
     await this.traitsUpdaterService.handleSetTraitsWhereNotSet(
-      cronJobs.traits.collectionTraitsToSetEvery10s,
+      cronJobs.traits.collectionTraitsToSetEvery1m,
     );
   }
 
