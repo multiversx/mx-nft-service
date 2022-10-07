@@ -18,6 +18,7 @@ import { BatchUtils } from '@elrondnetwork/erdnest';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { TraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -537,6 +538,13 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionsCount.name,
       `collections/${ticker}/nfts/count`,
+    );
+  }
+
+  async getCollectionTraitSummary(ticker: string): Promise<TraitSummary[]> {
+    return await this.doGetGeneric(
+      this.getCollectionTraitSummary.name,
+      `collections/${ticker}?extract=traits`,
     );
   }
 

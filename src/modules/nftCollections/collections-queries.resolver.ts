@@ -25,6 +25,7 @@ import {
 } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
+import { TraitSummary } from '../nft-traits/models/collection-traits.model';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -160,6 +161,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     return (
       node.description ??
       (await this.collectionsGetterService.getRandomCollectionDescription(node))
+    );
+  }
+
+  @ResolveField('traitSummary')
+  async traitSummary(@Parent() node: Collection): Promise<TraitSummary[]> {
+    return await this.collectionsGetterService.getCollectionTraitSummary(
+      node.collection,
     );
   }
 }
