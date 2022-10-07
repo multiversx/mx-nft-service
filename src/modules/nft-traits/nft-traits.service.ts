@@ -417,11 +417,8 @@ export class NftTraitsService {
     try {
       const res = await this.apiService.getAllNftsByCollection(
         collectionTicker,
-        'identifier,nonce,timestamp,metadata', //,isWhitelistedStorage,uris',
+        'identifier,nonce,timestamp,metadata',
       );
-      // res = res.filter(
-      //   (nft) => nft.isWhitelistedStorage && nft.uris?.length > 0,
-      // );
       return res?.map(NftTraits.fromNft) ?? [];
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
@@ -487,12 +484,6 @@ export class NftTraitsService {
         .withMustCondition(
           QueryType.Match('identifier', identifier, QueryOperator.AND),
         )
-        // .withMustCondition(
-        //   QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-        // )
-        // .withMustCondition(
-        //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        // )
         .withFields(['nft_traitValues'])
         .withPagination({
           from: 0,
@@ -530,12 +521,6 @@ export class NftTraitsService {
         .withMustCondition(
           QueryType.Match('token', collection, QueryOperator.AND),
         )
-        // .withMustCondition(
-        //   QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-        // )
-        // .withMustCondition(
-        //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        // )
         .withFields(['nft_traitValues'])
         .withPagination({
           from: 0,
