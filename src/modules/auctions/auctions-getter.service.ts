@@ -38,6 +38,7 @@ import {
   getAuctionsForCollectionRequest,
   runningAuctionRequest,
 } from './auctionsRequest';
+import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -735,29 +736,37 @@ export class AuctionsGetterService {
   }
 
   async getCurrentPaymentTokens(
-    marketplaceKey: string = undefined,
+    filters: CurrentPaymentTokensFilters,
   ): Promise<Token[]> {
     try {
       return await this.auctionCachingService.getCurrentPaymentTokens(
-        marketplaceKey,
-        () => this.getMappedCurrentPaymentTokens(marketplaceKey),
+        () =>
+          this.getMappedCurrentPaymentTokens(
+            filters?.marketplaceKey,
+            filters?.collectionIdentifier,
+          ),
+        filters?.marketplaceKey,
+        filters?.collectionIdentifier,
       );
     } catch (error) {
       this.logger.error('An error occurred while get auctions', {
         path: 'AuctionsService.getCurrentPaymentTokens',
-        marketplaceKey,
+        marketplaceKey: filters?.marketplaceKey,
+        collectionIdentifier: filters?.collectionIdentifier,
         exception: error,
       });
     }
   }
 
   private async getMappedCurrentPaymentTokens(
-    marketplaceKey: string = undefined,
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
   ): Promise<Token[]> {
     const [currentPaymentTokenIds, allMexTokens, egldToken] = await Promise.all(
       [
         this.persistenceService.getCurrentPaymentTokenIdsWithCounts(
           marketplaceKey,
+          collectionIdentifier,
         ),
         this.usdPriceService.getCachedMexTokensWithDecimals(),
         this.usdPriceService.getToken(elrondConfig.egld),

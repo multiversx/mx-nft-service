@@ -912,11 +912,15 @@ export class PersistenceService {
   }
 
   async getCurrentPaymentTokenIdsWithCounts(
-    marketplaceKey: string = undefined,
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
   ): Promise<{ paymentToken: string; activeAuctions: number }[]> {
     return await this.execute(
       this.getCurrentPaymentTokenIdsWithCounts.name,
-      this.auctionsRepository.getCurrentPaymentTokenIds(marketplaceKey),
+      this.auctionsRepository.getCurrentPaymentTokenIds(
+        marketplaceKey,
+        collectionIdentifier,
+      ),
     );
   }
 

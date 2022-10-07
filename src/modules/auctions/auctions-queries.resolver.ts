@@ -36,6 +36,7 @@ import { TokenFilter } from './models/Token.Filter';
 import { elrondConfig } from 'src/config';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -267,15 +268,13 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @Query(() => [Token])
   async currentPaymentTokens(
     @Args({
-      name: 'marketplaceKey',
-      type: () => String,
+      name: 'filters',
+      type: () => CurrentPaymentTokensFilters,
       nullable: true,
     })
-    marketplaceKey,
+    filters: CurrentPaymentTokensFilters,
   ): Promise<Token[]> {
-    return await this.auctionsGetterService.getCurrentPaymentTokens(
-      marketplaceKey,
-    );
+    return await this.auctionsGetterService.getCurrentPaymentTokens(filters);
   }
 
   private hasToResolveAsset(fields: string[]) {

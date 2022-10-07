@@ -24,6 +24,7 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
+import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -31,6 +32,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     private collectionsGetterService: CollectionsGetterService,
     private accountsProvider: AccountsProvider,
     private artistAddressProvider: ArtistAddressProvider,
+    private collectionAssetsCountProvider: CollectionAssetsCountProvider,
     private assetProvider: AssetsCollectionsProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
@@ -69,17 +71,28 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(@Parent() auction: Collection) {
-    const { ownerAddress } = auction;
+  async owner(@Parent() collectionNode: Collection) {
+    const { ownerAddress } = collectionNode;
 
     if (!ownerAddress) return null;
     const account = await this.accountsProvider.load(ownerAddress);
     return Account.fromEntity(account?.value ?? null, ownerAddress);
   }
 
+  @ResolveField('nftsCount', () => Account)
+  async nftsCount(@Parent() collectionNode: Collection) {
+    const { nftsCount, collection } = collectionNode;
+
+    if (nftsCount) return nftsCount;
+    const assetsCount = await this.collectionAssetsCountProvider.load(
+      collection,
+    );
+    return assetsCount?.value ?? 0;
+  }
+
   @ResolveField('artist', () => Account)
-  async artist(@Parent() auction: Collection) {
-    const { ownerAddress, artistAddress } = auction;
+  async artist(@Parent() collectionNode: Collection) {
+    const { ownerAddress, artistAddress } = collectionNode;
 
     if (artistAddress) {
       const account = await this.accountsProvider.load(artistAddress);
