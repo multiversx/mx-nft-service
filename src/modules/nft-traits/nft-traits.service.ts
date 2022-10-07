@@ -129,9 +129,6 @@ export class NftTraitsService {
               collections = collections.concat([
                 ...new Set(items.map((i) => i.token)),
               ]);
-              if (collections.length === 0) {
-                return undefined;
-              }
             },
           );
 
