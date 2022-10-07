@@ -387,7 +387,7 @@ export class AuctionsRepository {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
-        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, MIN(a.minBidDenominated) as minBid',
       )
       .leftJoin(
         'orders',
@@ -411,7 +411,7 @@ export class AuctionsRepository {
       filterQueryBuilder.build();
     const response = await queryBuilder
       .select(
-        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated) OR ISNULL(MAX(`o`.`priceAmountDenominated`)), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, MIN(a.minBidDenominated) AS minBid',
       )
       .leftJoin(
         'orders',
