@@ -124,13 +124,10 @@ export class TraitsUpdaterService {
                   (c) => collectionsToUpdate.indexOf(c) === -1,
                 ),
               );
+              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+                return undefined;
+              }
             },
-            maxCollectionsToUpdate,
-          );
-
-          collectionsToUpdate = collectionsToUpdate.slice(
-            0,
-            maxCollectionsToUpdate,
           );
 
           await this.updateCollectionTraits(collectionsToUpdate);
