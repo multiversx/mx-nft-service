@@ -5,7 +5,7 @@ import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
 

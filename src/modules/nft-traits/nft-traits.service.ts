@@ -45,7 +45,7 @@ export class NftTraitsService {
 
     if (nftsFromApi.length === 0) {
       this.logger.log(`${collectionTicker} - Empty collection`, {
-        path: 'NftTraitsService.updateCollectionTraits',
+        path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
       });
       await this.setCollectionTraitTypesInElastic(
         new CollectionTraitSummary({
@@ -74,7 +74,7 @@ export class NftTraitsService {
       !areCollectionSummariesDifferent
     ) {
       this.logger.log(`${collectionTicker} - VALID`, {
-        path: 'NftTraitsService.updateCollectionTraits',
+        path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
       });
       return false;
     }
@@ -83,7 +83,7 @@ export class NftTraitsService {
       this.logger.log(
         `${collectionTicker} - Updated ${notIdenticalEncodedValues.length}/${nftsFromApi.length} NFTs`,
         {
-          path: 'NftTraitsService.updateCollectionTraits',
+          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         },
       );
       await this.setNftsValuesInElastic(notIdenticalEncodedValues);
@@ -91,9 +91,9 @@ export class NftTraitsService {
 
     if (areCollectionSummariesDifferent) {
       this.logger.log(
-        `${collectionTicker} - Found different collection trait summary`,
+        `${collectionTicker} - Updated collection trait summary`,
         {
-          path: 'NftTraitsService.updateCollectionTraits',
+          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         },
       );
       await this.setCollectionTraitTypesInElastic(collectionTraits);
@@ -104,7 +104,7 @@ export class NftTraitsService {
 
   async updateTraitsForAllCollections(): Promise<void> {
     await Locker.lock(
-      'processTokenTraitsQueue: Update traits for all collections in the traits queue',
+      'updateTraitsForAllCollections: Update traits for all existing collections',
       async () => {
         const query: ElasticQuery = ElasticQuery.create()
           .withMustExistCondition('token')
@@ -144,7 +144,7 @@ export class NftTraitsService {
           }
         } catch (error) {
           this.logger.error('Error when updating all collections', {
-            path: 'NftRarityService.updateAllCollections',
+            path: `${NftTraitsService.name}.${this.updateTraitsForAllCollections.name}`,
             exception: error?.message,
           });
         }
@@ -169,7 +169,7 @@ export class NftTraitsService {
 
     if (nftTraitsFromApi && !areIdenticalTraits) {
       this.logger.log(`${identifier} - MINT/UPDATE`, {
-        path: 'NftTraitsService.updateNftTraits',
+        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
       });
       return await this.mintCollectionNft(
         new CollectionTraitSummary({
@@ -180,7 +180,7 @@ export class NftTraitsService {
       );
     } else if (!nftTraitsFromApi && !areIdenticalTraits) {
       this.logger.log(`${identifier} - BURN`, {
-        path: 'NftTraitsService.updateNftTraits',
+        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
       });
       return await this.burnCollectionNft(collection);
     } else if (
@@ -189,7 +189,7 @@ export class NftTraitsService {
       !areIdenticalTraits
     ) {
       this.logger.log(`${identifier} - Unknown problem => update collection`, {
-        path: 'NftTraitsService.updateNftTraits',
+        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
       });
       return await this.updateCollectionTraits(collection);
     }
@@ -341,7 +341,7 @@ export class NftTraitsService {
       await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
     } catch (error) {
       this.logger.error('Error when setting collection trait types', {
-        path: 'NftRarityService.setCollectionTraitTypesInElastic',
+        path: `${NftTraitsService.name}.${this.setCollectionTraitTypesInElastic.name}`,
         exception: error?.message,
         collection: collection.identifier,
       });
@@ -388,7 +388,7 @@ export class NftTraitsService {
         );
       } catch (error) {
         this.logger.error('Error when bulk updating nft traits in Elastic', {
-          path: 'NftRarityService.setNftsTraitsInElastic',
+          path: `${NftTraitsService.name}.${this.setNftsTraitsInElastic.name}`,
           exception: error?.message,
         });
       }
@@ -407,7 +407,7 @@ export class NftTraitsService {
         );
       } catch (error) {
         this.logger.error('Error when bulk updating nft traits in Elastic', {
-          path: 'NftRarityService.setNftsValuesInElastic',
+          path: `${NftTraitsService.name}.${this.setNftsValuesInElastic.name}`,
           exception: error?.message,
         });
       }
@@ -428,7 +428,7 @@ export class NftTraitsService {
       return res?.map(NftTraits.fromNft) ?? [];
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
-        path: 'NftRarityService.getAllCollectionNftsFromAPI',
+        path: `${NftTraitsService.name}.${this.getAllCollectionNftsFromAPI.name}`,
         exception: error?.message,
         collection: collectionTicker,
       });
@@ -450,7 +450,7 @@ export class NftTraitsService {
       });
     } catch (error) {
       this.logger.error(`Error when getting NFT from API`, {
-        path: 'NftRarityService.getCollectionNftFromAPI',
+        path: `${NftTraitsService.name}.${this.getCollectionNftMetadataFromAPI.name}`,
         exception: error?.message,
         identifier: identifier,
       });
@@ -513,7 +513,7 @@ export class NftTraitsService {
       );
     } catch (error) {
       this.logger.error(`Error when getting NFT trait values from Elastic`, {
-        path: 'NftRarityService.getNftTraitsFromElastic',
+        path: `${NftTraitsService.name}.${this.getNftValuesFromElastic.name}`,
         exception: error?.message,
         identifier: identifier,
       });
@@ -567,7 +567,7 @@ export class NftTraitsService {
       this.logger.error(
         `Error when getting all NFT trait values from Elastic`,
         {
-          path: 'NftRarityService.getAllNftValuesFromElastic',
+          path: `${NftTraitsService.name}.${this.getAllEncodedNftValuesFromElastic.name}`,
           exception: error?.message,
           identifier: collection,
         },
@@ -604,7 +604,7 @@ export class NftTraitsService {
       this.logger.error(
         'Error when trying to map Elastic types for trait variables',
         {
-          path: 'NftTraitsService.setElasticTraitMappings',
+          path: `${NftTraitsService.name}.${this.setElasticTraitMappings.name}`,
         },
       );
     }
