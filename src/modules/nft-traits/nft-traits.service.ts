@@ -454,7 +454,7 @@ export class NftTraitsService {
   private async getCollectionTraitsFromElastic(
     collectionTicker: string,
   ): Promise<TraitSummary[]> {
-    let traitTypes: TraitSummary[];
+    let traitTypes: TraitSummary[] = [];
 
     const query = ElasticQuery.create()
       .withMustNotExistCondition('nonce')
@@ -476,7 +476,7 @@ export class NftTraitsService {
   }
 
   private async getNftValuesFromElastic(identifier: string): Promise<string[]> {
-    let nftValues: string[];
+    let nftValues: string[] = [];
 
     try {
       const query = ElasticQuery.create()
