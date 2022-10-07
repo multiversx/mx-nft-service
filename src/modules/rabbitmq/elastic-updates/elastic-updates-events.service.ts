@@ -48,7 +48,7 @@ export class ElasticUpdatesEventsService {
     mintEvents: any[],
   ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
-    let collectionsToUpdate: string[] = [];
+    let nftsToUpdate: string[] = [];
 
     for (let event of mintEvents) {
       const mintEvent = new MintEvent(event);
@@ -64,13 +64,13 @@ export class ElasticUpdatesEventsService {
         nft.type === NftTypeEnum.NonFungibleESDT ||
         nft.type === NftTypeEnum.SemiFungibleESDT
       ) {
-        collectionsToUpdate.push(nft.collection);
+        nftsToUpdate.push(nft.identifier);
       }
     }
 
-    collectionsToUpdate = [...new Set(collectionsToUpdate)];
+    nftsToUpdate = [...new Set(nftsToUpdate)];
 
-    await this.addCollectionsToTraitsQueue(collectionsToUpdate);
+    await this.addNftsToTraitsQueue(nftsToUpdate);
   }
 
   public async handleRaritiesForNftMintBurnAndUpdateEvents(
@@ -131,9 +131,7 @@ export class ElasticUpdatesEventsService {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
   }
 
-  async addCollectionsToTraitsQueue(
-    collectionTickers: string[],
-  ): Promise<void> {
+  async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.addItemsToList(
         this.traitsRedisClient,
