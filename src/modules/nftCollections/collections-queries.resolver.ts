@@ -165,9 +165,14 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('traitSummary')
-  async traitSummary(@Parent() node: Collection): Promise<TraitSummary[]> {
-    return await this.collectionsGetterService.getCollectionTraitSummary(
-      node.collection,
+  async traitSummary(
+    @Parent() collectionNode: Collection,
+  ): Promise<TraitSummary[]> {
+    return (
+      collectionNode.traitSummary ??
+      (await this.collectionsGetterService.getCollectionTraitSummary(
+        collectionNode.collection,
+      ))
     );
   }
 }

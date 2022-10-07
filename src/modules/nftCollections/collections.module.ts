@@ -23,6 +23,7 @@ import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.l
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { CollectionsGetterService } from './collections-getter.service';
+import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
 
 @Module({
   providers: [
@@ -47,6 +48,7 @@ import { CollectionsGetterService } from './collections-getter.service';
     ArtistAddressRedisHandler,
     AssetsCollectionsProvider,
     AssetsCollectionRedisHandler,
+    CollectionsTraitSummaryRedisHandler,
     SmartContractArtistsService,
   ],
   imports: [

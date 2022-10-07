@@ -542,10 +542,11 @@ export class ElrondApiService {
   }
 
   async getCollectionTraitSummary(ticker: string): Promise<TraitSummary[]> {
-    return await this.doGetGeneric(
+    const collection = await this.doGetGeneric(
       this.getCollectionTraitSummary.name,
-      `collections/${ticker}?extract=traits`,
+      `collections/${ticker}`, //?extract=traits`,
     );
+    return collection?.traits ?? [];
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

@@ -22,6 +22,7 @@ import {
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
 import { TraitSummary } from '../nft-traits/models/collection-traits.model';
+import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -33,6 +34,7 @@ export class CollectionsGetterService {
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
+    private collectionTraitSummaryRedis: CollectionsTraitSummaryRedisHandler,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -206,6 +208,10 @@ export class CollectionsGetterService {
 
       mappedCollections = await this.mapCollectionNfts(mappedCollections);
 
+      mappedCollections = await this.mapCollectionTraitSummaries(
+        mappedCollections,
+      );
+
       collectionsResponse.push(...mappedCollections);
 
       from = from + size;
@@ -230,6 +236,8 @@ export class CollectionsGetterService {
     );
     [collection] = await this.mapCollectionNftsCount([collection], 0);
     [collection] = await this.mapCollectionNfts([collection]);
+    [collection] = await this.mapCollectionTraitSummaries([collection]);
+
     return collection;
   }
 
@@ -365,6 +373,23 @@ export class CollectionsGetterService {
     return localCollections;
   }
 
+  private async mapCollectionTraitSummaries(localCollections: Collection[]) {
+    let traitSummariesGroupByCollection =
+      await this.collectionTraitSummaryRedis.batchLoad(
+        localCollections?.map((item) => item.collection),
+      );
+
+    for (const collection of localCollections) {
+      for (const groupByCollection of traitSummariesGroupByCollection) {
+        if (collection.collection === groupByCollection.key) {
+          collection.traitSummary = groupByCollection.value;
+        }
+      }
+    }
+
+    return localCollections;
+  }
+
   private async getCollectionsForUser(
     offset: number = 0,
     limit: number = 10,
@@ -426,6 +451,6 @@ export class CollectionsGetterService {
   }
 
   async getCollectionTraitSummary(collection: string): Promise<TraitSummary[]> {
-    return (await this.apiService.getCollectionTraitSummary(collection)) ?? [];
+    return await this.apiService.getCollectionTraitSummary(collection);
   }
 }
