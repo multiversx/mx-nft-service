@@ -18,6 +18,7 @@ import { BatchUtils } from '@elrondnetwork/erdnest';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { getNftIdentifierByNonce } from 'src/utils/helpers';
 
 @Injectable()
 export class ElrondApiService {
@@ -375,48 +376,32 @@ export class ElrondApiService {
     fields: string = 'identifier,nonce,timestamp',
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
-    let additionalBatchSize: number = 0;
-    let currentBatchExpectedSize: number;
 
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    let smallestTimestampInLastBatch: number = undefined;
-    let biggestNonceInLastBatch: number = undefined;
-
     do {
-      currentBatchExpectedSize = batchSize + additionalBatchSize;
+      let identifiers: string[] = [];
+
+      const end = nfts.length + batchSize;
+      for (let i = nfts.length ?? 1; i <= end; i++) {
+        identifiers.push(getNftIdentifierByNonce(collection, i));
+      }
 
       let query = new AssetsQuery()
         .addCollection(collection)
-        .addPageSize(0, currentBatchExpectedSize)
+        .addPageSize(0, batchSize)
+        .addIdentifiers(identifiers)
         .addQuery(`&fields=${fields}`);
-      if (smallestTimestampInLastBatch) {
-        query = query.addBefore(smallestTimestampInLastBatch);
-      }
 
       const url = `nfts${query.build()}`;
 
       batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
 
-      if (batch?.length !== 0) {
-        nfts = nfts.concat(batch);
+      nfts = nfts.concat(batch);
+    } while (batch.length === batchSize);
 
-        smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;
-
-        const biggestNonceInCurrentBatch: number = batch[0].nonce;
-
-        if (biggestNonceInLastBatch === biggestNonceInCurrentBatch) {
-          additionalBatchSize += Math.max(batchSize / 2, 1);
-        } else if (additionalBatchSize > 0) {
-          additionalBatchSize = 0;
-        } else {
-          biggestNonceInLastBatch = biggestNonceInCurrentBatch;
-        }
-      }
-    } while (batch?.length === currentBatchExpectedSize);
-
-    return this.filterUniqueNftsByNonce(nfts);
+    return nfts;
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
@@ -538,9 +523,5 @@ export class ElrondApiService {
       this.getCollectionsCount.name,
       `collections/${ticker}/nfts/count`,
     );
-  }
-
-  private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
-    return nfts.distinct((nft) => nft.nonce);
   }
 }
