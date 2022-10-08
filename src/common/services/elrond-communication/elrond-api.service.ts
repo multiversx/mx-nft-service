@@ -383,8 +383,9 @@ export class ElrondApiService {
     do {
       let identifiers: string[] = [];
 
-      const end = nfts.length + batchSize;
-      for (let i = nfts.length ?? 1; i <= end; i++) {
+      const start = nfts.length + 1;
+      const end = start + batchSize - 1;
+      for (let i = start; i <= end; i++) {
         identifiers.push(getNftIdentifierByNonce(collection, i));
       }
 
