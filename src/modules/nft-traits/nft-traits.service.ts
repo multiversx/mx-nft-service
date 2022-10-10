@@ -233,7 +233,7 @@ export class NftTraitsService {
     traits: NftTrait[],
     traitValues: string[],
   ): boolean {
-    if (traits.length !== traitValues.length) {
+    if (traits?.length !== traitValues.length) {
       return false;
     }
     for (const trait of traits) {
@@ -255,7 +255,7 @@ export class NftTraitsService {
         (encodedNft) => encodedNft.identifier === nft.identifier,
       );
 
-      const newEncodedNftValues = nft.traits.map((trait) =>
+      const newEncodedNftValues = nft?.traits?.map((trait) =>
         this.traitToBase64Encoded(trait),
       );
 
@@ -288,6 +288,23 @@ export class NftTraitsService {
       }
     }
 
+    for (const encodedNft of encodedNftValuesFromElastic) {
+      const nft = nftsFromApi.find(
+        (nft) => nft.identifier === encodedNft.identifier,
+      );
+
+      if (nft?.traits?.length !== encodedNft.encodedValues.length) {
+        if (
+          !notIdenticalEncodedValues.find(
+            (n) => n.identifier === encodedNft.identifier,
+          )
+        ) {
+          notIdenticalEncodedValues.push(encodedNft);
+        }
+        continue;
+      }
+    }
+
     return notIdenticalEncodedValues;
   }
 
@@ -301,10 +318,12 @@ export class NftTraitsService {
     });
 
     for (const nft of nfts) {
-      collectionTraits = collectionTraits.addNftTraitsToCollection(
-        nft.traits,
-        nfts.length,
-      );
+      if (nft.traits) {
+        collectionTraits = collectionTraits.addNftTraitsToCollection(
+          nft.traits,
+          nfts.length,
+        );
+      }
     }
 
     return collectionTraits;
@@ -323,17 +342,14 @@ export class NftTraitsService {
           true,
         ),
       );
-
-      if (collection.traitTypes?.length > 0) {
-        updates.push(
-          this.elasticService.buildBulkUpdate<TraitSummary[]>(
-            'tokens',
-            collection.identifier,
-            'nft_traitSummary',
-            collection.traitTypes,
-          ),
-        );
-      }
+      updates.push(
+        this.elasticService.buildBulkUpdate<TraitSummary[]>(
+          'tokens',
+          collection.identifier,
+          'nft_traitSummary',
+          collection.traitTypes,
+        ),
+      );
 
       await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
     } catch (error) {
@@ -439,8 +455,11 @@ export class NftTraitsService {
       );
       return new NftTraits({
         identifier: identifier,
-        traits:
-          metadata?.attributes?.map(NftTrait.fromNftMetadataAttribute) ?? [],
+        traits: Array.isArray(metadata?.attributes)
+          ? metadata?.attributes
+              ?.filter((a) => a.trait_type && a.value)
+              ?.map(NftTrait.fromNftMetadataAttribute)
+          : [],
       });
     } catch (error) {
       this.logger.error(`Error when getting NFT from API`, {
