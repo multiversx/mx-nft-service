@@ -13,7 +13,7 @@ export class NftTrait {
   }
 
   static fromNftMetadataAttribute(attribute: { [key: string]: string }) {
-    return attribute
+    return attribute && attribute.trait_type && attribute.value
       ? new NftTrait({
           name: attribute.trait_type,
           value: attribute.value,
