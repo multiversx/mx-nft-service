@@ -52,6 +52,12 @@ export class CollectionsFilter {
 
   @Field(() => Boolean, {
     nullable: true,
+    description: 'Flag for collections where owner address has nfts',
+  })
+  withNfts: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
     description: 'Flag for active last 30 days',
   })
   activeLast30Days: boolean;
