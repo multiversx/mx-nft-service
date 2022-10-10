@@ -14,6 +14,7 @@ export interface CollectionApi {
   canAddQuantity: boolean;
   roles: RolesApi[];
   assets: CollectionAssetApi;
+  count: number;
 }
 
 export interface RolesApi {
