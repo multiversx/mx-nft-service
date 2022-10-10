@@ -44,15 +44,15 @@ export class NftTraitsService {
     ]);
 
     if (nftsFromApi.length === 0) {
-      this.logger.log(`${collectionTicker} - Empty collection`, {
-        path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-      });
       await this.setCollectionTraitTypesInElastic(
         new CollectionTraitSummary({
           identifier: collectionTicker,
           traitTypes: [],
         }),
       );
+      this.logger.log(`${collectionTicker} - Empty collection`, {
+        path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+      });
       return false;
     }
 
@@ -80,23 +80,23 @@ export class NftTraitsService {
     }
 
     if (notIdenticalEncodedValues.length > 0) {
+      await this.setNftsValuesInElastic(notIdenticalEncodedValues);
       this.logger.log(
         `${collectionTicker} - Updated ${notIdenticalEncodedValues.length}/${nftsFromApi.length} NFTs`,
         {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         },
       );
-      await this.setNftsValuesInElastic(notIdenticalEncodedValues);
     }
 
     if (!areCollectionSummariesIdentical || !collectionTraitsFromElastic) {
+      await this.setCollectionTraitTypesInElastic(collectionTraits);
       this.logger.log(
         `${collectionTicker} - Updated collection trait summary`,
         {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         },
       );
-      await this.setCollectionTraitTypesInElastic(collectionTraits);
     }
 
     return true;
@@ -152,8 +152,6 @@ export class NftTraitsService {
 
   async updateNftTraits(identifier: string): Promise<boolean> {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
-    let collectionPromise = this.getCollectionTraitsFromElastic(collection);
-
     let [nftTraitsFromApi, nftTraitValuesFromElastic] = await Promise.all([
       this.getCollectionNftMetadataFromAPI(identifier),
       this.getNftValuesFromElastic(identifier),
@@ -168,10 +166,12 @@ export class NftTraitsService {
       this.logger.log(`${identifier} - MINT/UPDATE`, {
         path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
       });
+      const traitTypes: TraitSummary[] =
+        await this.getCollectionTraitsFromElastic(collection);
       return await this.mintCollectionNft(
         new CollectionTraitSummary({
           identifier: collection,
-          traitTypes: (await collectionPromise) ?? [],
+          traitTypes: traitTypes ?? [],
         }),
         nftTraitsFromApi,
       );
@@ -474,7 +474,11 @@ export class NftTraitsService {
       .withMustNotExistCondition('nonce')
       .withMustCondition(
         QueryType.Match('token', collectionTicker, QueryOperator.AND),
-      );
+      )
+      .withPagination({
+        from: 0,
+        size: 1,
+      });
 
     await this.elasticService.getScrollableList(
       'tokens',
