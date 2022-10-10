@@ -69,7 +69,7 @@ async function bootstrap() {
   if (process.env.ENABLE_TRAITS_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticTraitsUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(6014);
+    await processorApp.listen(6015);
   }
 
   const logger = new Logger('Bootstrapper');
