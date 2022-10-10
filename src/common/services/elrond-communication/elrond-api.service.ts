@@ -400,9 +400,9 @@ export class ElrondApiService {
       batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
 
       nfts = nfts.concat(batch);
-    } while (batch.length === batchSize);
+    } while (batch.length > 0);
 
-    return nfts;
+    return this.filterUniqueNftsByNonce(nfts);
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
@@ -524,5 +524,9 @@ export class ElrondApiService {
       this.getCollectionsCount.name,
       `collections/${ticker}/nfts/count`,
     );
+  }
+
+  private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {
+    return nfts.distinct((nft) => nft.nonce);
   }
 }
