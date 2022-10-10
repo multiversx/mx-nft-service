@@ -390,7 +390,7 @@ type Collection {
   creationDate: Int!
   description: String
   name: String!
-  nftsCount: Int!
+  nftsCount: Int
   onSaleAssetsCount: Int!
   owner: Account
   ownerAddress: String
@@ -498,6 +498,9 @@ input CollectionsFilter {
 
   """Flag for verified collections"""
   verified: Boolean
+
+  """Flag for collections where owner address has nfts"""
+  withNfts: Boolean
 }
 
 enum CollectionsSortingEnum {
