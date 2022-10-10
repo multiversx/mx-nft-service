@@ -279,13 +279,23 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionsForAddress(
+  async getCollectionsForAddressWithRoles(
     address: string = '',
     query: string = '',
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddress.name,
+      this.getCollectionsForAddressWithRoles.name,
       `accounts/${address}/roles/collections${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithNfts(
+    address: string = '',
+    query: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithNfts.name,
+      `accounts/${address}/collections${query}`,
     );
   }
 
@@ -328,13 +338,23 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionsForAddressCount(
+  async getCollectionsForAddressWithNftsCount(
     address: string = '',
     query: string = '',
   ): Promise<number> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddressCount.name,
+      this.getCollectionsForAddressWithNftsCount.name,
       `accounts/${address}/roles/collections/count${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithRolesCount(
+    address: string = '',
+    query: string = '',
+  ): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithRolesCount.name,
+      `accounts/${address}/collections/count${query}`,
     );
   }
 

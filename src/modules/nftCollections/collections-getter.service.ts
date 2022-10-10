@@ -224,15 +224,6 @@ export class CollectionsGetterService {
     return [uniqueCollections, uniqueCollections?.length];
   }
 
-  private async getFullCollectionRaw(ticker: string): Promise<Collection> {
-    let collection = Collection.fromCollectionApi(
-      await this.apiService.getCollectionByIdentifierForQuery(ticker),
-    );
-    [collection] = await this.mapCollectionNftsCount([collection], 0);
-    [collection] = await this.mapCollectionNfts([collection]);
-    return collection;
-  }
-
   async getOrSetMostActiveCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
@@ -385,31 +376,36 @@ export class CollectionsGetterService {
       return [[Collection.fromCollectionApi(collection)], collection ? 1 : 0];
     }
 
-    const [collectionsApi, count, [fullCollections]] = await Promise.all([
-      this.apiService.getCollectionsForAddress(filters.ownerAddress, query),
-      this.apiService.getCollectionsForAddressCount(
+    if (filters?.withNfts) {
+      const [collectionsApi, count] = await Promise.all([
+        this.apiService.getCollectionsForAddressWithNfts(
+          filters.ownerAddress,
+          query,
+        ),
+        this.apiService.getCollectionsForAddressWithNftsCount(
+          filters.ownerAddress,
+          query,
+        ),
+      ]);
+      return [
+        collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
+        count,
+      ];
+    }
+    const [collectionsApi, count] = await Promise.all([
+      this.apiService.getCollectionsForAddressWithRoles(
         filters.ownerAddress,
         query,
       ),
-      this.getOrSetFullCollections(),
+      this.apiService.getCollectionsForAddressWithRolesCount(
+        filters.ownerAddress,
+        query,
+      ),
     ]);
-
-    let collections: Collection[] = [];
-
-    let promises: Promise<Collection>[] = [];
-    for (const collection of collectionsApi) {
-      const newCollection = fullCollections.find(
-        (c) => c.ticker === collection.ticker,
-      );
-      if (newCollection) {
-        collections.push(newCollection);
-      } else {
-        promises.push(this.getFullCollectionRaw(collection.ticker));
-      }
-    }
-    collections = collections.concat(await Promise.all(promises));
-
-    return [collections, count];
+    return [
+      collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
+      count,
+    ];
   }
 
   async getRandomCollectionDescription(node: Collection): Promise<string> {
