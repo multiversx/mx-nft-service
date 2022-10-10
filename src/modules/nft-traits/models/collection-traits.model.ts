@@ -97,7 +97,9 @@ export class CollectionTraitSummary {
     }
 
     for (const trait of nftTraits) {
-      let traitType = this.traitTypes.find((t) => t.name === trait.name);
+      let traitType = new TraitSummary(
+        this.traitTypes.find((t) => t.name === trait.name),
+      );
 
       if (traitType) {
         traitType.addTraitToAttributes(trait, collectionTotalSize);
