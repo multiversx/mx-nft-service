@@ -8,6 +8,7 @@ import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
 import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -166,17 +167,17 @@ export class TraitsUpdaterService {
 
   async processTokenTraitsQueue() {
     await Locker.lock(
-      'processTokenTraitsQueue: Update traits for all collections in the traits queue',
+      'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
-        const nftsToUpdate: string[] =
+        const tokensToUpdate: string[] =
           await this.redisCacheService.popAllItemsFromList(
             this.traitsQueueRedisClient,
             this.getTraitsQueueCacheKey(),
             true,
           );
 
-        const notUpdatedNfts: string[] = await this.updateNftTraits(
-          nftsToUpdate,
+        const notUpdatedNfts: string[] = await this.updateTokenTraits(
+          tokensToUpdate,
         );
 
         await this.addNftsToTraitQueue(notUpdatedNfts);
@@ -185,14 +186,20 @@ export class TraitsUpdaterService {
     );
   }
 
-  async updateNftTraits(identifiers: string[]): Promise<string[]> {
-    let notUpdatedNfts: string[] = [];
+  async updateTokenTraits(identifiers: string[]): Promise<string[]> {
+    let notUpdatedTokens: string[] = [];
     for (const identifier of identifiers) {
       try {
         await Locker.lock(
-          `updateNftTraits ${identifier}`,
+          `updateTokenTraits ${identifier}`,
           async () => {
-            await this.nftTraitsService.updateNftTraits(identifier);
+            const token = getCollectionAndNonceFromIdentifier(identifier);
+            console.log(token);
+            if (token.nonce) {
+              await this.nftTraitsService.updateNftTraits(identifier);
+            } else {
+              await this.nftTraitsService.updateCollectionTraits(identifier);
+            }
           },
           true,
         );
@@ -202,10 +209,10 @@ export class TraitsUpdaterService {
           exception: error?.message,
           identifier: identifier,
         });
-        notUpdatedNfts.push(identifier);
+        notUpdatedTokens.push(identifier);
       }
     }
-    return notUpdatedNfts;
+    return notUpdatedTokens;
   }
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {

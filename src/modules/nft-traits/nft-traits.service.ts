@@ -175,11 +175,6 @@ export class NftTraitsService {
         }),
         nftTraitsFromApi,
       );
-    } else if (!nftTraitsFromApi && !areIdenticalTraits) {
-      this.logger.log(`${identifier} - BURN`, {
-        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
-      });
-      return await this.burnCollectionNft(collection);
     } else if (
       nftTraitsFromApi &&
       nftTraitValuesFromElastic &&
@@ -190,6 +185,10 @@ export class NftTraitsService {
       });
       return await this.updateCollectionTraits(collection);
     }
+
+    this.logger.log(`${identifier} - VALID`, {
+      path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
+    });
 
     return false;
   }
@@ -207,10 +206,6 @@ export class NftTraitsService {
       this.setCollectionTraitTypesInElastic(traitSummaryFromElastic),
     ]);
     return true;
-  }
-
-  async burnCollectionNft(collectionTicker: string): Promise<boolean> {
-    return await this.updateCollectionTraits(collectionTicker);
   }
 
   async getNftsByTraits(

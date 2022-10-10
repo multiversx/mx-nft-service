@@ -8,6 +8,8 @@ import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { MintEvent } from '../entities/auction/mint.event';
 import * as Redis from 'ioredis';
+import { BurnEvent } from '../entities/auction/burn.event';
+import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -45,15 +47,32 @@ export class ElasticUpdatesEventsService {
   }
 
   public async handleTraitsForNftMintBurnAndUpdateEvents(
-    mintEvents: any[],
+    events: any[],
   ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
-    let nftsToUpdate: string[] = [];
+    let nftsOrCollectionsToUpdate: string[] = [];
 
-    for (let event of mintEvents) {
-      const mintEvent = new MintEvent(event);
-      const createTopics = mintEvent.getTopics();
-      const identifier = `${createTopics.collection}-${createTopics.nonce}`;
+    for (let event of events) {
+      switch (event.identifier) {
+        case NftEventEnum.ESDTNFTCreate: {
+          event = new MintEvent(event);
+        }
+        case NftEventEnum.ESDTNFTUpdateAttributes: {
+          event = new UpdateAttributesEvent(event);
+        }
+        case NftEventEnum.ESDTNFTBurn: {
+          event = new BurnEvent(event);
+        }
+      }
+
+      const topics = event.getTopics();
+      const identifier = `${topics.collection}-${topics.nonce}`;
+
+      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+        nftsOrCollectionsToUpdate.push(topics.collection);
+        continue;
+      }
+
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
@@ -64,13 +83,13 @@ export class ElasticUpdatesEventsService {
         nft.type === NftTypeEnum.NonFungibleESDT ||
         nft.type === NftTypeEnum.SemiFungibleESDT
       ) {
-        nftsToUpdate.push(nft.identifier);
+        nftsOrCollectionsToUpdate.push(identifier);
       }
     }
 
-    nftsToUpdate = [...new Set(nftsToUpdate)];
+    nftsOrCollectionsToUpdate = [...new Set(nftsOrCollectionsToUpdate)];
 
-    await this.addNftsToTraitsQueue(nftsToUpdate);
+    await this.addNftsToTraitsQueue(nftsOrCollectionsToUpdate);
   }
 
   public async handleRaritiesForNftMintBurnAndUpdateEvents(
