@@ -529,36 +529,42 @@ export class NftTraitsService {
   }
 
   async setElasticTraitMappings(): Promise<void> {
-    try {
-      await this.elasticService.putMappings(
-        'tokens',
-        this.elasticService.buildPutMultipleMappingsBody([
-          {
-            key: 'nft_traitSummary.attributes.occurencePercentage',
-            value: 'float',
-          },
-          {
-            key: 'nft_traitSummary.attributes.occurenceCount',
-            value: 'long',
-          },
-          {
-            key: 'nft_traitSummary.occurencePercentage',
-            value: 'float',
-          },
-          {
-            key: 'nft_traitSummary.occurenceCount',
-            value: 'long',
-          },
-        ]),
-      );
-    } catch (error) {
-      this.logger.error(
-        'Error when trying to map Elastic types for trait variables',
-        {
-          path: `${NftTraitsService.name}.${this.setElasticTraitMappings.name}`,
-        },
-      );
-    }
+    await Locker.lock(
+      'setElasticTraitMappings',
+      async () => {
+        try {
+          await this.elasticService.putMappings(
+            'tokens',
+            this.elasticService.buildPutMultipleMappingsBody([
+              {
+                key: 'nft_traitSummary.attributes.occurencePercentage',
+                value: 'float',
+              },
+              {
+                key: 'nft_traitSummary.attributes.occurenceCount',
+                value: 'long',
+              },
+              {
+                key: 'nft_traitSummary.occurencePercentage',
+                value: 'float',
+              },
+              {
+                key: 'nft_traitSummary.occurenceCount',
+                value: 'long',
+              },
+            ]),
+          );
+        } catch (error) {
+          this.logger.error(
+            'Error when trying to map Elastic types for trait variables',
+            {
+              path: `${NftTraitsService.name}.${this.setElasticTraitMappings.name}`,
+            },
+          );
+        }
+      },
+      false,
+    );
   }
 
   traitToBase64Encoded(trait: NftTrait): string {
