@@ -13,6 +13,7 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
       .where({
         address: address,
       })
+      .orderBy('assetsLiked.id', 'DESC')
       .skip(offset)
       .take(limit)
       .getManyAndCount();
@@ -34,6 +35,14 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
     return await this.count({
       where: {
         identifier,
+      },
+    });
+  }
+
+  async getLikesCountForAddress(address: string): Promise<number> {
+    return await this.count({
+      where: {
+        address,
       },
     });
   }
@@ -83,5 +92,19 @@ export class AssetsLikesRepository extends Repository<AssetLikeEntity> {
       identifier,
       address,
     });
+  }
+
+  async getMostLikedAssetsIdentifiers(
+    offset?: number,
+    limit?: number,
+  ): Promise<AssetLikeEntity[]> {
+    return await this.createQueryBuilder('al')
+      .select('count(*) as cnt, al.identifier')
+      .groupBy('al.identifier')
+      .orderBy('cnt', 'DESC')
+      .addOrderBy('al.identifier', 'DESC')
+      .offset(offset ?? 0)
+      .limit(limit ?? 1000)
+      .execute();
   }
 }

@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
-import { CollectionModuleGraph } from './modules/nftCollections/collection.module';
+import { CollectionsModuleGraph } from './modules/nftCollections/collections.module';
 import { AssetsModuleGraph } from './modules/assets/assets.module';
 import { AuctionsModuleGraph } from './modules/auctions/auctions.module';
 import { OrdersModuleGraph } from './modules/orders/orders.module';
@@ -15,7 +15,7 @@ import { AssetHistoryModuleGraph } from './modules/asset-history/asset-history.m
 import { FeaturedModuleGraph } from './modules/featured/featured.module';
 import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
-import { UsdAmountModuleGraph } from './modules/usdAmount/usd-amount.module';
+import { UsdPriceModuleGraph } from './modules/usdPrice/usd-price.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
 import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
@@ -25,11 +25,11 @@ import { TagsModuleGraph } from './modules/tags/tags.module';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { NotificationsModuleGraph } from './modules/notifications/notifications.module';
-import { ContractInfoModuleGraph } from './modules/contract-info/contract-info.module';
 import * as ormconfig from './ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
+import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 
 @Module({
   imports: [
@@ -56,7 +56,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
       },
     }),
     CommonModule,
-    CollectionModuleGraph,
+    CollectionsModuleGraph,
     AssetsModuleGraph,
     AssetHistoryModuleGraph,
     AuctionsModuleGraph,
@@ -66,18 +66,18 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
     CollectionsStatsModuleGraph,
     ReportNftsModuleGraph,
     FeaturedModuleGraph,
-    UsdAmountModuleGraph,
+    UsdPriceModuleGraph,
     TrendingModuleGraph,
     CampaignsModuleGraph,
     IpfsModule,
     SearchModuleGraph,
-    ContractInfoModuleGraph,
     TagsModuleGraph,
     NftRarityModuleGraph,
     AdminOperationsModuleGraph,
     NotificationsModuleGraph,
     MarketplacesModuleGraph,
     ArtistsModuleGraph,
+    ExploreStatsModuleGraph,
   ],
 })
 export class AppModule {}

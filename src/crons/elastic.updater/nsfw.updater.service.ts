@@ -6,9 +6,9 @@ import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
-  CacheEventTypeEnum,
   ChangedEvent,
-} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
+  CacheEventTypeEnum,
+} from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 
 type NsfwType = {
   identifier: string;

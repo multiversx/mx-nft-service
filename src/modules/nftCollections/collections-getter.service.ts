@@ -1,42 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  TokenPayment,
-  TypedValue,
-} from '@elrondnetwork/erdjs';
-import { cacheConfig, elrondConfig, gas } from 'src/config';
-import { SetNftRolesArgs } from './models/SetNftRolesArgs';
+import { Address } from '@elrondnetwork/erdjs';
+import { cacheConfig, genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import {
   CollectionApi,
   ElrondApiService,
   ElrondIdentityService,
-  getSmartContract,
 } from 'src/common';
 import * as Redis from 'ioredis';
-import { TransactionNode } from '../common/transaction';
-import { CollectionsFilter } from '../common/filters/filtersTypes';
-import {
-  IssueCollectionRequest,
-  StopNftCreateRequest,
-  TransferNftCreateRoleRequest,
-  SetNftRolesRequest,
-} from './models/requests';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { TimeConstants } from 'src/utils/time-utils';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import {
+  CollectionsFilter,
+  CollectionsSortingEnum,
+} from './models/Collections-Filters';
+import { randomBetween } from 'src/utils/helpers';
 
 @Injectable()
-export class CollectionsService {
+export class CollectionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
@@ -52,102 +39,52 @@ export class CollectionsService {
     );
   }
 
-  async issueToken(ownerAddress: string, request: IssueCollectionRequest) {
-    let transactionArgs = this.getIssueTokenArguments(request);
-
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction(request.collectionType),
-      value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
-      args: transactionArgs,
-      gasLimit: gas.issueToken,
-      chainID: elrondConfig.chainID,
-    });
-    return transaction.toPlainObject(new Address(ownerAddress));
-  }
-
-  async stopNFTCreate(
-    ownerAddress: string,
-    request: StopNftCreateRequest,
-  ): Promise<TransactionNode> {
-    const smartContract = getSmartContract(request.ownerAddress);
-    const transaction = smartContract.call({
-      func: new ContractFunction('stopNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [BytesValue.fromUTF8(request.collection)],
-      gasLimit: gas.stopNFTCreate,
-      chainID: elrondConfig.chainID,
-    });
-    return transaction.toPlainObject(new Address(ownerAddress));
-  }
-
-  async transferNFTCreateRole(
-    ownerAddress: string,
-    request: TransferNftCreateRoleRequest,
-  ): Promise<TransactionNode> {
-    const smartContract = getSmartContract(request.ownerAddress);
-    let transactionArgs = this.getTransferCreateRoleArgs(request);
-    const transaction = smartContract.call({
-      func: new ContractFunction('transferNFTCreateRole'),
-      value: TokenPayment.egldFromAmount(0),
-      args: transactionArgs,
-      gasLimit: gas.transferNFTCreateRole,
-      chainID: elrondConfig.chainID,
-    });
-    return transaction.toPlainObject(new Address(ownerAddress));
-  }
-
-  async setNftRoles(
-    ownerAddress: string,
-    args: SetNftRolesRequest,
-  ): Promise<TransactionNode> {
-    let transactionArgs = this.getSetRolesArgs(args);
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction('setSpecialRole'),
-      value: TokenPayment.egldFromAmount(0),
-      args: transactionArgs,
-      gasLimit: gas.setRoles,
-      chainID: elrondConfig.chainID,
-    });
-    return transaction.toPlainObject(new Address(ownerAddress));
-  }
-
   async getCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
-    const apiQuery = new CollectionQuery()
-      .addCreator(filters?.creatorAddress)
-      .addType(filters?.type)
-      .addCanCreate(filters?.canCreate)
-      .addPageSize(offset, limit)
-      .build();
-
-    if (filters && Object.keys(filters).length > 0) {
-      if (filters.ownerAddress) {
-        const [collections, count] = await this.getCollectionsForUser(
-          filters,
-          apiQuery,
-        );
-        return [
-          collections?.map((element) => Collection.fromCollectionApi(element)),
-          count,
-        ];
-      }
-      return await this.getAllCollections(filters, apiQuery);
+    if (filters?.collection) {
+      const collection = await this.apiService.getCollectionForIdentifier(
+        filters.collection,
+      );
+      return [
+        [Collection.fromCollectionApi(collection)],
+        Collection.fromCollectionApi(collection) ? 1 : 0,
+      ];
     }
-    return await this.getFilteredCollections(offset, limit, filters);
+
+    if (sorting === CollectionsSortingEnum.Trending) {
+      return this.getTrendingCollections(offset, limit, filters);
+    }
+
+    if (filters?.ownerAddress) {
+      return await this.getCollectionsForUser(offset, limit, filters);
+    }
+
+    if (filters?.activeLast30Days) {
+      return await this.getFilteredActiveCollectionsFromLast30Days(
+        offset,
+        limit,
+        filters,
+        sorting,
+      );
+    }
+
+    return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
   async getTrendingCollections(
     offset: number = 0,
     limit: number = 10,
+    filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [collections, count] = await this.getAllTrendingCollections();
-
-    collections = collections?.slice(offset, offset + limit);
-
-    return [collections, count];
+    let [trendingCollections] = await this.getAllTrendingCollections();
+    trendingCollections = this.applyFilters(filters, trendingCollections);
+    const count = trendingCollections.length;
+    trendingCollections = trendingCollections?.slice(offset, offset + limit);
+    return [trendingCollections, count];
   }
 
   async getAllTrendingCollections(): Promise<[Collection[], number]> {
@@ -165,45 +102,86 @@ export class CollectionsService {
     return [mappedCollections, mappedCollections.length];
   }
 
-  private async getAllCollections(
-    filters: CollectionsFilter,
-    query: string = '',
-  ): Promise<[Collection[], number]> {
-    if (filters?.collection) {
-      const collection = await this.apiService.getCollectionForIdentifier(
-        filters.collection,
-      );
-      return [
-        [Collection.fromCollectionApi(collection)],
-        Collection.fromCollectionApi(collection) ? 1 : 0,
-      ];
-    }
-    const [collectionsApi, count] = await Promise.all([
-      this.apiService.getCollections(query),
-      this.apiService.getCollectionsCount(query),
+  async getActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
+    const [trendingCollections] = await Promise.all([
+      this.persistenceService.getActiveCollectionsLast30Days(),
+      this.persistenceService.getActiveCollectionsLast30DaysCount(),
     ]);
-    const collections = collectionsApi?.map((element) =>
-      Collection.fromCollectionApi(element),
-    );
-    return [collections, count];
+    const mappedCollections = [];
+    const [collections] = await this.getOrSetFullCollections();
+    for (const trendingCollection of trendingCollections) {
+      mappedCollections.push(
+        collections.find((c) => c.collection === trendingCollection.collection),
+      );
+    }
+    return [mappedCollections, mappedCollections.length];
+  }
+
+  async getFilteredActiveCollectionsFromLast30Days(
+    offset: number = 0,
+    limit: number = 10,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
+  ): Promise<[Collection[], number]> {
+    let [activeCollections, count] =
+      await this.getActiveCollectionsFromLast30Days();
+    activeCollections = this.applyFilters(filters, activeCollections);
+
+    if (sorting && sorting === CollectionsSortingEnum.Newest) {
+      activeCollections = orderBy(
+        activeCollections,
+        ['creationDate', 'verified'],
+        ['desc', 'desc'],
+      );
+    }
+    count = activeCollections.length;
+    activeCollections = activeCollections?.slice(offset, offset + limit);
+    return [activeCollections, count];
+  }
+
+  private applyFilters(filters: CollectionsFilter, collections: Collection[]) {
+    if (this.hasVerifiedFilter(filters)) {
+      collections = collections.filter(
+        (token) => token.verified === filters?.verified,
+      );
+    }
+
+    if (filters?.creatorAddress) {
+      collections = collections.filter(
+        (token) => token.artistAddress === filters?.creatorAddress,
+      );
+    }
+
+    if (filters?.type) {
+      collections = collections.filter((token) => token.type === filters?.type);
+    }
+    return collections;
   }
 
   private async getFilteredCollections(
     offset: number = 0,
     limit: number = 10,
-    filters: CollectionsFilter,
+    filters?: CollectionsFilter,
+    sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     let [collections, count] = await this.getOrSetFullCollections();
 
-    if (filters?.collection) {
-      collections = collections.filter(
-        (token) => token.collection === filters.collection,
-      );
-      count = 1;
-    }
+    collections = this.applyFilters(filters, collections);
 
+    if (sorting && sorting === CollectionsSortingEnum.Newest) {
+      collections = orderBy(
+        collections,
+        ['creationDate', 'verified'],
+        ['desc', 'desc'],
+      );
+    }
+    count = collections.length;
     collections = collections?.slice(offset, offset + limit);
     return [collections, count];
+  }
+
+  private hasVerifiedFilter(filters: CollectionsFilter) {
+    return filters?.verified !== null && filters?.verified !== undefined;
   }
 
   async getOrSetFullCollections(): Promise<[Collection[], number]> {
@@ -348,7 +326,10 @@ export class CollectionsService {
     return localCollections;
   }
 
-  private async mapCollectionNftsCount(localCollections: Collection[]) {
+  private async mapCollectionNftsCount(
+    localCollections: Collection[],
+    filterByNftsCountThresold: number = 4,
+  ) {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
@@ -364,80 +345,79 @@ export class CollectionsService {
         }
       }
     }
-    localCollections = localCollections.filter(
-      (x) => parseInt(x.collectionAsset?.totalCount) >= 4,
-    );
+
+    if (filterByNftsCountThresold) {
+      localCollections = localCollections.filter(
+        (x) =>
+          parseInt(x.collectionAsset?.totalCount) >= filterByNftsCountThresold,
+      );
+    }
+
     return localCollections;
   }
 
   private async getCollectionsForUser(
-    filters: CollectionsFilter,
-    query: string = '',
-  ): Promise<[CollectionApi[], number]> {
+    offset: number = 0,
+    limit: number = 10,
+    filters?: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    const query = new CollectionQuery()
+      .addCreator(filters?.creatorAddress)
+      .addType(filters?.type)
+      .addCanCreate(filters?.canCreate)
+      .addPageSize(offset, limit)
+      .build();
     if (filters?.collection) {
       const collection =
         await this.apiService.getCollectionForOwnerAndIdentifier(
           filters.ownerAddress,
           filters.collection,
         );
-      return [[collection], collection ? 1 : 0];
+      return [[Collection.fromCollectionApi(collection)], collection ? 1 : 0];
+    }
+
+    if (filters?.withNfts) {
+      const [collectionsApi, count] = await Promise.all([
+        this.apiService.getCollectionsForAddressWithNfts(
+          filters.ownerAddress,
+          query,
+        ),
+        this.apiService.getCollectionsForAddressWithNftsCount(
+          filters.ownerAddress,
+          query,
+        ),
+      ]);
+      return [
+        collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
+        count,
+      ];
     }
     const [collectionsApi, count] = await Promise.all([
-      this.apiService.getCollectionsForAddress(filters.ownerAddress, query),
-      this.apiService.getCollectionsForAddressCount(
+      this.apiService.getCollectionsForAddressWithRoles(
+        filters.ownerAddress,
+        query,
+      ),
+      this.apiService.getCollectionsForAddressWithRolesCount(
         filters.ownerAddress,
         query,
       ),
     ]);
-    return [collectionsApi, count];
-  }
-
-  private getIssueTokenArguments(args: IssueCollectionRequest) {
-    let transactionArgs = [
-      BytesValue.fromUTF8(args.tokenName),
-      BytesValue.fromUTF8(args.tokenTicker),
+    return [
+      collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
+      count,
     ];
-    if (args.canFreeze) {
-      transactionArgs.push(BytesValue.fromUTF8('canFreeze'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canFreeze.toString()));
-    }
-    if (args.canWipe) {
-      transactionArgs.push(BytesValue.fromUTF8('canWipe'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canWipe.toString()));
-    }
-    if (args.canPause) {
-      transactionArgs.push(BytesValue.fromUTF8('canPause'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canPause.toString()));
-    }
-    if (args.canTransferNFTCreateRole) {
-      transactionArgs.push(BytesValue.fromUTF8('canTransferNFTCreateRole'));
-      transactionArgs.push(
-        BytesValue.fromUTF8(args.canTransferNFTCreateRole.toString()),
-      );
-    }
-    return transactionArgs;
   }
 
-  private getSetRolesArgs(args: SetNftRolesArgs) {
-    let transactionArgs = [
-      BytesValue.fromUTF8(args.collection),
-      new AddressValue(new Address(args.addressToTransfer)),
-    ];
-    args.roles.forEach((role) => {
-      transactionArgs.push(BytesValue.fromUTF8(role));
-    });
-    return transactionArgs;
-  }
+  async getRandomCollectionDescription(node: Collection): Promise<string> {
+    const size =
+      node.nftsCount ??
+      (await this.apiService.getCollectionNftsCount(node.ticker));
 
-  private getTransferCreateRoleArgs(args: TransferNftCreateRoleRequest) {
-    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.collection)];
-    args.addressToTransferList.forEach((address) => {
-      transactionArgs.push(new AddressValue(new Address(address)));
-    });
-    return transactionArgs;
+    const descriptions =
+      size > 100
+        ? genericDescriptions.forBigCollections
+        : genericDescriptions.forSmallCollections;
+    const randomIdx = randomBetween(0, descriptions.length);
+    return descriptions[randomIdx].replace('{size}', size.toString());
   }
-
-  private readonly esdtSmartContract = getSmartContract(
-    elrondConfig.esdtNftAddress,
-  );
 }

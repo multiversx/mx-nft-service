@@ -1,22 +1,22 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Price } from '../assets/models';
-import { UsdPriceLoader } from './loaders/usd-price.loader';
+import { UsdPriceService } from './usd-price.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
 @Resolver(() => Price)
-export class UsdAmountResolver extends BaseResolver(Price) {
-  constructor(private readonly usdPriceLoader: UsdPriceLoader) {
+export class UsdPriceResolver extends BaseResolver(Price) {
+  constructor(private readonly usdPriceService: UsdPriceService) {
     super();
   }
 
   @ResolveField(() => String)
   async usdAmount(@Parent() price: Price) {
-    return this.usdPriceLoader.getUsdAmountDenom(price.token, price.amount);
+    return this.usdPriceService.getUsdAmountDenom(price.token, price.amount);
   }
 
   @ResolveField(() => Token)
   async tokenData(@Parent() price: Price) {
-    return this.usdPriceLoader.getToken(price.token);
+    return this.usdPriceService.getToken(price.token);
   }
 }

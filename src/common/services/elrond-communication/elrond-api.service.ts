@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Nft, NftTag } from './models/nft.dto';
+import { Nft, NftMetadata, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { Logger } from 'winston';
@@ -195,6 +195,17 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftByIdentifier.name, url);
   }
 
+  async getNftMetadataByIdentifierForQuery(
+    identifier: string,
+    query: string = 'extract=metadata&withOwner=true&withSupply=true',
+  ): Promise<NftMetadata> {
+    const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
+    return await this.doGetGeneric(
+      this.getNftMetadataByIdentifierForQuery.name,
+      url,
+    );
+  }
+
   async getOwnersForIdentifier(
     identifier: string,
     offset: number = 0,
@@ -267,13 +278,23 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionsForAddress(
+  async getCollectionsForAddressWithRoles(
     address: string = '',
     query: string = '',
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddress.name,
+      this.getCollectionsForAddressWithRoles.name,
       `accounts/${address}/roles/collections${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithNfts(
+    address: string = '',
+    query: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithNfts.name,
+      `accounts/${address}/collections${query}`,
     );
   }
 
@@ -312,16 +333,26 @@ export class ElrondApiService {
   ): Promise<CollectionApi> {
     return await this.doGetGeneric(
       this.getCollectionForOwnerAndIdentifier.name,
-      `accounts/${address}/collections/${identifier}`,
+      `accounts/${address}/roles/collections/${identifier}`,
     );
   }
 
-  async getCollectionsForAddressCount(
+  async getCollectionsForAddressWithNftsCount(
     address: string = '',
     query: string = '',
   ): Promise<number> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddressCount.name,
+      this.getCollectionsForAddressWithNftsCount.name,
+      `accounts/${address}/collections/count${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithRolesCount(
+    address: string = '',
+    query: string = '',
+  ): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithRolesCount.name,
       `accounts/${address}/roles/collections/count${query}`,
     );
   }
@@ -461,7 +492,7 @@ export class ElrondApiService {
       const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
       const tokensWithDecimals = await this.doGetGeneric(
         this.getAllMexTokensWithDecimals.name,
-        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals`,
+        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals&size=${tokenChunk.length}`,
       );
 
       if (!tokensWithDecimals) {

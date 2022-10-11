@@ -102,6 +102,13 @@ export class PersistenceService {
     );
   }
 
+  async getLikesCountForAddress(address: string): Promise<number> {
+    return await this.execute(
+      this.getLikesCountForAddress.name,
+      this.assetsLikesRepository.getLikesCountForAddress(address),
+    );
+  }
+
   async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
     return await this.execute(
       this.getBulkAssetLikesCount.name,
@@ -709,6 +716,20 @@ export class PersistenceService {
     );
   }
 
+  async getActiveCollectionsLast30Days(): Promise<any[]> {
+    return await this.execute(
+      this.getActiveCollectionsLast30Days.name,
+      this.auctionsRepository.getActiveCollectionsFromLast30Days(),
+    );
+  }
+
+  async getActiveCollectionsLast30DaysCount(): Promise<number> {
+    return await this.execute(
+      this.getActiveCollectionsLast30DaysCount.name,
+      this.auctionsRepository.getCollectionsActiveFromLast30DaysCount(),
+    );
+  }
+
   async getAuctionsOrderByOrdersCount(
     queryRequest: QueryRequest,
   ): Promise<[AuctionEntity[], number, PriceRange]> {
@@ -887,6 +908,29 @@ export class PersistenceService {
     return await this.execute(
       this.updateAuctions.name,
       this.auctionsRepository.updateAuctions(auctions),
+    );
+  }
+
+  async getCurrentPaymentTokenIdsWithCounts(
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
+  ): Promise<{ paymentToken: string; activeAuctions: number }[]> {
+    return await this.execute(
+      this.getCurrentPaymentTokenIdsWithCounts.name,
+      this.auctionsRepository.getCurrentPaymentTokenIds(
+        marketplaceKey,
+        collectionIdentifier,
+      ),
+    );
+  }
+
+  async getMostLikedAssetsIdentifiers(
+    offset?: number,
+    limit?: number,
+  ): Promise<AssetLikeEntity[]> {
+    return await this.execute(
+      this.getMostLikedAssetsIdentifiers.name,
+      this.assetsLikesRepository.getMostLikedAssetsIdentifiers(offset, limit),
     );
   }
 }

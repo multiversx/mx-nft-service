@@ -4,10 +4,10 @@ import * as Redis from 'ioredis';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
-import { CollectionsService } from '../nftCollections/collection.service';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';
 import { ArtistFilters } from './models/Artists.Filter';
 import { cacheConfig } from 'src/config';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 
 @Injectable()
 export class ArtistsService {
@@ -15,7 +15,7 @@ export class ArtistsService {
   constructor(
     private idService: ElrondIdentityService,
     private cachingService: CachingService,
-    private collectionsService: CollectionsService,
+    private collectionsGetterService: CollectionsGetterService,
   ) {
     this.redisClient = this.cachingService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -41,7 +41,7 @@ export class ArtistsService {
     size: number = 25,
   ): Promise<[Account[], number]> {
     const [collections, count] =
-      await this.collectionsService.getOrSetMostFollowedCollections();
+      await this.collectionsGetterService.getOrSetMostFollowedCollections();
 
     const selectedCollections = collections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(
@@ -58,7 +58,7 @@ export class ArtistsService {
     size: number = 25,
   ): Promise<[Account[], number]> {
     const [collections, count] =
-      await this.collectionsService.getOrSetMostActiveCollections();
+      await this.collectionsGetterService.getOrSetMostActiveCollections();
 
     const selectedCollections = collections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(
@@ -75,7 +75,7 @@ export class ArtistsService {
     size: number = 25,
   ): Promise<[Account[], number]> {
     const [trendingCollections, count] =
-      await this.collectionsService.getAllTrendingCollections();
+      await this.collectionsGetterService.getAllTrendingCollections();
 
     const trendingCreators = trendingCollections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(

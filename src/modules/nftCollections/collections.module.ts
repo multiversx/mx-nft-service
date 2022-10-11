@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { CollectionsQueriesResolver } from './collection-queries.resolver';
-import { CollectionsService } from './collection.service';
+import { CollectionsQueriesResolver } from './collections-queries.resolver';
+import { CollectionsTransactionsService } from './collections-transactions.service';
 import { AssetsModuleGraph } from '../assets/assets.module';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
@@ -9,7 +9,7 @@ import { CollectionAssetsRedisHandler } from './loaders/collection-assets.redis-
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { CollectionAssetsCountRedisHandler } from './loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsResolver } from './collection-assets.resolver';
-import { CollectionsMutationsResolver } from './collection-mutations.resolver';
+import { CollectionsMutationsResolver } from './collections-mutations.resolver';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
@@ -18,14 +18,18 @@ import { ElrondCommunicationModule } from 'src/common/services/elrond-communicat
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
 import { ArtistAddressProvider } from '../artists/artists.loader';
-import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
+import { AssetsCollectionsRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import { CollectionsGetterService } from './collections-getter.service';
+import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
+import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-collection-for-owner.redis-handler';
 
 @Module({
   providers: [
-    CollectionsService,
+    CollectionsTransactionsService,
+    CollectionsGetterService,
     CollectionAssetsResolver,
     CollectionAssetsProvider,
     CollectionAssetsRedisHandler,
@@ -44,13 +48,19 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
     ArtistAddressProvider,
     ArtistAddressRedisHandler,
     AssetsCollectionsProvider,
-    AssetsCollectionRedisHandler,
+    AssetsCollectionsRedisHandler,
+    AssetsCollectionsForOwnerProvider,
+    AssetsCollectionsForOwnerRedisHandler,
     SmartContractArtistsService,
   ],
   imports: [
     forwardRef(() => ElrondCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
   ],
-  exports: [CollectionsService, LocalCacheService],
+  exports: [
+    CollectionsTransactionsService,
+    CollectionsGetterService,
+    LocalCacheService,
+  ],
 })
-export class CollectionModuleGraph {}
+export class CollectionsModuleGraph {}

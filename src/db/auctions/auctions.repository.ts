@@ -18,7 +18,7 @@ import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalida
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from 'src/modules/rabbitmq/cache-invalidation/events/owner-changed.event';
+} from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { nominateAmount } from 'src/utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -31,6 +31,7 @@ import {
   getAvailableTokensbyAuctionId,
   getAvailableTokensbyAuctionIds,
   getAvailableTokensScriptsByIdentifiers,
+  getCurrentPaymentTokens,
   getDefaultAuctionsForIdentifierQuery,
   getDefaultAuctionsForIdentifierQueryCount,
   getDefaultAuctionsQuery,
@@ -313,6 +314,37 @@ export class AuctionsRepository {
     return count;
   }
 
+  async getActiveCollectionsFromLast30Days(): Promise<any[]> {
+    return this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.collection as collection')
+      .addSelect('COUNT(a.collection) as auctionsCount')
+      .where(
+        `a.endDate BETWEEN '${DateUtils.getCurrentTimestampPlusDays(
+          -30,
+        )}' AND '${DateUtils.getCurrentTimestamp()}'`,
+      )
+      .groupBy('a.collection')
+      .orderBy('COUNT(a.collection)', 'DESC')
+      .offset(0)
+      .limit(1000)
+      .execute();
+  }
+
+  async getCollectionsActiveFromLast30DaysCount(): Promise<number> {
+    const { count } = await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('COUNT(DISTINCT(a.collection)) as count')
+      .where(
+        `a.endDate BETWEEN '${DateUtils.getCurrentTimestampPlusDays(
+          -30,
+        )}' AND '${DateUtils.getCurrentTimestamp()}'`,
+      )
+      .execute();
+
+    return count;
+  }
+
   async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
     const getAuctions = this.auctionsRepository
       .createQueryBuilder('a')
@@ -355,7 +387,7 @@ export class AuctionsRepository {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
-        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, GREATEST(MIN(`a`.`minBidDenominated`), IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`))) AS minBid',
       )
       .leftJoin(
         'orders',
@@ -379,7 +411,7 @@ export class AuctionsRepository {
       filterQueryBuilder.build();
     const response = await queryBuilder
       .select(
-        'if(MAX(a.maxBidDenominated)>MAX(o.priceAmountDenominated) OR ISNULL(MAX(`o`.`priceAmountDenominated`)), MAX(a.maxBidDenominated),MAX(o.priceAmountDenominated)) as maxBid, MIN(a.minBidDenominated) as minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, GREATEST(MIN(`a`.`minBidDenominated`), IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`))) AS minBid',
       )
       .leftJoin(
         'orders',
@@ -666,7 +698,7 @@ export class AuctionsRepository {
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.UpdateAuction,
-        ownerAddress: ownerAddress,
+        address: ownerAddress,
       }),
     );
   }
@@ -701,5 +733,21 @@ export class AuctionsRepository {
       Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
     ),
       queryBuilder.addOrderBy(alias ? `${alias}.id` : 'id', 'ASC');
+  }
+
+  async getCurrentPaymentTokenIds(
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
+  ): Promise<{ paymentToken: string; activeAuctions: number }[]> {
+    const paymentTokens = await this.auctionsRepository.query(
+      getCurrentPaymentTokens(marketplaceKey, collectionIdentifier),
+    );
+
+    return paymentTokens.map((r: { paymentToken: any; count: any }) => {
+      return {
+        paymentToken: r.paymentToken,
+        activeAuctions: r.count,
+      };
+    });
   }
 }

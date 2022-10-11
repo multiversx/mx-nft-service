@@ -11,15 +11,20 @@ import * as Redis from 'ioredis';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
-  private readonly redisClient: Redis.Redis;
+  private readonly rarityRedisClient: Redis.Redis;
+  private readonly traitsRedisClient: Redis.Redis;
+
   constructor(
     private readonly nftFlagsService: FlagNftService,
     private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly nftRarityService: NftRarityService,
     private readonly redisCacheService: RedisCacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
+    this.rarityRedisClient = this.redisCacheService.getClient(
       cacheConfig.rarityQueueClientName,
+    );
+    this.traitsRedisClient = this.redisCacheService.getClient(
+      cacheConfig.traitsQueueClientName,
     );
   }
   public async handleNftMintEvents(
@@ -39,7 +44,36 @@ export class ElasticUpdatesEventsService {
     }
   }
 
-  public async handleRaritiesForNftMintAndBurnEvents(
+  public async handleTraitsForNftMintBurnAndUpdateEvents(
+    mintEvents: any[],
+  ): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    let collectionsToUpdate: string[] = [];
+
+    for (let event of mintEvents) {
+      const mintEvent = new MintEvent(event);
+      const createTopics = mintEvent.getTopics();
+      const identifier = `${createTopics.collection}-${createTopics.nonce}`;
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
+
+      if (!nft || Object.keys(nft).length === 0) {
+        return;
+      }
+
+      if (
+        nft.type === NftTypeEnum.NonFungibleESDT ||
+        nft.type === NftTypeEnum.SemiFungibleESDT
+      ) {
+        collectionsToUpdate.push(nft.collection);
+      }
+    }
+
+    collectionsToUpdate = [...new Set(collectionsToUpdate)];
+
+    await this.addCollectionsToTraitsQueue(collectionsToUpdate);
+  }
+
+  public async handleRaritiesForNftMintBurnAndUpdateEvents(
     mintEvents: any[],
   ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -86,7 +120,7 @@ export class ElasticUpdatesEventsService {
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.addItemsToList(
-        this.redisClient,
+        this.rarityRedisClient,
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -95,5 +129,21 @@ export class ElasticUpdatesEventsService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+  }
+
+  async addCollectionsToTraitsQueue(
+    collectionTickers: string[],
+  ): Promise<void> {
+    if (collectionTickers?.length > 0) {
+      await this.redisCacheService.addItemsToList(
+        this.traitsRedisClient,
+        this.getTraitsQueueCacheKey(),
+        collectionTickers,
+      );
+    }
+  }
+
+  private getTraitsQueueCacheKey() {
+    return generateCacheKeyFromParams(cacheConfig.traitsQueueClientName);
   }
 }

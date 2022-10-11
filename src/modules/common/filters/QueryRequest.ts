@@ -1,4 +1,11 @@
-import { FiltersExpression, Sorting, Grouping, Operation, Sort } from './filtersTypes';
+import {
+  FiltersExpression,
+  Sorting,
+  Grouping,
+  Operation,
+  Sort,
+  Filter,
+} from './filtersTypes';
 import { AuctionCustomEnum, AuctionCustomFilter } from './AuctionCustomFilters';
 
 export class QueryRequest {
@@ -13,8 +20,12 @@ export class QueryRequest {
     Object.assign(this, init);
   }
 
-  getFilter(name: string): string | undefined {
-    const values = this.filters.filters.find(x => x.field === name)?.values;
+  getFilter(name: string): Filter | undefined {
+    return this.filters.filters.find((x) => x.field === name);
+  }
+
+  getFilterName(name: string): string | undefined {
+    const values = this.filters.filters.find((x) => x.field === name)?.values;
     if (!values || values.length === 0) {
       return undefined;
     }
@@ -30,7 +41,11 @@ export class QueryRequest {
     const result: Record<string, string> = {};
 
     for (const filter of this.filters.filters) {
-      if (!filter.values || filter.values.length === 0 || (filter.values.length === 1 && !filter.values[0])) {
+      if (
+        !filter.values ||
+        filter.values.length === 0 ||
+        (filter.values.length === 1 && !filter.values[0])
+      ) {
         continue;
       }
 
@@ -40,13 +55,17 @@ export class QueryRequest {
     return result;
   }
 
-  getRange(field: AuctionCustomEnum): { startPrice: string, endPrice: string } | undefined {
+  getRange(
+    field: AuctionCustomEnum,
+  ): { startPrice: string; endPrice: string } | undefined {
     const customFilters = this.customFilters;
     if (!customFilters) {
       return undefined;
     }
 
-    const customFilter = customFilters.find(x => x.field === field && x.op === Operation.BETWEEN);
+    const customFilter = customFilters.find(
+      (x) => x.field === field && x.op === Operation.BETWEEN,
+    );
     if (!customFilter) {
       return undefined;
     }
@@ -62,7 +81,7 @@ export class QueryRequest {
     };
   }
 
-  getSort(): { field: string, direction: Sort } | undefined {
+  getSort(): { field: string; direction: Sort } | undefined {
     if (!this.sorting || this.sorting.length === 0) {
       return undefined;
     }

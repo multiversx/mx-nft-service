@@ -14,14 +14,20 @@ export function getCollectionStats(
       a.collection AS endedIdentifier
     FROM orders o 
     LEFT JOIN auctions a ON o.auctionId = a.id 
-    WHERE a.collection  = '${identifier}' AND o.status = 'Bought' ${marketplaceKeyFilter}),
+    WHERE a.collection  = '${identifier}' AND o.status = 'Bought' ${getMarketplaceKeyFilter(
+    'o',
+    marketplaceKey,
+  )}),
 
     activeAuctions AS (SELECT MIN(if(o.priceAmountDenominated, o.priceAmountDenominated , a.minBidDenominated)) AS minPrice, 
     COUNT(DISTINCT(a.id)) AS activeAuctions,
     a.collection AS activeIdentifier
     FROM auctions a
     LEFT JOIN orders o ON o.auctionId = a.id 
-    WHERE a.collection  = '${identifier}' AND a.status = 'Running' ${marketplaceKeyFilter}) 
+    WHERE a.collection  = '${identifier}' AND a.status = 'Running' ${getMarketplaceKeyFilter(
+    'a',
+    marketplaceKey,
+  )}) 
 
     SELECT volumeTraded, saleAverage, maxPrice, auctionsEnded, activeAuctions, minPrice
     FROM (
@@ -29,4 +35,13 @@ export function getCollectionStats(
     LEFT JOIN activeAuctions aa ON aa.activeIdentifier = '${identifier}'
     ) temp
   `;
+}
+
+function getMarketplaceKeyFilter(
+  alias: string,
+  marketplaceKey: string,
+): string {
+  return marketplaceKey
+    ? `AND ${alias}.marketplaceKey = '${marketplaceKey}'`
+    : '';
 }

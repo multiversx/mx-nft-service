@@ -85,7 +85,7 @@ export class TagsService {
         this.redisClient,
         CacheInfo.AuctionTags.key,
         async () => await this.getAuctionTagsFromDb(),
-        5 * TimeConstants.oneMinute,
+        CacheInfo.AuctionTags.ttl,
       );
     }
   }

@@ -5,7 +5,7 @@ import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -71,7 +71,10 @@ export class RarityUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 50,
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToValidate,
+              ),
             });
 
           await this.elasticService.getScrollableList(
@@ -89,16 +92,14 @@ export class RarityUpdaterService {
             lastIndex + maxCollectionsToValidate,
           );
 
-          if (collectionsToValidate.length < maxCollectionsToValidate) {
+          if (collectionsToValidate.length !== 0) {
+            await this.validateTokenRarities(collectionsToValidate);
+            await this.setLastValidatedCollectionIndex(
+              lastIndex + collectionsToValidate.length,
+            );
+          } else {
             await this.setLastValidatedCollectionIndex(0);
-            return;
           }
-
-          await this.validateTokenRarities(collectionsToValidate);
-
-          await this.setLastValidatedCollectionIndex(
-            lastIndex + collectionsToValidate.length,
-          );
         },
         true,
       );
@@ -152,7 +153,10 @@ export class RarityUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 50,
+              size: Math.min(
+                constants.getCollectionsFromElasticBatchSize,
+                maxCollectionsToValidate,
+              ),
             });
 
           await this.elasticService.getScrollableList(
@@ -170,16 +174,14 @@ export class RarityUpdaterService {
             lastIndex + maxCollectionsToValidate,
           );
 
-          if (collectionsToValidate.length < maxCollectionsToValidate) {
+          if (collectionsToValidate.length !== 0) {
+            await this.validateTokenRarityFlags(collectionsToValidate);
+            await this.setLastFlagValidatedCollectionIndex(
+              lastIndex + collectionsToValidate.length,
+            );
+          } else {
             await this.setLastFlagValidatedCollectionIndex(0);
-            return;
           }
-
-          await this.validateTokenRarityFlags(collectionsToValidate);
-
-          await this.setLastFlagValidatedCollectionIndex(
-            lastIndex + collectionsToValidate.length,
-          );
         },
         true,
       );
@@ -234,7 +236,7 @@ export class RarityUpdaterService {
             )
             .withPagination({
               from: 0,
-              size: 100,
+              size: constants.getNftsFromElasticBatchSize,
             });
 
           await this.elasticService.getScrollableList(

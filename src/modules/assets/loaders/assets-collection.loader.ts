@@ -3,14 +3,14 @@ import { ElrondApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AssetsQuery } from '../assets-query';
-import { AssetsCollectionRedisHandler } from './assets-collection.redis-handler';
+import { AssetsCollectionsRedisHandler } from './assets-collection.redis-handler';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class AssetsCollectionsProvider extends BaseProvider<string> {
   constructor(
-    assetsRedisHandler: AssetsCollectionRedisHandler,
+    assetsRedisHandler: AssetsCollectionsRedisHandler,
     private apiService: ElrondApiService,
   ) {
     super(

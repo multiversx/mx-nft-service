@@ -15,7 +15,7 @@ import {
   SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
-import { CollectionsService } from '../nftCollections/collection.service';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 
 @Injectable()
 export class SearchService {
@@ -27,7 +27,7 @@ export class SearchService {
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-    private collectionsService: CollectionsService,
+    private collectionsGetterService: CollectionsGetterService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -143,7 +143,7 @@ export class SearchService {
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
     const [collections, count] =
-      await this.collectionsService.getOrSetFullCollections();
+      await this.collectionsGetterService.getOrSetFullCollections();
     let allResults = collections
       .filter(
         (x) =>

@@ -64,12 +64,12 @@ export function getDefaultAuctionsQuery(
 ) {
   let supplementalFilters = '';
 
-  const collection = queryRequest.getFilter('collection');
+  const collection = queryRequest.getFilterName('collection');
   if (collection) {
     supplementalFilters += ` AND a.collection = '${collection}'`;
   }
 
-  const marketplaceKey = queryRequest.getFilter('marketplaceKey');
+  const marketplaceKey = queryRequest.getFilterName('marketplaceKey');
   if (marketplaceKey) {
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
   }
@@ -250,4 +250,18 @@ export function getAuctionsOrderByNoBidsQuery() {
 		  WHERE	a.status = 'Running'
 		  GROUP BY a.id
 		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
+}
+
+export function getCurrentPaymentTokens(
+  marketplaceKey?: string,
+  collectionIdentifier?: string,
+) {
+  let filter = marketplaceKey
+    ? `AND a.marketplaceKey = '${marketplaceKey}'`
+    : '';
+  filter = `${filter} ${
+    collectionIdentifier ? `AND a.collection = '${collectionIdentifier}'` : ''
+  }`;
+  return `SELECT DISTINCT paymentToken, COUNT(a.paymentToken) AS count FROM auctions a 
+  WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken`;
 }
