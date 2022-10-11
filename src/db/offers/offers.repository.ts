@@ -14,8 +14,14 @@ export class OffersRepository extends Repository<OfferEntity> {
       .getManyAndCount();
   }
 
-  async saveOrder(order: OfferEntity) {
-    return await this.save(order);
+  async getOfferById(id: number): Promise<OfferEntity> {
+    return await this.findOne({
+      where: [{ id: id }],
+    });
+  }
+
+  async saveOffer(offer: OfferEntity) {
+    return await this.save(offer);
   }
 
   async updateOrderWithStatus(order: OfferEntity, status: OfferStatusEnum) {
