@@ -8,7 +8,7 @@ import { AssetsCollectionsRedisHandler } from './assets-collection.redis-handler
 @Injectable({
   scope: Scope.REQUEST,
 })
-export class AssetsCollectionsProvider extends BaseProvider<string> {
+export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
   constructor(
     assetsRedisHandler: AssetsCollectionsRedisHandler,
     private apiService: ElrondApiService,
@@ -22,8 +22,10 @@ export class AssetsCollectionsProvider extends BaseProvider<string> {
   async getData(identifiers: string[]) {
     const page = parseInt(identifiers[0].split('_')[1]);
     const size = parseInt(identifiers[0].split('_')[2]);
+    const ownerAddress = identifiers[0].split('_')[3];
     const nftsPromises = identifiers.map((identifier) =>
-      this.apiService.getNftsAndCount(
+      this.apiService.getNftsAndCountForAccount(
+        ownerAddress,
         new AssetsQuery()
           .addCollection(identifier.split('_')[0])
           .addPageSize(page, size)
@@ -35,7 +37,7 @@ export class AssetsCollectionsProvider extends BaseProvider<string> {
     const nftsPromisesResponse = await Promise.all(nftsPromises);
     let response: any = {};
     for (const [nfts, count] of nftsPromisesResponse) {
-      const key = `${nfts[0].collection}_${page}_${size}`;
+      const key = `${nfts[0].collection}_${page}_${size}_${ownerAddress}`;
       response[key] = { nfts: nfts, count: count };
     }
     return response;

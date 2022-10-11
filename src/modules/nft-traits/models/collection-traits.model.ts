@@ -1,4 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 import { NftTrait } from './nft-traits.model';
 
 @ObjectType()
@@ -12,6 +14,18 @@ export class AttributeSummary {
 
   constructor(init?: Partial<AttributeSummary>) {
     Object.assign(this, init);
+  }
+
+  isIdentical(attribute: AttributeSummary): boolean {
+    if (
+      this.value !== attribute.value ||
+      this.occurenceCount !== attribute.occurenceCount ||
+      this.occurencePercentage !== attribute.occurencePercentage
+    ) {
+      return false;
+    }
+
+    return true;
   }
 }
 
@@ -31,9 +45,12 @@ export class TraitSummary {
   }
 
   addTraitToAttributes(newTrait: NftTrait, collectionTotalSize: number): this {
-    let attribute = this.attributes.find((a) => a.value === newTrait.value);
+    let attribute = this.attributes?.find((a) => a.value === newTrait.value);
 
     if (!attribute) {
+      if (!this.attributes) {
+        this.attributes = [];
+      }
       this.attributes.push(
         new AttributeSummary({
           value: newTrait.value,
@@ -76,10 +93,44 @@ export class TraitSummary {
 
     return this;
   }
+
+  isIdentical(trait: TraitSummary) {
+    if (
+      this.name !== trait.name ||
+      this.occurenceCount !== trait.occurenceCount ||
+      this.occurencePercentage !== trait.occurencePercentage
+    ) {
+      return false;
+    }
+
+    if (this.attributes.length !== trait.attributes.length) {
+      return false;
+    }
+
+    for (const attribute of this.attributes) {
+      const correspondingAttribute = trait.attributes.find(
+        (a) => a.value === attribute.value,
+      );
+
+      if (
+        !correspondingAttribute ||
+        !attribute.isIdentical(correspondingAttribute)
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
+export type CollectionTraitSummaryDocument = CollectionTraitSummary & Document;
+
+@Schema()
 export class CollectionTraitSummary {
+  @Prop()
   identifier: string;
+  @Prop([TraitSummary])
   traitTypes: TraitSummary[];
 
   constructor(init?: Partial<CollectionTraitSummary>) {
@@ -97,11 +148,14 @@ export class CollectionTraitSummary {
     }
 
     for (const trait of nftTraits) {
-      let traitType = this.traitTypes.find((t) => t.name === trait.name);
+      let traitType = this.traitTypes?.find((t) => t.name === trait.name);
 
       if (traitType) {
         traitType.addTraitToAttributes(trait, collectionTotalSize);
       } else {
+        if (!this.traitTypes) {
+          this.traitTypes = [];
+        }
         this.traitTypes.push(
           new TraitSummary({
             name: trait.name,
@@ -175,4 +229,34 @@ export class CollectionTraitSummary {
     }
     return this;
   }
+
+  isIdentical(traitSummary: CollectionTraitSummary): boolean {
+    if (
+      this.identifier !== traitSummary.identifier ||
+      this.traitTypes.length !== traitSummary.traitTypes.length
+    ) {
+      return false;
+    }
+
+    for (const traitType of this.traitTypes) {
+      const correspondingTrait = traitSummary.traitTypes.find(
+        (t) => t.name === traitType.name,
+      );
+
+      if (!correspondingTrait || !traitType.isIdentical(correspondingTrait)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
+
+export const CollectionTraitSummarySchema = SchemaFactory.createForClass(
+  CollectionTraitSummary,
+).index(
+  {
+    identifier: 1,
+  },
+  { unique: true },
+);

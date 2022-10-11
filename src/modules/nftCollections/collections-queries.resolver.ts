@@ -26,6 +26,7 @@ import {
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { TraitSummary } from '../nft-traits/models/collection-traits.model';
+import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -35,6 +36,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     private artistAddressProvider: ArtistAddressProvider,
     private collectionAssetsCountProvider: CollectionAssetsCountProvider,
     private assetProvider: AssetsCollectionsProvider,
+    private assetByOwnerProvider: AssetsCollectionsForOwnerProvider,
     private onSaleAssetsCountProvider: OnSaleAssetsCountForCollectionProvider,
   ) {
     super();
@@ -138,11 +140,30 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     @Parent() collectionResponse: Collection,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
+    @Args({
+      name: 'filters',
+      type: () => CollectionsFilter,
+      nullable: true,
+    })
+    filters: CollectionsFilter,
   ): Promise<AssetsResponse> {
     const { collection } = collectionResponse;
     const { limit, offset } = pagination.pagingParams();
 
     if (!collection) return null;
+    if (filters?.ownerAddress) {
+      const assets = await this.assetByOwnerProvider.load(
+        `${collection}_${offset}_${limit}_${filters.ownerAddress}`,
+      );
+      const assetsValue = assets?.value;
+      return PageResponse.mapResponse<Asset>(
+        assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)),
+        pagination,
+        assetsValue?.count ?? 0,
+        offset,
+        limit,
+      );
+    }
     const assets = await this.assetProvider.load(
       `${collection}_${offset}_${limit}`,
     );

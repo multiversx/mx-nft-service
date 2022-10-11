@@ -64,7 +64,7 @@ export class Collection {
   social: CollectionSocial;
   @Field(() => Int)
   onSaleAssetsCount: number;
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   nftsCount: number;
   @Field(() => String)
   artistAddress: string;
@@ -111,6 +111,7 @@ export class Collection {
         collectionIdentifer: collectionApi.collection,
       }),
       artistFollowersCount: followersCount,
+      nftsCount: collectionApi.count,
     });
   }
 }

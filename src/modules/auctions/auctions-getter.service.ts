@@ -530,6 +530,13 @@ export class AuctionsGetterService {
         typeFilter.values.includes(x.type),
       );
     }
+
+    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    if (paymentTokenFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        paymentTokenFilter.values.includes(x.minBid?.token),
+      );
+    }
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,

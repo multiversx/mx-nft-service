@@ -146,7 +146,7 @@ export class AccountsStatsService {
   async getCollectionsCount(address: string): Promise<number> {
     try {
       return this.accountStatsCachingService.getCollectionsCount(address, () =>
-        this.apiService.getCollectionsForAddressCount(
+        this.apiService.getCollectionsForAddressWithNftsCount(
           address,
           '?type=SemiFungibleESDT,NonFungibleESDT',
         ),

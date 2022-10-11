@@ -19,6 +19,7 @@ import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { TraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
+import { getNftIdentifierByNonce } from 'src/utils/helpers';
 
 @Injectable()
 export class ElrondApiService {
@@ -260,6 +261,17 @@ export class ElrondApiService {
     ];
   }
 
+  async getNftsAndCountForAccount(
+    ownerAddress: string,
+    nftsQuery: string = '',
+    nftsCountQuery = '',
+  ): Promise<[Nft[], number]> {
+    return [
+      await this.getNftsForUser(ownerAddress, nftsQuery),
+      await this.getNftsForUserCount(ownerAddress, nftsCountQuery),
+    ];
+  }
+
   async getNftsCountForCollection(
     query: string = '',
     collection,
@@ -279,13 +291,23 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionsForAddress(
+  async getCollectionsForAddressWithRoles(
     address: string = '',
     query: string = '',
   ): Promise<CollectionApi[]> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddress.name,
+      this.getCollectionsForAddressWithRoles.name,
       `accounts/${address}/roles/collections${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithNfts(
+    address: string = '',
+    query: string = '',
+  ): Promise<CollectionApi[]> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithNfts.name,
+      `accounts/${address}/collections${query}`,
     );
   }
 
@@ -328,12 +350,22 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionsForAddressCount(
+  async getCollectionsForAddressWithNftsCount(
     address: string = '',
     query: string = '',
   ): Promise<number> {
     return await this.doGetGeneric(
-      this.getCollectionsForAddressCount.name,
+      this.getCollectionsForAddressWithNftsCount.name,
+      `accounts/${address}/collections/count${query}`,
+    );
+  }
+
+  async getCollectionsForAddressWithRolesCount(
+    address: string = '',
+    query: string = '',
+  ): Promise<number> {
+    return await this.doGetGeneric(
+      this.getCollectionsForAddressWithRolesCount.name,
       `accounts/${address}/roles/collections/count${query}`,
     );
   }
@@ -376,46 +408,31 @@ export class ElrondApiService {
     fields: string = 'identifier,nonce,timestamp',
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
-    let additionalBatchSize: number = 0;
-    let currentBatchExpectedSize: number;
 
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    let smallestTimestampInLastBatch: number = undefined;
-    let biggestNonceInLastBatch: number = undefined;
-
     do {
-      currentBatchExpectedSize = batchSize + additionalBatchSize;
+      let identifiers: string[] = [];
+
+      const start = nfts.length + 1;
+      const end = start + batchSize - 1;
+      for (let i = start; i <= end; i++) {
+        identifiers.push(getNftIdentifierByNonce(collection, i));
+      }
 
       let query = new AssetsQuery()
         .addCollection(collection)
-        .addPageSize(0, currentBatchExpectedSize)
+        .addPageSize(0, batchSize)
+        .addIdentifiers(identifiers)
         .addQuery(`&fields=${fields}`);
-      if (smallestTimestampInLastBatch) {
-        query = query.addBefore(smallestTimestampInLastBatch);
-      }
 
       const url = `nfts${query.build()}`;
 
       batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
 
-      if (batch?.length !== 0) {
-        nfts = nfts.concat(batch);
-
-        smallestTimestampInLastBatch = batch[batch.length - 1].timestamp;
-
-        const biggestNonceInCurrentBatch: number = batch[0].nonce;
-
-        if (biggestNonceInLastBatch === biggestNonceInCurrentBatch) {
-          additionalBatchSize += Math.max(batchSize / 2, 1);
-        } else if (additionalBatchSize > 0) {
-          additionalBatchSize = 0;
-        } else {
-          biggestNonceInLastBatch = biggestNonceInCurrentBatch;
-        }
-      }
-    } while (batch?.length === currentBatchExpectedSize);
+      nfts = nfts.concat(batch);
+    } while (batch.length > 0);
 
     return this.filterUniqueNftsByNonce(nfts);
   }

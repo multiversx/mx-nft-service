@@ -52,9 +52,25 @@ export class CollectionsFilter {
 
   @Field(() => Boolean, {
     nullable: true,
+    description: 'Flag for collections where owner address has nfts',
+  })
+  withNfts: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
     description: 'Flag for active last 30 days',
   })
   activeLast30Days: boolean;
+}
+@InputType()
+export class AssetsCollectionFilter {
+  @IsOptional()
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, {
+    nullable: true,
+    description: 'The owner of the collection',
+  })
+  ownerAddress: string;
 }
 
 export enum CollectionsSortingEnum {
