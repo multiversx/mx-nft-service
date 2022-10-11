@@ -26,9 +26,7 @@ export class NftTraitsService {
     private readonly elasticService: ElrondElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly logger: Logger,
-  ) {
-    this.setElasticTraitMappings();
-  }
+  ) {}
 
   async updateCollectionTraits(collectionTicker: string): Promise<boolean> {
     const [
@@ -526,45 +524,6 @@ export class NftTraitsService {
     }
 
     return encodedNftValues;
-  }
-
-  async setElasticTraitMappings(): Promise<void> {
-    await Locker.lock(
-      'setElasticTraitMappings',
-      async () => {
-        try {
-          await this.elasticService.putMappings(
-            'tokens',
-            this.elasticService.buildPutMultipleMappingsBody([
-              {
-                key: 'nft_traitSummary.attributes.occurencePercentage',
-                value: 'float',
-              },
-              {
-                key: 'nft_traitSummary.attributes.occurenceCount',
-                value: 'long',
-              },
-              {
-                key: 'nft_traitSummary.occurencePercentage',
-                value: 'float',
-              },
-              {
-                key: 'nft_traitSummary.occurenceCount',
-                value: 'long',
-              },
-            ]),
-          );
-        } catch (error) {
-          this.logger.error(
-            'Error when trying to map Elastic types for trait variables',
-            {
-              path: `${NftTraitsService.name}.${this.setElasticTraitMappings.name}`,
-            },
-          );
-        }
-      },
-      false,
-    );
   }
 
   traitToBase64Encoded(trait: NftTrait): string {
