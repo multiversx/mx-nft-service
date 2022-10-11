@@ -5,9 +5,9 @@ import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
-export class AssetsCollectionsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
+export class AssetsCollectionsForOwnerRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'asset_collection');
+    super(redisCacheService, 'asset_collection_owner');
   }
 
   mapValues(
@@ -28,7 +28,7 @@ export class AssetsCollectionsRedisHandler extends RedisKeyValueDataloaderHandle
 
     response = [
       ...response,
-      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
+      new RedisValue({ values: finalNfts, ttl: 5 * TimeConstants.oneMinute }),
     ];
     return response;
   }

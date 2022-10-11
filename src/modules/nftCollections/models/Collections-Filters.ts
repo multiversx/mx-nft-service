@@ -62,6 +62,16 @@ export class CollectionsFilter {
   })
   activeLast30Days: boolean;
 }
+@InputType()
+export class AssetsCollectionFilter {
+  @IsOptional()
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, {
+    nullable: true,
+    description: 'The owner of the collection',
+  })
+  ownerAddress: string;
+}
 
 export enum CollectionsSortingEnum {
   Verified = 'Verified',

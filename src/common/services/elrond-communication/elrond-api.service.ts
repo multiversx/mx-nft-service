@@ -260,6 +260,17 @@ export class ElrondApiService {
     ];
   }
 
+  async getNftsAndCountForAccount(
+    ownerAddress: string,
+    nftsQuery: string = '',
+    nftsCountQuery = '',
+  ): Promise<[Nft[], number]> {
+    return [
+      await this.getNftsForUser(ownerAddress, nftsQuery),
+      await this.getNftsForUserCount(ownerAddress, nftsCountQuery),
+    ];
+  }
+
   async getNftsCountForCollection(
     query: string = '',
     collection,
@@ -344,7 +355,7 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getCollectionsForAddressWithNftsCount.name,
-      `accounts/${address}/roles/collections/count${query}`,
+      `accounts/${address}/collections/count${query}`,
     );
   }
 
@@ -354,7 +365,7 @@ export class ElrondApiService {
   ): Promise<number> {
     return await this.doGetGeneric(
       this.getCollectionsForAddressWithRolesCount.name,
-      `accounts/${address}/collections/count${query}`,
+      `accounts/${address}/roles/collections/count${query}`,
     );
   }
 

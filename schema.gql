@@ -159,6 +159,11 @@ type AssetPageInfo {
   startCursor: String
 }
 
+input AssetsCollectionFilter {
+  """The owner of the collection"""
+  ownerAddress: String
+}
+
 input AssetsFilter {
   collection: String
 
@@ -383,7 +388,7 @@ type Collection {
   artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
-  assets(pagination: ConnectionArgs): AssetsResponse
+  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -713,6 +718,8 @@ enum MediaTypeEnum {
   mp3
   mp4
   png
+  svg
+  svgXml
   wav
   webm
   webp

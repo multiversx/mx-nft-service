@@ -18,11 +18,13 @@ import { ElrondCommunicationModule } from 'src/common/services/elrond-communicat
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
 import { ArtistAddressProvider } from '../artists/artists.loader';
-import { AssetsCollectionRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
+import { AssetsCollectionsRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { CollectionsGetterService } from './collections-getter.service';
+import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
+import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-collection-for-owner.redis-handler';
 
 @Module({
   providers: [
@@ -46,7 +48,9 @@ import { CollectionsGetterService } from './collections-getter.service';
     ArtistAddressProvider,
     ArtistAddressRedisHandler,
     AssetsCollectionsProvider,
-    AssetsCollectionRedisHandler,
+    AssetsCollectionsRedisHandler,
+    AssetsCollectionsForOwnerProvider,
+    AssetsCollectionsForOwnerRedisHandler,
     SmartContractArtistsService,
   ],
   imports: [
