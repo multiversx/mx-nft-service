@@ -43,6 +43,7 @@ export class NftTraitsService {
         `${collectionTicker} - Collection NFTs count bigger than threshold`,
         {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+          nftsCount: nftsCount,
         },
       );
       return false;
