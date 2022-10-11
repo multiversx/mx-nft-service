@@ -7,6 +7,7 @@ import {
   ChangedEvent,
 } from '../cache-invalidation/events/changed.event';
 import { MintEvent } from '../entities/auction/mint.event';
+import { SendOfferEvent } from '../entities/auction/sendOffer.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
 

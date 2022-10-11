@@ -38,6 +38,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
+import { OffersModuleGraph } from 'src/modules/offers/offers.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => MxCommunicationModule),
+    forwardRef(() => OffersModuleGraph),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     NftScamModule,
