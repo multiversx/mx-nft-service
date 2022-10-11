@@ -19,7 +19,6 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
-import { DocumentDatabaseModule } from 'src/document-db/document-db.module';
 import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
 import {
   CollectionTraitSummary,
@@ -28,6 +27,8 @@ import {
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CommonModule } from 'src/common.module';
+import { ApiConfigService } from 'src/utils/api.config.service';
 
 @Global()
 @Module({
@@ -47,7 +48,17 @@ import { MongooseModule } from '@nestjs/mongoose';
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
     CacheEventsPublisherModule,
-    DocumentDatabaseModule,
+    MongooseModule.forRootAsync({
+      imports: [CommonModule],
+      useFactory: async (configService: ApiConfigService) => ({
+        uri: `${configService.getNftTraitSummariesDbUrl()}`,
+        dbName: configService.getNftTraitSummariesDatabase(),
+        user: configService.getNftTraitSummariesUsername(),
+        pass: configService.getNftTraitSummariesPassword(),
+        tlsAllowInvalidCertificates: true,
+      }),
+      inject: [ApiConfigService],
+    }),
     MongooseModule.forFeature([
       {
         name: CollectionTraitSummary.name,

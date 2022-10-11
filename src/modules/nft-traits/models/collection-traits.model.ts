@@ -126,7 +126,7 @@ export class TraitSummary {
 
 export type CollectionTraitSummaryDocument = CollectionTraitSummary & Document;
 
-@Schema()
+@Schema({ collection: 'nft_trait_summaries' })
 export class CollectionTraitSummary {
   @Prop()
   identifier: string;
