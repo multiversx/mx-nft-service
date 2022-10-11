@@ -132,6 +132,13 @@ export class CollectionTraitSummary {
   identifier: string;
   @Prop([TraitSummary])
   traitTypes: TraitSummary[];
+  @Prop()
+  lastUpdated?: number;
+
+  updateTimestamp(): this {
+    this.lastUpdated = new Date().getTime();
+    return this;
+  }
 
   constructor(init?: Partial<CollectionTraitSummary>) {
     Object.assign(this, init);

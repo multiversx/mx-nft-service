@@ -946,6 +946,7 @@ export class PersistenceService {
   async saveOrUpdateTraitSummary(
     traitSummary: CollectionTraitSummary,
   ): Promise<void> {
+    traitSummary = traitSummary.updateTimestamp();
     await this.traitRepositoryService
       .findOneAndUpdate(
         {
