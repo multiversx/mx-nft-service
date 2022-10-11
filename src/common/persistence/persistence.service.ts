@@ -39,6 +39,7 @@ import {
   NotificationEntity,
   NotificationsRepository,
 } from 'src/db/notifications';
+import { OfferEntity, OffersRepository } from 'src/db/offers';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
@@ -68,6 +69,7 @@ export class PersistenceService {
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
+    private readonly offersRepository: OffersRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -942,6 +944,20 @@ export class PersistenceService {
         marketplaceKey,
         collectionIdentifier,
       ),
+    );
+  }
+
+  async getOfferById(id: number): Promise<OfferEntity> {
+    return await this.execute(
+      this.getOfferById.name,
+      this.offersRepository.getOfferById(id),
+    );
+  }
+
+  async saveOffer(offer: OfferEntity): Promise<OfferEntity> {
+    return await this.execute(
+      this.saveOffer.name,
+      this.offersRepository.saveOffer(offer),
     );
   }
 

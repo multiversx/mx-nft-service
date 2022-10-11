@@ -4,6 +4,7 @@ export enum AuctionEventEnum {
   BidEvent = 'bid',
   BuySftEvent = 'buySft',
   WithdrawEvent = 'withdraw',
+  SendOffer = 'sendOffer',
 }
 
 export enum ExternalAuctionEventEnum {
