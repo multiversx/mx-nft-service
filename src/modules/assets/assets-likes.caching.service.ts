@@ -16,7 +16,6 @@ export class AssetsLikesCachingService {
   private readonly ttl = 6 * TimeConstants.oneHour;
 
   constructor(
-    @Inject()
     private isAssetLikedRedisHandler: IsAssetLikedRedisHandler,
     private redisCacheService: RedisCacheService,
   ) {
