@@ -30,6 +30,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
 import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
+import { OffersModuleGraph } from 'src/modules/offers/offers.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
+    forwardRef(() => OffersModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
