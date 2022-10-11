@@ -576,6 +576,15 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+input CreateOfferArgs {
+  deadline: String!
+  identifier: String!
+  paymentAmount: String!
+  paymentToken: String!
+  paymentTokenNonce: Int = 0
+  quantity: String = "1"
+}
+
 input CurrentPaymentTokensFilters {
   collectionIdentifier: String
   marketplaceKey: String
@@ -758,6 +767,7 @@ type MintPrice {
 }
 
 type Mutation {
+  acceptOffer(offerId: Int!): TransactionNode!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -776,6 +786,7 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  sendOffer(input: CreateOfferArgs!): TransactionNode!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
@@ -790,6 +801,7 @@ type Mutation {
   validateCollectionRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
+  withdrawOffer(offerId: Int!): TransactionNode!
 }
 
 input MyClaimableAuctionsFilters {
@@ -845,7 +857,7 @@ type NotificationsResponse {
 }
 
 type Offer {
-  asset: Asset
+  asset: Asset!
   boughtTokensNo: String
   creationDate: Int
   endDate: Int
@@ -858,10 +870,28 @@ type Offer {
   status: OfferStatusEnum!
 }
 
+type OfferEdge {
+  cursor: String
+  node: Offer
+}
+
+type OfferPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 enum OfferStatusEnum {
   Active
   Bought
   Closed
+}
+
+type OffersResponse {
+  edges: [OfferEdge!]
+  pageData: PageData
+  pageInfo: OfferPageInfo
 }
 
 enum Operation {

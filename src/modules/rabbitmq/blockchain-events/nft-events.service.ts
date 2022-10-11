@@ -2,6 +2,7 @@ import { ElrondApiService } from 'src/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
+import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
 import {
   AuctionEventEnum,
@@ -18,6 +19,8 @@ import { Marketplace } from 'src/modules/marketplaces/models';
 import { NotificationStatusEnum } from 'src/modules/notifications/models';
 import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { OfferStatusEnum } from 'src/modules/offers/models';
+import { OffersService } from 'src/modules/offers/offers.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
@@ -33,6 +36,7 @@ import {
   AuctionTokenEvent,
 } from '../entities/auction';
 import { MintEvent } from '../entities/auction/mint.event';
+import { SendOfferEvent } from '../entities/auction/sendOffer.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
 
@@ -42,6 +46,7 @@ export class NftEventsService {
   constructor(
     private auctionsService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
+    private offersService: OffersService,
     private ordersService: OrdersService,
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
@@ -246,6 +251,24 @@ export class NftEventsService {
               auctionTokenMarketplace,
             );
           }
+          break;
+        case AuctionEventEnum.SendOffer:
+          const sendOffer = new SendOfferEvent(event);
+          const topicsSendOffer = sendOffer.getTopics();
+          const sendOfferMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsSendOffer.collection,
+              sendOffer.getAddress(),
+            );
+          await this.offersService.saveOffer(
+            OfferEntity.fromEventTopics(
+              topicsSendOffer,
+              hash,
+              sendOfferMarketplace.key,
+              OfferStatusEnum.Active,
+            ),
+          );
+
           break;
       }
     }
