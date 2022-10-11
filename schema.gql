@@ -585,18 +585,9 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
-<<<<<<< HEAD
 input CurrentPaymentTokensFilters {
   collectionIdentifier: String
   marketplaceKey: String
-=======
-input CreateOfferArgs {
-  deadline: String!
-  identifier: String!
-  paymentAmount: String!
-  paymentToken: String!
-  paymentTokenNonce: Int = 0
->>>>>>> Add offers functionality first commit
 }
 
 type ExploreCollectionsStats {
@@ -805,7 +796,6 @@ type Mutation {
   clearNftScamInfo(identifier: String!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
-  createOffer(input: CreateOfferArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
@@ -881,6 +871,26 @@ type NotificationsResponse {
   edges: [NotificationEdge!]
   pageData: PageData
   pageInfo: NotificationPageInfo
+}
+
+type Offer {
+  asset: Asset
+  boughtTokensNo: String
+  creationDate: Int
+  endDate: Int
+  from: Account
+  id: ID!
+  identifier: String!
+  marketplaceKey: String!
+  ownerAddress: String!
+  price: Price!
+  status: OfferStatusEnum!
+}
+
+enum OfferStatusEnum {
+  Active
+  Bought
+  Closed
 }
 
 enum Operation {
