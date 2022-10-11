@@ -71,7 +71,7 @@
     "getTokensFromApiBatchSize": 100,
     "getCollectionsFromElasticBatchSize": 100,
     "getNftsFromElasticBatchSize": 100,
-    "maxCollectionNftsCountThreshold": 100000
+    "nftsCountThresholdForTraitAndRarityIndexing": 100000
   },
   "genericDescriptions": {
     "forBigCollections": [

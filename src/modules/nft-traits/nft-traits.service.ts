@@ -32,7 +32,7 @@ export class NftTraitsService {
     const nftsCount = await this.apiService.getCollectionNftsCount(
       collectionTicker,
     );
-    if (nftsCount > constants.maxCollectionNftsCountThreshold) {
+    if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
       await this.persistenceService.saveOrUpdateTraitSummary(
         new CollectionTraitSummary({
           identifier: collectionTicker,
