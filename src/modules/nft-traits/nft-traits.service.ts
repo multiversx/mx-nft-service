@@ -29,6 +29,25 @@ export class NftTraitsService {
   ) {}
 
   async updateCollectionTraits(collectionTicker: string): Promise<boolean> {
+    const nftsCount = await this.apiService.getCollectionNftsCount(
+      collectionTicker,
+    );
+    if (nftsCount > constants.maxCollectionNftsCountThreshold) {
+      await this.persistenceService.saveOrUpdateTraitSummary(
+        new CollectionTraitSummary({
+          identifier: collectionTicker,
+          traitTypes: [],
+        }),
+      );
+      this.logger.log(
+        `${collectionTicker} - Collection NFTs count bigger than threshold`,
+        {
+          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+        },
+      );
+      return false;
+    }
+
     const [
       nftsFromApi,
       encodedNftValuesFromElastic,
@@ -39,6 +58,9 @@ export class NftTraitsService {
         this.getAllEncodedNftValuesFromElastic(collectionTicker),
         this.getCollectionTraitsFromDb(collectionTicker),
       ]);
+
+    console.log(nftsFromApi.length);
+    console.log(encodedNftValuesFromElastic.length);
 
     if (nftsFromApi.length === 0) {
       await this.persistenceService.saveOrUpdateTraitSummary(
