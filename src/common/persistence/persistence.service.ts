@@ -946,15 +946,17 @@ export class PersistenceService {
   async saveOrUpdateTraitSummary(
     traitSummary: CollectionTraitSummary,
   ): Promise<void> {
-    try {
-      await this.traitRepositoryService.findOneAndUpdate(
+    await this.traitRepositoryService
+      .findOneAndUpdate(
         {
           identifier: traitSummary.identifier,
         },
         traitSummary,
-      );
-    } catch (error) {
-      await this.traitRepositoryService.create(traitSummary);
-    }
+      )
+      .then(async (data) => {
+        if (!data) {
+          await this.traitRepositoryService.create(traitSummary);
+        }
+      });
   }
 }
