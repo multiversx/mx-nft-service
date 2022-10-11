@@ -543,7 +543,7 @@ export class NftRarityService {
               },
               {
                 key: 'nft_rarity_rank',
-                value: 'float',
+                value: 'long',
               },
             ]),
           );
