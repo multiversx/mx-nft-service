@@ -712,6 +712,8 @@ enum MediaTypeEnum {
   mp3
   mp4
   png
+  svg
+  svgXml
   wav
   webm
   webp

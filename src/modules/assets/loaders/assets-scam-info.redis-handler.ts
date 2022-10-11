@@ -17,9 +17,10 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key][0]?.scamInfo
-          : { key: item.key };
+        item.value =
+          assetsIdentifiers && assetsIdentifiers[item.key]
+            ? assetsIdentifiers[item.key][0]?.scamInfo
+            : { key: item.key };
         redisValues.push(item);
       }
     }

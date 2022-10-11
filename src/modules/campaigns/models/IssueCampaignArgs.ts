@@ -119,6 +119,8 @@ export enum MediaTypeEnum {
   jpg = 'image/jpg',
   gif = 'image/gif',
   webp = 'image/webp',
+  svg = 'image/svg',
+  svgXml = 'image/svg+xml',
 
   aac = 'audio/aac',
   flac = 'audio/flac',
