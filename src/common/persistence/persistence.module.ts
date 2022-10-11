@@ -19,8 +19,15 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
+import { DocumentDatabaseModule } from 'src/document-db/document-db.module';
+import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
+import {
+  CollectionTraitSummary,
+  CollectionTraitSummarySchema,
+} from 'src/modules/nft-traits/models/collection-traits.model';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Global()
 @Module({
@@ -40,12 +47,20 @@ import { PersistenceService } from './persistence.service';
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
     CacheEventsPublisherModule,
+    DocumentDatabaseModule,
+    MongooseModule.forFeature([
+      {
+        name: CollectionTraitSummary.name,
+        schema: CollectionTraitSummarySchema,
+      },
+    ]),
   ],
   providers: [
     PersistenceService,
     AccountStatsRepository,
     CollectionStatsRepository,
     AuctionsRepository,
+    TraitRepositoryService,
   ],
   exports: [PersistenceService],
 })
