@@ -67,7 +67,9 @@ type Asset {
   artist: Account
   attributes: String!
 
-  """This will return only the running query!"""
+  """
+  This will return only the running query!
+  """
   auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
   branding: CollectionBranding
@@ -160,7 +162,9 @@ type AssetPageInfo {
 }
 
 input AssetsCollectionFilter {
-  """The owner of the collection"""
+  """
+  The owner of the collection
+  """
   ownerAddress: String
 }
 
@@ -168,7 +172,9 @@ input AssetsFilter {
   artistAddress: String
   collection: String
 
-  """This will work only with an owner address"""
+  """
+  This will work only with an owner address
+  """
   collections: [String!]
   creatorAddress: String
   identifier: String
@@ -286,10 +292,14 @@ input BidActionArgs {
 }
 
 input BuyRandomNftActionArgs {
-  """The campaign id where the user wants to buy the nft/s"""
+  """
+  The campaign id where the user wants to buy the nft/s
+  """
   campaignId: String!
 
-  """The smart contract address of the campaign"""
+  """
+  The smart contract address of the campaign
+  """
   minterAddress: String!
 
   """
@@ -297,10 +307,14 @@ input BuyRandomNftActionArgs {
   """
   price: String!
 
-  """The number of nfts the user wants to buy"""
+  """
+  The number of nfts the user wants to buy
+  """
   quantity: String
 
-  """The tier name on which the user wants to buy the nft"""
+  """
+  The tier name on which the user wants to buy the nft
+  """
   tier: String!
 }
 
@@ -333,7 +347,9 @@ type Campaign {
   totalNfts: Int!
   verified: Boolean!
 
-  """This is the timestamp when the whitelist period expires"""
+  """
+  This is the timestamp when the whitelist period expires
+  """
   whitelistExpire: Int!
 }
 
@@ -394,8 +410,13 @@ type Collection {
   artistAddress: String!
   artistFollowersCount: Int!
 
-  """This will return only the first 10 assets"""
-  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
+  """
+  This will return only the first 10 assets
+  """
+  assets(
+    filters: AssetsCollectionFilter
+    pagination: ConnectionArgs
+  ): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -511,29 +532,45 @@ input CollectionStatsFilter {
 }
 
 input CollectionsFilter {
-  """Flag for active last 30 days"""
+  """
+  Flag for active last 30 days
+  """
   activeLast30Days: Boolean
 
-  """The actual artist of the collection"""
+  """
+  The actual artist of the collection
+  """
   artistAddress: String
 
-  """Flag for can create or not on collection"""
+  """
+  Flag for can create or not on collection
+  """
   canCreate: Boolean
 
-  """Collection identifier"""
+  """
+  Collection identifier
+  """
   collection: String
 
-  """The user that has create role"""
+  """
+  The user that has create role
+  """
   creatorAddress: String
 
-  """The owner of the collection"""
+  """
+  The owner of the collection
+  """
   ownerAddress: String
   type: NftTypeEnum
 
-  """Flag for verified collections"""
+  """
+  Flag for verified collections
+  """
   verified: Boolean
 
-  """Flag for collections where owner address has nfts"""
+  """
+  Flag for collections where owner address has nfts
+  """
   withNfts: Boolean
 }
 
@@ -544,16 +581,24 @@ enum CollectionsSortingEnum {
 }
 
 input ConnectionArgs {
-  """Paginate after opaque cursor"""
+  """
+  Paginate after opaque cursor
+  """
   after: String
 
-  """Paginate before opaque cursor"""
+  """
+  Paginate before opaque cursor
+  """
   before: String
 
-  """Paginate first"""
+  """
+  Paginate first
+  """
   first: Int = 10
 
-  """Paginate last"""
+  """
+  Paginate last
+  """
   last: Int
 }
 
@@ -575,6 +620,15 @@ input CreateNftArgs {
   name: String!
   quantity: String = "1"
   royalties: String = "0"
+}
+
+input CreateOfferArgs {
+  deadline: String!
+  identifier: String!
+  paymentAmount: String!
+  paymentToken: String!
+  paymentTokenNonce: Int = 0
+  quantity: String = "1"
 }
 
 input CurrentPaymentTokensFilters {
@@ -646,10 +700,14 @@ input HandleQuantityArgs {
 }
 
 input HistoryPagination {
-  """Paginate first"""
+  """
+  Paginate first
+  """
   first: Int = 10
 
-  """Timestamp from where to start"""
+  """
+  Timestamp from where to start
+  """
   timestamp: Int
 }
 
@@ -759,6 +817,7 @@ type MintPrice {
 }
 
 type Mutation {
+  acceptOffer(offerId: Int!): TransactionNode!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -778,7 +837,12 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
-  setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
+  setNftScamInfo(
+    identifier: String!
+    info: String!
+    type: ScamInfoTypeEnum!
+  ): Boolean!
+  sendOffer(input: CreateOfferArgs!): TransactionNode!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
@@ -790,6 +854,7 @@ type Mutation {
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
+  withdrawOffer(offerId: Int!): TransactionNode!
 }
 
 input MyClaimableAuctionsFilters {
@@ -845,7 +910,7 @@ type NotificationsResponse {
 }
 
 type Offer {
-  asset: Asset
+  asset: Asset!
   boughtTokensNo: String
   creationDate: Int
   endDate: Int
@@ -858,10 +923,28 @@ type Offer {
   status: OfferStatusEnum!
 }
 
+type OfferEdge {
+  cursor: String
+  node: Offer
+}
+
+type OfferPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
 enum OfferStatusEnum {
   Active
   Bought
   Closed
+}
+
+type OffersResponse {
+  edges: [OfferEdge!]
+  pageData: PageData
+  pageInfo: OfferPageInfo
 }
 
 enum Operation {
@@ -1000,8 +1083,15 @@ enum Privacy {
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
   artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
-  assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
-  assets(filters: AssetsFilter, pagination: ConnectionArgs, sorting: AssetsSortingEnum): AssetsResponse!
+  assetHistory(
+    filters: AssetHistoryFilter!
+    pagination: HistoryPagination
+  ): AssetHistoryLogResponse!
+  assets(
+    filters: AssetsFilter
+    pagination: ConnectionArgs
+    sorting: AssetsSortingEnum
+  ): AssetsResponse!
   auctions(
     customFilters: [AuctionCustomFilter]
 
@@ -1017,22 +1107,49 @@ type Query {
     """
     sorting: [Sorting!]
   ): AuctionResponse!
-  auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
-  campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
+  auctionsSortByBids(
+    filters: FiltersExpression
+    grouping: Grouping
+    pagination: ConnectionArgs
+  ): AuctionResponse!
+  campaigns(
+    filters: CampaignsFilter
+    pagination: ConnectionArgs
+  ): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
-  collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
+  collections(
+    filters: CollectionsFilter
+    pagination: ConnectionArgs
+    sorting: CollectionsSortingEnum
+  ): CollectionResponse!
   currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
   exploreCollectionsStats: ExploreCollectionsStats!
   exploreNftsStats: ExploreNftsStats!
   exploreStats: ExploreStats!
-  featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
+  featuredCollections(
+    filters: FeaturedCollectionsFilter
+    pagination: ConnectionArgs
+  ): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   isWhitelisted: Boolean!
-  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
-  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
+  marketplaces(
+    filters: MarketplaceFilters
+    pagination: ConnectionArgs
+  ): MarketplacesResponse!
+  myClaimableAuctions(
+    filters: MyClaimableAuctionsFilters
+    pagination: ConnectionArgs
+  ): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
-  notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
-  orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
+  notifications(
+    filters: NotificationsFilters
+    pagination: ConnectionArgs
+  ): NotificationsResponse!
+  orders(
+    filters: FiltersExpression
+    pagination: ConnectionArgs
+    sorting: [Sorting!]
+  ): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange(filters: TokenFilter): PriceRange!
   primarySale(filters: PrimarySaleFilter!): PrimarySale!
@@ -1220,5 +1337,7 @@ input TransferNftCreateRoleArgs {
   ownerAddress: String!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload

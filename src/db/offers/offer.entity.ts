@@ -1,9 +1,12 @@
 import { OfferStatusEnum } from 'src/modules/offers/models';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 
 @Entity('offers')
+@Unique('OfferEntity_UQ_Marketplace', ['marketplaceOfferId', 'marketplaceKey'])
 export class OfferEntity extends BaseEntity {
+  @Column()
+  marketplaceOfferId: number;
   @Column({ length: 20 })
   priceToken: string;
 
@@ -29,7 +32,7 @@ export class OfferEntity extends BaseEntity {
   identifier: string;
 
   @Column({ length: 20 })
-  @Index('auction_collection')
+  @Index('offer_collection')
   collection: string;
 
   @Column({ nullable: true, length: 62 })
@@ -45,5 +48,38 @@ export class OfferEntity extends BaseEntity {
   constructor(init?: Partial<OfferEntity>) {
     super();
     Object.assign(this, init);
+  }
+
+  static fromEventTopics(
+    offerEventTopics: {
+      offerOwner: string;
+      collection: string;
+      nonce: string;
+      offerId: number;
+      nrOfferTokens: number;
+      paymentTokenIdentifier: string;
+      paymentTokenNonce: number;
+      paymentAmount: string;
+      startdate: string;
+      enddate: string;
+    },
+    blockHash: string,
+    marketplaceKey: string,
+    status: OfferStatusEnum,
+  ): OfferEntity {
+    if (!offerEventTopics) return null;
+    return new OfferEntity({
+      blockHash: blockHash,
+      boughtTokensNo: offerEventTopics.nrOfferTokens.toString(),
+      collection: offerEventTopics.collection,
+      identifier: `${offerEventTopics.collection}-${offerEventTopics.nonce}`,
+      marketplaceKey: marketplaceKey,
+      marketplaceOfferId: offerEventTopics.offerId,
+      ownerAddress: offerEventTopics.offerOwner,
+      priceAmount: offerEventTopics.paymentAmount,
+      priceNonce: offerEventTopics.paymentTokenNonce,
+      priceToken: offerEventTopics.paymentTokenIdentifier,
+      status: status,
+    });
   }
 }

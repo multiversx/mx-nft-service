@@ -9,6 +9,7 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { CommonModule } from 'src/common.module';
 import { MarketplaceProvider } from './loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
+import { OffersModuleGraph } from '../offers/offers.module';
 
 @Module({
   providers: [
@@ -24,6 +25,7 @@ import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
     ElrondCommunicationModule,
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
+    forwardRef(() => OffersModuleGraph),
   ],
   exports: [MarketplacesService],
 })

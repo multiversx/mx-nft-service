@@ -119,6 +119,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     AssetsSupplyLoader,
     AssetScamInfoProvider,
     AssetsRedisHandler,
+    AssetsProvider,
   ],
 })
 export class AssetsModuleGraph {}

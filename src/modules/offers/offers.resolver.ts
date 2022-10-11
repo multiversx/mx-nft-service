@@ -9,7 +9,6 @@ import {
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Auction } from '../auctions/models';
-import { OffersService } from './offers.service';
 import {
   CreateOfferArgs,
   CreateOfferRequest,
@@ -18,21 +17,20 @@ import {
 } from './models';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
-import { AuctionProvider, NftMarketplaceAbiService } from '../auctions';
+import { NftMarketplaceAbiService } from '../auctions';
 import { Account } from '../account-stats/models';
 import { FiltersExpression, Sorting } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
-import { QueryRequest } from '../common/filters/QueryRequest';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { User } from '../auth/user';
 import { TransactionNode } from '../common/transaction';
 import { AssetsProvider } from '../assets';
+import { Asset } from '../assets/models';
 
 @Resolver(() => Offer)
 export class OffersResolver extends BaseResolver(Offer) {
   constructor(
-    private ordersService: OffersService,
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
     private nftAbiService: NftMarketplaceAbiService,
@@ -71,7 +69,7 @@ export class OffersResolver extends BaseResolver(Offer) {
     return Account.fromEntity(account?.value ?? null, ownerAddress);
   }
 
-  @ResolveField('asset', () => Auction)
+  @ResolveField('asset', () => Asset)
   async auction(@Parent() order: Offer) {
     const { identifier } = order;
     const auctions = await this.assetsProvider.load(identifier);
@@ -93,19 +91,18 @@ export class OffersResolver extends BaseResolver(Offer) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async withdrawOffer(
-    @Args({ name: 'offerId', type: () => Int }) auctionId: number,
+    @Args({ name: 'offerId', type: () => Int }) offerId: number,
     @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(user.publicKey, auctionId);
+    return await this.nftAbiService.withdraw(user.publicKey, offerId);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async acceptOffer(
-    @Args('input', { type: () => CreateOfferArgs }) input: CreateOfferArgs,
+    @Args({ name: 'offerId', type: () => Int }) offerId: number,
     @User() user: any,
   ): Promise<TransactionNode> {
-    const request = CreateOfferRequest.fromArgs(input);
-    return await this.nftAbiService.createOffer(user.publicKey, request);
+    return await this.nftAbiService.withdraw(user.publicKey, offerId);
   }
 }

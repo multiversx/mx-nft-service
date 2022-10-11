@@ -43,6 +43,7 @@ import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/c
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { CreateOfferRequest } from '../offers/models';
+import { OffersService } from '../offers/offers.service';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -57,6 +58,7 @@ export class NftMarketplaceAbiService {
   constructor(
     private elrondProxyService: ElrondProxyService,
     private auctionsService: AuctionsGetterService,
+    private offersService: OffersService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
@@ -163,16 +165,21 @@ export class NftMarketplaceAbiService {
 
   async withdrawOffer(
     ownerAddress: string,
-    auctionId: number,
+    offerId: number,
   ): Promise<TransactionNode> {
-    const { contract, auction } = await this.configureTransactionData(
-      auctionId,
-    );
+    const offer = await this.offersService.getOfferById(offerId);
+
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(
+        offer.collection,
+      );
+
+    const contract = await this.contract.getContract(marketplace.address);
 
     let withdraw = contract.call({
-      func: new ContractFunction('withdraw'),
+      func: new ContractFunction('withdrawOffer'),
       value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
+      args: [new U64Value(new BigNumber(offerId))],
       gasLimit: gas.withdraw,
       chainID: elrondConfig.chainID,
     });
