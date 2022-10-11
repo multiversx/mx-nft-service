@@ -60,9 +60,6 @@ export class NftTraitsService {
         this.getCollectionTraitsFromDb(collectionTicker),
       ]);
 
-    console.log(nftsFromApi.length);
-    console.log(encodedNftValuesFromElastic.length);
-
     if (nftsFromApi.length === 0) {
       await this.persistenceService.saveOrUpdateTraitSummary(
         new CollectionTraitSummary({
