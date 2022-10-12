@@ -407,6 +407,10 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
+    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    const paymentToken = paymentTokenFilter
+      ? paymentTokenFilter.values[0]
+      : 'EGLD';
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder
@@ -418,7 +422,7 @@ export class AuctionsRepository {
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
-      .andWhere("a.paymentToken = 'EGLD'")
+      .andWhere(`a.paymentToken = '${paymentToken}'`)
       .execute();
     return response[0];
   }
