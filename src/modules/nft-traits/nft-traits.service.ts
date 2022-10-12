@@ -31,109 +31,122 @@ export class NftTraitsService {
   ) {}
 
   async updateCollectionTraits(collectionTicker: string): Promise<boolean> {
-    const [collectionTraitSummaryFromDb, nftsCount]: [
-      CollectionTraitSummary,
-      number,
-    ] = await Promise.all([
-      this.getCollectionTraitSummaryFromDb(collectionTicker),
-      this.apiService.getCollectionNftsCount(collectionTicker),
-    ]);
+    try {
+      const [collectionTraitSummaryFromDb, nftsCount]: [
+        CollectionTraitSummary,
+        number,
+      ] = await Promise.all([
+        this.getCollectionTraitSummaryFromDb(collectionTicker),
+        this.apiService.getCollectionNftsCount(collectionTicker),
+      ]);
 
-    if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
-      await this.persistenceService.saveOrUpdateTraitSummary(
+      if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
+        await this.persistenceService.saveOrUpdateTraitSummary(
+          new CollectionTraitSummary({
+            identifier: collectionTicker,
+            traitTypes: {},
+          }),
+        );
+        this.logger.log(
+          `${collectionTicker} - Collection NFTs count bigger than threshold`,
+          {
+            path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+            nftsCount: nftsCount,
+          },
+        );
+        return false;
+      }
+
+      const batchSize = Math.min(
+        constants.getNftsFromApiBatchSize,
+        constants.getNftsFromElasticBatchSize,
+      );
+
+      let lastNonce: number = 0;
+      let notIdenticalNftsCount: number = 0;
+      let collectionTraitSummary: CollectionTraitSummary =
         new CollectionTraitSummary({
           identifier: collectionTicker,
           traitTypes: {},
-        }),
-      );
-      this.logger.log(
-        `${collectionTicker} - Collection NFTs count bigger than threshold`,
-        {
+        });
+
+      do {
+        const [nftsFromApi, encodedNftValuesFromElastic]: [
+          NftTraits[],
+          EncodedNftValues[],
+        ] = await Promise.all([
+          this.getAllCollectionNftsFromAPI(
+            collectionTicker,
+            lastNonce,
+            lastNonce + batchSize,
+          ),
+          this.getAllEncodedNftValuesFromElastic(
+            collectionTicker,
+            lastNonce,
+            lastNonce + batchSize,
+          ),
+        ]);
+
+        const notIdenticalEncodedValues: EncodedNftValues[] =
+          this.getNotIdenticalNftValues(
+            nftsFromApi,
+            encodedNftValuesFromElastic,
+          );
+        const updateNftsInElasticPromise = this.setNftsValuesInElastic(
+          notIdenticalEncodedValues,
+        );
+        notIdenticalNftsCount += notIdenticalEncodedValues.length;
+
+        for (const nft of nftsFromApi) {
+          collectionTraitSummary.addNftTraitsToCollection(nft.traits);
+        }
+
+        await updateNftsInElasticPromise;
+
+        lastNonce += batchSize;
+      } while (lastNonce < nftsCount);
+
+      const areCollectionSummariesIdentical =
+        collectionTraitSummary.isIdentical(collectionTraitSummaryFromDb);
+
+      if (notIdenticalNftsCount === 0 && areCollectionSummariesIdentical) {
+        this.logger.log(`${collectionTicker} - VALID`, {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-          nftsCount: nftsCount,
-        },
-      );
-      return false;
-    }
-
-    const batchSize = Math.min(
-      constants.getNftsFromApiBatchSize,
-      constants.getNftsFromElasticBatchSize,
-    );
-
-    let lastNonce: number = 0;
-    let notIdenticalNftsCount: number = 0;
-    let collectionTraitSummary: CollectionTraitSummary =
-      new CollectionTraitSummary({
-        identifier: collectionTicker,
-      });
-
-    do {
-      const [nftsFromApi, encodedNftValuesFromElastic]: [
-        NftTraits[],
-        EncodedNftValues[],
-      ] = await Promise.all([
-        this.getAllCollectionNftsFromAPI(
-          collectionTicker,
-          lastNonce,
-          lastNonce + batchSize,
-        ),
-        this.getAllEncodedNftValuesFromElastic(
-          collectionTicker,
-          lastNonce,
-          lastNonce + batchSize,
-        ),
-      ]);
-
-      const notIdenticalEncodedValues: EncodedNftValues[] =
-        this.getNotIdenticalNftValues(nftsFromApi, encodedNftValuesFromElastic);
-      const updateNftsInElasticPromise = this.setNftsValuesInElastic(
-        notIdenticalEncodedValues,
-      );
-      notIdenticalNftsCount += notIdenticalEncodedValues.length;
-
-      for (const nft of nftsFromApi) {
-        collectionTraitSummary.addNftTraitsToCollection(nft.traits);
+        });
+        return false;
       }
 
-      await updateNftsInElasticPromise;
+      if (notIdenticalNftsCount > 0) {
+        this.logger.log(
+          `${collectionTicker} - Updated ${notIdenticalNftsCount}/${lastNonce} NFTs`,
+          {
+            path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+          },
+        );
+      }
 
-      lastNonce += batchSize;
-    } while (lastNonce < nftsCount);
+      if (!areCollectionSummariesIdentical || !collectionTraitSummaryFromDb) {
+        await this.persistenceService.saveOrUpdateTraitSummary(
+          collectionTraitSummary,
+        );
+        this.logger.log(
+          `${collectionTicker} - Updated collection trait summary`,
+          {
+            path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+          },
+        );
+      }
 
-    const areCollectionSummariesIdentical = collectionTraitSummary.isIdentical(
-      collectionTraitSummaryFromDb,
-    );
-
-    if (notIdenticalNftsCount === 0 && areCollectionSummariesIdentical) {
-      this.logger.log(`${collectionTicker} - VALID`, {
-        path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-      });
+      return true;
+    } catch (error) {
+      this.logger.log(
+        `Error when trying to updating/validating collection traits for ${collectionTicker}`,
+        {
+          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+        },
+      );
       return false;
     }
-
-    if (notIdenticalNftsCount > 0) {
-      this.logger.log(
-        `${collectionTicker} - Updated ${notIdenticalNftsCount}/${lastNonce} NFTs`,
-        {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-        },
-      );
-    }
-
-    if (!areCollectionSummariesIdentical || !collectionTraitSummaryFromDb) {
-      await this.persistenceService.saveOrUpdateTraitSummary(
-        collectionTraitSummary,
-      );
-      this.logger.log(
-        `${collectionTicker} - Updated collection trait summary`,
-        {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-        },
-      );
-    }
-
-    return true;
   }
 
   async updateTraitsForAllCollections(): Promise<void> {

@@ -18,7 +18,6 @@ import { BatchUtils } from '@elrondnetwork/erdnest';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
-import { getNftIdentifierByNonce } from 'src/utils/helpers';
 
 @Injectable()
 export class ElrondApiService {
