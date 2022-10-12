@@ -194,7 +194,6 @@ export class TraitsUpdaterService {
           `updateTokenTraits ${identifier}`,
           async () => {
             const token = getCollectionAndNonceFromIdentifier(identifier);
-            console.log(token);
             if (token.nonce) {
               await this.nftTraitsService.updateNftTraits(identifier);
             } else {
