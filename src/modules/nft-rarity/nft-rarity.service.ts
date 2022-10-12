@@ -401,7 +401,7 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<NftRarityData[]> {
     try {
-      const res = await this.apiService.getAllNftsByCollection(
+      const res = await this.apiService.getAllNftsByCollectionAfterNonce(
         collectionTicker,
         'identifier,nonce,metadata,score,rank,timestamp',
       );

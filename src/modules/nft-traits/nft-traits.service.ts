@@ -412,7 +412,7 @@ export class NftTraitsService {
     collectionTicker: string,
   ): Promise<NftTraits[]> {
     try {
-      const res = await this.apiService.getAllNftsByCollection(
+      const res = await this.apiService.getAllNftsByCollectionAfterNonce(
         collectionTicker,
         'identifier,nonce,timestamp,metadata',
       );
