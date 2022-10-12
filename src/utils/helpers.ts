@@ -73,12 +73,3 @@ export const randomBetween = (min: number, max: number): number => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 };
-
-export const getNftIdentifierByNonce = (
-  collection: string,
-  nonce: number,
-): string => {
-  let nonceToHex = nonce.toString(16);
-  nonceToHex = BinaryUtils.padHex(nonceToHex);
-  return `${collection}-${nonceToHex}`;
-};
