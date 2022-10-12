@@ -1,5 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { count } from 'console';
+import { Controller, Get } from '@nestjs/common';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 
