@@ -947,17 +947,14 @@ export class PersistenceService {
     traitSummary: CollectionTraitSummary,
   ): Promise<void> {
     traitSummary = traitSummary.updateTimestamp();
-    await this.traitRepositoryService
-      .findOneAndUpdate(
-        {
-          identifier: traitSummary.identifier,
-        },
-        traitSummary,
-      )
-      .then(async (data) => {
-        if (!data) {
-          await this.traitRepositoryService.create(traitSummary);
-        }
-      });
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      {
+        identifier: traitSummary.identifier,
+      },
+      traitSummary,
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(traitSummary);
+    }
   }
 }

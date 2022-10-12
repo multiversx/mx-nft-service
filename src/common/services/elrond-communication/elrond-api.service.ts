@@ -402,7 +402,7 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsBySearch.name, url);
   }
 
-  async getAllNftsByCollection(
+  async getAllNftsByCollectionAfterNonce(
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
   ): Promise<Nft[]> {
@@ -428,7 +428,7 @@ export class ElrondApiService {
 
       const url = `nfts${query.build()}`;
 
-      batch = await this.doGetGeneric(this.getAllNftsByCollection.name, url);
+      batch = await this.doGetGeneric(this.getAllNftsByCollectionAfterNonce.name, url);
 
       nfts = nfts.concat(batch);
     } while (batch.length > 0);
