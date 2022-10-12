@@ -135,7 +135,6 @@ export class FeedEventsSenderService {
     currentWinner: string,
     bid: string,
     boughtTokens: string,
-
     orderSft: Order,
     buyAuction: AuctionEntity,
     buyMarketplace: Marketplace,
