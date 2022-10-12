@@ -490,7 +490,6 @@ export class AuctionsGetterService {
     }
 
     if (paymentTokenFilter) {
-      console.log(111111111111);
       return await this.retriveTokensAuctions(
         paymentTokenFilter,
         queryRequest,
