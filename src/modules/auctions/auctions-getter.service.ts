@@ -489,7 +489,7 @@ export class AuctionsGetterService {
       );
     }
 
-    if (paymentTokenFilter) {
+    if (paymentTokenFilter && !hasCurrentPriceFilter) {
       return await this.retriveTokensAuctions(
         paymentTokenFilter,
         queryRequest,
