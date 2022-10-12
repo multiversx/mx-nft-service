@@ -21,6 +21,7 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
+import { S } from 'clarifai-nodejs-grpc/proto/clarifai/auth/scope/scope_pb';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -167,7 +168,7 @@ export class CollectionsGetterService {
     let [collections, count] = await this.getOrSetFullCollections();
 
     collections = this.applyFilters(filters, collections);
-
+    collections = collections.filter((c) => c.nftsCount > 4);
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
       collections = orderBy(
         collections,
@@ -224,7 +225,9 @@ export class CollectionsGetterService {
     return [uniqueCollections, uniqueCollections?.length];
   }
 
-  async getOrSetMostActiveCollections(): Promise<[Collection[], number]> {
+  async getOrSetMostActiveCollections(): Promise<
+    [{ artist: string; nfts: number }[], number]
+  > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.CollectionsMostActive.key,
@@ -233,7 +236,15 @@ export class CollectionsGetterService {
     );
   }
 
-  public async getMostActiveCollections(): Promise<[Collection[], number]> {
+  async getCreationsCount(address: string): Promise<number> {
+    const [collections] = await this.getOrSetMostActiveCollections();
+    const response = collections.find((x) => x.artist === address);
+    return response.nfts;
+  }
+
+  public async getMostActiveCollections(): Promise<
+    [{ artist: string; nfts: number }[], number]
+  > {
     const [collections] = await this.getOrSetFullCollections();
     let groupedCollections = collections
       .groupBy((x) => x.artistAddress, true)
@@ -326,10 +337,7 @@ export class CollectionsGetterService {
     return localCollections;
   }
 
-  private async mapCollectionNftsCount(
-    localCollections: Collection[],
-    filterByNftsCountThresold: number = 4,
-  ) {
+  private async mapCollectionNftsCount(localCollections: Collection[]) {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
@@ -344,13 +352,6 @@ export class CollectionsGetterService {
           });
         }
       }
-    }
-
-    if (filterByNftsCountThresold) {
-      localCollections = localCollections.filter(
-        (x) =>
-          parseInt(x.collectionAsset?.totalCount) >= filterByNftsCountThresold,
-      );
     }
 
     return localCollections;

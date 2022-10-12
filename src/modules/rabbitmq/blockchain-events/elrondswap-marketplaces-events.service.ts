@@ -263,8 +263,8 @@ export class ElrondSwapMarketplaceEventsService {
               }),
             );
             await this.feedEventsSenderService.sendBuyEvent(
-              buySftTopics.currentBid,
               buySftTopics.currentWinner,
+              buySftTopics.currentBid,
               buySftTopics.nrAuctionTokens,
               orderSft,
               buyAuction,

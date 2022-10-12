@@ -60,7 +60,15 @@ export class AssetsQuery {
   }
 
   addPageSize(from: number, size: number): this {
-    return this.addParamToQuery('from', from).addParamToQuery('size', size);
+    if ((!from && from < 0) || !size) {
+      return this;
+    }
+    if (this.query === '') {
+      this.query = `?from=${from}&size=${size}`;
+    } else {
+      this.query = `${this.query}&from=${from}&size=${size}`;
+    }
+    return this;
   }
 
   withSupply(): this {
