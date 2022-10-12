@@ -87,6 +87,15 @@ export class NftTraitsService {
           ),
         ]);
 
+        if (nftsFromApi.length !== encodedNftValuesFromElastic.length) {
+          this.logger.log(`Missing/extra NFTs in API/Elastic`, {
+            path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+            collection: collectionTicker,
+            nftsInApi: nftsFromApi.length,
+            nftsInElastic: encodedNftValuesFromElastic.length,
+          });
+        }
+
         const notIdenticalEncodedValues: EncodedNftValues[] =
           this.getNotIdenticalNftValues(
             nftsFromApi,
