@@ -8,9 +8,9 @@ export class AttributeSummary {
   @Field(() => String)
   value: string;
   @Field(() => Number)
-  occurenceCount: number;
+  occurrenceCount: number;
   @Field(() => Number)
-  occurencePercentage: number;
+  occurrencePercentage: number;
 
   constructor(init?: Partial<AttributeSummary>) {
     Object.assign(this, init);
@@ -19,8 +19,8 @@ export class AttributeSummary {
   isIdentical(attribute: AttributeSummary): boolean {
     if (
       this.value !== attribute.value ||
-      this.occurenceCount !== attribute.occurenceCount ||
-      this.occurencePercentage !== attribute.occurencePercentage
+      this.occurrenceCount !== attribute.occurrenceCount ||
+      this.occurrencePercentage !== attribute.occurrencePercentage
     ) {
       return false;
     }
@@ -36,9 +36,9 @@ export class TraitSummary {
   @Field(() => [AttributeSummary])
   attributes: AttributeSummary[];
   @Field(() => Number)
-  occurenceCount: number;
+  occurrenceCount: number;
   @Field(() => Number)
-  occurencePercentage: number;
+  occurrencePercentage: number;
 
   constructor(init?: Partial<TraitSummary>) {
     Object.assign(this, init);
@@ -54,19 +54,19 @@ export class TraitSummary {
       this.attributes.push(
         new AttributeSummary({
           value: newTrait.value,
-          occurenceCount: 1,
-          occurencePercentage: (1 / collectionTotalSize) * 100,
+          occurrenceCount: 1,
+          occurrencePercentage: (1 / collectionTotalSize) * 100,
         }),
       );
     } else {
-      attribute.occurenceCount++;
-      attribute.occurencePercentage =
-        (attribute.occurenceCount / collectionTotalSize) * 100;
+      attribute.occurrenceCount++;
+      attribute.occurrencePercentage =
+        (attribute.occurrenceCount / collectionTotalSize) * 100;
     }
 
-    this.occurenceCount++;
-    this.occurencePercentage =
-      (this.occurenceCount / collectionTotalSize) * 100;
+    this.occurrenceCount++;
+    this.occurrencePercentage =
+      (this.occurrenceCount / collectionTotalSize) * 100;
 
     return this;
   }
@@ -75,21 +75,21 @@ export class TraitSummary {
     oldTrait: NftTrait,
     collectionTotalSize: number,
   ): this {
-    this.occurenceCount--;
-    this.occurencePercentage =
-      (this.occurenceCount / collectionTotalSize) * 100;
+    this.occurrenceCount--;
+    this.occurrencePercentage =
+      (this.occurrenceCount / collectionTotalSize) * 100;
 
     let attribute = this.attributes.find((a) => a.value === oldTrait.value);
-    if (attribute.occurenceCount === 1) {
+    if (attribute.occurrenceCount === 1) {
       this.attributes = this.attributes.filter(
         (a) => a.value !== oldTrait.value,
       );
       return this;
     }
 
-    attribute.occurenceCount--;
-    attribute.occurencePercentage =
-      (attribute.occurenceCount / collectionTotalSize) * 100;
+    attribute.occurrenceCount--;
+    attribute.occurrencePercentage =
+      (attribute.occurrenceCount / collectionTotalSize) * 100;
 
     return this;
   }
@@ -97,8 +97,8 @@ export class TraitSummary {
   isIdentical(trait: TraitSummary) {
     if (
       this.name !== trait.name ||
-      this.occurenceCount !== trait.occurenceCount ||
-      this.occurencePercentage !== trait.occurencePercentage
+      this.occurrenceCount !== trait.occurrenceCount ||
+      this.occurrencePercentage !== trait.occurrencePercentage
     ) {
       return false;
     }
@@ -169,12 +169,12 @@ export class CollectionTraitSummary {
             attributes: [
               new AttributeSummary({
                 value: trait.value,
-                occurenceCount: 1,
-                occurencePercentage: (1 / collectionTotalSize) * 100,
+                occurrenceCount: 1,
+                occurrencePercentage: (1 / collectionTotalSize) * 100,
               }),
             ],
-            occurenceCount: 1,
-            occurencePercentage: (1 / collectionTotalSize) * 100,
+            occurrenceCount: 1,
+            occurrencePercentage: (1 / collectionTotalSize) * 100,
           }),
         );
       }
@@ -200,7 +200,7 @@ export class CollectionTraitSummary {
     for (const trait of traits) {
       let traitType = this.traitTypes.find((t) => t.name === trait.name);
 
-      if (traitType.occurenceCount === 1) {
+      if (traitType.occurrenceCount === 1) {
         this.traitTypes = this.traitTypes.filter((t) => t.name !== trait.name);
         continue;
       }
@@ -220,18 +220,18 @@ export class CollectionTraitSummary {
 
   getSize(): number {
     const percentage =
-      (this.traitTypes?.[0]?.occurenceCount * 100) /
-      this.traitTypes?.[0]?.occurencePercentage;
+      (this.traitTypes?.[0]?.occurrenceCount * 100) /
+      this.traitTypes?.[0]?.occurrencePercentage;
     return isNaN(percentage) ? 0 : percentage;
   }
 
   updateOcurrencePercentages(collectionTotalSize: number): this {
     for (let trait of this.traitTypes) {
-      trait.occurencePercentage =
-        (trait.occurenceCount / collectionTotalSize) * 100;
+      trait.occurrencePercentage =
+        (trait.occurrenceCount / collectionTotalSize) * 100;
       for (let attribute of trait.attributes) {
-        attribute.occurencePercentage =
-          (attribute.occurenceCount / collectionTotalSize) * 100;
+        attribute.occurrencePercentage =
+          (attribute.occurrenceCount / collectionTotalSize) * 100;
       }
     }
     return this;
