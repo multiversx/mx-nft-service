@@ -122,6 +122,7 @@ export class NftTraitsService {
         this.logger.log(`${collectionTicker} - VALID`, {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         });
+        await this.setCollectionTraitsFlagInElastic(collectionTicker);
         return false;
       }
 
@@ -138,6 +139,7 @@ export class NftTraitsService {
         await this.persistenceService.saveOrUpdateTraitSummary(
           collectionTraitSummary,
         );
+        await this.setCollectionTraitsFlagInElastic(collectionTicker);
         this.logger.log(
           `${collectionTicker} - Updated collection trait summary`,
           {
@@ -580,5 +582,28 @@ export class NftTraitsService {
 
   traitToBase64Encoded(trait: NftTrait): string {
     return BinaryUtils.base64Encode(`${trait.name}_${trait.value}`);
+  }
+
+  private async setCollectionTraitsFlagInElastic(
+    collection: string,
+  ): Promise<void> {
+    try {
+      let updates: string[] = [];
+      updates.push(
+        this.elasticService.buildBulkUpdate<boolean>(
+          'tokens',
+          collection,
+          'nft_hasTraitSummary',
+          true,
+        ),
+      );
+      await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
+    } catch (error) {
+      this.logger.error('Error when setting collection traits flag', {
+        path: `${NftTraitsService.name}.${this.setCollectionTraitsFlagInElastic.name}`,
+        exception: error?.message,
+        collection: collection,
+      });
+    }
   }
 }
