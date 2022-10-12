@@ -75,6 +75,14 @@ export class AssetsQuery {
     return this.addParamToQuery('isNsfw', false);
   }
 
+  addNonceBefore(nonce: number): this {
+    return this.addParamToQuery('nonceBefore', nonce);
+  }
+
+  addNonceAfter(nonce: number): this {
+    return this.addParamToQuery('nonceAfter', nonce);
+  }
+
   addBefore(timestamp: number): this {
     return this.addParamToQuery('before', timestamp);
   }

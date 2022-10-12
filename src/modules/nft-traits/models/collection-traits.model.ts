@@ -219,13 +219,13 @@ export class CollectionTraitSummary {
   }
 
   getSize(): number {
-    return (
-      (this.traitTypes[0].occurenceCount * 100) /
-      this.traitTypes[0].occurencePercentage
-    );
+    const percentage =
+      (this.traitTypes?.[0]?.occurenceCount * 100) /
+      this.traitTypes?.[0]?.occurencePercentage;
+    return isNaN(percentage) ? 0 : percentage;
   }
 
-  private updateOcurrencePercentages(collectionTotalSize: number): this {
+  updateOcurrencePercentages(collectionTotalSize: number): this {
     for (let trait of this.traitTypes) {
       trait.occurencePercentage =
         (trait.occurenceCount / collectionTotalSize) * 100;

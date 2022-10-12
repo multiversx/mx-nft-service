@@ -405,33 +405,42 @@ export class ElrondApiService {
   async getAllNftsByCollectionAfterNonce(
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
+    startNonce?: number,
+    endNonce?: number,
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
 
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    do {
-      let identifiers: string[] = [];
+    let lastEnd = startNonce ?? 0;
 
-      const start = nfts.length + 1;
-      const end = start + batchSize - 1;
-      for (let i = start; i <= end; i++) {
-        identifiers.push(getNftIdentifierByNonce(collection, i));
+    do {
+      const start = lastEnd + 1;
+      let end;
+
+      if (startNonce !== undefined && endNonce !== undefined) {
+        end = Math.min(endNonce, start + batchSize - 1);
+      } else {
+        end = start + batchSize - 1;
       }
 
       let query = new AssetsQuery()
-        .addCollection(collection)
+        .addNonceAfter(start)
+        .addNonceBefore(end)
         .addPageSize(0, batchSize)
-        .addIdentifiers(identifiers)
         .addQuery(`&fields=${fields}`);
 
-      const url = `nfts${query.build()}`;
+      const url = `collections/${collection}/nfts${query.build()}`;
 
-      batch = await this.doGetGeneric(this.getAllNftsByCollectionAfterNonce.name, url);
+      batch = await this.doGetGeneric(
+        this.getAllNftsByCollectionAfterNonce.name,
+        url,
+      );
 
       nfts = nfts.concat(batch);
-    } while (batch.length > 0);
+      lastEnd = end;
+    } while (lastEnd < endNonce);
 
     return this.filterUniqueNftsByNonce(nfts);
   }
