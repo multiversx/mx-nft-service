@@ -36,6 +36,7 @@ import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filte
 @Injectable()
 export class AuctionsGetterService {
   private redisClient: Redis.Redis;
+  private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
@@ -45,6 +46,9 @@ export class AuctionsGetterService {
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
+    );
+    this.auctionsRedisClient = this.cacheService.getClient(
+      cacheConfig.auctionsRedisClientName,
     );
   }
 
@@ -519,7 +523,7 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
+        this.auctionsRedisClient,
         `collectionAuctions:${collectionFilter}`,
         async () => await this.getAuctionsByCollection(collectionFilter),
         Constants.oneMinute() * 10,
@@ -572,7 +576,7 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
+        this.auctionsRedisClient,
         `paymentTokenAuctions:${paymentTokenFilter}`,
         async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
         Constants.oneMinute() * 10,
@@ -587,12 +591,6 @@ export class AuctionsGetterService {
       );
     }
 
-    // const paymentTokenFilter = queryRequest.getFilter('paymentToken');
-    // if (paymentTokenFilter) {
-    //   allAuctions = allAuctions.filter((x) =>
-    //     paymentTokenFilter.values.includes(x.minBid?.token),
-    //   );
-    // }
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
@@ -808,7 +806,7 @@ export class AuctionsGetterService {
   }
 
   async getCurrentPaymentTokens(
-    filters: CurrentPaymentTokensFilters,
+    filters?: CurrentPaymentTokensFilters,
   ): Promise<Token[]> {
     try {
       return await this.auctionCachingService.getCurrentPaymentTokens(

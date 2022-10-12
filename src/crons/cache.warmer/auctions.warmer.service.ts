@@ -70,6 +70,31 @@ export class AuctionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForPaymentTokensCollections() {
+    await Locker.lock(
+      'Payment tokens auctions',
+      async () => {
+        const paymentTokens =
+          await this.auctionsGetterService.getCurrentPaymentTokens();
+
+        for (const paymentToken of paymentTokens) {
+          const auctionResult =
+            await this.auctionsGetterService.getAuctionsByPaymentToken(
+              paymentToken.identifier,
+            );
+
+          await this.invalidateKey(
+            `paymentTokenAuctions:${paymentToken.identifier}`,
+            auctionResult,
+            10 * TimeConstants.oneMinute,
+          );
+        }
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCachingForActiveAuctions() {
     await Locker.lock(
       'Active auctions',
