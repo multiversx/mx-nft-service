@@ -158,7 +158,10 @@ export class CollectionTraitSummary {
       let traitType = this.traitTypes?.find((t) => t.name === trait.name);
 
       if (traitType) {
-        traitType.addTraitToAttributes(trait, collectionTotalSize);
+        traitType = new TraitSummary(traitType).addTraitToAttributes(
+          trait,
+          collectionTotalSize,
+        );
       } else {
         if (!this.traitTypes) {
           this.traitTypes = [];
