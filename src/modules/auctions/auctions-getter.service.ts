@@ -1,18 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Auction } from './models';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import {
-  Filter,
-  FiltersExpression,
   GroupBy,
-  Grouping,
   Operation,
-  Operator,
   Sort,
 } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';

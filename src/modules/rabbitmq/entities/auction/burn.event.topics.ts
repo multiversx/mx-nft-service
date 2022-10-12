@@ -1,12 +1,13 @@
-import '../../../../utils/extentions';
+import { BinaryUtils } from '@elrondnetwork/erdnest';
+import '../../../../utils/extensions';
 
 export class BurnEventsTopics {
   private collection: string;
   private nonce: string;
 
   constructor(rawTopics: string[]) {
-    this.collection = Buffer.from(rawTopics[0], 'base64').toString();
-    this.nonce = Buffer.from(rawTopics[1], 'base64').toString('hex');
+    this.collection = BinaryUtils.base64Decode(rawTopics[0]);
+    this.nonce = BinaryUtils.base64ToHex(rawTopics[1]);
   }
 
   toPlainObject() {
