@@ -274,6 +274,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     })
     filters: CurrentPaymentTokensFilters,
   ): Promise<Token[]> {
+    console.log(11111111111111, elrondConfig.lkmex);
     return await this.auctionsGetterService.getCurrentPaymentTokens(filters);
   }
 
