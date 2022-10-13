@@ -1,5 +1,4 @@
 import { Address } from '@elrondnetwork/erdjs';
-import { BinaryUtils } from '@elrondnetwork/erdnest';
 import BigNumber from 'bignumber.js';
 
 export function oneSecond(): number {
