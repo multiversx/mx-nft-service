@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { ElrondElasticService } from 'src/common';
 import { elrondConfig } from 'src/config';
 import { DateUtils } from 'src/utils/date-utils';

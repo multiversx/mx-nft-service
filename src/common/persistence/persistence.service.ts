@@ -37,9 +37,11 @@ import {
 } from 'src/db/notifications';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
+import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/elrond-communication/models/nft.dto';
@@ -63,6 +65,7 @@ export class PersistenceService {
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
+    private readonly traitRepositoryService: TraitRepositoryService,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -932,5 +935,41 @@ export class PersistenceService {
       this.getMostLikedAssetsIdentifiers.name,
       this.assetsLikesRepository.getMostLikedAssetsIdentifiers(offset, limit),
     );
+  }
+
+  async getTraitSummary(collection: string): Promise<CollectionTraitSummary> {
+    return await this.traitRepositoryService.findOne({
+      identifier: collection,
+    });
+  }
+
+  async saveOrUpdateTraitSummary(
+    traitSummary: CollectionTraitSummary,
+  ): Promise<void> {
+    traitSummary = traitSummary.updateTimestamp();
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      {
+        identifier: traitSummary.identifier,
+      },
+      traitSummary,
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(traitSummary);
+    }
+  }
+
+  async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      { identifier: collection },
+      { lastUpdated: new Date().getTime() },
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(
+        new CollectionTraitSummary({
+          identifier: collection,
+          lastUpdated: new Date().getTime(),
+        }),
+      );
+    }
   }
 }

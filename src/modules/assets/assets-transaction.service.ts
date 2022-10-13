@@ -10,7 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { getSmartContract } from 'src/common';
 import { elrondConfig, gas } from 'src/config';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
 import { PinataService } from '../ipfs/pinata.service';

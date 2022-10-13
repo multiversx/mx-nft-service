@@ -5,9 +5,10 @@ import { cacheConfig, constants } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -60,8 +61,10 @@ export class TraitsUpdaterService {
               collections = collections.concat([
                 ...new Set(items.map((i) => i.token)),
               ]);
+              if (collections.length > lastIndex + maxCollectionsToValidate) {
+                return undefined;
+              }
             },
-            lastIndex + maxCollectionsToValidate,
           );
 
           const collectionsToValidate = collections.slice(
@@ -122,13 +125,10 @@ export class TraitsUpdaterService {
                   (c) => collectionsToUpdate.indexOf(c) === -1,
                 ),
               );
+              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+                return undefined;
+              }
             },
-            maxCollectionsToUpdate,
-          );
-
-          collectionsToUpdate = collectionsToUpdate.slice(
-            0,
-            maxCollectionsToUpdate,
           );
 
           await this.updateCollectionTraits(collectionsToUpdate);
@@ -165,29 +165,56 @@ export class TraitsUpdaterService {
     return notUpdatedCollections;
   }
 
+  async updateTokenTraits(identifiers: string[]): Promise<string[]> {
+    let notUpdatedTokens: string[] = [];
+    for (const identifier of identifiers) {
+      try {
+        await Locker.lock(
+          `updateTokenTraits ${identifier}`,
+          async () => {
+            const token = getCollectionAndNonceFromIdentifier(identifier);
+            if (token.nonce) {
+              await this.nftTraitsService.updateNftTraits(identifier);
+            } else {
+              await this.nftTraitsService.updateCollectionTraits(identifier);
+            }
+          },
+          true,
+        );
+      } catch (error) {
+        this.logger.error(`Error when updating nft traits`, {
+          path: 'TraitsUpdaterService.updateNftTraits',
+          exception: error?.message,
+          identifier: identifier,
+        });
+        notUpdatedTokens.push(identifier);
+      }
+    }
+    return notUpdatedTokens;
+  }
+
   async processTokenTraitsQueue() {
     await Locker.lock(
-      'processTokenTraitsQueue: Update traits for all collections in the traits queue',
+      'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
-        const collectionsToUpdate: string[] =
+        const tokensToUpdate: string[] =
           await this.redisCacheService.popAllItemsFromList(
             this.traitsQueueRedisClient,
             this.getTraitsQueueCacheKey(),
             true,
           );
 
-        const notUpdatedCollections: string[] =
-          await this.updateCollectionTraits(collectionsToUpdate);
+        const notUpdatedNfts: string[] = await this.updateTokenTraits(
+          tokensToUpdate,
+        );
 
-        await this.addCollectionsToTraitsQueue(notUpdatedCollections);
+        await this.addNftsToTraitQueue(notUpdatedNfts);
       },
       true,
     );
   }
 
-  async addCollectionsToTraitsQueue(
-    collectionTickers: string[],
-  ): Promise<void> {
+  async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.addItemsToList(
         this.traitsQueueRedisClient,

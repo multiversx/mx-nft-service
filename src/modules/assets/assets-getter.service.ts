@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
 import { Asset, CollectionType } from './models';

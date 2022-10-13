@@ -10,6 +10,7 @@ import { ElrondPrivateApiService } from 'src/common/services/elrond-communicatio
 import { NftRarityData } from './nft-rarity-data.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { constants } from 'src/config';
+import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class NftRarityService {
@@ -400,7 +401,7 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<NftRarityData[]> {
     try {
-      const res = await this.apiService.getAllNftsByCollection(
+      const res = await this.apiService.getAllNftsByCollectionAfterNonce(
         collectionTicker,
         'identifier,nonce,metadata,score,rank,timestamp',
       );
@@ -529,27 +530,33 @@ export class NftRarityService {
   }
 
   async setElasticRarityMappings(): Promise<void> {
-    try {
-      await this.elasticService.putMappings(
-        'tokens',
-        this.elasticService.buildPutMultipleMappingsBody([
-          {
-            key: 'nft_rarity_score',
-            value: 'float',
-          },
-          {
-            key: 'nft_rarity_rank',
-            value: 'float',
-          },
-        ]),
-      );
-    } catch (error) {
-      this.logger.error(
-        'Error when trying to map Elastic types for rarity variables',
-        {
-          path: 'NftRarityService.setElasticRarityMappings',
-        },
-      );
-    }
+    await Locker.lock(
+      'Featured collection auctions',
+      async () => {
+        try {
+          await this.elasticService.putMappings(
+            'tokens',
+            this.elasticService.buildPutMultipleMappingsBody([
+              {
+                key: 'nft_rarity_score',
+                value: 'float',
+              },
+              {
+                key: 'nft_rarity_rank',
+                value: 'long',
+              },
+            ]),
+          );
+        } catch (error) {
+          this.logger.error(
+            'Error when trying to map Elastic types for rarity variables',
+            {
+              path: 'NftRarityService.setElasticRarityMappings',
+            },
+          );
+        }
+      },
+      false,
+    );
   }
 }

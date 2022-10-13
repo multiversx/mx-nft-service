@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { BuyRandomNftActionArgs } from './models';
 import BigNumber from 'bignumber.js';
 import {

@@ -1,168 +1,109 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 import { NftTrait } from './nft-traits.model';
 
-export class AttributeType {
-  value: string;
-  occurenceCount: number;
-  occurencePercentage: number;
+export type CollectionTraitSummaryDocument = CollectionTraitSummary & Document;
 
-  constructor(init?: Partial<AttributeType>) {
-    Object.assign(this, init);
-  }
-}
-
-export class TraitType {
-  name: string;
-  attributes: AttributeType[];
-  occurenceCount: number;
-  occurencePercentage: number;
-
-  constructor(init?: Partial<TraitType>) {
-    Object.assign(this, init);
-  }
-
-  addTraitToAttributes(newTrait: NftTrait, collectionTotalSize: number): this {
-    let attribute = this.attributes.find((a) => a.value === newTrait.value);
-
-    if (!attribute) {
-      this.attributes.push(
-        new AttributeType({
-          value: newTrait.value,
-          occurenceCount: 1,
-          occurencePercentage: (1 / collectionTotalSize) * 100,
-        }),
-      );
-    } else {
-      attribute.occurenceCount++;
-      attribute.occurencePercentage =
-        (attribute.occurenceCount / collectionTotalSize) * 100;
-    }
-
-    this.occurenceCount++;
-    this.occurencePercentage =
-      (this.occurenceCount / collectionTotalSize) * 100;
-
-    return this;
-  }
-
-  removeTraitFromAttributes(
-    oldTrait: NftTrait,
-    collectionTotalSize: number,
-  ): this {
-    this.occurenceCount--;
-    this.occurencePercentage =
-      (this.occurenceCount / collectionTotalSize) * 100;
-
-    let attribute = this.attributes.find((a) => a.value === oldTrait.value);
-    if (attribute.occurenceCount === 1) {
-      this.attributes = this.attributes.filter(
-        (a) => a.value !== oldTrait.value,
-      );
-      return this;
-    }
-
-    attribute.occurenceCount--;
-    attribute.occurencePercentage =
-      (attribute.occurenceCount / collectionTotalSize) * 100;
-
-    return this;
-  }
-}
-
-export class CollectionTraits {
+@Schema({ collection: 'nft_trait_summaries' })
+export class CollectionTraitSummary {
+  @Prop()
   identifier: string;
-  traitTypes: TraitType[];
+  @Prop({ type: Object })
+  traitTypes: { [key: string]: { [key: string]: number } };
+  @Prop()
+  lastUpdated?: number;
 
-  constructor(init?: Partial<CollectionTraits>) {
-    Object.assign(this, init);
-  }
-
-  addNftTraitsToCollection(
-    nftTraits: NftTrait[],
-    collectionTotalSize: number = undefined,
-    sizeChanged: boolean = false,
-  ): this {
-    if (!collectionTotalSize) {
-      collectionTotalSize = this.getSize() + 1;
-      sizeChanged = true;
-    }
-
-    for (const trait of nftTraits) {
-      let traitType = this.traitTypes.find((t) => t.name === trait.name);
-
-      if (traitType) {
-        traitType.addTraitToAttributes(trait, collectionTotalSize);
-      } else {
-        this.traitTypes.push(
-          new TraitType({
-            name: trait.name,
-            attributes: [
-              new AttributeType({
-                value: trait.value,
-                occurenceCount: 1,
-                occurencePercentage: (1 / collectionTotalSize) * 100,
-              }),
-            ],
-            occurenceCount: 1,
-            occurencePercentage: (1 / collectionTotalSize) * 100,
-          }),
-        );
-      }
-    }
-
-    if (sizeChanged) {
-      return this.updateOcurrencePercentages(collectionTotalSize);
-    }
-
+  updateTimestamp(): this {
+    this.lastUpdated = new Date().getTime();
     return this;
   }
 
-  removeNftTraitsFromCollection(
-    traits: NftTrait[],
-    collectionTotalSize: number = undefined,
-    sizeChanged: boolean = false,
-  ): this {
-    if (!collectionTotalSize) {
-      collectionTotalSize = this.getSize() - 1;
-      sizeChanged = true;
+  constructor(init?: Partial<CollectionTraitSummary>) {
+    Object.assign(this, init);
+  }
+
+  addNftTraitsToCollection(traits: NftTrait[]): this {
+    if (!this.traitTypes) {
+      this.traitTypes = {};
     }
 
     for (const trait of traits) {
-      let traitType = this.traitTypes.find((t) => t.name === trait.name);
-
-      if (traitType.occurenceCount === 1) {
-        this.traitTypes = this.traitTypes.filter((t) => t.name !== trait.name);
-        continue;
+      if (!this.traitTypes[trait.name]) {
+        this.traitTypes[trait.name] = {};
       }
 
-      traitType = traitType.removeTraitFromAttributes(
-        trait,
-        collectionTotalSize,
-      );
-    }
-
-    if (sizeChanged) {
-      return this.updateOcurrencePercentages(collectionTotalSize);
+      if (!this.traitTypes[trait.name][trait.value]) {
+        this.traitTypes[trait.name][trait.value] = 1;
+      } else {
+        this.traitTypes[trait.name][trait.value]++;
+      }
     }
 
     return this;
   }
 
-  getSize(): number {
-    return (
-      (this.traitTypes[0].occurenceCount * 100) /
-      this.traitTypes[0].occurencePercentage
-    );
-  }
+  removeNftTraitsFromCollection(traits: NftTrait[]): this {
+    if (!this.traitTypes) {
+      this.traitTypes = {};
+    }
 
-  private updateOcurrencePercentages(collectionTotalSize: number): this {
-    for (let trait of this.traitTypes) {
-      trait.occurencePercentage =
-        (trait.occurenceCount / collectionTotalSize) * 100;
-      for (let attribute of trait.attributes) {
-        attribute.occurencePercentage =
-          (attribute.occurenceCount / collectionTotalSize) * 100;
+    for (const trait of traits) {
+      if (this.traitTypes[trait.name][trait.value] === 1) {
+        delete this.traitTypes[trait.name][trait.value];
+
+        if (Object.entries(this.traitTypes[trait.name]).length === 0) {
+          delete this.traitTypes[trait.name];
+        }
+      } else {
+        this.traitTypes[trait.name][trait.value]--;
       }
     }
+
     return this;
+  }
+
+  isIdenticalTo(traitSummary: CollectionTraitSummary): boolean {
+    if (!traitSummary.traitTypes) {
+      traitSummary.traitTypes = {};
+    }
+
+    if (
+      this.identifier !== traitSummary?.identifier ||
+      Object.entries(this.traitTypes).length !==
+        Object.entries(traitSummary?.traitTypes)?.length
+    ) {
+      return false;
+    }
+
+    for (const [traitName, trait] of Object.entries(this.traitTypes)) {
+      if (
+        Object.entries(trait).length !==
+        Object.entries(traitSummary.traitTypes?.[traitName])?.length
+      ) {
+        return false;
+      }
+
+      for (const [attributeName, attributeOccurrenceCount] of Object.entries(
+        this.traitTypes[traitName],
+      )) {
+        if (
+          attributeOccurrenceCount !==
+          traitSummary.traitTypes?.[traitName]?.[attributeName]
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
+
+export const CollectionTraitSummarySchema = SchemaFactory.createForClass(
+  CollectionTraitSummary,
+).index(
+  {
+    identifier: 1,
+  },
+  { unique: true },
+);

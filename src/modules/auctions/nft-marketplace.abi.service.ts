@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
 import BigNumber from 'bignumber.js';
 import {

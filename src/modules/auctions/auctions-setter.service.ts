@@ -5,7 +5,7 @@ import {
   AuctionStatusEnum,
   ExternalAuctionAbi,
 } from './models';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';

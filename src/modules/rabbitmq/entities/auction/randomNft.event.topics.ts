@@ -1,4 +1,4 @@
-import '../../../../utils/extentions';
+import '../../../../utils/extensions';
 
 export class RandomNftEventsTopics {
   private campaignId: string;

@@ -13,13 +13,18 @@ export class ElasticTraitsUpdaterService {
 
   @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async handleValidateAllTokenTraits() {
-    await this.nftTraitsService.updateAllCollections();
+    await this.nftTraitsService.updateAllCollectionTraits();
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_5AM)
+  async handleValidateAllNftTraitValues() {
+    await this.nftTraitsService.updateAllNftTraits();
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleSetTraitsWhereNotSetCronJob() {
     await this.traitsUpdaterService.handleSetTraitsWhereNotSet(
-      cronJobs.traits.collectionTraitsToSetEvery10s,
+      cronJobs.traits.collectionTraitsToSetEvery1m,
     );
   }
 

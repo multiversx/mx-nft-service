@@ -1,5 +1,5 @@
 import { Address } from '@elrondnetwork/erdjs/out';
-import '../../../../utils/extentions';
+import '../../../../utils/extensions';
 
 export class BuySftEventsTopics {
   private collection: string;
