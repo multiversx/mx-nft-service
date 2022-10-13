@@ -16,10 +16,7 @@
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
-    "egld": "EGLD",
-    "lkmexIdentifier": "LKMEX-aab910",
-    "lkmexSymbol": "LKMEX",
-    "mexSymbol": "MEX"
+    "egld": "EGLD"
   },
   "caching": {
     "ordersRedisClientName": "orders",

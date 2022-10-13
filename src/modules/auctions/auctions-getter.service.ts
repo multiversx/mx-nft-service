@@ -831,28 +831,25 @@ export class AuctionsGetterService {
     marketplaceKey?: string,
     collectionIdentifier?: string,
   ): Promise<Token[]> {
-    const [currentPaymentTokenIds, allMexTokens, egldToken] = await Promise.all(
-      [
+    const [currentPaymentTokenIds, allMexTokens, egldToken, lkmexToken] =
+      await Promise.all([
         this.persistenceService.getCurrentPaymentTokenIdsWithCounts(
           marketplaceKey,
           collectionIdentifier,
         ),
         this.usdPriceService.getCachedMexTokensWithDecimals(),
         this.usdPriceService.getToken(elrondConfig.egld),
-      ],
-    );
+        this.usdPriceService.getToken(elrondConfig.lkmex),
+      ]);
 
-    const allTokens: Token[] = allMexTokens.concat(egldToken);
+    const allTokens: Token[] = allMexTokens
+      .concat(egldToken)
+      .concat(lkmexToken);
     let mappedTokens = [];
     for (const payment of currentPaymentTokenIds) {
-      let token: Token;
-      if (payment.paymentToken === elrondConfig.lkmexIdentifier) {
-        token = allTokens.find((x) => x.symbol === elrondConfig.mexSymbol);
-        token.identifier = payment.paymentToken;
-        token.symbol = elrondConfig.lkmexSymbol;
-      } else {
-        token = allTokens.find((x) => x.identifier === payment.paymentToken);
-      }
+      const token = allTokens.find(
+        (x) => x.identifier === payment.paymentToken,
+      );
       if (token) {
         mappedTokens.push({ ...token, activeAuctions: payment.activeAuctions });
       }
