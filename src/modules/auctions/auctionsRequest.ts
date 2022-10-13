@@ -76,6 +76,43 @@ export function getAuctionsForCollectionRequest(collection: string) {
   });
 }
 
+export function getAuctionsForPaymentTokenRequest(paymentToken: string) {
+  return new QueryRequest({
+    customFilters: [],
+    offset: 0,
+    limit: 10000,
+    filters: new FiltersExpression({
+      filters: [
+        new Filter({
+          field: 'status',
+          values: ['Running'],
+          op: Operation.EQ,
+        }),
+        new Filter({
+          field: 'tags',
+          values: [null],
+          op: Operation.LIKE,
+        }),
+        new Filter({
+          field: 'startDate',
+          values: [Math.round(new Date().getTime() / 1000).toString()],
+          op: Operation.LE,
+        }),
+        new Filter({
+          field: 'paymentToken',
+          values: [paymentToken],
+          op: Operation.EQ,
+        }),
+      ],
+      operator: Operator.AND,
+    }),
+    groupByOption: new Grouping({
+      groupBy: GroupBy.IDENTIFIER,
+    }),
+    sorting: [],
+  });
+}
+
 export const runningAuctionRequest = new QueryRequest({
   customFilters: [],
   offset: 0,

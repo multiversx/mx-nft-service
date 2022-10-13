@@ -58,15 +58,17 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
    GROUP BY a.collection`;
 }
 
-export function getDefaultAuctionsQuery(
-  endDate: number,
-  queryRequest: QueryRequest,
-) {
+export function getDefaultAuctionsQuery(queryRequest: QueryRequest) {
   let supplementalFilters = '';
 
   const collection = queryRequest.getFilterName('collection');
   if (collection) {
     supplementalFilters += ` AND a.collection = '${collection}'`;
+  }
+
+  const paymentToken = queryRequest.getFilterName('paymentToken');
+  if (paymentToken) {
+    supplementalFilters += ` AND a.paymentToken = '${paymentToken}'`;
   }
 
   const marketplaceKey = queryRequest.getFilterName('marketplaceKey');
@@ -78,16 +80,7 @@ export function getDefaultAuctionsQuery(
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
-       AND a.endDate <= ${endDate}
-       ${supplementalFilters})
-    UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price
-    FROM auctions a 
-    LEFT JOIN LATERAL 
-    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
-      AND a.endDate> ${endDate}
+    WHERE a.status='Running' AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
        ${supplementalFilters}))
     order by if(price, price, minBidDenominated) ASC ) as temp`;
 
