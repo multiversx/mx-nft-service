@@ -43,6 +43,7 @@ export class AuctionEntity extends BaseEntity {
   type: AuctionTypeEnum;
 
   @Column({ length: 20 })
+  @Index('auction_payment_token')
   paymentToken: string;
 
   @Column()

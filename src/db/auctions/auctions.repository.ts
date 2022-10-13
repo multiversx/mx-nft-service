@@ -86,7 +86,6 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
@@ -97,7 +96,7 @@ export class AuctionsRepository {
     queryBuilder
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
-    FROM (${getDefaultAuctionsQuery(endDate, queryRequest)})`,
+    FROM (${getDefaultAuctionsQuery(queryRequest)})`,
         't',
         'a.id = t.id',
       )
