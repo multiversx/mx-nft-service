@@ -79,9 +79,10 @@ export class NftTraitsService {
             path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
           },
         );
+        return true;
       }
 
-      return true;
+      return false;
     } catch (error) {
       this.logger.log(
         `Error when trying to update/validate collection traits for ${collectionTicker}`,
@@ -90,7 +91,6 @@ export class NftTraitsService {
           error: error.message,
         },
       );
-      console.log(error);
       return false;
     }
   }
