@@ -579,7 +579,7 @@ export class ElrondApiService {
 
   async getCollectionNftsCount(ticker: string): Promise<number> {
     return await this.doGetGeneric(
-      this.getCollectionsCount.name,
+      this.getCollectionNftsCount.name,
       `collections/${ticker}/nfts/count`,
     );
   }

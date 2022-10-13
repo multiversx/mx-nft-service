@@ -62,7 +62,7 @@ export class FeaturedService {
     filters: FeaturedCollectionsFilter,
   ): Promise<[Collection[], number]> {
     try {
-      const cacheKey = this.getFeaturedCollectionsCacheKey(limit, offset);
+      const cacheKey = this.getFeaturedCollectionsCacheKey();
       const getFeaturedCollections = () =>
         this.persistenceService.getFeaturedCollections(limit, offset);
       let [featuredCollections, count] = await this.redisCacheService.getOrSet(
@@ -75,8 +75,9 @@ export class FeaturedService {
         featuredCollections = featuredCollections.filter(
           (x: { type: FeaturedCollectionTypeEnum }) => x.type === filters.type,
         );
-        count = featuredCollections?.length;
       }
+      count = featuredCollections.length;
+      featuredCollections = featuredCollections.slice(offset, offset + limit);
       const collections = await this.apiService.getCollectionsByIdentifiers(
         featuredCollections?.map((x) => x.identifier),
       );
@@ -95,7 +96,7 @@ export class FeaturedService {
     }
   }
 
-  private getFeaturedCollectionsCacheKey(limit, offset) {
-    return generateCacheKeyFromParams('featuredCollections', limit, offset);
+  private getFeaturedCollectionsCacheKey() {
+    return generateCacheKeyFromParams('featuredCollections');
   }
 }
