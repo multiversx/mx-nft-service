@@ -25,7 +25,6 @@ import {
 } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
-import { TraitSummary } from '../nft-traits/models/collection-traits.model';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 
 @Resolver(() => Collection)
@@ -188,7 +187,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   @ResolveField('traitSummary')
   async traitSummary(
     @Parent() collectionNode: Collection,
-  ): Promise<TraitSummary[]> {
+  ): Promise<{ [key: string]: { [key: string]: number } }> {
     return (
       collectionNode.traitSummary ??
       (await this.collectionsGetterService.getCollectionTraitSummary(
