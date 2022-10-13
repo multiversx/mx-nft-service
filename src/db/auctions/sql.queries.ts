@@ -66,6 +66,11 @@ export function getDefaultAuctionsQuery(queryRequest: QueryRequest) {
     supplementalFilters += ` AND a.collection = '${collection}'`;
   }
 
+  const paymentToken = queryRequest.getFilterName('paymentToken');
+  if (paymentToken) {
+    supplementalFilters += ` AND a.paymentToken = '${paymentToken}'`;
+  }
+
   const marketplaceKey = queryRequest.getFilterName('marketplaceKey');
   if (marketplaceKey) {
     supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
@@ -75,14 +80,7 @@ export function getDefaultAuctionsQuery(queryRequest: QueryRequest) {
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
-       ${supplementalFilters})
-    UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price
-    FROM auctions a 
-    LEFT JOIN LATERAL 
-    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
+    WHERE a.status='Running' AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
        ${supplementalFilters}))
     order by if(price, price, minBidDenominated) ASC ) as temp`;
 
