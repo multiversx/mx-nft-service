@@ -41,12 +41,10 @@ export class NftTraitsService {
       ]);
 
       if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
-        await this.persistenceService.saveOrUpdateTraitSummary(
-          new CollectionTraitSummary({
-            identifier: collectionTicker,
-            traitTypes: {},
-          }),
+        await this.persistenceService.updateTraitSummaryLastUpdated(
+          collectionTicker,
         );
+        await this.setCollectionTraitsFlagInElastic(collectionTicker);
         this.logger.log(
           `${collectionTicker} - Collection NFTs count bigger than threshold`,
           {
@@ -122,6 +120,9 @@ export class NftTraitsService {
         this.logger.log(`${collectionTicker} - VALID`, {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         });
+        await this.persistenceService.updateTraitSummaryLastUpdated(
+          collectionTicker,
+        );
         await this.setCollectionTraitsFlagInElastic(collectionTicker);
         return false;
       }
@@ -151,9 +152,10 @@ export class NftTraitsService {
       return true;
     } catch (error) {
       this.logger.log(
-        `Error when trying to updating/validating collection traits for ${collectionTicker}`,
+        `Error when trying to update/validate collection traits for ${collectionTicker}`,
         {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
+          error: error.message,
         },
       );
       return false;
@@ -220,6 +222,14 @@ export class NftTraitsService {
       nftTraitValuesFromElastic,
     );
 
+    if (!nftTraitValuesFromElastic) {
+      this.logger.warn(`NFT ${identifier} not found in Elastic`, {
+        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
+        identifier: identifier,
+      });
+      return false;
+    }
+
     if (nftTraitsFromApi && !areIdenticalTraits) {
       this.logger.log(`${identifier} - MINT/UPDATE`, {
         path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
@@ -240,6 +250,7 @@ export class NftTraitsService {
     ) {
       this.logger.log(`${identifier} - Unknown problem => update collection`, {
         path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
+        identifier: identifier,
       });
       return await this.updateCollectionTraits(collection);
     }
@@ -285,11 +296,11 @@ export class NftTraitsService {
     traits: NftTrait[],
     traitValues: string[],
   ): boolean {
-    if (traits?.length !== traitValues.length) {
+    if (traits?.length !== traitValues?.length) {
       return false;
     }
     for (const trait of traits) {
-      if (!traitValues.includes(this.traitToBase64Encoded(trait))) {
+      if (!traitValues?.includes(this.traitToBase64Encoded(trait))) {
         return false;
       }
     }

@@ -957,4 +957,19 @@ export class PersistenceService {
       await this.traitRepositoryService.create(traitSummary);
     }
   }
+
+  async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      { identifier: collection },
+      { lastUpdated: new Date().getTime() },
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(
+        new CollectionTraitSummary({
+          identifier: collection,
+          lastUpdated: new Date().getTime(),
+        }),
+      );
+    }
+  }
 }

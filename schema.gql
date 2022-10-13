@@ -751,6 +751,7 @@ type Mutation {
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateAllCollectionTraits: Boolean!
+  updateAllNftTraits: Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftRarities(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
