@@ -424,11 +424,11 @@ export class ElrondApiService {
         end = start + batchSize - 1;
       }
 
-      let query = new AssetsQuery()
+      const query = new AssetsQuery()
         .addNonceAfter(start)
         .addNonceBefore(end)
         .addPageSize(0, batchSize)
-        .addQuery(`&fields=${fields}`);
+        .addQuery(`fields=${fields}`);
 
       const url = `collections/${collection}/nfts${query.build()}`;
 
@@ -442,6 +442,25 @@ export class ElrondApiService {
     } while (lastEnd < endNonce);
 
     return this.filterUniqueNftsByNonce(nfts);
+  }
+
+  async getNftsWithAttributesBeforeTimestamp(
+    beforeTimestamp: number,
+    size: number,
+  ): Promise<[Nft[], number]> {
+    const query = new AssetsQuery()
+      .addBefore(beforeTimestamp)
+      .addPageSize(0, size)
+      .addQuery('hasUris=true')
+      .addFields(['identifier', 'metadata', 'timestamp']);
+    const url = `nfts${query.build()}`;
+    let nfts = await this.doGetGeneric(
+      this.getAllNftsByCollectionAfterNonce.name,
+      url,
+    );
+    const lastTimestamp = nfts?.[nfts.length - 1]?.timestamp ?? beforeTimestamp;
+    nfts = nfts.filter((nft) => nft.metadata?.attributes);
+    return [nfts, lastTimestamp];
   }
 
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {

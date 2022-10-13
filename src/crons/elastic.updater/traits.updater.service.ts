@@ -165,27 +165,6 @@ export class TraitsUpdaterService {
     return notUpdatedCollections;
   }
 
-  async processTokenTraitsQueue() {
-    await Locker.lock(
-      'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
-      async () => {
-        const tokensToUpdate: string[] =
-          await this.redisCacheService.popAllItemsFromList(
-            this.traitsQueueRedisClient,
-            this.getTraitsQueueCacheKey(),
-            true,
-          );
-
-        const notUpdatedNfts: string[] = await this.updateTokenTraits(
-          tokensToUpdate,
-        );
-
-        await this.addNftsToTraitQueue(notUpdatedNfts);
-      },
-      true,
-    );
-  }
-
   async updateTokenTraits(identifiers: string[]): Promise<string[]> {
     let notUpdatedTokens: string[] = [];
     for (const identifier of identifiers) {
@@ -212,6 +191,27 @@ export class TraitsUpdaterService {
       }
     }
     return notUpdatedTokens;
+  }
+
+  async processTokenTraitsQueue() {
+    await Locker.lock(
+      'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
+      async () => {
+        const tokensToUpdate: string[] =
+          await this.redisCacheService.popAllItemsFromList(
+            this.traitsQueueRedisClient,
+            this.getTraitsQueueCacheKey(),
+            true,
+          );
+
+        const notUpdatedNfts: string[] = await this.updateTokenTraits(
+          tokensToUpdate,
+        );
+
+        await this.addNftsToTraitQueue(notUpdatedNfts);
+      },
+      true,
+    );
   }
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {

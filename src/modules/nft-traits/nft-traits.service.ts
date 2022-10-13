@@ -4,6 +4,7 @@ import {
   QueryOperator,
   RangeLowerThanOrEqual,
   RangeGreaterThan,
+  ElasticSortOrder,
 } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
@@ -134,7 +135,7 @@ export class NftTraitsService {
             ? 'Missing NFTs from Elastic'
             : 'Extra NFTs in Elastic';
         this.logger.log(
-          `${message} ${nftsFromApi.length} vs ${encodedNftValuesFromElastic.length}`,
+          `${collection} - ${message} ${nftsFromApi.length} vs ${encodedNftValuesFromElastic.length}`,
           {
             path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
             collection: collection,
@@ -582,6 +583,140 @@ export class NftTraitsService {
     }
   }
 
+  async updateAllNftTraits(): Promise<void> {
+    await Locker.lock(
+      'updateAllNftTraits: Update traits for all existing NFTs',
+      async () => {
+        try {
+          const batchSize = constants.updateAllNftTraitsBatchSize;
+          let iterations = 0;
+          let beforeTimestamp = Math.round(Date.now() / 1000);
+          let totalProcessedNfts = 0;
+
+          let collectionsNftsCountDict = {};
+
+          while (true) {
+            const [[nftsBatch, lastTimestamp], nftsFromElasticDict] =
+              await Promise.all([
+                this.apiService.getNftsWithAttributesBeforeTimestamp(
+                  beforeTimestamp,
+                  batchSize,
+                ),
+                this.getAllNftsWithTraitsFromElastic(
+                  beforeTimestamp,
+                  batchSize,
+                ),
+              ]);
+
+            for (const nft of nftsBatch) {
+              const { collection } = getCollectionAndNonceFromIdentifier(
+                nft.identifier,
+              );
+
+              if (!collectionsNftsCountDict[nft.identifier]) {
+                collectionsNftsCountDict[nft.identifier] =
+                  await this.apiService.getCollectionNftsCount(collection);
+              }
+
+              if (
+                this.isCollectionTooBig(
+                  collection,
+                  collectionsNftsCountDict[nft.identifier],
+                )
+              ) {
+                totalProcessedNfts++;
+                continue;
+              }
+
+              const nftTraitsFromApi = new NftTraits({
+                identifier: nft.identifier,
+                traits: Array.isArray(nft.metadata.attributes)
+                  ? nft.metadata?.attributes
+                      ?.filter((a) => a.trait_type && a.value)
+                      ?.map(NftTrait.fromNftMetadataAttribute)
+                  : [],
+              });
+
+              const areIdenticalTraits = this.areIdenticalTraits(
+                nftTraitsFromApi.traits,
+                nftsFromElasticDict[nft.identifier] ?? [],
+              );
+
+              if (!areIdenticalTraits) {
+                const logMssage = nftsFromElasticDict[nft.identifier]
+                  ? 'Not identical traits'
+                  : 'Missing NFT from Elastic';
+                this.logger.log(logMssage, {
+                  path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
+                  identifier: nft.identifier,
+                });
+                await this.updateNftTraits(nft.identifier);
+                totalProcessedNfts++;
+                continue;
+              }
+
+              this.logger.log(`${nft.identifier} - VALID`, {
+                path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
+              });
+              totalProcessedNfts++;
+            }
+
+            if (lastTimestamp === beforeTimestamp) {
+              this.logger.log(
+                `Processed ${totalProcessedNfts} in ${iterations} iterations of ${batchSize} NFTs`,
+                {
+                  path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
+                },
+              );
+              break;
+            }
+
+            iterations++;
+            beforeTimestamp = lastTimestamp;
+          }
+        } catch (error) {
+          this.logger.error('Error when updating all collections', {
+            path: `${NftTraitsService.name}.${this.updateAllCollectionTraits.name}`,
+            exception: error?.message,
+          });
+        }
+      },
+      true,
+    );
+  }
+
+  private async getAllNftsWithTraitsFromElastic(
+    beforeTimestamp: number,
+    maxToFetch: number,
+  ): Promise<{ [key: string]: string[] }> {
+    let dict: { [key: string]: string[] } = {};
+    try {
+      const query =
+        this.getAllEncodedNftValuesFromElasticBeforeTimestampQuery(
+          beforeTimestamp,
+        );
+
+      await this.elasticService.getScrollableList(
+        'tokens',
+        'identifier',
+        query,
+        async (items) => {
+          items.map((item) => (dict[item.identifier] = item.nft_traitValues));
+        },
+        maxToFetch,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error when getting all NFT trait values from Elastic`,
+        {
+          path: `${NftTraitsService.name}.${this.getAllNftsWithTraitsFromElastic.name}`,
+          exception: error?.message,
+        },
+      );
+    }
+    return dict;
+  }
+
   getAllEncodedNftValuesFromElasticQuery(
     collection: string,
     startNonce?: number,
@@ -604,6 +739,21 @@ export class NftTraitsService {
         new RangeLowerThanOrEqual(endNonce),
       );
     }
+    return query;
+  }
+
+  getAllEncodedNftValuesFromElasticBeforeTimestampQuery(
+    beforeTimestamp?: number,
+  ): ElasticQuery {
+    let query = ElasticQuery.create()
+      .withMustExistCondition('nonce')
+      .withFields(['nft_traitValues', 'timestamp', 'identifier'])
+      .withRangeFilter('timestamp', new RangeLowerThanOrEqual(beforeTimestamp))
+      .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
+      .withPagination({
+        from: 0,
+        size: constants.getNftsFromElasticBatchSize,
+      });
     return query;
   }
 
