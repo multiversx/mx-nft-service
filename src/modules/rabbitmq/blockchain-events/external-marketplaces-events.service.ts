@@ -154,8 +154,8 @@ export class ExternalMarketplaceEventsService {
               }),
             );
             await this.feedEventsSenderService.sendBuyEvent(
-              buySftTopics.bid,
               buySftTopics.currentWinner,
+              buySftTopics.bid,
               buySftTopics.boughtTokens,
               orderSft,
               buyAuction,

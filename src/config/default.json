@@ -67,10 +67,12 @@
   },
   "constants": {
     "getNftsFromApiBatchSize": 250,
-    "bulkUpdateElasticBatchSize": 100,
     "getTokensFromApiBatchSize": 100,
+    "bulkUpdateElasticBatchSize": 100,
+    "getNftsFromElasticBatchSize": 250,
     "getCollectionsFromElasticBatchSize": 100,
-    "getNftsFromElasticBatchSize": 100
+    "nftsCountThresholdForTraitAndRarityIndexing": 100000,
+    "updateAllNftTraitsBatchSize": 10000
   },
   "genericDescriptions": {
     "forBigCollections": [

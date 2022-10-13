@@ -95,7 +95,14 @@ export class AdminOperationsResolver {
   @Mutation(() => Boolean)
   @UseGuards(GqlAdminAuthGuard)
   updateAllCollectionTraits(): boolean {
-    this.nftTraitService.updateTraitsForAllCollections();
+    this.nftTraitService.updateAllCollectionTraits();
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  updateAllNftTraits(): boolean {
+    this.nftTraitService.updateAllNftTraits();
     return true;
   }
 }

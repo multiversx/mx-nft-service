@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../../utils/extentions';
+import '../../../utils/extensions';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { RedisCacheService } from 'src/common';

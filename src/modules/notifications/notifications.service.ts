@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { Notification, NotificationStatusEnum } from './models';
 import { NotificationEntity } from 'src/db/notifications';
 import { AuctionEntity } from 'src/db/auctions';

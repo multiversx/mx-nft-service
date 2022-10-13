@@ -53,17 +53,7 @@ export class ElasticUpdatesEventsService {
     let nftsOrCollectionsToUpdate: string[] = [];
 
     for (let event of events) {
-      switch (event.identifier) {
-        case NftEventEnum.ESDTNFTCreate: {
-          event = new MintEvent(event);
-        }
-        case NftEventEnum.ESDTNFTUpdateAttributes: {
-          event = new UpdateAttributesEvent(event);
-        }
-        case NftEventEnum.ESDTNFTBurn: {
-          event = new BurnEvent(event);
-        }
-      }
+      event = this.convertToMatchingEventType(event);
 
       const topics = event.getTopics();
       const identifier = `${topics.collection}-${topics.nonce}`;
@@ -162,5 +152,22 @@ export class ElasticUpdatesEventsService {
 
   private getTraitsQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.traitsQueueClientName);
+  }
+
+  private convertToMatchingEventType(
+    event: any,
+  ): MintEvent | UpdateAttributesEvent | BurnEvent {
+    switch (event.identifier) {
+      case NftEventEnum.ESDTNFTCreate: {
+        event = new MintEvent(event);
+      }
+      case NftEventEnum.ESDTNFTUpdateAttributes: {
+        event = new UpdateAttributesEvent(event);
+      }
+      case NftEventEnum.ESDTNFTBurn: {
+        event = new BurnEvent(event);
+      }
+    }
+    return event;
   }
 }

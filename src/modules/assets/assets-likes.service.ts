@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AssetLikeEntity } from 'src/db/assets';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
 import {

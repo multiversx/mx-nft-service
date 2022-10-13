@@ -1,20 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Auction } from './models';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
-import {
-  Filter,
-  FiltersExpression,
-  GroupBy,
-  Grouping,
-  Operation,
-  Operator,
-  Sort,
-} from '../common/filters/filtersTypes';
+import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { DateUtils } from 'src/utils/date-utils';
@@ -36,6 +28,7 @@ import {
   auctionsByNoBidsRequest,
   buyNowAuctionRequest,
   getAuctionsForCollectionRequest,
+  getAuctionsForPaymentTokenRequest,
   runningAuctionRequest,
 } from './auctionsRequest';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
@@ -43,6 +36,7 @@ import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filte
 @Injectable()
 export class AuctionsGetterService {
   private redisClient: Redis.Redis;
+  private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
@@ -52,6 +46,9 @@ export class AuctionsGetterService {
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
+    );
+    this.auctionsRedisClient = this.cacheService.getClient(
+      cacheConfig.auctionsRedisClientName,
     );
   }
 
@@ -472,6 +469,7 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
     const collectionFilter = queryRequest.getFilterName('collection');
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     const currentPriceFilter = queryRequest.getRange(
       AuctionCustomEnum.CURRENTPRICE,
     );
@@ -486,6 +484,14 @@ export class AuctionsGetterService {
     if (collectionFilter && !hasCurrentPriceFilter) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
+        queryRequest,
+        sort,
+      );
+    }
+
+    if (paymentTokenFilter && !hasCurrentPriceFilter) {
+      return await this.retriveTokensAuctions(
+        paymentTokenFilter,
         queryRequest,
         sort,
       );
@@ -516,7 +522,7 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
+        this.auctionsRedisClient,
         `collectionAuctions:${collectionFilter}`,
         async () => await this.getAuctionsByCollection(collectionFilter),
         Constants.oneMinute() * 10,
@@ -537,6 +543,53 @@ export class AuctionsGetterService {
         paymentTokenFilter.values.includes(x.minBid?.token),
       );
     }
+    if (marketplaceFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.marketplaceKey === marketplaceFilter,
+      );
+
+      priceRange = this.computePriceRange(allAuctions);
+    }
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retriveTokensAuctions(
+    paymentTokenFilter: string,
+    queryRequest: QueryRequest,
+    sort: { field: string; direction: Sort },
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.auctionsRedisClient,
+        `paymentTokenAuctions:${paymentTokenFilter}`,
+        async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
+        Constants.oneMinute() * 10,
+        Constants.oneSecond() * 30,
+      );
+
+    const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
+    const typeFilter = queryRequest.getFilter('type');
+    if (typeFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        typeFilter.values.includes(x.type),
+      );
+    }
+
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
@@ -706,6 +759,15 @@ export class AuctionsGetterService {
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
 
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
+  async getAuctionsByPaymentToken(
+    paymentToken: string,
+  ): Promise<[Auction[], number, PriceRange]> {
+    const queryRequest = getAuctionsForPaymentTokenRequest(paymentToken);
+
+    return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
+  }
+
   async getAuctionsGroupByIdentifierRaw(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
@@ -743,7 +805,7 @@ export class AuctionsGetterService {
   }
 
   async getCurrentPaymentTokens(
-    filters: CurrentPaymentTokensFilters,
+    filters?: CurrentPaymentTokensFilters,
   ): Promise<Token[]> {
     try {
       return await this.auctionCachingService.getCurrentPaymentTokens(

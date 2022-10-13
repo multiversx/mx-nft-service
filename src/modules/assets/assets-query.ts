@@ -60,7 +60,15 @@ export class AssetsQuery {
   }
 
   addPageSize(from: number, size: number): this {
-    return this.addParamToQuery('from', from).addParamToQuery('size', size);
+    if ((!from && from < 0) || !size) {
+      return this;
+    }
+    if (this.query === '') {
+      this.query = `?from=${from}&size=${size}`;
+    } else {
+      this.query = `${this.query}&from=${from}&size=${size}`;
+    }
+    return this;
   }
 
   withSupply(): this {
@@ -73,6 +81,14 @@ export class AssetsQuery {
 
   withNsfwFlag(): this {
     return this.addParamToQuery('isNsfw', false);
+  }
+
+  addNonceBefore(nonce: number): this {
+    return this.addParamToQuery('nonceBefore', nonce);
+  }
+
+  addNonceAfter(nonce: number): this {
+    return this.addParamToQuery('nonceAfter', nonce);
   }
 
   addBefore(timestamp: number): this {

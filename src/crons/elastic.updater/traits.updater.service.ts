@@ -165,6 +165,34 @@ export class TraitsUpdaterService {
     return notUpdatedCollections;
   }
 
+  async updateTokenTraits(identifiers: string[]): Promise<string[]> {
+    let notUpdatedTokens: string[] = [];
+    for (const identifier of identifiers) {
+      try {
+        await Locker.lock(
+          `updateTokenTraits ${identifier}`,
+          async () => {
+            const token = getCollectionAndNonceFromIdentifier(identifier);
+            if (token.nonce) {
+              await this.nftTraitsService.updateNftTraits(identifier);
+            } else {
+              await this.nftTraitsService.updateCollectionTraits(identifier);
+            }
+          },
+          true,
+        );
+      } catch (error) {
+        this.logger.error(`Error when updating nft traits`, {
+          path: 'TraitsUpdaterService.updateNftTraits',
+          exception: error?.message,
+          identifier: identifier,
+        });
+        notUpdatedTokens.push(identifier);
+      }
+    }
+    return notUpdatedTokens;
+  }
+
   async processTokenTraitsQueue() {
     await Locker.lock(
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
@@ -184,35 +212,6 @@ export class TraitsUpdaterService {
       },
       true,
     );
-  }
-
-  async updateTokenTraits(identifiers: string[]): Promise<string[]> {
-    let notUpdatedTokens: string[] = [];
-    for (const identifier of identifiers) {
-      try {
-        await Locker.lock(
-          `updateTokenTraits ${identifier}`,
-          async () => {
-            const token = getCollectionAndNonceFromIdentifier(identifier);
-            console.log(token);
-            if (token.nonce) {
-              await this.nftTraitsService.updateNftTraits(identifier);
-            } else {
-              await this.nftTraitsService.updateCollectionTraits(identifier);
-            }
-          },
-          true,
-        );
-      } catch (error) {
-        this.logger.error(`Error when updating nft traits`, {
-          path: 'TraitsUpdaterService.updateNftTraits',
-          exception: error?.message,
-          identifier: identifier,
-        });
-        notUpdatedTokens.push(identifier);
-      }
-    }
-    return notUpdatedTokens;
   }
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { ElrondApiService, RedisCacheService } from 'src/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from '../common/redis-value.dto';
 import { BaseCollectionsAssetsRedisHandler } from './base-collection-assets.redis-handler';
@@ -12,6 +13,7 @@ export class CollectionsTraitSummaryRedisHandler extends BaseCollectionsAssetsRe
   constructor(
     redisCacheService: RedisCacheService,
     private apiService: ElrondApiService,
+    private persistenceService: PersistenceService,
   ) {
     super(redisCacheService, 'collectionTraitSummary');
   }
@@ -38,16 +40,18 @@ export class CollectionsTraitSummaryRedisHandler extends BaseCollectionsAssetsRe
     let getTraitSummayPromises = keys.map((collection) => {
       return {
         collection,
-        traitsPromise: this.apiService.getCollectionTraitSummary(collection),
+        traitsPromise: this.persistenceService.getTraitSummary(collection),
       };
     });
 
     let traitSummaries = await Promise.all(getTraitSummayPromises);
-    let traitSummariesGroupByCollection: { [key: string]: any[] } = {};
+    let traitSummariesGroupByCollection: {
+      [key: string]: { [key: string]: { [key: string]: number } };
+    } = {};
 
     for (const traitSummary of traitSummaries) {
       traitSummariesGroupByCollection[traitSummary.collection] =
-        (await traitSummary.traitsPromise) ?? [];
+        (await traitSummary.traitsPromise).traitTypes ?? {};
     }
     return traitSummariesGroupByCollection;
   }

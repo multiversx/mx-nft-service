@@ -86,7 +86,6 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
@@ -97,7 +96,7 @@ export class AuctionsRepository {
     queryBuilder
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
-    FROM (${getDefaultAuctionsQuery(endDate, queryRequest)})`,
+    FROM (${getDefaultAuctionsQuery(queryRequest)})`,
         't',
         'a.id = t.id',
       )
@@ -387,7 +386,7 @@ export class AuctionsRepository {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
       .select(
-        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, GREATEST(MIN(`a`.`minBidDenominated`), IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`))) AS minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, MIN(GREATEST(a.minBidDenominated,IF(ISNULL(o.priceAmountDenominated), a.minBidDenominated, o.priceAmountDenominated))) AS minBid',
       )
       .leftJoin(
         'orders',
@@ -407,18 +406,22 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
+    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    const paymentToken = paymentTokenFilter
+      ? paymentTokenFilter.values[0]
+      : 'EGLD';
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder
       .select(
-        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, GREATEST(MIN(`a`.`minBidDenominated`), IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`))) AS minBid',
+        'GREATEST(MAX(`a`.`maxBidDenominated`),IF(ISNULL(MAX(`o`.`priceAmountDenominated`)), 0, MAX(`o`.`priceAmountDenominated`)), MAX(`a`.`minBidDenominated`)) AS maxBid, MIN(GREATEST(a.minBidDenominated, IF(ISNULL(o.priceAmountDenominated), a.minBidDenominated, o.priceAmountDenominated))) AS minBid',
       )
       .leftJoin(
         'orders',
         'o',
         'o.auctionId=a.id AND o.id =(SELECT MAX(id) FROM orders o2 WHERE o2.auctionId = a.id)',
       )
-      .andWhere("a.paymentToken = 'EGLD'")
+      .andWhere(`a.paymentToken = '${paymentToken}'`)
       .execute();
     return response[0];
   }

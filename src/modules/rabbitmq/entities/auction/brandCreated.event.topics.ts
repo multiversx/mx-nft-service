@@ -1,4 +1,4 @@
-import '../../../../utils/extentions';
+import '../../../../utils/extensions';
 
 export class BrandCreatedEventTopics {
   private eventIdentifier: string;

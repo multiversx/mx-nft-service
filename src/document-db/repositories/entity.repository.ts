@@ -5,7 +5,7 @@ export abstract class EntityRepository<T extends Document> {
 
   async create(createEntityData: any): Promise<T> {
     const entity = new this.entityModel(createEntityData);
-    return entity.save();
+    return entity.save({ checkKeys: false });
   }
 
   async findOne(

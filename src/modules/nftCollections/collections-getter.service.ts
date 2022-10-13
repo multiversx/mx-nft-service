@@ -21,7 +21,6 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
-import { TraitSummary } from '../nft-traits/models/collection-traits.model';
 import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
 
 @Injectable()
@@ -169,7 +168,7 @@ export class CollectionsGetterService {
     let [collections, count] = await this.getOrSetFullCollections();
 
     collections = this.applyFilters(filters, collections);
-
+    collections = collections.filter((c) => c.nftsCount > 4);
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
       collections = orderBy(
         collections,
@@ -230,18 +229,9 @@ export class CollectionsGetterService {
     return [uniqueCollections, uniqueCollections?.length];
   }
 
-  private async getFullCollectionRaw(ticker: string): Promise<Collection> {
-    let collection = Collection.fromCollectionApi(
-      await this.apiService.getCollectionByIdentifierForQuery(ticker),
-    );
-    [collection] = await this.mapCollectionNftsCount([collection], 0);
-    [collection] = await this.mapCollectionNfts([collection]);
-    [collection] = await this.mapCollectionTraitSummaries([collection]);
-
-    return collection;
-  }
-
-  async getOrSetMostActiveCollections(): Promise<[Collection[], number]> {
+  async getOrSetMostActiveCollections(): Promise<
+    [{ artist: string; nfts: number }[], number]
+  > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.CollectionsMostActive.key,
@@ -250,7 +240,15 @@ export class CollectionsGetterService {
     );
   }
 
-  public async getMostActiveCollections(): Promise<[Collection[], number]> {
+  async getCreationsCount(address: string): Promise<number> {
+    const [collections] = await this.getOrSetMostActiveCollections();
+    const response = collections.find((x) => x.artist === address);
+    return response.nfts;
+  }
+
+  public async getMostActiveCollections(): Promise<
+    [{ artist: string; nfts: number }[], number]
+  > {
     const [collections] = await this.getOrSetFullCollections();
     let groupedCollections = collections
       .groupBy((x) => x.artistAddress, true)
@@ -343,10 +341,7 @@ export class CollectionsGetterService {
     return localCollections;
   }
 
-  private async mapCollectionNftsCount(
-    localCollections: Collection[],
-    filterByNftsCountThresold: number = 4,
-  ) {
+  private async mapCollectionNftsCount(localCollections: Collection[]) {
     const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
       localCollections.map((collection) => collection.collection),
     );
@@ -361,13 +356,6 @@ export class CollectionsGetterService {
           });
         }
       }
-    }
-
-    if (filterByNftsCountThresold) {
-      localCollections = localCollections.filter(
-        (x) =>
-          parseInt(x.collectionAsset?.totalCount) >= filterByNftsCountThresold,
-      );
     }
 
     return localCollections;
@@ -445,7 +433,7 @@ export class CollectionsGetterService {
   async getRandomCollectionDescription(node: Collection): Promise<string> {
     const size =
       node.nftsCount ??
-      (await this.apiService.getCollectionNftsCount(node.ticker));
+      (await this.apiService.getCollectionNftsCount(node.collection));
 
     const descriptions =
       size > 100
@@ -455,7 +443,12 @@ export class CollectionsGetterService {
     return descriptions[randomIdx].replace('{size}', size.toString());
   }
 
-  async getCollectionTraitSummary(collection: string): Promise<TraitSummary[]> {
-    return await this.apiService.getCollectionTraitSummary(collection);
+  async getCollectionTraitSummary(
+    collection: string,
+  ): Promise<{ [key: string]: { [key: string]: number } }> {
+    const traitSummary = await this.persistenceService.getTraitSummary(
+      collection,
+    );
+    return traitSummary.traitTypes;
   }
 }

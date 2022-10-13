@@ -39,9 +39,7 @@ if (!!process.env.LOG_FILE) {
   imports: [
     forwardRef(() => CachingModule),
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule,
     WinstonModule.forRoot({
       transports: logTransports,
     }),

@@ -946,17 +946,30 @@ export class PersistenceService {
   async saveOrUpdateTraitSummary(
     traitSummary: CollectionTraitSummary,
   ): Promise<void> {
-    await this.traitRepositoryService
-      .findOneAndUpdate(
-        {
-          identifier: traitSummary.identifier,
-        },
-        traitSummary,
-      )
-      .then(async (data) => {
-        if (!data) {
-          await this.traitRepositoryService.create(traitSummary);
-        }
-      });
+    traitSummary = traitSummary.updateTimestamp();
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      {
+        identifier: traitSummary.identifier,
+      },
+      traitSummary,
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(traitSummary);
+    }
+  }
+
+  async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
+    const res = await this.traitRepositoryService.findOneAndUpdate(
+      { identifier: collection },
+      { lastUpdated: new Date().getTime() },
+    );
+    if (!res) {
+      await this.traitRepositoryService.create(
+        new CollectionTraitSummary({
+          identifier: collection,
+          lastUpdated: new Date().getTime(),
+        }),
+      );
+    }
   }
 }
