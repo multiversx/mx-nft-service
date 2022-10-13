@@ -845,9 +845,14 @@ export class AuctionsGetterService {
     const allTokens: Token[] = allMexTokens.concat(egldToken);
     let mappedTokens = [];
     for (const payment of currentPaymentTokenIds) {
-      const token = allTokens.find(
-        (x) => x.identifier === payment.paymentToken,
-      );
+      let token: Token;
+      if (payment.paymentToken === elrondConfig.lkmexIdentifier) {
+        token = allTokens.find((x) => x.symbol === elrondConfig.mexSymbol);
+        token.identifier = payment.paymentToken;
+        token.symbol = elrondConfig.lkmexSymbol;
+      } else {
+        token = allTokens.find((x) => x.identifier === payment.paymentToken);
+      }
       if (token) {
         mappedTokens.push({ ...token, activeAuctions: payment.activeAuctions });
       }
