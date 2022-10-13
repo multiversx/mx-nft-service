@@ -4,8 +4,6 @@ import { NftTrait } from './nft-traits.model';
 
 export type CollectionTraitSummaryDocument = CollectionTraitSummary & Document;
 
-export interface Wtf extends CollectionTraitSummaryDocument {}
-
 @Schema({ collection: 'nft_trait_summaries' })
 export class CollectionTraitSummary {
   @Prop()
