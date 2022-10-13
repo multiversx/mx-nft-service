@@ -59,22 +59,11 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
 }
 
 export function getDefaultAuctionsQuery(queryRequest: QueryRequest) {
-  let supplementalFilters = '';
-
-  const collection = queryRequest.getFilterName('collection');
-  if (collection) {
-    supplementalFilters += ` AND a.collection = '${collection}'`;
-  }
-
-  const paymentToken = queryRequest.getFilterName('paymentToken');
-  if (paymentToken) {
-    supplementalFilters += ` AND a.paymentToken = '${paymentToken}'`;
-  }
-
-  const marketplaceKey = queryRequest.getFilterName('marketplaceKey');
-  if (marketplaceKey) {
-    supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
-  }
+  let supplementalFilters = new AuctionFilterBuilder(queryRequest)
+    .addIfExists('collection')
+    .addIfExists('paymentToken')
+    .addIfExists('marketplaceKey')
+    .build();
 
   const result = `((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
@@ -257,4 +246,25 @@ export function getCurrentPaymentTokens(
   }`;
   return `SELECT DISTINCT paymentToken, COUNT(a.paymentToken) AS count FROM auctions a 
   WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken`;
+}
+
+export class AuctionFilterBuilder {
+  private queryFilter: string = '';
+  private queryRequest: QueryRequest;
+  constructor(queryRequest: QueryRequest) {
+    this.queryRequest = queryRequest;
+  }
+
+  addIfExists(filterName: string): this {
+    const filter = this.queryRequest.getFilterName(filterName);
+    if (filter) {
+      this.queryFilter += ` AND a.${filterName} = '${filter}'`;
+    }
+
+    return this;
+  }
+
+  build(): string {
+    return this.queryFilter;
+  }
 }
