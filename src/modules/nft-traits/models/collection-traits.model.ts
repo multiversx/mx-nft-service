@@ -62,11 +62,15 @@ export class CollectionTraitSummary {
     return this;
   }
 
-  isIdentical(traitSummary: CollectionTraitSummary): boolean {
+  isIdenticalTo(traitSummary: CollectionTraitSummary): boolean {
+    if (!traitSummary.traitTypes) {
+      traitSummary.traitTypes = {};
+    }
+
     if (
       this.identifier !== traitSummary?.identifier ||
       Object.entries(this.traitTypes).length !==
-        Object.entries(traitSummary?.traitTypes).length
+        Object.entries(traitSummary?.traitTypes)?.length
     ) {
       return false;
     }
@@ -74,7 +78,7 @@ export class CollectionTraitSummary {
     for (const [traitName, trait] of Object.entries(this.traitTypes)) {
       if (
         Object.entries(trait).length !==
-        Object.entries(traitSummary.traitTypes?.[traitName]).length
+        Object.entries(traitSummary.traitTypes?.[traitName])?.length
       ) {
         return false;
       }

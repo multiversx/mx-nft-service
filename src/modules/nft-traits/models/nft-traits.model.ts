@@ -1,3 +1,4 @@
+import { BinaryUtils } from '@elrondnetwork/erdnest';
 import { Field, InputType } from '@nestjs/graphql';
 import { Nft } from 'src/common';
 
@@ -28,6 +29,10 @@ export class EncodedNftValues {
 
   constructor(init?: Partial<EncodedNftValues>) {
     Object.assign(this, init);
+  }
+
+  static encode(trait: NftTrait): string {
+    return BinaryUtils.base64Encode(`${trait.name}_${trait.value}`);
   }
 }
 
@@ -66,5 +71,35 @@ export class NftTraits {
     }
 
     return newNft;
+  }
+
+  isIdenticalTo(
+    encodedNftValues2: EncodedNftValues,
+  ): [boolean, EncodedNftValues] {
+    const encodedNftValues1 = new EncodedNftValues({
+      identifier: this.identifier,
+      encodedValues: this.traits?.map((trait) =>
+        EncodedNftValues.encode(trait),
+      ),
+    });
+
+    if (!encodedNftValues2 && encodedNftValues1.encodedValues.length === 0) {
+      return [true, encodedNftValues1];
+    }
+
+    if (
+      encodedNftValues1.encodedValues.length !==
+      encodedNftValues2?.encodedValues?.length
+    ) {
+      return [false, encodedNftValues1];
+    }
+
+    for (const encodedValue of encodedNftValues1.encodedValues) {
+      if (!encodedNftValues2.encodedValues.includes(encodedValue)) {
+        return [false, encodedNftValues1];
+      }
+    }
+
+    return [true, encodedNftValues1];
   }
 }
