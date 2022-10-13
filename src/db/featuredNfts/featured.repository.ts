@@ -29,8 +29,8 @@ export class FeaturedCollectionsRepository extends Repository<FeaturedCollection
     const featuredCollections = await this.createQueryBuilder(
       'featuredCollections',
     )
-      .skip(offset)
-      .take(limit)
+      .skip(0)
+      .take(100)
       .getManyAndCount();
     return featuredCollections;
   }
