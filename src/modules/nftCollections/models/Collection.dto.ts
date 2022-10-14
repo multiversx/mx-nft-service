@@ -71,7 +71,7 @@ export class Collection {
   @Field(() => Int)
   artistFollowersCount: number;
   @Field(() => [CollectionNftTrait], { nullable: 'itemsAndList' })
-  traits?: CollectionNftTrait[];
+  traits: CollectionNftTrait[];
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
