@@ -403,9 +403,7 @@ export class NftTraitsService {
       try {
         await this.elasticService.bulkRequest(
           'tokens',
-          this.buildNftEncodedValuesBulkUpdate(
-            encodedNftValues.filter((nft) => nft.encodedValues.length > 0),
-          ),
+          this.buildNftEncodedValuesBulkUpdate(encodedNftValues),
           '?timeout=1m',
         );
       } catch (error) {
