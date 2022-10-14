@@ -215,13 +215,18 @@ export class PersistenceService {
     );
   }
 
-  async getStats(
+  async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
+    paymentToken: string = 'EGLD',
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
-      this.getStats.name,
-      this.collectionStatsRepository.getStats(identifier, marketplaceKey),
+      this.getCollectionStats.name,
+      this.collectionStatsRepository.getStats(
+        identifier,
+        marketplaceKey,
+        paymentToken,
+      ),
     );
   }
 

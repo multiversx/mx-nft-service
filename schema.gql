@@ -494,6 +494,7 @@ type CollectionStats {
 input CollectionStatsFilter {
   identifier: String!
   marketplaceKey: String
+  paymentToken: String
 }
 
 input CollectionsFilter {
