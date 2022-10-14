@@ -49,6 +49,7 @@ import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { AssetsLikesCachingService } from './assets-likes.caching.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 
 @Module({
   providers: [
@@ -101,6 +102,7 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
     ElrondCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
+    forwardRef(() => CollectionsModuleGraph),
     IpfsModule,
     PersistenceModule,
   ],
