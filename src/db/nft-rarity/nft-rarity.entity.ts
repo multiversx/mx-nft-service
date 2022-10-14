@@ -12,14 +12,34 @@ export class NftRarityEntity extends BaseEntity {
   @Index('rarity_identifier')
   identifier: string;
 
-  @Column('decimal', { precision: 6, scale: 3 })
-  score: number;
-
   @Column()
   nonce: number;
 
+  // manual
+  @Column('decimal', { precision: 6, scale: 3 })
+  score: number;
   @Column()
   rank: number;
+
+  @Column('decimal', { precision: 6, scale: 3 })
+  opScore: number;
+  @Column()
+  opRank: number;
+
+  @Column('decimal', { precision: 6, scale: 3 })
+  jdScore: number;
+  @Column()
+  jdRank: number;
+
+  @Column('decimal', { precision: 6, scale: 3 })
+  trScore: number;
+  @Column()
+  trRank: number;
+
+  @Column('decimal', { precision: 6, scale: 3 })
+  srScore: number;
+  @Column()
+  srRank: number;
 
   constructor(init?: Partial<NftRarityEntity>) {
     super();

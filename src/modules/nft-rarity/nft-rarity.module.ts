@@ -4,6 +4,7 @@ import { CommonModule } from 'src/common.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { CollectionsModuleGraph } from 'src/modules/nftCollections/collections.module';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
+import { JaccardDistancesRarityService } from './algorithms/jaccard-distances.service';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityService } from './nft-rarity.service';
 
@@ -12,6 +13,7 @@ import { NftRarityService } from './nft-rarity.service';
   providers: [
     NftRarityService,
     NftRarityComputeService,
+    JaccardDistancesRarityService,
     AssetRarityInfoRedisHandler,
     RarityUpdaterService,
   ],
