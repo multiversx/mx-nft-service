@@ -70,7 +70,7 @@ export class Collection {
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
-  @Field(() => [CollectionNftTrait], { nullable: true })
+  @Field(() => [CollectionNftTrait], { nullable: 'itemsAndList' })
   traits?: CollectionNftTrait[];
 
   constructor(init?: Partial<Collection>) {
