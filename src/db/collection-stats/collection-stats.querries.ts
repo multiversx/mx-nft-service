@@ -1,6 +1,7 @@
 export function getCollectionStats(
   identifier: string,
   marketplaceKey: string = undefined,
+  paymentToken: string = 'EGLD',
 ) {
   return `
   WITH
@@ -21,7 +22,7 @@ export function getCollectionStats(
     a.collection AS activeIdentifier
     FROM auctions a
     LEFT JOIN orders o ON o.auctionId = a.id 
-    WHERE a.collection  = '${identifier}' AND a.status = 'Running' ${getMarketplaceKeyFilter(
+    WHERE a.collection  = '${identifier}' AND a.status = 'Running' AND a.paymentToken='${paymentToken}' ${getMarketplaceKeyFilter(
     'a',
     marketplaceKey,
   )}) 

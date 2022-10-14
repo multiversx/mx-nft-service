@@ -27,11 +27,20 @@ export class CollectionsStatsService {
   async getStats(
     identifier: string,
     marketplaceKey: string = undefined,
+    paymentToken: string = 'EGLD',
   ): Promise<CollectionStatsEntity> {
     try {
-      const cacheKey = this.getStatsCacheKey(identifier, marketplaceKey);
+      const cacheKey = this.getStatsCacheKey(
+        identifier,
+        marketplaceKey,
+        paymentToken,
+      );
       const getCollectionStats = () =>
-        this.persistenceService.getStats(identifier, marketplaceKey);
+        this.persistenceService.getCollectionStats(
+          identifier,
+          marketplaceKey,
+          paymentToken,
+        );
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -55,11 +64,13 @@ export class CollectionsStatsService {
   private getStatsCacheKey(
     identifier: string,
     marketplaceKey: string = undefined,
+    paymentToken: string = 'EGLD',
   ) {
     return generateCacheKeyFromParams(
       'collection_stats',
       identifier,
       marketplaceKey ?? '',
+      paymentToken ?? '',
     );
   }
 
