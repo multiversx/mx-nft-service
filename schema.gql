@@ -95,10 +95,12 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
+  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
+  url: String @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
   viewsCount: Int
 }
