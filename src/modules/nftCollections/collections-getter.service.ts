@@ -21,6 +21,7 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
+import { S } from 'clarifai-nodejs-grpc/proto/clarifai/auth/scope/scope_pb';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Injectable()
@@ -72,6 +73,7 @@ export class CollectionsGetterService {
         sorting,
       );
     }
+
     return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
@@ -209,7 +211,7 @@ export class CollectionsGetterService {
       collectionsResponse.push(...mappedCollections);
 
       from = from + size;
-    } while (from < totalCount && from <= 10);
+    } while (from < totalCount && from <= 9975);
     let uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),
