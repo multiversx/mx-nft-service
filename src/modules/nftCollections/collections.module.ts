@@ -22,7 +22,6 @@ import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.l
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { CollectionsGetterService } from './collections-getter.service';
-import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-collection-for-owner.redis-handler';
 import { AssetsCollectionsRedisHandler } from '../assets/loaders/assets-collection.redis-handler';
@@ -50,7 +49,6 @@ import { AssetsCollectionsRedisHandler } from '../assets/loaders/assets-collecti
     ArtistAddressRedisHandler,
     AssetsCollectionsProvider,
     AssetsCollectionsRedisHandler,
-    CollectionsTraitSummaryRedisHandler,
     AssetsCollectionsForOwnerProvider,
     AssetsCollectionsForOwnerRedisHandler,
     SmartContractArtistsService,

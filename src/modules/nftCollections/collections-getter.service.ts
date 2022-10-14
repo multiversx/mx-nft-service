@@ -21,7 +21,6 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
-import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Injectable()
@@ -34,7 +33,6 @@ export class CollectionsGetterService {
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
-    private collectionTraitSummaryRedis: CollectionsTraitSummaryRedisHandler,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -208,14 +206,10 @@ export class CollectionsGetterService {
 
       mappedCollections = await this.mapCollectionNfts(mappedCollections);
 
-      mappedCollections = await this.mapCollectionTraitSummaries(
-        mappedCollections,
-      );
-
       collectionsResponse.push(...mappedCollections);
 
       from = from + size;
-    } while (from < totalCount && from <= 9975);
+    } while (from < totalCount && from <= 10);
     let uniqueCollections = [
       ...new Map(
         collectionsResponse.map((item) => [item.collection, item]),
@@ -355,23 +349,6 @@ export class CollectionsGetterService {
             collectionIdentifer: collectionNftsCount.key,
             totalCount: collectionNftsCount.value,
           });
-        }
-      }
-    }
-
-    return localCollections;
-  }
-
-  private async mapCollectionTraitSummaries(localCollections: Collection[]) {
-    let traitSummariesGroupByCollection =
-      await this.collectionTraitSummaryRedis.batchLoad(
-        localCollections?.map((item) => item.collection),
-      );
-
-    for (const collection of localCollections) {
-      for (const groupByCollection of traitSummariesGroupByCollection) {
-        if (collection.collection === groupByCollection.key) {
-          collection.traits = groupByCollection.value;
         }
       }
     }
