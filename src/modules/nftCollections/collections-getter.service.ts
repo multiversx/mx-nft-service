@@ -423,12 +423,14 @@ export class CollectionsGetterService {
     return descriptions[randomIdx].replace('{size}', size.toString());
   }
 
-  async getCollectionTraits(collection: string): Promise<CollectionNftTrait[]> {
+  async getCollectionTraits(
+    collection: string,
+  ): Promise<CollectionNftTrait[] | undefined> {
     const traitSummary = await this.persistenceService.getTraitSummary(
       collection,
     );
     if (!traitSummary || !traitSummary?.traitTypes) {
-      return [];
+      return undefined;
     }
     return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
   }
