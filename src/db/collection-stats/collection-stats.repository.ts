@@ -8,9 +8,10 @@ export class CollectionStatsRepository {
   async getStats(
     identifier: string,
     marketplaceKey: string = undefined,
+    paymentToken: string = 'EGLD',
   ): Promise<CollectionStatsEntity> {
     const response = await this.manager.query(
-      getCollectionStats(identifier, marketplaceKey),
+      getCollectionStats(identifier, marketplaceKey, paymentToken),
     );
     return response?.length > 0 ? response[0] : new CollectionStatsEntity();
   }
