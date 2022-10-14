@@ -69,9 +69,8 @@ export class AccountsStatsResolver {
   @ResolveField(() => Int)
   async creations(@Parent() stats: AccountStats) {
     const { address } = stats;
-    const creationsCount = await this.accountsStatsService.getCreationsCount(
-      address,
-    );
+    const creationsCount =
+      await this.accountsStatsService.getArtistCreationsInfo(address);
     return creationsCount?.nfts || 0;
   }
 }

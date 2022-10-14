@@ -106,7 +106,7 @@ describe.skip('AccountsStatsService', () => {
 
   describe('getCreationsCount', () => {
     it('should return total created nfts count', async () => {
-      const results = await service.getCreationsCount('');
+      const results = await service.getArtistCreationsInfo('');
 
       expect(results).toStrictEqual(10);
     });

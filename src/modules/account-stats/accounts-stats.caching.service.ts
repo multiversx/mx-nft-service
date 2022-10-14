@@ -87,10 +87,10 @@ export class AccountsStatsCachingService {
     );
   }
 
-  public async getCreationsCount(
+  public async getArtistCreationsInfo(
     address: string,
     getCreationsCount: () => any,
-  ): Promise<number> {
+  ): Promise<{ artist: string; nfts: number; collections: string[] }> {
     return this.redisCacheService.getOrSet(
       this.redisClient,
       generateCacheKeyFromParams('account_creations', address),
