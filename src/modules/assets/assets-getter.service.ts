@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import {
+  ElrondApiService,
+  ElrondElasticService,
+  RedisCacheService,
+} from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
@@ -17,12 +21,24 @@ import * as hash from 'object-hash';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import {
+  ElasticPagination,
+  ElasticQuery,
+  ElasticSortOrder,
+  QueryConditionOptions,
+  QueryOperator,
+  QueryType,
+} from '@elrondnetwork/erdnest';
+import { QueryPagination } from 'src/common/services/elrond-communication/models/query-pagination';
 
 @Injectable()
 export class AssetsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private collectionsService: CollectionsGetterService,
+    private elasticService: ElrondElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetRarityLoader: AssetRarityInfoProvider,
@@ -85,6 +101,7 @@ export class AssetsGetterService {
       this.addToCache(response);
       return response;
     }
+
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
         filters.likedByAddress,
@@ -94,6 +111,17 @@ export class AssetsGetterService {
       this.addToCache(response);
       return response;
     }
+
+    if (filters?.artistAddress) {
+      const response = await this.getAssetsByArtistAddress(
+        filters.artistAddress,
+        limit,
+        offset,
+      );
+      this.addToCache(response);
+      return response;
+    }
+
     if (filters?.ownerAddress) {
       const response = await this.getAssetsByOwnerAddress(
         filters,
@@ -234,6 +262,64 @@ export class AssetsGetterService {
         countQuery,
       );
     }
+  }
+
+  private async getAssetsByArtistAddress(
+    address: string,
+    size: number = 25,
+    offset: number = 0,
+  ): Promise<CollectionType<Asset>> {
+    const artistCollections = await this.collectionsService.getArtistCreations(
+      address,
+    );
+    let elasticQuery = this.getCollectionsElasticQuery(
+      artistCollections?.collections,
+      offset,
+      size,
+    );
+    let elasticNfts = await this.elasticService.getList(
+      'tokens',
+      'identifier',
+      elasticQuery,
+    );
+    const returnAssets = await this.mapElasticNfts(elasticNfts);
+    return new CollectionType({
+      items: returnAssets,
+      count: artistCollections.nfts,
+    });
+  }
+
+  private async mapElasticNfts(elasticNfts: any[]) {
+    const assets = await this.getAssetsForIdentifiers(
+      elasticNfts?.map((e) => e.identifier),
+    );
+
+    const returnAssets = [];
+    for (const asset of elasticNfts) {
+      returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
+    }
+    return returnAssets;
+  }
+
+  private getCollectionsElasticQuery(
+    collections: string[],
+    offset: number,
+    size: number,
+  ) {
+    return ElasticQuery.create()
+      .withCondition(QueryConditionOptions.must, QueryType.Exists('identifier'))
+      .withMustCondition(
+        QueryType.Should(
+          collections.map((collection) =>
+            QueryType.Match('token', collection, QueryOperator.AND),
+          ),
+        ),
+      )
+      .withPagination(new QueryPagination({ from: offset, size: size }))
+      .withSort([
+        { name: 'timestamp', order: ElasticSortOrder.descending },
+        { name: 'nonce', order: ElasticSortOrder.descending },
+      ]);
   }
 
   private async getAssetsByTraits(
