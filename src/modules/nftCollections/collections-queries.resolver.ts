@@ -20,6 +20,7 @@ import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.l
 import { Asset, AssetsResponse } from '../assets/models';
 import { Nft } from 'src/common';
 import {
+  AssetsCollectionFilter,
   CollectionsFilter,
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
@@ -142,10 +143,10 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
     @Args({
       name: 'filters',
-      type: () => CollectionsFilter,
+      type: () => AssetsCollectionFilter,
       nullable: true,
     })
-    filters: CollectionsFilter,
+    filters: AssetsCollectionFilter,
   ): Promise<AssetsResponse> {
     const { collection } = collectionResponse;
     const { limit, offset } = pagination.pagingParams();
