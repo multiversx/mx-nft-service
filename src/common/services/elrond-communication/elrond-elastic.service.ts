@@ -377,7 +377,6 @@ export class ElrondElasticService {
     const url = `${this.url}/${collection}/_search`;
 
     const profiler = new PerformanceProfiler();
-    console.log(JSON.stringify(elasticQuery));
     const result = await this.apiService.post(url, elasticQuery.toJson());
 
     profiler.stop();
