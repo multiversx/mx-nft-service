@@ -39,6 +39,15 @@ services:
       - 5673:5672
       - 15673:15672
 
+  mongodb:
+    image: mongo:latest
+    environment:
+      - MONGODB_DATABASE=development
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - 27017:27017
+
   db:
     image: mysql:latest
     container_name: nft-db

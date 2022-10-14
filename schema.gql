@@ -32,6 +32,7 @@ type AccountStats {
   collected: String
   collections: String
   creations: String
+  likes: String
   marketplaceKey: String
   orders: String
 }
@@ -69,6 +70,7 @@ type Asset {
   """This will return only the running query!"""
   auctions(pagination: ConnectionArgs): AuctionResponse
   balance: String
+  branding: CollectionBranding
   collection: ID!
   creationDate: Int
   creator: Account
@@ -93,12 +95,10 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum
   uris: [String!]!
-  url: String @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
   viewsCount: Int
 }
@@ -159,6 +159,11 @@ type AssetPageInfo {
   startCursor: String
 }
 
+input AssetsCollectionFilter {
+  """The owner of the collection"""
+  ownerAddress: String
+}
+
 input AssetsFilter {
   collection: String
 
@@ -170,6 +175,7 @@ input AssetsFilter {
   likedByAddress: String
   ownerAddress: String
   tags: [String!]
+  traits: [NftTrait]
   type: NftTypeEnum
 }
 
@@ -177,6 +183,10 @@ type AssetsResponse {
   edges: [AssetEdge!]
   pageData: PageData
   pageInfo: AssetPageInfo
+}
+
+enum AssetsSortingEnum {
+  MostLikes
 }
 
 input AttributeInput {
@@ -372,7 +382,7 @@ type Collection {
   artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
-  assets(pagination: ConnectionArgs): AssetsResponse
+  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -385,7 +395,7 @@ type Collection {
   creationDate: Int!
   description: String
   name: String!
-  nftsCount: Int!
+  nftsCount: Int
   onSaleAssetsCount: Int!
   owner: Account
   ownerAddress: String
@@ -395,6 +405,7 @@ type Collection {
   status: String
   svgUrl: String
   ticker: String!
+  traits: [CollectionNftTrait!]!
   type: String
   verified: Boolean!
   website: String
@@ -414,9 +425,28 @@ input CollectionAssetsRetriveCount {
   size: Int = 4
 }
 
+type CollectionBranding {
+  description: String
+  pngUrl: String
+  social: CollectionSocial
+  status: String
+  svgUrl: String
+  website: String
+}
+
 type CollectionEdge {
   cursor: String
   node: Collection
+}
+
+type CollectionNftTrait {
+  name: String!
+  values: [CollectionNftTraitValues!]!
+}
+
+type CollectionNftTraitValues {
+  occurrences: Float!
+  value: String!
 }
 
 type CollectionPageInfo {
@@ -462,9 +492,13 @@ type CollectionStats {
 
 input CollectionStatsFilter {
   identifier: String!
+  marketplaceKey: String
 }
 
 input CollectionsFilter {
+  """Flag for active last 30 days"""
+  activeLast30Days: Boolean
+
   """Flag for can create or not on collection"""
   canCreate: Boolean
 
@@ -477,6 +511,18 @@ input CollectionsFilter {
   """The owner of the collection"""
   ownerAddress: String
   type: NftTypeEnum
+
+  """Flag for verified collections"""
+  verified: Boolean
+
+  """Flag for collections where owner address has nfts"""
+  withNfts: Boolean
+}
+
+enum CollectionsSortingEnum {
+  Newest
+  Trending
+  Verified
 }
 
 input ConnectionArgs {
@@ -491,12 +537,6 @@ input ConnectionArgs {
 
   """Paginate last"""
   last: Int
-}
-
-type ContractInfo {
-  address: ID
-  isPaused: Boolean
-  marketplaceCutPercentage: String
 }
 
 input CreateAuctionArgs {
@@ -517,6 +557,29 @@ input CreateNftArgs {
   name: String!
   quantity: String = "1"
   royalties: String = "0"
+}
+
+input CurrentPaymentTokensFilters {
+  collectionIdentifier: String
+  marketplaceKey: String
+}
+
+type ExploreCollectionsStats {
+  activeLast30DaysCount: Int!
+  allCollectionsCount: Int!
+  verifiedCount: Int!
+}
+
+type ExploreNftsStats {
+  allNftsCount: Int!
+  buyNowCount: Int!
+  liveAuctionsCount: Int!
+}
+
+type ExploreStats {
+  artists: Int!
+  collections: Int!
+  nfts: Int!
 }
 
 enum FeaturedCollectionTypeEnum {
@@ -660,6 +723,8 @@ enum MediaTypeEnum {
   mp3
   mp4
   png
+  svg
+  svgXml
   wav
   webm
   webp
@@ -668,9 +733,6 @@ enum MediaTypeEnum {
 type Metadata {
   attributes: [AttributeType!]
   description: String
-  fileName: String @deprecated(reason: "This field will be removed in the next version")
-  fileType: String @deprecated(reason: "This field will be removed in the next version")
-  fileUri: String @deprecated(reason: "This field will be removed in the next version")
 }
 
 type MintPrice {
@@ -699,7 +761,11 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
+  updateAllCollectionTraits: Boolean!
+  updateAllNftTraits: Boolean!
+  updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftRarities(collectionTicker: String!): Boolean!
+  updateNftTraits(identifier: String!): Boolean!
   validateNftRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
@@ -707,6 +773,11 @@ type Mutation {
 
 input MyClaimableAuctionsFilters {
   marketplaceKey: String!
+}
+
+input NftTrait {
+  name: String!
+  value: String!
 }
 
 enum NftTypeEnum {
@@ -862,7 +933,7 @@ type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
   artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
-  assets(filters: AssetsFilter, pagination: ConnectionArgs): AssetsResponse!
+  assets(filters: AssetsFilter, pagination: ConnectionArgs, sorting: AssetsSortingEnum): AssetsResponse!
   auctions(
     customFilters: [AuctionCustomFilter]
 
@@ -881,8 +952,11 @@ type Query {
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
-  collections(filters: CollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
-  contractInfo: ContractInfo!
+  collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
+  currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
+  exploreCollectionsStats: ExploreCollectionsStats!
+  exploreNftsStats: ExploreNftsStats!
+  exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
@@ -894,7 +968,6 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  trendingCollections(pagination: ConnectionArgs): CollectionResponse!
 }
 
 type Rarity {
@@ -1024,6 +1097,7 @@ enum TierStatusEnum {
 }
 
 type Token {
+  activeAuctions: Int
   decimals: Float
   identifier: String!
   name: String

@@ -1,5 +1,6 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
+import { NftTrait } from 'src/modules/nft-traits/models/nft-traits.model';
 import {
   ADDRESS_ERROR,
   ADDRESS_RGX,
@@ -162,43 +163,9 @@ export class AssetsFilter {
   constructor(init?: Partial<AssetsFilter>) {
     Object.assign(this, init);
   }
-}
 
-@InputType()
-export class CollectionsFilter {
-  @IsOptional()
-  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
-  @Field(() => String, {
-    nullable: true,
-    description: 'The owner of the collection',
-  })
-  ownerAddress: string;
-
-  @IsOptional()
-  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
-  @Field(() => String, {
-    nullable: true,
-    description: 'The user that has create role',
-  })
-  creatorAddress: string;
-
-  @Field(() => Boolean, {
-    nullable: true,
-    description: 'Flag for can create or not on collection',
-  })
-  canCreate: boolean;
-
-  @IsOptional()
-  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
-    message: COLLECTION_IDENTIFIER_ERROR,
-  })
-  @Field(() => String, {
-    nullable: true,
-    description: 'Collection identifier',
-  })
-  collection: string;
-  @Field(() => NftTypeEnum, { nullable: true })
-  type: NftTypeEnum;
+  @Field(() => [NftTrait], { nullable: 'itemsAndList' })
+  traits: NftTrait[];
 }
 
 @InputType()

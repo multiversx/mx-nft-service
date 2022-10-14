@@ -1,17 +1,19 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Token {
   @Field(() => String)
   identifier: string;
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   symbol?: string;
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   name?: string;
-  @Field(() => String, {nullable: true})
+  @Field(() => String, { nullable: true })
   priceUsd?: string;
-  @Field(() => Number, {nullable: true})
+  @Field(() => Number, { nullable: true })
   decimals?: number;
+  @Field(() => Int, { nullable: true })
+  activeAuctions?: number;
 
   constructor(init?: Partial<Token>) {
     Object.assign(this, init);

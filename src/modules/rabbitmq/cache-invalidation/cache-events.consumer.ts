@@ -5,7 +5,7 @@ import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders
 import { rabbitExchanges, rabbitQueues } from './../rabbit-config';
 import { PublicRabbitConsumer } from './../rabbitmq.consumers';
 import { CacheInvalidationEventsService } from './cache-invalidation-module/cache-invalidation-events.service';
-import { CacheEventTypeEnum, ChangedEvent } from './events/owner-changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -51,6 +51,10 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.UpdateOneNotification:
         await this.cacheInvalidationService.invalidateOneNotification(event);
+        break;
+
+      case CacheEventTypeEnum.AssetLike:
+        await this.cacheInvalidationService.invalidateAssetLike(event);
         break;
     }
   }

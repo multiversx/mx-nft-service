@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
 import { Asset, CollectionType } from './models';
@@ -14,6 +14,9 @@ import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
+import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
+import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { NftTrait } from '../nft-traits/models/nft-traits.model';
 
 @Injectable()
 export class AssetsGetterService {
@@ -25,6 +28,7 @@ export class AssetsGetterService {
     private assetRarityLoader: AssetRarityInfoProvider,
     private assetSupplyLoader: AssetsSupplyLoader,
     private assetsLikedService: AssetsLikesService,
+    private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -56,12 +60,31 @@ export class AssetsGetterService {
     offset: number = 0,
     limit: number = 10,
     filters: AssetsFilter,
+    sorting: AssetsSortingEnum,
   ): Promise<CollectionType<Asset>> {
     const apiQuery = filters?.ownerAddress
       ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
 
+    if (sorting === AssetsSortingEnum.MostLikes) {
+      const assets = await this.assetsLikedService.getMostLikedAssets();
+      return new CollectionType({
+        count: assets.length,
+        items: assets.slice(offset, offset + limit),
+      });
+    }
+
+    if (filters?.traits) {
+      const response = await this.getAssetsByTraits(
+        filters.collection,
+        filters.traits,
+        limit,
+        offset,
+      );
+      this.addToCache(response);
+      return response;
+    }
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
         filters.likedByAddress,
@@ -213,6 +236,22 @@ export class AssetsGetterService {
     }
   }
 
+  private async getAssetsByTraits(
+    collection: string,
+    traits: NftTrait[],
+    limit: number,
+    offset: number,
+  ): Promise<CollectionType<Asset>> {
+    const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
+      collection,
+      traits,
+      limit,
+      offset,
+    );
+    const assets = nfts?.map((nft) => Asset.fromNft(nft));
+    return new CollectionType({ items: assets, count: count });
+  }
+
   private async getlikedByAssets(
     likedByAddress: string,
     limit: number,
@@ -228,7 +267,11 @@ export class AssetsGetterService {
       assetsLiked?.map((e) => e.identifier),
     );
 
-    return new CollectionType({ items: assets, count: assetsCount });
+    const returnAssets = [];
+    for (const asset of assetsLiked) {
+      returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
+    }
+    return new CollectionType({ items: returnAssets, count: assetsCount });
   }
 
   private getApiQuery(filters: AssetsFilter, offset: number, limit: number) {

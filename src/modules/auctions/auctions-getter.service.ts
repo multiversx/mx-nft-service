@@ -1,20 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Auction } from './models';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
-import {
-  Filter,
-  FiltersExpression,
-  GroupBy,
-  Grouping,
-  Operation,
-  Operator,
-  Sort,
-} from '../common/filters/filtersTypes';
+import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { DateUtils } from 'src/utils/date-utils';
@@ -30,18 +22,33 @@ import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import {
+  auctionsByNoBidsRequest,
+  buyNowAuctionRequest,
+  getAuctionsForCollectionRequest,
+  getAuctionsForPaymentTokenRequest,
+  runningAuctionRequest,
+} from './auctionsRequest';
+import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 
 @Injectable()
 export class AuctionsGetterService {
   private redisClient: Redis.Redis;
+  private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
+    private readonly usdPriceService: UsdPriceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
+    );
+    this.auctionsRedisClient = this.cacheService.getClient(
+      cacheConfig.auctionsRedisClientName,
     );
   }
 
@@ -70,7 +77,7 @@ export class AuctionsGetterService {
         return await this.getEndingAuctions(queryRequest);
       }
 
-      const tags = queryRequest.getFilter('tags');
+      const tags = queryRequest.getFilterName('tags');
       if (tags && tags.length > 0 && tags[0]) {
         return this.getMappedAuctionsOrderBids(queryRequest);
       }
@@ -461,12 +468,11 @@ export class AuctionsGetterService {
   async getAuctionsGroupByIdentifier(
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
-    const collectionFilter = queryRequest.getFilter('collection');
+    const collectionFilter = queryRequest.getFilterName('collection');
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     const currentPriceFilter = queryRequest.getRange(
       AuctionCustomEnum.CURRENTPRICE,
     );
-    const statusFilter = queryRequest.getFilter('status');
-    const startDateFilter = queryRequest.getFilter('startDate');
     const sort = queryRequest.getSort();
     const allFilters = queryRequest.getAllFilters();
 
@@ -476,68 +482,27 @@ export class AuctionsGetterService {
         currentPriceFilter.endPrice !== '0000000000000000000');
 
     if (collectionFilter && !hasCurrentPriceFilter) {
-      let [allAuctions, _totalCount, priceRange] =
-        await this.cacheService.getOrSetCache(
-          this.redisClient,
-          `collectionAuctions:${collectionFilter}`,
-          async () => await this.getAuctionsByCollection(collectionFilter),
-          Constants.oneMinute() * 10,
-          Constants.oneSecond() * 30,
-        );
-
-      const marketplaceFilter = queryRequest.getFilter('marketplaceKey');
-      if (marketplaceFilter) {
-        allAuctions = allAuctions.filter(
-          (x) => x.marketplaceKey === marketplaceFilter,
-        );
-
-        priceRange = this.computePriceRange(allAuctions);
-      }
-
-      if (sort) {
-        if (sort.direction === Sort.ASC) {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
-        } else {
-          allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
-        }
-      }
-
-      const auctions = allAuctions.slice(
-        queryRequest.offset,
-        queryRequest.offset + queryRequest.limit,
+      return await this.retriveCollectionAuctions(
+        collectionFilter,
+        queryRequest,
+        sort,
       );
-
-      return [auctions, allAuctions.length, priceRange];
     }
 
-    if (
-      Object.keys(allFilters).length === 2 &&
-      statusFilter &&
-      startDateFilter
-    ) {
-      let [allAuctions, _totalCount, priceRange] =
-        await this.cacheService.getOrSetCache(
-          this.redisClient,
-          CacheInfo.ActiveAuctions.key,
-          async () => await this.getActiveAuctions(),
-          CacheInfo.ActiveAuctions.ttl,
-          Constants.oneSecond() * 30,
-        );
-
-      if (sort) {
-        if (sort.direction === Sort.ASC) {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
-        } else {
-          allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
-        }
-      }
-
-      const auctions = allAuctions.slice(
-        queryRequest.offset,
-        queryRequest.offset + queryRequest.limit,
+    if (paymentTokenFilter && !hasCurrentPriceFilter) {
+      return await this.retriveTokensAuctions(
+        paymentTokenFilter,
+        queryRequest,
+        sort,
       );
+    }
 
-      return [auctions, allAuctions.length, priceRange];
+    if (this.requestForRunningAuctions(allFilters, queryRequest)) {
+      return await this.retrieveRunningAuctions(sort, queryRequest);
+    }
+
+    if (this.requestForBuyNowAuctions(allFilters, queryRequest)) {
+      return await this.retrieveBuyNowAuctions(sort, queryRequest);
     }
 
     const [auctions, count, priceRange] =
@@ -548,6 +513,193 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  private async retriveCollectionAuctions(
+    collectionFilter: string,
+    queryRequest: QueryRequest,
+    sort: { field: string; direction: Sort },
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.auctionsRedisClient,
+        `collectionAuctions:${collectionFilter}`,
+        async () => await this.getAuctionsByCollection(collectionFilter),
+        Constants.oneMinute() * 10,
+        Constants.oneSecond() * 30,
+      );
+
+    const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
+    const typeFilter = queryRequest.getFilter('type');
+    if (typeFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        typeFilter.values.includes(x.type),
+      );
+    }
+
+    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    if (paymentTokenFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        paymentTokenFilter.values.includes(x.minBid?.token),
+      );
+    }
+    if (marketplaceFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.marketplaceKey === marketplaceFilter,
+      );
+
+      priceRange = this.computePriceRange(allAuctions);
+    }
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retriveTokensAuctions(
+    paymentTokenFilter: string,
+    queryRequest: QueryRequest,
+    sort: { field: string; direction: Sort },
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.auctionsRedisClient,
+        `paymentTokenAuctions:${paymentTokenFilter}`,
+        async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
+        Constants.oneMinute() * 10,
+        Constants.oneSecond() * 30,
+      );
+
+    const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
+    const typeFilter = queryRequest.getFilter('type');
+    if (typeFilter) {
+      allAuctions = allAuctions.filter((x) =>
+        typeFilter.values.includes(x.type),
+      );
+    }
+
+    if (marketplaceFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.marketplaceKey === marketplaceFilter,
+      );
+
+      priceRange = this.computePriceRange(allAuctions);
+    }
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retrieveRunningAuctions(
+    sort: { field: string; direction: Sort },
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.ActiveAuctions.key,
+        async () => await this.getActiveAuctions(),
+        CacheInfo.ActiveAuctions.ttl,
+        Constants.oneSecond() * 30,
+      );
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private async retrieveBuyNowAuctions(
+    sort: { field: string; direction: Sort },
+    queryRequest: QueryRequest,
+  ): Promise<[Auction[], number, PriceRange]> {
+    let [allAuctions, _totalCount, priceRange] =
+      await this.cacheService.getOrSetCache(
+        this.redisClient,
+        CacheInfo.ActiveAuctions.key,
+        async () => await this.getBuyNowAuctions(),
+        CacheInfo.ActiveAuctions.ttl,
+        Constants.oneSecond() * 30,
+      );
+
+    if (sort) {
+      if (sort.direction === Sort.ASC) {
+        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+      } else {
+        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+      }
+    }
+
+    const count = allAuctions.length;
+    const auctions = allAuctions.slice(
+      queryRequest.offset,
+      queryRequest.offset + queryRequest.limit,
+    );
+
+    return [auctions, count, priceRange];
+  }
+
+  private requestForRunningAuctions(
+    allFilters: Record<string, string>,
+    queryRequest: QueryRequest,
+  ) {
+    const statusFilter = queryRequest.getFilterName('status');
+    const startDateFilter = queryRequest.getFilterName('startDate');
+    return (
+      Object.keys(allFilters).length === 2 && statusFilter && startDateFilter
+    );
+  }
+
+  private requestForBuyNowAuctions(
+    allFilters: Record<string, string>,
+    queryRequest: QueryRequest,
+  ) {
+    const statusFilter = queryRequest.getFilterName('status');
+    const startDateFilter = queryRequest.getFilterName('startDate');
+    const buyNowFilter = queryRequest.getFilter('maxBid');
+    return (
+      Object.keys(allFilters).length === 3 &&
+      statusFilter &&
+      startDateFilter &&
+      buyNowFilter &&
+      buyNowFilter.op === Operation.GE
+    );
   }
 
   private computePriceRange(auctions: Auction[]): PriceRange {
@@ -585,107 +737,33 @@ export class AuctionsGetterService {
   async getTopAuctionsOrderByNoBids(): Promise<
     [Auction[], number, PriceRange]
   > {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 1000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'tags',
-            values: [null],
-            op: Operation.LIKE,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
+    return this.getMappedAuctionsOrderBids(auctionsByNoBidsRequest);
+  }
 
-    return this.getMappedAuctionsOrderBids(queryRequest);
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
+  async getBuyNowAuctions(): Promise<[Auction[], number, PriceRange]> {
+    return await this.getAuctionsGroupByIdentifierRaw(buyNowAuctionRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 10000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
-
-    return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(runningAuctionRequest);
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getAuctionsByCollection(
     collection: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = new QueryRequest({
-      customFilters: [],
-      offset: 0,
-      limit: 10000,
-      filters: new FiltersExpression({
-        filters: [
-          new Filter({
-            field: 'status',
-            values: ['Running'],
-            op: Operation.EQ,
-          }),
-          new Filter({
-            field: 'tags',
-            values: [null],
-            op: Operation.LIKE,
-          }),
-          new Filter({
-            field: 'startDate',
-            values: [Math.round(new Date().getTime() / 1000).toString()],
-            op: Operation.LE,
-          }),
-          new Filter({
-            field: 'collection',
-            values: [collection],
-            op: Operation.EQ,
-          }),
-        ],
-        operator: Operator.AND,
-      }),
-      groupByOption: new Grouping({
-        groupBy: GroupBy.IDENTIFIER,
-      }),
-      sorting: [],
-    });
+    const queryRequest = getAuctionsForCollectionRequest(collection);
+
+    return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
+  }
+
+  // TODO: use db access directly without intermediate caching layers once we optimize the model
+  async getAuctionsByPaymentToken(
+    paymentToken: string,
+  ): Promise<[Auction[], number, PriceRange]> {
+    const queryRequest = getAuctionsForPaymentTokenRequest(paymentToken);
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
@@ -724,5 +802,59 @@ export class AuctionsGetterService {
       count,
       priceRange,
     ];
+  }
+
+  async getCurrentPaymentTokens(
+    filters?: CurrentPaymentTokensFilters,
+  ): Promise<Token[]> {
+    try {
+      return await this.auctionCachingService.getCurrentPaymentTokens(
+        () =>
+          this.getMappedCurrentPaymentTokens(
+            filters?.marketplaceKey,
+            filters?.collectionIdentifier,
+          ),
+        filters?.marketplaceKey,
+        filters?.collectionIdentifier,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while get auctions', {
+        path: 'AuctionsService.getCurrentPaymentTokens',
+        marketplaceKey: filters?.marketplaceKey,
+        collectionIdentifier: filters?.collectionIdentifier,
+        exception: error,
+      });
+    }
+  }
+
+  private async getMappedCurrentPaymentTokens(
+    marketplaceKey?: string,
+    collectionIdentifier?: string,
+  ): Promise<Token[]> {
+    const [currentPaymentTokenIds, allMexTokens, egldToken, lkmexToken] =
+      await Promise.all([
+        this.persistenceService.getCurrentPaymentTokenIdsWithCounts(
+          marketplaceKey,
+          collectionIdentifier,
+        ),
+        this.usdPriceService.getCachedMexTokensWithDecimals(),
+        this.usdPriceService.getToken(elrondConfig.egld),
+        this.usdPriceService.getToken(elrondConfig.lkmex),
+      ]);
+
+    const allTokens: Token[] = allMexTokens
+      .concat(egldToken)
+      .concat(lkmexToken);
+    let mappedTokens = [];
+    for (const payment of currentPaymentTokenIds) {
+      const token = allTokens.find(
+        (x) => x.identifier === payment.paymentToken,
+      );
+      if (token) {
+        mappedTokens.push({ ...token, activeAuctions: payment.activeAuctions });
+      }
+    }
+
+    return mappedTokens;
   }
 }

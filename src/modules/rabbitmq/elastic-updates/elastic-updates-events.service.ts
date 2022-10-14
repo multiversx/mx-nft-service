@@ -8,18 +8,25 @@ import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { MintEvent } from '../entities/auction/mint.event';
 import * as Redis from 'ioredis';
+import { BurnEvent } from '../entities/auction/burn.event';
+import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
-  private readonly redisClient: Redis.Redis;
+  private readonly rarityRedisClient: Redis.Redis;
+  private readonly traitsRedisClient: Redis.Redis;
+
   constructor(
     private readonly nftFlagsService: FlagNftService,
     private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly nftRarityService: NftRarityService,
     private readonly redisCacheService: RedisCacheService,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
+    this.rarityRedisClient = this.redisCacheService.getClient(
       cacheConfig.rarityQueueClientName,
+    );
+    this.traitsRedisClient = this.redisCacheService.getClient(
+      cacheConfig.traitsQueueClientName,
     );
   }
   public async handleNftMintEvents(
@@ -39,7 +46,43 @@ export class ElasticUpdatesEventsService {
     }
   }
 
-  public async handleRaritiesForNftMintAndBurnEvents(
+  public async handleTraitsForNftMintBurnAndUpdateEvents(
+    events: any[],
+  ): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    let nftsOrCollectionsToUpdate: string[] = [];
+
+    for (let event of events) {
+      event = this.convertToMatchingEventType(event);
+
+      const topics = event.getTopics();
+      const identifier = `${topics.collection}-${topics.nonce}`;
+
+      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+        nftsOrCollectionsToUpdate.push(topics.collection);
+        continue;
+      }
+
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
+
+      if (!nft || Object.keys(nft).length === 0) {
+        return;
+      }
+
+      if (
+        nft.type === NftTypeEnum.NonFungibleESDT ||
+        nft.type === NftTypeEnum.SemiFungibleESDT
+      ) {
+        nftsOrCollectionsToUpdate.push(identifier);
+      }
+    }
+
+    nftsOrCollectionsToUpdate = [...new Set(nftsOrCollectionsToUpdate)];
+
+    await this.addNftsToTraitsQueue(nftsOrCollectionsToUpdate);
+  }
+
+  public async handleRaritiesForNftMintBurnAndUpdateEvents(
     mintEvents: any[],
   ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -86,7 +129,7 @@ export class ElasticUpdatesEventsService {
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.addItemsToList(
-        this.redisClient,
+        this.rarityRedisClient,
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -95,5 +138,36 @@ export class ElasticUpdatesEventsService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+  }
+
+  async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
+    if (collectionTickers?.length > 0) {
+      await this.redisCacheService.addItemsToList(
+        this.traitsRedisClient,
+        this.getTraitsQueueCacheKey(),
+        collectionTickers,
+      );
+    }
+  }
+
+  private getTraitsQueueCacheKey() {
+    return generateCacheKeyFromParams(cacheConfig.traitsQueueClientName);
+  }
+
+  private convertToMatchingEventType(
+    event: any,
+  ): MintEvent | UpdateAttributesEvent | BurnEvent {
+    switch (event.identifier) {
+      case NftEventEnum.ESDTNFTCreate: {
+        event = new MintEvent(event);
+      }
+      case NftEventEnum.ESDTNFTUpdateAttributes: {
+        event = new UpdateAttributesEvent(event);
+      }
+      case NftEventEnum.ESDTNFTBurn: {
+        event = new BurnEvent(event);
+      }
+    }
+    return event;
   }
 }

@@ -69,6 +69,31 @@ export class AuctionsWarmerService {
     );
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async handleCachingForPaymentTokensCollections() {
+    await Locker.lock(
+      'Payment tokens auctions',
+      async () => {
+        const paymentTokens =
+          await this.auctionsGetterService.getCurrentPaymentTokens();
+
+        for (const paymentToken of paymentTokens) {
+          const auctionResult =
+            await this.auctionsGetterService.getAuctionsByPaymentToken(
+              paymentToken.identifier,
+            );
+
+          await this.invalidateKey(
+            `paymentTokenAuctions:${paymentToken.identifier}`,
+            auctionResult,
+            10 * TimeConstants.oneMinute,
+          );
+        }
+      },
+      true,
+    );
+  }
+
   @Cron(CronExpression.EVERY_MINUTE)
   async handleCachingForActiveAuctions() {
     await Locker.lock(
@@ -81,6 +106,24 @@ export class AuctionsWarmerService {
           CacheInfo.ActiveAuctions.key,
           auctionResult,
           CacheInfo.ActiveAuctions.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async handleCachingForBuyNowAuctions() {
+    await Locker.lock(
+      'Buy now auctions',
+      async () => {
+        const auctionResult =
+          await this.auctionsGetterService.getBuyNowAuctions();
+
+        await this.invalidateKey(
+          CacheInfo.BuyNowAuctions.key,
+          auctionResult,
+          CacheInfo.BuyNowAuctions.ttl,
         );
       },
       true,

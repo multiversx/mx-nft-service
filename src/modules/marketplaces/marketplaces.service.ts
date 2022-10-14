@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';

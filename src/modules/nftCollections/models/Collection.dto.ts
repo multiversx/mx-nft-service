@@ -3,6 +3,7 @@ import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
 import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
+import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-traits.model';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
 
@@ -63,12 +64,14 @@ export class Collection {
   social: CollectionSocial;
   @Field(() => Int)
   onSaleAssetsCount: number;
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   nftsCount: number;
   @Field(() => String)
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
+  @Field(() => [CollectionNftTrait])
+  traits: CollectionNftTrait[];
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -108,6 +111,8 @@ export class Collection {
         collectionIdentifer: collectionApi.collection,
       }),
       artistFollowersCount: followersCount,
+      nftsCount: collectionApi.count,
+      traits: CollectionNftTrait.fromCollectionTraits(collectionApi.traits),
     });
   }
 }

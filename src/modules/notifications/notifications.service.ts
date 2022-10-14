@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { Notification, NotificationStatusEnum } from './models';
 import { NotificationEntity } from 'src/db/notifications';
 import { AuctionEntity } from 'src/db/auctions';
@@ -12,7 +12,7 @@ import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cach
 import {
   CacheEventTypeEnum,
   ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/owner-changed.event';
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()

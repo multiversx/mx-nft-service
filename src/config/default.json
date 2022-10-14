@@ -30,7 +30,9 @@
     "collectionsRedisClientName": "collections",
     "collectionsDbName": 6,
     "rarityQueueClientName": "rarityQueue",
-    "rarityQueueDbName": 7
+    "rarityQueueDbName": 7,
+    "traitsQueueClientName": "traitsQueue",
+    "traitsQueueDbName": 8
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
@@ -57,11 +59,30 @@
       "collectionRaritiesToValidateEvery30m": 10,
       "colectionRaritiesToUpdateEvery10s": 2,
       "collectionRarityFlagsToValidateEvery10m": 10
+    },
+    "traits": {
+      "collectionTraitsToSetEvery1m": 10,
+      "collectionTraitsToValidateEvery5m": 10
     }
   },
   "constants": {
     "getNftsFromApiBatchSize": 250,
+    "getTokensFromApiBatchSize": 100,
     "bulkUpdateElasticBatchSize": 100,
-    "getTokensFromApiBatchSize": 100
+    "getNftsFromElasticBatchSize": 250,
+    "getCollectionsFromElasticBatchSize": 100,
+    "nftsCountThresholdForTraitAndRarityIndexing": 100000,
+    "updateAllNftTraitsBatchSize": 10000
+  },
+  "genericDescriptions": {
+    "forBigCollections": [
+      "A collection of {size} uniquely inspiring NFTs.",
+      "A collection of {size} beautifully designed & minted NFTs.",
+      "A {size} piece, exquisitely crafted NFTs collection.",
+      "{size} magnificently designed and truly inspiring NFTs.",
+      "An alluring collection of {size} wonderfully minted NFTs."
+    ],
+    "forSmallCollections": [""],
+    "forAssets": [""]
   }
 }

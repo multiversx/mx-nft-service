@@ -10,7 +10,7 @@ import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
-import { UsdPriceLoader } from 'src/modules/usdAmount/loaders/usd-price.loader';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 
@@ -19,7 +19,7 @@ export class FeedEventsSenderService {
   constructor(
     private accountFeedService: ElrondFeedService,
     private assetByIdentifierService: AssetByIdentifierService,
-    private readonly usdPriceLoader: UsdPriceLoader,
+    private readonly usdPriceService: UsdPriceService,
   ) {}
 
   public async sendStartAuctionEvent(
@@ -46,12 +46,12 @@ export class FeedEventsSenderService {
       startAuction.maxBid
     ) {
       [tokenData, minBidUsdAmount, maxBidUsdAmount] = await Promise.all([
-        this.usdPriceLoader.getToken(startAuction.paymentToken),
-        this.usdPriceLoader.getUsdAmountDenom(
+        this.usdPriceService.getToken(startAuction.paymentToken),
+        this.usdPriceService.getUsdAmountDenom(
           startAuction.paymentToken,
           startAuction.minBid,
         ),
-        this.usdPriceLoader.getUsdAmountDenom(
+        this.usdPriceService.getUsdAmountDenom(
           startAuction.paymentToken,
           startAuction.maxBid,
         ),
@@ -105,8 +105,8 @@ export class FeedEventsSenderService {
     let tokenData: Token;
     if (endAuction.paymentToken && topicsEndAuction.currentBid) {
       [tokenData, usdAmount] = await Promise.all([
-        this.usdPriceLoader.getToken(endAuction.paymentToken),
-        this.usdPriceLoader.getUsdAmountDenom(
+        this.usdPriceService.getToken(endAuction.paymentToken),
+        this.usdPriceService.getUsdAmountDenom(
           endAuction.paymentToken,
           topicsEndAuction.currentBid,
         ),
@@ -147,8 +147,8 @@ export class FeedEventsSenderService {
     let tokenData: Token;
     if (buyAuction.paymentToken && bid) {
       [tokenData, usdAmount] = await Promise.all([
-        this.usdPriceLoader.getToken(buyAuction.paymentToken),
-        this.usdPriceLoader.getUsdAmountDenom(buyAuction.paymentToken, bid),
+        this.usdPriceService.getToken(buyAuction.paymentToken),
+        this.usdPriceService.getUsdAmountDenom(buyAuction.paymentToken, bid),
       ]);
     }
 
@@ -214,8 +214,8 @@ export class FeedEventsSenderService {
     let tokenData: Token;
     if (auction.paymentToken && topics.currentBid) {
       [tokenData, usdAmount] = await Promise.all([
-        this.usdPriceLoader.getToken(auction.paymentToken),
-        this.usdPriceLoader.getUsdAmountDenom(
+        this.usdPriceService.getToken(auction.paymentToken),
+        this.usdPriceService.getUsdAmountDenom(
           auction.paymentToken,
           topics.currentBid,
         ),

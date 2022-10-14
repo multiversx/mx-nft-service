@@ -11,6 +11,7 @@ import * as Transport from 'winston-transport';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
 import { cacheConfig } from './config';
 import { CachingModule } from './common/services/caching/caching.module';
+import { ApiConfigService } from './utils/api.config.service';
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -91,11 +92,17 @@ if (!!process.env.LOG_FILE) {
         password: process.env.REDIS_PASSWORD,
         db: cacheConfig.rarityQueueDbName,
       },
+      {
+        clientName: cacheConfig.traitsQueueClientName,
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        db: cacheConfig.traitsQueueDbName,
+      },
     ]),
-
     ElrondCommunicationModule,
   ],
-  exports: [ElrondCommunicationModule, CachingModule, Logger],
-  providers: [Logger],
+  exports: [ElrondCommunicationModule, CachingModule, Logger, ApiConfigService],
+  providers: [Logger, ApiConfigService],
 })
 export class CommonModule {}

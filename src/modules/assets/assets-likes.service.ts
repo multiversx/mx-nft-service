@@ -1,12 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { AssetLikeEntity } from 'src/db/assets';
-import { RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { cacheConfig } from 'src/config';
-import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
-import { TimeConstants } from 'src/utils/time-utils';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
 import {
   EventEnum,
@@ -14,23 +8,24 @@ import {
 } from 'src/common/services/elrond-communication/models/feed.dto';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Asset } from './models';
+import { AssetsLikesCachingService } from './assets-likes.caching.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class AssetsLikesService {
-  private redisClient: Redis.Redis;
-  private readonly ttl = 6 * TimeConstants.oneHour;
   constructor(
     private persistenceService: PersistenceService,
-    private isAssetLikedLikeProvider: IsAssetLikedProvider,
     private assetByIdentifierService: AssetByIdentifierService,
-    private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
     private accountFeedService: ElrondFeedService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private assetsLikesCachingService: AssetsLikesCachingService,
+    private cacheEventsPublisherService: CacheEventsPublisherService,
+    private readonly logger: Logger,
+  ) {}
 
   getAssetLiked(
     limit: number = 50,
@@ -38,14 +33,11 @@ export class AssetsLikesService {
     address: string,
   ): Promise<[AssetLikeEntity[], number]> {
     try {
-      const cacheKey = this.getAssetLikedByCacheKey(address);
       const getAssetLiked = () =>
         this.persistenceService.getAssetsLiked(limit, offset, address);
-      return this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
+      return this.assetsLikesCachingService.getAssetLiked(
+        address,
         getAssetLiked,
-        this.ttl,
       );
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
@@ -71,7 +63,7 @@ export class AssetsLikesService {
       } else {
         await this.incremenLikesCount(identifier);
         await this.saveAssetLikeEntity(identifier, address);
-        await this.invalidateCache(identifier, address);
+        await this.invalidateAssetLike(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
         const nftData = await this.assetByIdentifierService.getAsset(
           identifier,
@@ -113,7 +105,7 @@ export class AssetsLikesService {
       if (deleteResults.affected > 0) {
         await this.accountFeedService.unsubscribe(identifier, authorization);
         await this.decrementLikesCount(identifier);
-        await this.invalidateCache(identifier, address);
+        await this.invalidateAssetLike(identifier, address);
       }
       return true;
     } catch (err) {
@@ -129,68 +121,70 @@ export class AssetsLikesService {
 
   async decrementLikesCount(identifier: string): Promise<number> {
     // Make sure that Redis Key is generated from DB.
-    const followersCount = await this.loadLikesCount(identifier);
-    if (followersCount > 0) {
-      return await this.redisCacheService.decrement(
-        this.redisClient,
-        this.getAssetLikesCountCacheKey(identifier),
-        this.ttl,
-      );
+    try {
+      const followersCount = await this.loadLikesCount(identifier);
+      if (followersCount > 0) {
+        return await this.assetsLikesCachingService.decrementLikesCount(
+          identifier,
+        );
+      }
+      return 0;
+    } catch (error) {
+      this.logger.error("An error occurred while decrementing asset's likes.", {
+        path: 'AssetsService.decrementLikesCount',
+        identifier,
+        exception: error,
+      });
     }
-    return 0;
   }
 
   async incremenLikesCount(identifier: string): Promise<number> {
     // Make sure that Redis Key is generated from DB.
-    const likes = await this.loadLikesCount(identifier);
-    return await this.redisCacheService.increment(
-      this.redisClient,
-      this.getAssetLikesCountCacheKey(identifier),
-      this.ttl,
-    );
+    try {
+      const likes = await this.loadLikesCount(identifier);
+      return await this.assetsLikesCachingService.incremenLikesCount(
+        identifier,
+      );
+    } catch (error) {
+      this.logger.error("An error occurred while incrementing asset's likes.", {
+        path: 'AssetsService.incremenLikesCount',
+        identifier,
+        exception: error,
+      });
+    }
   }
 
   async loadLikesCount(identifier: string) {
-    return await this.redisCacheService.getOrSet(
-      this.redisClient,
-      this.getAssetLikesCountCacheKey(identifier),
-      () => this.persistenceService.getAssetLikesCount(identifier),
-      this.ttl,
+    try {
+      const getAssetLikesCount = () =>
+        this.persistenceService.getAssetLikesCount(identifier);
+      return this.assetsLikesCachingService.loadLikesCount(
+        identifier,
+        getAssetLikesCount,
+      );
+    } catch (error) {
+      this.logger.error("An error occurred while loading asset's likes.", {
+        path: 'AssetsService.loadLikesCount',
+        identifier,
+        exception: error,
+      });
+    }
+  }
+
+  async getMostLikedAssets(): Promise<Asset[]> {
+    const getMostLikedAssets = async () => {
+      const assetLikes =
+        await this.persistenceService.getMostLikedAssetsIdentifiers();
+      return await Promise.all(
+        assetLikes.map((assetLikes) =>
+          this.assetByIdentifierService.getAsset(assetLikes.identifier),
+        ),
+      );
+    };
+
+    return await this.assetsLikesCachingService.getMostLikedAssets(
+      getMostLikedAssets,
     );
-  }
-
-  private getAssetLikedByCacheKey(address: string) {
-    return generateCacheKeyFromParams('assetLiked', address);
-  }
-
-  private getAssetLikesCountCacheKey(identifier: string) {
-    return generateCacheKeyFromParams('assetLikesCount', identifier);
-  }
-
-  private async invalidateCache(
-    identifier: string,
-    address: string,
-  ): Promise<void> {
-    await this.isAssetLikedLikeProvider.clearKey(`${identifier}_${address}`);
-    await this.invalidateAssetLikeCache(identifier, address);
-    await this.invalidateAssetLikedByCount(address);
-  }
-
-  private invalidateAssetLikedByCount(address: string): Promise<void> {
-    const cacheKey = this.getAssetLikedByCacheKey(address);
-    return this.redisCacheService.del(this.redisClient, cacheKey);
-  }
-
-  private invalidateAssetLikeCache(
-    identifier: string,
-    address: string,
-  ): Promise<void> {
-    const cacheKey = this.getAssetLikedCacheKey(identifier, address);
-    return this.redisCacheService.del(this.redisClient, cacheKey);
-  }
-
-  private getAssetLikedCacheKey(identifier: string, address: string) {
-    return generateCacheKeyFromParams('isAssetLiked', identifier, address);
   }
 
   private async saveAssetLikeEntity(
@@ -214,5 +208,21 @@ export class AssetsLikesService {
       identifier,
       address,
     });
+  }
+
+  private async invalidateAssetLike(
+    identifier: string,
+    address: string,
+  ): Promise<void> {
+    await Promise.all([
+      this.assetsLikesCachingService.invalidateCache(identifier, address),
+      this.cacheEventsPublisherService.publish(
+        new ChangedEvent({
+          id: identifier,
+          address: address,
+          type: CacheEventTypeEnum.AssetLike,
+        }),
+      ),
+    ]);
   }
 }

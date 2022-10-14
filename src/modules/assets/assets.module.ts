@@ -47,6 +47,8 @@ import { PersistenceModule } from 'src/common/persistence/persistence.module';
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import { AssetsLikesCachingService } from './assets-likes.caching.service';
+import { NftTraitsService } from '../nft-traits/nft-traits.service';
 
 @Module({
   providers: [
@@ -54,6 +56,7 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
     AssetsGetterService,
     AssetByIdentifierService,
     AssetsLikesService,
+    AssetsLikesCachingService,
     VerifyContentService,
     ContentValidation,
     AssetLikesProviderRedisHandler,
@@ -92,6 +95,7 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
     FeaturedMarketplaceRedisHandler,
     InternalMarketplaceProvider,
     InternalMarketplaceRedisHandler,
+    NftTraitsService,
   ],
   imports: [
     ElrondCommunicationModule,
@@ -105,6 +109,9 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
     AssetByIdentifierService,
     AssetsGetterService,
     AssetsLikesService,
+    AssetsLikesCachingService,
+    IsAssetLikedProvider,
+    IsAssetLikedRedisHandler,
     S3Service,
     AssetLikesProvider,
     AssetsSupplyLoader,

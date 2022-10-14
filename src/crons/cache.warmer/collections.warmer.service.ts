@@ -2,12 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CollectionsService } from 'src/modules/nftCollections/collection.service';
 import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
+import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 
 const EVERY_15_MINUTES = '0 */15 * * * *';
 
@@ -17,7 +17,7 @@ export class CollectionsWarmerService {
 
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
-    private collectionsService: CollectionsService,
+    private collectionsGetterService: CollectionsGetterService,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -30,7 +30,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Collections tokens invalidations',
       async () => {
-        const tokens = await this.collectionsService.getFullCollectionsRaw();
+        const tokens =
+          await this.collectionsGetterService.getFullCollectionsRaw();
         await this.invalidateKey(
           CacheInfo.AllCollections.key,
           tokens,
@@ -46,7 +47,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Collections Most Active tokens invalidations',
       async () => {
-        const tokens = await this.collectionsService.getMostActiveCollections();
+        const tokens =
+          await this.collectionsGetterService.getMostActiveCollections();
         await this.invalidateKey(
           CacheInfo.CollectionsMostActive.key,
           tokens,
@@ -63,7 +65,7 @@ export class CollectionsWarmerService {
       'Collections Most Followed tokens invalidations',
       async () => {
         const tokens =
-          await this.collectionsService.getMostFollowedCollections();
+          await this.collectionsGetterService.getMostFollowedCollections();
         await this.invalidateKey(
           CacheInfo.CollectionsMostFollowed.key,
           tokens,
@@ -80,11 +82,28 @@ export class CollectionsWarmerService {
       'Trending collections order by number of running auctions',
       async () => {
         const result =
-          await this.collectionsService.getAllTrendingCollections();
+          await this.collectionsGetterService.getAllTrendingCollections();
         await this.invalidateKey(
           CacheInfo.trendingCollections.key,
           result,
           CacheInfo.trendingCollections.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async handleActiveCollectionsFromLast30Days() {
+    await Locker.lock(
+      'Active collections from last 30 days order by number auctions',
+      async () => {
+        const result =
+          await this.collectionsGetterService.getActiveCollectionsFromLast30Days();
+        await this.invalidateKey(
+          CacheInfo.activeCollectionLast30Days.key,
+          result,
+          CacheInfo.activeCollectionLast30Days.ttl,
         );
       },
       true,

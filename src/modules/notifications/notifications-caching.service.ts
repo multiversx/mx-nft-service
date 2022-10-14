@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { Notification } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisCacheService } from 'src/common';

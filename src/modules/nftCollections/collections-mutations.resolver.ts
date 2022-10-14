@@ -7,7 +7,7 @@ import {
   IssueCollectionArgs,
   SetNftRolesArgs,
 } from './models';
-import { CollectionsService } from './collection.service';
+import { CollectionsTransactionsService } from './collections-transactions.service';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
@@ -21,7 +21,9 @@ import { User } from '../auth/user';
 
 @Resolver(() => Collection)
 export class CollectionsMutationsResolver extends BaseResolver(Collection) {
-  constructor(private collectionsService: CollectionsService) {
+  constructor(
+    private collectionsTransactionsService: CollectionsTransactionsService,
+  ) {
     super();
   }
 
@@ -33,7 +35,10 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueNonFungible');
-    return await this.collectionsService.issueToken(user.publicKey, request);
+    return await this.collectionsTransactionsService.issueToken(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -44,7 +49,10 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = IssueCollectionRequest.fromArgs(input, 'issueSemiFungible');
-    return await this.collectionsService.issueToken(user.publicKey, request);
+    return await this.collectionsTransactionsService.issueToken(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -54,7 +62,10 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = SetNftRolesRequest.fromArgs(input);
-    return await this.collectionsService.setNftRoles(user.publicKey, request);
+    return await this.collectionsTransactionsService.setNftRoles(
+      user.publicKey,
+      request,
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -65,7 +76,7 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = TransferNftCreateRoleRequest.fromArgs(input);
-    return await this.collectionsService.transferNFTCreateRole(
+    return await this.collectionsTransactionsService.transferNFTCreateRole(
       user.publicKey,
       request,
     );
@@ -78,6 +89,9 @@ export class CollectionsMutationsResolver extends BaseResolver(Collection) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = StopNftCreateRequest.fromArgs(input);
-    return await this.collectionsService.stopNFTCreate(user.publicKey, request);
+    return await this.collectionsTransactionsService.stopNFTCreate(
+      user.publicKey,
+      request,
+    );
   }
 }

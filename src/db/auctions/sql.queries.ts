@@ -58,36 +58,18 @@ export function getOnSaleAssetsCountForCollection(collections: string[]) {
    GROUP BY a.collection`;
 }
 
-export function getDefaultAuctionsQuery(
-  endDate: number,
-  queryRequest: QueryRequest,
-) {
-  let supplementalFilters = '';
-
-  const collection = queryRequest.getFilter('collection');
-  if (collection) {
-    supplementalFilters += ` AND a.collection = '${collection}'`;
-  }
-
-  const marketplaceKey = queryRequest.getFilter('marketplaceKey');
-  if (marketplaceKey) {
-    supplementalFilters += ` AND a.marketplaceKey = '${marketplaceKey}'`;
-  }
+export function getDefaultAuctionsQuery(queryRequest: QueryRequest) {
+  let supplementalFilters = new AuctionFilterBuilder(queryRequest)
+    .addIfExists('collection')
+    .addIfExists('paymentToken')
+    .addIfExists('marketplaceKey')
+    .build();
 
   const result = `((SELECT a.*,o.priceAmountDenominated as price
     FROM auctions a 
     LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
-       AND a.endDate <= ${endDate}
-       ${supplementalFilters})
-    UNION All 
-    (SELECT a.*, o.priceAmountDenominated as price
-    FROM auctions a 
-    LEFT JOIN LATERAL 
-    (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status='Running' 
-      AND a.endDate> ${endDate}
+    WHERE a.status='Running' AND a.startDate <= UNIX_TIMESTAMP(CURRENT_TIMESTAMP)
        ${supplementalFilters}))
     order by if(price, price, minBidDenominated) ASC ) as temp`;
 
@@ -250,4 +232,39 @@ export function getAuctionsOrderByNoBidsQuery() {
 		  WHERE	a.status = 'Running'
 		  GROUP BY a.id
 		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
+}
+
+export function getCurrentPaymentTokens(
+  marketplaceKey?: string,
+  collectionIdentifier?: string,
+) {
+  let filter = marketplaceKey
+    ? `AND a.marketplaceKey = '${marketplaceKey}'`
+    : '';
+  filter = `${filter} ${
+    collectionIdentifier ? `AND a.collection = '${collectionIdentifier}'` : ''
+  }`;
+  return `SELECT DISTINCT paymentToken, COUNT(a.paymentToken) AS count FROM auctions a 
+  WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken`;
+}
+
+export class AuctionFilterBuilder {
+  private queryFilter: string = '';
+  private queryRequest: QueryRequest;
+  constructor(queryRequest: QueryRequest) {
+    this.queryRequest = queryRequest;
+  }
+
+  addIfExists(filterName: string): this {
+    const filter = this.queryRequest.getFilterName(filterName);
+    if (filter) {
+      this.queryFilter += ` AND a.${filterName} = '${filter}'`;
+    }
+
+    return this;
+  }
+
+  build(): string {
+    return this.queryFilter;
+  }
 }

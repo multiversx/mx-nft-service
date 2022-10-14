@@ -11,6 +11,8 @@ export class AccountStats {
   @Field({ nullable: true })
   creations: string;
   @Field({ nullable: true })
+  likes: string;
+  @Field({ nullable: true })
   collected: string;
   @Field({ nullable: true })
   collections: string;

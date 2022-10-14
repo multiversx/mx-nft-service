@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { Asset } from './models';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';

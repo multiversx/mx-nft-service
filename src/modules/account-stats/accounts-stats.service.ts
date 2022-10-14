@@ -7,11 +7,13 @@ import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 
 @Injectable()
 export class AccountsStatsService {
   constructor(
     private persistenceService: PersistenceService,
+    private collectionsService: CollectionsGetterService,
     private apiService: ElrondApiService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
@@ -98,6 +100,24 @@ export class AccountsStatsService {
     }
   }
 
+  async getLikesCount(address: string): Promise<number> {
+    try {
+      return this.accountStatsCachingService.getLikesCount(address, () =>
+        this.persistenceService.getLikesCountForAddress(address),
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting likes count for account',
+        {
+          path: this.getLikesCount.name,
+          address,
+          exception: err?.message,
+        },
+      );
+      return 0;
+    }
+  }
+
   async getCollectedCount(
     address: string,
     marketplaceKey: string = null,
@@ -128,7 +148,7 @@ export class AccountsStatsService {
   async getCollectionsCount(address: string): Promise<number> {
     try {
       return this.accountStatsCachingService.getCollectionsCount(address, () =>
-        this.apiService.getCollectionsForAddressCount(
+        this.apiService.getCollectionsForAddressWithRolesCount(
           address,
           '?type=SemiFungibleESDT,NonFungibleESDT',
         ),
@@ -145,9 +165,8 @@ export class AccountsStatsService {
 
   async getCreationsCount(address: string): Promise<any> {
     try {
-      const query = new AssetsQuery().addCreator(address).build();
       return this.accountStatsCachingService.getCreationsCount(address, () =>
-        this.apiService.getNftsCount(query),
+        this.collectionsService.getCreationsCount(address),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting creations count', {
