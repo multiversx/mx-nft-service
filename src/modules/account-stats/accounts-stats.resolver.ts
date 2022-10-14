@@ -72,6 +72,6 @@ export class AccountsStatsResolver {
     const creationsCount = await this.accountsStatsService.getCreationsCount(
       address,
     );
-    return creationsCount || 0;
+    return creationsCount?.nfts || 0;
   }
 }

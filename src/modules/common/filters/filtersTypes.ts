@@ -130,6 +130,11 @@ export class AssetsFilter {
   creatorAddress: string;
 
   @IsOptional()
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, { nullable: true })
+  artistAddress: string;
+
+  @IsOptional()
   @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
   @Field(() => String, { nullable: true })
   identifier: string;

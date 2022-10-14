@@ -166,7 +166,7 @@ export class AccountsStatsService {
   async getCreationsCount(address: string): Promise<any> {
     try {
       return this.accountStatsCachingService.getCreationsCount(address, () =>
-        this.collectionsService.getCreationsCount(address),
+        this.collectionsService.getArtistCreations(address),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting creations count', {

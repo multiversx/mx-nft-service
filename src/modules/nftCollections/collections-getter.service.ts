@@ -227,7 +227,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number }[], number]
+    [{ artist: string; nfts: number; collections: string[] }[], number]
   > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
@@ -237,14 +237,16 @@ export class CollectionsGetterService {
     );
   }
 
-  async getCreationsCount(address: string): Promise<number> {
+  async getArtistCreations(
+    address: string,
+  ): Promise<{ artist: string; nfts: number; collections: string[] }> {
     const [collections] = await this.getOrSetMostActiveCollections();
     const response = collections.find((x) => x.artist === address);
-    return response.nfts;
+    return response;
   }
 
   public async getMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number }[], number]
+    [{ artist: string; nfts: number; collections: string[] }[], number]
   > {
     const [collections] = await this.getOrSetFullCollections();
     let groupedCollections = collections
@@ -252,6 +254,7 @@ export class CollectionsGetterService {
       .map((group: { key: any; values: any[] }) => ({
         artist: group.key,
         nfts: group.values.sum((x) => x.nftsCount),
+        collections: [...new Set(group.values.map((x) => x.collection))],
       }))
       .sortedDescending((x: { nfts: any }) => x.nfts);
 

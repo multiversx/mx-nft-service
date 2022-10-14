@@ -8,6 +8,7 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
+import { ElasticMetricType } from '@elrondnetwork/erdnest/lib/src/common/metrics/entities/elastic.metric.type';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -366,6 +367,28 @@ export class ElrondElasticService {
     return JSON.stringify({
       properties: properties,
     });
+  }
+
+  async getList(
+    collection: string,
+    key: string,
+    elasticQuery: ElasticQuery,
+  ): Promise<any[]> {
+    const url = `${this.url}/${collection}/_search`;
+
+    const profiler = new PerformanceProfiler();
+    console.log(JSON.stringify(elasticQuery));
+    const result = await this.apiService.post(url, elasticQuery.toJson());
+
+    profiler.stop();
+
+    MetricsCollector.setElasticDuration(
+      ElasticMetricType.list,
+      profiler.duration,
+    );
+
+    const documents = result.data.hits.hits;
+    return documents.map((document: any) => this.formatItem(document, key));
   }
 
   private buildBulkUpdateBody(updates: string[]): string {
