@@ -400,7 +400,7 @@ type Collection {
   status: String
   svgUrl: String
   ticker: String!
-  traitSummary: [TraitSummary!]!
+  traits: [CollectionNftTrait!]!
   type: String
   verified: Boolean!
   website: String
@@ -432,6 +432,16 @@ type CollectionBranding {
 type CollectionEdge {
   cursor: String
   node: Collection
+}
+
+type CollectionNftTrait {
+  name: String!
+  values: [CollectionNftTraitValues!]!
+}
+
+type CollectionNftTraitValues {
+  occurrences: Float!
+  value: String!
 }
 
 type CollectionPageInfo {
@@ -1092,13 +1102,6 @@ type Token {
 
 input TokenFilter {
   token: String = "EGLD"
-}
-
-type TraitSummary {
-  attributes: [AttributeSummary!]!
-  name: String!
-  occurenceCount: Float!
-  occurencePercentage: Float!
 }
 
 type TransactionNode {

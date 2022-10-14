@@ -3,6 +3,7 @@ import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
 import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
+import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-traits.model';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
 
@@ -69,10 +70,8 @@ export class Collection {
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
-
-  //here//todo: custom type mamping
-  @Field(() => Record<String, Record<String, Number>>)
-  traitSummary: { [key: string]: { [key: string]: number } };
+  @Field(() => [CollectionNftTrait])
+  traits: CollectionNftTrait[];
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -113,6 +112,7 @@ export class Collection {
       }),
       artistFollowersCount: followersCount,
       nftsCount: collectionApi.count,
+      traits: CollectionNftTrait.fromCollectionTraits(collectionApi.traits),
     });
   }
 }

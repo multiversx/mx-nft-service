@@ -22,6 +22,7 @@ import {
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
 import { CollectionsTraitSummaryRedisHandler } from './collection-trait-summary.redis-handler';
+import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -370,7 +371,7 @@ export class CollectionsGetterService {
     for (const collection of localCollections) {
       for (const groupByCollection of traitSummariesGroupByCollection) {
         if (collection.collection === groupByCollection.key) {
-          collection.traitSummary = groupByCollection.value;
+          collection.traits = groupByCollection.value;
         }
       }
     }
@@ -443,12 +444,13 @@ export class CollectionsGetterService {
     return descriptions[randomIdx].replace('{size}', size.toString());
   }
 
-  async getCollectionTraitSummary(
-    collection: string,
-  ): Promise<{ [key: string]: { [key: string]: number } }> {
+  async getCollectionTraits(collection: string): Promise<CollectionNftTrait[]> {
     const traitSummary = await this.persistenceService.getTraitSummary(
       collection,
     );
-    return traitSummary.traitTypes;
+    if (!traitSummary || !traitSummary?.traitTypes) {
+      return [];
+    }
+    return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
   }
 }
