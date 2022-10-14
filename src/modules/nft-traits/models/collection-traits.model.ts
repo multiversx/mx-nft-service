@@ -115,7 +115,7 @@ export class CollectionNftTrait {
     [key: string]: { [key: string]: number };
   }): CollectionNftTrait[] {
     if (!traits) {
-      return [];
+      return;
     }
     let convertedTraits: CollectionNftTrait[] = [];
     for (const [traitName, trait] of Object.entries(traits)) {

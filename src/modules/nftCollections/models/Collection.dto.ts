@@ -70,8 +70,8 @@ export class Collection {
   artistAddress: string;
   @Field(() => Int)
   artistFollowersCount: number;
-  @Field(() => [CollectionNftTrait])
-  traits: CollectionNftTrait[];
+  @Field(() => [CollectionNftTrait], { nullable: true })
+  traits?: CollectionNftTrait[];
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);

@@ -428,7 +428,7 @@ export class CollectionsGetterService {
       collection,
     );
     if (!traitSummary || !traitSummary?.traitTypes) {
-      return [];
+      return;
     }
     return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
   }
