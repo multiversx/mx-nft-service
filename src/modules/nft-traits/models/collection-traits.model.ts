@@ -113,9 +113,9 @@ export class CollectionNftTrait {
 
   static fromCollectionTraits(traits: {
     [key: string]: { [key: string]: number };
-  }): CollectionNftTrait[] {
+  }): CollectionNftTrait[] | undefined {
     if (!traits) {
-      return;
+      return undefined;
     }
     let convertedTraits: CollectionNftTrait[] = [];
     for (const [traitName, trait] of Object.entries(traits)) {
