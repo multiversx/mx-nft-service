@@ -15,6 +15,7 @@ export interface CollectionApi {
   roles: RolesApi[];
   assets: CollectionAssetApi;
   count: number;
+  traits: { [key: string]: { [key: string]: number } };
 }
 
 export interface RolesApi {

@@ -1,3 +1,4 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { NftTrait } from './nft-traits.model';
@@ -96,6 +97,63 @@ export class CollectionTraitSummary {
     }
 
     return true;
+  }
+}
+
+@ObjectType()
+export class CollectionNftTrait {
+  @Field()
+  name: string = '';
+  @Field(() => [CollectionNftTraitValues])
+  values: CollectionNftTraitValues[] = [];
+
+  constructor(init?: Partial<CollectionNftTrait>) {
+    Object.assign(this, init);
+  }
+
+  static fromCollectionTraits(traits: {
+    [key: string]: { [key: string]: number };
+  }): CollectionNftTrait[] {
+    if (!traits) {
+      return [];
+    }
+    let convertedTraits: CollectionNftTrait[] = [];
+    for (const [traitName, trait] of Object.entries(traits)) {
+      convertedTraits.push(
+        new CollectionNftTrait({
+          name: traitName,
+          values: CollectionNftTraitValues.fromCollectionTrait(trait),
+        }),
+      );
+    }
+    return convertedTraits;
+  }
+}
+
+@ObjectType()
+export class CollectionNftTraitValues {
+  @Field()
+  value: string = '';
+  @Field()
+  occurrences: number = 0;
+
+  constructor(init?: Partial<CollectionNftTraitValues>) {
+    Object.assign(this, init);
+  }
+
+  static fromCollectionTrait(trait: {
+    [key: string]: number;
+  }): CollectionNftTraitValues[] {
+    let values: CollectionNftTraitValues[] = [];
+    for (const [traitValue, occurrences] of Object.entries(trait)) {
+      values.push(
+        new CollectionNftTraitValues({
+          value: traitValue,
+          occurrences: occurrences,
+        }),
+      );
+    }
+    return values;
   }
 }
 
