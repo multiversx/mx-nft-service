@@ -20,13 +20,13 @@ import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.l
 import { Asset, AssetsResponse } from '../assets/models';
 import { Nft } from 'src/common';
 import {
-  AssetsCollectionFilter,
   CollectionsFilter,
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
+import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -142,10 +142,10 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
     @Args({
       name: 'filters',
-      type: () => AssetsCollectionFilter,
+      type: () => CollectionsFilter,
       nullable: true,
     })
-    filters: AssetsCollectionFilter,
+    filters: CollectionsFilter,
   ): Promise<AssetsResponse> {
     const { collection } = collectionResponse;
     const { limit, offset } = pagination.pagingParams();
@@ -182,6 +182,18 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     return (
       node.description ??
       (await this.collectionsGetterService.getRandomCollectionDescription(node))
+    );
+  }
+
+  @ResolveField('traits')
+  async traits(
+    @Parent() collectionNode: Collection,
+  ): Promise<CollectionNftTrait[]> {
+    return (
+      collectionNode.traits ??
+      (await this.collectionsGetterService.getCollectionTraits(
+        collectionNode.collection,
+      ))
     );
   }
 }

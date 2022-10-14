@@ -159,11 +159,6 @@ type AssetPageInfo {
   startCursor: String
 }
 
-input AssetsCollectionFilter {
-  """The owner of the collection"""
-  ownerAddress: String
-}
-
 input AssetsFilter {
   collection: String
 
@@ -382,7 +377,7 @@ type Collection {
   artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
-  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
+  assets(filters: CollectionsFilter, pagination: ConnectionArgs): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -405,6 +400,7 @@ type Collection {
   status: String
   svgUrl: String
   ticker: String!
+  traits: [CollectionNftTrait!]!
   type: String
   verified: Boolean!
   website: String
@@ -436,6 +432,16 @@ type CollectionBranding {
 type CollectionEdge {
   cursor: String
   node: Collection
+}
+
+type CollectionNftTrait {
+  name: String!
+  values: [CollectionNftTraitValues!]!
+}
+
+type CollectionNftTraitValues {
+  occurrences: Float!
+  value: String!
 }
 
 type CollectionPageInfo {
