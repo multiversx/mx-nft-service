@@ -17,6 +17,13 @@ export class CollectionsFilter {
     description: 'The owner of the collection',
   })
   ownerAddress: string;
+  @IsOptional()
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, {
+    nullable: true,
+    description: 'The actual artist of the collection',
+  })
+  artistAddress: string;
 
   @IsOptional()
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
