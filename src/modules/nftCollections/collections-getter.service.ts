@@ -21,7 +21,6 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
-import { S } from 'clarifai-nodejs-grpc/proto/clarifai/auth/scope/scope_pb';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Injectable()
@@ -63,6 +62,10 @@ export class CollectionsGetterService {
 
     if (filters?.ownerAddress) {
       return await this.getCollectionsForUser(offset, limit, filters);
+    }
+
+    if (filters?.artistAddress) {
+      return await this.getCollectionsByArtist(offset, limit, filters);
     }
 
     if (filters?.activeLast30Days) {
@@ -411,6 +414,25 @@ export class CollectionsGetterService {
       collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
       count,
     ];
+  }
+
+  private async getCollectionsByArtist(
+    offset: number = 0,
+    limit: number = 100,
+    filters?: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    const artistCollections = await this.getArtistCreations(
+      filters.artistAddress,
+    );
+    let collectionIdentifiers = artistCollections?.collections?.slice(
+      offset,
+      limit,
+    );
+    let [collections] = await this.getOrSetFullCollections();
+    const filteredCollection = collections.filter((c) =>
+      collectionIdentifiers.includes(c.collection),
+    );
+    return [filteredCollection, artistCollections?.nfts];
   }
 
   async getRandomCollectionDescription(node: Collection): Promise<string> {
