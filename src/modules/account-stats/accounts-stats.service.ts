@@ -163,18 +163,21 @@ export class AccountsStatsService {
     }
   }
 
-  async getCreationsCount(address: string): Promise<any> {
+  async getArtistCreationsInfo(
+    address: string,
+  ): Promise<{ artist: string; nfts: number; collections: string[] }> {
     try {
-      return this.accountStatsCachingService.getCreationsCount(address, () =>
-        this.collectionsService.getArtistCreations(address),
+      return this.accountStatsCachingService.getArtistCreationsInfo(
+        address,
+        () => this.collectionsService.getArtistCreations(address),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting creations count', {
-        path: 'AccountsStatsService.getCreationsCount',
+        path: this.getArtistCreationsInfo.name,
         address,
         exception: err?.message,
       });
-      return new AccountStatsEntity();
+      return null;
     }
   }
 }
