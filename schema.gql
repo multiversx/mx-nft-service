@@ -408,7 +408,7 @@ type Collection {
   status: String
   svgUrl: String
   ticker: String!
-  traits: [CollectionNftTrait!]!
+  traits: [CollectionNftTrait]
   type: String
   verified: Boolean!
   website: String
