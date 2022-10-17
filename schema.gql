@@ -503,6 +503,9 @@ input CollectionsFilter {
   """Flag for active last 30 days"""
   activeLast30Days: Boolean
 
+  """The actual artist of the collection"""
+  artistAddress: String
+
   """Flag for can create or not on collection"""
   canCreate: Boolean
 
