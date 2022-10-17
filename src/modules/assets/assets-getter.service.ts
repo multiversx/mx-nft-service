@@ -272,20 +272,23 @@ export class AssetsGetterService {
     const artistCollections = await this.collectionsService.getArtistCreations(
       address,
     );
-    let elasticQuery = this.getCollectionsElasticQuery(
-      artistCollections?.collections,
-      offset,
-      size,
-    );
-    let elasticNfts = await this.elasticService.getList(
-      'tokens',
-      'identifier',
-      elasticQuery,
-    );
-    const returnAssets = await this.mapElasticNfts(elasticNfts);
+    if (artistCollections) {
+      const batch = artistCollections?.collections?.slice(0, 100);
+      let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
+      let elasticNfts = await this.elasticService.getList(
+        'tokens',
+        'identifier',
+        elasticQuery,
+      );
+      const returnAssets = await this.mapElasticNfts(elasticNfts);
+      return new CollectionType({
+        items: returnAssets,
+        count: artistCollections.nfts,
+      });
+    }
     return new CollectionType({
-      items: returnAssets,
-      count: artistCollections.nfts,
+      items: [],
+      count: 0,
     });
   }
 
