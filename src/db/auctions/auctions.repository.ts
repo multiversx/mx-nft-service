@@ -423,7 +423,7 @@ export class AuctionsRepository {
       )
       .andWhere(`a.paymentToken = '${paymentToken}'`)
       .execute();
-    return response[0];
+    return { ...response[0], paymentToken };
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {
