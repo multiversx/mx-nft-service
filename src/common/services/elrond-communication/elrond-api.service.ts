@@ -406,8 +406,13 @@ export class ElrondApiService {
     fields: string = 'identifier,nonce,timestamp',
     startNonce?: number,
     endNonce?: number,
+    maxNftsCount?: number,
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
+
+    if (!maxNftsCount) {
+      maxNftsCount = await this.getCollectionNftsCount(collection);
+    }
 
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
@@ -439,7 +444,7 @@ export class ElrondApiService {
 
       nfts = nfts.concat(batch);
       lastEnd = end;
-    } while (lastEnd < endNonce);
+    } while (lastEnd < endNonce || nfts.length < maxNftsCount);
 
     return this.filterUniqueNftsByNonce(nfts);
   }
