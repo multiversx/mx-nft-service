@@ -428,7 +428,9 @@ export class CollectionsGetterService {
       offset,
       limit,
     );
-    if (!collectionIdentifiers) [[], 0];
+    if (!collectionIdentifiers) {
+      return [[], 0];
+    }
     let [collections] = await this.getOrSetFullCollections();
     const filteredCollection = collections.filter((c) =>
       collectionIdentifiers?.includes(c.collection),
