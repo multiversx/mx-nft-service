@@ -428,9 +428,10 @@ export class CollectionsGetterService {
       offset,
       limit,
     );
+    if (!collectionIdentifiers) [[], 0];
     let [collections] = await this.getOrSetFullCollections();
     const filteredCollection = collections.filter((c) =>
-      collectionIdentifiers.includes(c.collection),
+      collectionIdentifiers?.includes(c.collection),
     );
     return [filteredCollection, artistCollections?.nfts];
   }
