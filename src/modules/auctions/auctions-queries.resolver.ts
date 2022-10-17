@@ -102,7 +102,11 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
         limit,
       ),
       priceRange: priceRange
-        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
+        ? PriceRange.fromEntity(
+            priceRange?.minBid,
+            priceRange?.maxBid,
+            priceRange?.paymentToken,
+          )
         : null,
     };
   }
@@ -131,7 +135,11 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
         limit,
       ),
       priceRange: priceRange
-        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid)
+        ? PriceRange.fromEntity(
+            priceRange?.minBid,
+            priceRange?.maxBid,
+            priceRange?.paymentToken,
+          )
         : null,
     };
   }
