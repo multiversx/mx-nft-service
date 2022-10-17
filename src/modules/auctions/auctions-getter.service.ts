@@ -711,7 +711,6 @@ export class AuctionsGetterService {
     auctions: Auction[],
     paymentToken: string = elrondConfig.egld,
   ): PriceRange {
-    console.log(paymentToken);
     const minBids = auctions
       .filter((x) => x.minBid.token === paymentToken)
       .map((x) =>
@@ -739,6 +738,7 @@ export class AuctionsGetterService {
     return {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
       maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
+      paymentToken,
     };
   }
 

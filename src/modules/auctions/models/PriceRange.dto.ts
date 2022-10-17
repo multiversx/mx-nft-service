@@ -16,16 +16,20 @@ export class PriceRange {
     Object.assign(this, init);
   }
 
-  static fromEntity(minBid: string, maxBid: string) {
+  static fromEntity(
+    minBid: string,
+    maxBid: string,
+    paymentToken: string = elrondConfig.egld,
+  ) {
     return new PriceRange({
       minBid: new Price({
-        token: elrondConfig.egld,
+        token: paymentToken,
         nonce: 0,
         amount: minBid ? nominateAmount(minBid) : '0',
         timestamp: DateUtils.getCurrentTimestamp(),
       }),
       maxBid: new Price({
-        token: elrondConfig.egld,
+        token: paymentToken,
         nonce: 0,
         amount: maxBid ? nominateAmount(maxBid) : '0',
         timestamp: DateUtils.getCurrentTimestamp(),
