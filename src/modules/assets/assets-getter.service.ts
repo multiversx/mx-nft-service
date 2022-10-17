@@ -273,7 +273,6 @@ export class AssetsGetterService {
       address,
     );
     if (artistCollections) {
-      console.log(artistCollections.collections.length);
       const batch = artistCollections?.collections?.slice(0, 100);
       let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
       let elasticNfts = await this.elasticService.getList(
@@ -294,7 +293,6 @@ export class AssetsGetterService {
   }
 
   private async mapElasticNfts(elasticNfts: any[]) {
-    console.log(elasticNfts);
     const assets = await this.getAssetsForIdentifiers(
       elasticNfts?.map((e) => e.identifier),
     );
