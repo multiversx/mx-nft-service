@@ -766,7 +766,7 @@ type Mutation {
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
-  validateNftRarities(collectionTicker: String!): Boolean!
+  validateCollectionRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }
@@ -971,8 +971,16 @@ type Query {
 }
 
 type Rarity {
-  rank: Int
-  score: Float
+  customRank: Int
+  jaccardDistancesRank: Float
+  jaccardDistancesScore: Float
+  openRarityRank: Float
+  openRarityScore: Float
+  preferredRankAlgorithm: String!
+  statisticalRank: Float
+  statisticalScore: Float
+  traitRank: Float
+  traitScore: Float
 }
 
 input RemoveLikeArgs {

@@ -1,12 +1,6 @@
-//import { registerEnumType } from '@nestjs/graphql';
-
 export enum RarityAlgorithmsEnum {
-  OpenRarity = 'OpenRarity',
   JaccardDistances = 'JaccardDistances',
-  TraitRarity = 'TraitRarity',
+  OpenRarity = 'OpenRarity',
   StatisticalRarity = 'StatisticalRarity',
+  TraitRarity = 'TraitRarity',
 }
-
-// registerEnumType(RarityAlgorithmsEnum, {
-//   name: 'RarityAlgorithmsEnum',
-// });

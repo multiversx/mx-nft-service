@@ -35,9 +35,17 @@ export interface Nft {
   metadata: NftMetadata;
   media: NftMedia[];
   scamInfo: NftScamInfo;
-  rank: number;
-  score: number;
   assets: CollectionAssetApi;
+  // todo map
+  rank_custom: number;
+  score_openRarity: number;
+  rank_openRarity: number;
+  score_jaccardDistances: number;
+  rank_jaccardDistances: number;
+  score_trait: number;
+  rank_trait: number;
+  score_statistical: number;
+  rank_statistical: number;
 }
 
 export interface NftMedia {

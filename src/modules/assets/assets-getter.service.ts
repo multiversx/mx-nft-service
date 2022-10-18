@@ -342,8 +342,15 @@ export class AssetsGetterService {
     let assetsRarity = assetsWithRarity.map((a) => {
       return {
         identifier: a.identifier,
-        rank: a.rarity.rank,
-        score: a.rarity.score,
+        customRank: a.rarity.customRank,
+        openRarityScore: a.rarity.openRarityScore,
+        openRarityRank: a.rarity.openRarityRank,
+        jaccardDistancesScore: a.rarity.jaccardDistancesScore,
+        jaccardDistancesRank: a.rarity.jaccardDistancesRank,
+        traitScore: a.rarity.traitScore,
+        traitRank: a.rarity.traitRank,
+        statisticalScore: a.rarity.statisticalScore,
+        statisticalRank: a.rarity.statisticalRank,
       };
     });
     return assetsRarity;

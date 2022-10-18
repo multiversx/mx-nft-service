@@ -1,5 +1,5 @@
-import e from 'express';
 import { Nft, NftMetadata } from 'src/common';
+import { NftRarityEntity } from 'src/db/nft-rarity';
 
 export class NftRarityData {
   identifier: string;
@@ -8,52 +8,59 @@ export class NftRarityData {
   metadata: NftMetadata;
   DNA?: number[];
 
-  // manual
-  nft_rarity_score?: number;
-  nft_rarity_rank?: number;
-  // score: number;
-  // rank: number;
+  score_openRarity: number;
+  rank_openRarity: number;
 
-  // opScore: number;
-  // opRank: number;
+  score_jaccardDistances: number;
+  rank_jaccardDistances: number;
 
-  // jdScore: number;
-  // jdRank: number;
+  score_trait: number;
+  rank_trait: number;
 
-  // trScore: number;
-  // trRank: number;
-
-  // srScore: number;
-  // srRank: number;
+  score_statistical: number;
+  rank_statistical: number;
 
   constructor(init?: Partial<NftRarityData>) {
     Object.assign(this, init);
   }
 
-  private static fromNft(nft: Nft): NftRarityData {
+  static fromNft(nft: Nft): NftRarityData {
     if (!nft) {
       return undefined;
     }
 
+    // todo map
     return nft
       ? {
           identifier: nft.identifier,
           nonce: nft.nonce,
           metadata: nft.metadata,
-          nft_rarity_score: nft.score,
-          nft_rarity_rank: nft.rank,
+          score_openRarity: 0, //nft.nft_score_openRarity,
+          rank_openRarity: 0, //nft.nft_rank_openRarity,
+          score_jaccardDistances: 0, //nft.nft_score_jaccardDistances,
+          rank_jaccardDistances: 0, //nft.nft_rank_jaccardDistances,
+          score_trait: 0, //nft.nft_score_trait,
+          rank_trait: 0, //nft.nft_rank_trait,
+          score_statistical: 0, //nft.nft_score_statistical,
+          rank_statistical: 0, //nft.nft_rank_statistical,
         }
       : null;
   }
 
-  private static fromElasticNft(nft: any): NftRarityData {
+  static fromElasticNft(nft: any): NftRarityData {
     return nft
       ? {
           identifier: nft.identifier,
           nonce: nft.nonce,
           metadata: undefined,
-          nft_rarity_score: nft.nft_rarity_score,
-          nft_rarity_rank: nft.nft_rarity_rank,
+          score_openRarity: nft.nft_score_openRarity,
+          rank_openRarity: nft.nft_rank_openRarity,
+          score_jaccardDistances: nft.nft_score_jaccardDistances,
+          rank_jaccardDistances: nft.nft_rank_jaccardDistances,
+          score_trait: nft.nft_score_trait,
+          rank_trait: nft.nft_rank_trait,
+          score_statistical: nft.nft_score_statistical,
+          rank_statistical: nft.nft_rank_statistical,
         }
       : null;
   }
@@ -63,9 +70,7 @@ export class NftRarityData {
   }
 
   static fromElasticNfts(nfts: any[]): NftRarityData[] {
-    return this.computeDNA(
-      nfts.map((nft) => this.fromElasticNft(nft)),
-    );
+    return this.computeDNA(nfts.map((nft) => this.fromElasticNft(nft)));
   }
 
   static computeDNA(nfts: NftRarityData[]): NftRarityData[] {
@@ -140,5 +145,41 @@ export class NftRarityData {
     }
 
     return attributeIndexes[traitIndex][traitValue];
+  }
+
+  static areIdenticalRarities(
+    nftRarityData: NftRarityData,
+    nftRarityEntity: NftRarityEntity,
+  ): boolean {
+    if (
+      Number(nftRarityData.score_openRarity) !==
+        Number(nftRarityEntity.score_openRarity) ||
+      nftRarityData.rank_openRarity !== nftRarityEntity.rank_openRarity
+    ) {
+      return false;
+    }
+    if (
+      Number(nftRarityData.score_jaccardDistances) !==
+        Number(nftRarityEntity.score_jaccardDistances) ||
+      nftRarityData.rank_jaccardDistances !==
+        nftRarityEntity.rank_jaccardDistances
+    ) {
+      return false;
+    }
+    if (
+      Number(nftRarityData.score_statistical) !==
+        Number(nftRarityEntity.score_statistical) ||
+      nftRarityData.rank_statistical !== nftRarityEntity.rank_statistical
+    ) {
+      return false;
+    }
+    if (
+      Number(nftRarityData.score_trait) !==
+        Number(nftRarityEntity.score_trait) ||
+      nftRarityData.rank_trait !== nftRarityEntity.rank_trait
+    ) {
+      return false;
+    }
+    return true;
   }
 }

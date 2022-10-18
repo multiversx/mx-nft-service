@@ -39,7 +39,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   async updateCollectionRarities(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -52,8 +52,8 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
-  async validateNftRarities(
+  @UseGuards(GqlAdminAuthGuard)
+  async validateCollectionRarities(
     @Args('collectionTicker')
     collectionTicker: string,
   ): Promise<boolean> {

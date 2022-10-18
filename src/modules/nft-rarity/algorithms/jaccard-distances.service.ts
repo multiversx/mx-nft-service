@@ -1,34 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { NftRarityEntity } from 'src/db/nft-rarity';
 import { NftRarityData } from '../models/nft-rarity-data.model';
 
-/// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
+// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
 
 @Injectable()
 export class JaccardDistancesRarityService {
   async computeJaccardDistancesRarities(
-    collection: string,
     nfts: NftRarityData[],
   ): Promise<{ [key: string]: { [key: string]: number } }> {
     if (nfts.length === 1) {
       return {
         [nfts[0].nonce]: {
-          jdScore: 100,
-          jdRank: 1,
+          score: 100,
+          rank: 1,
         },
       };
-      // return [
-      //   new NftRarityEntity({
-      //     collection: collection,
-      //     identifier: nfts[0].identifier,
-      //     jdScore: 100,
-      //     nonce: nfts[0].nonce,
-      //     jdRank: 1,
-      //   }),
-      // ];
     }
-
-    //const nftsWithMaps = this.computeNftsAttributeMaps(nfts);
 
     const jaccardDistances: number[][] = await this.computeJd(nfts);
     const avg: number[] = this.computeAvg(jaccardDistances);
@@ -42,17 +29,9 @@ export class JaccardDistancesRarityService {
       scoreArrayAsc = this.markScoreAsUsed(scoreArrayAsc, scoreIndex);
 
       rarities[nft.nonce] = {
-        jdScore: parseFloat(scoreArray[i].toFixed(3)),
-        jdRank: scoreArray.length - scoreIndex,
+        score: scoreArray[i],
+        rank: scoreArray.length - scoreIndex,
       };
-
-      // return new NftRarityEntity({
-      //   collection: collection,
-      //   identifier: nft.identifier,
-      //   nonce: nft.nonce,
-      //   jdScore: parseFloat(scoreArray[i].toFixed(3)),
-      //   jdRank: scoreArray.length - scoreIndex,
-      // });
     });
     return rarities;
   }
