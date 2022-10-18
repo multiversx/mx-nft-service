@@ -32,7 +32,6 @@ import {
   runningAuctionRequest,
 } from './auctionsRequest';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
-import denominate from 'src/utils/formatters';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -715,18 +714,11 @@ export class AuctionsGetterService {
     const minBids = auctions
       .filter((x) => x.minBid.token === paymentToken)
       .map((x) =>
-        parseFloat(
-          denominate({
-            input: x.maxBid.amount,
-            denomination: 18,
-            decimals: 2,
-            showLastNonZeroDecimal: true,
-          }).replace(',', ''),
-        ),
+        new BigNumber(x.minBid.amount).dividedBy(new BigNumber(10 ** 18)),
       );
-    let minBid = 1000000000000000;
+    let minBid = new BigNumber('Infinity');
     for (const amount of minBids) {
-      if (amount < minBid) {
+      if (amount.isLessThan(minBid)) {
         minBid = amount;
       }
     }
@@ -734,25 +726,18 @@ export class AuctionsGetterService {
     const maxBids = auctions
       .filter((x) => x.maxBid.token === paymentToken)
       .map((x) =>
-        parseFloat(
-          denominate({
-            input: x.maxBid.amount,
-            denomination: 18,
-            decimals: 2,
-            showLastNonZeroDecimal: true,
-          }).replace(',', ''),
-        ),
+        new BigNumber(x.maxBid.amount).dividedBy(new BigNumber(10 ** 18)),
       );
     let maxBid = minBid;
     for (const amount of maxBids) {
-      if (amount > maxBid) {
+      if (amount.isGreaterThan(maxBid)) {
         maxBid = amount;
       }
     }
 
     return {
-      minBid: minBid ? minBid.toString() : '0',
-      maxBid: maxBid ? maxBid.toString() : '0',
+      minBid: minBid.isFinite() ? minBid.toString() : '0',
+      maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
       paymentToken,
     };
   }
