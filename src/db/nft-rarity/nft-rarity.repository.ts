@@ -55,7 +55,9 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
   async findNftRarityByCollection(
     collectionTicker: string,
   ): Promise<NftRarityEntity[]> {
-    return await this.find({ collection: collectionTicker });
+    return await (
+      await this.find({ collection: collectionTicker })
+    ).sort((a, b) => b.nonce - a.nonce);
   }
 
   async deleteNftRarity(identifier: string): Promise<any> {
