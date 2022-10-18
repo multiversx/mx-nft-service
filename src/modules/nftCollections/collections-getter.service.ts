@@ -21,7 +21,6 @@ import {
   CollectionsSortingEnum,
 } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
-import { S } from 'clarifai-nodejs-grpc/proto/clarifai/auth/scope/scope_pb';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 
 @Injectable()
@@ -63,6 +62,10 @@ export class CollectionsGetterService {
 
     if (filters?.ownerAddress) {
       return await this.getCollectionsForUser(offset, limit, filters);
+    }
+
+    if (filters?.artistAddress) {
+      return await this.getCollectionsByArtist(offset, limit, filters);
     }
 
     if (filters?.activeLast30Days) {
@@ -227,7 +230,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number }[], number]
+    [{ artist: string; nfts: number; collections: string[] }[], number]
   > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
@@ -237,14 +240,16 @@ export class CollectionsGetterService {
     );
   }
 
-  async getCreationsCount(address: string): Promise<number> {
+  async getArtistCreations(
+    address: string,
+  ): Promise<{ artist: string; nfts: number; collections: string[] }> {
     const [collections] = await this.getOrSetMostActiveCollections();
     const response = collections.find((x) => x.artist === address);
-    return response.nfts;
+    return response;
   }
 
   public async getMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number }[], number]
+    [{ artist: string; nfts: number; collections: string[] }[], number]
   > {
     const [collections] = await this.getOrSetFullCollections();
     let groupedCollections = collections
@@ -252,6 +257,7 @@ export class CollectionsGetterService {
       .map((group: { key: any; values: any[] }) => ({
         artist: group.key,
         nfts: group.values.sum((x) => x.nftsCount),
+        collections: [...new Set(group.values.map((x) => x.collection))],
       }))
       .sortedDescending((x: { nfts: any }) => x.nfts);
 
@@ -410,6 +416,28 @@ export class CollectionsGetterService {
     ];
   }
 
+  private async getCollectionsByArtist(
+    offset: number = 0,
+    limit: number = 100,
+    filters?: CollectionsFilter,
+  ): Promise<[Collection[], number]> {
+    const artistCollections = await this.getArtistCreations(
+      filters.artistAddress,
+    );
+    let collectionIdentifiers = artistCollections?.collections?.slice(
+      offset,
+      limit,
+    );
+    if (!collectionIdentifiers) {
+      return [[], 0];
+    }
+    let [collections] = await this.getOrSetFullCollections();
+    const filteredCollection = collections.filter((c) =>
+      collectionIdentifiers?.includes(c.collection),
+    );
+    return [filteredCollection, artistCollections?.nfts];
+  }
+
   async getRandomCollectionDescription(node: Collection): Promise<string> {
     const size =
       node.nftsCount ??
@@ -423,12 +451,14 @@ export class CollectionsGetterService {
     return descriptions[randomIdx].replace('{size}', size.toString());
   }
 
-  async getCollectionTraits(collection: string): Promise<CollectionNftTrait[]> {
+  async getCollectionTraits(
+    collection: string,
+  ): Promise<CollectionNftTrait[] | undefined> {
     const traitSummary = await this.persistenceService.getTraitSummary(
       collection,
     );
     if (!traitSummary || !traitSummary?.traitTypes) {
-      return [];
+      return undefined;
     }
     return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
   }

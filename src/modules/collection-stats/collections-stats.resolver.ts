@@ -22,6 +22,7 @@ export class CollectionsStatsResolver {
     const collection = await this.collectionsStatsService.getStats(
       filters.identifier,
       filters.marketplaceKey,
+      filters.paymentToken,
     );
     return CollectionStats.fromEntity(collection, filters?.identifier);
   }

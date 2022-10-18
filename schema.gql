@@ -165,6 +165,7 @@ input AssetsCollectionFilter {
 }
 
 input AssetsFilter {
+  artistAddress: String
   collection: String
 
   """This will work only with an owner address"""
@@ -405,7 +406,7 @@ type Collection {
   status: String
   svgUrl: String
   ticker: String!
-  traits: [CollectionNftTrait!]!
+  traits: [CollectionNftTrait]
   type: String
   verified: Boolean!
   website: String
@@ -493,11 +494,15 @@ type CollectionStats {
 input CollectionStatsFilter {
   identifier: String!
   marketplaceKey: String
+  paymentToken: String
 }
 
 input CollectionsFilter {
   """Flag for active last 30 days"""
   activeLast30Days: Boolean
+
+  """The actual artist of the collection"""
+  artistAddress: String
 
   """Flag for can create or not on collection"""
   canCreate: Boolean
