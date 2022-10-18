@@ -15,6 +15,7 @@ import { AssetsModuleGraph } from '../assets/assets.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { OrdersCachingModule } from './caching/orders-caching.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
+import { UsdPriceModuleGraph } from '../usdPrice/usd-price.module';
 
 @Module({
   providers: [
@@ -36,6 +37,7 @@ import { NotificationsModuleGraph } from '../notifications/notifications.module'
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
+    forwardRef(() => UsdPriceModuleGraph),
     CacheEventsPublisherModule,
   ],
   exports: [OrdersService],

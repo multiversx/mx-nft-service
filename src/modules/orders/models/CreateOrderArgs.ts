@@ -1,5 +1,5 @@
+import BigNumber from 'bignumber.js';
 import { OrderEntity } from 'src/db/orders';
-import denominate from 'src/utils/formatters';
 import { OrderStatusEnum } from '.';
 
 export class CreateOrderArgs {
@@ -17,20 +17,15 @@ export class CreateOrderArgs {
     Object.assign(this, init);
   }
 
-  static toEntity(args: CreateOrderArgs): OrderEntity {
+  static toEntity(args: CreateOrderArgs, decimals: number): OrderEntity {
     return new OrderEntity({
       auctionId: args.auctionId,
       ownerAddress: args.ownerAddress,
       priceToken: args.priceToken,
       priceAmount: args.priceAmount,
-      priceAmountDenominated: parseFloat(
-        denominate({
-          input: args.priceAmount,
-          denomination: 18,
-          decimals: 18,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
-      ),
+      priceAmountDenominated: new BigNumber(args.priceAmount)
+        .dividedBy(Math.pow(10, decimals))
+        .toNumber(),
       priceNonce: args.priceNonce,
       boughtTokensNo: args.boughtTokens,
       blockHash: args.blockHash,
