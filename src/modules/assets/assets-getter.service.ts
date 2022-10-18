@@ -23,7 +23,6 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
-  ElasticPagination,
   ElasticQuery,
   ElasticSortOrder,
   QueryConditionOptions,
