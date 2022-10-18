@@ -444,7 +444,7 @@ export class ElrondApiService {
 
       nfts = nfts.concat(batch);
       lastEnd = end;
-    } while (lastEnd < endNonce || nfts.length < maxNftsCount);
+    } while (lastEnd < endNonce && nfts.length < maxNftsCount);
 
     return this.filterUniqueNftsByNonce(nfts);
   }
