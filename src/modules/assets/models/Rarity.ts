@@ -6,6 +6,12 @@ export class Rarity {
   @Field()
   preferredRankAlgorithm: string;
 
+  // todo map
+  @Field(() => Int, { nullable: true })
+  rank: number;
+  @Field({ nullable: true })
+  score: number;
+
   @Field(() => Int, { nullable: true })
   customRank: number;
 
@@ -34,6 +40,8 @@ export class Rarity {
   static fromNftRarity(asset: Nft) {
     return asset
       ? new Rarity({
+          rank: 0,
+          score: 0,
           preferredRankAlgorithm: asset.assets.preferredRankAlgorithm,
           customRank: 0, //asset?.nft_rank_custom,
           openRarityScore: 0, //asset?.nft_score_openRarity,
