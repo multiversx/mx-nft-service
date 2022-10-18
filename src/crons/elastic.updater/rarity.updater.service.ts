@@ -200,7 +200,7 @@ export class RarityUpdaterService {
         await Locker.lock(
           `Validate rarity flag for ${collection}`,
           async () => {
-            await this.nftRarityService.updateRarities(collection);
+            await this.nftRarityService.updateCollectionRarities(collection);
           },
           true,
         );
@@ -280,7 +280,7 @@ export class RarityUpdaterService {
         await Locker.lock(
           `Update/Validate rarities for ${collection}`,
           async () => {
-            await this.nftRarityService.updateRarities(collection);
+            await this.nftRarityService.updateCollectionRarities(collection);
           },
           true,
         );
