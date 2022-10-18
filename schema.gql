@@ -982,6 +982,8 @@ type Rarity {
   openRarityRank: Float
   openRarityScore: Float
   preferredRankAlgorithm: String!
+  rank: Int
+  score: Float
   statisticalRank: Float
   statisticalScore: Float
   traitRank: Float
