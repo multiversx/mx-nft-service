@@ -542,7 +542,12 @@ export class AuctionsGetterService {
       allAuctions = allAuctions.filter((x) =>
         paymentTokenFilter.values.includes(x.minBid?.token),
       );
+      priceRange = this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter.values[0] ?? elrondConfig.egld,
+      );
     }
+
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
@@ -702,9 +707,12 @@ export class AuctionsGetterService {
     );
   }
 
-  private computePriceRange(auctions: Auction[]): PriceRange {
+  private computePriceRange(
+    auctions: Auction[],
+    paymentToken: string = elrondConfig.egld,
+  ): PriceRange {
     const minBids = auctions
-      .filter((x) => x.minBid.token === elrondConfig.egld)
+      .filter((x) => x.minBid.token === paymentToken)
       .map((x) =>
         new BigNumber(x.minBid.amount).dividedBy(new BigNumber(10 ** 18)),
       );
@@ -716,7 +724,7 @@ export class AuctionsGetterService {
     }
 
     const maxBids = auctions
-      .filter((x) => x.maxBid.token === elrondConfig.egld)
+      .filter((x) => x.maxBid.token === paymentToken)
       .map((x) =>
         new BigNumber(x.maxBid.amount).dividedBy(new BigNumber(10 ** 18)),
       );
@@ -730,6 +738,7 @@ export class AuctionsGetterService {
     return {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
       maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
+      paymentToken,
     };
   }
 
