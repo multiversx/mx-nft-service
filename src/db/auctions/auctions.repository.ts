@@ -1,5 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
@@ -137,12 +138,19 @@ export class AuctionsRepository {
         currentPrice.values?.length >= 1 && currentPrice.values[0]
           ? currentPrice.values[0]
           : 0;
+      const minBidDenominated = new BigNumber(minBid).dividedBy(
+        new BigNumber(10 ** 18),
+      );
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
           : nominateAmount(maxBidValue);
+      const maxBidDenominated = new BigNumber(maxBid).dividedBy(
+        new BigNumber(10 ** 18),
+      );
       queryBuilder.andWhere(
-        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
+        `(if(o.priceAmountDenominated, o.priceAmountDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated}, 
+          a.minBidDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated})) `,
       );
     }
     return currentPriceSort;
