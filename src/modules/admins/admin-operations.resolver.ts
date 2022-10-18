@@ -45,7 +45,9 @@ export class AdminOperationsResolver {
     collectionTicker: string,
   ): Promise<boolean> {
     try {
-      return await this.nftRarityService.updateRarities(collectionTicker);
+      return await this.nftRarityService.updateCollectionRarities(
+        collectionTicker,
+      );
     } catch (error) {
       throw new ApolloError(error);
     }
@@ -59,6 +61,17 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async updateAllCollectionRarities(): Promise<boolean> {
+    try {
+      this.nftRarityService.updateAllCollectionRarities();
+      return true;
     } catch (error) {
       throw new ApolloError(error);
     }

@@ -51,7 +51,7 @@ export class NftRarityService {
             collection: collectionTicker,
           },
         );
-        await this.updateRarities(collectionTicker);
+        await this.updateCollectionRarities(collectionTicker);
         return false;
       }
     }
@@ -59,7 +59,7 @@ export class NftRarityService {
     return true;
   }
 
-  async updateRarities(
+  async updateCollectionRarities(
     collectionTicker: string,
     skipIfRaritiesFlag = false,
   ): Promise<boolean> {
@@ -172,6 +172,44 @@ export class NftRarityService {
     }
 
     return true;
+  }
+
+  async updateAllCollectionRarities(): Promise<void> {
+    await Locker.lock(
+      'updateAllCollectionTraits: Update traits for all existing collections',
+      async () => {
+        const query = this.getAllCollectionsFromElasticQuery();
+
+        try {
+          let collections: string[] = [];
+
+          await this.elasticService.getScrollableList(
+            'tokens',
+            'token',
+            query,
+            async (items) => {
+              collections = collections.concat([
+                ...new Set(items.map((i) => i.token)),
+              ]);
+            },
+          );
+
+          this.logger.log(
+            `Total collections to be validated - ${collections.length}`,
+          );
+
+          for (const collection of collections) {
+            await this.updateCollectionRarities(collection);
+          }
+        } catch (error) {
+          this.logger.error('Error when updating all collection rarities', {
+            path: `${NftRarityService.name}.${this.updateAllCollectionRarities.name}`,
+            exception: error?.message,
+          });
+        }
+      },
+      true,
+    );
   }
 
   async deleteNftRarity(identifier: string): Promise<any> {
@@ -602,5 +640,19 @@ export class NftRarityService {
       },
       false,
     );
+  }
+
+  getAllCollectionsFromElasticQuery(): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('token')
+      .withMustNotExistCondition('nonce')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withPagination({
+        from: 0,
+        size: constants.getCollectionsFromElasticBatchSize,
+      });
   }
 }
