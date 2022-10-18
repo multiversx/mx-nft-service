@@ -981,7 +981,7 @@ type Rarity {
   jaccardDistancesScore: Float
   openRarityRank: Float
   openRarityScore: Float
-  preferredRankAlgorithm: String!
+  preferredRankAlgorithm: String
   rank: Int
   score: Float
   statisticalRank: Float

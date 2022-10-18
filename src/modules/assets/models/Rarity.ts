@@ -3,7 +3,7 @@ import { Nft } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field()
+  @Field({ nullable: true })
   preferredRankAlgorithm: string;
 
   // todo map
@@ -42,16 +42,16 @@ export class Rarity {
       ? new Rarity({
           rank: 0,
           score: 0,
-          // preferredRankAlgorithm: asset.assets.preferredRankAlgorithm,
-          // customRank: 0, //asset?.nft_rank_custom,
-          // openRarityScore: 0, //asset?.nft_score_openRarity,
-          // openRarityRank: 0, //asset?.nft_rank_openRarity,
-          // jaccardDistancesScore: 0, //asset?.nft_score_jaccardDistances,
-          // jaccardDistancesRank: 0, //asset?.nft_rank_jaccardDistances,
-          // traitScore: 0, //asset?.nft_score_trait,
-          // traitRank: 0, //asset?.nft_rank_trait,
-          // statisticalScore: 0, //asset?.nft_score_statistical,
-          // statisticalRank: 0, //asset?.nft_rank_statistical,
+          preferredRankAlgorithm: asset.assets?.preferredRankAlgorithm,
+          customRank: 0, //asset?.nft_rank_custom,
+          openRarityScore: 0, //asset?.nft_score_openRarity,
+          openRarityRank: 0, //asset?.nft_rank_openRarity,
+          jaccardDistancesScore: 0, //asset?.nft_score_jaccardDistances,
+          jaccardDistancesRank: 0, //asset?.nft_rank_jaccardDistances,
+          traitScore: 0, //asset?.nft_score_trait,
+          traitRank: 0, //asset?.nft_rank_trait,
+          statisticalScore: 0, //asset?.nft_score_statistical,
+          statisticalRank: 0, //asset?.nft_rank_statistical,
         })
       : null;
   }
