@@ -60,7 +60,7 @@ export class NftRarityService {
         valid = false;
       } else {
         this.logger.log(
-          `Rarities missmatch/missing for ${collectionTicker} => recalculate`,
+          `${collectionTicker} - Rarities missmatch/missing for => recalculate`,
           {
             collection: collectionTicker,
           },
@@ -106,9 +106,9 @@ export class NftRarityService {
 
     if (!raritiesFlag && skipIfRaritiesFlag) {
       this.logger.log(
-        `Update rarities process skipped because rarities flag === true & skipIfRaritiesFlag === true`,
+        `${collectionTicker} - Update rarities process skipped because rarities flag === true & skipIfRaritiesFlag === true`,
         {
-          path: 'NftRarityService.updateRarities',
+          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
           collection: collectionTicker,
         },
       );
@@ -126,9 +126,9 @@ export class NftRarityService {
           ? 'No NFTs'
           : 'Not valid NFT (bad metadata storage or/and URIs)';
       this.logger.log(
-        `${reason} -> set nft_hasRaries & nft_hasRarity flags to false & return false`,
+        `${collectionTicker} - ${reason} -> set nft_hasRaries & nft_hasRarity flags to false & return false`,
         {
-          path: 'NftRarityService.updateRarities',
+          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
           collection: collectionTicker,
         },
       );
@@ -150,9 +150,9 @@ export class NftRarityService {
 
     if (nftsWithAttributes?.length === 0) {
       this.logger.log(
-        'Collection has no attributes or attributes were not indexed yet by the elrond api',
+        `${collectionTicker} - Collection has no attributes or attributes were not indexed yet by the elrond api`,
         {
-          path: 'NftRarityService.updateRarities',
+          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
           collection: collectionTicker,
         },
       );
@@ -295,9 +295,13 @@ export class NftRarityService {
     collectionTicker: string,
     dbNfts: NftRarityEntity[],
   ): Promise<void> {
-    this.logger.log(`Elastic rarities missing => migration from DB`, {
-      collection: collectionTicker,
-    });
+    this.logger.log(
+      `${collectionTicker} - Elastic rarities missing => migration from DB`,
+      {
+        path: `${NftRarityService.name}.${this.migrateRaritiesFromDbToElastic.name}`,
+        collection: collectionTicker,
+      },
+    );
     await Promise.all([
       this.nftRarityElasticService.setCollectionRarityFlagInElastic(
         collectionTicker,
@@ -379,7 +383,7 @@ export class NftRarityService {
 
     try {
       let customInfo = {
-        path: 'NftRarityService.reprocessNftsMetadataAndSetFlags',
+        path: `${NftRarityService.name}.${this.reprocessNftsMetadataAndSetFlags.name}`,
         collection: collectionTicker,
         nftsFound: nftsWithAttributesCount,
         successfullyIndexed: 0,
@@ -410,7 +414,10 @@ export class NftRarityService {
         );
       }
 
-      this.logger.log(`Tried to reprocess NFT attributes`, customInfo);
+      this.logger.log(
+        `${collectionTicker} - Tried to reprocess NFT attributes`,
+        customInfo,
+      );
     } catch (error) {
       this.logger.error(`Error when trying to reprocess collection metadata`, {
         path: 'NftRarityService.reprocessNftsMetadataAndSetFlags',
