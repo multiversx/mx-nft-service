@@ -607,6 +607,10 @@ export class AuctionsGetterService {
       allAuctions = allAuctions.filter(
         (x) => x.collection === collectionFilter,
       );
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter,
+      );
     }
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
