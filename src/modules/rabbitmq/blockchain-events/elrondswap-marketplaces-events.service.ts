@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { ElrondApiService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
@@ -299,7 +300,7 @@ export class ElrondSwapMarketplaceEventsService {
     const paymentToken = await this.usdPriceService.getToken(
       changePriceAuction.paymentToken,
     );
-    const decimals = paymentToken ? paymentToken.decimals : 18;
+    const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
     changePriceAuction.minBid = topics.price;
     changePriceAuction.minBidDenominated = new BigNumber(topics.price)
       .dividedBy(Math.pow(10, decimals))

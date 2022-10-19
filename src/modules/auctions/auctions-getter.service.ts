@@ -714,7 +714,9 @@ export class AuctionsGetterService {
     const minBids = auctions
       .filter((x) => x.minBid.token === paymentToken)
       .map((x) =>
-        new BigNumber(x.minBid.amount).dividedBy(new BigNumber(10 ** 18)),
+        new BigNumber(x.minBid.amount).dividedBy(
+          new BigNumber(10 ** elrondConfig.decimals),
+        ),
       );
     let minBid = new BigNumber('Infinity');
     for (const amount of minBids) {
@@ -726,7 +728,9 @@ export class AuctionsGetterService {
     const maxBids = auctions
       .filter((x) => x.maxBid.token === paymentToken)
       .map((x) =>
-        new BigNumber(x.maxBid.amount).dividedBy(new BigNumber(10 ** 18)),
+        new BigNumber(x.maxBid.amount).dividedBy(
+          new BigNumber(10 ** elrondConfig.decimals),
+        ),
       );
     let maxBid = minBid;
     for (const amount of maxBids) {

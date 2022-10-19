@@ -1,4 +1,5 @@
 import { isEmpty, map } from 'lodash';
+import { elrondConfig } from 'src/config';
 import denominate from 'src/utils/formatters';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import { Filter, FiltersExpression, Operation, Operator } from './filtersTypes';
@@ -46,7 +47,7 @@ export default class WhereBuilder<Entity> {
       filterValues = filter.values.map((value) =>
         denominate({
           input: value,
-          denomination: 18,
+          denomination: elrondConfig.decimals,
           decimals: 2,
           showLastNonZeroDecimal: true,
         }).replace(',', ''),

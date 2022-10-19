@@ -20,6 +20,7 @@ import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import BigNumber from 'bignumber.js';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -57,7 +58,7 @@ export class AuctionsSetterService {
             asset?.tags?.toString(),
             hash,
             marketplace.key,
-            paymentToken.decimals,
+            paymentToken?.decimals ?? elrondConfig.decimals,
           );
         } else {
           const internalAuction = auctionData as AuctionAbi;
@@ -195,7 +196,7 @@ export class AuctionsSetterService {
       const paymentToken = await this.usdPriceService.getToken(
         auction.paymentToken,
       );
-      const decimals = paymentToken?.decimals ?? 18;
+      const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
       return await this.persistenceService.updateAuction({
         ...auction,
         maxBidDenominated: new BigNumber(auction.maxBid)

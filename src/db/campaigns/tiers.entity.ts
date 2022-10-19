@@ -1,3 +1,4 @@
+import { elrondConfig } from 'src/config';
 import { TierInfoAbi } from 'src/modules/campaigns/models/abi/TierInfoAbi';
 import denominate from 'src/utils/formatters';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -48,7 +49,7 @@ export class TierEntity extends BaseEntity {
           mintPriceDenominated: parseFloat(
             denominate({
               input: tier.mint_price.amount.valueOf()?.toString(),
-              denomination: 18,
+              denomination: elrondConfig.decimals,
               decimals: 2,
               showLastNonZeroDecimal: true,
             }).replace(',', ''),

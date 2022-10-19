@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
 import { ElrondApiService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
@@ -381,7 +382,7 @@ export class ExternalMarketplaceEventsService {
     changePriceAuction: AuctionEntity,
     newBid: string,
     hash: string,
-    decimals: number = 18,
+    decimals: number = elrondConfig.decimals,
   ) {
     changePriceAuction.minBid = newBid;
     changePriceAuction.minBidDenominated = new BigNumber(newBid)

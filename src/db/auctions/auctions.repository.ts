@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { elrondConfig } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -139,14 +140,14 @@ export class AuctionsRepository {
           ? currentPrice.values[0]
           : 0;
       const minBidDenominated = new BigNumber(minBid).dividedBy(
-        new BigNumber(10 ** 18),
+        new BigNumber(10 ** elrondConfig.decimals),
       );
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
           : nominateAmount(maxBidValue);
       const maxBidDenominated = new BigNumber(maxBid).dividedBy(
-        new BigNumber(10 ** 18),
+        new BigNumber(10 ** elrondConfig.decimals),
       );
       queryBuilder.andWhere(
         `(if(o.priceAmountDenominated, o.priceAmountDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated}, 

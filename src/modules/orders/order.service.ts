@@ -18,6 +18,7 @@ import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class OrdersService {
@@ -82,7 +83,10 @@ export class OrdersService {
         createOrderArgs.priceToken,
       );
       const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals ?? 18),
+        CreateOrderArgs.toEntity(
+          createOrderArgs,
+          paymentToken?.decimals ?? elrondConfig.decimals,
+        ),
       );
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
