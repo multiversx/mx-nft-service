@@ -49,7 +49,7 @@ export class AuctionsSetterService {
         if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
           const externalAuction = auctionData as ExternalAuctionAbi;
           const paymentToken = await this.usdPriceService.getToken(
-            externalAuction.payment_token_nonce.toString(),
+            externalAuction.payment_token_type.toString(),
           );
           auctionEntity = AuctionEntity.fromExternalAuctionAbi(
             auctionId,
