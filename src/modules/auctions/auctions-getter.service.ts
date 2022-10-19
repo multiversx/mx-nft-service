@@ -470,6 +470,7 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     const collectionFilter = queryRequest.getFilterName('collection');
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    let paymentDecimals = elrondConfig.decimals;
     const currentPriceFilter = queryRequest.getRange(
       AuctionCustomEnum.CURRENTPRICE,
     );
@@ -508,10 +509,16 @@ export class AuctionsGetterService {
     const [auctions, count, priceRange] =
       await this.persistenceService.getAuctionsGroupBy(queryRequest);
 
+    if (paymentTokenFilter) {
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenFilter,
+      );
+      paymentDecimals = paymentToken?.decimals;
+    }
     return [
       auctions?.map((element) => Auction.fromEntity(element)),
       count,
-      priceRange,
+      { ...priceRange, paymentDecimals },
     ];
   }
 
