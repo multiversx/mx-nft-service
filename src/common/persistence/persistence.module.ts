@@ -29,6 +29,8 @@ import { PersistenceService } from './persistence.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModule } from 'src/common.module';
 import { ApiConfigService } from 'src/utils/api.config.service';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { ElrondCommunicationModule } from '../services/elrond-communication';
 
 @Global()
 @Module({
@@ -65,14 +67,16 @@ import { ApiConfigService } from 'src/utils/api.config.service';
         schema: CollectionTraitSummarySchema,
       },
     ]),
+    ElrondCommunicationModule,
   ],
   providers: [
+    UsdPriceService,
     PersistenceService,
     AccountStatsRepository,
     CollectionStatsRepository,
     AuctionsRepository,
     TraitRepositoryService,
   ],
-  exports: [PersistenceService],
+  exports: [PersistenceService, UsdPriceService],
 })
 export class PersistenceModule {}
