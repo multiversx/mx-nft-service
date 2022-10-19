@@ -23,7 +23,7 @@ export class TraitAndStatisticalRarityService {
       for (let traitKey = 0; traitKey < nft.DNA.length; traitKey++) {
         const attributeKey = nft.DNA[traitKey];
 
-        if (!attributeKey) {
+        if (!Number.isInteger(attributeKey)) {
           continue;
         }
 

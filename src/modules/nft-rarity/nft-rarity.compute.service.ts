@@ -78,7 +78,7 @@ export class NftRarityComputeService {
 
         const attributeKey = nft.DNA[traitKey];
 
-        if (!Number.isNaN(attributeKey)) {
+        if (Number.isInteger(attributeKey)) {
           if (!dnaSummary[traitKey][attributeKey]) {
             dnaSummary[traitKey][attributeKey] = {
               occurences: 0,
@@ -99,7 +99,7 @@ export class NftRarityComputeService {
 
       for (const [traitPropertyKey] of Object.entries(traitProperties)) {
         const attributeKey = parseInt(traitPropertyKey);
-        if (!Number.isNaN(attributeKey)) {
+        if (Number.isInteger(attributeKey)) {
           dnaSummary[traitKey][attributeKey].occurencesPercentage =
             (dnaSummary[traitKey][attributeKey].occurences / nfts.length) * 100;
           dnaSummary[traitKey][attributeKey].frequency =
