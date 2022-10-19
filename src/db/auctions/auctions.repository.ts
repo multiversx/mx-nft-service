@@ -114,7 +114,6 @@ export class AuctionsRepository {
       queryBuilder.getManyAndCount(),
       this.getMinMaxForQuery(queryRequest),
     ]);
-
     return [...auctions, priceRange];
   }
 
@@ -417,10 +416,8 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
-    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
-    const paymentToken = paymentTokenFilter
-      ? paymentTokenFilter.values[0]
-      : 'EGLD';
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    const paymentToken = paymentTokenFilter ?? 'EGLD';
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder

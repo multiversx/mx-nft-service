@@ -106,6 +106,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
             priceRange?.minBid,
             priceRange?.maxBid,
             priceRange?.paymentToken,
+            priceRange?.paymentDecimals,
           )
         : null,
     };
