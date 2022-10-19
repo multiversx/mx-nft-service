@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { elrondConfig } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
@@ -22,6 +21,7 @@ import {
   ChangedEvent,
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { nominateAmount } from 'src/utils';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
@@ -139,15 +139,17 @@ export class AuctionsRepository {
         currentPrice.values?.length >= 1 && currentPrice.values[0]
           ? currentPrice.values[0]
           : 0;
-      const minBidDenominated = new BigNumber(minBid).dividedBy(
-        new BigNumber(10 ** elrondConfig.decimals),
+      const minBidDenominated = BigNumberUtils.denominateAmount(
+        minBid.toString(),
+        elrondConfig.decimals,
       );
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
           : nominateAmount(maxBidValue);
-      const maxBidDenominated = new BigNumber(maxBid).dividedBy(
-        new BigNumber(10 ** elrondConfig.decimals),
+      const maxBidDenominated = BigNumberUtils.denominateAmount(
+        maxBid.toString(),
+        elrondConfig.decimals,
       );
       queryBuilder.andWhere(
         `(if(o.priceAmountDenominated, o.priceAmountDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated}, 

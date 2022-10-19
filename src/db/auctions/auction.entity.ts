@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { elrondConfig } from 'src/config';
 import {
   AuctionTypeEnum,
@@ -7,8 +6,9 @@ import {
   ExternalAuctionAbi,
   ElrondSwapAuctionTypeEnum,
 } from 'src/modules/auctions/models';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
-import denominate, { nominateVal } from 'src/utils/formatters';
+import { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';
@@ -127,15 +127,10 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
       minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: new BigNumber(auction.min_bid.valueOf().toString())
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
-      maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: new BigNumber(
-        auction.max_bid?.valueOf()?.toString() || '0',
-      )
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        auction.min_bid.valueOf().toString(),
+        decimals,
+      ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: parseInt(auction.deadline.valueOf().toString()),
       identifier: `${auction.auctioned_tokens.token_identifier
@@ -172,15 +167,15 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
       // minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: new BigNumber(auction.min_bid.valueOf().toString())
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        auction.min_bid.valueOf().toString(),
+        decimals,
+      ),
       maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: new BigNumber(
+      maxBidDenominated: BigNumberUtils.denominateAmount(
         auction.max_bid?.valueOf()?.toString() || '0',
-      )
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
+        decimals,
+      ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: parseInt(auction.deadline.valueOf().toString()),
       identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
@@ -230,23 +225,22 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
       // minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: new BigNumber(topicsAuctionToken.price)
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        topicsAuctionToken.price,
+        decimals,
+      ),
       maxBid:
         parseInt(topicsAuctionToken.auctionType) ===
         ElrondSwapAuctionTypeEnum.Buy
           ? topicsAuctionToken.price
           : '0',
-      maxBidDenominated: new BigNumber(
+      maxBidDenominated: BigNumberUtils.denominateAmount(
         parseInt(topicsAuctionToken.auctionType) ===
-        ElrondSwapAuctionTypeEnum.Buy
+          ElrondSwapAuctionTypeEnum.Buy
           ? topicsAuctionToken.price
           : '0',
-      )
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
-
+        decimals,
+      ),
       startDate: DateUtils.getCurrentTimestamp(),
       endDate: topicsAuctionToken.deadline,
       identifier: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,

@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import BigNumber from 'bignumber.js';
 import { ElrondApiService } from 'src/common';
 import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
@@ -27,6 +26,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { ElrondSwapAuctionEvent } from '../entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ElrondSwapBidEvent } from '../entities/auction/elrondnftswap/elrondswap-bid.event';
 import { ElrondSwapBuyEvent } from '../entities/auction/elrondnftswap/elrondswap-buy.event';
@@ -302,9 +302,10 @@ export class ElrondSwapMarketplaceEventsService {
     );
     const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
     changePriceAuction.minBid = topics.price;
-    changePriceAuction.minBidDenominated = new BigNumber(topics.price)
-      .dividedBy(Math.pow(10, decimals))
-      .toNumber();
+    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+      topics.price,
+      decimals,
+    );
     changePriceAuction.endDate = topics.deadline;
     changePriceAuction.nrAuctionedTokens = topics.nrAuctionTokens;
     changePriceAuction.blockHash = hash;

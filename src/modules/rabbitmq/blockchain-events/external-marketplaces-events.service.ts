@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import BigNumber from 'bignumber.js';
 import { ElrondApiService } from 'src/common';
 import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
@@ -23,8 +22,8 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY, XOXNO_KEY } from 'src/utils/constants';
-import denominate from 'src/utils/formatters';
 import {
   BidEvent,
   BuySftEvent,
@@ -385,13 +384,15 @@ export class ExternalMarketplaceEventsService {
     decimals: number = elrondConfig.decimals,
   ) {
     changePriceAuction.minBid = newBid;
-    changePriceAuction.minBidDenominated = new BigNumber(newBid)
-      .dividedBy(Math.pow(10, decimals))
-      .toNumber();
+    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+      newBid,
+      decimals,
+    );
     changePriceAuction.maxBid = newBid;
-    changePriceAuction.maxBidDenominated = new BigNumber(newBid)
-      .dividedBy(Math.pow(10, decimals))
-      .toNumber();
+    changePriceAuction.maxBidDenominated = BigNumberUtils.denominateAmount(
+      newBid,
+      decimals,
+    );
     changePriceAuction.blockHash = hash;
   }
 

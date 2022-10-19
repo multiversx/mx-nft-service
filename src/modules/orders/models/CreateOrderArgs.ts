@@ -1,5 +1,5 @@
-import BigNumber from 'bignumber.js';
 import { OrderEntity } from 'src/db/orders';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { OrderStatusEnum } from '.';
 
 export class CreateOrderArgs {
@@ -23,9 +23,10 @@ export class CreateOrderArgs {
       ownerAddress: args.ownerAddress,
       priceToken: args.priceToken,
       priceAmount: args.priceAmount,
-      priceAmountDenominated: new BigNumber(args.priceAmount)
-        .dividedBy(Math.pow(10, decimals))
-        .toNumber(),
+      priceAmountDenominated: BigNumberUtils.denominateAmount(
+        args.priceAmount,
+        decimals,
+      ),
       priceNonce: args.priceNonce,
       boughtTokensNo: args.boughtTokens,
       blockHash: args.blockHash,
