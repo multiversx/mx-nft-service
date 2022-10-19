@@ -464,7 +464,7 @@ export class ElrondApiService {
       .addFields(['identifier', 'metadata', 'timestamp']);
     const url = `nfts${query.build()}`;
     let nfts = await this.doGetGeneric(
-      this.getAllNftsByCollectionAfterNonce.name,
+      this.getNftsWithAttributesBeforeTimestamp.name,
       url,
     );
     const lastTimestamp = nfts?.[nfts.length - 1]?.timestamp ?? beforeTimestamp;
