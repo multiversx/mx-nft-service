@@ -171,19 +171,4 @@ export class NftRarityData {
     }
     return nfts;
   }
-
-  static areIdenticalCustomRanks(
-    nfts: NftRarityData[],
-    customRanks: CustomRank[],
-  ): boolean {
-    for (let i = 0; i < nfts.length; i++) {
-      const customRank = customRanks.find(
-        (cr) => cr.identifier === nfts[i].identifier,
-      );
-      if (!customRank || nfts[i].rarities.customRank !== customRank.rank) {
-        return false;
-      }
-    }
-    return true;
-  }
 }

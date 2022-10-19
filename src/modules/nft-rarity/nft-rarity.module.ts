@@ -8,12 +8,14 @@ import { JaccardDistancesRarityService } from './algorithms/jaccard-distances.se
 import { OpenRarityService } from './algorithms/open-rarity.service';
 import { TraitAndStatisticalRarityService } from './algorithms/trait-and-statistical-rarity.service';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
+import { NftRarityElasticService } from './nft-rarity.elastic.service';
 import { NftRarityService } from './nft-rarity.service';
 
 @Module({
   imports: [CollectionsModuleGraph, ElrondCommunicationModule, CommonModule],
   providers: [
     NftRarityService,
+    NftRarityElasticService,
     NftRarityComputeService,
     JaccardDistancesRarityService,
     TraitAndStatisticalRarityService,

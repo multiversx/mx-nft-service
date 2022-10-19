@@ -18,6 +18,7 @@ import { BatchUtils } from '@elrondnetwork/erdnest';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -586,6 +587,28 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionNftsCount.name,
       `collections/${ticker}/nfts/count`,
+    );
+  }
+
+  async getCollectionPreferredAlgorithm(ticker: string): Promise<string> {
+    const res = await this.doGetGeneric(
+      this.getCollectionPreferredAlgorithm.name,
+      `collections/${ticker}?extract=assets`,
+    );
+    return res.preferredRankAlgorithm;
+  }
+
+  async getCollectionCustomRanks(ticker: string): Promise<CustomRank[]> {
+    const res = await this.doGetGeneric(
+      this.getCollectionCustomRanks.name,
+      `collections/${ticker}/ranks`,
+    );
+    return res?.map(
+      (nft) =>
+        new CustomRank({
+          identifier: nft.identifier,
+          rank: nft.rank,
+        }),
     );
   }
 
