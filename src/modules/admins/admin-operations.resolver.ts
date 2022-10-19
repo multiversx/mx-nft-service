@@ -70,7 +70,7 @@ export class AdminOperationsResolver {
   @UseGuards(GqlAdminAuthGuard)
   async updateAllCollectionRarities(): Promise<boolean> {
     try {
-      this.nftRarityService.updateAllCollectionRarities();
+      this.nftRarityService.updateAllCollectionsRarities();
       return true;
     } catch (error) {
       throw new ApolloError(error);
