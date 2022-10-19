@@ -1,7 +1,6 @@
-import BigNumber from 'bignumber.js';
 import { elrondConfig } from 'src/config';
 import { TierInfoAbi } from 'src/modules/campaigns/models/abi/TierInfoAbi';
-import denominate from 'src/utils/formatters';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { CampaignEntity } from './campaign.entity';
@@ -50,11 +49,10 @@ export class TierEntity extends BaseEntity {
           tierName: tier.tier.valueOf().toString(),
           mintToken: tier.mint_price.token_id.valueOf().toString(),
           mintPrice: tier.mint_price.amount.valueOf().toString(),
-          mintPriceDenominated: new BigNumber(
+          mintPriceDenominated: BigNumberUtils.denominateAmount(
             tier.mint_price.amount.valueOf().toString(),
-          )
-            .dividedBy(Math.pow(10, decimals))
-            .toNumber(),
+            decimals,
+          ),
           totalNfts: parseInt(tier.total_nfts.valueOf().toString()),
           availableNfts: parseInt(tier.available_nfts.valueOf().toString()),
           description: 'This is a default description for tier',

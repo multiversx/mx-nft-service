@@ -21,6 +21,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import BigNumber from 'bignumber.js';
 import { elrondConfig } from 'src/config';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -199,12 +200,14 @@ export class AuctionsSetterService {
       const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
       return await this.persistenceService.updateAuction({
         ...auction,
-        maxBidDenominated: new BigNumber(auction.maxBid)
-          .dividedBy(Math.pow(10, decimals))
-          .toNumber(),
-        minBidDenominated: new BigNumber(auction.minBid)
-          .dividedBy(Math.pow(10, decimals))
-          .toNumber(),
+        maxBidDenominated: BigNumberUtils.denominateAmount(
+          auction.maxBid,
+          decimals,
+        ),
+        minBidDenominated: BigNumberUtils.denominateAmount(
+          auction.minBid,
+          decimals,
+        ),
       });
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
