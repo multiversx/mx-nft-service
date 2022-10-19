@@ -481,7 +481,7 @@ export class AuctionsGetterService {
       (currentPriceFilter.startPrice !== '0000000000000000000' ||
         currentPriceFilter.endPrice !== '0000000000000000000');
 
-    if (collectionFilter && !hasCurrentPriceFilter) {
+    if (collectionFilter && !hasCurrentPriceFilter && !paymentTokenFilter) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
         queryRequest,
@@ -596,6 +596,12 @@ export class AuctionsGetterService {
       allAuctions = allAuctions.filter((x) =>
         typeFilter.values.includes(x.type),
       );
+    }
+
+    const collectionFilter = queryRequest.getFilterName('collection');
+
+    if (collectionFilter) {
+      allAuctions = allAuctions.filter((x) => x.type === collectionFilter);
     }
 
     if (marketplaceFilter) {
