@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CollectionApi, ElrondApiService } from 'src/common';
-import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
-import {
-  EventEnum,
-  Feed,
-} from 'src/common/services/elrond-communication/models/feed.dto';
+import { ElrondApiService } from 'src/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
-import { AssetByIdentifierService } from 'src/modules/assets';
 import {
   AuctionEventEnum,
   NftEventEnum,
