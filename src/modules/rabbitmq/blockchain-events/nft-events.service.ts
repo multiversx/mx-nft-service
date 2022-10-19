@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CollectionApi, ElrondApiService } from 'src/common';
 import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
 import {
@@ -44,6 +44,7 @@ import { FeedEventsSenderService } from './feed-events.service';
 
 @Injectable()
 export class NftEventsService {
+  private readonly logger = new Logger(NftEventsService.name);
   constructor(
     private auctionsService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
@@ -66,6 +67,9 @@ export class NftEventsService {
               topics.collection,
               bidEvent.getAddress(),
             );
+          this.logger.log(
+            `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
+          );
           const auction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topics.auctionId, 16),
@@ -110,6 +114,9 @@ export class NftEventsService {
               buySftTopics.collection,
               buySftEvent.getAddress(),
             );
+          this.logger.log(
+            `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
+          );
           const buyAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(buySftTopics.auctionId, 16),
@@ -162,6 +169,9 @@ export class NftEventsService {
               topicsWithdraw.collection,
               withdraw.getAddress(),
             );
+          this.logger.log(
+            `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
+          );
           const withdrawAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topicsWithdraw.auctionId, 16),
@@ -183,6 +193,9 @@ export class NftEventsService {
               topicsEndAuction.collection,
               endAuctionEvent.getAddress(),
             );
+          this.logger.log(
+            `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
+          );
           const endAuction =
             await this.auctionsGetterService.getAuctionByIdAndMarketplace(
               parseInt(topicsEndAuction.auctionId, 16),
@@ -213,6 +226,9 @@ export class NftEventsService {
               topicsAuctionToken.collection,
               auctionToken.getAddress(),
             );
+          this.logger.log(
+            `Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`,
+          );
           const startAuction = await this.auctionsService.saveAuction(
             parseInt(topicsAuctionToken.auctionId, 16),
             startAuctionIdentifier,
