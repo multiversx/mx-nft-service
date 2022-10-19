@@ -406,7 +406,7 @@ export class ElrondApiService {
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
     startNonce?: number,
-    endNonce?: number,
+    endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
     maxNftsCount?: number,
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
