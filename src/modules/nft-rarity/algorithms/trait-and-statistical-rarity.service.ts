@@ -14,12 +14,7 @@ export class TraitAndStatisticalRarityService {
     let rarities = [];
     for (const nft of nfts) {
       if (algorithms.includes(RarityAlgorithmsEnum.TraitRarity)) {
-        rarities[nft.nonce] = {
-          ...rarities[nft.nonce],
-          traitAvgRarity: 0,
-          traitScore: 0,
-          traitScoreNormed: 0,
-        };
+        rarities[nft.nonce] = { ...rarities[nft.nonce], traitScore: 0 };
       }
       if (algorithms.includes(RarityAlgorithmsEnum.StatisticalRarity)) {
         rarities[nft.nonce] = { ...rarities[nft.nonce], statisticalScore: 1 };
@@ -33,12 +28,8 @@ export class TraitAndStatisticalRarityService {
         }
 
         if (algorithms.includes(RarityAlgorithmsEnum.TraitRarity)) {
-          rarities[nft.nonce].traitAvgRarity +=
-            dnaSummary[traitKey][attributeKey].frequency;
           rarities[nft.nonce].traitScore +=
             dnaSummary[traitKey][attributeKey].rarity;
-          rarities[nft.nonce].traitScoreNormed +=
-            dnaSummary[traitKey][attributeKey].rarityNormed;
         }
 
         if (algorithms.includes(RarityAlgorithmsEnum.StatisticalRarity)) {
@@ -46,8 +37,6 @@ export class TraitAndStatisticalRarityService {
             dnaSummary[traitKey][attributeKey].frequency;
         }
       }
-
-      rarities[nft.nonce].traitAvgRarity /= nft.DNA.length;
     }
 
     let raritiesObj = {};

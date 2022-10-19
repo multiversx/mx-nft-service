@@ -60,7 +60,7 @@ export class Rarity {
           preferredRankAlgorithm: undefined,
           rank: undefined,
           score: undefined,
-          customRank: nft.nft_rank_custom ?? undefined,
+          customRank: nft.nft_rank_custom,
           openRarityScore: nft.nft_score_openRarity,
           openRarityRank: nft.nft_rank_openRarity,
           jaccardDistancesScore: nft.nft_score_jaccardDistances,

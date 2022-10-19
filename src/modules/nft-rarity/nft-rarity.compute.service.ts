@@ -93,9 +93,6 @@ export class NftRarityComputeService {
       }
     }
 
-    const totalLayersCount = Object.entries(dnaSummary).length;
-    const avgAttributesPerTrait = totalAttributesCount / totalLayersCount;
-
     for (const [traitKey, traitProperties] of Object.entries(dnaSummary)) {
       dnaSummary[traitKey].occurencesPercentage =
         (dnaSummary[traitKey].occurences / nfts.length) * 100;
@@ -105,14 +102,10 @@ export class NftRarityComputeService {
         if (!Number.isNaN(attributeKey)) {
           dnaSummary[traitKey][attributeKey].occurencesPercentage =
             (dnaSummary[traitKey][attributeKey].occurences / nfts.length) * 100;
-
           dnaSummary[traitKey][attributeKey].frequency =
             dnaSummary[traitKey][attributeKey].occurences / nfts.length;
           dnaSummary[traitKey][attributeKey].rarity =
             nfts.length / dnaSummary[traitKey][attributeKey].occurences;
-          dnaSummary[traitKey][attributeKey].rarityNormed =
-            dnaSummary[traitKey][attributeKey].rarity *
-            (avgAttributesPerTrait / totalLayersCount);
         }
       }
     }
