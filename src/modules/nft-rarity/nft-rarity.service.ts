@@ -3,7 +3,6 @@ import { ElrondApiService } from 'src/common';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
-import { ElrondPrivateApiService } from 'src/common/services/elrond-communication/elrond-private-api.service';
 import { NftRarityData } from './models/nft-rarity-data.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Locker } from 'src/utils/locker';
@@ -15,7 +14,6 @@ import { constants } from 'src/config';
 export class NftRarityService {
   constructor(
     private readonly elrondApiService: ElrondApiService,
-    private readonly privateApiService: ElrondPrivateApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
@@ -137,18 +135,6 @@ export class NftRarityService {
         this.nftRarityElasticService.setNftRaritiesInElastic(allNfts, false),
       ]);
       return false;
-    }
-
-    const nftsWithoutAttributes = this.filterNftsWithoutAttributes(allNfts);
-
-    if (nftsWithoutAttributes.length > 0) {
-      nftsWithAttributes = nftsWithAttributes.concat(
-        await this.reprocessNftsMetadataAndSetFlags(
-          collectionTicker,
-          nftsWithoutAttributes,
-          nftsWithAttributes.length,
-        ),
-      );
     }
 
     const rarities: NftRarityEntity[] = await this.computeRarities(
@@ -353,67 +339,8 @@ export class NftRarityService {
     }
   }
 
-  private async reprocessNftsMetadataAndSetFlags(
-    collectionTicker: string,
-    nftsWithoutAttributes: NftRarityData[],
-    nftsWithAttributesCount: number = null,
-  ): Promise<NftRarityData[]> {
-    let successfullyProcessedNFTs: NftRarityData[] = [];
-
-    try {
-      let customInfo = {
-        path: `${NftRarityService.name}.${this.reprocessNftsMetadataAndSetFlags.name}`,
-        collection: collectionTicker,
-        nftsFound: nftsWithAttributesCount,
-        successfullyIndexed: 0,
-        unsuccessfullyIndexed: 0,
-      };
-
-      for (const nft of nftsWithoutAttributes) {
-        await this.privateApiService.processNft(nft.identifier);
-        const processedNft = await this.elrondApiService.getNftByIdentifier(
-          nft.identifier,
-        );
-        if (processedNft?.metadata?.attributes !== undefined) {
-          successfullyProcessedNFTs.push(NftRarityData.fromNft(processedNft));
-        }
-      }
-
-      customInfo.successfullyIndexed = successfullyProcessedNFTs.length;
-
-      const unsuccessfullyProcessedNfts = nftsWithoutAttributes.filter(
-        (nft) => successfullyProcessedNFTs.indexOf(nft) === -1,
-      );
-
-      if (unsuccessfullyProcessedNfts.length > 0) {
-        customInfo.unsuccessfullyIndexed = unsuccessfullyProcessedNfts.length;
-        await this.nftRarityElasticService.setNftRaritiesInElastic(
-          unsuccessfullyProcessedNfts,
-          false,
-        );
-      }
-
-      this.logger.log(
-        `${collectionTicker} - Tried to reprocess NFT attributes`,
-        customInfo,
-      );
-    } catch (error) {
-      this.logger.error(`Error when trying to reprocess collection metadata`, {
-        path: 'NftRarityService.reprocessNftsMetadataAndSetFlags',
-        exception: error?.message,
-        collection: collectionTicker,
-      });
-    }
-
-    return successfullyProcessedNFTs;
-  }
-
   private filterNftsWithAttributes(nfts: NftRarityData[]): NftRarityData[] {
     return nfts.filter((nft) => nft.DNA?.length > 0);
-  }
-
-  private filterNftsWithoutAttributes(nfts: NftRarityData[]): NftRarityData[] {
-    return nfts.filter((nft) => nft.DNA?.length === 0);
   }
 
   private sortAscNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
