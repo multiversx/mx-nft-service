@@ -84,7 +84,7 @@ export class NftRarityService {
       }
     }
 
-    this.logger.error(
+    this.logger.log(
       `${collectionTicker} - ${valid ? 'Valid' : 'Not valid => Updated'}`,
     );
 
@@ -188,10 +188,14 @@ export class NftRarityService {
     );
 
     if (!rarities) {
-      this.logger.error(`No rarities were computed`, {
+      this.logger.log(`No rarities were computed`, {
         path: 'NftRarityService.updateRarities',
         collection: collectionTicker,
       });
+      await this.nftRarityElasticService.setNftRaritiesInElastic(
+        nftsWithAttributes,
+        false,
+      );
       return false;
     }
 
@@ -216,7 +220,7 @@ export class NftRarityService {
       return false;
     }
 
-    this.logger.error(`${collectionTicker} - Updated rarities`);
+    this.logger.log(`${collectionTicker} - Updated rarities`);
 
     return true;
   }
