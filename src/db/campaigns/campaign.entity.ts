@@ -1,3 +1,4 @@
+import { elrondConfig } from 'src/config';
 import { BrandInfoViewResultType } from 'src/modules/campaigns/models/abi/BrandInfoViewAbi';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
@@ -54,7 +55,11 @@ export class CampaignEntity extends BaseEntity {
     Object.assign(this, init);
   }
 
-  static fromCampaignAbi(campaign: BrandInfoViewResultType, address: string) {
+  static fromCampaignAbi(
+    campaign: BrandInfoViewResultType,
+    address: string,
+    decimals: number = elrondConfig.decimals,
+  ) {
     return campaign
       ? new CampaignEntity({
           campaignId: campaign?.brand_id?.valueOf().toString(),
@@ -79,7 +84,7 @@ export class CampaignEntity extends BaseEntity {
           ),
           royalties: campaign.brand_info.royalties.valueOf().toString(),
           tiers: campaign.tier_info_entries.map((t) =>
-            TierEntity.fromTierAbi(t),
+            TierEntity.fromTierAbi(t, decimals),
           ),
           maxNftsPerTransaction: 3,
           verified: 1,
