@@ -92,69 +92,67 @@ export class NftRarityService {
   }
 
   async updateCollectionRarities(collectionTicker: string): Promise<boolean> {
-    this.logger.log(`${collectionTicker} - Updating collection rarities...`);
+    try {
+      if (await this.isCollectionTooBig(collectionTicker)) {
+        return false;
+      }
 
-    if (await this.isCollectionTooBig(collectionTicker)) {
-      return false;
-    }
-
-    const allNfts = await this.getAllCollectionNftsWithCustomRanksFromAPI(
-      collectionTicker,
-    );
-
-    if (allNfts?.length === 0) {
-      this.logger.log(
-        `${collectionTicker} - No NFTs => update collection rarity flag`,
-        {
-          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
-          collection: collectionTicker,
-        },
-      );
-      await this.nftRarityElasticService.setCollectionRarityFlagInElastic(
+      const allNfts = await this.getAllCollectionNftsWithCustomRanksFromAPI(
         collectionTicker,
-        false,
       );
-      return false;
-    }
 
-    let nftsWithAttributes = this.filterNftsWithAttributes(allNfts);
-
-    if (nftsWithAttributes?.length === 0) {
-      this.logger.log(
-        `${collectionTicker} - Collection has no attributes or attributes were not indexed yet by the elrond api`,
-        {
-          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
-          collection: collectionTicker,
-        },
-      );
-      await Promise.all([
-        this.nftRarityElasticService.setCollectionRarityFlagInElastic(
+      if (allNfts?.length === 0) {
+        this.logger.log(
+          `${collectionTicker} - No NFTs => update collection rarity flag`,
+          {
+            path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
+            collection: collectionTicker,
+          },
+        );
+        await this.nftRarityElasticService.setCollectionRarityFlagInElastic(
           collectionTicker,
           false,
-        ),
-        this.nftRarityElasticService.setNftRaritiesInElastic(allNfts, false),
-      ]);
-      return false;
-    }
+        );
+        return false;
+      }
 
-    const rarities: NftRarityEntity[] = await this.computeRarities(
-      nftsWithAttributes,
-      collectionTicker,
-    );
+      let nftsWithAttributes = this.filterNftsWithAttributes(allNfts);
 
-    if (!rarities) {
-      this.logger.log(`No rarities were computed`, {
-        path: 'NftRarityService.updateRarities',
-        collection: collectionTicker,
-      });
-      await this.nftRarityElasticService.setNftRaritiesInElastic(
+      if (nftsWithAttributes?.length === 0) {
+        this.logger.log(
+          `${collectionTicker} - Collection has no attributes or attributes were not indexed yet by the elrond api`,
+          {
+            path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
+            collection: collectionTicker,
+          },
+        );
+        await Promise.all([
+          this.nftRarityElasticService.setCollectionRarityFlagInElastic(
+            collectionTicker,
+            false,
+          ),
+          this.nftRarityElasticService.setNftRaritiesInElastic(allNfts, false),
+        ]);
+        return false;
+      }
+
+      const rarities: NftRarityEntity[] = await this.computeRarities(
         nftsWithAttributes,
-        false,
+        collectionTicker,
       );
-      return false;
-    }
 
-    try {
+      if (!rarities) {
+        this.logger.log(`No rarities were computed`, {
+          path: 'NftRarityService.updateRarities',
+          collection: collectionTicker,
+        });
+        await this.nftRarityElasticService.setNftRaritiesInElastic(
+          nftsWithAttributes,
+          false,
+        );
+        return false;
+      }
+
       await Promise.all([
         this.persistenceService.saveOrUpdateBulkRarities(rarities),
         this.nftRarityElasticService.setCollectionRarityFlagInElastic(
@@ -166,18 +164,20 @@ export class NftRarityService {
           rarities.map((r) => r.identifier),
         ),
       ]);
+
+      this.logger.log(`${collectionTicker} - Updated rarities`);
+
+      return true;
     } catch (error) {
-      this.logger.error(`Error when updating DB, Elastic or clearing cache`, {
-        path: 'NftRarityService.updateRarities',
-        exception: error?.message,
-        collection: collectionTicker,
-      });
+      this.logger.log(
+        `Error when trying to update/validate collection rarities for ${collectionTicker}`,
+        {
+          path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
+          error: error.message,
+        },
+      );
       return false;
     }
-
-    this.logger.log(`${collectionTicker} - Updated rarities`);
-
-    return true;
   }
 
   async updateAllCollectionsRarities(): Promise<void> {
