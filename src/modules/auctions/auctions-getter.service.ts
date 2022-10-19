@@ -601,7 +601,9 @@ export class AuctionsGetterService {
     const collectionFilter = queryRequest.getFilterName('collection');
 
     if (collectionFilter) {
-      allAuctions = allAuctions.filter((x) => x.type === collectionFilter);
+      allAuctions = allAuctions.filter(
+        (x) => x.collection === collectionFilter,
+      );
     }
 
     if (marketplaceFilter) {
