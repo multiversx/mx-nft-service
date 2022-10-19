@@ -537,14 +537,14 @@ export class AuctionsGetterService {
       );
     }
 
-    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     if (paymentTokenFilter) {
-      allAuctions = allAuctions.filter((x) =>
-        paymentTokenFilter.values.includes(x.minBid?.token),
+      allAuctions = allAuctions.filter(
+        (x) => x.minBid?.token === paymentTokenFilter,
       );
-      priceRange = this.computePriceRange(
+      priceRange = await this.computePriceRange(
         allAuctions,
-        paymentTokenFilter.values[0] ?? elrondConfig.egld,
+        paymentTokenFilter,
       );
     }
 
@@ -553,7 +553,10 @@ export class AuctionsGetterService {
         (x) => x.marketplaceKey === marketplaceFilter,
       );
 
-      priceRange = this.computePriceRange(allAuctions);
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter ?? elrondConfig.egld,
+      );
     }
 
     if (sort) {
@@ -600,7 +603,10 @@ export class AuctionsGetterService {
         (x) => x.marketplaceKey === marketplaceFilter,
       );
 
-      priceRange = this.computePriceRange(allAuctions);
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter,
+      );
     }
 
     if (sort) {
@@ -707,15 +713,18 @@ export class AuctionsGetterService {
     );
   }
 
-  private computePriceRange(
+  private async computePriceRange(
     auctions: Auction[],
-    paymentToken: string = elrondConfig.egld,
-  ): PriceRange {
+    paymentTokenIdentifier: string,
+  ): Promise<PriceRange> {
+    const paymentToken = await this.usdPriceService.getToken(
+      paymentTokenIdentifier,
+    );
     const minBids = auctions
-      .filter((x) => x.minBid.token === paymentToken)
+      .filter((x) => x.minBid.token === paymentTokenIdentifier)
       .map((x) =>
         new BigNumber(x.minBid.amount).dividedBy(
-          new BigNumber(10 ** elrondConfig.decimals),
+          new BigNumber(10 ** paymentToken?.decimals),
         ),
       );
     let minBid = new BigNumber('Infinity');
@@ -726,10 +735,10 @@ export class AuctionsGetterService {
     }
 
     const maxBids = auctions
-      .filter((x) => x.maxBid.token === paymentToken)
+      .filter((x) => x.maxBid.token === paymentTokenIdentifier)
       .map((x) =>
         new BigNumber(x.maxBid.amount).dividedBy(
-          new BigNumber(10 ** elrondConfig.decimals),
+          new BigNumber(10 ** paymentToken?.decimals),
         ),
       );
     let maxBid = minBid;
@@ -742,7 +751,7 @@ export class AuctionsGetterService {
     return {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
       maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
-      paymentToken,
+      paymentToken: paymentTokenIdentifier,
     };
   }
 
