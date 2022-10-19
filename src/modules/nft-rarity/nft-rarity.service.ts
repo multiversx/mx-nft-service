@@ -84,6 +84,10 @@ export class NftRarityService {
       }
     }
 
+    this.logger.error(
+      `${collectionTicker} - ${valid ? 'Valid' : 'Not valid => Updated'}`,
+    );
+
     return valid;
   }
 
@@ -211,6 +215,8 @@ export class NftRarityService {
       });
       return false;
     }
+
+    this.logger.error(`${collectionTicker} - Updated rarities`);
 
     return true;
   }
