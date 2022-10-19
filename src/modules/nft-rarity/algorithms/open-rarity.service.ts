@@ -21,6 +21,10 @@ export class OpenRarityService {
           dnaSummary[traitIndex][nft.DNA[traitIndex]].occurencesPercentage /
           100;
 
+        if (!chanceOfTraitValue) {
+          continue;
+        }
+
         rarities[nft.nonce].sum += -Math.log2(chanceOfTraitValue);
       }
     }

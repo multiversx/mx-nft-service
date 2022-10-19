@@ -28,6 +28,10 @@ export class TraitAndStatisticalRarityService {
       for (let traitKey = 0; traitKey < nft.DNA.length; traitKey++) {
         const attributeKey = nft.DNA[traitKey];
 
+        if (!attributeKey) {
+          continue;
+        }
+
         if (algorithms.includes(RarityAlgorithmsEnum.TraitRarity)) {
           rarities[nft.nonce].traitAvgRarity +=
             dnaSummary[traitKey][attributeKey].frequency;
