@@ -436,7 +436,8 @@ export class ElrondApiService {
         .addPageSize(0, batchSize)
         .addQuery(`fields=${fields}`);
 
-      const url = `collections/${collection}/nfts${query.build()}`;
+      const url = `collections/${collection}/nfts${query.build(false)}`;
+      console.log(url);
 
       batch = await this.doGetGeneric(
         this.getAllNftsByCollectionAfterNonce.name,
@@ -446,7 +447,8 @@ export class ElrondApiService {
       nfts = nfts.concat(batch);
       lastEnd = end;
     } while (
-      endNonce ? lastEnd < endNonce : true && nfts.length < maxNftsCount
+      nfts.length < maxNftsCount &&
+      (endNonce ? lastEnd < endNonce : true)
     );
 
     return this.filterUniqueNftsByNonce(nfts);
