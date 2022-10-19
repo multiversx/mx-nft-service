@@ -38,18 +38,18 @@ export class Rarity {
   static fromNftRarity(asset: Nft) {
     return asset
       ? new Rarity({
-          rank: asset.rank,
-          score: asset.score,
+          rank: asset.rank ?? undefined,
+          score: asset.score ?? undefined,
           preferredRankAlgorithm: asset.assets?.preferredRankAlgorithm,
-          customRank: asset.rarities?.custom.rank,
-          openRarityScore: asset.rarities?.openRarity.score,
-          openRarityRank: asset.rarities?.openRarity.rank,
-          jaccardDistancesScore: asset.rarities?.jaccardDistances.score,
-          jaccardDistancesRank: asset.rarities?.jaccardDistances.rank,
-          traitScore: asset.rarities?.trait.score,
-          traitRank: asset.rarities?.trait.rank,
-          statisticalScore: asset.rarities?.statistical.score,
-          statisticalRank: asset.rarities?.statistical.rank,
+          customRank: asset.rarities?.custom?.rank,
+          openRarityScore: asset.rarities?.openRarity?.score,
+          openRarityRank: asset.rarities?.openRarity?.rank,
+          jaccardDistancesScore: asset.rarities?.jaccardDistances?.score,
+          jaccardDistancesRank: asset.rarities?.jaccardDistances?.rank,
+          traitScore: asset.rarities?.trait?.score,
+          traitRank: asset.rarities?.trait?.rank,
+          statisticalScore: asset.rarities?.statistical?.score,
+          statisticalRank: asset.rarities?.statistical?.rank,
         })
       : null;
   }
