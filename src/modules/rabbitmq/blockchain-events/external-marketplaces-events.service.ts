@@ -269,7 +269,7 @@ export class ExternalMarketplaceEventsService {
 
           if (changePriceAuction) {
             const paymentToken = await this.usdPriceService.getToken(
-              auction.paymentToken,
+              changePriceAuction.paymentToken,
             );
             this.updateAuctionPrice(
               changePriceAuction,
@@ -305,7 +305,7 @@ export class ExternalMarketplaceEventsService {
           );
           if (updatePriceAuction && newPrice) {
             const paymentToken = await this.usdPriceService.getToken(
-              auction.paymentToken,
+              updatePriceAuction.paymentToken,
             );
             this.updateAuctionPrice(
               updatePriceAuction,
