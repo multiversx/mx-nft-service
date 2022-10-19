@@ -6,7 +6,6 @@ export class Rarity {
   @Field({ nullable: true })
   preferredRankAlgorithm: string;
 
-  // todo map
   @Field(() => Int, { nullable: true })
   rank: number;
   @Field({ nullable: true })
@@ -36,22 +35,40 @@ export class Rarity {
     Object.assign(this, init);
   }
 
-  // todo map
   static fromNftRarity(asset: Nft) {
     return asset
       ? new Rarity({
-          rank: 0,
-          score: 0,
+          rank: asset.rank,
+          score: asset.score,
           preferredRankAlgorithm: asset.assets?.preferredRankAlgorithm,
-          customRank: 0, //asset?.nft_rank_custom,
-          openRarityScore: 0, //asset?.nft_score_openRarity,
-          openRarityRank: 0, //asset?.nft_rank_openRarity,
-          jaccardDistancesScore: 0, //asset?.nft_score_jaccardDistances,
-          jaccardDistancesRank: 0, //asset?.nft_rank_jaccardDistances,
-          traitScore: 0, //asset?.nft_score_trait,
-          traitRank: 0, //asset?.nft_rank_trait,
-          statisticalScore: 0, //asset?.nft_score_statistical,
-          statisticalRank: 0, //asset?.nft_rank_statistical,
+          customRank: asset.rarities?.custom.rank,
+          openRarityScore: asset.rarities?.openRarity.score,
+          openRarityRank: asset.rarities?.openRarity.rank,
+          jaccardDistancesScore: asset.rarities?.jaccardDistances.score,
+          jaccardDistancesRank: asset.rarities?.jaccardDistances.rank,
+          traitScore: asset.rarities?.trait.score,
+          traitRank: asset.rarities?.trait.rank,
+          statisticalScore: asset.rarities?.statistical.score,
+          statisticalRank: asset.rarities?.statistical.rank,
+        })
+      : null;
+  }
+
+  static fromElasticNftRarity(nft: any): Rarity {
+    return nft
+      ? new Rarity({
+          preferredRankAlgorithm: undefined,
+          rank: undefined,
+          score: undefined,
+          customRank: nft.nft_rank_custom ?? undefined,
+          openRarityScore: nft.nft_score_openRarity,
+          openRarityRank: nft.nft_rank_openRarity,
+          jaccardDistancesScore: nft.nft_score_jaccardDistances,
+          jaccardDistancesRank: nft.nft_rank_jaccardDistances,
+          traitScore: nft.nft_score_trait,
+          traitRank: nft.nft_rank_trait,
+          statisticalScore: nft.nft_score_statistical,
+          statisticalRank: nft.nft_rank_statistical,
         })
       : null;
   }

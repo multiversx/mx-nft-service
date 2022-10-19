@@ -1,5 +1,7 @@
 import { Nft, NftMetadata } from 'src/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
+import { Rarity } from 'src/modules/assets/models/Rarity';
+import { CustomRank } from './custom-rank.model';
 
 export class NftRarityData {
   identifier: string;
@@ -8,17 +10,7 @@ export class NftRarityData {
   metadata: NftMetadata;
   DNA?: number[];
 
-  score_openRarity: number;
-  rank_openRarity: number;
-
-  score_jaccardDistances: number;
-  rank_jaccardDistances: number;
-
-  score_trait: number;
-  rank_trait: number;
-
-  score_statistical: number;
-  rank_statistical: number;
+  rarities: Rarity;
 
   constructor(init?: Partial<NftRarityData>) {
     Object.assign(this, init);
@@ -29,20 +21,12 @@ export class NftRarityData {
       return undefined;
     }
 
-    // todo map
     return nft
       ? {
           identifier: nft.identifier,
           nonce: nft.nonce,
           metadata: nft.metadata,
-          score_openRarity: 0, //nft.nft_score_openRarity,
-          rank_openRarity: 0, //nft.nft_rank_openRarity,
-          score_jaccardDistances: 0, //nft.nft_score_jaccardDistances,
-          rank_jaccardDistances: 0, //nft.nft_rank_jaccardDistances,
-          score_trait: 0, //nft.nft_score_trait,
-          rank_trait: 0, //nft.nft_rank_trait,
-          score_statistical: 0, //nft.nft_score_statistical,
-          rank_statistical: 0, //nft.nft_rank_statistical,
+          rarities: Rarity.fromNftRarity(nft),
         }
       : null;
   }
@@ -53,14 +37,7 @@ export class NftRarityData {
           identifier: nft.identifier,
           nonce: nft.nonce,
           metadata: undefined,
-          score_openRarity: nft.nft_score_openRarity,
-          rank_openRarity: nft.nft_rank_openRarity,
-          score_jaccardDistances: nft.nft_score_jaccardDistances,
-          rank_jaccardDistances: nft.nft_rank_jaccardDistances,
-          score_trait: nft.nft_score_trait,
-          rank_trait: nft.nft_rank_trait,
-          score_statistical: nft.nft_score_statistical,
-          rank_statistical: nft.nft_rank_statistical,
+          rarities: Rarity.fromElasticNftRarity(nft),
         }
       : null;
   }
@@ -111,8 +88,6 @@ export class NftRarityData {
 
         nft.DNA[traitIndex] = attributeIndex;
       }
-
-      nft.metadata = null;
     }
 
     return nftsWithDNA;
@@ -152,33 +127,62 @@ export class NftRarityData {
     nftRarityEntity: NftRarityEntity,
   ): boolean {
     if (
-      Number(nftRarityData.score_openRarity) !==
+      Number(nftRarityData.rarities.openRarityScore) !==
         Number(nftRarityEntity.score_openRarity) ||
-      nftRarityData.rank_openRarity !== nftRarityEntity.rank_openRarity
+      nftRarityData.rarities.openRarityRank !== nftRarityEntity.rank_openRarity
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.score_jaccardDistances) !==
+      Number(nftRarityData.rarities.jaccardDistancesScore) !==
         Number(nftRarityEntity.score_jaccardDistances) ||
-      nftRarityData.rank_jaccardDistances !==
+      nftRarityData.rarities.jaccardDistancesRank !==
         nftRarityEntity.rank_jaccardDistances
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.score_statistical) !==
+      Number(nftRarityData.rarities.statisticalScore) !==
         Number(nftRarityEntity.score_statistical) ||
-      nftRarityData.rank_statistical !== nftRarityEntity.rank_statistical
+      nftRarityData.rarities.statisticalRank !==
+        nftRarityEntity.rank_statistical
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.score_trait) !==
+      Number(nftRarityData.rarities.traitScore) !==
         Number(nftRarityEntity.score_trait) ||
-      nftRarityData.rank_trait !== nftRarityEntity.rank_trait
+      nftRarityData.rarities.traitRank !== nftRarityEntity.rank_trait
     ) {
       return false;
+    }
+    return true;
+  }
+
+  static setCustomRanks(
+    nfts: NftRarityData[],
+    customRanks: CustomRank[],
+  ): NftRarityData[] {
+    for (let nft of nfts) {
+      const customRank = customRanks.find(
+        (cr) => cr.identifier === nft.identifier,
+      );
+      nft.rarities.customRank = customRank.rank;
+    }
+    return nfts;
+  }
+
+  static areIdenticalCustomRanks(
+    nfts: NftRarityData[],
+    customRanks: CustomRank[],
+  ): boolean {
+    for (let i = 0; i < nfts.length; i++) {
+      const customRank = customRanks.find(
+        (cr) => cr.identifier === nfts[i].identifier,
+      );
+      if (!customRank || nfts[i].rarities.customRank !== customRank.rank) {
+        return false;
+      }
     }
     return true;
   }

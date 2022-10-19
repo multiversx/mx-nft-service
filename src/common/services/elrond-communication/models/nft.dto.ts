@@ -36,16 +36,31 @@ export interface Nft {
   media: NftMedia[];
   scamInfo: NftScamInfo;
   assets: CollectionAssetApi;
-  // todo map
-  rank_custom: number;
-  score_openRarity: number;
-  rank_openRarity: number;
-  score_jaccardDistances: number;
-  rank_jaccardDistances: number;
-  score_trait: number;
-  rank_trait: number;
-  score_statistical: number;
-  rank_statistical: number;
+  score: number;
+  rank: number;
+  rarities: NftRarities;
+}
+
+export interface NftRarities {
+  jaccardDistances: {
+    rank: number;
+    score: number;
+  };
+  openRarity: {
+    rank: number;
+    score: number;
+  };
+  statistical: {
+    rank: number;
+    score: number;
+  };
+  trait: {
+    rank: number;
+    score: number;
+  };
+  custom: {
+    rank: number;
+  };
 }
 
 export interface NftMedia {
