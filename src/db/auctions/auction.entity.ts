@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { elrondConfig } from 'src/config';
 import {
   AuctionTypeEnum,
   AuctionStatusEnum,
@@ -103,7 +104,7 @@ export class AuctionEntity extends BaseEntity {
     tags: string,
     hash: string,
     marketplaceKey: string,
-    decimals: number = 18,
+    decimals: number = elrondConfig.decimals,
   ) {
     if (!auction) {
       return null;
