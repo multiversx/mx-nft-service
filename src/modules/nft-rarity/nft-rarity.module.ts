@@ -23,6 +23,14 @@ import { NftRarityService } from './nft-rarity.service';
     AssetRarityInfoRedisHandler,
     RarityUpdaterService,
   ],
-  exports: [NftRarityService, RarityUpdaterService],
+  exports: [
+    NftRarityService,
+    NftRarityElasticService,
+    NftRarityComputeService,
+    JaccardDistancesRarityService,
+    TraitAndStatisticalRarityService,
+    OpenRarityService,
+    RarityUpdaterService,
+  ],
 })
 export class NftRarityModuleGraph {}
