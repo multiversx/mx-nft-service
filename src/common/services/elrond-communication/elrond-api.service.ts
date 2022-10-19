@@ -437,7 +437,6 @@ export class ElrondApiService {
         .addQuery(`fields=${fields}`);
 
       const url = `collections/${collection}/nfts${query.build(false)}`;
-      console.log(url);
 
       batch = await this.doGetGeneric(
         this.getAllNftsByCollectionAfterNonce.name,
