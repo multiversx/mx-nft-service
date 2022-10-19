@@ -113,7 +113,7 @@ export class UsdPriceService {
       }
       return denominate({
         input: usdAmount,
-        denomination: 6,
+        denomination: token.decimals,
         decimals: 3,
         showLastNonZeroDecimal: false,
       });

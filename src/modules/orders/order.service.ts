@@ -17,6 +17,8 @@ import {
 import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class OrdersService {
@@ -26,6 +28,7 @@ export class OrdersService {
     private ordersCachingService: OrdersCachingService,
     private notificationsService: NotificationsService,
     private assetByIdentifierService: AssetByIdentifierService,
+    private usdPriceService: UsdPriceService,
     private readonly rabbitPublisherService: CacheEventsPublisherService,
   ) {}
 
@@ -43,8 +46,12 @@ export class OrdersService {
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
+
+      const paymentToken = await this.usdPriceService.getToken(
+        createOrderArgs.priceToken,
+      );
       const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs),
+        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals),
       );
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
@@ -72,8 +79,14 @@ export class OrdersService {
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
+      const paymentToken = await this.usdPriceService.getToken(
+        createOrderArgs.priceToken,
+      );
       const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs),
+        CreateOrderArgs.toEntity(
+          createOrderArgs,
+          paymentToken?.decimals ?? elrondConfig.decimals,
+        ),
       );
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
@@ -157,8 +170,12 @@ export class OrdersService {
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
       );
+
+      const paymentToken = await this.usdPriceService.getToken(
+        createOrderArgs.priceToken,
+      );
       const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs),
+        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals),
       );
       return Order.fromEntity(orderEntity);
     } catch (error) {

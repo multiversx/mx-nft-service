@@ -18,6 +18,10 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import BigNumber from 'bignumber.js';
+import { elrondConfig } from 'src/config';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -25,6 +29,7 @@ export class AuctionsSetterService {
     private nftAbiService: NftMarketplaceAbiService,
     private assetByIdentifierService: AssetByIdentifierService,
     private persistenceService: PersistenceService,
+    private usdPriceService: UsdPriceService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -42,23 +47,35 @@ export class AuctionsSetterService {
       );
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
-        const auctionEntity = MarketplaceUtils.isExternalMarketplace(
-          marketplace.type,
-        )
-          ? AuctionEntity.fromExternalAuctionAbi(
-              auctionId,
-              auctionData as ExternalAuctionAbi,
-              asset?.tags?.toString(),
-              hash,
-              marketplace.key,
-            )
-          : AuctionEntity.fromAuctionAbi(
-              auctionId,
-              auctionData as AuctionAbi,
-              asset?.tags?.toString(),
-              hash,
-              marketplace.key,
-            );
+        let auctionEntity: AuctionEntity;
+        if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
+          const externalAuction = auctionData as ExternalAuctionAbi;
+          const paymentToken = await this.usdPriceService.getToken(
+            externalAuction.payment_token_type.toString(),
+          );
+          auctionEntity = AuctionEntity.fromExternalAuctionAbi(
+            auctionId,
+            externalAuction,
+            asset?.tags?.toString(),
+            hash,
+            marketplace.key,
+            paymentToken?.decimals ?? elrondConfig.decimals,
+          );
+        } else {
+          const internalAuction = auctionData as AuctionAbi;
+          const paymentToken = await this.usdPriceService.getToken(
+            internalAuction.payment_token.valueOf().toString(),
+          );
+          auctionEntity = AuctionEntity.fromAuctionAbi(
+            auctionId,
+            internalAuction,
+            asset?.tags?.toString(),
+            hash,
+            marketplace.key,
+            paymentToken.decimals,
+          );
+        }
+
         const savedAuction = await this.persistenceService.insertAuction(
           auctionEntity,
         );
@@ -177,7 +194,21 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.persistenceService.updateAuction(auction);
+      const paymentToken = await this.usdPriceService.getToken(
+        auction.paymentToken,
+      );
+      const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
+      return await this.persistenceService.updateAuction({
+        ...auction,
+        maxBidDenominated: BigNumberUtils.denominateAmount(
+          auction.maxBid,
+          decimals,
+        ),
+        minBidDenominated: BigNumberUtils.denominateAmount(
+          auction.minBid,
+          decimals,
+        ),
+      });
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuction',
