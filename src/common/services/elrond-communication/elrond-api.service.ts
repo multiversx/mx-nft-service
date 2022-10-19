@@ -590,15 +590,19 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionPreferredAlgorithm(ticker: string): Promise<string> {
+  async getCollectionPreferredAlgorithm(
+    ticker: string,
+  ): Promise<string | undefined> {
     const res = await this.doGetGeneric(
       this.getCollectionPreferredAlgorithm.name,
-      `collections/${ticker}?extract=assets`,
+      `collections/${ticker}?fields=assets`,
     );
-    return res.preferredRankAlgorithm;
+    return res?.preferredRankAlgorithm;
   }
 
-  async getCollectionCustomRanks(ticker: string): Promise<CustomRank[]> {
+  async getCollectionCustomRanks(
+    ticker: string,
+  ): Promise<CustomRank[] | undefined> {
     const res = await this.doGetGeneric(
       this.getCollectionCustomRanks.name,
       `collections/${ticker}/ranks`,

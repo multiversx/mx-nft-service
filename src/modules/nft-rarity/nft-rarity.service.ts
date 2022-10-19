@@ -27,21 +27,28 @@ export class NftRarityService {
   async validateRarities(collectionTicker: string): Promise<boolean> {
     let valid = true;
 
-    const [elasticNfts, dbNfts, customRanks, customRanksElasticHash]: [
+    const [elasticNfts, dbNfts, preferredAlgorithm]: [
       NftRarityData[],
       NftRarityEntity[],
-      CustomRank[],
       string,
     ] = await Promise.all([
       this.nftRarityElasticService.getAllCollectionNftsFromElastic(
         collectionTicker,
       ),
       this.persistenceService.findNftRarityByCollection(collectionTicker),
-      this.elrondApiService.getCollectionCustomRanks(collectionTicker),
-      this.nftRarityElasticService.getCollectionCustomRanksHash(
-        collectionTicker,
-      ),
+      this.elrondApiService.getCollectionPreferredAlgorithm(collectionTicker),
     ]);
+
+    let customRanksPromise;
+    let customRanksElasticHashPromise;
+    if (preferredAlgorithm === 'custom') {
+      customRanksPromise =
+        this.elrondApiService.getCollectionCustomRanks(collectionTicker);
+      customRanksElasticHashPromise =
+        this.nftRarityElasticService.getCollectionCustomRanksHash(
+          collectionTicker,
+        );
+    }
 
     const areIdenticalRarities = this.areIdenticalRarities(elasticNfts, dbNfts);
 
@@ -62,16 +69,19 @@ export class NftRarityService {
       }
     }
 
-    if (
-      customRanks &&
-      !CustomRank.areIdenticalHashes(customRanks, customRanksElasticHash)
-    ) {
-      console.log('never');
-      await this.nftRarityElasticService.setNftCustomRanksInElastic(
-        collectionTicker,
-        customRanks,
-      );
-      valid = false;
+    if (preferredAlgorithm === 'custom') {
+      const [customRanks, customRanksElasticHash]: [CustomRank[], string] =
+        await Promise.all([customRanksPromise, customRanksElasticHashPromise]);
+      if (
+        customRanks &&
+        !CustomRank.areIdenticalHashes(customRanks, customRanksElasticHash)
+      ) {
+        await this.nftRarityElasticService.setNftCustomRanksInElastic(
+          collectionTicker,
+          customRanks,
+        );
+        valid = false;
+      }
     }
 
     return valid;
@@ -333,16 +343,21 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<NftRarityData[]> {
     try {
-      let [nftsRaw, customRanks] = await Promise.all([
+      let [nftsRaw, preferredAlgorithm] = await Promise.all([
         this.elrondApiService.getAllNftsByCollectionAfterNonce(
           collectionTicker,
           'identifier,nonce,metadata,score,rank,rarities,timestamp',
         ),
-        this.elrondApiService.getCollectionCustomRanks(collectionTicker),
+        this.elrondApiService.getCollectionPreferredAlgorithm(collectionTicker),
       ]);
+      let customRanksPromise: Promise<CustomRank[] | undefined>;
+      if (preferredAlgorithm === 'custom') {
+        customRanksPromise =
+          this.elrondApiService.getCollectionCustomRanks(collectionTicker);
+      }
       let nfts = NftRarityData.fromNfts(nftsRaw);
-      if (customRanks) {
-        return NftRarityData.setCustomRanks(nfts, customRanks);
+      if (customRanksPromise) {
+        return NftRarityData.setCustomRanks(nfts, await customRanksPromise);
       }
       return nfts;
     } catch (error) {
