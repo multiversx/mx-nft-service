@@ -6,4 +6,7 @@ export class BigNumberUtils {
       .dividedBy(Math.pow(10, decimals))
       .toNumber();
   }
+
+  static nominateAmount = (tokenAmount: string, decimals: number): string =>
+    new BigNumber(tokenAmount).multipliedBy(Math.pow(10, decimals)).toFixed();
 }

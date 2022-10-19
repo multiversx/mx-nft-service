@@ -590,6 +590,9 @@ export class AuctionsGetterService {
         Constants.oneSecond() * 30,
       );
 
+    const paymentToken = await this.usdPriceService.getToken(
+      paymentTokenFilter,
+    );
     const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
     const typeFilter = queryRequest.getFilter('type');
     if (typeFilter) {
@@ -605,7 +608,6 @@ export class AuctionsGetterService {
         (x) => x.collection === collectionFilter,
       );
     }
-
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
@@ -631,7 +633,11 @@ export class AuctionsGetterService {
       queryRequest.offset + queryRequest.limit,
     );
 
-    return [auctions, count, priceRange];
+    return [
+      auctions,
+      count,
+      { ...priceRange, paymentDecimals: paymentToken?.decimals },
+    ];
   }
 
   private async retrieveRunningAuctions(
@@ -760,6 +766,7 @@ export class AuctionsGetterService {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
       maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
       paymentToken: paymentTokenIdentifier,
+      paymentDecimals: paymentToken?.decimals,
     };
   }
 

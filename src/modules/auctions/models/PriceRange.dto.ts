@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { elrondConfig } from 'src/config';
 import { Price } from 'src/modules/assets/models';
-import { nominateAmount } from 'src/utils';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 
 @ObjectType()
@@ -20,18 +20,23 @@ export class PriceRange {
     minBid: string,
     maxBid: string,
     paymentToken: string = elrondConfig.egld,
+    paymentDecimals: number = elrondConfig.decimals,
   ) {
     return new PriceRange({
       minBid: new Price({
         token: paymentToken,
         nonce: 0,
-        amount: minBid ? nominateAmount(minBid) : '0',
+        amount: minBid
+          ? BigNumberUtils.nominateAmount(minBid, paymentDecimals)
+          : '0',
         timestamp: DateUtils.getCurrentTimestamp(),
       }),
       maxBid: new Price({
         token: paymentToken,
         nonce: 0,
-        amount: maxBid ? nominateAmount(maxBid) : '0',
+        amount: maxBid
+          ? BigNumberUtils.nominateAmount(maxBid, paymentDecimals)
+          : '0',
         timestamp: DateUtils.getCurrentTimestamp(),
       }),
     });
