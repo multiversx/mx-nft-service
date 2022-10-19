@@ -53,7 +53,7 @@ export class NftRarityComputeService {
         score_trait: parseFloat(tsrRarities[nonce].traitScore.toFixed(3)),
         rank_trait: tsrRarities[nonce].traitRank,
         score_statistical: parseFloat(
-          tsrRarities[nonce].statisticalScore.toFixed(3),
+          tsrRarities[nonce].statisticalScore.toFixed(18),
         ),
         rank_statistical: tsrRarities[nonce].statisticalRank,
       });
