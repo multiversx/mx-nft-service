@@ -20,7 +20,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
-import { nominateAmount } from 'src/utils';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -48,6 +48,8 @@ export class AuctionsRepository {
     @Inject(forwardRef(() => PersistenceService))
     private persistenceService: PersistenceService,
     private cacheEventsPublisherService: CacheEventsPublisherService,
+    @Inject(forwardRef(() => UsdPriceService))
+    private readonly usdPriceService: UsdPriceService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -62,7 +64,7 @@ export class AuctionsRepository {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    const currentPriceSort = this.handleCurrentPriceFilter(
+    const currentPriceSort = await this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
     );
@@ -91,7 +93,7 @@ export class AuctionsRepository {
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
-    const currentPriceSort = this.handleCurrentPriceFilter(
+    const currentPriceSort = await this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
     );
@@ -117,11 +119,20 @@ export class AuctionsRepository {
     return [...auctions, priceRange];
   }
 
-  private handleCurrentPriceFilter(
+  private async handleCurrentPriceFilter(
     queryRequest: QueryRequest,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
   ) {
     const maxBidValue = '1000000000';
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    let paymentDecimals = elrondConfig.decimals;
+
+    if (paymentTokenFilter) {
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenFilter,
+      );
+      paymentDecimals = paymentToken?.decimals;
+    }
     const currentPrice = queryRequest.customFilters?.find(
       (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
     );
@@ -140,15 +151,15 @@ export class AuctionsRepository {
           : 0;
       const minBidDenominated = BigNumberUtils.denominateAmount(
         minBid.toString(),
-        elrondConfig.decimals,
+        paymentDecimals,
       );
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
-          : nominateAmount(maxBidValue);
+          : BigNumberUtils.nominateAmount(maxBidValue, paymentDecimals);
       const maxBidDenominated = BigNumberUtils.denominateAmount(
         maxBid.toString(),
-        elrondConfig.decimals,
+        paymentDecimals,
       );
       queryBuilder.andWhere(
         `(if(o.priceAmountDenominated, o.priceAmountDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated}, 
