@@ -7,7 +7,7 @@ export class NftRarityData {
   identifier: string;
   nonce: number;
 
-  metadata: NftMetadata;
+  temporaryMetadata?: NftMetadata;
   DNA?: number[];
 
   rarities: Rarity;
@@ -16,7 +16,7 @@ export class NftRarityData {
     Object.assign(this, init);
   }
 
-  static fromNft(nft: Nft): NftRarityData {
+  private static fromNft(nft: Nft): NftRarityData {
     if (!nft) {
       return undefined;
     }
@@ -25,18 +25,18 @@ export class NftRarityData {
       ? {
           identifier: nft.identifier,
           nonce: nft.nonce,
-          metadata: nft.metadata,
+          temporaryMetadata: nft.metadata,
           rarities: Rarity.fromNftRarity(nft),
         }
       : null;
   }
 
-  static fromElasticNft(nft: any): NftRarityData {
+  private static fromElasticNft(nft: any): NftRarityData {
     return nft
       ? {
           identifier: nft.identifier,
           nonce: nft.nonce,
-          metadata: undefined,
+          temporaryMetadata: undefined,
           rarities: Rarity.fromElasticNftRarity(nft),
         }
       : null;
@@ -59,11 +59,13 @@ export class NftRarityData {
     for (let nft of nftsWithDNA) {
       nft.DNA = [];
 
-      if (!nft.metadata || !nft.metadata.attributes) {
+      if (!nft.temporaryMetadata || !nft.temporaryMetadata.attributes) {
         continue;
       }
 
-      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
+      for (const [key, value] of Object.entries(
+        nft.temporaryMetadata.attributes,
+      )) {
         if (value.trait_type === undefined || value.value === undefined) {
           continue;
         }
@@ -88,6 +90,8 @@ export class NftRarityData {
 
         nft.DNA[traitIndex] = attributeIndex;
       }
+
+      delete nft.temporaryMetadata;
     }
 
     return nftsWithDNA;
