@@ -245,7 +245,7 @@ export class NftRarityService {
     try {
       rarities = await this.nftRarityComputeService.computeRarities(
         collectionTicker,
-        this.sortAscNftsByNonce(nfts),
+        this.sortDescNftsByNonce(nfts),
       );
     } catch (error) {
       this.logger.error(`Error when computing rarities`, {
@@ -313,23 +313,38 @@ export class NftRarityService {
     collectionTicker: string,
   ): Promise<NftRarityData[]> {
     try {
-      let [nftsRaw, preferredAlgorithm] = await Promise.all([
-        this.elrondApiService.getAllNftsByCollectionAfterNonce(
+      let traitTypeIndexes: number[] = [];
+      let attributeIndexes: number[][] = [];
+      let allNfts: NftRarityData[] = [];
+      let nfts: NftRarityData[];
+
+      await this.elrondApiService.getScrollableNftsByCollectionAfterNonce(
+        collectionTicker,
+        'identifier,nonce,metadata,score,rank,rarities,timestamp',
+        async (nftsBatch) => {
+          [nfts, traitTypeIndexes, attributeIndexes] = NftRarityData.fromNfts(
+            nftsBatch,
+            traitTypeIndexes,
+            attributeIndexes,
+          );
+          allNfts = allNfts.concat(nfts);
+        },
+      );
+      allNfts = this.sortDescNftsByNonce(allNfts);
+
+      const preferredAlgorithm =
+        await this.elrondApiService.getCollectionPreferredAlgorithm(
           collectionTicker,
-          'identifier,nonce,metadata,score,rank,rarities,timestamp',
-        ),
-        this.elrondApiService.getCollectionPreferredAlgorithm(collectionTicker),
-      ]);
-      let customRanksPromise: Promise<CustomRank[] | undefined>;
+        );
       if (preferredAlgorithm === 'custom') {
-        customRanksPromise =
-          this.elrondApiService.getCollectionCustomRanks(collectionTicker);
+        const customRanks =
+          await this.elrondApiService.getCollectionCustomRanks(
+            collectionTicker,
+          );
+        return NftRarityData.setCustomRanks(allNfts, customRanks);
       }
-      let nfts = NftRarityData.fromNfts(nftsRaw);
-      if (customRanksPromise) {
-        return NftRarityData.setCustomRanks(nfts, await customRanksPromise);
-      }
-      return nfts;
+
+      return allNfts;
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
@@ -344,7 +359,7 @@ export class NftRarityService {
     return nfts.filter((nft) => nft.DNA?.length > 0);
   }
 
-  private sortAscNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
+  private sortDescNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
     return [...nfts].sort(function (a, b) {
       return b.nonce - a.nonce;
     });
