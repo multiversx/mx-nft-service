@@ -79,18 +79,4 @@ export class ElrondPrivateApiService {
       );
     }
   }
-
-  async processCollectionNfts(collection: string): Promise<any> {
-    return await this.doPostGeneric('processNfts', 'nfts/process', {
-      collection: collection,
-      forceRefreshMetadata: true,
-    });
-  }
-
-  async processNft(identifier: string): Promise<any> {
-    return await this.doPostGeneric('processNfts', 'nfts/process', {
-      identifier: identifier,
-      forceRefreshMetadata: true,
-    });
-  }
 }

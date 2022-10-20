@@ -35,9 +35,32 @@ export interface Nft {
   metadata: NftMetadata;
   media: NftMedia[];
   scamInfo: NftScamInfo;
-  rank: number;
-  score: number;
   assets: CollectionAssetApi;
+  score: number;
+  rank: number;
+  rarities: NftRarities;
+}
+
+export interface NftRarities {
+  jaccardDistances: {
+    rank: number;
+    score: number;
+  };
+  openRarity: {
+    rank: number;
+    score: number;
+  };
+  statistical: {
+    rank: number;
+    score: number;
+  };
+  trait: {
+    rank: number;
+    score: number;
+  };
+  custom: {
+    rank: number;
+  };
 }
 
 export interface NftMedia {
