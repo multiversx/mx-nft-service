@@ -65,8 +65,6 @@ export class NftRarityComputeService {
   } {
     let dnaSummary = {};
 
-    let totalAttributesCount = 0;
-
     for (const nft of nfts) {
       for (let traitKey = 0; traitKey < nft.DNA.length; traitKey++) {
         if (!dnaSummary[traitKey]) {
@@ -84,7 +82,6 @@ export class NftRarityComputeService {
               occurences: 0,
               occurencesPercentage: 0,
             };
-            totalAttributesCount++;
           }
 
           dnaSummary[traitKey].occurences++;
