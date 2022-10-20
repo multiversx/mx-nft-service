@@ -161,9 +161,9 @@ export class NftRarityService {
           true,
         ),
         this.nftRarityElasticService.setNftRaritiesInElastic(rarities),
-        // this.assetRarityRedisHandler.clearMultipleKeys(
-        //   rarities.map((r) => r.identifier),
-        // ),
+        this.assetRarityRedisHandler.clearMultipleKeys(
+          rarities.map((r) => r.identifier),
+        ),
       ]);
 
       this.logger.log(`${collectionTicker} - Updated rarities`);
