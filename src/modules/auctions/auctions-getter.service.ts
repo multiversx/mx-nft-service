@@ -482,7 +482,11 @@ export class AuctionsGetterService {
       (currentPriceFilter.startPrice !== '0000000000000000000' ||
         currentPriceFilter.endPrice !== '0000000000000000000');
 
-    if (collectionFilter && !hasCurrentPriceFilter) {
+    if (
+      collectionFilter &&
+      !hasCurrentPriceFilter &&
+      (!paymentTokenFilter || paymentTokenFilter === elrondConfig.egld)
+    ) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
         queryRequest,
