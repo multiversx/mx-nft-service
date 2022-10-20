@@ -7,5 +7,6 @@ import { UsdPriceResolver } from './usd-price.resolver';
 @Module({
   providers: [UsdPriceResolver, UsdPriceRedisHandler, UsdPriceService],
   imports: [ElrondCommunicationModule],
+  exports: [UsdPriceService],
 })
 export class UsdPriceModuleGraph {}

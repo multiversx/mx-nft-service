@@ -1,3 +1,4 @@
+import { elrondConfig } from 'src/config';
 import {
   AuctionTypeEnum,
   AuctionStatusEnum,
@@ -5,8 +6,9 @@ import {
   ExternalAuctionAbi,
   ElrondSwapAuctionTypeEnum,
 } from 'src/modules/auctions/models';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
-import denominate, { nominateVal } from 'src/utils/formatters';
+import { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { OrderEntity } from '../orders';
@@ -102,6 +104,7 @@ export class AuctionEntity extends BaseEntity {
     tags: string,
     hash: string,
     marketplaceKey: string,
+    decimals: number = elrondConfig.decimals,
   ) {
     if (!auction) {
       return null;
@@ -124,22 +127,9 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
       minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: parseFloat(
-        denominate({
-          input: auction.min_bid.valueOf()?.toString(),
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
-      ),
-      maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: parseFloat(
-        denominate({
-          input: auction?.max_bid?.valueOf()?.toString() || '0',
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        auction.min_bid.valueOf().toString(),
+        decimals,
       ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: parseInt(auction.deadline.valueOf().toString()),
@@ -160,6 +150,7 @@ export class AuctionEntity extends BaseEntity {
     tags: string,
     hash: string,
     marketplaceKey: string,
+    decimals: number = 18,
   ) {
     if (!auction) return null;
     return new AuctionEntity({
@@ -176,22 +167,14 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
       // minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: parseFloat(
-        denominate({
-          input: auction.min_bid.valueOf()?.toString(),
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        auction.min_bid.valueOf().toString(),
+        decimals,
       ),
       maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: parseFloat(
-        denominate({
-          input: auction?.max_bid?.valueOf()?.toString() || '0',
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+      maxBidDenominated: BigNumberUtils.denominateAmount(
+        auction.max_bid?.valueOf()?.toString() || '0',
+        decimals,
       ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: parseInt(auction.deadline.valueOf().toString()),
@@ -220,6 +203,7 @@ export class AuctionEntity extends BaseEntity {
     tags: string,
     hash: string,
     marketplaceKey: string,
+    decimals: number = 18,
   ) {
     if (!topicsAuctionToken) {
       return null;
@@ -241,30 +225,21 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
       // minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: parseFloat(
-        denominate({
-          input: topicsAuctionToken.price?.toString(),
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+      minBidDenominated: BigNumberUtils.denominateAmount(
+        topicsAuctionToken.price,
+        decimals,
       ),
       maxBid:
         parseInt(topicsAuctionToken.auctionType) ===
         ElrondSwapAuctionTypeEnum.Buy
           ? topicsAuctionToken.price
           : '0',
-      maxBidDenominated: parseFloat(
-        denominate({
-          input:
-            parseInt(topicsAuctionToken.auctionType) ===
-            ElrondSwapAuctionTypeEnum.Buy
-              ? topicsAuctionToken.price
-              : '0',
-          denomination: 18,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+      maxBidDenominated: BigNumberUtils.denominateAmount(
+        parseInt(topicsAuctionToken.auctionType) ===
+          ElrondSwapAuctionTypeEnum.Buy
+          ? topicsAuctionToken.price
+          : '0',
+        decimals,
       ),
       startDate: DateUtils.getCurrentTimestamp(),
       endDate: topicsAuctionToken.deadline,
