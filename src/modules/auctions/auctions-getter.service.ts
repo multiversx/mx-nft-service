@@ -470,6 +470,7 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     const collectionFilter = queryRequest.getFilterName('collection');
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    let paymentDecimals = elrondConfig.decimals;
     const currentPriceFilter = queryRequest.getRange(
       AuctionCustomEnum.CURRENTPRICE,
     );
@@ -481,7 +482,11 @@ export class AuctionsGetterService {
       (currentPriceFilter.startPrice !== '0000000000000000000' ||
         currentPriceFilter.endPrice !== '0000000000000000000');
 
-    if (collectionFilter && !hasCurrentPriceFilter) {
+    if (
+      collectionFilter &&
+      !hasCurrentPriceFilter &&
+      (!paymentTokenFilter || paymentTokenFilter === elrondConfig.egld)
+    ) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
         queryRequest,
@@ -508,10 +513,16 @@ export class AuctionsGetterService {
     const [auctions, count, priceRange] =
       await this.persistenceService.getAuctionsGroupBy(queryRequest);
 
+    if (paymentTokenFilter) {
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenFilter,
+      );
+      paymentDecimals = paymentToken?.decimals;
+    }
     return [
       auctions?.map((element) => Auction.fromEntity(element)),
       count,
-      priceRange,
+      { ...priceRange, paymentDecimals },
     ];
   }
 
@@ -537,14 +548,14 @@ export class AuctionsGetterService {
       );
     }
 
-    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     if (paymentTokenFilter) {
-      allAuctions = allAuctions.filter((x) =>
-        paymentTokenFilter.values.includes(x.minBid?.token),
+      allAuctions = allAuctions.filter(
+        (x) => x.minBid?.token === paymentTokenFilter,
       );
-      priceRange = this.computePriceRange(
+      priceRange = await this.computePriceRange(
         allAuctions,
-        paymentTokenFilter.values[0] ?? elrondConfig.egld,
+        paymentTokenFilter,
       );
     }
 
@@ -553,7 +564,10 @@ export class AuctionsGetterService {
         (x) => x.marketplaceKey === marketplaceFilter,
       );
 
-      priceRange = this.computePriceRange(allAuctions);
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter ?? elrondConfig.egld,
+      );
     }
 
     if (sort) {
@@ -587,6 +601,9 @@ export class AuctionsGetterService {
         Constants.oneSecond() * 30,
       );
 
+    const paymentToken = await this.usdPriceService.getToken(
+      paymentTokenFilter,
+    );
     const marketplaceFilter = queryRequest.getFilterName('marketplaceKey');
     const typeFilter = queryRequest.getFilter('type');
     if (typeFilter) {
@@ -595,12 +612,26 @@ export class AuctionsGetterService {
       );
     }
 
+    const collectionFilter = queryRequest.getFilterName('collection');
+
+    if (collectionFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.collection === collectionFilter,
+      );
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter,
+      );
+    }
     if (marketplaceFilter) {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
       );
 
-      priceRange = this.computePriceRange(allAuctions);
+      priceRange = await this.computePriceRange(
+        allAuctions,
+        paymentTokenFilter,
+      );
     }
 
     if (sort) {
@@ -617,7 +648,11 @@ export class AuctionsGetterService {
       queryRequest.offset + queryRequest.limit,
     );
 
-    return [auctions, count, priceRange];
+    return [
+      auctions,
+      count,
+      { ...priceRange, paymentDecimals: paymentToken?.decimals },
+    ];
   }
 
   private async retrieveRunningAuctions(
@@ -707,15 +742,18 @@ export class AuctionsGetterService {
     );
   }
 
-  private computePriceRange(
+  private async computePriceRange(
     auctions: Auction[],
-    paymentToken: string = elrondConfig.egld,
-  ): PriceRange {
+    paymentTokenIdentifier: string,
+  ): Promise<PriceRange> {
+    const paymentToken = await this.usdPriceService.getToken(
+      paymentTokenIdentifier,
+    );
     const minBids = auctions
-      .filter((x) => x.minBid.token === paymentToken)
+      .filter((x) => x.minBid.token === paymentTokenIdentifier)
       .map((x) =>
         new BigNumber(x.minBid.amount).dividedBy(
-          new BigNumber(10 ** elrondConfig.decimals),
+          new BigNumber(10 ** paymentToken?.decimals),
         ),
       );
     let minBid = new BigNumber('Infinity');
@@ -726,10 +764,10 @@ export class AuctionsGetterService {
     }
 
     const maxBids = auctions
-      .filter((x) => x.maxBid.token === paymentToken)
+      .filter((x) => x.maxBid.token === paymentTokenIdentifier)
       .map((x) =>
         new BigNumber(x.maxBid.amount).dividedBy(
-          new BigNumber(10 ** elrondConfig.decimals),
+          new BigNumber(10 ** paymentToken?.decimals),
         ),
       );
     let maxBid = minBid;
@@ -742,7 +780,8 @@ export class AuctionsGetterService {
     return {
       minBid: minBid.isFinite() ? minBid.toString() : '0',
       maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
-      paymentToken,
+      paymentToken: paymentTokenIdentifier,
+      paymentDecimals: paymentToken?.decimals,
     };
   }
 
