@@ -18,6 +18,7 @@ import { BatchUtils } from '@elrondnetwork/erdnest';
 import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -405,9 +406,14 @@ export class ElrondApiService {
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
     startNonce?: number,
-    endNonce?: number,
+    endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
+    maxNftsCount?: number,
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
+
+    if (!maxNftsCount) {
+      maxNftsCount = await this.getCollectionNftsCount(collection);
+    }
 
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
@@ -430,7 +436,7 @@ export class ElrondApiService {
         .addPageSize(0, batchSize)
         .addQuery(`fields=${fields}`);
 
-      const url = `collections/${collection}/nfts${query.build()}`;
+      const url = `collections/${collection}/nfts${query.build(false)}`;
 
       batch = await this.doGetGeneric(
         this.getAllNftsByCollectionAfterNonce.name,
@@ -439,7 +445,10 @@ export class ElrondApiService {
 
       nfts = nfts.concat(batch);
       lastEnd = end;
-    } while (lastEnd < endNonce);
+    } while (
+      nfts.length < maxNftsCount &&
+      (endNonce ? lastEnd < endNonce : true)
+    );
 
     return this.filterUniqueNftsByNonce(nfts);
   }
@@ -455,7 +464,7 @@ export class ElrondApiService {
       .addFields(['identifier', 'metadata', 'timestamp']);
     const url = `nfts${query.build()}`;
     let nfts = await this.doGetGeneric(
-      this.getAllNftsByCollectionAfterNonce.name,
+      this.getNftsWithAttributesBeforeTimestamp.name,
       url,
     );
     const lastTimestamp = nfts?.[nfts.length - 1]?.timestamp ?? beforeTimestamp;
@@ -581,6 +590,32 @@ export class ElrondApiService {
     return await this.doGetGeneric(
       this.getCollectionNftsCount.name,
       `collections/${ticker}/nfts/count`,
+    );
+  }
+
+  async getCollectionPreferredAlgorithm(
+    ticker: string,
+  ): Promise<string | undefined> {
+    const res = await this.doGetGeneric(
+      this.getCollectionPreferredAlgorithm.name,
+      `collections/${ticker}?fields=assets`,
+    );
+    return res?.preferredRankAlgorithm;
+  }
+
+  async getCollectionCustomRanks(
+    ticker: string,
+  ): Promise<CustomRank[] | undefined> {
+    const res = await this.doGetGeneric(
+      this.getCollectionCustomRanks.name,
+      `collections/${ticker}/ranks`,
+    );
+    return res?.map(
+      (nft) =>
+        new CustomRank({
+          identifier: nft.identifier,
+          rank: nft.rank,
+        }),
     );
   }
 

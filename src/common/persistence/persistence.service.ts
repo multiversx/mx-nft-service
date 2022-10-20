@@ -454,9 +454,11 @@ export class PersistenceService {
     );
   }
 
-  async saveOrUpdateBulk(nftRarities: NftRarityEntity[]): Promise<void> {
+  async saveOrUpdateBulkRarities(
+    nftRarities: NftRarityEntity[],
+  ): Promise<void> {
     return await this.execute(
-      this.saveOrUpdateBulk.name,
+      this.saveOrUpdateBulkRarities.name,
       this.nftRarityRepository.saveOrUpdateBulk(nftRarities),
     );
   }

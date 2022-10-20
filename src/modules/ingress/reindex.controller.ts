@@ -16,6 +16,6 @@ export class ReindexController {
 
   @Get('/trigger-rarity-reindex')
   async triggerRarityReindex(): Promise<void> {
-    await this.rarityUpdaterService.handleReindexTokenRarities();
+    await this.rarityUpdaterService.handleReindexAllTokenRarities();
   }
 }

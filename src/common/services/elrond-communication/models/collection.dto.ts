@@ -35,6 +35,7 @@ export interface CollectionAssetApi {
   pngUrl: string;
   svgUrl: string;
   social: CollectionAssetSocialApi;
+  preferredRankAlgorithm: string;
 }
 
 export interface CollectionAssetSocialApi {

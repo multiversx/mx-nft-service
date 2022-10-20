@@ -28,6 +28,7 @@ import { FeedEventsSenderService } from './feed-events.service';
 import { UsdPriceModuleGraph } from 'src/modules/usdPrice/usd-price.module';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
+import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-ev
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     UsdPriceModuleGraph,
+    NftRarityModuleGraph,
   ],
   providers: [
     NftEventsConsumer,
