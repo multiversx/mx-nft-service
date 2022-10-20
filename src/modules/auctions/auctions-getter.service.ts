@@ -482,7 +482,7 @@ export class AuctionsGetterService {
       (currentPriceFilter.startPrice !== '0000000000000000000' ||
         currentPriceFilter.endPrice !== '0000000000000000000');
 
-    if (collectionFilter && !hasCurrentPriceFilter && !paymentTokenFilter) {
+    if (collectionFilter && !hasCurrentPriceFilter) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
         queryRequest,
