@@ -22,23 +22,26 @@ export class NftRarityData {
     }
 
     return nft
-      ? {
+      ? new NftRarityData({
           identifier: nft.identifier,
           nonce: nft.nonce,
-          temporaryMetadata: nft.metadata,
+          temporaryMetadata:
+            typeof nft.metadata === 'string'
+              ? JSON.parse(nft.metadata)
+              : nft.metadata,
           rarities: Rarity.fromNftRarity(nft),
-        }
+        })
       : null;
   }
 
   private static fromElasticNft(nft: any): NftRarityData {
     return nft
-      ? {
+      ? new NftRarityData({
           identifier: nft.identifier,
           nonce: nft.nonce,
           temporaryMetadata: undefined,
           rarities: Rarity.fromElasticNftRarity(nft),
-        }
+        })
       : null;
   }
 
