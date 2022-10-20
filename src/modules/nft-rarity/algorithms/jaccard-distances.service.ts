@@ -17,10 +17,8 @@ export class JaccardDistancesRarityService {
       };
     }
 
-    const jaccardDistances: number[][] = await this.computeJd(nfts);
-    const avg: number[] = this.computeAvg(jaccardDistances);
+    const avg: number[] = this.computeAvgUsingJaccardDistances(nfts);
     const scoreArray: number[] = this.computeScore(avg);
-
     let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
 
     let rarities = {};
@@ -36,30 +34,70 @@ export class JaccardDistancesRarityService {
     return rarities;
   }
 
-  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
-    let jaccardDistances: number[][] = [];
+  private computeAvgUsingJaccardDistances(nfts: NftRarityData[]): number[] {
+    let avg: number[] = [];
+
+    let jdSumArray: number[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
-      jaccardDistances[i] = await this.computePartialJd(i, nfts);
+      console.log(i);
+      for (let j = 0; j < i; j++) {
+        const commonTraitsCount = this.getCommonTraitsCountFromDna(
+          nfts[i].DNA,
+          nfts[j].DNA,
+        );
+
+        const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(
+          nfts[i].DNA,
+          nfts[j].DNA,
+          commonTraitsCount,
+        );
+
+        const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
+
+        const jaccardDistance = 1 - jaccardIndex;
+
+        if (jdSumArray[i]) {
+          jdSumArray[i] += jaccardDistance;
+        } else {
+          jdSumArray[i] = jaccardDistance;
+        }
+
+        if (jdSumArray[j]) {
+          jdSumArray[j] += jaccardDistance;
+        } else {
+          jdSumArray[j] = jaccardDistance;
+        }
+      }
     }
 
-    return jaccardDistances;
+    const realLength = nfts.length - 1;
+    for (let i = 0; i < nfts.length; i++) {
+      avg[i] = jdSumArray[i] > 0 ? jdSumArray[i] / realLength : 0;
+    }
+
+    return avg;
   }
 
-  private async computePartialJd(
+  private computePartialJd(
     i: number,
     nfts: NftRarityData[],
-  ): Promise<number[]> {
+    computeFullRow: boolean,
+  ): number[] {
     let jaccardDistances: number[] = [];
 
-    for (let j = 0; j < i; j++) {
-      const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
+    const end = computeFullRow ? nfts.length : i;
+    for (let j = 0; j < end; j++) {
+      const commonTraitsCount = this.getCommonTraitsCountFromDna(
         nfts[i].DNA,
         nfts[j].DNA,
       );
 
-      const uniqueTraitsCount =
-        nfts[i].DNA.length + nfts[j].DNA.length - commonTraitsCount;
+      const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(
+        nfts[i].DNA,
+        nfts[j].DNA,
+        commonTraitsCount,
+      );
 
       const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
 
@@ -67,22 +105,6 @@ export class JaccardDistancesRarityService {
     }
 
     return jaccardDistances;
-  }
-
-  private computeAvg(jaccardDistances: number[][]): number[] {
-    let avg: number[] = [];
-    for (let i = 0; i < jaccardDistances.length; i++) {
-      avg[i] = 0;
-      for (let j = 0; j < jaccardDistances.length; j++) {
-        if (i === j) continue;
-        avg[i] +=
-          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
-      }
-      const realLength = jaccardDistances.length - 1;
-      if (avg[i] > 0) avg[i] /= realLength;
-    }
-
-    return avg;
   }
 
   private computeScore(avg: number[]): number[] {
@@ -116,14 +138,23 @@ export class JaccardDistancesRarityService {
     return scoreArray;
   }
 
-  private getCommonTraitsCountFromAttributeMaps(
-    map1: number[],
-    map2: number[],
-  ): number {
+  private getCommonTraitsCountFromDna(dna1: number[], dna2: number[]): number {
     let count = 0;
-    for (let i = 0; i < map1.length; i++) {
-      if (map1[i] === map2[i] && map1[i] !== undefined) count++;
+    for (let i = 0; i < dna1.length; i++) {
+      if (dna1[i] === dna2[i] && Number.isInteger(dna1[i])) count++;
     }
     return count;
+  }
+
+  private getUniqueTraitsCountFromDna(
+    dna1: number[],
+    dna2: number[],
+    commonTraitsCount: number,
+  ): number {
+    return (
+      dna1.filter((dna) => Number.isInteger(dna)).length +
+      dna2.filter((dna) => Number.isInteger(dna)).length -
+      commonTraitsCount
+    );
   }
 }
