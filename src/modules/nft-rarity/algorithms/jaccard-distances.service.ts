@@ -40,7 +40,6 @@ export class JaccardDistancesRarityService {
     let jdSumArray: number[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
-      console.log(i);
       for (let j = 0; j < i; j++) {
         const commonTraitsCount = this.getCommonTraitsCountFromDna(
           nfts[i].DNA,

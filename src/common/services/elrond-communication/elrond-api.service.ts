@@ -511,8 +511,6 @@ export class ElrondApiService {
       actionResult = await action(nfts);
 
       lastEnd = end;
-
-      console.log(`${start}->${end}, ${nftsCount}`);
     } while (
       nftsCount < collectionNftsCount &&
       (endNonce ? lastEnd < endNonce : true) &&
