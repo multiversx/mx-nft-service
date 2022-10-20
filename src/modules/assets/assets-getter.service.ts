@@ -23,7 +23,6 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
-  ElasticPagination,
   ElasticQuery,
   ElasticSortOrder,
   QueryConditionOptions,
@@ -433,6 +432,7 @@ export class AssetsGetterService {
         identifier: a.identifier,
         rank: a.rarity.rank,
         score: a.rarity.score,
+        rarity: a.rarity,
       };
     });
     return assetsRarity;
