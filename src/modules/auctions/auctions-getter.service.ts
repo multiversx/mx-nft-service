@@ -7,9 +7,7 @@ import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
-import { TimeConstants } from 'src/utils/time-utils';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { DateUtils } from 'src/utils/date-utils';
 import {
   AuctionWithBidsCount,
   AuctionWithStartBid,
@@ -73,10 +71,6 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
     try {
-      if (this.filtersForRunningAndEndDate(queryRequest)) {
-        return await this.getEndingAuctions(queryRequest);
-      }
-
       const tags = queryRequest.getFilterName('tags');
       if (tags && tags.length > 0 && tags[0]) {
         return this.getMappedAuctionsOrderBids(queryRequest);
@@ -218,183 +212,6 @@ export class AuctionsGetterService {
         exception: error,
       });
     }
-  }
-
-  private filtersForRunningAndEndDate(queryRequest: QueryRequest) {
-    return (
-      queryRequest?.filters?.filters?.length === 2 &&
-      queryRequest.filters.filters.filter(
-        (item) =>
-          item.field === 'status' ||
-          item.field === 'endDate' ||
-          item.field === 'startDate',
-      ).length === 3 &&
-      queryRequest.filters.filters.find(
-        (f) =>
-          f.field === 'endDate' &&
-          f.values.length === 1 &&
-          parseInt(f.values[0]) < DateUtils.getCurrentTimestampPlusDays(30),
-      )
-    );
-  }
-
-  private filtersForMarketplaceAuctions(queryRequest: QueryRequest) {
-    return (
-      ((queryRequest?.filters?.filters?.length === 2 &&
-        queryRequest.filters.filters.filter(
-          (item) => item.field === 'status' || item.field === 'startDate',
-        ).length === 2) ||
-        (queryRequest?.filters?.filters?.length === 3 &&
-          queryRequest.filters.filters.filter(
-            (item) =>
-              item.field === 'status' ||
-              item.field === 'startDate' ||
-              item.field === 'tags',
-          ).length === 3)) &&
-      (!queryRequest.customFilters ||
-        queryRequest.customFilters?.length === 0) &&
-      this.isSortingByCreationDate(queryRequest)
-    );
-  }
-
-  private isSortingByCreationDate(queryRequest: QueryRequest) {
-    return (
-      !queryRequest.sorting ||
-      queryRequest.sorting?.length === 0 ||
-      (queryRequest.sorting?.length === 1 &&
-        queryRequest.sorting[0].field === 'creationDate')
-    );
-  }
-
-  private async getMarketplaceAuctions(
-    queryRequest: QueryRequest,
-  ): Promise<[Auction[], number, PriceRange]> {
-    let [auctions, count, priceRange] = await this.getMarketplaceAuctionsMap();
-    auctions = auctions.filter(
-      (a) => a.endDate > DateUtils.getCurrentTimestamp(),
-    );
-    const tagsFilter = queryRequest.filters.filters.filter(
-      (item) => item.field === 'tags',
-    );
-    if (tagsFilter && !tagsFilter[0]?.values?.every((v) => v === null)) {
-      auctions = auctions.filter((a) =>
-        tagsFilter[0].values.every((tag) => a.tags.includes(tag)),
-      );
-    }
-    count = auctions.length;
-    auctions = this.sortByCreationDate(queryRequest, auctions);
-    auctions = auctions?.slice(
-      queryRequest.offset,
-      queryRequest.offset + queryRequest.limit,
-    );
-    return [
-      auctions?.map((item) => Auction.fromEntity(item)),
-      count,
-      priceRange,
-    ];
-  }
-
-  private sortByCreationDate(
-    queryRequest: QueryRequest,
-    auctions: AuctionWithStartBid[],
-  ) {
-    let sortedAuctions = [...auctions];
-    if (
-      queryRequest.sorting?.length === 1 &&
-      queryRequest.sorting[0].direction === Sort.DESC
-    ) {
-      sortedAuctions = sortedAuctions?.sortedDescending((a) =>
-        new Date(a.creationDate).getTime(),
-      );
-    } else if (
-      queryRequest.sorting?.length === 1 &&
-      queryRequest.sorting[0].direction === Sort.ASC
-    ) {
-      sortedAuctions = sortedAuctions?.sort(
-        (a, b) =>
-          new Date(a.creationDate).getTime() -
-          new Date(b.creationDate).getTime(),
-      );
-    }
-    return sortedAuctions;
-  }
-
-  private async getEndingAuctions(
-    queryRequest: QueryRequest,
-  ): Promise<[Auction[], number, PriceRange]> {
-    if (
-      queryRequest.filters.filters.find(
-        (f) =>
-          f.field === 'endDate' &&
-          f.values.length === 1 &&
-          parseInt(f.values[0]) < DateUtils.getCurrentTimestampPlusMinute(10),
-      )
-    ) {
-      let [auctions, count, priceRange] = await this.getAuctionsToday();
-      auctions = auctions.filter(
-        (a) => a.endDate > DateUtils.getCurrentTimestamp(),
-      );
-      count = auctions.length;
-      auctions = auctions?.slice(
-        queryRequest.offset,
-        queryRequest.offset + queryRequest.limit,
-      );
-
-      return [
-        auctions?.map((item) => Auction.fromEntity(item)),
-        count,
-        priceRange,
-      ];
-    }
-    let [auctions, count, priceRange] = await this.getAuctionsEndingInAMonth();
-    auctions = auctions.filter(
-      (a) => a.endDate > DateUtils.getCurrentTimestamp(),
-    );
-    auctions = auctions?.slice(
-      queryRequest.offset,
-      queryRequest.offset + queryRequest.limit,
-    );
-
-    return [
-      auctions?.map((item) => Auction.fromEntity(item)),
-      count,
-      priceRange,
-    ];
-  }
-
-  private async getAuctionsToday(): Promise<
-    [AuctionWithBidsCount[], number, PriceRange]
-  > {
-    return this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.AuctionsEndingToday.key,
-      () =>
-        this.getRunningAuctionsEndingBefore(
-          DateUtils.getCurrentTimestampPlus(24),
-        ),
-      TimeConstants.oneHour,
-    );
-  }
-
-  private async getMarketplaceAuctionsMap(): Promise<
-    [AuctionWithStartBid[], number, PriceRange]
-  > {
-    return await this.cacheService.getOrSetCache(
-      this.redisClient,
-      CacheInfo.MarketplaceAuctions.key,
-      () => this.getMarketplaceAuctionsQuery(DateUtils.getCurrentTimestamp()),
-      5 * TimeConstants.oneMinute,
-    );
-  }
-
-  private async getAuctionsEndingInAMonth(): Promise<
-    [AuctionWithBidsCount[], number, PriceRange]
-  > {
-    return await this.auctionCachingService.getAuctionsEndingInAMonth(() =>
-      this.getRunningAuctionsEndingBefore(
-        DateUtils.getCurrentTimestampPlusDays(30),
-      ),
-    );
   }
 
   private async getMappedClaimableAuctions(
