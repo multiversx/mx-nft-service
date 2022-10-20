@@ -502,7 +502,7 @@ export class ElrondApiService {
       const url = `collections/${collection}/nfts${query.build(false)}`;
 
       const nfts = await this.doGetGeneric(
-        this.getAllNftsByCollectionAfterNonce.name,
+        this.getScrollableNftsByCollectionAfterNonce.name,
         url,
       );
 
@@ -511,6 +511,8 @@ export class ElrondApiService {
       actionResult = await action(nfts);
 
       lastEnd = end;
+
+      console.log(`${start}->${end}, ${nftsCount}`);
     } while (
       nftsCount < collectionNftsCount &&
       (endNonce ? lastEnd < endNonce : true) &&

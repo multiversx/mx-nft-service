@@ -18,18 +18,22 @@ export class NftRarityComputeService {
     collection: string,
     nfts: NftRarityData[],
   ): Promise<NftRarityEntity[]> {
+    console.log(`computing jd...`);
     const jdRarities: { [key: string]: { [key: string]: number } } =
       await this.jaccardDistancesService.computeJaccardDistancesRarities(nfts);
 
+    console.log(`computing dnaSummary...`);
     const dnaSummary: {
       [key: string]: { [key: string]: { [key: string]: number } };
     } = this.computeDNASummary(nfts);
 
+    console.log(`computing openRarities...`);
     const openRarities = this.openRarityService.computeOpenRarities(
       nfts,
       dnaSummary,
     );
 
+    console.log(`computing tsrRarities...`);
     const tsrRarities: { [key: string]: { [key: string]: number } } =
       await this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(
         nfts,
@@ -39,6 +43,8 @@ export class NftRarityComputeService {
           RarityAlgorithmsEnum.StatisticalRarity,
         ],
       );
+
+    console.log(`rarities computed...`);
 
     return nfts.map((nft) => {
       const nonce = nft.nonce;
