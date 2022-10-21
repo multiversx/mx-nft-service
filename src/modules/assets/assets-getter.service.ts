@@ -96,12 +96,18 @@ export class AssetsGetterService {
         sorting === AssetsSortingEnum.RankAsc ||
         sorting === AssetsSortingEnum.RankDesc)
     ) {
+      const sortByRank: Sort =
+        sorting === AssetsSortingEnum.RankDesc
+          ? Sort.DESC
+          : sorting === AssetsSortingEnum.RankAsc
+          ? Sort.ASC
+          : undefined;
       const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
         limit,
         offset,
-        sorting === AssetsSortingEnum.RankAsc ? Sort.ASC : Sort.DESC,
+        sortByRank,
       );
       this.addToCache(response);
       return response;
