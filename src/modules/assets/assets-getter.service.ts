@@ -99,9 +99,9 @@ export class AssetsGetterService {
       const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
-        sorting === AssetsSortingEnum.RankAsc ? Sort.ASC : Sort.DESC,
         limit,
         offset,
+        sorting === AssetsSortingEnum.RankAsc ? Sort.ASC : Sort.DESC,
       );
       this.addToCache(response);
       return response;
