@@ -97,13 +97,13 @@ export class AssetsGetterService {
       sortByRank = Sort.DESC;
     }
 
-    if (filters?.traits) {
-      const response = await this.getCollectionAssetsByTraits(
+    if (filters?.traits || (sortByRank !== undefined && filters?.collection)) {
+      const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
+        sortByRank,
         limit,
         offset,
-        sortByRank,
       );
       this.addToCache(response);
       return response;
@@ -336,20 +336,21 @@ export class AssetsGetterService {
       ]);
   }
 
-  private async getCollectionAssetsByTraits(
+  private async getCollectionAssetsByTraitsAndRanks(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
-    const [nfts, count] = await this.nftTraitsService.getCollectionNftsByTraits(
-      collection,
-      traits,
-      limit,
-      offset,
-      sortByRank,
-    );
+    const [nfts, count] =
+      await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(
+        collection,
+        traits,
+        limit,
+        offset,
+        sortByRank,
+      );
     const assets = nfts?.map((nft) => Asset.fromNft(nft));
     return new CollectionType({ items: assets, count: count });
   }

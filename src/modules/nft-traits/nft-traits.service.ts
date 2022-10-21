@@ -296,7 +296,7 @@ export class NftTraitsService {
     return true;
   }
 
-  async getCollectionNftsByTraits(
+  async getCollectionNftsByTraitsAndRanks(
     collection: string,
     traits: NftTrait[],
     limit: number,
