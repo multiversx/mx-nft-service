@@ -90,18 +90,16 @@ export class AssetsGetterService {
       });
     }
 
-    let sortByRank: Sort;
-    if (sorting === AssetsSortingEnum.RankAsc) {
-      sortByRank = Sort.ASC;
-    } else if (sorting === AssetsSortingEnum.RankDesc) {
-      sortByRank = Sort.DESC;
-    }
-
-    if (filters?.traits || (sortByRank !== undefined && filters?.collection)) {
+    if (
+      filters?.collection &&
+      (filters?.traits ||
+        sorting === AssetsSortingEnum.RankAsc ||
+        sorting === AssetsSortingEnum.RankDesc)
+    ) {
       const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
-        sortByRank,
+        sorting === AssetsSortingEnum.RankAsc ? Sort.ASC : Sort.DESC,
         limit,
         offset,
       );
