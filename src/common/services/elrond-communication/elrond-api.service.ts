@@ -423,6 +423,22 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsBySearch.name, url);
   }
 
+  async getBulkNftRaritiesByIdentifiers(identifiers: string[]): Promise<Nft[]> {
+    const batchSize = constants.getNftsFromApiBatchSize;
+    let nfts: Nft[] = [];
+    for (let i = 0; i < identifiers.length; i += batchSize) {
+      const query = `nfts${new AssetsQuery()
+        .addIdentifiers(identifiers.slice(i, i + batchSize))
+        .addPageSize(0, batchSize)
+        .addFields(['identifier', 'rank', 'score', 'rarities'])
+        .build(false)}`;
+      nfts = nfts.concat(
+        await this.doGetGeneric(this.getNftsByIdentifiers.name, query),
+      );
+    }
+    return nfts;
+  }
+
   async getAllNftsByCollectionAfterNonce(
     collection: string,
     fields: string = 'identifier,nonce,timestamp',

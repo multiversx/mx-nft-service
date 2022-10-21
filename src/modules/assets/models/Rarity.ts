@@ -3,9 +3,6 @@ import { Nft } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field({ nullable: true })
-  preferredRankAlgorithm: string;
-
   @Field(() => Int, { nullable: true })
   rank: number;
   @Field({ nullable: true })
@@ -40,7 +37,6 @@ export class Rarity {
       ? new Rarity({
           rank: nft.rank,
           score: nft.score,
-          preferredRankAlgorithm: nft.assets?.preferredRankAlgorithm,
           customRank: nft.rarities?.custom?.rank,
           openRarityScore: nft.rarities?.openRarity?.score,
           openRarityRank: nft.rarities?.openRarity?.rank,
@@ -57,7 +53,6 @@ export class Rarity {
   static fromElasticNftRarity(nft: any): Rarity {
     return nft
       ? new Rarity({
-          preferredRankAlgorithm: undefined,
           rank: undefined,
           score: undefined,
           customRank: nft.nft_rank_custom,
