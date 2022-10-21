@@ -205,10 +205,6 @@ export class AssetsGetterService {
     }
 
     const assets = nfts?.map((element) => Asset.fromNft(element));
-
-    // todo remove debug log
-    console.log(assets.map((nft) => nft.rarity.rank));
-
     return new CollectionType({ count, items: assets });
   }
 
