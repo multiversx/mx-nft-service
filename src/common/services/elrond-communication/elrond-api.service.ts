@@ -241,12 +241,8 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsForUserCount.name, url);
   }
 
-  async getAllNfts(query: string = '', sortByRank?: Sort): Promise<Nft[]> {
-    console.log(`sortByRank ${sortByRank}`);
-    const url = `nfts${new AssetsQuery(query)
-      .addSortByRank(sortByRank)
-      .withNsfwFlag()
-      .build()}`;
+  async getAllNfts(query: string = ''): Promise<Nft[]> {
+    const url = `nfts${new AssetsQuery(query).withNsfwFlag().build()}`;
     return await this.doGetGeneric(this.getAllNfts.name, url);
   }
 
@@ -262,6 +258,16 @@ export class ElrondApiService {
     return [
       await this.getAllNfts(nftsQuery),
       await this.getNftsCount(nftsCountQuery),
+    ];
+  }
+
+  async getCollectionNftsAndCount(
+    collection: string,
+    nftsQuery: string = '',
+  ): Promise<[Nft[], number]> {
+    return [
+      await this.getCollectionNftsForQuery(collection, nftsQuery),
+      await this.getCollectionNftsCountForQuery(collection, nftsQuery),
     ];
   }
 
@@ -315,14 +321,24 @@ export class ElrondApiService {
     );
   }
 
-  async getAllCollectionNftsForQuery(
-    identifier: string = '',
+  async getCollectionNftsForQuery(
+    collection: string = '',
     query: string = '',
   ): Promise<Nft[]> {
-    const url = `collections/${identifier}/nfts${new AssetsQuery(
+    const url = `collections/${collection}/nfts${new AssetsQuery(
       query,
     ).build()}`;
-    return await this.doGetGeneric(this.getAllCollectionNftsForQuery.name, url);
+    return await this.doGetGeneric(this.getCollectionNftsForQuery.name, url);
+  }
+
+  async getCollectionNftsCountForQuery(
+    collection: string = '',
+    query: string = '',
+  ): Promise<number> {
+    const url = `collections/${collection}/nfts/count${new AssetsQuery(
+      query,
+    ).build()}`;
+    return await this.doGetGeneric(this.getCollectionNftsForQuery.name, url);
   }
 
   async getCollectionByIdentifierForQuery(

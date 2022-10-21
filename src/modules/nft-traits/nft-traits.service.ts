@@ -296,21 +296,20 @@ export class NftTraitsService {
     return true;
   }
 
-  async getNftsByTraits(
+  async getCollectionNftsByTraits(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
     sortByRank?: Sort,
   ): Promise<[Nft[], number]> {
-    return await this.apiService.getNftsAndCount(
+    return await this.apiService.getCollectionNftsAndCount(
+      collection,
       new AssetsQuery()
-        .addCollection(collection)
         .addTraits(traits)
         .addSortByRank(sortByRank)
         .addPageSize(offset, limit)
         .build(),
-      new AssetsQuery().addCollection(collection).addTraits(traits).build(),
     );
   }
 

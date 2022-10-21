@@ -98,7 +98,7 @@ export class AssetsGetterService {
     }
 
     if (filters?.traits) {
-      const response = await this.getAssetsByTraits(
+      const response = await this.getCollectionAssetsByTraits(
         filters.collection,
         filters.traits,
         limit,
@@ -148,7 +148,6 @@ export class AssetsGetterService {
       filters,
       apiQuery,
       apiCountQuery,
-      sortByRank,
     );
     this.addToCache(response);
     return response;
@@ -196,12 +195,11 @@ export class AssetsGetterService {
   private async getAllAssets(
     query: string = '',
     countQuery: string = '',
-    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     query = new AssetsQuery(query).build();
     countQuery = new AssetsQuery(countQuery).build();
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(query, sortByRank),
+      this.apiService.getAllNfts(query),
       this.apiService.getNftsCount(countQuery),
     ]);
     if (!nfts || !count) {
@@ -220,7 +218,6 @@ export class AssetsGetterService {
     filters: AssetsFilter,
     query: string = '',
     countQuery: string = '',
-    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       const asset = await this.assetByIdentifierService.getAsset(
@@ -230,18 +227,17 @@ export class AssetsGetterService {
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
         : null;
     } else {
-      return await this.getOrSetAssets(query, countQuery, sortByRank);
+      return await this.getOrSetAssets(query, countQuery);
     }
   }
 
   private async getOrSetAssets(
     query: string,
     countQuery: string = '',
-    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      const getAssets = () => this.getAllAssets(query, countQuery, sortByRank);
+      const getAssets = () => this.getAllAssets(query, countQuery);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -340,14 +336,14 @@ export class AssetsGetterService {
       ]);
   }
 
-  private async getAssetsByTraits(
+  private async getCollectionAssetsByTraits(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
-    const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
+    const [nfts, count] = await this.nftTraitsService.getCollectionNftsByTraits(
       collection,
       traits,
       limit,
