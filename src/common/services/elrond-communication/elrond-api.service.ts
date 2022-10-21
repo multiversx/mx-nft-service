@@ -420,6 +420,17 @@ export class ElrondApiService {
       maxNftsCount = await this.getCollectionNftsCount(collection);
     }
 
+    if (maxNftsCount < batchSize) {
+      const query = new AssetsQuery()
+        .addPageSize(0, batchSize)
+        .addQuery(`fields=${fields}`);
+      const url = `collections/${collection}/nfts${query.build(false)}`;
+      return await this.doGetGeneric(
+        this.getAllNftsByCollectionAfterNonce.name,
+        url,
+      );
+    }
+
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
@@ -456,6 +467,60 @@ export class ElrondApiService {
     );
 
     return this.filterUniqueNftsByNonce(nfts);
+  }
+
+  async getScrollableNftsByCollectionAfterNonce(
+    collection: string,
+    fields: string = 'identifier,nonce,timestamp',
+    action: (nfts: Nft[]) => Promise<boolean | any>,
+    startNonce?: number,
+    endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
+    collectionNftsCount?: number,
+  ): Promise<void> {
+    const batchSize = constants.getNftsFromApiBatchSize;
+
+    if (!collectionNftsCount) {
+      collectionNftsCount = await this.getCollectionNftsCount(collection);
+    }
+
+    let nftsCount = 0;
+    let lastEnd = startNonce ?? 0;
+    let actionResult: boolean;
+
+    do {
+      const start = lastEnd + 1;
+      let end;
+
+      if (startNonce !== undefined && endNonce !== undefined) {
+        end = Math.min(endNonce, start + batchSize - 1);
+      } else {
+        end = start + batchSize - 1;
+      }
+
+      let query = new AssetsQuery()
+        .addPageSize(0, batchSize)
+        .addQuery(`fields=${fields}`);
+      if (collectionNftsCount > batchSize || startNonce || endNonce) {
+        query = query.addNonceAfter(start).addNonceBefore(end);
+      }
+
+      const url = `collections/${collection}/nfts${query.build(false)}`;
+
+      const nfts = await this.doGetGeneric(
+        this.getScrollableNftsByCollectionAfterNonce.name,
+        url,
+      );
+
+      nftsCount += nfts.length;
+
+      actionResult = await action(nfts);
+
+      lastEnd = end;
+    } while (
+      nftsCount < collectionNftsCount &&
+      (endNonce ? lastEnd < endNonce : true) &&
+      actionResult !== false
+    );
   }
 
   async getNftsWithAttributesBeforeTimestamp(
