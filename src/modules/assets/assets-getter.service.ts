@@ -13,7 +13,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
-import { AssetsFilter } from '../common/filters/filtersTypes';
+import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
@@ -90,12 +90,20 @@ export class AssetsGetterService {
       });
     }
 
+    let sortByRank: Sort = undefined;
+    if (sorting === AssetsSortingEnum.RankAsc) {
+      sortByRank = Sort.ASC;
+    } else if (sorting === AssetsSortingEnum.RankDesc) {
+      sortByRank = Sort.DESC;
+    }
+
     if (filters?.traits) {
       const response = await this.getAssetsByTraits(
         filters.collection,
         filters.traits,
         limit,
         offset,
+        sortByRank,
       );
       this.addToCache(response);
       return response;
@@ -140,6 +148,7 @@ export class AssetsGetterService {
       filters,
       apiQuery,
       apiCountQuery,
+      sortByRank,
     );
     this.addToCache(response);
     return response;
@@ -187,11 +196,12 @@ export class AssetsGetterService {
   private async getAllAssets(
     query: string = '',
     countQuery: string = '',
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     query = new AssetsQuery(query).build();
     countQuery = new AssetsQuery(countQuery).build();
     const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(query),
+      this.apiService.getAllNfts(query, sortByRank),
       this.apiService.getNftsCount(countQuery),
     ]);
     if (!nfts || !count) {
@@ -199,6 +209,10 @@ export class AssetsGetterService {
     }
 
     const assets = nfts?.map((element) => Asset.fromNft(element));
+
+    // todo remove debug log
+    console.log(assets.map((nft) => nft.rarity.rank));
+
     return new CollectionType({ count, items: assets });
   }
 
@@ -206,6 +220,7 @@ export class AssetsGetterService {
     filters: AssetsFilter,
     query: string = '',
     countQuery: string = '',
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
       const asset = await this.assetByIdentifierService.getAsset(
@@ -215,17 +230,18 @@ export class AssetsGetterService {
         ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
         : null;
     } else {
-      return await this.getOrSetAssets(query, countQuery);
+      return await this.getOrSetAssets(query, countQuery, sortByRank);
     }
   }
 
   private async getOrSetAssets(
     query: string,
     countQuery: string = '',
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      const getAssets = () => this.getAllAssets(query, countQuery);
+      const getAssets = () => this.getAllAssets(query, countQuery, sortByRank);
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
@@ -329,12 +345,14 @@ export class AssetsGetterService {
     traits: NftTrait[],
     limit: number,
     offset: number,
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
       collection,
       traits,
       limit,
       offset,
+      sortByRank,
     );
     const assets = nfts?.map((nft) => Asset.fromNft(nft));
     return new CollectionType({ items: assets, count: count });

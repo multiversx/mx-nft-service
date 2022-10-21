@@ -20,6 +20,7 @@ import { AssetsQuery } from '../assets';
 import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Sort } from '../common/filters/filtersTypes';
 
 @Injectable()
 export class NftTraitsService {
@@ -300,11 +301,13 @@ export class NftTraitsService {
     traits: NftTrait[],
     limit: number,
     offset: number,
+    sortByRank?: Sort,
   ): Promise<[Nft[], number]> {
     return await this.apiService.getNftsAndCount(
       new AssetsQuery()
         .addCollection(collection)
         .addTraits(traits)
+        .addSortByRank(sortByRank)
         .addPageSize(offset, limit)
         .build(),
       new AssetsQuery().addCollection(collection).addTraits(traits).build(),

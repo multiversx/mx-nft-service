@@ -19,6 +19,7 @@ import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
+import { Sort } from 'src/modules/common/filters/filtersTypes';
 
 @Injectable()
 export class ElrondApiService {
@@ -240,8 +241,12 @@ export class ElrondApiService {
     return await this.doGetGeneric(this.getNftsForUserCount.name, url);
   }
 
-  async getAllNfts(query: string = ''): Promise<Nft[]> {
-    const url = `nfts${new AssetsQuery(query).withNsfwFlag().build()}`;
+  async getAllNfts(query: string = '', sortByRank?: Sort): Promise<Nft[]> {
+    console.log(`sortByRank ${sortByRank}`);
+    const url = `nfts${new AssetsQuery(query)
+      .addSortByRank(sortByRank)
+      .withNsfwFlag()
+      .build()}`;
     return await this.doGetGeneric(this.getAllNfts.name, url);
   }
 
