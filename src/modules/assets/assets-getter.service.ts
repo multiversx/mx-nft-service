@@ -90,7 +90,7 @@ export class AssetsGetterService {
       });
     }
 
-    let sortByRank: Sort = undefined;
+    let sortByRank: Sort;
     if (sorting === AssetsSortingEnum.RankAsc) {
       sortByRank = Sort.ASC;
     } else if (sorting === AssetsSortingEnum.RankDesc) {
