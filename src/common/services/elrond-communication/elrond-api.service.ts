@@ -665,7 +665,7 @@ export class ElrondApiService {
       this.getCollectionPreferredAlgorithm.name,
       `collections/${ticker}?fields=assets`,
     );
-    return res?.preferredRankAlgorithm;
+    return res?.assets?.preferredRankAlgorithm;
   }
 
   async getCollectionCustomRanks(
