@@ -116,6 +116,14 @@ export class NftRarityService {
         return false;
       }
 
+      const nftsWithoutAttributes = this.filterNftsWithoutAttributes(allNfts);
+      if (nftsWithoutAttributes) {
+        await this.nftRarityElasticService.setNftRaritiesInElastic(
+          nftsWithoutAttributes,
+          false,
+        );
+      }
+
       let nftsWithAttributes = this.filterNftsWithAttributes(allNfts);
 
       if (nftsWithAttributes?.length === 0) {
@@ -363,6 +371,10 @@ export class NftRarityService {
 
   private filterNftsWithAttributes(nfts: NftRarityData[]): NftRarityData[] {
     return nfts.filter((nft) => nft.DNA?.length > 0);
+  }
+
+  private filterNftsWithoutAttributes(nfts: NftRarityData[]): NftRarityData[] {
+    return nfts.filter((nft) => !nft.DNA || nft.DNA.length === 0);
   }
 
   private sortDescNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
