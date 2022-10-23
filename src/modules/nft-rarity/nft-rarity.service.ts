@@ -369,7 +369,7 @@ export class NftRarityService {
   }
 
   private filterNftsWithoutAttributes(nfts: NftRarityData[]): NftRarityData[] {
-    return nfts.filter((nft) => !nft.DNA || nft.DNA?.length === 0);
+    return nfts.filter((nft) => !nft.DNA || nft.DNA.length === 0);
   }
 
   private sortDescNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {
