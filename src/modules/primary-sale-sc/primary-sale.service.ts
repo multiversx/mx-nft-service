@@ -123,33 +123,6 @@ export class PrimarySaleService {
     return response.firstValue.valueOf();
   }
 
-  async getPaymentToken(): Promise<string> {
-    try {
-      const cacheKey = generateCacheKeyFromParams('primarySalePaymentToken');
-      return await this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        () => this.getPaymentTokenMap(),
-        TimeConstants.oneHour,
-      );
-    } catch (err) {
-      this.logger.error('An error occurred while getting the payment token.', {
-        path: this.getPaymentToken.name,
-        exception: err,
-      });
-    }
-  }
-
-  async getPaymentTokenMap(): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let price = <Interaction>contract.methodsExplicit.current_token();
-
-    const response = await this.getFirstQueryResult(price);
-    return response.firstValue.valueOf();
-  }
-
   async getMaxNftPerWallet(collectionIdentifier: string): Promise<string> {
     try {
       const cacheKey = generateCacheKeyFromParams(

@@ -37,37 +37,35 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   @ResolveField('price', () => String)
   async price(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
-    const claimableCount = await this.primarySaleService.getPricePerTicket(
+    const pricePerTicket = await this.primarySaleService.getPricePerTicket(
       collectionIdentifier,
     );
-    return claimableCount || 0;
+    return pricePerTicket || 0;
   }
 
   @ResolveField(() => Int)
   async maxUnitsPerWallet(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
 
-    const claimableCount = await this.primarySaleService.getMaxNftPerWallet(
+    const maxNftsPerWallet = await this.primarySaleService.getMaxNftPerWallet(
       collectionIdentifier,
     );
-    return claimableCount || 0;
+    return maxNftsPerWallet || 0;
   }
 
   @ResolveField(() => String)
   async paymentToken(@Parent() sale: PrimarySale) {
-    const claimableCount = await this.primarySaleService.getPaymentToken();
-
-    return claimableCount || 'EGLD';
+    return 'EGLD';
   }
 
   @ResolveField(() => PrimarySaleTime)
   async saleTime(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
-    const claimableCount = await this.primarySaleService.getTimestamps(
+    const saleTime = await this.primarySaleService.getTimestamps(
       collectionIdentifier,
     );
 
-    return claimableCount || 'EGLD';
+    return saleTime;
   }
 
   @Mutation(() => TransactionNode)
