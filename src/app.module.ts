@@ -30,6 +30,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
+import { PrimarySaleModuleGraph } from './modules/holorideIntegration/primary-sale.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.m
     MarketplacesModuleGraph,
     ArtistsModuleGraph,
     ExploreStatsModuleGraph,
+    PrimarySaleModuleGraph,
   ],
 })
 export class AppModule {}

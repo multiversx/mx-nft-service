@@ -309,6 +309,12 @@ input BuySftActionArgs {
   quantity: String
 }
 
+input BuyTicketsArgs {
+  collectionName: String!
+  price: String!
+  ticketsNumber: Int!
+}
+
 type Campaign {
   availableNfts: Int!
   campaignId: ID!
@@ -375,6 +381,10 @@ input ChildFilter {
   op: Operation!
   relationField: String
   values: [String!]!
+}
+
+input ClaimTicketsArgs {
+  collectionName: String!
 }
 
 type Collection {
@@ -528,6 +538,12 @@ enum CollectionsSortingEnum {
   Newest
   Trending
   Verified
+}
+
+input ConfigureCollectionArgs {
+  collectionName: String!
+  maxNftsPerWallet: Int!
+  price: String!
 }
 
 input ConnectionArgs {
@@ -751,8 +767,11 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buyHolorideTicket(input: BuyTicketsArgs!): TransactionNode!
   buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
+  claimTicket(input: ClaimTicketsArgs!): TransactionNode!
+  configureCollection(input: ConfigureCollectionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
@@ -763,6 +782,8 @@ type Mutation {
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
+  setSaleClaimPeriod(input: SetSaleClaimPeriodArgs!): TransactionNode!
+  setWhitelisted(input: WhiteListAddressesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
@@ -1038,6 +1059,14 @@ input SetNftRolesArgs {
   roles: [String!]!
 }
 
+input SetSaleClaimPeriodArgs {
+  collectionName: String!
+  endClaim: Int!
+  endSale: Int!
+  startClaim: Int!
+  startSale: Int!
+}
+
 type SocialLink {
   type: ID
   url: String
@@ -1152,3 +1181,7 @@ input TransferNftCreateRoleArgs {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input WhiteListAddressesArgs {
+  addresses: [String!]!
+}
