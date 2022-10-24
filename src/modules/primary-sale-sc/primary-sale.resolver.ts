@@ -1,4 +1,12 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import {
+  Resolver,
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Parent,
+  Int,
+} from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { PrimarySaleService } from './primary-sale.service';
@@ -8,11 +16,58 @@ import { TransactionNode } from '../common/transaction';
 import { User } from '../auth/user';
 import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
 import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
+import { PrimarySale } from './models/PrimarySale.dto';
+import { PrimarySaleFilter } from './models/Primary-sale.Filter';
+import { PrimarySaleTime } from './models/PrimarySaleTime';
 
-@Resolver(() => TransactionNode)
-export class PrimarySaleResolver extends BaseResolver(TransactionNode) {
+@Resolver(() => PrimarySale)
+export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   constructor(private primarySaleService: PrimarySaleService) {
     super();
+  }
+
+  @Query(() => PrimarySale)
+  async primarySale(
+    @Args({ name: 'filters', type: () => PrimarySaleFilter })
+    filters: PrimarySaleFilter,
+  ): Promise<PrimarySale> {
+    return await this.primarySaleService.getStatus(filters.collectionName);
+  }
+
+  @ResolveField('price', () => String)
+  async price(@Parent() sale: PrimarySale) {
+    const { collectionIdentifier } = sale;
+    const claimableCount = await this.primarySaleService.getPricePerTicket(
+      collectionIdentifier,
+    );
+    return claimableCount || 0;
+  }
+
+  @ResolveField(() => Int)
+  async maxUnitsPerWallet(@Parent() sale: PrimarySale) {
+    const { collectionIdentifier } = sale;
+
+    const claimableCount = await this.primarySaleService.getMaxNftPerWallet(
+      collectionIdentifier,
+    );
+    return claimableCount || 0;
+  }
+
+  @ResolveField(() => String)
+  async paymentToken(@Parent() sale: PrimarySale) {
+    const claimableCount = await this.primarySaleService.getPaymentToken();
+
+    return claimableCount || 'EGLD';
+  }
+
+  @ResolveField(() => PrimarySaleTime)
+  async saleTime(@Parent() sale: PrimarySale) {
+    const { collectionIdentifier } = sale;
+    const claimableCount = await this.primarySaleService.getTimestamps(
+      collectionIdentifier,
+    );
+
+    return claimableCount || 'EGLD';
   }
 
   @Mutation(() => TransactionNode)

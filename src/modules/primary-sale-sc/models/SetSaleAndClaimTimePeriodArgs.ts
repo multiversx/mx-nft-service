@@ -8,12 +8,10 @@ import {
 @InputType()
 export class SetSaleClaimPeriodArgs {
   @Field(() => String)
-  @MinLength(3, { message: 'The token name should have at least 3 caracters' })
-  @MaxLength(20, { message: 'The token name should have at most 20 caracters' })
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
     message: COLLECTION_IDENTIFIER_ERROR,
   })
-  collectionName: string;
+  collectionIdentifier: string;
 
   @Field(() => Int)
   startSale: number;

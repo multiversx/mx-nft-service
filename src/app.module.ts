@@ -30,7 +30,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
-import { PrimarySaleModuleGraph } from './modules/holorideIntegration/primary-sale.module';
+import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 
 @Module({
   imports: [
