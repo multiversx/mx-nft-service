@@ -152,12 +152,12 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
   @ResolveField('rarity', () => Rarity)
   async rarity(@Parent() asset: Asset) {
+    if (asset.rarity) {
+      return asset.rarity;
+    }
     const { identifier } = asset;
-    const rarity = await this.assetRarityProvider.load(identifier);
-    const rarityValue = rarity?.value;
-    return rarityValue && Object.keys(rarityValue).length > 1
-      ? rarityValue
-      : null;
+    const rarityRaw = await this.assetRarityProvider.load(identifier);
+    return Rarity.fromNftRarity(rarityRaw.value);
   }
 
   @ResolveField('lowestAuction', () => Auction)

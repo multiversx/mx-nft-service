@@ -20,6 +20,7 @@ import { AssetsQuery } from '../assets';
 import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Sort } from '../common/filters/filtersTypes';
 
 @Injectable()
 export class NftTraitsService {
@@ -295,19 +296,20 @@ export class NftTraitsService {
     return true;
   }
 
-  async getNftsByTraits(
+  async getCollectionNftsByTraitsAndRanks(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
+    sortByRank?: Sort,
   ): Promise<[Nft[], number]> {
-    return await this.apiService.getNftsAndCount(
+    return await this.apiService.getCollectionNftsAndCount(
+      collection,
       new AssetsQuery()
-        .addCollection(collection)
         .addTraits(traits)
+        .addSortByRank(sortByRank)
         .addPageSize(offset, limit)
         .build(),
-      new AssetsQuery().addCollection(collection).addTraits(traits).build(),
     );
   }
 
