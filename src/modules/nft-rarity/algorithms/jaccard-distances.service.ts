@@ -78,34 +78,6 @@ export class JaccardDistancesRarityService {
     return avg;
   }
 
-  private computePartialJd(
-    i: number,
-    nfts: NftRarityData[],
-    computeFullRow: boolean,
-  ): number[] {
-    let jaccardDistances: number[] = [];
-
-    const end = computeFullRow ? nfts.length : i;
-    for (let j = 0; j < end; j++) {
-      const commonTraitsCount = this.getCommonTraitsCountFromDna(
-        nfts[i].DNA,
-        nfts[j].DNA,
-      );
-
-      const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(
-        nfts[i].DNA,
-        nfts[j].DNA,
-        commonTraitsCount,
-      );
-
-      const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
-
-      jaccardDistances[j] = 1 - jaccardIndex;
-    }
-
-    return jaccardDistances;
-  }
-
   private computeScore(avg: number[]): number[] {
     let scores: number[] = [];
 
