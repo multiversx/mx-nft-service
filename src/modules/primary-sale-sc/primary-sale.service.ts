@@ -147,7 +147,6 @@ export class PrimarySaleService {
     let price = <Interaction>contract.methodsExplicit.current_token();
 
     const response = await this.getFirstQueryResult(price);
-    console.log(response.firstValue);
     return response.firstValue.valueOf();
   }
 
