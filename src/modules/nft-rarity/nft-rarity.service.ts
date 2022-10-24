@@ -98,9 +98,8 @@ export class NftRarityService {
         return false;
       }
 
-      const allNfts = await this.getAllCollectionNftsWithCustomRanksFromAPI(
-        collectionTicker,
-      );
+      const [allNfts, customRanks] =
+        await this.getAllCollectionNftsWithCustomRanksFromAPI(collectionTicker);
 
       if (allNfts?.length === 0) {
         this.logger.log(
@@ -115,6 +114,14 @@ export class NftRarityService {
           false,
         );
         return false;
+      }
+
+      const nftsWithoutAttributes = this.filterNftsWithoutAttributes(allNfts);
+      if (nftsWithoutAttributes) {
+        await this.nftRarityElasticService.setNftRaritiesInElastic(
+          nftsWithoutAttributes,
+          false,
+        );
       }
 
       let nftsWithAttributes = this.filterNftsWithAttributes(allNfts);
@@ -163,6 +170,10 @@ export class NftRarityService {
         this.nftRarityElasticService.setNftRaritiesInElastic(rarities),
         this.assetRarityRedisHandler.clearMultipleKeys(
           rarities.map((r) => r.identifier),
+        ),
+        await this.nftRarityElasticService.setNftCustomRanksInElastic(
+          collectionTicker,
+          customRanks,
         ),
       ]);
 
@@ -311,7 +322,7 @@ export class NftRarityService {
 
   private async getAllCollectionNftsWithCustomRanksFromAPI(
     collectionTicker: string,
-  ): Promise<NftRarityData[]> {
+  ): Promise<[NftRarityData[], CustomRank[]]> {
     try {
       let traitTypeIndexes: number[] = [];
       let attributeIndexes: number[][] = [];
@@ -342,22 +353,28 @@ export class NftRarityService {
           await this.elrondApiService.getCollectionCustomRanks(
             collectionTicker,
           );
-        return NftRarityData.setCustomRanks(allNfts, customRanks);
+        return [
+          NftRarityData.setCustomRanks(allNfts, customRanks),
+          customRanks,
+        ];
       }
-
-      return allNfts;
+      return [allNfts, []];
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
         path: 'NftRarityService.getAllCollectionNftsFromAPI',
         exception: error?.message,
         collection: collectionTicker,
       });
-      return [];
+      return [[], []];
     }
   }
 
   private filterNftsWithAttributes(nfts: NftRarityData[]): NftRarityData[] {
     return nfts.filter((nft) => nft.DNA?.length > 0);
+  }
+
+  private filterNftsWithoutAttributes(nfts: NftRarityData[]): NftRarityData[] {
+    return nfts.filter((nft) => !nft.DNA || nft.DNA.length === 0);
   }
 
   private sortDescNftsByNonce(nfts: NftRarityData[]): NftRarityData[] {

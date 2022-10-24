@@ -1,3 +1,4 @@
+import { Sort } from '../common/filters/filtersTypes';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { NftTypeEnum } from './models/NftTypes.enum';
 
@@ -106,6 +107,16 @@ export class AssetsQuery {
       traitsQuery += i < traits.length - 1 ? ';' : '';
     }
     return this.addParamToQuery('traits', traitsQuery);
+  }
+
+  addSortByRank(sort?: Sort): this {
+    if (sort !== undefined) {
+      return this.addParamToQuery('sort', 'rank').addParamToQuery(
+        'order',
+        sort === Sort.ASC ? 'asc' : 'desc',
+      );
+    }
+    return this;
   }
 
   build(addDefaultQuery: boolean = true): string {

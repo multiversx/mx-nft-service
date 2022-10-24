@@ -13,7 +13,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
-import { AssetsFilter } from '../common/filters/filtersTypes';
+import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
@@ -90,12 +90,18 @@ export class AssetsGetterService {
       });
     }
 
-    if (filters?.traits) {
-      const response = await this.getAssetsByTraits(
+    if (
+      filters?.collection &&
+      (filters?.traits ||
+        sorting === AssetsSortingEnum.RankAsc ||
+        sorting === AssetsSortingEnum.RankDesc)
+    ) {
+      const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
         limit,
         offset,
+        sorting === AssetsSortingEnum.RankDesc ? Sort.DESC : Sort.ASC,
       );
       this.addToCache(response);
       return response;
@@ -324,18 +330,21 @@ export class AssetsGetterService {
       ]);
   }
 
-  private async getAssetsByTraits(
+  private async getCollectionAssetsByTraitsAndRanks(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
-    const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
-      collection,
-      traits,
-      limit,
-      offset,
-    );
+    const [nfts, count] =
+      await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(
+        collection,
+        traits,
+        limit,
+        offset,
+        sortByRank,
+      );
     const assets = nfts?.map((nft) => Asset.fromNft(nft));
     return new CollectionType({ items: assets, count: count });
   }
