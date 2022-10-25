@@ -147,6 +147,7 @@ export class NftRarityService {
       const rarities: NftRarityEntity[] = await this.computeRarities(
         nftsWithAttributes,
         collectionTicker,
+        allNfts.length,
       );
 
       if (!rarities) {
@@ -251,11 +252,13 @@ export class NftRarityService {
   private async computeRarities(
     nfts: NftRarityData[],
     collectionTicker: string,
+    collectionSize: number,
   ) {
     let rarities: NftRarityEntity[] = [];
     try {
       rarities = await this.nftRarityComputeService.computeRarities(
         collectionTicker,
+        collectionSize,
         this.sortDescNftsByNonce(nfts),
       );
     } catch (error) {
