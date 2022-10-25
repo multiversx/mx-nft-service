@@ -1,4 +1,4 @@
-export class Stats {
+export class ElrondStats {
   shards: number;
   blocks: number;
   accounts: number;
@@ -8,7 +8,7 @@ export class Stats {
   roundsPassed: number;
   roundsPerEpoch: number;
 
-  constructor(init?: Partial<Stats>) {
+  constructor(init?: Partial<ElrondStats>) {
     Object.assign(this, init);
   }
 }

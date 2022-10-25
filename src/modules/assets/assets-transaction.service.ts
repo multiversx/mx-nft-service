@@ -32,7 +32,7 @@ import {
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import * as Redis from 'ioredis';
 import { TimeConstants } from 'src/utils/time-utils';
-import { Stats } from 'src/common/services/elrond-communication/models/stats.model';
+import { ElrondStats } from 'src/common/services/elrond-communication/models/elrond-stats.model';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -76,9 +76,9 @@ export class AssetsTransactionService {
     ownerAddress: string,
     request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
-    const [nft, networkStats] = await Promise.all([
+    const [nft, elrondStats] = await Promise.all([
       this.elrondApiService.getNftByIdentifier(request.identifier),
-      this.getOrSetAproximateNetworkStats(),
+      this.getOrSetAproximateElrondStats(),
     ]);
 
     if (!nft) {
@@ -87,10 +87,10 @@ export class AssetsTransactionService {
 
     const [epoch] = timestampToEpochAndRound(
       nft.timestamp,
-      networkStats.epoch,
-      networkStats.roundsPassed,
-      networkStats.roundsPerEpoch,
-      networkStats.refreshRate,
+      elrondStats.epoch,
+      elrondStats.roundsPassed,
+      elrondStats.roundsPerEpoch,
+      elrondStats.refreshRate,
     );
 
     if (epoch > elrondConfig.burnNftActivationEpoch) {
@@ -181,25 +181,25 @@ export class AssetsTransactionService {
     };
   }
 
-  private async getOrSetAproximateNetworkStats(): Promise<Stats> {
+  private async getOrSetAproximateElrondStats(): Promise<ElrondStats> {
     try {
-      const cacheKey = this.getApproximateNetworkStatsCacheKey();
-      const getNetworkStats = () => this.elrondApiService.getNetworkStats();
+      const cacheKey = this.getApproximateElrondStatsCacheKey();
+      const getElrondStats = () => this.elrondApiService.getElrondStats();
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getNetworkStats,
+        getElrondStats,
         TimeConstants.oneDay,
       );
     } catch (error) {
-      this.logger.error('An error occurred while getting network stats', {
-        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateNetworkStats.name}`,
+      this.logger.error('An error occurred while getting elrond stats', {
+        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateElrondStats.name}`,
         exception: error,
       });
     }
   }
 
-  private getApproximateNetworkStatsCacheKey() {
-    return generateCacheKeyFromParams('assets', 'approximateNetworkStats');
+  private getApproximateElrondStatsCacheKey() {
+    return generateCacheKeyFromParams('assets', 'approximateElrondStats');
   }
 }
