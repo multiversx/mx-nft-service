@@ -403,23 +403,12 @@ export class AuctionsGetterService {
       );
     }
 
-    const currentPriceFilter = queryRequest.getRange(
-      AuctionCustomEnum.CURRENTPRICE,
+    allAuctions = this.filterByPriceRange(
+      queryRequest,
+      paymentToken,
+      allAuctions,
     );
 
-    if (currentPriceFilter && currentPriceFilter.startPrice) {
-      const minBid = BigNumberUtils.denominateAmount(
-        currentPriceFilter.startPrice ?? '0',
-        paymentToken.decimals,
-      );
-      const maxBid = BigNumberUtils.denominateAmount(
-        currentPriceFilter.endPrice ?? '0',
-        paymentToken.decimals,
-      );
-      allAuctions = allAuctions.filter(
-        (a) => a.startBid >= minBid && a.startBid <= maxBid,
-      );
-    }
     if (sort) {
       if (sort.direction === Sort.ASC) {
         allAuctions = allAuctions.sorted((x) => x[sort.field]);
@@ -439,6 +428,44 @@ export class AuctionsGetterService {
       count,
       { ...priceRange, paymentDecimals: paymentToken?.decimals },
     ];
+  }
+
+  private filterByPriceRange(
+    queryRequest: QueryRequest,
+    paymentToken: Token,
+    allAuctions: Auction[],
+  ) {
+    const currentPriceFilter = queryRequest.getRange(
+      AuctionCustomEnum.CURRENTPRICE,
+    );
+
+    if (currentPriceFilter) {
+      const currentPriceSort = queryRequest.getCustomFilterSort(
+        AuctionCustomEnum.CURRENTPRICE,
+      );
+      if (currentPriceFilter.startPrice) {
+        const minBid = BigNumberUtils.denominateAmount(
+          currentPriceFilter.startPrice,
+          paymentToken.decimals,
+        );
+        allAuctions = allAuctions.filter((a) => a.startBid >= minBid);
+      }
+      if (currentPriceFilter.endPrice) {
+        const maxBid = BigNumberUtils.denominateAmount(
+          currentPriceFilter.endPrice,
+          paymentToken.decimals,
+        );
+        allAuctions = allAuctions.filter((a) => a.startBid <= maxBid);
+      }
+      if (currentPriceSort) {
+        if (currentPriceSort.direction === Sort.ASC) {
+          allAuctions = allAuctions.sorted((x) => x['startBid']);
+        } else {
+          allAuctions = allAuctions.sortedDescending((x) => x['startBid']);
+        }
+      }
+    }
+    return allAuctions;
   }
 
   private async retrieveRunningAuctions(
