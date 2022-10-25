@@ -8,7 +8,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
-import { DateUtils } from 'src/utils/date-utils';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
@@ -22,25 +21,6 @@ export class AuctionsWarmerService {
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.auctionsRedisClientName,
-    );
-  }
-
-  @Cron(CronExpression.EVERY_MINUTE)
-  async handleAuctionsEndingInAMonth() {
-    await Locker.lock(
-      'Auctions tokens ending in a month invalidations',
-      async () => {
-        const tokens =
-          await this.auctionsGetterService.getRunningAuctionsEndingBefore(
-            DateUtils.getCurrentTimestampPlusDays(30),
-          );
-        await this.invalidateKey(
-          CacheInfo.AuctionsEndingInAMonth.key,
-          tokens,
-          3 * TimeConstants.oneMinute,
-        );
-      },
-      true,
     );
   }
 

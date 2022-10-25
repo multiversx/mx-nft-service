@@ -749,22 +749,6 @@ export class PersistenceService {
     );
   }
 
-  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    return await this.execute(
-      this.getAuctionsEndingBefore.name,
-      this.auctionsRepository.getAuctionsEndingBefore(endDate),
-    );
-  }
-
-  async getAuctionsForMarketplace(
-    startDate: number,
-  ): Promise<[any[], PriceRange]> {
-    return await this.execute(
-      this.getAuctionsForMarketplace.name,
-      this.auctionsRepository.getAuctionsForMarketplace(startDate),
-    );
-  }
-
   async getMinMax(token: string): Promise<PriceRange> {
     return await this.execute(
       this.getMinMax.name,
