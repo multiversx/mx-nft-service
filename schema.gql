@@ -188,6 +188,8 @@ type AssetsResponse {
 
 enum AssetsSortingEnum {
   MostLikes
+  RankAsc
+  RankDesc
 }
 
 input AttributeInput {
@@ -1030,7 +1032,6 @@ type Rarity {
   jaccardDistancesScore: Float
   openRarityRank: Float
   openRarityScore: Float
-  preferredRankAlgorithm: String
   rank: Int
   score: Float
   statisticalRank: Float

@@ -45,19 +45,28 @@ export class NftRarityData {
       : null;
   }
 
-  static fromNfts(nfts: Nft[]): NftRarityData[] {
-    return this.computeDNA(nfts.map((nft) => this.fromNft(nft)));
+  static fromNfts(
+    nfts: Nft[],
+    traitTypeIndexes: number[] = [],
+    attributeIndexes: number[][] = [],
+  ): [NftRarityData[], number[], number[][]] {
+    return this.computeDNA(
+      nfts.map((nft) => this.fromNft(nft)),
+      traitTypeIndexes,
+      attributeIndexes,
+    );
   }
 
   static fromElasticNfts(nfts: any[]): NftRarityData[] {
-    return this.computeDNA(nfts.map((nft) => this.fromElasticNft(nft)));
+    return this.computeDNA(nfts.map((nft) => this.fromElasticNft(nft)))[0];
   }
 
-  static computeDNA(nfts: NftRarityData[]): NftRarityData[] {
+  static computeDNA(
+    nfts: NftRarityData[],
+    traitTypeIndexes: number[] = [],
+    attributeIndexes: number[][] = [],
+  ): [NftRarityData[], number[], number[][]] {
     let nftsWithDNA: NftRarityData[] = JSON.parse(JSON.stringify(nfts));
-
-    let traitTypeIndexes: number[] = [];
-    let attributeIndexes: number[][] = [];
 
     for (let nft of nftsWithDNA) {
       nft.DNA = [];
@@ -97,7 +106,7 @@ export class NftRarityData {
       delete nft.temporaryMetadata;
     }
 
-    return nftsWithDNA;
+    return [nftsWithDNA, traitTypeIndexes, attributeIndexes];
   }
 
   static getOrSetTraitIndex(

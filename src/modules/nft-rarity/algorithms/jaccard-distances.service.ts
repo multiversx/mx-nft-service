@@ -17,10 +17,8 @@ export class JaccardDistancesRarityService {
       };
     }
 
-    const jaccardDistances: number[][] = await this.computeJd(nfts);
-    const avg: number[] = this.computeAvg(jaccardDistances);
+    const avg: number[] = this.computeAvgUsingJaccardDistances(nfts);
     const scoreArray: number[] = this.computeScore(avg);
-
     let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
 
     let rarities = {};
@@ -36,50 +34,45 @@ export class JaccardDistancesRarityService {
     return rarities;
   }
 
-  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
-    let jaccardDistances: number[][] = [];
+  private computeAvgUsingJaccardDistances(nfts: NftRarityData[]): number[] {
+    let avg: number[] = [];
+
+    let jdSumArray: number[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
-      jaccardDistances[i] = await this.computePartialJd(i, nfts);
-    }
+      for (let j = 0; j < i; j++) {
+        const commonTraitsCount = this.getCommonTraitsCountFromDna(
+          nfts[i].DNA,
+          nfts[j].DNA,
+        );
 
-    return jaccardDistances;
-  }
+        const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(
+          nfts[i].DNA,
+          nfts[j].DNA,
+          commonTraitsCount,
+        );
 
-  private async computePartialJd(
-    i: number,
-    nfts: NftRarityData[],
-  ): Promise<number[]> {
-    let jaccardDistances: number[] = [];
+        const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
 
-    for (let j = 0; j < i; j++) {
-      const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
-        nfts[i].DNA,
-        nfts[j].DNA,
-      );
+        const jaccardDistance = 1 - jaccardIndex;
 
-      const uniqueTraitsCount =
-        nfts[i].DNA.length + nfts[j].DNA.length - commonTraitsCount;
+        if (jdSumArray[i]) {
+          jdSumArray[i] += jaccardDistance;
+        } else {
+          jdSumArray[i] = jaccardDistance;
+        }
 
-      const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
-
-      jaccardDistances[j] = 1 - jaccardIndex;
-    }
-
-    return jaccardDistances;
-  }
-
-  private computeAvg(jaccardDistances: number[][]): number[] {
-    let avg: number[] = [];
-    for (let i = 0; i < jaccardDistances.length; i++) {
-      avg[i] = 0;
-      for (let j = 0; j < jaccardDistances.length; j++) {
-        if (i === j) continue;
-        avg[i] +=
-          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
+        if (jdSumArray[j]) {
+          jdSumArray[j] += jaccardDistance;
+        } else {
+          jdSumArray[j] = jaccardDistance;
+        }
       }
-      const realLength = jaccardDistances.length - 1;
-      if (avg[i] > 0) avg[i] /= realLength;
+    }
+
+    const realLength = nfts.length - 1;
+    for (let i = 0; i < nfts.length; i++) {
+      avg[i] = jdSumArray[i] > 0 ? jdSumArray[i] / realLength : 0;
     }
 
     return avg;
@@ -116,14 +109,23 @@ export class JaccardDistancesRarityService {
     return scoreArray;
   }
 
-  private getCommonTraitsCountFromAttributeMaps(
-    map1: number[],
-    map2: number[],
-  ): number {
+  private getCommonTraitsCountFromDna(dna1: number[], dna2: number[]): number {
     let count = 0;
-    for (let i = 0; i < map1.length; i++) {
-      if (map1[i] === map2[i] && map1[i] !== undefined) count++;
+    for (let i = 0; i < dna1.length; i++) {
+      if (dna1[i] === dna2[i] && Number.isInteger(dna1[i])) count++;
     }
     return count;
+  }
+
+  private getUniqueTraitsCountFromDna(
+    dna1: number[],
+    dna2: number[],
+    commonTraitsCount: number,
+  ): number {
+    return (
+      dna1.filter((dna) => Number.isInteger(dna)).length +
+      dna2.filter((dna) => Number.isInteger(dna)).length -
+      commonTraitsCount
+    );
   }
 }
