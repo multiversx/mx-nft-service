@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { OfferEntity } from 'src/db/offers';
