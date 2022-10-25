@@ -8,10 +8,6 @@ import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import {
-  AuctionWithBidsCount,
-  AuctionWithStartBid,
-} from 'src/db/auctions/auctionWithBidCount.dto';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
@@ -30,6 +26,7 @@ import {
   runningAuctionRequest,
 } from './auctionsRequest';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -267,7 +264,7 @@ export class AuctionsGetterService {
       );
     }
 
-    if (paymentTokenFilter && !hasCurrentPriceFilter) {
+    if (paymentTokenFilter) {
       return await this.retriveTokensAuctions(
         paymentTokenFilter,
         queryRequest,
@@ -400,12 +397,17 @@ export class AuctionsGetterService {
       allAuctions = allAuctions.filter(
         (x) => x.marketplaceKey === marketplaceFilter,
       );
-
       priceRange = await this.computePriceRange(
         allAuctions,
         paymentTokenFilter,
       );
     }
+
+    allAuctions = this.filterByPriceRange(
+      queryRequest,
+      paymentToken,
+      allAuctions,
+    );
 
     if (sort) {
       if (sort.direction === Sort.ASC) {
@@ -426,6 +428,44 @@ export class AuctionsGetterService {
       count,
       { ...priceRange, paymentDecimals: paymentToken?.decimals },
     ];
+  }
+
+  private filterByPriceRange(
+    queryRequest: QueryRequest,
+    paymentToken: Token,
+    allAuctions: Auction[],
+  ) {
+    const currentPriceFilter = queryRequest.getRange(
+      AuctionCustomEnum.CURRENTPRICE,
+    );
+
+    if (currentPriceFilter) {
+      const currentPriceSort = queryRequest.getCustomFilterSort(
+        AuctionCustomEnum.CURRENTPRICE,
+      );
+      if (currentPriceFilter.startPrice) {
+        const minBid = BigNumberUtils.denominateAmount(
+          currentPriceFilter.startPrice,
+          paymentToken.decimals,
+        );
+        allAuctions = allAuctions.filter((a) => a.startBid >= minBid);
+      }
+      if (currentPriceFilter.endPrice) {
+        const maxBid = BigNumberUtils.denominateAmount(
+          currentPriceFilter.endPrice,
+          paymentToken.decimals,
+        );
+        allAuctions = allAuctions.filter((a) => a.startBid <= maxBid);
+      }
+      if (currentPriceSort) {
+        if (currentPriceSort.direction === Sort.ASC) {
+          allAuctions = allAuctions.sorted((x) => x['startBid']);
+        } else {
+          allAuctions = allAuctions.sortedDescending((x) => x['startBid']);
+        }
+      }
+    }
+    return allAuctions;
   }
 
   private async retrieveRunningAuctions(
@@ -600,7 +640,7 @@ export class AuctionsGetterService {
       await this.persistenceService.getAuctionsGroupBy(queryRequest);
 
     return [
-      auctions?.map((element) => Auction.fromEntity(element)),
+      auctions?.map((element) => Auction.fromEntityWithStartBid(element)),
       count,
       priceRange,
     ];
