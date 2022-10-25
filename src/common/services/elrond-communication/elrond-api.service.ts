@@ -19,7 +19,7 @@ import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
-import { Sort } from 'src/modules/common/filters/filtersTypes';
+import { Stats } from './models/stats.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -719,6 +719,11 @@ export class ElrondApiService {
           rank: nft.rank,
         }),
     );
+  }
+
+  async getStats(): Promise<Stats> {
+    const stats = await this.doGetGeneric(this.getStats.name, 'stats');
+    return new Stats(stats);
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

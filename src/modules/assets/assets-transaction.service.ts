@@ -7,9 +7,12 @@ import {
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { Injectable } from '@nestjs/common';
-import { getSmartContract } from 'src/common';
+import { ElrondApiService, getSmartContract, Nft } from 'src/common';
 import { elrondConfig, gas } from 'src/config';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import {
+  getCollectionAndNonceFromIdentifier,
+  timestampToEpochAndRound,
+} from 'src/utils/helpers';
 import '../../utils/extensions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
@@ -28,6 +31,7 @@ export class AssetsTransactionService {
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
+    private elrondApiService: ElrondApiService,
   ) {}
 
   async updateQuantity(
@@ -50,6 +54,44 @@ export class AssetsTransactionService {
       chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
+  }
+
+  async burnQuantity(
+    ownerAddress: string,
+    request: UpdateQuantityRequest,
+  ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      request.identifier,
+    );
+
+    const [nft, stats] = await Promise.all([
+      this.elrondApiService.getNftByIdentifier(request.identifier),
+      this.elrondApiService.getStats(),
+    ]);
+
+    if (!nft) {
+      throw new Error('NFT not found');
+    }
+
+    const [epoch] = timestampToEpochAndRound(
+      nft.timestamp,
+      stats.epoch,
+      stats.roundsPassed,
+      stats.roundsPerEpoch,
+    );
+
+    if (epoch > elrondConfig.burnNftActivationEpoch) {
+      return await this.updateQuantity(ownerAddress, request);
+    }
+
+    return await this.transferNft(
+      ownerAddress,
+      new TransferNftRequest({
+        identifier: request.identifier,
+        quantity: request.quantity,
+        destinationAddress: elrondConfig.burnAddress,
+      }),
+    );
   }
 
   async createNft(

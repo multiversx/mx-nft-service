@@ -72,3 +72,23 @@ export const randomBetween = (min: number, max: number): number => {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min) + min);
 };
+
+export function timestampToEpochAndRound(
+  timestamp: number,
+  currentEpoch: number,
+  currentRound: number,
+  roundsPerEpoch: number,
+  secondsPerRound: number = 6,
+): [number, number] {
+  const currentTimestamp = new Date();
+  const timeDiffInMs =
+    +currentTimestamp.getTime() - +new Date(timestamp).getTime() * 1000;
+
+  const roundDiff = timeDiffInMs / 1000 / secondsPerRound;
+  const epochDiff = roundDiff / roundsPerEpoch;
+
+  const epoch = currentEpoch - epochDiff;
+  const round = currentRound - (epochDiff % roundsPerEpoch);
+
+  return [Math.trunc(epoch), Math.trunc(round)];
+}
