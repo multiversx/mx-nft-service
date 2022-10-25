@@ -794,6 +794,7 @@ type Mutation {
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
+  validateAllCollectionRarities: Boolean!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
