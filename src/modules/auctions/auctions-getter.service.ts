@@ -407,13 +407,13 @@ export class AuctionsGetterService {
       AuctionCustomEnum.CURRENTPRICE,
     );
 
-    if (currentPriceFilter) {
+    if (currentPriceFilter && currentPriceFilter.startPrice) {
       const minBid = BigNumberUtils.denominateAmount(
-        currentPriceFilter.startPrice,
+        currentPriceFilter.startPrice ?? '0',
         paymentToken.decimals,
       );
       const maxBid = BigNumberUtils.denominateAmount(
-        currentPriceFilter.endPrice,
+        currentPriceFilter.endPrice ?? '0',
         paymentToken.decimals,
       );
       allAuctions = allAuctions.filter(
