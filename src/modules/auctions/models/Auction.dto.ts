@@ -1,5 +1,4 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import {
   AuctionWithBidsCount,
@@ -86,6 +85,8 @@ export class Auction {
   @Field(() => Marketplace, { nullable: true })
   marketplace: Marketplace;
 
+  startBid: number;
+
   constructor(init?: Partial<Auction>) {
     Object.assign(this, init);
   }
@@ -131,6 +132,49 @@ export class Auction {
           creationDate: DateUtils.getTimestamp(auction.creationDate),
           marketplaceKey: auction.marketplaceKey,
           marketplaceAuctionId: auction.marketplaceAuctionId,
+        });
+  }
+
+  static fromEntityWithStartBid(auction: AuctionWithStartBid) {
+    return !auction || Object.entries(auction).length === 0
+      ? null
+      : new Auction({
+          id: auction.id,
+          status: auction.status,
+          type: auction.type,
+          ownerAddress: auction.ownerAddress,
+          collection: auction.collection,
+          nonce: auction.nonce,
+          identifier: auction.identifier,
+          startDate: auction.startDate,
+          endDate:
+            auction.endDate > DateUtils.getCurrentTimestampPlusYears(1)
+              ? 0
+              : auction.endDate,
+          nrAuctionedTokens: auction.nrAuctionedTokens || 1,
+          minBid: new Price({
+            token: auction.paymentToken,
+            nonce: 0,
+            amount: auction.minBid,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
+          }),
+          minBidDiff: new Price({
+            token: auction.paymentToken,
+            nonce: 0,
+            amount: auction.minBidDiff,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
+          }),
+          maxBid: new Price({
+            token: auction.paymentToken,
+            nonce: 0,
+            amount: auction.maxBid,
+            timestamp: DateUtils.getTimestamp(auction.creationDate),
+          }),
+          tags: auction.tags.split(',').filter((i) => i),
+          creationDate: DateUtils.getTimestamp(auction.creationDate),
+          marketplaceKey: auction.marketplaceKey,
+          marketplaceAuctionId: auction.marketplaceAuctionId,
+          startBid: auction.startBid,
         });
   }
 }

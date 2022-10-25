@@ -78,29 +78,6 @@ export class AuctionsCachingService {
     );
   }
 
-  public async getAuctionsOrderByNoBids(
-    queryRequest,
-    getAuctions: () => any,
-  ): Promise<[Auction[], number, PriceRange]> {
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      CacheInfo.TopAuctionsOrderByNoBids.key,
-      () => getAuctions(),
-      TimeConstants.oneHour,
-    );
-  }
-
-  public async getAuctionsEndingInAMonth(
-    getAuctions: () => any,
-  ): Promise<[AuctionWithBidsCount[], number, PriceRange]> {
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      CacheInfo.AuctionsEndingInAMonth.key,
-      () => getAuctions(),
-      TimeConstants.oneHour,
-    );
-  }
-
   public async getMinAndMax(
     token: string,
     getData: () => any,
