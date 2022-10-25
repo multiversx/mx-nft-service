@@ -1,5 +1,5 @@
 import { BinaryUtils } from '@elrondnetwork/erdnest';
-import '../../../../utils/extentions';
+import '../../../../utils/extensions';
 
 export class IssueCollectionTopics {
   private collection: string;
