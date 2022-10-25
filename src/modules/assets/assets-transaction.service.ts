@@ -60,10 +60,6 @@ export class AssetsTransactionService {
     ownerAddress: string,
     request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
-
     const [nft, stats] = await Promise.all([
       this.elrondApiService.getNftByIdentifier(request.identifier),
       this.elrondApiService.getStats(),
