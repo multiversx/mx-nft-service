@@ -60,9 +60,9 @@ export class AssetsTransactionService {
     ownerAddress: string,
     request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
-    const [nft, stats] = await Promise.all([
+    const [nft, networkStats] = await Promise.all([
       this.elrondApiService.getNftByIdentifier(request.identifier),
-      this.elrondApiService.getStats(),
+      this.elrondApiService.getNetworkStats(),
     ]);
 
     if (!nft) {
@@ -71,9 +71,10 @@ export class AssetsTransactionService {
 
     const [epoch] = timestampToEpochAndRound(
       nft.timestamp,
-      stats.epoch,
-      stats.roundsPassed,
-      stats.roundsPerEpoch,
+      networkStats.epoch,
+      networkStats.roundsPassed,
+      networkStats.roundsPerEpoch,
+      networkStats.refreshRate,
     );
 
     if (epoch > elrondConfig.burnNftActivationEpoch) {

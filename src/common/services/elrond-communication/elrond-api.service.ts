@@ -721,8 +721,11 @@ export class ElrondApiService {
     );
   }
 
-  async getStats(): Promise<Stats> {
-    const stats = await this.doGetGeneric(this.getStats.name, 'stats');
+  async getNetworkStats(): Promise<Stats> {
+    const stats = await this.doGetGeneric(
+      this.getNetworkStats.name,
+      'stats',
+    );
     return new Stats(stats);
   }
 

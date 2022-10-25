@@ -78,13 +78,13 @@ export function timestampToEpochAndRound(
   currentEpoch: number,
   currentRound: number,
   roundsPerEpoch: number,
-  secondsPerRound: number = 6,
+  milisecondsPerRound: number,
 ): [number, number] {
   const currentTimestamp = new Date();
   const timeDiffInMs =
     +currentTimestamp.getTime() - +new Date(timestamp).getTime() * 1000;
 
-  const roundDiff = timeDiffInMs / 1000 / secondsPerRound;
+  const roundDiff = timeDiffInMs / milisecondsPerRound;
   const epochDiff = roundDiff / roundsPerEpoch;
 
   const epoch = currentEpoch - epochDiff;
