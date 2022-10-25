@@ -16,6 +16,7 @@ export class NftRarityComputeService {
 
   async computeRarities(
     collection: string,
+    collectionSize: number,
     nfts: NftRarityData[],
   ): Promise<NftRarityEntity[]> {
     const jdRarities: { [key: string]: { [key: string]: number } } =
@@ -23,7 +24,7 @@ export class NftRarityComputeService {
 
     const dnaSummary: {
       [key: string]: { [key: string]: { [key: string]: number } };
-    } = this.computeDNASummary(nfts);
+    } = this.computeDNASummary(nfts, collectionSize);
 
     const openRarities = this.openRarityService.computeOpenRarities(
       nfts,
@@ -60,7 +61,10 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeDNASummary(nfts: NftRarityData[]): {
+  private computeDNASummary(
+    nfts: NftRarityData[],
+    collectionSize: number,
+  ): {
     [key: string]: { [key: string]: { [key: string]: number } };
   } {
     let dnaSummary = {};
@@ -92,17 +96,18 @@ export class NftRarityComputeService {
 
     for (const [traitKey, traitProperties] of Object.entries(dnaSummary)) {
       dnaSummary[traitKey].occurencesPercentage =
-        (dnaSummary[traitKey].occurences / nfts.length) * 100;
+        (dnaSummary[traitKey].occurences / collectionSize) * 100;
 
       for (const [traitPropertyKey] of Object.entries(traitProperties)) {
         const attributeKey = parseInt(traitPropertyKey);
         if (Number.isInteger(attributeKey)) {
           dnaSummary[traitKey][attributeKey].occurencesPercentage =
-            (dnaSummary[traitKey][attributeKey].occurences / nfts.length) * 100;
+            (dnaSummary[traitKey][attributeKey].occurences / collectionSize) *
+            100;
           dnaSummary[traitKey][attributeKey].frequency =
-            dnaSummary[traitKey][attributeKey].occurences / nfts.length;
+            dnaSummary[traitKey][attributeKey].occurences / collectionSize;
           dnaSummary[traitKey][attributeKey].rarity =
-            nfts.length / dnaSummary[traitKey][attributeKey].occurences;
+            collectionSize / dnaSummary[traitKey][attributeKey].occurences;
         }
       }
     }

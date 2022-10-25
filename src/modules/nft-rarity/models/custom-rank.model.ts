@@ -1,4 +1,3 @@
-import { throws } from 'assert';
 import * as crypto from 'crypto-js';
 export class CustomRank {
   identifier: string;

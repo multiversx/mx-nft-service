@@ -188,6 +188,8 @@ type AssetsResponse {
 
 enum AssetsSortingEnum {
   MostLikes
+  RankAsc
+  RankDesc
 }
 
 input AttributeInput {
@@ -309,6 +311,12 @@ input BuySftActionArgs {
   quantity: String
 }
 
+input BuyTicketsArgs {
+  collectionIdentifier: String!
+  price: String!
+  ticketsNumber: Int!
+}
+
 type Campaign {
   availableNfts: Int!
   campaignId: ID!
@@ -375,6 +383,10 @@ input ChildFilter {
   op: Operation!
   relationField: String
   values: [String!]!
+}
+
+input ClaimTicketsArgs {
+  collectionIdentifier: String!
 }
 
 type Collection {
@@ -528,6 +540,12 @@ enum CollectionsSortingEnum {
   Newest
   Trending
   Verified
+}
+
+input ConfigureCollectionArgs {
+  collectionIdentifier: String!
+  maxNftsPerWallet: Int!
+  price: String!
 }
 
 input ConnectionArgs {
@@ -751,8 +769,11 @@ type Mutation {
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
+  buyHolorideTicket(input: BuyTicketsArgs!): TransactionNode!
   buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
+  claimTicket(input: ClaimTicketsArgs!): TransactionNode!
+  configureCollection(input: ConfigureCollectionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
@@ -763,6 +784,7 @@ type Mutation {
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
+  setSaleClaimPeriod(input: SetSaleClaimPeriodArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
@@ -772,6 +794,7 @@ type Mutation {
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
+  validateAllCollectionRarities: Boolean!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
@@ -930,6 +953,33 @@ type PriceRange {
   minBid: Price!
 }
 
+type PrimarySale {
+  collectionIdentifier: ID
+  frozen: Boolean
+  maxUnitsPerWallet: Int!
+  paymentToken: String!
+  price: String
+  saleTime: PrimarySaleTime!
+  status: PrimarySaleStatusEnum!
+}
+
+input PrimarySaleFilter {
+  collectionName: String!
+}
+
+enum PrimarySaleStatusEnum {
+  ClaimPeriod
+  NonePeriod
+  SalePeriod
+}
+
+type PrimarySaleTime {
+  endClaim: Int
+  endSale: Int!
+  startClaim: Int
+  startSale: Int!
+}
+
 enum Privacy {
   private
   public
@@ -971,6 +1021,7 @@ type Query {
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange(filters: TokenFilter): PriceRange!
+  primarySale(filters: PrimarySaleFilter!): PrimarySale!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
@@ -982,7 +1033,6 @@ type Rarity {
   jaccardDistancesScore: Float
   openRarityRank: Float
   openRarityScore: Float
-  preferredRankAlgorithm: String
   rank: Int
   score: Float
   statisticalRank: Float
@@ -1036,6 +1086,14 @@ input SetNftRolesArgs {
   addressToTransfer: String!
   collection: String!
   roles: [String!]!
+}
+
+input SetSaleClaimPeriodArgs {
+  collectionIdentifier: String!
+  endClaim: Int!
+  endSale: Int!
+  startClaim: Int!
+  startSale: Int!
 }
 
 type SocialLink {

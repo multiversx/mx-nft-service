@@ -365,44 +365,6 @@ export class AuctionsRepository {
     return count;
   }
 
-  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    const getAuctions = this.auctionsRepository
-      .createQueryBuilder('a')
-      .select('a.*')
-      .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .groupBy('a.id')
-      .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.endDate > 0`)
-      .andWhere(`a.endDate <= ${endDate}`)
-      .execute();
-    const getPriceRange = this.getMinMaxForQuery(
-      this.getDefaultQueryRequest(DateUtils.getCurrentTimestamp(), endDate),
-    );
-
-    return await Promise.all([getAuctions, getPriceRange]);
-  }
-
-  async getAuctionsForMarketplace(
-    startDate: number,
-  ): Promise<[any[], PriceRange]> {
-    const getAuctions = await this.auctionsRepository
-      .createQueryBuilder('a')
-      .select('a.*')
-      .addSelect(
-        'if(COUNT(`o`.`auctionId`)>0,MAX(o.priceAmountDenominated),a.minBidDenominated) as startBid',
-      )
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .groupBy('a.id')
-      .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.startDate <= ${startDate}`)
-      .execute();
-    const getPriceRange = await this.getMinMaxForQuery(
-      this.getDefaultQueryRequest(startDate),
-    );
-    return await Promise.all([getAuctions, getPriceRange]);
-  }
-
   async getMinMax(token: string): Promise<PriceRange> {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')

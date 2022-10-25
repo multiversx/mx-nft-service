@@ -10,6 +10,7 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
       .values(nftRarities)
       .orUpdate({
         conflict_target: [
+          'identifier',
           'nonce',
           'score_openRarity',
           'rank_openRarity',
@@ -21,7 +22,6 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
           'rank_statistical',
         ],
         overwrite: [
-          'nonce',
           'score_openRarity',
           'rank_openRarity',
           'score_jaccardDistances',

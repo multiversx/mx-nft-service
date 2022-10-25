@@ -133,50 +133,6 @@ export class AuctionsGetterService {
     }
   }
 
-  public async getRunningAuctionsEndingBefore(
-    endDate: number,
-  ): Promise<[AuctionWithBidsCount[], number, PriceRange]> {
-    let [auctions, priceRange] =
-      await this.persistenceService.getAuctionsEndingBefore(endDate);
-    auctions = auctions?.map((item) => new AuctionWithBidsCount(item));
-
-    const group: { key: string; value: AuctionWithBidsCount[] } =
-      auctions?.groupBy((a) => a.identifier);
-    let groupedAuctions = [];
-    for (const key in group) {
-      groupedAuctions = [
-        ...groupedAuctions,
-        group[key].sortedDescending(
-          (i: { ordersCount: any }) => i.ordersCount,
-        )[0],
-      ];
-    }
-
-    groupedAuctions = groupedAuctions?.sortedDescending((a) => a.ordersCount);
-    return [groupedAuctions, groupedAuctions?.length, priceRange];
-  }
-
-  public async getMarketplaceAuctionsQuery(
-    startDate: number,
-  ): Promise<[AuctionWithStartBid[], number, PriceRange]> {
-    let [auctions, priceRange] =
-      await this.persistenceService.getAuctionsForMarketplace(startDate);
-    auctions = auctions?.map((item) => new AuctionWithStartBid(item));
-
-    const group: { key: string; value: AuctionWithBidsCount[] } =
-      auctions?.groupBy((a) => a.identifier, false);
-    let groupedAuctions = [];
-    for (const key in group) {
-      groupedAuctions = [
-        ...groupedAuctions,
-        group[key].sortedDescending((i: { startBid: any }) => i.startBid)[0],
-      ];
-    }
-
-    groupedAuctions = groupedAuctions?.sortedDescending((a) => a.creationDate);
-    return [groupedAuctions, groupedAuctions?.length, priceRange];
-  }
-
   async getAuctionsThatReachedDeadline(): Promise<AuctionEntity[]> {
     return await this.persistenceService.getAuctionsThatReachedDeadline();
   }

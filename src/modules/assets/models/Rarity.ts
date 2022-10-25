@@ -3,9 +3,6 @@ import { Nft } from 'src/common';
 
 @ObjectType()
 export class Rarity {
-  @Field({ nullable: true })
-  preferredRankAlgorithm: string;
-
   @Field(() => Int, { nullable: true })
   rank: number;
   @Field({ nullable: true })
@@ -35,21 +32,20 @@ export class Rarity {
     Object.assign(this, init);
   }
 
-  static fromNftRarity(asset: Nft) {
-    return asset
+  static fromNftRarity(nft: Nft): Rarity {
+    return nft
       ? new Rarity({
-          rank: asset.rank ?? undefined,
-          score: asset.score ?? undefined,
-          preferredRankAlgorithm: asset.assets?.preferredRankAlgorithm,
-          customRank: asset.rarities?.custom?.rank,
-          openRarityScore: asset.rarities?.openRarity?.score,
-          openRarityRank: asset.rarities?.openRarity?.rank,
-          jaccardDistancesScore: asset.rarities?.jaccardDistances?.score,
-          jaccardDistancesRank: asset.rarities?.jaccardDistances?.rank,
-          traitScore: asset.rarities?.trait?.score,
-          traitRank: asset.rarities?.trait?.rank,
-          statisticalScore: asset.rarities?.statistical?.score,
-          statisticalRank: asset.rarities?.statistical?.rank,
+          rank: nft.rank,
+          score: nft.score,
+          customRank: nft.rarities?.custom?.rank,
+          openRarityScore: nft.rarities?.openRarity?.score,
+          openRarityRank: nft.rarities?.openRarity?.rank,
+          jaccardDistancesScore: nft.rarities?.jaccardDistances?.score,
+          jaccardDistancesRank: nft.rarities?.jaccardDistances?.rank,
+          traitScore: nft.rarities?.trait?.score,
+          traitRank: nft.rarities?.trait?.rank,
+          statisticalScore: nft.rarities?.statistical?.score,
+          statisticalRank: nft.rarities?.statistical?.rank,
         })
       : null;
   }
@@ -57,7 +53,6 @@ export class Rarity {
   static fromElasticNftRarity(nft: any): Rarity {
     return nft
       ? new Rarity({
-          preferredRankAlgorithm: undefined,
           rank: undefined,
           score: undefined,
           customRank: nft.nft_rank_custom,
