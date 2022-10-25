@@ -81,6 +81,26 @@ export class QueryRequest {
     };
   }
 
+  getCustomFilterSort(
+    field: AuctionCustomEnum,
+  ): { field: string; direction: Sort } | undefined {
+    const customFilters = this.customFilters;
+    if (!customFilters) {
+      return undefined;
+    }
+    const customFilter = customFilters.find(
+      (x) => x.field === field && x.op === Operation.BETWEEN,
+    );
+    if (!customFilter.sort) {
+      return undefined;
+    }
+
+    return {
+      field: 'startBid',
+      direction: customFilter.sort.direction,
+    };
+  }
+
   getSort(): { field: string; direction: Sort } | undefined {
     if (!this.sorting || this.sorting.length === 0) {
       return undefined;

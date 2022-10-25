@@ -5,6 +5,7 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
+import { AuctionWithStartBid } from 'src/db/auctions/auctionWithBidCount.dto';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
@@ -650,7 +651,7 @@ export class PersistenceService {
 
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number, PriceRange]> {
+  ): Promise<[AuctionEntity[] | AuctionWithStartBid[], number, PriceRange]> {
     return await this.execute(
       this.getAuctionsGroupBy.name,
       this.auctionsRepository.getAuctionsGroupBy(queryRequest),
