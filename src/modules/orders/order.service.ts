@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import '../../utils/extentions';
+import '../../utils/extensions';
 import { OrderEntity } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
