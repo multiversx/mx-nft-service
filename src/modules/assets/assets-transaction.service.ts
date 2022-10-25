@@ -6,9 +6,13 @@ import {
   TokenPayment,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { Injectable } from '@nestjs/common';
-import { ElrondApiService, getSmartContract, Nft } from 'src/common';
-import { elrondConfig, gas } from 'src/config';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  ElrondApiService,
+  getSmartContract,
+  RedisCacheService,
+} from 'src/common';
+import { cacheConfig, elrondConfig, gas } from 'src/config';
 import {
   getCollectionAndNonceFromIdentifier,
   timestampToEpochAndRound,
@@ -25,14 +29,26 @@ import {
   CreateNftRequest,
   TransferNftRequest,
 } from './models/requests';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import * as Redis from 'ioredis';
+import { TimeConstants } from 'src/utils/time-utils';
+import { Stats } from 'src/common/services/elrond-communication/models/stats.model';
 
 @Injectable()
 export class AssetsTransactionService {
+  private redisClient: Redis.Redis;
+
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
     private elrondApiService: ElrondApiService,
-  ) {}
+    private readonly logger: Logger,
+    private redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.persistentRedisClientName,
+    );
+  }
 
   async updateQuantity(
     ownerAddress: string,
@@ -62,7 +78,7 @@ export class AssetsTransactionService {
   ): Promise<TransactionNode> {
     const [nft, networkStats] = await Promise.all([
       this.elrondApiService.getNftByIdentifier(request.identifier),
-      this.elrondApiService.getNetworkStats(),
+      this.getOrSetAproximateNetworkStats(),
     ]);
 
     if (!nft) {
@@ -163,5 +179,27 @@ export class AssetsTransactionService {
       ...response,
       chainID: elrondConfig.chainID,
     };
+  }
+
+  private async getOrSetAproximateNetworkStats(): Promise<Stats> {
+    try {
+      const cacheKey = this.getApproximateNetworkStatsCacheKey();
+      const getNetworkStats = () => this.elrondApiService.getNetworkStats();
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getNetworkStats,
+        TimeConstants.oneDay,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while getting network stats', {
+        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateNetworkStats.name}`,
+        exception: error,
+      });
+    }
+  }
+
+  private getApproximateNetworkStatsCacheKey() {
+    return generateCacheKeyFromParams('assets', 'approximateNetworkStats');
   }
 }
