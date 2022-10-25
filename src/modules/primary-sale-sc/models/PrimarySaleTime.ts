@@ -16,7 +16,7 @@ export class PrimarySaleTime {
     Object.assign(this, init);
   }
 
-  static fromAbi(abi: PrimarySaleTimeAbi): PrimarySaleTime {
+  static fromAbi(abi: PrimarySaleTimeAbi): PrimarySaleTime | undefined {
     return abi
       ? new PrimarySaleTime({
           startSale: parseInt(abi.start_sale.valueOf().toString()),
