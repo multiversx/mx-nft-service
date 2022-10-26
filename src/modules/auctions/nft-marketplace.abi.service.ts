@@ -110,22 +110,18 @@ export class NftMarketplaceAbiService {
     );
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(collection);
-    const auction =
-      await this.auctionsService.getAuctionByIdentifierAndMarketplace(
-        request.identifier,
-        marketplace.key,
-      );
 
     const contract = await this.contract.getContract(marketplace.address);
 
     let sendOffer = contract.call({
       func: new ContractFunction('sendOffer'),
       value: TokenPayment.egldFromBigInteger(request.paymentAmount),
-      args: [
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(request.deadline)),
-      ],
+      args: await this.getCreateOfferArgs(
+        collection,
+        nonce,
+        request,
+        marketplace.key,
+      ),
       gasLimit: gas.bid,
       chainID: elrondConfig.chainID,
     });
@@ -191,7 +187,30 @@ export class NftMarketplaceAbiService {
     let withdraw = contract.call({
       func: new ContractFunction('withdrawOffer'),
       value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(offerId))],
+      args: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
+      gasLimit: gas.withdraw,
+      chainID: elrondConfig.chainID,
+    });
+    return withdraw.toPlainObject(new Address(ownerAddress));
+  }
+
+  async acceptOffer(
+    ownerAddress: string,
+    offerId: number,
+  ): Promise<TransactionNode> {
+    const offer = await this.offersService.getOfferById(offerId);
+
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(
+        offer.collection,
+      );
+
+    const contract = await this.contract.getContract(marketplace.address);
+
+    let withdraw = contract.call({
+      func: new ContractFunction('acceptOffer'),
+      value: TokenPayment.egldFromAmount(0),
+      args: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
       gasLimit: gas.withdraw,
       chainID: elrondConfig.chainID,
     });
@@ -358,6 +377,31 @@ export class NftMarketplaceAbiService {
     );
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf().toFixed();
+  }
+
+  private async getCreateOfferArgs(
+    collection: string,
+    nonce: string,
+    request: CreateOfferRequest,
+    marketplaceKey: string,
+  ): Promise<TypedValue[]> {
+    const auction =
+      await this.auctionsService.getAuctionByIdentifierAndMarketplace(
+        request.identifier,
+        marketplaceKey,
+      );
+    let returnArgs: TypedValue[] = [
+      BytesValue.fromUTF8(collection),
+      BytesValue.fromHex(nonce),
+      BytesValue.fromHex(request.quantity),
+      new U64Value(new BigNumber(request.deadline)),
+    ];
+    if (auction) {
+      returnArgs.push(
+        new U64Value(new BigNumber(auction?.marketplaceAuctionId)),
+      );
+    }
+    return returnArgs;
   }
 
   private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
