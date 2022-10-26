@@ -27,6 +27,8 @@ import { User } from '../auth/user';
 import { TransactionNode } from '../common/transaction';
 import { AssetsProvider } from '../assets';
 import { Asset } from '../assets/models';
+import { AcceptOfferArgs } from './models/AcceptOfferArgs';
+import { AcceptOfferRequest } from './models/AcceptOfferRequest';
 
 @Resolver(() => Offer)
 export class OffersResolver extends BaseResolver(Offer) {
@@ -100,9 +102,10 @@ export class OffersResolver extends BaseResolver(Offer) {
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
   async acceptOffer(
-    @Args({ name: 'offerId', type: () => Int }) offerId: number,
+    @Args('input', { type: () => AcceptOfferArgs }) input: AcceptOfferArgs,
     @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(user.publicKey, offerId);
+    const request = AcceptOfferRequest.fromArgs(input);
+    return await this.nftAbiService.acceptOffer(user.publicKey, request);
   }
 }

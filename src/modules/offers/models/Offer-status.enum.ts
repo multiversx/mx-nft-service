@@ -3,7 +3,7 @@ import { registerEnumType } from '@nestjs/graphql';
 export enum OfferStatusEnum {
   Active = 'Active',
   Closed = 'Closed',
-  Bought = 'Bought',
+  Accepted = 'Accepted',
 }
 
 registerEnumType(OfferStatusEnum, {
