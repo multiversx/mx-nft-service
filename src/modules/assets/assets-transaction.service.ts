@@ -6,7 +6,7 @@ import {
   TokenPayment,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   ElrondApiService,
   getSmartContract,
@@ -82,7 +82,7 @@ export class AssetsTransactionService {
     ]);
 
     if (!nft) {
-      throw new Error('NFT not found');
+      throw new NotFoundException('NFT not found');
     }
 
     const [epoch] = timestampToEpochAndRound(
