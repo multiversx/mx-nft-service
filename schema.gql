@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AcceptOfferArgs {
+  auctionId: Int
+  offerId: Int
+}
+
 type Account {
   address: ID
   cover: String
@@ -845,6 +850,7 @@ type MintPrice {
 type Mutation {
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   acceptOffer(offerId: Int!): TransactionNode!
+  acceptOffer(input: AcceptOfferArgs!): TransactionNode!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -967,8 +973,8 @@ type OfferPageInfo {
 }
 
 enum OfferStatusEnum {
+  Accepted
   Active
-  Bought
   Closed
 }
 
