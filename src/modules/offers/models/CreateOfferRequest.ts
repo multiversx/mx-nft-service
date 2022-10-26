@@ -14,15 +14,15 @@ export class CreateOfferRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(auctionArgs: CreateOfferArgs) {
+  static fromArgs(args: CreateOfferArgs) {
     return new CreateOfferRequest({
-      identifier: auctionArgs.identifier,
+      identifier: args.identifier,
       startDate: DateUtils.getCurrentTimestamp().toString(),
-      deadline: auctionArgs.deadline,
-      paymentToken: auctionArgs.paymentToken,
-      paymentTokenNonce: auctionArgs.paymentTokenNonce,
-      paymentAmount: auctionArgs.paymentAmount,
-      quantity: auctionArgs.quantity,
+      deadline: args.deadline,
+      paymentToken: args.paymentToken,
+      paymentTokenNonce: args.paymentTokenNonce,
+      paymentAmount: args.paymentAmount,
+      quantity: args.quantity,
     });
   }
 }
