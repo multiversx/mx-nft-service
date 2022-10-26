@@ -39,7 +39,7 @@ export class OffersResolver extends BaseResolver(Offer) {
   }
 
   @Query(() => OffersResponse)
-  async orders(
+  async offers(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
     @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
@@ -70,7 +70,7 @@ export class OffersResolver extends BaseResolver(Offer) {
   }
 
   @ResolveField('asset', () => Asset)
-  async auction(@Parent() order: Offer) {
+  async asset(@Parent() order: Offer) {
     const { identifier } = order;
     const auctions = await this.assetsProvider.load(identifier);
     return auctions?.value !== undefined
@@ -94,7 +94,7 @@ export class OffersResolver extends BaseResolver(Offer) {
     @Args({ name: 'offerId', type: () => Int }) offerId: number,
     @User() user: any,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(user.publicKey, offerId);
+    return await this.nftAbiService.withdrawOffer(user.publicKey, offerId);
   }
 
   @Mutation(() => TransactionNode)
