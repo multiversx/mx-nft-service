@@ -120,6 +120,7 @@ export class NftTraitsService {
       ] = await Promise.all([
         this.getAllCollectionNftsFromAPI(
           collection,
+          nftsCount,
           lastNonce,
           lastNonce + batchSize,
         ),
@@ -415,6 +416,7 @@ export class NftTraitsService {
 
   private async getAllCollectionNftsFromAPI(
     collectionTicker: string,
+    collectionNftsCount: number,
     startNonce?: number,
     endNonce?: number,
   ): Promise<NftTraits[]> {
@@ -422,6 +424,7 @@ export class NftTraitsService {
       const res = await this.apiService.getAllNftsByCollectionAfterNonce(
         collectionTicker,
         'identifier,nonce,timestamp,metadata',
+        collectionNftsCount,
         startNonce,
         endNonce,
       );

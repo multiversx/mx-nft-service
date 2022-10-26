@@ -94,12 +94,18 @@ export class NftRarityService {
   async updateCollectionRarities(collectionTicker: string): Promise<boolean> {
     this.logger.log(`${collectionTicker} - Updating rarities...`);
     try {
-      if (await this.isCollectionTooBig(collectionTicker)) {
+      const [isCollectionTooBig, nftsCount] = await this.isCollectionTooBig(
+        collectionTicker,
+      );
+      if (isCollectionTooBig) {
         return false;
       }
 
       const [allNfts, customRanks] =
-        await this.getAllCollectionNftsWithCustomRanksFromAPI(collectionTicker);
+        await this.getAllCollectionNftsWithCustomRanksFromAPI(
+          collectionTicker,
+          nftsCount,
+        );
 
       if (allNfts?.length === 0) {
         this.logger.log(
@@ -325,6 +331,7 @@ export class NftRarityService {
 
   private async getAllCollectionNftsWithCustomRanksFromAPI(
     collectionTicker: string,
+    collectionNftsCount: number,
   ): Promise<[NftRarityData[], CustomRank[]]> {
     try {
       let traitTypeIndexes: number[] = [];
@@ -344,6 +351,7 @@ export class NftRarityService {
           allNfts = allNfts.concat(nfts);
           nfts = undefined;
         },
+        collectionNftsCount,
       );
       allNfts = this.sortDescNftsByNonce(allNfts);
 
@@ -389,7 +397,7 @@ export class NftRarityService {
   private async isCollectionTooBig(
     collection: string,
     nftsCount?: number,
-  ): Promise<boolean> {
+  ): Promise<[boolean, number]> {
     if (!nftsCount) {
       nftsCount = await this.elrondApiService.getCollectionNftsCount(
         collection,
@@ -403,7 +411,8 @@ export class NftRarityService {
           nftsCount: nftsCount,
         },
       );
-      return true;
+      return [true, nftsCount];
     }
+    return [false, nftsCount];
   }
 }
