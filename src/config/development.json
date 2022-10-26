@@ -5,7 +5,8 @@
     "issueNftCost": 50000000000000000,
     "wegld": "WEGLD-d7c6bb",
     "mex": "MEX-dc289c",
-    "lkmex": "LKMEX-3b7d9a"
+    "lkmex": "LKMEX-3b7d9a",
+    "burnNftActivationEpoch": 2011
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

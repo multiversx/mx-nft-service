@@ -6,10 +6,17 @@ import {
   TokenPayment,
   U64Value,
 } from '@elrondnetwork/erdjs';
-import { Injectable } from '@nestjs/common';
-import { getSmartContract } from 'src/common';
-import { elrondConfig, gas } from 'src/config';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ElrondApiService,
+  getSmartContract,
+  RedisCacheService,
+} from 'src/common';
+import { cacheConfig, elrondConfig, gas } from 'src/config';
+import {
+  getCollectionAndNonceFromIdentifier,
+  timestampToEpochAndRound,
+} from 'src/utils/helpers';
 import '../../utils/extensions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
@@ -22,13 +29,26 @@ import {
   CreateNftRequest,
   TransferNftRequest,
 } from './models/requests';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import * as Redis from 'ioredis';
+import { TimeConstants } from 'src/utils/time-utils';
+import { ElrondStats } from 'src/common/services/elrond-communication/models/elrond-stats.model';
 
 @Injectable()
 export class AssetsTransactionService {
+  private redisClient: Redis.Redis;
+
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
-  ) {}
+    private elrondApiService: ElrondApiService,
+    private readonly logger: Logger,
+    private redisCacheService: RedisCacheService,
+  ) {
+    this.redisClient = this.redisCacheService.getClient(
+      cacheConfig.persistentRedisClientName,
+    );
+  }
 
   async updateQuantity(
     ownerAddress: string,
@@ -50,6 +70,41 @@ export class AssetsTransactionService {
       chainID: elrondConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
+  }
+
+  async burnQuantity(
+    ownerAddress: string,
+    request: UpdateQuantityRequest,
+  ): Promise<TransactionNode> {
+    const [nft, elrondStats] = await Promise.all([
+      this.elrondApiService.getNftByIdentifier(request.identifier),
+      this.getOrSetAproximateElrondStats(),
+    ]);
+
+    if (!nft) {
+      throw new NotFoundException('NFT not found');
+    }
+
+    const [epoch] = timestampToEpochAndRound(
+      nft.timestamp,
+      elrondStats.epoch,
+      elrondStats.roundsPassed,
+      elrondStats.roundsPerEpoch,
+      elrondStats.refreshRate,
+    );
+
+    if (epoch > elrondConfig.burnNftActivationEpoch) {
+      return await this.updateQuantity(ownerAddress, request);
+    }
+
+    return await this.transferNft(
+      ownerAddress,
+      new TransferNftRequest({
+        identifier: request.identifier,
+        quantity: request.quantity,
+        destinationAddress: elrondConfig.burnAddress,
+      }),
+    );
   }
 
   async createNft(
@@ -124,5 +179,27 @@ export class AssetsTransactionService {
       ...response,
       chainID: elrondConfig.chainID,
     };
+  }
+
+  private async getOrSetAproximateElrondStats(): Promise<ElrondStats> {
+    try {
+      const cacheKey = this.getApproximateElrondStatsCacheKey();
+      const getElrondStats = () => this.elrondApiService.getElrondStats();
+      return this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        getElrondStats,
+        TimeConstants.oneDay,
+      );
+    } catch (error) {
+      this.logger.error('An error occurred while getting elrond stats', {
+        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateElrondStats.name}`,
+        exception: error,
+      });
+    }
+  }
+
+  private getApproximateElrondStatsCacheKey() {
+    return generateCacheKeyFromParams('assets', 'approximateElrondStats');
   }
 }

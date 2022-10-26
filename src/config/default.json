@@ -16,7 +16,8 @@
     "keepAliveMaxSockets": 100,
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
-    "egld": "EGLD"
+    "egld": "EGLD",
+    "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag"
   },
   "caching": {
     "ordersRedisClientName": "orders",
@@ -52,7 +53,8 @@
     "setRoles": 60000000,
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
-    "addBurnQuantity": 200000
+    "addBurnQuantity": 200000,
+    "nftBurn": 10000000
   },
   "cronJobs": {
     "rarity": {
