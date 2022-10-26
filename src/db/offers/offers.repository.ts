@@ -20,6 +20,20 @@ export class OffersRepository extends Repository<OfferEntity> {
     });
   }
 
+  async getOfferByIdAndMarketplaceKey(
+    marketplaceOfferId: number,
+    marketplaceKey: string,
+  ): Promise<OfferEntity> {
+    return await this.findOne({
+      where: [
+        {
+          marketplaceOfferId: marketplaceOfferId,
+          marketplaceKey: marketplaceKey,
+        },
+      ],
+    });
+  }
+
   async saveOffer(offer: OfferEntity) {
     return await this.save(offer);
   }

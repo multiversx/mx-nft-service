@@ -39,6 +39,8 @@ import { MintEvent } from '../entities/auction/mint.event';
 import { SendOfferEvent } from '../entities/auction/sendOffer.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
+import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
+import { WithdrawOfferEvent } from '../entities/auction/withdrawOffer.event';
 
 @Injectable()
 export class NftEventsService {
@@ -268,6 +270,47 @@ export class NftEventsService {
               OfferStatusEnum.Active,
             ),
           );
+
+          break;
+
+        case AuctionEventEnum.AcceptOffer:
+          const acceptOffer = new AcceptOfferEvent(event);
+          const topicsAcceptOffer = acceptOffer.getTopics();
+          const acceptOfferMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsSendOffer.collection,
+              acceptOffer.getAddress(),
+            );
+
+          const offer = await this.offersService.getOfferByIdAndMarketplace(
+            topicsAcceptOffer.offerId,
+            acceptOfferMarketplace.key,
+          );
+          await this.offersService.saveOffer({
+            ...offer,
+            status: OfferStatusEnum.Accepted,
+          });
+
+          break;
+
+        case AuctionEventEnum.WithdrawOffer:
+          const withdrawOfferEvent = new WithdrawOfferEvent(event);
+          const topicsWithdrawOffer = withdrawOfferEvent.getTopics();
+          const withdrawOfferMarketplace: Marketplace =
+            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
+              topicsWithdrawOffer.collection,
+              withdrawOfferEvent.getAddress(),
+            );
+
+          const withdrawOffer =
+            await this.offersService.getOfferByIdAndMarketplace(
+              topicsWithdrawOffer.offerId,
+              withdrawOfferMarketplace.key,
+            );
+          await this.offersService.saveOffer({
+            ...withdrawOffer,
+            status: OfferStatusEnum.Closed,
+          });
 
           break;
       }
