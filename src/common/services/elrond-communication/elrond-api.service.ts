@@ -442,15 +442,11 @@ export class ElrondApiService {
   async getAllNftsByCollectionAfterNonce(
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
-    startNonce?: number,
+    maxNftsCount: number,
+    startNonce: number = 1,
     endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
-    maxNftsCount?: number,
   ): Promise<Nft[]> {
     const batchSize = constants.getNftsFromApiBatchSize;
-
-    if (!maxNftsCount) {
-      maxNftsCount = await this.getCollectionNftsCount(collection);
-    }
 
     if (maxNftsCount < batchSize) {
       const query = new AssetsQuery()
@@ -466,7 +462,7 @@ export class ElrondApiService {
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    let lastEnd = startNonce ?? 0;
+    let lastEnd = startNonce ? startNonce - 1 : 0;
 
     do {
       const start = lastEnd + 1;
@@ -505,18 +501,14 @@ export class ElrondApiService {
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
     action: (nfts: Nft[]) => Promise<boolean | any>,
-    startNonce?: number,
+    collectionNftsCount: number,
+    startNonce: number = 1,
     endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
-    collectionNftsCount?: number,
   ): Promise<void> {
     const batchSize = constants.getNftsFromApiBatchSize;
 
-    if (!collectionNftsCount) {
-      collectionNftsCount = await this.getCollectionNftsCount(collection);
-    }
-
     let nftsCount = 0;
-    let lastEnd = startNonce ?? 0;
+    let lastEnd = startNonce ? startNonce - 1 : 0;
     let actionResult: boolean;
 
     do {
@@ -722,10 +714,7 @@ export class ElrondApiService {
   }
 
   async getElrondStats(): Promise<ElrondStats> {
-    const stats = await this.doGetGeneric(
-      this.getElrondStats.name,
-      'stats',
-    );
+    const stats = await this.doGetGeneric(this.getElrondStats.name, 'stats');
     return new ElrondStats(stats);
   }
 
