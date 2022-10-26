@@ -276,10 +276,6 @@ export class NftTraitsService {
       return await this.updateCollectionTraits(collection);
     }
 
-    this.logger.log(`${identifier} - VALID`, {
-      path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
-    });
-
     return false;
   }
 
@@ -604,6 +600,7 @@ export class NftTraitsService {
                 this.apiService.getNftsWithAttributesBeforeTimestamp(
                   beforeTimestamp,
                   batchSize,
+                  'hasUris=true&type=SemiFungibleESDT,NonFungibleESDT',
                 ),
                 this.getAllNftsWithTraitsFromElastic(
                   beforeTimestamp,
@@ -640,13 +637,20 @@ export class NftTraitsService {
                   : [],
               });
 
+              let nftFromElastic = nftsFromElasticDict[nft.identifier];
+              if (!nftFromElastic) {
+                nftFromElastic = await this.getNftValuesFromElastic(
+                  nft.identifier,
+                );
+              }
+
               const areIdenticalTraits = this.areIdenticalTraits(
                 nftTraitsFromApi.traits,
-                nftsFromElasticDict[nft.identifier] ?? [],
+                nftFromElastic,
               );
 
               if (!areIdenticalTraits) {
-                const logMssage = nftsFromElasticDict[nft.identifier]
+                const logMssage = nftFromElastic
                   ? 'Not identical traits'
                   : 'Missing NFT from Elastic';
                 this.logger.log(logMssage, {
@@ -658,9 +662,6 @@ export class NftTraitsService {
                 continue;
               }
 
-              this.logger.log(`${nft.identifier} - VALID`, {
-                path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
-              });
               totalProcessedNfts++;
             }
 
@@ -731,6 +732,10 @@ export class NftTraitsService {
         QueryType.Match('token', collection, QueryOperator.AND),
       )
       .withFields(['nft_traitValues'])
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
       .withPagination({
         from: 0,
         size: constants.getNftsFromElasticBatchSize,
@@ -753,22 +758,16 @@ export class NftTraitsService {
       .withFields(['nft_traitValues', 'timestamp', 'identifier'])
       .withRangeFilter('timestamp', new RangeLowerThanOrEqual(beforeTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
       .withPagination({
         from: 0,
         size: constants.getNftsFromElasticBatchSize,
       });
-    return query;
-  }
 
-  getAllNftsWithTraitsFromElasticQuery(batchSize: number): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withMustExistCondition('nft_traitValues')
-      .withFields(['nft_traitValues'])
-      .withPagination({
-        from: 0,
-        size: batchSize ?? constants.getNftsFromElasticBatchSize,
-      });
+    return query;
   }
 
   getAllCollectionsFromElasticQuery(): ElasticQuery {
@@ -792,6 +791,10 @@ export class NftTraitsService {
         QueryType.Match('identifier', identifier, QueryOperator.AND),
       )
       .withFields(['nft_traitValues'])
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
       .withPagination({
         from: 0,
         size: 1,

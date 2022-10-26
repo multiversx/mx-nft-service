@@ -550,11 +550,12 @@ export class ElrondApiService {
   async getNftsWithAttributesBeforeTimestamp(
     beforeTimestamp: number,
     size: number,
+    additionalQuery?: string,
   ): Promise<[Nft[], number]> {
     const query = new AssetsQuery()
       .addBefore(beforeTimestamp)
       .addPageSize(0, size)
-      .addQuery('hasUris=true')
+      .addQuery(additionalQuery)
       .addFields(['identifier', 'metadata', 'timestamp']);
     const url = `nfts${query.build()}`;
     let nfts = await this.doGetGeneric(
