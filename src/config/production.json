@@ -9,7 +9,8 @@
     "egld": "EGLD",
     "wegld": "WEGLD-bd4d79",
     "mex": "MEX-455c57",
-    "lkmex": "LKMEX-aab910"
+    "lkmex": "LKMEX-aab910",
+    "burnNftActivationEpoch": 795
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

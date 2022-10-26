@@ -88,7 +88,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @User() user: any,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
-    return await this.assetsTransactionService.updateQuantity(
+    return await this.assetsTransactionService.burnQuantity(
       user.publicKey,
       request,
     );
