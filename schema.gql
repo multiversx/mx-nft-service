@@ -941,7 +941,7 @@ type NotificationsResponse {
 }
 
 type Offer {
-  asset: Asset!
+  asset: Asset
   boughtTokensNo: String
   creationDate: Int
   endDate: Int
@@ -1180,6 +1180,11 @@ type Query {
     filters: NotificationsFilters
     pagination: ConnectionArgs
   ): NotificationsResponse!
+  offers(
+    filters: FiltersExpression
+    pagination: ConnectionArgs
+    sorting: [Sorting!]
+  ): OffersResponse!
   orders(
     filters: FiltersExpression
     pagination: ConnectionArgs
