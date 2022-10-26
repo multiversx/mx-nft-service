@@ -21,8 +21,7 @@ export class SendOfferEventsTopics {
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
     this.nrOfferTokens = parseInt(
-      Buffer.from(rawTopics[4], 'base64').toString('hex'),
-      16,
+      BinaryUtils.tryBase64ToBigInt(rawTopics[4])?.toString() ?? '1',
     );
     this.paymentTokenIdentifier = Buffer.from(
       rawTopics[5],
