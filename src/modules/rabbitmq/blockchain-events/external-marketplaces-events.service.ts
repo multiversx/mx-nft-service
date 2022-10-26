@@ -32,8 +32,8 @@ import {
   AuctionTokenEvent,
 } from '../entities/auction';
 import { AcceptGlobalOfferEvent } from '../entities/auction/acceptGlobalOffer.event';
-import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
 import { ChangePriceEvent } from '../entities/auction/changePrice.event';
+import { AcceptOfferEvent } from '../entities/auction/externalEvents/acceptOffer.event';
 import { UpdatePriceEvent } from '../entities/auction/updatePrice.event';
 import { FeedEventsSenderService } from './feed-events.service';
 

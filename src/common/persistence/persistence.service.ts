@@ -946,6 +946,19 @@ export class PersistenceService {
     );
   }
 
+  async getOfferByIdAndMarketplace(
+    marketplaceOfferId: number,
+    marletplaceKey: string,
+  ): Promise<OfferEntity> {
+    return await this.execute(
+      this.getOfferByIdAndMarketplace.name,
+      this.offersRepository.getOfferByIdAndMarketplaceKey(
+        marketplaceOfferId,
+        marletplaceKey,
+      ),
+    );
+  }
+
   async saveOffer(offer: OfferEntity): Promise<OfferEntity> {
     return await this.execute(
       this.saveOffer.name,
