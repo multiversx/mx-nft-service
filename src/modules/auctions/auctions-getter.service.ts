@@ -241,20 +241,10 @@ export class AuctionsGetterService {
     const collectionFilter = queryRequest.getFilterName('collection');
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     let paymentDecimals = elrondConfig.decimals;
-    const currentPriceFilter = queryRequest.getRange(
-      AuctionCustomEnum.CURRENTPRICE,
-    );
     const sort = queryRequest.getSort();
     const allFilters = queryRequest.getAllFilters();
-
-    const hasCurrentPriceFilter =
-      currentPriceFilter &&
-      (currentPriceFilter.startPrice !== '0000000000000000000' ||
-        currentPriceFilter.endPrice !== '0000000000000000000');
-
     if (
       collectionFilter &&
-      !hasCurrentPriceFilter &&
       (!paymentTokenFilter || paymentTokenFilter === elrondConfig.egld)
     ) {
       return await this.retriveCollectionAuctions(
@@ -320,12 +310,22 @@ export class AuctionsGetterService {
 
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     if (paymentTokenFilter) {
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenFilter,
+      );
       allAuctions = allAuctions.filter(
         (x) => x.minBid?.token === paymentTokenFilter,
       );
       priceRange = await this.computePriceRange(
         allAuctions,
         paymentTokenFilter,
+        paymentToken,
+      );
+
+      allAuctions = this.filterByPriceRange(
+        queryRequest,
+        paymentToken,
+        allAuctions,
       );
     }
 
@@ -391,6 +391,7 @@ export class AuctionsGetterService {
       priceRange = await this.computePriceRange(
         allAuctions,
         paymentTokenFilter,
+        paymentToken,
       );
     }
     if (marketplaceFilter) {
@@ -400,6 +401,7 @@ export class AuctionsGetterService {
       priceRange = await this.computePriceRange(
         allAuctions,
         paymentTokenFilter,
+        paymentToken,
       );
     }
 
@@ -558,10 +560,13 @@ export class AuctionsGetterService {
   private async computePriceRange(
     auctions: Auction[],
     paymentTokenIdentifier: string,
+    paymentToken?: Token,
   ): Promise<PriceRange> {
-    const paymentToken = await this.usdPriceService.getToken(
-      paymentTokenIdentifier,
-    );
+    if (!paymentToken) {
+      paymentToken = await this.usdPriceService.getToken(
+        paymentTokenIdentifier,
+      );
+    }
     const minBids = auctions
       .filter((x) => x.minBid.token === paymentTokenIdentifier)
       .map((x) =>
