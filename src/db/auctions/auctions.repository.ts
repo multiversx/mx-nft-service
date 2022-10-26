@@ -25,6 +25,7 @@ import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
+import { AuctionWithStartBid } from './auctionWithBidCount.dto';
 import { PriceRange } from './price-range';
 import {
   getAuctionsForAsset,
@@ -84,7 +85,7 @@ export class AuctionsRepository {
 
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number, PriceRange]> {
+  ): Promise<[AuctionEntity[] | AuctionWithStartBid[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -98,13 +99,18 @@ export class AuctionsRepository {
       queryBuilder,
     );
     queryBuilder
+      .select('a.*')
+      .addSelect(
+        'IF(ord.priceAmountDenominated, ord.priceAmountDenominated, minBidDenominated) as startBid',
+      )
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
     FROM (${getDefaultAuctionsQuery(queryRequest)})`,
         't',
         'a.id = t.id',
       )
-      .groupBy('a.id');
+      .leftJoin('orders', 'ord', 'ord.auctionId=a.id')
+      .groupBy('a.id, ord.priceAmountDenominated');
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     if (currentPriceSort) {
@@ -112,11 +118,13 @@ export class AuctionsRepository {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    const [auctions, priceRange] = await Promise.all([
-      queryBuilder.getManyAndCount(),
+
+    const [auctions, count, priceRange] = await Promise.all([
+      queryBuilder.getRawMany(),
+      queryBuilder.getCount(),
       this.getMinMaxForQuery(queryRequest),
     ]);
-    return [...auctions, priceRange];
+    return [auctions, count, priceRange];
   }
 
   private async handleCurrentPriceFilter(
