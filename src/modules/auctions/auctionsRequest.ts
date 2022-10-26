@@ -80,7 +80,7 @@ export function getAuctionsForPaymentTokenRequest(paymentToken: string) {
   return new QueryRequest({
     customFilters: [],
     offset: 0,
-    limit: 100000,
+    limit: 10000,
     filters: new FiltersExpression({
       filters: [
         new Filter({
