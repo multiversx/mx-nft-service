@@ -197,6 +197,10 @@ export class NftRarityElasticService {
           'nft_score_statistical',
           'nft_rank_statistical',
         ])
+        .withMustMultiShouldCondition(
+          [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+          (type) => QueryType.Match('type', type),
+        )
         .withSort([{ name: 'nonce', order: ElasticSortOrder.descending }])
         .withPagination({
           from: 0,
