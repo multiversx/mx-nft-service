@@ -560,7 +560,7 @@ export class AuctionsGetterService {
   private async computePriceRange(
     auctions: Auction[],
     paymentTokenIdentifier: string,
-    paymentToken: Token = null,
+    paymentToken?: Token,
   ): Promise<PriceRange> {
     if (!paymentToken) {
       paymentToken = await this.usdPriceService.getToken(
