@@ -19,6 +19,8 @@ import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
+import { TicketInfo } from './models/TicketInfo';
+import { bool } from 'aws-sdk/clients/signer';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -34,15 +36,24 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     return await this.primarySaleService.getStatus(filters.collectionName);
   }
 
-  @Query(() => [String])
+  @Query(() => [TicketInfo])
   @UseGuards(GqlAuthGuard)
   async myTickets(
     @Args({ name: 'collectionIdentifier', type: () => String })
     collectionIdentifier: string,
     @User() user: any,
-  ): Promise<String[]> {
+  ): Promise<TicketInfo[]> {
     const response = await this.primarySaleService.getMyTickets(
       collectionIdentifier,
+      user.publicKey,
+    );
+    return response;
+  }
+
+  @Query(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async isWhitelisted(@User() user: any): Promise<boolean> {
+    const response = await this.primarySaleService.isWhitelisted(
       user.publicKey,
     );
     return response;
@@ -69,7 +80,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
 
   @ResolveField(() => String)
   async paymentToken(@Parent() sale: PrimarySale) {
-    return 'EGLD';
+    return process.env.HOLORIDE_PAYMENT_TOKEN;
   }
 
   @ResolveField(() => PrimarySaleTime)

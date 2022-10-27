@@ -1015,9 +1015,10 @@ type Query {
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  isWhitelisted: Boolean!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
-  myTickets(collectionIdentifier: String!): [String!]!
+  myTickets(collectionIdentifier: String!): [TicketInfo!]!
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
@@ -1148,6 +1149,12 @@ type TagsResponse {
   edges: [TagEdge!]
   pageData: PageData
   pageInfo: TagPageInfo
+}
+
+type TicketInfo {
+  buyer: String!
+  ticketNumber: Int!
+  winningNonce: String!
 }
 
 type Tier {

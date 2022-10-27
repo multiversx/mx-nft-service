@@ -19,14 +19,22 @@ import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/c
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
 import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
-import { ElrondProxyService, RedisCacheService } from 'src/common';
-import { PrimarySaleTimeAbi } from './models/PrimarySaleTimestamp.abi';
+import {
+  ElrondProxyService,
+  getSmartContract,
+  RedisCacheService,
+} from 'src/common';
+import {
+  PrimarySaleTimeAbi,
+  TicketInfoAbi,
+} from './models/PrimarySaleTimestamp.abi';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
+import { TicketInfo } from './models/TicketInfo';
 
 @Injectable()
 export class PrimarySaleService {
@@ -185,29 +193,10 @@ export class PrimarySaleService {
     }
   }
 
-  async getMyTicketsMap(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<string[]> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let myTicketsInteraction = <Interaction>(
-      contract.methodsExplicit.my_tickets([
-        BytesValue.fromUTF8(collectionIdentifier),
-        new AddressValue(new Address(address)),
-      ])
-    );
-
-    const response = await this.getFirstQueryResult(myTicketsInteraction);
-    const myTickets = response?.firstValue?.valueOf();
-    return myTickets?.map((t) => t.toFixed());
-  }
-
   async getMyTickets(
     collectionIdentifier: string,
     address: string,
-  ): Promise<string[]> {
+  ): Promise<TicketInfo[]> {
     try {
       const cacheKey = generateCacheKeyFromParams(
         'myTickets',
@@ -218,7 +207,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
-        TimeConstants.oneHour,
+        5 * TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -227,6 +216,59 @@ export class PrimarySaleService {
         exception: err,
       });
     }
+  }
+
+  async getMyTicketsMap(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<TicketInfo[]> {
+    const contract = await this.contract.getContract(
+      process.env.HOLORIDE_PRIMARY_SC,
+    );
+    let myTicketsInteraction = <Interaction>(
+      contract.methodsExplicit.all_tickets([
+        new AddressValue(new Address(address)),
+        BytesValue.fromUTF8(collectionIdentifier),
+      ])
+    );
+
+    const response = await this.getFirstQueryResult(myTicketsInteraction);
+    const myTickets: TicketInfoAbi[] = response?.firstValue?.valueOf();
+    return myTickets?.map((t) => TicketInfo.fromAbi(t));
+  }
+
+  async isWhitelisted(address: string): Promise<boolean> {
+    try {
+      const cacheKey = generateCacheKeyFromParams('isWhitelisted', address);
+      return await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.isWhitelistedMap(address),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting is whitelisted.', {
+        path: this.getTimestampsMap.name,
+        exception: err,
+      });
+    }
+  }
+
+  async isWhitelistedMap(address: string): Promise<boolean> {
+    const contract = getSmartContract(process.env.HOLORIDE_WHITELIST_SC);
+    const func = new ContractFunction('in_whitelist');
+    const args = [new AddressValue(new Address(address))];
+    const query = new Interaction(contract, func, args)
+      .withQuerent(new Address(address))
+      .buildQuery();
+
+    const queryResponse = await this.elrondProxyService
+      .getService()
+      .queryContract(query);
+
+    return queryResponse?.returnData && queryResponse.returnData.length > 0
+      ? new Boolean(queryResponse.returnData[0].base64ToHex()).valueOf()
+      : false;
   }
 
   async getTimestampsMap(
@@ -254,15 +296,20 @@ export class PrimarySaleService {
       process.env.HOLORIDE_PRIMARY_SC,
     );
     let bid = contract.call({
-      func: new ContractFunction('buy_tickets'),
-      value: TokenPayment.egldFromBigInteger(request.price),
+      func: new ContractFunction('ESDTTransfer'),
+      value: TokenPayment.egldFromBigInteger(0),
       args: [
+        BytesValue.fromUTF8(process.env.HOLORIDE_PAYMENT_TOKEN),
+        new U64Value(new BigNumber(request.price)),
+        BytesValue.fromUTF8('buy_tickets'),
         BytesValue.fromUTF8(request.collectionIdentifier),
         new U32Value(new BigNumber(request.ticketsNumber)),
       ],
+
       gasLimit: gas.bid,
       chainID: elrondConfig.chainID,
     });
+
     return bid.toPlainObject(new Address(ownerAddress));
   }
 
