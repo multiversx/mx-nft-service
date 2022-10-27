@@ -34,6 +34,20 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     return await this.primarySaleService.getStatus(filters.collectionName);
   }
 
+  @Query(() => [String])
+  @UseGuards(GqlAuthGuard)
+  async myTickets(
+    @Args({ name: 'collectionIdentifier', type: () => String })
+    collectionIdentifier: string,
+    @User() user: any,
+  ): Promise<String[]> {
+    const response = await this.primarySaleService.getMyTickets(
+      collectionIdentifier,
+      user.publicKey,
+    );
+    return response;
+  }
+
   @ResolveField('price', () => String)
   async price(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
@@ -70,7 +84,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async buyHolorideTicket(
+  async buyTicket(
     @Args('input', { type: () => BuyTicketsArgs })
     input: BuyTicketsArgs,
     @User() user: any,

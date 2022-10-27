@@ -3,6 +3,7 @@ import '../../utils/extensions';
 import BigNumber from 'bignumber.js';
 import {
   Address,
+  AddressValue,
   BigUIntValue,
   BytesValue,
   ContractFunction,
@@ -153,13 +154,13 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-    let price = <Interaction>(
+    let maxNftPerWalletInteraction = <Interaction>(
       contract.methodsExplicit.max_units_per_wallet([
         BytesValue.fromUTF8(collectionIdentifier),
       ])
     );
 
-    const response = await this.getFirstQueryResult(price);
+    const response = await this.getFirstQueryResult(maxNftPerWalletInteraction);
     return response.firstValue.valueOf().toFixed();
   }
 
@@ -173,6 +174,50 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getTimestampsMap(collectionIdentifier),
+        TimeConstants.oneHour,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting timestamp.', {
+        path: this.getTimestampsMap.name,
+        collectionIdentifier,
+        exception: err,
+      });
+    }
+  }
+
+  async getMyTicketsMap(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<string[]> {
+    const contract = await this.contract.getContract(
+      process.env.HOLORIDE_PRIMARY_SC,
+    );
+    let myTicketsInteraction = <Interaction>(
+      contract.methodsExplicit.my_tickets([
+        BytesValue.fromUTF8(collectionIdentifier),
+        new AddressValue(new Address(address)),
+      ])
+    );
+
+    const response = await this.getFirstQueryResult(myTicketsInteraction);
+    const myTickets = response?.firstValue?.valueOf();
+    return myTickets?.map((t) => t.toFixed());
+  }
+
+  async getMyTickets(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<string[]> {
+    try {
+      const cacheKey = generateCacheKeyFromParams(
+        'myTickets',
+        address,
+        collectionIdentifier,
+      );
+      return await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getMyTicketsMap(collectionIdentifier, address),
         TimeConstants.oneHour,
       );
     } catch (err) {
