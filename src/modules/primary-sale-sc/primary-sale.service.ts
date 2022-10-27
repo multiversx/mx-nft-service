@@ -9,6 +9,7 @@ import {
   ContractFunction,
   Interaction,
   ResultsParser,
+  TokenIdentifierValue,
   TokenPayment,
   U32Value,
   U64Value,
@@ -211,7 +212,7 @@ export class PrimarySaleService {
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
-        path: this.getTimestampsMap.name,
+        path: this.getMyTickets.name,
         collectionIdentifier,
         exception: err,
       });
@@ -228,7 +229,7 @@ export class PrimarySaleService {
     let myTicketsInteraction = <Interaction>(
       contract.methodsExplicit.all_tickets([
         new AddressValue(new Address(address)),
-        BytesValue.fromUTF8(collectionIdentifier),
+        new TokenIdentifierValue(collectionIdentifier),
       ])
     );
 
@@ -248,7 +249,7 @@ export class PrimarySaleService {
       );
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {
-        path: this.getTimestampsMap.name,
+        path: this.isWhitelisted.name,
         exception: err,
       });
     }

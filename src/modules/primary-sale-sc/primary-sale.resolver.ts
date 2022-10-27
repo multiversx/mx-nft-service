@@ -42,20 +42,16 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     collectionIdentifier: string,
     @User() user: any,
   ): Promise<TicketInfo[]> {
-    const response = await this.primarySaleService.getMyTickets(
+    return await this.primarySaleService.getMyTickets(
       collectionIdentifier,
       user.publicKey,
     );
-    return response;
   }
 
   @Query(() => Boolean)
   @UseGuards(GqlAuthGuard)
   async isWhitelisted(@User() user: any): Promise<boolean> {
-    const response = await this.primarySaleService.isWhitelisted(
-      user.publicKey,
-    );
-    return response;
+    return await this.primarySaleService.isWhitelisted(user.publicKey);
   }
 
   @ResolveField('price', () => String)
@@ -85,11 +81,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   @ResolveField(() => PrimarySaleTime)
   async saleTime(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
-    const saleTime = await this.primarySaleService.getTimestamps(
-      collectionIdentifier,
-    );
-
-    return saleTime;
+    return await this.primarySaleService.getTimestamps(collectionIdentifier);
   }
 
   @Mutation(() => TransactionNode)
