@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
@@ -24,7 +25,8 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
-import denominate from 'src/utils/formatters';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { ElrondSwapAuctionEvent } from '../entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ElrondSwapBidEvent } from '../entities/auction/elrondnftswap/elrondswap-bid.event';
 import { ElrondSwapBuyEvent } from '../entities/auction/elrondnftswap/elrondswap-buy.event';
@@ -44,6 +46,7 @@ export class ElrondSwapMarketplaceEventsService {
     private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
     private assetByIdentifierService: AssetByIdentifierService,
+    private usdPriceService: UsdPriceService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -145,12 +148,16 @@ export class ElrondSwapMarketplaceEventsService {
             startAuctionIdentifier,
           );
 
+          const paymentToken = await this.usdPriceService.getToken(
+            topicsAuctionToken.paymentToken,
+          );
           const startAuction = await this.auctionsService.saveAuctionEntity(
             AuctionEntity.fromWithdrawTopics(
               topicsAuctionToken,
               asset.tags?.toString(),
               hash,
               auctionTokenMarketplace.key,
+              paymentToken?.decimals,
             ),
             asset.tags,
           );
@@ -249,6 +256,7 @@ export class ElrondSwapMarketplaceEventsService {
                 AuctionStatusEnum.Ended,
               );
             }
+
             const orderSft = await this.ordersService.createOrderForSft(
               new CreateOrderArgs({
                 ownerAddress: buySftTopics.currentWinner,
@@ -276,7 +284,7 @@ export class ElrondSwapMarketplaceEventsService {
     }
   }
 
-  private updateAuctionPrice(
+  private async updateAuctionPrice(
     changePriceAuction: AuctionEntity,
     topics: {
       seller: string;
@@ -289,14 +297,14 @@ export class ElrondSwapMarketplaceEventsService {
     },
     hash: string,
   ) {
+    const paymentToken = await this.usdPriceService.getToken(
+      changePriceAuction.paymentToken,
+    );
+    const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
     changePriceAuction.minBid = topics.price;
-    changePriceAuction.minBidDenominated = parseFloat(
-      denominate({
-        input: topics.price,
-        denomination: 18,
-        decimals: 2,
-        showLastNonZeroDecimal: true,
-      }).replace(',', ''),
+    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+      topics.price,
+      decimals,
     );
     changePriceAuction.endDate = topics.deadline;
     changePriceAuction.nrAuctionedTokens = topics.nrAuctionTokens;

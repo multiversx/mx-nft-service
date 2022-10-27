@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AssetRarityInfoRedisHandler } from './assets-rarity-info.redis-handler';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { ElrondApiService } from 'src/common';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 export class AssetRarityInfoProvider extends BaseProvider<string> {
   constructor(
     private assetRarityInfoRedisHandler: AssetRarityInfoRedisHandler,
-    private persistenceService: PersistenceService,
+    private elrondApiService: ElrondApiService,
   ) {
     super(
       assetRarityInfoRedisHandler,
@@ -19,10 +19,9 @@ export class AssetRarityInfoProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const nftRarities = await this.persistenceService.getBulkRarities(
-      identifiers,
-    );
-    return nftRarities?.groupBy((rarity) => rarity.identifier, false);
+    const nftRarities =
+      await this.elrondApiService.getBulkNftRaritiesByIdentifiers(identifiers);
+    return nftRarities?.groupBy((nft) => nft.identifier, false);
   }
 
   public batchRarity = async (identifiers: string[], data: any) => {

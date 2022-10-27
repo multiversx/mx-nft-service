@@ -108,15 +108,7 @@ export class UsdPriceService {
         amount,
         token.decimals,
       );
-      if (tokenId === elrondConfig.egld) {
-        return usdAmount;
-      }
-      return denominate({
-        input: usdAmount,
-        denomination: 6,
-        decimals: 3,
-        showLastNonZeroDecimal: false,
-      });
+      return usdAmount;
     }
     return null;
   }

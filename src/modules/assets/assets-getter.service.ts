@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import {
+  ElrondApiService,
+  ElrondElasticService,
+  RedisCacheService,
+} from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
@@ -9,7 +13,7 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
-import { AssetsFilter } from '../common/filters/filtersTypes';
+import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
@@ -17,12 +21,23 @@ import * as hash from 'object-hash';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import {
+  ElasticQuery,
+  ElasticSortOrder,
+  QueryConditionOptions,
+  QueryOperator,
+  QueryType,
+} from '@elrondnetwork/erdnest';
+import { QueryPagination } from 'src/common/services/elrond-communication/models/query-pagination';
 
 @Injectable()
 export class AssetsGetterService {
   private redisClient: Redis.Redis;
   constructor(
     private apiService: ElrondApiService,
+    private collectionsService: CollectionsGetterService,
+    private elasticService: ElrondElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetRarityLoader: AssetRarityInfoProvider,
@@ -75,16 +90,23 @@ export class AssetsGetterService {
       });
     }
 
-    if (filters?.traits) {
-      const response = await this.getAssetsByTraits(
+    if (
+      filters?.collection &&
+      (filters?.traits ||
+        sorting === AssetsSortingEnum.RankAsc ||
+        sorting === AssetsSortingEnum.RankDesc)
+    ) {
+      const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
         limit,
         offset,
+        sorting === AssetsSortingEnum.RankDesc ? Sort.DESC : Sort.ASC,
       );
       this.addToCache(response);
       return response;
     }
+
     if (filters?.likedByAddress) {
       const response = await this.getlikedByAssets(
         filters.likedByAddress,
@@ -94,6 +116,17 @@ export class AssetsGetterService {
       this.addToCache(response);
       return response;
     }
+
+    if (filters?.artistAddress) {
+      const response = await this.getAssetsByArtistAddress(
+        filters.artistAddress,
+        limit,
+        offset,
+      );
+      this.addToCache(response);
+      return response;
+    }
+
     if (filters?.ownerAddress) {
       const response = await this.getAssetsByOwnerAddress(
         filters,
@@ -236,18 +269,82 @@ export class AssetsGetterService {
     }
   }
 
-  private async getAssetsByTraits(
+  private async getAssetsByArtistAddress(
+    address: string,
+    size: number = 25,
+    offset: number = 0,
+  ): Promise<CollectionType<Asset>> {
+    const artistCollections = await this.collectionsService.getArtistCreations(
+      address,
+    );
+    if (artistCollections) {
+      const batch = artistCollections?.collections?.slice(0, 100);
+      let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
+      let elasticNfts = await this.elasticService.getList(
+        'tokens',
+        'identifier',
+        elasticQuery,
+      );
+      const returnAssets = await this.mapElasticNfts(elasticNfts);
+      return new CollectionType({
+        items: returnAssets,
+        count: artistCollections.nfts,
+      });
+    }
+    return new CollectionType({
+      items: [],
+      count: 0,
+    });
+  }
+
+  private async mapElasticNfts(elasticNfts: any[]) {
+    const assets = await this.getAssetsForIdentifiers(
+      elasticNfts?.map((e) => e.identifier),
+    );
+
+    const returnAssets = [];
+    for (const asset of elasticNfts) {
+      returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
+    }
+    return returnAssets;
+  }
+
+  private getCollectionsElasticQuery(
+    collections: string[],
+    offset: number,
+    size: number,
+  ) {
+    return ElasticQuery.create()
+      .withCondition(QueryConditionOptions.must, QueryType.Exists('identifier'))
+      .withMustCondition(
+        QueryType.Should(
+          collections.map((collection) =>
+            QueryType.Match('token', collection, QueryOperator.AND),
+          ),
+        ),
+      )
+      .withPagination(new QueryPagination({ from: offset, size: size }))
+      .withSort([
+        { name: 'timestamp', order: ElasticSortOrder.descending },
+        { name: 'nonce', order: ElasticSortOrder.descending },
+      ]);
+  }
+
+  private async getCollectionAssetsByTraitsAndRanks(
     collection: string,
     traits: NftTrait[],
     limit: number,
     offset: number,
+    sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
-    const [nfts, count] = await this.nftTraitsService.getNftsByTraits(
-      collection,
-      traits,
-      limit,
-      offset,
-    );
+    const [nfts, count] =
+      await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(
+        collection,
+        traits,
+        limit,
+        offset,
+        sortByRank,
+      );
     const assets = nfts?.map((nft) => Asset.fromNft(nft));
     return new CollectionType({ items: assets, count: count });
   }
@@ -344,6 +441,7 @@ export class AssetsGetterService {
         identifier: a.identifier,
         rank: a.rarity.rank,
         score: a.rarity.score,
+        rarity: a.rarity,
       };
     });
     return assetsRarity;

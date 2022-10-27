@@ -5,6 +5,7 @@ import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repos
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
+import { AuctionWithStartBid } from 'src/db/auctions/auctionWithBidCount.dto';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
@@ -215,13 +216,18 @@ export class PersistenceService {
     );
   }
 
-  async getStats(
+  async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
+    paymentToken: string = 'EGLD',
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
-      this.getStats.name,
-      this.collectionStatsRepository.getStats(identifier, marketplaceKey),
+      this.getCollectionStats.name,
+      this.collectionStatsRepository.getStats(
+        identifier,
+        marketplaceKey,
+        paymentToken,
+      ),
     );
   }
 
@@ -449,9 +455,11 @@ export class PersistenceService {
     );
   }
 
-  async saveOrUpdateBulk(nftRarities: NftRarityEntity[]): Promise<void> {
+  async saveOrUpdateBulkRarities(
+    nftRarities: NftRarityEntity[],
+  ): Promise<void> {
     return await this.execute(
-      this.saveOrUpdateBulk.name,
+      this.saveOrUpdateBulkRarities.name,
       this.nftRarityRepository.saveOrUpdateBulk(nftRarities),
     );
   }
@@ -643,7 +651,7 @@ export class PersistenceService {
 
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number, PriceRange]> {
+  ): Promise<[AuctionEntity[] | AuctionWithStartBid[], number, PriceRange]> {
     return await this.execute(
       this.getAuctionsGroupBy.name,
       this.auctionsRepository.getAuctionsGroupBy(queryRequest),
@@ -739,22 +747,6 @@ export class PersistenceService {
     return await this.execute(
       this.getAuctionsOrderByOrdersCount.name,
       this.auctionsRepository.getAuctionsOrderByOrdersCount(queryRequest),
-    );
-  }
-
-  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    return await this.execute(
-      this.getAuctionsEndingBefore.name,
-      this.auctionsRepository.getAuctionsEndingBefore(endDate),
-    );
-  }
-
-  async getAuctionsForMarketplace(
-    startDate: number,
-  ): Promise<[any[], PriceRange]> {
-    return await this.execute(
-      this.getAuctionsForMarketplace.name,
-      this.auctionsRepository.getAuctionsForMarketplace(startDate),
     );
   }
 

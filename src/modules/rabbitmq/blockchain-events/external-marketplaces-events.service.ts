@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationEntity } from 'src/db/notifications';
 import { OrderEntity } from 'src/db/orders';
@@ -20,8 +21,9 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY, XOXNO_KEY } from 'src/utils/constants';
-import denominate from 'src/utils/formatters';
 import {
   BidEvent,
   BuySftEvent,
@@ -46,6 +48,7 @@ export class ExternalMarketplaceEventsService {
     private feedEventsSenderService: FeedEventsSenderService,
     private nftAbiService: NftMarketplaceAbiService,
     private elrondApi: ElrondApiService,
+    private usdPriceService: UsdPriceService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -58,6 +61,7 @@ export class ExternalMarketplaceEventsService {
         case AuctionEventEnum.BidEvent:
           const bidEvent = new BidEvent(event);
           const topics = bidEvent.getTopics();
+
           const bidMarketplace: Marketplace =
             await this.marketplaceService.getMarketplaceByAddress(
               bidEvent.getAddress(),
@@ -264,10 +268,14 @@ export class ExternalMarketplaceEventsService {
             );
 
           if (changePriceAuction) {
+            const paymentToken = await this.usdPriceService.getToken(
+              changePriceAuction.paymentToken,
+            );
             this.updateAuctionPrice(
               changePriceAuction,
               topicsChangePrice.newBid,
               hash,
+              paymentToken?.decimals,
             );
 
             this.auctionsService.updateAuction(
@@ -296,7 +304,15 @@ export class ExternalMarketplaceEventsService {
             topicsUpdatePrice,
           );
           if (updatePriceAuction && newPrice) {
-            this.updateAuctionPrice(updatePriceAuction, newPrice, hash);
+            const paymentToken = await this.usdPriceService.getToken(
+              updatePriceAuction.paymentToken,
+            );
+            this.updateAuctionPrice(
+              updatePriceAuction,
+              newPrice,
+              hash,
+              paymentToken?.decimals,
+            );
 
             this.auctionsService.updateAuction(
               updatePriceAuction,
@@ -365,24 +381,17 @@ export class ExternalMarketplaceEventsService {
     changePriceAuction: AuctionEntity,
     newBid: string,
     hash: string,
+    decimals: number = elrondConfig.decimals,
   ) {
     changePriceAuction.minBid = newBid;
-    changePriceAuction.minBidDenominated = parseFloat(
-      denominate({
-        input: newBid.valueOf()?.toString(),
-        denomination: 18,
-        decimals: 2,
-        showLastNonZeroDecimal: true,
-      }).replace(',', ''),
+    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+      newBid,
+      decimals,
     );
     changePriceAuction.maxBid = newBid;
-    changePriceAuction.maxBidDenominated = parseFloat(
-      denominate({
-        input: newBid.valueOf()?.toString(),
-        denomination: 18,
-        decimals: 2,
-        showLastNonZeroDecimal: true,
-      }).replace(',', ''),
+    changePriceAuction.maxBidDenominated = BigNumberUtils.denominateAmount(
+      newBid,
+      decimals,
     );
     changePriceAuction.blockHash = hash;
   }

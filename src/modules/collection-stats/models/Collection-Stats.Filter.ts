@@ -15,6 +15,9 @@ export class CollectionStatsFilter {
   @Field(() => String, { nullable: true })
   marketplaceKey: string;
 
+  @Field(() => String, { nullable: true })
+  paymentToken: string;
+
   constructor(init?: Partial<CollectionStatsFilter>) {
     Object.assign(this, init);
   }

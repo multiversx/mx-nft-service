@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { elrondConfig } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -19,10 +20,12 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
-import { nominateAmount } from 'src/utils';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { AuctionEntity } from './auction.entity';
+import { AuctionWithStartBid } from './auctionWithBidCount.dto';
 import { PriceRange } from './price-range';
 import {
   getAuctionsForAsset,
@@ -46,6 +49,8 @@ export class AuctionsRepository {
     @Inject(forwardRef(() => PersistenceService))
     private persistenceService: PersistenceService,
     private cacheEventsPublisherService: CacheEventsPublisherService,
+    @Inject(forwardRef(() => UsdPriceService))
+    private readonly usdPriceService: UsdPriceService,
     @InjectRepository(AuctionEntity)
     private auctionsRepository: Repository<AuctionEntity>,
   ) {}
@@ -60,7 +65,7 @@ export class AuctionsRepository {
     );
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
-    const currentPriceSort = this.handleCurrentPriceFilter(
+    const currentPriceSort = await this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
     );
@@ -80,7 +85,7 @@ export class AuctionsRepository {
 
   async getAuctionsGroupBy(
     queryRequest: QueryRequest,
-  ): Promise<[AuctionEntity[], number, PriceRange]> {
+  ): Promise<[AuctionEntity[] | AuctionWithStartBid[], number, PriceRange]> {
     const filterQueryBuilder = new FilterQueryBuilder<AuctionEntity>(
       this.auctionsRepository,
       queryRequest.filters,
@@ -89,18 +94,23 @@ export class AuctionsRepository {
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
 
-    const currentPriceSort = this.handleCurrentPriceFilter(
+    const currentPriceSort = await this.handleCurrentPriceFilter(
       queryRequest,
       queryBuilder,
     );
     queryBuilder
+      .select('a.*')
+      .addSelect(
+        'IF(ord.priceAmountDenominated, ord.priceAmountDenominated, minBidDenominated) as startBid',
+      )
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
     FROM (${getDefaultAuctionsQuery(queryRequest)})`,
         't',
         'a.id = t.id',
       )
-      .groupBy('a.id');
+      .leftJoin('orders', 'ord', 'ord.auctionId=a.id')
+      .groupBy('a.id, ord.priceAmountDenominated');
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     if (currentPriceSort) {
@@ -108,19 +118,29 @@ export class AuctionsRepository {
     } else {
       this.addOrderBy(queryRequest.sorting, queryBuilder, 'a');
     }
-    const [auctions, priceRange] = await Promise.all([
-      queryBuilder.getManyAndCount(),
+
+    const [auctions, count, priceRange] = await Promise.all([
+      queryBuilder.getRawMany(),
+      queryBuilder.getCount(),
       this.getMinMaxForQuery(queryRequest),
     ]);
-
-    return [...auctions, priceRange];
+    return [auctions, count, priceRange];
   }
 
-  private handleCurrentPriceFilter(
+  private async handleCurrentPriceFilter(
     queryRequest: QueryRequest,
     queryBuilder: SelectQueryBuilder<AuctionEntity>,
   ) {
     const maxBidValue = '1000000000';
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    let paymentDecimals = elrondConfig.decimals;
+
+    if (paymentTokenFilter) {
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenFilter,
+      );
+      paymentDecimals = paymentToken?.decimals;
+    }
     const currentPrice = queryRequest.customFilters?.find(
       (f) => f.field === AuctionCustomEnum.CURRENTPRICE,
     );
@@ -137,12 +157,21 @@ export class AuctionsRepository {
         currentPrice.values?.length >= 1 && currentPrice.values[0]
           ? currentPrice.values[0]
           : 0;
+      const minBidDenominated = BigNumberUtils.denominateAmount(
+        minBid.toString(),
+        paymentDecimals,
+      );
       const maxBid =
         currentPrice.values?.length >= 2 && currentPrice.values[1]
           ? currentPrice.values[1]
-          : nominateAmount(maxBidValue);
+          : BigNumberUtils.nominateAmount(maxBidValue, paymentDecimals);
+      const maxBidDenominated = BigNumberUtils.denominateAmount(
+        maxBid.toString(),
+        paymentDecimals,
+      );
       queryBuilder.andWhere(
-        `(if(o.priceAmount, o.priceAmount BETWEEN ${minBid} AND ${maxBid}, a.minBid BETWEEN ${minBid} AND ${maxBid})) `,
+        `(if(o.priceAmountDenominated, o.priceAmountDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated}, 
+          a.minBidDenominated BETWEEN ${minBidDenominated} AND ${maxBidDenominated})) `,
       );
     }
     return currentPriceSort;
@@ -344,44 +373,6 @@ export class AuctionsRepository {
     return count;
   }
 
-  async getAuctionsEndingBefore(endDate: number): Promise<any[]> {
-    const getAuctions = this.auctionsRepository
-      .createQueryBuilder('a')
-      .select('a.*')
-      .addSelect('COUNT(`o`.`auctionId`) as ordersCount')
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .groupBy('a.id')
-      .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.endDate > 0`)
-      .andWhere(`a.endDate <= ${endDate}`)
-      .execute();
-    const getPriceRange = this.getMinMaxForQuery(
-      this.getDefaultQueryRequest(DateUtils.getCurrentTimestamp(), endDate),
-    );
-
-    return await Promise.all([getAuctions, getPriceRange]);
-  }
-
-  async getAuctionsForMarketplace(
-    startDate: number,
-  ): Promise<[any[], PriceRange]> {
-    const getAuctions = await this.auctionsRepository
-      .createQueryBuilder('a')
-      .select('a.*')
-      .addSelect(
-        'if(COUNT(`o`.`auctionId`)>0,MAX(o.priceAmountDenominated),a.minBidDenominated) as startBid',
-      )
-      .leftJoin('orders', 'o', 'o.auctionId=a.id')
-      .groupBy('a.id')
-      .where({ status: AuctionStatusEnum.Running })
-      .andWhere(`a.startDate <= ${startDate}`)
-      .execute();
-    const getPriceRange = await this.getMinMaxForQuery(
-      this.getDefaultQueryRequest(startDate),
-    );
-    return await Promise.all([getAuctions, getPriceRange]);
-  }
-
   async getMinMax(token: string): Promise<PriceRange> {
     const response = await this.auctionsRepository
       .createQueryBuilder('a')
@@ -406,10 +397,8 @@ export class AuctionsRepository {
       queryRequest.filters,
       'a',
     );
-    const paymentTokenFilter = queryRequest.getFilter('paymentToken');
-    const paymentToken = paymentTokenFilter
-      ? paymentTokenFilter.values[0]
-      : 'EGLD';
+    const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
+    const paymentToken = paymentTokenFilter ?? 'EGLD';
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder
@@ -423,7 +412,7 @@ export class AuctionsRepository {
       )
       .andWhere(`a.paymentToken = '${paymentToken}'`)
       .execute();
-    return response[0];
+    return { ...response[0], paymentToken };
   }
 
   async getAuction(id: number): Promise<AuctionEntity> {

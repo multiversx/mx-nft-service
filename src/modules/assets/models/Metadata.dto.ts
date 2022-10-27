@@ -1,6 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { NftMetadata } from 'src/common';
-import { Rarity } from './Rarity';
 
 @ObjectType()
 export class Metadata {

@@ -1,209 +1,117 @@
-import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
-import { NftRarityData } from './nft-rarity-data.model';
+import { JaccardDistancesRarityService } from './algorithms/jaccard-distances.service';
+import { OpenRarityService } from './algorithms/open-rarity.service';
+import { TraitAndStatisticalRarityService } from './algorithms/trait-and-statistical-rarity.service';
+import { NftRarityData } from './models/nft-rarity-data.model';
+import { RarityAlgorithmsEnum } from './models/rarity-algortihms.enum';
 
 @Injectable()
 export class NftRarityComputeService {
-  /// https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
-  async computeJaccardDistancesRarities(
+  constructor(
+    private readonly jaccardDistancesService: JaccardDistancesRarityService,
+    private readonly traitAndStatisticalRarityService: TraitAndStatisticalRarityService,
+    private readonly openRarityService: OpenRarityService,
+  ) {}
+
+  async computeRarities(
     collection: string,
+    collectionSize: number,
     nfts: NftRarityData[],
   ): Promise<NftRarityEntity[]> {
-    if (nfts.length === 1) {
-      return [
-        new NftRarityEntity({
-          collection: collection,
-          identifier: nfts[0].identifier,
-          score: 100,
-          nonce: nfts[0].nonce,
-          rank: 1,
-        }),
-      ];
-    }
+    const jdRarities: { [key: string]: { [key: string]: number } } =
+      await this.jaccardDistancesService.computeJaccardDistancesRarities(nfts);
 
-    const nftsWithMaps = this.computeNftsAttributeMaps(nfts);
+    const dnaSummary: {
+      [key: string]: { [key: string]: { [key: string]: number } };
+    } = this.computeDNASummary(nfts, collectionSize);
 
-    const jaccardDistances: number[][] = await this.computeJd(nftsWithMaps);
-    const avg: number[] = this.computeAvg(jaccardDistances);
-    const scoreArray: number[] = this.computeScore(avg);
+    const openRarities = this.openRarityService.computeOpenRarities(
+      nfts,
+      dnaSummary,
+    );
 
-    let scoreArrayAsc: number[] = [...scoreArray].sort((a, b) => a - b);
+    const tsrRarities: { [key: string]: { [key: string]: number } } =
+      await this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(
+        nfts,
+        dnaSummary,
+        [
+          RarityAlgorithmsEnum.TraitRarity,
+          RarityAlgorithmsEnum.StatisticalRarity,
+        ],
+      );
 
-    return nftsWithMaps.map((nft, i) => {
-      const scoreIndex = scoreArrayAsc.indexOf(scoreArray[i]);
-      scoreArrayAsc = this.markScoreAsUsed(scoreArrayAsc, scoreIndex);
-
+    return nfts.map((nft) => {
+      const nonce = nft.nonce;
       return new NftRarityEntity({
         collection: collection,
         identifier: nft.identifier,
-        score: parseFloat(scoreArray[i].toFixed(3)),
-        nonce: nft.nonce,
-        rank: scoreArray.length - scoreIndex,
+        nonce: nonce,
+        score_openRarity: parseFloat(openRarities[nonce].sum.toFixed(3)),
+        rank_openRarity: openRarities[nonce].rank,
+        score_jaccardDistances: parseFloat(jdRarities[nonce].score.toFixed(3)),
+        rank_jaccardDistances: jdRarities[nonce].rank,
+        score_trait: parseFloat(tsrRarities[nonce].traitScore.toFixed(3)),
+        rank_trait: tsrRarities[nonce].traitRank,
+        score_statistical: parseFloat(
+          tsrRarities[nonce].statisticalScore.toFixed(18),
+        ),
+        rank_statistical: tsrRarities[nonce].statisticalRank,
       });
     });
   }
 
-  private async computeJd(nfts: NftRarityData[]): Promise<number[][]> {
-    let jaccardDistances: number[][] = [];
-
-    for (let i = 0; i < nfts.length; i++) {
-      jaccardDistances[i] = await this.computePartialJd(i, nfts);
-    }
-
-    return jaccardDistances;
-  }
-
-  private async computePartialJd(
-    i: number,
+  private computeDNASummary(
     nfts: NftRarityData[],
-  ): Promise<number[]> {
-    let jaccardDistances: number[] = [];
+    collectionSize: number,
+  ): {
+    [key: string]: { [key: string]: { [key: string]: number } };
+  } {
+    let dnaSummary = {};
 
-    for (let j = 0; j < i; j++) {
-      const commonTraitsCount = this.getCommonTraitsCountFromAttributeMaps(
-        nfts[i].attributesMap,
-        nfts[j].attributesMap,
-      );
-
-      const uniqueTraitsCount =
-        nfts[i].attributesCount + nfts[j].attributesCount - commonTraitsCount;
-
-      const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
-
-      jaccardDistances[j] = 1 - jaccardIndex;
-    }
-
-    return jaccardDistances;
-  }
-
-  private computeAvg(jaccardDistances: number[][]): number[] {
-    let avg: number[] = [];
-    for (let i = 0; i < jaccardDistances.length; i++) {
-      avg[i] = 0;
-      for (let j = 0; j < jaccardDistances.length; j++) {
-        if (i === j) continue;
-        avg[i] +=
-          (i > j ? jaccardDistances[i]?.[j] : jaccardDistances[j]?.[i]) || 0;
-      }
-      const realLength = jaccardDistances.length - 1;
-      if (avg[i] > 0) avg[i] /= realLength;
-    }
-
-    return avg;
-  }
-
-  private computeScore(avg: number[]): number[] {
-    let scores: number[] = [];
-
-    const avgMax: number = Math.max(...avg);
-    const avgMin: number = Math.min(...avg);
-    const avgDiff: number = avgMax - avgMin;
-
-    for (let i = 0; i < avg.length; i++) {
-      scores[i] = this.isUniqueByAvg(avg[i], avgDiff)
-        ? 100
-        : ((avg[i] - avgMin) / avgDiff) * 100;
-    }
-
-    return scores;
-  }
-
-  private isUniqueByAvg(avg: number, avgDiff: number): boolean {
-    return (
-      avg === undefined ||
-      avg === null ||
-      Number(avg) === 0 ||
-      Number(avgDiff) === 0 ||
-      !isFinite(Number(avgDiff))
-    );
-  }
-
-  private markScoreAsUsed(scoreArray: number[], scoreIndex: number): number[] {
-    scoreArray[scoreIndex] = -1;
-    return scoreArray;
-  }
-
-  private getCommonTraitsCountFromAttributeMaps(
-    map1: number[],
-    map2: number[],
-  ): number {
-    let count = 0;
-    for (let i = 0; i < map1.length; i++) {
-      if (map1[i] === map2[i] && map1[i] !== undefined) count++;
-    }
-    return count;
-  }
-
-  private computeNftsAttributeMaps(nfts: NftRarityData[]): NftRarityData[] {
-    let newNftsArray: NftRarityData[] = JSON.parse(JSON.stringify(nfts));
-
-    let traitTypeIndexes: number[] = [];
-    let attributeIndexes: number[][] = [];
-
-    for (let nft of newNftsArray) {
-      nft.attributesMap = [];
-
-      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-        if (value.trait_type === undefined || value.value === undefined) {
-          continue;
+    for (const nft of nfts) {
+      for (let traitKey = 0; traitKey < nft.DNA.length; traitKey++) {
+        if (!dnaSummary[traitKey]) {
+          dnaSummary[traitKey] = {
+            occurences: 0,
+            occurencesPercentage: 0,
+          };
         }
 
-        const traitType = String(value.trait_type);
-        const traitValue = String(value.value);
+        const attributeKey = nft.DNA[traitKey];
 
-        if (traitValue.toLowerCase() === 'none' || traitValue === '') {
-          continue;
+        if (Number.isInteger(attributeKey)) {
+          if (!dnaSummary[traitKey][attributeKey]) {
+            dnaSummary[traitKey][attributeKey] = {
+              occurences: 0,
+              occurencesPercentage: 0,
+            };
+          }
+
+          dnaSummary[traitKey].occurences++;
+          dnaSummary[traitKey][attributeKey].occurences++;
         }
-
-        let traitIndex: number = null;
-        let attributeIndex: number = null;
-
-        traitIndex = this.getOrSetTraitIndex(traitTypeIndexes, traitType);
-
-        attributeIndex = this.getOrSetAttributeIndex(
-          attributeIndexes,
-          traitIndex,
-          traitValue,
-        );
-
-        nft.attributesMap[traitIndex] = attributeIndex;
       }
-
-      nft.attributesCount = nft.metadata.attributes.length;
-
-      nft.metadata = null;
     }
 
-    return newNftsArray;
-  }
+    for (const [traitKey, traitProperties] of Object.entries(dnaSummary)) {
+      dnaSummary[traitKey].occurencesPercentage =
+        (dnaSummary[traitKey].occurences / collectionSize) * 100;
 
-  private getOrSetTraitIndex(
-    traitTypeIndexes: number[],
-    traitType: string,
-  ): number {
-    if (traitTypeIndexes[traitType] === undefined) {
-      traitTypeIndexes[traitType] = Object.entries(traitTypeIndexes).length;
+      for (const [traitPropertyKey] of Object.entries(traitProperties)) {
+        const attributeKey = parseInt(traitPropertyKey);
+        if (Number.isInteger(attributeKey)) {
+          dnaSummary[traitKey][attributeKey].occurencesPercentage =
+            (dnaSummary[traitKey][attributeKey].occurences / collectionSize) *
+            100;
+          dnaSummary[traitKey][attributeKey].frequency =
+            dnaSummary[traitKey][attributeKey].occurences / collectionSize;
+          dnaSummary[traitKey][attributeKey].rarity =
+            collectionSize / dnaSummary[traitKey][attributeKey].occurences;
+        }
+      }
     }
 
-    return traitTypeIndexes[traitType];
-  }
-
-  private getOrSetAttributeIndex(
-    attributeIndexes: number[][],
-    traitIndex: number,
-    traitValue: string,
-  ): number {
-    if (attributeIndexes?.[traitIndex] === undefined) {
-      attributeIndexes[traitIndex] = [];
-    }
-
-    if (attributeIndexes[traitIndex][traitValue] === undefined) {
-      attributeIndexes[traitIndex][traitValue] = Object.entries(
-        attributeIndexes[traitIndex],
-      ).length;
-    }
-
-    return attributeIndexes[traitIndex][traitValue];
+    return dnaSummary;
   }
 }
