@@ -771,7 +771,7 @@ type Mutation {
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
   buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
-  buyTicket(input: BuyTicketsArgs!): TransactionNode!
+  buyTickets(input: BuyTicketsArgs!): TransactionNode!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   configureCollection(input: ConfigureCollectionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!

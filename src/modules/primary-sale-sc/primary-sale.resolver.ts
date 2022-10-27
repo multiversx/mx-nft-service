@@ -20,7 +20,6 @@ import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
-import { bool } from 'aws-sdk/clients/signer';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -95,7 +94,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async buyTicket(
+  async buyTickets(
     @Args('input', { type: () => BuyTicketsArgs })
     input: BuyTicketsArgs,
     @User() user: any,
