@@ -4,7 +4,6 @@ import BigNumber from 'bignumber.js';
 import {
   Address,
   AddressValue,
-  BigUIntValue,
   BytesValue,
   ContractFunction,
   Interaction,
@@ -12,14 +11,11 @@ import {
   TokenIdentifierValue,
   TokenPayment,
   U32Value,
-  U64Value,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
-import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
-import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
 import {
   ElrondProxyService,
   getSmartContract,
@@ -296,22 +292,22 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-    let bid = contract.call({
-      func: new ContractFunction('ESDTTransfer'),
-      value: TokenPayment.egldFromBigInteger(0),
-      args: [
-        BytesValue.fromUTF8(process.env.HOLORIDE_PAYMENT_TOKEN),
-        new U64Value(new BigNumber(request.price)),
-        BytesValue.fromUTF8('buy_tickets'),
+
+    return contract.methodsExplicit
+      .buy_tickets([
         BytesValue.fromUTF8(request.collectionIdentifier),
         new U32Value(new BigNumber(request.ticketsNumber)),
-      ],
-
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-
-    return bid.toPlainObject(new Address(ownerAddress));
+      ])
+      .withSingleESDTTransfer(
+        TokenPayment.fungibleFromBigInteger(
+          process.env.HOLORIDE_PAYMENT_TOKEN,
+          new BigNumber(request.price),
+        ),
+      )
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.buyTickets)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async claim(
@@ -321,59 +317,13 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-
-    let withdraw = contract.call({
-      func: new ContractFunction('claim'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [BytesValue.fromUTF8(request.collectionIdentifier)],
-      gasLimit: gas.withdraw,
-      chainID: elrondConfig.chainID,
-    });
-    return withdraw.toPlainObject(new Address(ownerAddress));
-  }
-
-  async configureCollection(
-    ownerAddress: string,
-    request: ConfigureCollectionArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let bid = contract.call({
-      func: new ContractFunction('configure_collection_for_sale'),
-      value: TokenPayment.egldFromBigInteger(0),
-      args: [
-        BytesValue.fromUTF8(request.collectionIdentifier),
-        new BigUIntValue(new BigNumber(request.price)),
-        new U32Value(new BigNumber(request.maxNftsPerWallet)),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
-  }
-
-  async setSaleTime(
-    ownerAddress: string,
-    request: SetSaleClaimPeriodArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let bid = contract.call({
-      func: new ContractFunction('set_sale_timestamps'),
-      value: TokenPayment.egldFromBigInteger(0),
-      args: [
-        BytesValue.fromUTF8(request.collectionIdentifier),
-        new U64Value(new BigNumber(request.startSale)),
-        new U64Value(new BigNumber(request.endSale)),
-        new U64Value(new BigNumber(request.startClaim)),
-        new U64Value(new BigNumber(request.endClaim)),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .claim([new TokenIdentifierValue(request.collectionIdentifier)])
+      .withValue(TokenPayment.egldFromAmount(0))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   private async getFirstQueryResult(interaction: Interaction) {

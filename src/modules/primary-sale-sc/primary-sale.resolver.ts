@@ -14,8 +14,6 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
 import { User } from '../auth/user';
-import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
-import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
@@ -102,28 +100,5 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     @User() user: any,
   ): Promise<TransactionNode> {
     return await this.primarySaleService.claim(user.publicKey, input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async configureCollection(
-    @Args('input', { type: () => ConfigureCollectionArgs })
-    input: ConfigureCollectionArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    return await this.primarySaleService.configureCollection(
-      user.publicKey,
-      input,
-    );
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async setSaleClaimPeriod(
-    @Args('input', { type: () => SetSaleClaimPeriodArgs })
-    input: SetSaleClaimPeriodArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    return await this.primarySaleService.setSaleTime(user.publicKey, input);
   }
 }

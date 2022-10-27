@@ -542,12 +542,6 @@ enum CollectionsSortingEnum {
   Verified
 }
 
-input ConfigureCollectionArgs {
-  collectionIdentifier: String!
-  maxNftsPerWallet: Int!
-  price: String!
-}
-
 input ConnectionArgs {
   """Paginate after opaque cursor"""
   after: String
@@ -773,7 +767,6 @@ type Mutation {
   buySft(input: BuySftActionArgs!): TransactionNode!
   buyTickets(input: BuyTicketsArgs!): TransactionNode!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
-  configureCollection(input: ConfigureCollectionArgs!): TransactionNode!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
@@ -784,7 +777,6 @@ type Mutation {
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
-  setSaleClaimPeriod(input: SetSaleClaimPeriodArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
@@ -1088,14 +1080,6 @@ input SetNftRolesArgs {
   addressToTransfer: String!
   collection: String!
   roles: [String!]!
-}
-
-input SetSaleClaimPeriodArgs {
-  collectionIdentifier: String!
-  endClaim: Int!
-  endSale: Int!
-  startClaim: Int!
-  startSale: Int!
 }
 
 type SocialLink {
