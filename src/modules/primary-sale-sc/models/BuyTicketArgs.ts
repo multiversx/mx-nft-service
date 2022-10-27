@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { Matches, MaxLength, MinLength } from 'class-validator';
+import { Matches } from 'class-validator';
 import {
   COLLECTION_IDENTIFIER_ERROR,
   COLLECTION_IDENTIFIER_RGX,
