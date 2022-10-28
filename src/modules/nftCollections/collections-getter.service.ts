@@ -166,19 +166,21 @@ export class CollectionsGetterService {
 
   private applyFilters(filters: CollectionsFilter, collections: Collection[]) {
     if (this.hasVerifiedFilter(filters)) {
-      collections = collections.filter(
+      collections = collections?.filter(
         (token) => token.verified === filters?.verified,
       );
     }
 
     if (filters?.creatorAddress) {
-      collections = collections.filter(
+      collections = collections?.filter(
         (token) => token.artistAddress === filters?.creatorAddress,
       );
     }
 
     if (filters?.type) {
-      collections = collections.filter((token) => token.type === filters?.type);
+      collections = collections?.filter(
+        (token) => token.type === filters?.type,
+      );
     }
     return collections;
   }
