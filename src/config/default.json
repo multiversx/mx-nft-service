@@ -54,6 +54,7 @@
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
     "addBurnQuantity": 200000,
+    "buyTickets": 16000000,
     "nftBurn": 10000000
   },
   "cronJobs": {
