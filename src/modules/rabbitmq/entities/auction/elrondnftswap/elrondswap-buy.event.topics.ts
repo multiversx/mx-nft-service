@@ -16,7 +16,7 @@ export class ElrondSwapBuyTopics {
       Buffer.from(rawTopics[4], 'base64').toString('hex'),
       16,
     ).toString();
-    this.currentWinner = new Address(Buffer.from(rawTopics[9], 'base64'));
+    this.currentWinner = new Address(Buffer.from(rawTopics[5], 'base64'));
     this.currentBid = Buffer.from(rawTopics[6], 'base64')
       .toString('hex')
       .hexBigNumberToString();
