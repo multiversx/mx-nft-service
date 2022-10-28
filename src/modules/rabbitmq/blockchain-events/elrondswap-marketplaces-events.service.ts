@@ -226,6 +226,15 @@ export class ElrondSwapMarketplaceEventsService {
           break;
 
         case ElrondNftsSwapAuctionEventEnum.Purchase:
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ElrondNftsSwapAuctionEventEnum.UpdateListing
+          ) {
+            this.logger.log(
+              `Update Listing event detected for hash '${hash}' at Purchase external marketplace ${event.address}, ignore it for the moment`,
+            );
+            return;
+          }
           const buySftEvent = new ElrondSwapBuyEvent(event);
           const buySftTopics = buySftEvent.getTopics();
           const buyMarketplace: Marketplace =
