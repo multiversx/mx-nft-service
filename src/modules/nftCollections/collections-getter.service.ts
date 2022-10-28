@@ -85,11 +85,20 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections] = await this.getAllTrendingCollections();
+    let [trendingCollections] = await this.getOrSetTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
+  }
+
+  async getOrSetTrendingCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.TrendingCollections.key,
+      async () => await this.getAllTrendingCollections(),
+      CacheInfo.TrendingCollections.ttl,
+    );
   }
 
   async getAllTrendingCollections(): Promise<[Collection[], number]> {
@@ -105,6 +114,17 @@ export class CollectionsGetterService {
       );
     }
     return [mappedCollections, mappedCollections.length];
+  }
+
+  async getOrSetActiveCollectionsFromLast30Days(): Promise<
+    [Collection[], number]
+  > {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.ActiveCollectionLast30Days.key,
+      async () => await this.getActiveCollectionsFromLast30Days(),
+      CacheInfo.ActiveCollectionLast30Days.ttl,
+    );
   }
 
   async getActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
@@ -129,7 +149,7 @@ export class CollectionsGetterService {
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     let [activeCollections, count] =
-      await this.getActiveCollectionsFromLast30Days();
+      await this.getOrSetActiveCollectionsFromLast30Days();
     activeCollections = this.applyFilters(filters, activeCollections);
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
