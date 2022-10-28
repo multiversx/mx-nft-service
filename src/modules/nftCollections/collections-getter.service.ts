@@ -109,9 +109,10 @@ export class CollectionsGetterService {
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of trendingCollections) {
-      mappedCollections.push(
-        collections.find((c) => c.collection === trendingCollection.collection),
+      const mappedCollection = collections.find(
+        (c) => c.collection === trendingCollection.collection,
       );
+      if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
   }
@@ -128,16 +129,17 @@ export class CollectionsGetterService {
   }
 
   async getActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
-    const [trendingCollections] = await Promise.all([
+    const [activeCollections] = await Promise.all([
       this.persistenceService.getActiveCollectionsLast30Days(),
       this.persistenceService.getActiveCollectionsLast30DaysCount(),
     ]);
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
-    for (const trendingCollection of trendingCollections) {
-      mappedCollections.push(
-        collections.find((c) => c.collection === trendingCollection.collection),
+    for (const trendingCollection of activeCollections) {
+      const mappedCollection = collections.find(
+        (c) => c.collection === trendingCollection.collection,
       );
+      if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
   }
