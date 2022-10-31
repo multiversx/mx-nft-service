@@ -205,7 +205,7 @@ export class NftScamService {
     nftsFromElastic: any,
     elrondApiAbout: ElrondApiAbout,
   ): Promise<void> {
-    let nftsWithoutScamOutdatedInElastic: string[] = [];
+    let nftsWithoutScamOutdatedInElastic: Nft[] = [];
     let nftsWithScamOutdatedInElastic: Nft[] = [];
     let nftsOutdatedOrMissingFromDb: Nft[] = [];
 
@@ -231,7 +231,7 @@ export class NftScamService {
         const updateScamInfoInDb = !nftFromDb || nftFromDb.type !== undefined;
         if (updateScamInfoInElastic || updateScamInfoInDb) {
           if (updateScamInfoInElastic) {
-            nftsWithoutScamOutdatedInElastic.push(nftFromApi.identifier);
+            nftsWithoutScamOutdatedInElastic.push(nftFromApi);
           }
           if (updateScamInfoInDb) {
             nftsOutdatedOrMissingFromDb.push(nftFromApi);

@@ -35,7 +35,7 @@ export class NftScamElasticService {
   }
 
   async setBulkNftScamInfoInElastic(
-    nfts: Nft[] | string[],
+    nfts: Nft[],
     version: string,
     clearScamInfoIfEmpty?: boolean,
   ): Promise<void> {
@@ -83,16 +83,16 @@ export class NftScamElasticService {
   }
 
   buildNftScamInfoBulkUpdate(
-    nfts: Nft[] | string[],
+    nfts: Nft[],
     version: string,
     clearScamInfoIfEmpty?: boolean,
   ): string[] {
     let updates: string[] = [];
-    nfts.forEach((nft) => {
+    for (const nft of nfts) {
       updates.push(
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
-          nft.identifier ?? nft,
+          nft.identifier,
           'nft_scamInfoVersion',
           version,
         ),
@@ -118,7 +118,7 @@ export class NftScamElasticService {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nft.identifier ?? nft,
+            nft.identifier,
             'nft_scamInfoType',
             null,
           ),
@@ -126,13 +126,13 @@ export class NftScamElasticService {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nft.identifier ?? nft,
+            nft.identifier,
             'nft_scamInfoDescription',
             null,
           ),
         );
       }
-    });
+    }
     return updates;
   }
 
