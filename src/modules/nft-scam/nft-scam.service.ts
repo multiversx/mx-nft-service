@@ -22,14 +22,14 @@ export class NftScamService {
 
   async validateOrUpdateNftScamInfo(
     identifier: string,
-    optionalParams?: NftScamRelatedData,
+    nftScamRelatedData?: NftScamRelatedData,
   ): Promise<void> {
     const [nftFromApi, nftFromElastic, nftFromDb, elrondApiAbout]: [
       Nft,
       any,
       NftScamEntity,
       ElrondApiAbout,
-    ] = await this.getNftsAndElrondAbout(identifier, optionalParams);
+    ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
 
     if (!nftFromApi.scamInfo) {
       await this.validateOrUpdateScamInfoDataForNoScamNft(
@@ -50,16 +50,16 @@ export class NftScamService {
 
   async getNftsAndElrondAbout(
     identifier: string,
-    optionalParams?: NftScamRelatedData,
+    nftScamRelatedData?: NftScamRelatedData,
   ): Promise<[Nft, any, NftScamEntity, ElrondApiAbout]> {
     return await Promise.all([
-      optionalParams?.nftFromApi ??
+      nftScamRelatedData?.nftFromApi ??
         this.elrondApiService.getNftScamInfo(identifier, true),
-      optionalParams?.nftFromElastic ??
+      nftScamRelatedData?.nftFromElastic ??
         this.nftScamElasticService.getNftWithScamInfoFromElastic(identifier),
-      optionalParams?.nftFromDb ??
+      nftScamRelatedData?.nftFromDb ??
         this.persistenceService.getNftScamInfo(identifier),
-      optionalParams?.elrondApiAbout ??
+      nftScamRelatedData?.elrondApiAbout ??
         this.elrondApiService.getElrondApiAbout(),
     ]);
   }
