@@ -557,7 +557,6 @@ export class ElrondApiService {
     const query = new AssetsQuery()
       .addBefore(beforeTimestamp)
       .addPageSize(0, size)
-      .addQuery('hasUris=true')
       .addFields(fields);
     const url = `nfts${query.build()}`;
     let nfts = await this.doGetGeneric(this.getNftsBeforeTimestamp.name, url);
