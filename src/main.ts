@@ -14,6 +14,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
+import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -72,6 +73,12 @@ async function bootstrap() {
     await processorApp.listen(6015);
   }
 
+  if (process.env.ENABLE_SCAM_CRONJOBS === 'true') {
+    let processorApp = await NestFactory.create(ElasticNftScamUpdaterModule);
+    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    await processorApp.listen(6016);
+  }
+
   const logger = new Logger('Bootstrapper');
 
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -105,10 +112,16 @@ async function bootstrap() {
   );
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
   logger.log(
-    `Rarity cron jobs are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
+    `Elastic updates are active: ${process.env.ENABLE_ELASTIC_UPDATES}`,
   );
   logger.log(
-    `Elastic updates are active: ${process.env.ENABLE_ELASTIC_UPDATES}`,
+    `Elastic nft traits are active: ${process.env.ENABLE_TRAITS_CRONJOBS}`,
+  );
+  logger.log(
+    `Elastic nft rarities are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
+  );
+  logger.log(
+    `Elastic nft scams are active: ${process.env.ENABLE_SCAM_CRONJOBS}`,
   );
 }
 

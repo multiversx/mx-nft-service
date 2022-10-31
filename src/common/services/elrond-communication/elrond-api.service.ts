@@ -20,6 +20,7 @@ import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
 import { ElrondStats } from './models/elrond-stats.model';
+import { ElrondApiAbout } from './models/elrond-api-about.model';
 
 @Injectable()
 export class ElrondApiService {
@@ -547,22 +548,44 @@ export class ElrondApiService {
     );
   }
 
-  async getNftsWithAttributesBeforeTimestamp(
+  async getNftsBeforeTimestamp(
     beforeTimestamp: number,
     size: number,
+    fields: string[],
   ): Promise<[Nft[], number]> {
     const query = new AssetsQuery()
       .addBefore(beforeTimestamp)
       .addPageSize(0, size)
       .addQuery('hasUris=true')
-      .addFields(['identifier', 'metadata', 'timestamp']);
+      .addFields(fields);
     const url = `nfts${query.build()}`;
-    let nfts = await this.doGetGeneric(
-      this.getNftsWithAttributesBeforeTimestamp.name,
-      url,
-    );
+    let nfts = await this.doGetGeneric(this.getNftsBeforeTimestamp.name, url);
     const lastTimestamp = nfts?.[nfts.length - 1]?.timestamp ?? beforeTimestamp;
+    return [nfts, lastTimestamp];
+  }
+
+  async getNftsWithAttributesBeforeTimestamp(
+    beforeTimestamp: number,
+    size: number,
+  ): Promise<[Nft[], number]> {
+    let [nfts, lastTimestamp] = await this.getNftsBeforeTimestamp(
+      beforeTimestamp,
+      size,
+      ['identifier', 'metadata', 'timestamp'],
+    );
     nfts = nfts.filter((nft) => nft.metadata?.attributes);
+    return [nfts, lastTimestamp];
+  }
+
+  async getNftsWithScamInfoBeforeTimestamp(
+    beforeTimestamp: number,
+    size: number,
+  ): Promise<[Nft[], number]> {
+    let [nfts, lastTimestamp] = await this.getNftsBeforeTimestamp(
+      beforeTimestamp,
+      size,
+      ['identifier', 'scamInfo', 'timestamp'],
+    );
     return [nfts, lastTimestamp];
   }
 
@@ -716,6 +739,37 @@ export class ElrondApiService {
   async getElrondStats(): Promise<ElrondStats> {
     const stats = await this.doGetGeneric(this.getElrondStats.name, 'stats');
     return new ElrondStats(stats);
+  }
+
+  async getElrondApiAbout(): Promise<ElrondApiAbout> {
+    const about = await this.doGetGeneric(this.getElrondStats.name, 'about');
+    return new ElrondApiAbout(about);
+  }
+
+  async getBulkNftScamInfo(
+    identifiers: string[],
+    computeScamInfo: boolean,
+  ): Promise<Nft[]> {
+    const query = new AssetsQuery()
+      .addIdentifiers(identifiers)
+      .addPageSize(0, identifiers.length)
+      .addFields(['identifier', 'scamInfo'])
+      .addComputeScamInfo(computeScamInfo);
+    const url = `nfts${query.build(false)}`;
+    let nfts = await this.doGetGeneric(this.getBulkNftScamInfo.name, url);
+    return nfts;
+  }
+
+  async getNftScamInfo(
+    identifier: string,
+    computeScamInfo: boolean,
+  ): Promise<Nft> {
+    const query = new AssetsQuery()
+      .addFields(['identifier', 'scamInfo'])
+      .addComputeScamInfo(computeScamInfo);
+    const url = `nfts/${identifier}${query.build(false)}`;
+    let nftScamInfo = await this.doGetGeneric(this.getNftScamInfo.name, url);
+    return nftScamInfo;
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

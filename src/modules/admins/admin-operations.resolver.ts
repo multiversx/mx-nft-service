@@ -6,6 +6,7 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { NftScamService } from '../nft-scam/nft-scam.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -13,6 +14,7 @@ export class AdminOperationsResolver {
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
+    private readonly nftScamService: NftScamService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -128,5 +130,16 @@ export class AdminOperationsResolver {
   updateAllNftTraits(): boolean {
     this.nftTraitService.updateAllNftTraits();
     return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async updateAllNftScam(): Promise<boolean> {
+    try {
+      this.nftScamService.validateOrUpdateAllNftsScamInfo();
+      return true;
+    } catch (error) {
+      throw new ApolloError(error);
+    }
   }
 }
