@@ -43,19 +43,24 @@ export class NftScamService {
         nftFromDb,
       );
     } else if (nftFromApi.scamInfo) {
-      await this.validateOrUpdateScamInfoDataForScamNft();
+      await this.validateOrUpdateScamInfoDataForScamNft(
+        elrondApiAbout,
+        nftFromApi,
+        nftFromElastic,
+        nftFromDb,
+      );
     }
   }
 
   private async validateOrUpdateScamInfoDataForNoScamNft(
-    elrondApiAbout?: ElrondApiAbout,
-    nftFromApi?: Nft,
-    nftFromElastic?: any,
-    nftFromDb?: NftScamEntity,
+    elrondApiAbout: ElrondApiAbout,
+    nftFromApi: Nft,
+    nftFromElastic: any,
+    nftFromDb: NftScamEntity,
   ): Promise<void> {
-    const setScamInfoNullInElastic = nftFromElastic.nft_scamInfoType;
+    const clearScamInfoInElastic = nftFromElastic.nft_scamInfoType;
     const updateScamInfoInElastic =
-      setScamInfoNullInElastic ||
+      clearScamInfoInElastic ||
       nftFromElastic.nft_scamInfoVersion !== elrondApiAbout.version;
     const updateScamInfoInDb = !nftFromDb || nftFromDb.type !== undefined;
 
@@ -69,13 +74,12 @@ export class NftScamService {
         ),
       );
     }
-
     if (updateScamInfoInElastic) {
       updatePromises.push(
         this.nftScamElasticService.setBulkNftScamInfoInElastic(
           [nftFromApi],
           elrondApiAbout.version,
-          setScamInfoNullInElastic,
+          clearScamInfoInElastic,
         ),
       );
     }
@@ -84,10 +88,10 @@ export class NftScamService {
   }
 
   private async validateOrUpdateScamInfoDataForScamNft(
-    elrondApiAbout?: ElrondApiAbout,
-    nftFromApi?: Nft,
-    nftFromElastic?: any,
-    nftFromDb?: NftScamEntity,
+    elrondApiAbout: ElrondApiAbout,
+    nftFromApi: Nft,
+    nftFromElastic: any,
+    nftFromDb: NftScamEntity,
   ): Promise<void> {
     const isElasticScamInfoDifferent =
       ScamInfo.areApiAndElasticScamInfoDifferent(
@@ -115,7 +119,6 @@ export class NftScamService {
         ),
       );
     }
-
     if (isElasticScamInfoDifferent) {
       updatePromises.push(
         this.nftScamElasticService.setBulkNftScamInfoInElastic(
