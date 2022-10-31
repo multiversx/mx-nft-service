@@ -61,6 +61,8 @@ export class NftEventsService {
               topics.collection,
               bidEvent.getAddress(),
             );
+
+          if (!bidMarketplace) return;
           this.logger.log(
             `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
           );
@@ -108,6 +110,8 @@ export class NftEventsService {
               buySftTopics.collection,
               buySftEvent.getAddress(),
             );
+
+          if (!buyMarketplace) return;
           this.logger.log(
             `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
           );
@@ -163,6 +167,8 @@ export class NftEventsService {
               topicsWithdraw.collection,
               withdraw.getAddress(),
             );
+          if (!withdrawMarketplace) return;
+
           this.logger.log(
             `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
           );
@@ -187,6 +193,8 @@ export class NftEventsService {
               topicsEndAuction.collection,
               endAuctionEvent.getAddress(),
             );
+
+          if (!endMarketplace) return;
           this.logger.log(
             `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
           );
@@ -220,6 +228,8 @@ export class NftEventsService {
               topicsAuctionToken.collection,
               auctionToken.getAddress(),
             );
+
+          if (!auctionTokenMarketplace) return;
           this.logger.log(
             `Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`,
           );

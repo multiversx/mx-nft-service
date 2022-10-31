@@ -49,12 +49,12 @@ export class CacheInfo {
     ttl: TimeConstants.oneMinute * 10,
   };
 
-  static trendingCollections: CacheInfo = {
+  static TrendingCollections: CacheInfo = {
     key: 'trendingCollections',
     ttl: TimeConstants.oneDay,
   };
 
-  static activeCollectionLast30Days: CacheInfo = {
+  static ActiveCollectionLast30Days: CacheInfo = {
     key: 'activeCollectionLast30Days',
     ttl: TimeConstants.oneDay,
   };

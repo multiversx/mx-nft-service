@@ -75,7 +75,7 @@ export class ArtistsService {
     size: number = 25,
   ): Promise<[Account[], number]> {
     const [trendingCollections, count] =
-      await this.collectionsGetterService.getAllTrendingCollections();
+      await this.collectionsGetterService.getOrSetTrendingCollections();
 
     const trendingCreators = trendingCollections?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(

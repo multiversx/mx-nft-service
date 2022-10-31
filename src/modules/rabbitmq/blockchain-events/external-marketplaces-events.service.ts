@@ -114,6 +114,15 @@ export class ExternalMarketplaceEventsService {
           break;
         case ExternalAuctionEventEnum.Buy:
         case ExternalAuctionEventEnum.BulkBuy:
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ExternalAuctionEventEnum.UpdateOffer
+          ) {
+            this.logger.log(
+              `Update Offer event detected for hash '${hash}' at buy external marketplace, ignore it for the moment`,
+            );
+            return;
+          }
           const buySftEvent = new BuySftEvent(event);
           const buySftTopics = buySftEvent.getTopics();
           const buyMarketplace: Marketplace =
@@ -168,6 +177,15 @@ export class ExternalMarketplaceEventsService {
           }
           break;
         case AuctionEventEnum.WithdrawEvent:
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ExternalAuctionEventEnum.UpdateOffer
+          ) {
+            this.logger.log(
+              `Update Offer event detected for hash '${hash}' at withdraw external marketplace ${event.address}, ignore it for the moment`,
+            );
+            return;
+          }
           const withdraw = new WithdrawEvent(event);
           const topicsWithdraw = withdraw.getTopics();
           const withdrawMarketplace: Marketplace =
