@@ -66,9 +66,18 @@ Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
   const cloned = [...this];
 
   if (predicate) {
-    cloned.sort((a, b) => predicate(a) - predicate(b));
+    cloned.sort((a, b) => {
+      const x = predicate(a) === 0 ? Infinity : predicate(a);
+      const y = predicate(b) === 0 ? Infinity : predicate(b);
+
+      return x - y;
+    });
   } else {
-    cloned.sort((a, b) => a - b);
+    cloned.sort((a, b) => {
+      const x = a === 0 ? Infinity : a;
+      const y = b === 0 ? Infinity : b;
+      return x - y;
+    });
   }
 
   return cloned;
