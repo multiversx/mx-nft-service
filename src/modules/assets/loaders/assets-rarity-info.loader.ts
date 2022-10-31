@@ -21,7 +21,7 @@ export class AssetRarityInfoProvider extends BaseProvider<string> {
   async getData(identifiers: string[]) {
     const nftRarities =
       await this.elrondApiService.getBulkNftRaritiesByIdentifiers(identifiers);
-    return nftRarities?.groupBy((nft) => nft.identifier, false);
+    return nftRarities?.groupBy((nft) => nft.identifier);
   }
 
   public batchRarity = async (identifiers: string[], data: any) => {

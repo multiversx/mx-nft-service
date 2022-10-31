@@ -32,7 +32,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
     const getNftsResponse = await Promise.all(getNftsPromises);
 
     const nftsGroupByCollection = getNftsResponse.map((nftArray) =>
-      nftArray.groupBy((nft) => nft.collection, false),
+      nftArray.groupBy((nft) => nft.collection),
     );
     return this.mapKeyArrayObject(nftsGroupByCollection);
   }
