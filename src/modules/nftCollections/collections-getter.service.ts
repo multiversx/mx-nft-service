@@ -85,11 +85,20 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections] = await this.getAllTrendingCollections();
+    let [trendingCollections] = await this.getOrSetTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
+  }
+
+  async getOrSetTrendingCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.TrendingCollections.key,
+      async () => await this.getAllTrendingCollections(),
+      CacheInfo.TrendingCollections.ttl,
+    );
   }
 
   async getAllTrendingCollections(): Promise<[Collection[], number]> {
@@ -100,24 +109,37 @@ export class CollectionsGetterService {
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of trendingCollections) {
-      mappedCollections.push(
-        collections.find((c) => c.collection === trendingCollection.collection),
+      const mappedCollection = collections.find(
+        (c) => c.collection === trendingCollection.collection,
       );
+      if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
   }
 
+  async getOrSetActiveCollectionsFromLast30Days(): Promise<
+    [Collection[], number]
+  > {
+    return await this.cacheService.getOrSetCache(
+      this.redisClient,
+      CacheInfo.ActiveCollectionLast30Days.key,
+      async () => await this.getActiveCollectionsFromLast30Days(),
+      CacheInfo.ActiveCollectionLast30Days.ttl,
+    );
+  }
+
   async getActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
-    const [trendingCollections] = await Promise.all([
+    const [activeCollections] = await Promise.all([
       this.persistenceService.getActiveCollectionsLast30Days(),
       this.persistenceService.getActiveCollectionsLast30DaysCount(),
     ]);
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
-    for (const trendingCollection of trendingCollections) {
-      mappedCollections.push(
-        collections.find((c) => c.collection === trendingCollection.collection),
+    for (const trendingCollection of activeCollections) {
+      const mappedCollection = collections.find(
+        (c) => c.collection === trendingCollection.collection,
       );
+      if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
   }
@@ -129,7 +151,7 @@ export class CollectionsGetterService {
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     let [activeCollections, count] =
-      await this.getActiveCollectionsFromLast30Days();
+      await this.getOrSetActiveCollectionsFromLast30Days();
     activeCollections = this.applyFilters(filters, activeCollections);
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
@@ -146,19 +168,21 @@ export class CollectionsGetterService {
 
   private applyFilters(filters: CollectionsFilter, collections: Collection[]) {
     if (this.hasVerifiedFilter(filters)) {
-      collections = collections.filter(
+      collections = collections?.filter(
         (token) => token.verified === filters?.verified,
       );
     }
 
     if (filters?.creatorAddress) {
-      collections = collections.filter(
+      collections = collections?.filter(
         (token) => token.artistAddress === filters?.creatorAddress,
       );
     }
 
     if (filters?.type) {
-      collections = collections.filter((token) => token.type === filters?.type);
+      collections = collections?.filter(
+        (token) => token.type === filters?.type,
+      );
     }
     return collections;
   }

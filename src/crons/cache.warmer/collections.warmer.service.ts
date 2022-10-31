@@ -84,9 +84,9 @@ export class CollectionsWarmerService {
         const result =
           await this.collectionsGetterService.getAllTrendingCollections();
         await this.invalidateKey(
-          CacheInfo.trendingCollections.key,
+          CacheInfo.TrendingCollections.key,
           result,
-          CacheInfo.trendingCollections.ttl,
+          CacheInfo.TrendingCollections.ttl,
         );
       },
       true,
@@ -101,9 +101,9 @@ export class CollectionsWarmerService {
         const result =
           await this.collectionsGetterService.getActiveCollectionsFromLast30Days();
         await this.invalidateKey(
-          CacheInfo.activeCollectionLast30Days.key,
+          CacheInfo.ActiveCollectionLast30Days.key,
           result,
-          CacheInfo.activeCollectionLast30Days.ttl,
+          CacheInfo.ActiveCollectionLast30Days.ttl,
         );
       },
       true,

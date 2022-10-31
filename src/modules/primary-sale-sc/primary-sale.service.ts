@@ -3,29 +3,35 @@ import '../../utils/extensions';
 import BigNumber from 'bignumber.js';
 import {
   Address,
-  BigUIntValue,
+  AddressValue,
   BytesValue,
   ContractFunction,
   Interaction,
   ResultsParser,
+  TokenIdentifierValue,
   TokenPayment,
   U32Value,
-  U64Value,
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
-import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
-import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
-import { ElrondProxyService, RedisCacheService } from 'src/common';
-import { PrimarySaleTimeAbi } from './models/PrimarySaleTimestamp.abi';
+import {
+  ElrondProxyService,
+  getSmartContract,
+  RedisCacheService,
+} from 'src/common';
+import {
+  PrimarySaleTimeAbi,
+  TicketInfoAbi,
+} from './models/PrimarySaleTimestamp.abi';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
+import { TicketInfo } from './models/TicketInfo';
 
 @Injectable()
 export class PrimarySaleService {
@@ -153,13 +159,13 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-    let price = <Interaction>(
+    let maxNftPerWalletInteraction = <Interaction>(
       contract.methodsExplicit.max_units_per_wallet([
         BytesValue.fromUTF8(collectionIdentifier),
       ])
     );
 
-    const response = await this.getFirstQueryResult(price);
+    const response = await this.getFirstQueryResult(maxNftPerWalletInteraction);
     return response.firstValue.valueOf().toFixed();
   }
 
@@ -182,6 +188,84 @@ export class PrimarySaleService {
         exception: err,
       });
     }
+  }
+
+  async getMyTickets(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<TicketInfo[]> {
+    try {
+      const cacheKey = generateCacheKeyFromParams(
+        'myTickets',
+        address,
+        collectionIdentifier,
+      );
+      return await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.getMyTicketsMap(collectionIdentifier, address),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting timestamp.', {
+        path: this.getMyTickets.name,
+        collectionIdentifier,
+        exception: err,
+      });
+    }
+  }
+
+  async getMyTicketsMap(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<TicketInfo[]> {
+    const contract = await this.contract.getContract(
+      process.env.HOLORIDE_PRIMARY_SC,
+    );
+    let myTicketsInteraction = <Interaction>(
+      contract.methodsExplicit.all_tickets([
+        new AddressValue(new Address(address)),
+        new TokenIdentifierValue(collectionIdentifier),
+      ])
+    );
+
+    const response = await this.getFirstQueryResult(myTicketsInteraction);
+    const myTickets: TicketInfoAbi[] = response?.firstValue?.valueOf();
+    return myTickets?.map((t) => TicketInfo.fromAbi(t));
+  }
+
+  async isWhitelisted(address: string): Promise<boolean> {
+    try {
+      const cacheKey = generateCacheKeyFromParams('isWhitelisted', address);
+      return await this.redisCacheService.getOrSet(
+        this.redisClient,
+        cacheKey,
+        () => this.isWhitelistedMap(address),
+        5 * TimeConstants.oneMinute,
+      );
+    } catch (err) {
+      this.logger.error('An error occurred while getting is whitelisted.', {
+        path: this.isWhitelisted.name,
+        exception: err,
+      });
+    }
+  }
+
+  async isWhitelistedMap(address: string): Promise<boolean> {
+    const contract = getSmartContract(process.env.HOLORIDE_WHITELIST_SC);
+    const func = new ContractFunction('in_whitelist');
+    const args = [new AddressValue(new Address(address))];
+    const query = new Interaction(contract, func, args)
+      .withQuerent(new Address(address))
+      .buildQuery();
+
+    const queryResponse = await this.elrondProxyService
+      .getService()
+      .queryContract(query);
+
+    return queryResponse?.returnData && queryResponse.returnData.length > 0
+      ? new Boolean(queryResponse.returnData[0].base64ToHex()).valueOf()
+      : false;
   }
 
   async getTimestampsMap(
@@ -208,17 +292,22 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-    let bid = contract.call({
-      func: new ContractFunction('buy_tickets'),
-      value: TokenPayment.egldFromBigInteger(request.price),
-      args: [
+
+    return contract.methodsExplicit
+      .buy_tickets([
         BytesValue.fromUTF8(request.collectionIdentifier),
         new U32Value(new BigNumber(request.ticketsNumber)),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
+      ])
+      .withSingleESDTTransfer(
+        TokenPayment.fungibleFromBigInteger(
+          process.env.HOLORIDE_PAYMENT_TOKEN,
+          new BigNumber(request.price),
+        ),
+      )
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.buyTickets)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async claim(
@@ -228,59 +317,13 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
-
-    let withdraw = contract.call({
-      func: new ContractFunction('claim'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [BytesValue.fromUTF8(request.collectionIdentifier)],
-      gasLimit: gas.withdraw,
-      chainID: elrondConfig.chainID,
-    });
-    return withdraw.toPlainObject(new Address(ownerAddress));
-  }
-
-  async configureCollection(
-    ownerAddress: string,
-    request: ConfigureCollectionArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let bid = contract.call({
-      func: new ContractFunction('configure_collection_for_sale'),
-      value: TokenPayment.egldFromBigInteger(0),
-      args: [
-        BytesValue.fromUTF8(request.collectionIdentifier),
-        new BigUIntValue(new BigNumber(request.price)),
-        new U32Value(new BigNumber(request.maxNftsPerWallet)),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
-  }
-
-  async setSaleTime(
-    ownerAddress: string,
-    request: SetSaleClaimPeriodArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let bid = contract.call({
-      func: new ContractFunction('set_sale_timestamps'),
-      value: TokenPayment.egldFromBigInteger(0),
-      args: [
-        BytesValue.fromUTF8(request.collectionIdentifier),
-        new U64Value(new BigNumber(request.startSale)),
-        new U64Value(new BigNumber(request.endSale)),
-        new U64Value(new BigNumber(request.startClaim)),
-        new U64Value(new BigNumber(request.endClaim)),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .claim([new TokenIdentifierValue(request.collectionIdentifier)])
+      .withValue(TokenPayment.egldFromAmount(0))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   private async getFirstQueryResult(interaction: Interaction) {

@@ -14,11 +14,10 @@ import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
 import { User } from '../auth/user';
-import { ConfigureCollectionArgs } from './models/ConfigureCollectionForSaleArgs';
-import { SetSaleClaimPeriodArgs } from './models/SetSaleAndClaimTimePeriodArgs';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
+import { TicketInfo } from './models/TicketInfo';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -32,6 +31,25 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     filters: PrimarySaleFilter,
   ): Promise<PrimarySale> {
     return await this.primarySaleService.getStatus(filters.collectionName);
+  }
+
+  @Query(() => [TicketInfo])
+  @UseGuards(GqlAuthGuard)
+  async myTickets(
+    @Args({ name: 'collectionIdentifier', type: () => String })
+    collectionIdentifier: string,
+    @User() user: any,
+  ): Promise<TicketInfo[]> {
+    return await this.primarySaleService.getMyTickets(
+      collectionIdentifier,
+      user.publicKey,
+    );
+  }
+
+  @Query(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async isWhitelisted(@User() user: any): Promise<boolean> {
+    return await this.primarySaleService.isWhitelisted(user.publicKey);
   }
 
   @ResolveField('price', () => String)
@@ -55,22 +73,18 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
 
   @ResolveField(() => String)
   async paymentToken(@Parent() sale: PrimarySale) {
-    return 'EGLD';
+    return process.env.HOLORIDE_PAYMENT_TOKEN;
   }
 
   @ResolveField(() => PrimarySaleTime)
   async saleTime(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
-    const saleTime = await this.primarySaleService.getTimestamps(
-      collectionIdentifier,
-    );
-
-    return saleTime;
+    return await this.primarySaleService.getTimestamps(collectionIdentifier);
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(GqlAuthGuard)
-  async buyHolorideTicket(
+  async buyTickets(
     @Args('input', { type: () => BuyTicketsArgs })
     input: BuyTicketsArgs,
     @User() user: any,
@@ -86,28 +100,5 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     @User() user: any,
   ): Promise<TransactionNode> {
     return await this.primarySaleService.claim(user.publicKey, input);
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async configureCollection(
-    @Args('input', { type: () => ConfigureCollectionArgs })
-    input: ConfigureCollectionArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    return await this.primarySaleService.configureCollection(
-      user.publicKey,
-      input,
-    );
-  }
-
-  @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
-  async setSaleClaimPeriod(
-    @Args('input', { type: () => SetSaleClaimPeriodArgs })
-    input: SetSaleClaimPeriodArgs,
-    @User() user: any,
-  ): Promise<TransactionNode> {
-    return await this.primarySaleService.setSaleTime(user.publicKey, input);
   }
 }

@@ -694,6 +694,10 @@ export class ElrondApiService {
         this.getSmartContractOwner.name,
         `accounts/${scAddress.bech32()}?fields=ownerAddress`,
       );
+      if (ownerAddress === scAddress.bech32()) {
+        return { address, owner: scAddress.bech32() };
+      }
+
       scAddress = new Address(ownerAddress);
     }
     return { address, owner: scAddress.bech32() };
