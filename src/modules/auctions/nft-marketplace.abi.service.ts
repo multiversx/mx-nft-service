@@ -102,33 +102,6 @@ export class NftMarketplaceAbiService {
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
 
-  async createOffer(
-    ownerAddress: string,
-    request: CreateOfferRequest,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
-    const marketplace =
-      await this.marketplaceService.getMarketplaceByCollection(collection);
-
-    const contract = await this.contract.getContract(marketplace.address);
-
-    let sendOffer = contract.call({
-      func: new ContractFunction('sendOffer'),
-      value: TokenPayment.egldFromBigInteger(request.paymentAmount),
-      args: await this.getCreateOfferArgs(
-        collection,
-        nonce,
-        request,
-        marketplace.key,
-      ),
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return sendOffer.toPlainObject(new Address(ownerAddress));
-  }
-
   async bid(
     ownerAddress: string,
     request: BidRequest,
@@ -172,6 +145,36 @@ export class NftMarketplaceAbiService {
     return withdraw.toPlainObject(new Address(ownerAddress));
   }
 
+  async createOffer(
+    ownerAddress: string,
+    request: CreateOfferRequest,
+  ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      request.identifier,
+    );
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(collection);
+
+    const contract = await this.contract.getContract(marketplace.address);
+
+    if (marketplace) {
+      return contract.methodsExplicit
+        .sendOffer(
+          await this.getCreateOfferArgs(
+            collection,
+            nonce,
+            request,
+            marketplace.key,
+          ),
+        )
+        .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
+        .withChainID(elrondConfig.chainID)
+        .withGasLimit(gas.bid)
+        .buildTransaction()
+        .toPlainObject(new Address(ownerAddress));
+    }
+  }
+
   async withdrawOffer(
     ownerAddress: string,
     offerId: number,
@@ -182,17 +185,16 @@ export class NftMarketplaceAbiService {
       await this.marketplaceService.getMarketplaceByCollection(
         offer.collection,
       );
-
-    const contract = await this.contract.getContract(marketplace.address);
-
-    let withdraw = contract.call({
-      func: new ContractFunction('withdrawOffer'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
-      gasLimit: gas.withdraw,
-      chainID: elrondConfig.chainID,
-    });
-    return withdraw.toPlainObject(new Address(ownerAddress));
+    if (marketplace) {
+      const contract = await this.contract.getContract(marketplace.address);
+      return contract.methodsExplicit
+        .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
+        .withValue(TokenPayment.egldFromAmount(0))
+        .withChainID(elrondConfig.chainID)
+        .withGasLimit(gas.withdraw)
+        .buildTransaction()
+        .toPlainObject(new Address(ownerAddress));
+    }
   }
 
   async acceptOffer(
@@ -220,17 +222,16 @@ export class NftMarketplaceAbiService {
         await this.marketplaceService.getMarketplaceByCollection(
           offer?.collection,
         );
-
-      const contract = await this.contract.getContract(marketplace.address);
-
-      let withdraw = contract.call({
-        func: new ContractFunction('acceptOffer'),
-        value: TokenPayment.egldFromAmount(0),
-        args: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
-        gasLimit: gas.withdraw,
-        chainID: elrondConfig.chainID,
-      });
-      return withdraw.toPlainObject(new Address(ownerAddress));
+      if (marketplace) {
+        const contract = await this.contract.getContract(marketplace.address);
+        return contract.methodsExplicit
+          .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
+          .withValue(TokenPayment.egldFromAmount(0))
+          .withChainID(elrondConfig.chainID)
+          .withGasLimit(gas.withdraw)
+          .buildTransaction()
+          .toPlainObject(new Address(ownerAddress));
+      }
     }
   }
 
@@ -246,20 +247,19 @@ export class NftMarketplaceAbiService {
         await this.marketplaceService.getMarketplaceByCollection(
           offer?.collection,
         );
-
-      const contract = await this.contract.getContract(marketplace.address);
-
-      let withdraw = contract.call({
-        func: new ContractFunction('withdrawAuctionAndAcceptOffer'),
-        value: TokenPayment.egldFromAmount(0),
-        args: [
-          new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-          new U64Value(new BigNumber(offer.marketplaceOfferId)),
-        ],
-        gasLimit: gas.withdraw,
-        chainID: elrondConfig.chainID,
-      });
-      return withdraw.toPlainObject(new Address(ownerAddress));
+      if (marketplace) {
+        const contract = await this.contract.getContract(marketplace.address);
+        return contract.methodsExplicit
+          .withdrawAuctionAndAcceptOffer([
+            new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+            new U64Value(new BigNumber(offer.marketplaceOfferId)),
+          ])
+          .withValue(TokenPayment.egldFromAmount(0))
+          .withChainID(elrondConfig.chainID)
+          .withGasLimit(gas.withdraw)
+          .buildTransaction()
+          .toPlainObject(new Address(ownerAddress));
+      }
     }
   }
 
