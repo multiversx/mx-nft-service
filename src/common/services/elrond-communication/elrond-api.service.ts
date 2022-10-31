@@ -21,6 +21,7 @@ import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
 import { ElrondStats } from './models/elrond-stats.model';
 import { ElrondApiAbout } from './models/elrond-api-about.model';
+import { NftTypeEnum } from 'src/modules/assets/models';
 
 @Injectable()
 export class ElrondApiService {
@@ -556,7 +557,8 @@ export class ElrondApiService {
     const query = new AssetsQuery()
       .addBefore(beforeTimestamp)
       .addPageSize(0, size)
-      .addQuery('hasUris=true&type=SemiFungibleESDT,NonFungibleESDT')
+      .addNftTypes([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT])
+      .addQuery('hasUris=true')
       .addFields(fields);
     const url = `nfts${query.build()}`;
     let nfts = await this.doGetGeneric(this.getNftsBeforeTimestamp.name, url);
