@@ -358,14 +358,17 @@ export class ExternalMarketplaceEventsService {
                 topicsAcceptOffer.auctionId,
                 acceptOfferMarketplace.key,
               );
-            updatePriceAuction.status = AuctionStatusEnum.Closed;
-            updatePriceAuction.modifiedDate = new Date(
-              new Date().toUTCString(),
-            );
-            this.auctionsService.updateAuction(
-              updatePriceAuction,
-              ExternalAuctionEventEnum.AcceptOffer,
-            );
+
+            if (updatePriceAuction) {
+              updatePriceAuction.status = AuctionStatusEnum.Closed;
+              updatePriceAuction.modifiedDate = new Date(
+                new Date().toUTCString(),
+              );
+              this.auctionsService.updateAuction(
+                updatePriceAuction,
+                ExternalAuctionEventEnum.AcceptOffer,
+              );
+            }
           }
 
           break;
