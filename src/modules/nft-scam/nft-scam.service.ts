@@ -32,16 +32,7 @@ export class NftScamService {
       any,
       NftScamEntity,
       ElrondApiAbout,
-    ] = await Promise.all([
-      optionalParams?.nftFromApi ??
-        this.elrondApiService.getNftScamInfo(identifier, true),
-      optionalParams?.nftFromElastic ??
-        this.getNftWithScamInfoFromElastic(identifier),
-      optionalParams?.nftFromDb ??
-        this.persistenceService.getNftScamInfo(identifier),
-      optionalParams?.elrondApiAbout ??
-        this.elrondApiService.getElrondApiAbout(),
-    ]);
+    ] = await this.getNftsAndElrondAbout(identifier, optionalParams);
 
     if (!nftFromApi.scamInfo) {
       const setScamInfoNullInElastic = nftFromElastic.nft_scamInfoType;
@@ -112,6 +103,27 @@ export class NftScamService {
     }
 
     return false;
+  }
+
+  async getNftsAndElrondAbout(
+    identifier: string,
+    optionalParams?: {
+      elrondApiAbout?: ElrondApiAbout;
+      nftFromApi?: Nft;
+      nftFromElastic?: any;
+      nftFromDb?: NftScamEntity;
+    },
+  ): Promise<[Nft, any, NftScamEntity, ElrondApiAbout]> {
+    return await Promise.all([
+      optionalParams?.nftFromApi ??
+        this.elrondApiService.getNftScamInfo(identifier, true),
+      optionalParams?.nftFromElastic ??
+        this.getNftWithScamInfoFromElastic(identifier),
+      optionalParams?.nftFromDb ??
+        this.persistenceService.getNftScamInfo(identifier),
+      optionalParams?.elrondApiAbout ??
+        this.elrondApiService.getElrondApiAbout(),
+    ]);
   }
 
   async validateOrUpdateAllNftsScamInfo(): Promise<void> {
@@ -249,6 +261,26 @@ export class NftScamService {
     ]);
   }
 
+  async manuallySetNftScamInfo(
+    identifier: string,
+    type: ScamInfoTypeEnum,
+    info: string,
+  ): Promise<boolean> {
+    await Promise.all([
+      this.persistenceService.saveOrUpdateNftScamInfo(
+        identifier,
+        'manual',
+        new ScamInfo({
+          type: ScamInfoTypeEnum[type],
+          info: info,
+        }),
+      ),
+      this.setNftScamInfoInElastic(identifier, type, info),
+    ]);
+
+    return true;
+  }
+
   private async getNftWithScamInfoFromElastic(
     identifier: string,
   ): Promise<any> {
@@ -285,7 +317,6 @@ export class NftScamService {
         await this.elasticService.bulkRequest(
           'tokens',
           this.buildNftScamInfoBulkUpdate(nfts, version, clearScamInfoIfEmpty),
-          '?timeout=1m',
         );
       } catch (error) {
         this.logger.error('Error when bulk updating nft scam info in Elastic', {
@@ -293,6 +324,44 @@ export class NftScamService {
           exception: error?.message,
         });
       }
+    }
+  }
+
+  async setNftScamInfoInElastic(
+    identifier: string,
+    type: ScamInfoTypeEnum,
+    info: string,
+  ): Promise<void> {
+    try {
+      const updates = [
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoVersion',
+          'manual',
+        ),
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoType',
+          type,
+        ),
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoDescription',
+          info,
+        ),
+      ];
+      await this.elasticService.bulkRequest('tokens', updates);
+    } catch (error) {
+      this.logger.error(
+        'Error when manually setting nft scam info in Elastic',
+        {
+          path: `${NftScamService.name}.${this.setNftScamInfoInElastic.name}`,
+          exception: error?.message,
+        },
+      );
     }
   }
 
