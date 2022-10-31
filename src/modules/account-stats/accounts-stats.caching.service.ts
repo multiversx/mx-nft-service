@@ -112,9 +112,13 @@ export class AccountsStatsCachingService {
       this.redisClient,
       this.getStatsCacheKey(`owner_${address}`),
     );
-    return await this.redisCacheService.delByPattern(
+    await this.redisCacheService.delByPattern(
       this.redisClient,
       this.getStatsCacheKey(address),
+    );
+    return await this.redisCacheService.delByPattern(
+      this.redisClient,
+      this.getStatsCacheKey(`owner_${address}`),
     );
   }
 
