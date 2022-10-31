@@ -2,18 +2,19 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { ElrondApiAbout } from 'src/common/services/elrond-communication/models/elrond-api-about.model';
-import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
+import { NftScamElasticService } from './nft-scam.elastic.service';
 
 @Injectable()
 export class NftScamService {
   constructor(
     private persistenceService: PersistenceService,
-    private elasticService: ElrondElasticService,
+    private nftScamElasticService: NftScamElasticService,
+    private elrondElasticService: ElrondElasticService,
     private elrondApiService: ElrondApiService,
     private readonly logger: Logger,
   ) {}
@@ -26,7 +27,7 @@ export class NftScamService {
       nftFromElastic?: any;
       nftFromDb?: NftScamEntity;
     },
-  ): Promise<boolean> {
+  ): Promise<void> {
     const [nftFromApi, nftFromElastic, nftFromDb, elrondApiAbout]: [
       Nft,
       any,
@@ -35,74 +36,97 @@ export class NftScamService {
     ] = await this.getNftsAndElrondAbout(identifier, optionalParams);
 
     if (!nftFromApi.scamInfo) {
-      const setScamInfoNullInElastic = nftFromElastic.nft_scamInfoType;
-      const updateScamInfoInElastic =
-        setScamInfoNullInElastic ||
-        nftFromElastic.nft_scamInfoVersion !== elrondApiAbout.version;
-      const updateScamInfoInDb = !nftFromDb || nftFromDb.type !== undefined;
-      if (updateScamInfoInElastic || updateScamInfoInDb) {
-        await Promise.all([
-          updateScamInfoInDb
-            ? this.persistenceService.saveOrUpdateNftScamInfo(
-                nftFromApi.identifier,
-                elrondApiAbout.version,
-              )
-            : undefined,
-          updateScamInfoInElastic
-            ? this.setBulkNftScamInfoInElastic(
-                [nftFromApi],
-                elrondApiAbout.version,
-                setScamInfoNullInElastic,
-              )
-            : undefined,
-        ]);
+      await this.validateOrUpdateScamInfoDataForNoScamNft(
+        elrondApiAbout,
+        nftFromApi,
+        nftFromElastic,
+        nftFromDb,
+      );
+    } else if (nftFromApi.scamInfo) {
+      await this.validateOrUpdateScamInfoDataForScamNft();
+    }
+  }
 
-        this.logger.log(
-          `${nftFromApi.identifier} - SCAM Info cleared / version saved`,
-        );
-        return true;
-      }
+  private async validateOrUpdateScamInfoDataForNoScamNft(
+    elrondApiAbout?: ElrondApiAbout,
+    nftFromApi?: Nft,
+    nftFromElastic?: any,
+    nftFromDb?: NftScamEntity,
+  ): Promise<void> {
+    const setScamInfoNullInElastic = nftFromElastic.nft_scamInfoType;
+    const updateScamInfoInElastic =
+      setScamInfoNullInElastic ||
+      nftFromElastic.nft_scamInfoVersion !== elrondApiAbout.version;
+    const updateScamInfoInDb = !nftFromDb || nftFromDb.type !== undefined;
+
+    let updatePromises = [];
+
+    if (updateScamInfoInDb) {
+      updatePromises.push(
+        this.persistenceService.saveOrUpdateNftScamInfo(
+          nftFromApi.identifier,
+          elrondApiAbout.version,
+        ),
+      );
     }
 
-    if (nftFromApi.scamInfo) {
-      const isElasticScamInfoDifferent =
-        ScamInfo.areApiAndElasticScamInfoDifferent(
-          nftFromApi,
-          nftFromElastic,
+    if (updateScamInfoInElastic) {
+      updatePromises.push(
+        this.nftScamElasticService.setBulkNftScamInfoInElastic(
+          [nftFromApi],
           elrondApiAbout.version,
-        );
-      const isDbScamInfoDifferent = ScamInfo.areApiAndDbScamInfoDifferent(
+          setScamInfoNullInElastic,
+        ),
+      );
+    }
+
+    await Promise.all(updatePromises);
+  }
+
+  private async validateOrUpdateScamInfoDataForScamNft(
+    elrondApiAbout?: ElrondApiAbout,
+    nftFromApi?: Nft,
+    nftFromElastic?: any,
+    nftFromDb?: NftScamEntity,
+  ): Promise<void> {
+    const isElasticScamInfoDifferent =
+      ScamInfo.areApiAndElasticScamInfoDifferent(
         nftFromApi,
-        nftFromDb,
+        nftFromElastic,
         elrondApiAbout.version,
       );
+    const isDbScamInfoDifferent = ScamInfo.areApiAndDbScamInfoDifferent(
+      nftFromApi,
+      nftFromDb,
+      elrondApiAbout.version,
+    );
 
-      if (isElasticScamInfoDifferent || isDbScamInfoDifferent) {
-        await Promise.all([
-          isDbScamInfoDifferent
-            ? this.persistenceService.saveOrUpdateNftScamInfo(
-                nftFromApi.identifier,
-                elrondApiAbout.version,
-                new ScamInfo({
-                  type: ScamInfoTypeEnum[nftFromApi.scamInfo.type],
-                  info: nftFromApi.scamInfo.info,
-                }),
-              )
-            : undefined,
-          isElasticScamInfoDifferent
-            ? this.setBulkNftScamInfoInElastic(
-                [nftFromApi],
-                elrondApiAbout.version,
-                true,
-              )
-            : undefined,
-        ]);
-        this.logger.log(`${nftFromApi.identifier} - SCAM info updated`);
-        return true;
-      }
+    let updatePromises = [];
+
+    if (isDbScamInfoDifferent) {
+      updatePromises.push(
+        this.persistenceService.saveOrUpdateNftScamInfo(
+          nftFromApi.identifier,
+          elrondApiAbout.version,
+          new ScamInfo({
+            type: ScamInfoTypeEnum[nftFromApi.scamInfo.type],
+            info: nftFromApi.scamInfo.info,
+          }),
+        ),
+      );
     }
 
-    return false;
+    if (isElasticScamInfoDifferent) {
+      updatePromises.push(
+        this.nftScamElasticService.setBulkNftScamInfoInElastic(
+          [nftFromApi],
+          elrondApiAbout.version,
+          true,
+        ),
+      );
+    }
+
+    await Promise.all(updatePromises);
   }
 
   async getNftsAndElrondAbout(
@@ -118,7 +142,7 @@ export class NftScamService {
       optionalParams?.nftFromApi ??
         this.elrondApiService.getNftScamInfo(identifier, true),
       optionalParams?.nftFromElastic ??
-        this.getNftWithScamInfoFromElastic(identifier),
+        this.nftScamElasticService.getNftWithScamInfoFromElastic(identifier),
       optionalParams?.nftFromDb ??
         this.persistenceService.getNftScamInfo(identifier),
       optionalParams?.elrondApiAbout ??
@@ -131,14 +155,15 @@ export class NftScamService {
       'updateAllNftsScamInfos: Update scam info for all existing NFTs',
       async () => {
         try {
-          const query = this.getAllNftsWithScamInfoFromElasticQuery();
+          const query =
+            this.nftScamElasticService.getAllNftsWithScamInfoFromElasticQuery();
           const apiBatchSize = constants.getTokensFromApiBatchSize;
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
 
           let totalProcessedScamInfo = 0;
 
-          await this.elasticService.getScrollableList(
+          await this.elrondElasticService.getScrollableList(
             'tokens',
             'identifier',
             query,
@@ -241,226 +266,25 @@ export class NftScamService {
       }
     }
 
-    const elasticUpdates = this.buildNftScamInfoBulkUpdate(
-      nftsWithoutScamOutdatedInElastic,
-      elrondApiAbout.version,
-      true,
-    ).concat(
-      this.buildNftScamInfoBulkUpdate(
-        nftsWithScamOutdatedInElastic,
+    const elasticUpdates = this.nftScamElasticService
+      .buildNftScamInfoBulkUpdate(
+        nftsWithoutScamOutdatedInElastic,
         elrondApiAbout.version,
-      ),
-    );
+        true,
+      )
+      .concat(
+        this.nftScamElasticService.buildNftScamInfoBulkUpdate(
+          nftsWithScamOutdatedInElastic,
+          elrondApiAbout.version,
+        ),
+      );
 
     await Promise.all([
-      this.updateBulkNftScamInfoInElastic(elasticUpdates),
+      this.nftScamElasticService.updateBulkNftScamInfoInElastic(elasticUpdates),
       this.persistenceService.saveOrUpdateBulkNftScamInfo(
         nftsOutdatedOrMissingFromDb,
         elrondApiAbout.version,
       ),
     ]);
-  }
-
-  async manuallySetNftScamInfo(
-    identifier: string,
-    type: ScamInfoTypeEnum,
-    info: string,
-  ): Promise<boolean> {
-    await Promise.all([
-      this.persistenceService.saveOrUpdateNftScamInfo(
-        identifier,
-        'manual',
-        new ScamInfo({
-          type: ScamInfoTypeEnum[type],
-          info: info,
-        }),
-      ),
-      this.setNftScamInfoInElastic(identifier, type, info),
-    ]);
-
-    return true;
-  }
-
-  private async getNftWithScamInfoFromElastic(
-    identifier: string,
-  ): Promise<any> {
-    let nft: any;
-    try {
-      const query = this.getNftWithScamInfoFromElasticQuery(identifier);
-
-      await this.elasticService.getScrollableList(
-        'tokens',
-        'identifier',
-        query,
-        async (items) => {
-          nft = items[0];
-          return undefined;
-        },
-      );
-    } catch (error) {
-      this.logger.error(`Error when getting NFT trait values from Elastic`, {
-        path: `${NftScamService.name}.${this.getNftWithScamInfoFromElastic.name}`,
-        exception: error?.message,
-        identifier: identifier,
-      });
-    }
-    return nft;
-  }
-
-  async setBulkNftScamInfoInElastic(
-    nfts: Nft[] | string[],
-    version: string,
-    clearScamInfoIfEmpty?: boolean,
-  ): Promise<void> {
-    if (nfts.length > 0) {
-      try {
-        await this.elasticService.bulkRequest(
-          'tokens',
-          this.buildNftScamInfoBulkUpdate(nfts, version, clearScamInfoIfEmpty),
-        );
-      } catch (error) {
-        this.logger.error('Error when bulk updating nft scam info in Elastic', {
-          path: `${NftScamService.name}.${this.setBulkNftScamInfoInElastic.name}`,
-          exception: error?.message,
-        });
-      }
-    }
-  }
-
-  async setNftScamInfoInElastic(
-    identifier: string,
-    type: ScamInfoTypeEnum,
-    info: string,
-  ): Promise<void> {
-    try {
-      const updates = [
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          'nft_scamInfoVersion',
-          'manual',
-        ),
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          'nft_scamInfoType',
-          type,
-        ),
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          'nft_scamInfoDescription',
-          info,
-        ),
-      ];
-      await this.elasticService.bulkRequest('tokens', updates);
-    } catch (error) {
-      this.logger.error(
-        'Error when manually setting nft scam info in Elastic',
-        {
-          path: `${NftScamService.name}.${this.setNftScamInfoInElastic.name}`,
-          exception: error?.message,
-        },
-      );
-    }
-  }
-
-  async updateBulkNftScamInfoInElastic(updates: string[]): Promise<void> {
-    if (updates.length > 0) {
-      try {
-        await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
-      } catch (error) {
-        this.logger.error('Error when bulk updating nft scam info in Elastic', {
-          path: `${NftScamService.name}.${this.updateBulkNftScamInfoInElastic.name}`,
-          exception: error?.message,
-        });
-      }
-    }
-  }
-
-  private buildNftScamInfoBulkUpdate(
-    nfts: Nft[] | string[],
-    version: string,
-    clearScamInfoIfEmpty?: boolean,
-  ): string[] {
-    let updates: string[] = [];
-    nfts.forEach((nft) => {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          nft.identifier ?? nft,
-          'nft_scamInfoVersion',
-          version,
-        ),
-      );
-      if (nft.scamInfo) {
-        updates.push(
-          this.elasticService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            'nft_scamInfoType',
-            nft.scamInfo.type,
-          ),
-        );
-        updates.push(
-          this.elasticService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            'nft_scamInfoDescription',
-            nft.scamInfo.info,
-          ),
-        );
-      } else if (clearScamInfoIfEmpty) {
-        updates.push(
-          this.elasticService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier ?? nft,
-            'nft_scamInfoType',
-            null,
-          ),
-        );
-        updates.push(
-          this.elasticService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier ?? nft,
-            'nft_scamInfoDescription',
-            null,
-          ),
-        );
-      }
-    });
-    return updates;
-  }
-
-  private getAllNftsWithScamInfoFromElasticQuery(): ElasticQuery {
-    let query = ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withFields([
-        'nft_scamInfoVersion',
-        'nft_scamInfoType',
-        'nft_scamInfoDescription',
-      ])
-      .withPagination({
-        from: 0,
-        size: constants.getNftsFromElasticBatchSize,
-      });
-    return query;
-  }
-
-  private getNftWithScamInfoFromElasticQuery(identifier: string): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withMustCondition(
-        QueryType.Match('identifier', identifier, QueryOperator.AND),
-      )
-      .withFields([
-        'nft_scamInfoVersion',
-        'nft_scamInfoType',
-        'nft_scamInfoDescription',
-      ])
-      .withPagination({
-        from: 0,
-        size: 1,
-      });
   }
 }
