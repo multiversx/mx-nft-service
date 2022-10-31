@@ -418,18 +418,18 @@ export class AssetsGetterService {
       const assetsRarity = this.getAssetsWithRarity(response);
       await this.assetRarityLoader.batchRarity(
         assetsRarity?.map((a) => a.identifier),
-        assetsRarity?.groupBy((asset) => asset.identifier, false),
+        assetsRarity?.groupBy((asset) => asset.identifier),
       );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
       await this.assetScamLoader.batchScamInfo(
         assetsWithScamInfo?.map((a) => a.identifier),
-        assetsWithScamInfo?.groupBy((asset) => asset.identifier, false),
+        assetsWithScamInfo?.groupBy((asset) => asset.identifier),
       );
 
       let assetsWithSupply = response.items?.filter((x) => x?.supply);
       await this.assetSupplyLoader.batchSupplyInfo(
         assetsWithSupply?.map((a) => a.identifier),
-        assetsWithSupply?.groupBy((asset) => asset.identifier, false),
+        assetsWithSupply?.groupBy((asset) => asset.identifier),
       );
     }
   }

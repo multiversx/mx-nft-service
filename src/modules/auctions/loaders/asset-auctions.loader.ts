@@ -22,6 +22,6 @@ export class AuctionsForAssetProvider extends BaseProvider<string> {
     const auctions = await this.persistenceService.getAuctionsForIdentifiers(
       identifiers,
     );
-    return auctions?.groupBy((auction) => auction.batchKey, false);
+    return auctions?.groupBy((auction) => auction.batchKey);
   }
 }

@@ -25,6 +25,6 @@ export class ArtistAddressProvider extends BaseProvider<string> {
     );
 
     const smartContractsResponse = await Promise.all(scPromises);
-    return smartContractsResponse?.groupBy((item) => item.address, false);
+    return smartContractsResponse?.groupBy((item) => item.address);
   };
 }
