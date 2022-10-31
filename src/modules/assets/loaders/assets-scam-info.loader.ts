@@ -24,7 +24,7 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
       0,
       'fields=identifier,scamInfo',
     );
-    return nfts?.groupBy((asset) => asset.identifier, false);
+    return nfts?.groupBy((asset) => asset.identifier);
   }
 
   public batchScamInfo = async (identifiers: string[], data: any) => {

@@ -342,7 +342,11 @@ export class AuctionsGetterService {
 
     if (sort) {
       if (sort.direction === Sort.ASC) {
-        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        if (sort.field === 'endDate') {
+          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+        } else {
+          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        }
       } else {
         allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
       }
@@ -413,7 +417,11 @@ export class AuctionsGetterService {
 
     if (sort) {
       if (sort.direction === Sort.ASC) {
-        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        if (sort.field === 'endDate') {
+          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+        } else {
+          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        }
       } else {
         allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
       }
@@ -485,7 +493,11 @@ export class AuctionsGetterService {
 
     if (sort) {
       if (sort.direction === Sort.ASC) {
-        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        if (sort.field === 'endDate') {
+          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+        } else {
+          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        }
       } else {
         allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
       }
@@ -515,7 +527,11 @@ export class AuctionsGetterService {
 
     if (sort) {
       if (sort.direction === Sort.ASC) {
-        allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        if (sort.field === 'endDate') {
+          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+        } else {
+          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+        }
       } else {
         allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
       }

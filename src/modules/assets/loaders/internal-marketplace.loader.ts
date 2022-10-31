@@ -24,7 +24,6 @@ export class InternalMarketplaceProvider extends BaseProvider<string> {
     return marketplace?.groupBy(
       (subdomainCollection: { collectionIdentifier: any }) =>
         subdomainCollection.collectionIdentifier,
-      false,
     );
   }
 }

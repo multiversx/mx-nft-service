@@ -1,8 +1,8 @@
 declare global {
   interface Array<T> {
-    groupBy(predicate: (item: T) => any, asArray: boolean): any;
+    groupBy(predicate: (item: T) => any, asArray?: boolean): any;
     remove(element: T): number;
-    sorted(predicate?: (element: T) => number): T[];
+    sorted(predicate?: (element: T) => number, ignoreZeros?: boolean): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
     sum(predicate?: (item: T) => number): number;
     toRecord<TOUT>(
@@ -62,13 +62,31 @@ Array.prototype.remove = function <T>(element: T): number {
   return index;
 };
 
-Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
+Array.prototype.sorted = function <T>(
+  predicate?: (item: T) => number,
+  ignoreZeros: boolean = false,
+): T[] {
   const cloned = [...this];
 
   if (predicate) {
-    cloned.sort((a, b) => predicate(a) - predicate(b));
+    cloned.sort((a, b) => {
+      if (ignoreZeros) {
+        const x = predicate(a) === 0 ? Infinity : predicate(a);
+        const y = predicate(b) === 0 ? Infinity : predicate(b);
+
+        return x - y;
+      }
+      return predicate(a) - predicate(b);
+    });
   } else {
-    cloned.sort((a, b) => a - b);
+    cloned.sort((a, b) => {
+      if (ignoreZeros) {
+        const x = a === 0 ? Infinity : a;
+        const y = b === 0 ? Infinity : b;
+        return x - y;
+      }
+      return a - b;
+    });
   }
 
   return cloned;

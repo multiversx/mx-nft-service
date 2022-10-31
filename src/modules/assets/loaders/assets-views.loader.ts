@@ -24,6 +24,6 @@ export class AssetsViewsLoader extends BaseProvider<string> {
     );
 
     const viewsCountResponse = await Promise.all(getViewsCountPromises);
-    return viewsCountResponse?.groupBy((item) => item.identifier, false);
+    return viewsCountResponse?.groupBy((item) => item.identifier);
   }
 }
