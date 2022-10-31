@@ -52,6 +52,75 @@ export class NftScamService {
     }
   }
 
+  async getNftsAndElrondAbout(
+    identifier: string,
+    optionalParams?: {
+      elrondApiAbout?: ElrondApiAbout;
+      nftFromApi?: Nft;
+      nftFromElastic?: any;
+      nftFromDb?: NftScamEntity;
+    },
+  ): Promise<[Nft, any, NftScamEntity, ElrondApiAbout]> {
+    return await Promise.all([
+      optionalParams?.nftFromApi ??
+        this.elrondApiService.getNftScamInfo(identifier, true),
+      optionalParams?.nftFromElastic ??
+        this.nftScamElasticService.getNftWithScamInfoFromElastic(identifier),
+      optionalParams?.nftFromDb ??
+        this.persistenceService.getNftScamInfo(identifier),
+      optionalParams?.elrondApiAbout ??
+        this.elrondApiService.getElrondApiAbout(),
+    ]);
+  }
+
+  async validateOrUpdateAllNftsScamInfo(): Promise<void> {
+    await Locker.lock(
+      'updateAllNftsScamInfos: Update scam info for all existing NFTs',
+      async () => {
+        try {
+          const query =
+            this.nftScamElasticService.getAllNftsWithScamInfoFromElasticQuery();
+          const apiBatchSize = constants.getTokensFromApiBatchSize;
+          const elrondApiAbout =
+            await this.elrondApiService.getElrondApiAbout();
+
+          let totalProcessedScamInfo = 0;
+
+          await this.elrondElasticService.getScrollableList(
+            'tokens',
+            'identifier',
+            query,
+            async (nftsBatch) => {
+              for (let i = 0; i < nftsBatch.length; i += apiBatchSize) {
+                await this.validateOrUpdateNftsScamInfoBatch(
+                  nftsBatch.slice(i, i + apiBatchSize),
+                  elrondApiAbout,
+                );
+              }
+              totalProcessedScamInfo += nftsBatch.length;
+            },
+          );
+
+          this.logger.log(
+            `Processed NFT Scam for ${totalProcessedScamInfo} NFTs`,
+            {
+              path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
+            },
+          );
+        } catch (error) {
+          this.logger.error(
+            'Error when updating/validating scam info for all NFTs',
+            {
+              path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
+              exception: error?.message,
+            },
+          );
+        }
+      },
+      true,
+    );
+  }
+
   private async validateOrUpdateScamInfoDataForNoScamNft(
     elrondApiAbout: ElrondApiAbout,
     nftFromApi: Nft,
@@ -130,75 +199,6 @@ export class NftScamService {
     }
 
     await Promise.all(updatePromises);
-  }
-
-  async getNftsAndElrondAbout(
-    identifier: string,
-    optionalParams?: {
-      elrondApiAbout?: ElrondApiAbout;
-      nftFromApi?: Nft;
-      nftFromElastic?: any;
-      nftFromDb?: NftScamEntity;
-    },
-  ): Promise<[Nft, any, NftScamEntity, ElrondApiAbout]> {
-    return await Promise.all([
-      optionalParams?.nftFromApi ??
-        this.elrondApiService.getNftScamInfo(identifier, true),
-      optionalParams?.nftFromElastic ??
-        this.nftScamElasticService.getNftWithScamInfoFromElastic(identifier),
-      optionalParams?.nftFromDb ??
-        this.persistenceService.getNftScamInfo(identifier),
-      optionalParams?.elrondApiAbout ??
-        this.elrondApiService.getElrondApiAbout(),
-    ]);
-  }
-
-  async validateOrUpdateAllNftsScamInfo(): Promise<void> {
-    await Locker.lock(
-      'updateAllNftsScamInfos: Update scam info for all existing NFTs',
-      async () => {
-        try {
-          const query =
-            this.nftScamElasticService.getAllNftsWithScamInfoFromElasticQuery();
-          const apiBatchSize = constants.getTokensFromApiBatchSize;
-          const elrondApiAbout =
-            await this.elrondApiService.getElrondApiAbout();
-
-          let totalProcessedScamInfo = 0;
-
-          await this.elrondElasticService.getScrollableList(
-            'tokens',
-            'identifier',
-            query,
-            async (nftsBatch) => {
-              for (let i = 0; i < nftsBatch.length; i += apiBatchSize) {
-                await this.validateOrUpdateNftsScamInfoBatch(
-                  nftsBatch.slice(i, i + apiBatchSize),
-                  elrondApiAbout,
-                );
-              }
-              totalProcessedScamInfo += nftsBatch.length;
-            },
-          );
-
-          this.logger.log(
-            `Processed NFT Scam for ${totalProcessedScamInfo} NFTs`,
-            {
-              path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
-            },
-          );
-        } catch (error) {
-          this.logger.error(
-            'Error when updating/validating scam info for all NFTs',
-            {
-              path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
-              exception: error?.message,
-            },
-          );
-        }
-      },
-      true,
-    );
   }
 
   private async validateOrUpdateNftsScamInfoBatch(
