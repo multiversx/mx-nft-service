@@ -8,6 +8,7 @@ import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
 import { NftScamElasticService } from './nft-scam.elastic.service';
+import { NftScamRelatedData } from './nft-scam-data.model';
 
 @Injectable()
 export class NftScamService {
@@ -21,12 +22,7 @@ export class NftScamService {
 
   async validateOrUpdateNftScamInfo(
     identifier: string,
-    optionalParams?: {
-      elrondApiAbout?: ElrondApiAbout;
-      nftFromApi?: Nft;
-      nftFromElastic?: any;
-      nftFromDb?: NftScamEntity;
-    },
+    optionalParams?: NftScamRelatedData,
   ): Promise<void> {
     const [nftFromApi, nftFromElastic, nftFromDb, elrondApiAbout]: [
       Nft,
@@ -54,12 +50,7 @@ export class NftScamService {
 
   async getNftsAndElrondAbout(
     identifier: string,
-    optionalParams?: {
-      elrondApiAbout?: ElrondApiAbout;
-      nftFromApi?: Nft;
-      nftFromElastic?: any;
-      nftFromDb?: NftScamEntity;
-    },
+    optionalParams?: NftScamRelatedData,
   ): Promise<[Nft, any, NftScamEntity, ElrondApiAbout]> {
     return await Promise.all([
       optionalParams?.nftFromApi ??
