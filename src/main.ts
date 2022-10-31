@@ -15,6 +15,7 @@ import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rari
 import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
+import { ports } from './config';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
@@ -64,19 +65,19 @@ async function bootstrap() {
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(6013);
+    await processorApp.listen(ports.rarity);
   }
 
   if (process.env.ENABLE_TRAITS_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticTraitsUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(6015);
+    await processorApp.listen(ports.traits);
   }
 
   if (process.env.ENABLE_SCAM_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNftScamUpdaterModule);
     processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
-    await processorApp.listen(6016);
+    await processorApp.listen(ports.scamInfo);
   }
 
   const logger = new Logger('Bootstrapper');
