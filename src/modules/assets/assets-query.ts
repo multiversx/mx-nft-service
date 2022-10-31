@@ -126,17 +126,10 @@ export class AssetsQuery {
     return this.addParamToQuery('computeScamInfo', true);
   }
 
-  addNftTypes(types: NftTypeEnum[]): this {
-    if (!types) {
-      return this;
-    }
-    return this.addParamToQuery('type', types.join(','));
-  }
-
   build(addDefaultQuery: boolean = true): string {
     // TODO: handle whitelisting in a different way
     // const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
-    const defaultQuery = 'hasUris=true';
+    const defaultQuery = 'hasUris=true&type=NonFungibleESDT,SemiFungibleESDT,';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
     return this.addQuery(defaultQuery).build(false);
