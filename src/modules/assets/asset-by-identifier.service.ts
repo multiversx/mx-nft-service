@@ -49,7 +49,7 @@ export class AssetByIdentifierService {
     }
     if (
       (nft?.media && nft?.media[0].thumbnailUrl.includes('default')) ||
-      (nft.type === NftTypeEnum.NonFungibleESDT && !nft.owner)
+      (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner)
     )
       ttl = TimeConstants.oneMinute;
     return {

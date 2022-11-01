@@ -415,6 +415,7 @@ type Collection {
   owner: Account
   ownerAddress: String
   pngUrl: String
+  preferredRankAlgorithm: String
   roles: [CollectionRole!]
   social: CollectionSocial
   status: String
