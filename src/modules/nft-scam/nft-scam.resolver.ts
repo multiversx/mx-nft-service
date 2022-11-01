@@ -20,4 +20,35 @@ export class NftScamResolver {
       throw new ApolloError(error);
     }
   }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async setNftScamInfo(
+    @Args('identifier') identifier: string,
+    @Args({ name: 'type', type: () => ScamInfoTypeEnum })
+    type: ScamInfoTypeEnum,
+    @Args('info') info: string,
+  ): Promise<boolean> {
+    try {
+      return await this.nftScamService.manuallySetNftScamInfo(
+        identifier,
+        type,
+        info,
+      );
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async clearNftScamInfo(
+    @Args('identifier') identifier: string,
+  ): Promise<boolean> {
+    try {
+      return await this.nftScamService.manuallyClearNftScamInfo(identifier);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
 }
