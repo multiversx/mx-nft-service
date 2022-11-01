@@ -3,6 +3,7 @@ import * as Redis from 'ioredis';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
+import { NftTypeEnum } from '../assets/models';
 import { RedisValue } from '../common/redis-value.dto';
 import { BaseCollectionsAssetsRedisHandler } from './base-collection-assets.redis-handler';
 import { CollectionAssetModel } from './models/CollectionAsset.dto';
@@ -48,8 +49,12 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
 
   private hasDefaultThumbnail(item: { key: string; value: any }) {
     return (
-      item.value &&
-      item.value.filter((i) => i.thumbnailUrl.includes('default')).length > 0
+      (item.value &&
+        item.value.filter((i) => i.thumbnailUrl.includes('default')).length >
+          0) ||
+      (item.value &&
+        item.value.type === NftTypeEnum.NonFungibleESDT &&
+        !item.value.owner)
     );
   }
 
