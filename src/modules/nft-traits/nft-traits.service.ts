@@ -600,7 +600,6 @@ export class NftTraitsService {
                 this.apiService.getNftsWithAttributesBeforeTimestamp(
                   beforeTimestamp,
                   batchSize,
-                  'hasUris=true&type=SemiFungibleESDT,NonFungibleESDT',
                 ),
                 this.getAllNftsWithTraitsFromElastic(
                   beforeTimestamp,

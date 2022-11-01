@@ -87,5 +87,10 @@
     ],
     "forSmallCollections": [""],
     "forAssets": [""]
+  },
+  "ports": {
+    "rarity": 6013,
+    "traits": 6015,
+    "scamInfo": 6016
   }
 }
