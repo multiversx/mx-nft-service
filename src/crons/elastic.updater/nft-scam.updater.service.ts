@@ -76,6 +76,7 @@ export class NftScamUpdaterService {
       .withMustExistCondition('token')
       .withMustExistCondition('nonce')
       .withMustNotCondition(QueryType.Match('nft_scamInfoVersion', version))
+      .withMustNotCondition(QueryType.Match('nft_scamInfoVersion', 'manual'))
       .withMustMultiShouldCondition(
         [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
         (type) => QueryType.Match('type', type),

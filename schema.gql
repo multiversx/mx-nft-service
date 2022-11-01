@@ -413,6 +413,7 @@ type Collection {
   owner: Account
   ownerAddress: String
   pngUrl: String
+  preferredRankAlgorithm: String
   roles: [CollectionRole!]
   social: CollectionSocial
   status: String
@@ -767,6 +768,7 @@ type Mutation {
   buySft(input: BuySftActionArgs!): TransactionNode!
   buyTickets(input: BuyTicketsArgs!): TransactionNode!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
+  clearNftScamInfo(identifier: String!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
@@ -776,6 +778,7 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!

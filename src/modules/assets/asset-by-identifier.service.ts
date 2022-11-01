@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extensions';
-import { Asset } from './models';
+import { Asset, NftTypeEnum } from './models';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -47,7 +47,10 @@ export class AssetByIdentifierService {
     if (!nft) {
       ttl = 3 * TimeConstants.oneSecond;
     }
-    if (nft?.media && nft?.media[0].thumbnailUrl.includes('default'))
+    if (
+      (nft?.media && nft?.media[0].thumbnailUrl.includes('default')) ||
+      (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner)
+    )
       ttl = TimeConstants.oneMinute;
     return {
       key: identifier,
