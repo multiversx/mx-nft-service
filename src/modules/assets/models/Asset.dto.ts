@@ -77,6 +77,16 @@ export class Asset {
   media: Media[];
   @Field()
   verified: boolean;
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
+  url: string;
+  @Field(() => String, {
+    nullable: true,
+    deprecationReason: 'This field will be removed in the next version',
+  })
+  thumbnailUrl: string;
   @Field({ nullable: true })
   isNsfw: boolean;
   @Field(() => [Marketplace], { nullable: true })
