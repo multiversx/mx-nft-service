@@ -588,14 +588,8 @@ export class AuctionsGetterService {
       .map((x) => x.startBid)
       .sorted();
 
-    let minBid = BigNumberUtils.nominateAmount(
-      startingBids[0].toString(),
-      paymentToken?.decimals,
-    );
-    let maxBid = BigNumberUtils.nominateAmount(
-      startingBids[startingBids.length - 1].toString(),
-      paymentToken?.decimals,
-    );
+    let minBid = startingBids[0];
+    let maxBid = startingBids[startingBids.length - 1];
 
     return {
       minBid: minBid?.toString() ?? '0',
