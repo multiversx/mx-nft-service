@@ -3,6 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { NftScamService } from './nft-scam.service';
 import { ApolloError } from 'apollo-server-express';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
+import { ScamInfoTypeEnum } from '../assets/models';
 
 @Resolver(() => Boolean)
 export class NftScamResolver {
