@@ -40,7 +40,7 @@ export class CollectionStats {
             decimals,
           ),
           minPrice: BigNumberUtils.nominateAmount(
-            entity.maxPrice ? entity.minPrice : '0',
+            entity.minPrice ? entity.minPrice : '0',
             decimals,
           ),
           saleAverage: BigNumberUtils.nominateAmount(
