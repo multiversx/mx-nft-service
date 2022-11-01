@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants } from 'src/config';
-import { ScamInfoTypeEnum } from '../assets/models';
+import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
 
 @Injectable()
@@ -221,6 +221,41 @@ export class NftScamElasticService {
       .withPagination({
         from: 0,
         size: 1,
+      });
+  }
+
+  getAllCollectionsFromElasticQuery(): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('token')
+      .withMustNotExistCondition('nonce')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withPagination({
+        from: 0,
+        size: constants.getCollectionsFromElasticBatchSize,
+      });
+  }
+
+  getAllCollectionNftsFromElasticQuery(collection: string): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('nonce')
+      .withMustCondition(
+        QueryType.Match('token', collection, QueryOperator.AND),
+      )
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withFields([
+        'nft_scamInfoVersion',
+        'nft_scamInfoType',
+        'nft_scamInfoDescription',
+      ])
+      .withPagination({
+        from: 0,
+        size: constants.getCollectionsFromElasticBatchSize,
       });
   }
 }

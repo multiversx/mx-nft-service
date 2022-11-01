@@ -71,29 +71,25 @@ export class NftScamService {
       'updateAllNftsScamInfos: Update scam info for all existing NFTs',
       async () => {
         try {
-          const query =
-            this.nftScamElasticService.getAllNftsWithScamInfoFromElasticQuery();
-          const apiBatchSize = constants.getTokensFromApiBatchSize;
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
+
+          const collectionsQuery =
+            this.nftScamElasticService.getAllCollectionsFromElasticQuery();
 
           let totalProcessedScamInfo = 0;
 
           await this.elrondElasticService.getScrollableList(
             'tokens',
-            'identifier',
-            query,
-            async (nftsBatch) => {
-              for (let i = 0; i < nftsBatch.length; i += apiBatchSize) {
-                await this.validateOrUpdateNftsScamInfoBatch(
-                  nftsBatch.slice(i, i + apiBatchSize),
-                  elrondApiAbout,
-                );
-              }
-              totalProcessedScamInfo += nftsBatch.length;
+            'token',
+            collectionsQuery,
+            async (collections) => {
+              await this.validateOrUpdateAllNftsScamInfForCollectionsBatch(
+                collections.map((collection) => collection.token),
+                elrondApiAbout,
+              );
             },
           );
-
           this.logger.log(
             `Processed NFT Scam for ${totalProcessedScamInfo} NFTs`,
             {
@@ -112,6 +108,29 @@ export class NftScamService {
       },
       true,
     );
+  }
+
+  async validateOrUpdateAllNftsScamInfForCollectionsBatch(
+    collections: string[],
+    elrondApiAbout: ElrondApiAbout,
+  ): Promise<void> {
+    for (let i = 0; i < collections.length; i++) {
+      const nftsQuery =
+        this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
+          collections[i],
+        );
+      await this.elrondElasticService.getScrollableList(
+        'tokens',
+        'identifier',
+        nftsQuery,
+        async (nftsBatch) => {
+          await this.validateOrUpdateNftsScamInfoBatch(
+            nftsBatch,
+            elrondApiAbout,
+          );
+        },
+      );
+    }
   }
 
   async manuallySetNftScamInfo(
@@ -229,6 +248,10 @@ export class NftScamService {
     nftsFromElastic: any,
     elrondApiAbout: ElrondApiAbout,
   ): Promise<void> {
+    if (!nftsFromElastic || nftsFromElastic.length === 0) {
+      return;
+    }
+
     const [
       nftsNoScamNoVersionInElastic,
       nftsNoScamOutdatedInElastic,
@@ -288,7 +311,8 @@ export class NftScamService {
         this.persistenceService.getBulkNftScamInfo(identifiers),
       ]);
 
-    for (const nftFromApi of nftsFromApi) {
+    for (let i = 0; i < nftsFromApi?.length; i++) {
+      const nftFromApi = nftsFromApi[i];
       let nftFromElastic = nftsFromElastic.find(
         (nft) => nft.identifier === nftFromApi.identifier,
       );
