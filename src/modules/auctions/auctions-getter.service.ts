@@ -583,37 +583,23 @@ export class AuctionsGetterService {
         paymentTokenIdentifier,
       );
     }
-    const minBids = auctions
+    const startingBids = auctions
       .filter((x) => x.minBid.token === paymentTokenIdentifier)
-      .map((x) =>
-        new BigNumber(x.minBid.amount).dividedBy(
-          new BigNumber(10 ** paymentToken?.decimals),
-        ),
-      );
-    let minBid = new BigNumber('Infinity');
-    for (const amount of minBids) {
-      if (amount.isLessThan(minBid)) {
-        minBid = amount;
-      }
-    }
+      .map((x) => x.startBid)
+      .sorted();
 
-    const maxBids = auctions
-      .filter((x) => x.maxBid.token === paymentTokenIdentifier)
-      .map((x) =>
-        new BigNumber(x.maxBid.amount).dividedBy(
-          new BigNumber(10 ** paymentToken?.decimals),
-        ),
-      );
-    let maxBid = minBid;
-    for (const amount of maxBids) {
-      if (amount.isGreaterThan(maxBid)) {
-        maxBid = amount;
-      }
-    }
+    let minBid = BigNumberUtils.nominateAmount(
+      startingBids[0].toString(),
+      paymentToken?.decimals,
+    );
+    let maxBid = BigNumberUtils.nominateAmount(
+      startingBids[startingBids.length - 1].toString(),
+      paymentToken?.decimals,
+    );
 
     return {
-      minBid: minBid.isFinite() ? minBid.toString() : '0',
-      maxBid: maxBid.isFinite() ? maxBid.toString() : '0',
+      minBid: minBid?.toString() ?? '0',
+      maxBid: maxBid?.toString() ?? '0',
       paymentToken: paymentTokenIdentifier,
       paymentDecimals: paymentToken?.decimals,
     };
