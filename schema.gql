@@ -782,12 +782,14 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateAllCollectionRarities: Boolean!
   updateAllCollectionTraits: Boolean!
+  updateAllNftScam: Boolean!
   updateAllNftTraits: Boolean!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateNftTraits(identifier: String!): Boolean!
   validateAllCollectionRarities: Boolean!
   validateCollectionRarities(collectionTicker: String!): Boolean!
+  validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
 }

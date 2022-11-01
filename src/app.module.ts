@@ -31,6 +31,7 @@ import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.mod
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
+import { NftScamModule } from './modules/nft-scam/nft-scam.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.m
     AccountsStatsModuleGraph,
     CollectionsStatsModuleGraph,
     ReportNftsModuleGraph,
+    NftScamModule,
     FeaturedModuleGraph,
     UsdPriceModuleGraph,
     TrendingModuleGraph,
