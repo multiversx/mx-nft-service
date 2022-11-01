@@ -17,6 +17,7 @@ export class NftScamsRepository extends Repository<NftScamEntity> {
 
   async getBulkNftScams(identifiers: string[]): Promise<NftScamEntity[]> {
     return await this.createQueryBuilder()
+      .select('*')
       .where(`identifier IN(:identifiers)`, {
         identifiers: identifiers,
       })

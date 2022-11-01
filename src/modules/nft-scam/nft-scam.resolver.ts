@@ -2,7 +2,6 @@ import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { NftScamService } from './nft-scam.service';
 import { ApolloError } from 'apollo-server-express';
-import { ScamInfoTypeEnum } from '../assets/models';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 
 @Resolver(() => Boolean)
@@ -13,9 +12,9 @@ export class NftScamResolver {
   @UseGuards(GqlAdminAuthGuard)
   async validateOrUpdateNftScamInfo(
     @Args('identifier') identifier: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
-      await this.nftScamService.validateOrUpdateNftScamInfo(identifier);
+      return await this.nftScamService.validateOrUpdateNftScamInfo(identifier);
     } catch (error) {
       throw new ApolloError(error);
     }

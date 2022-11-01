@@ -3,6 +3,7 @@ import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants } from 'src/config';
 import { ScamInfoTypeEnum } from '../assets/models';
+import { NftScamEntity } from 'src/db/reports-nft-scam';
 
 @Injectable()
 export class NftScamElasticService {
@@ -124,7 +125,7 @@ export class NftScamElasticService {
   buildNftScamInfoBulkUpdate(
     nfts: Nft[],
     version: string,
-    clearScamInfoIfEmpty?: boolean,
+    clearScamInfo?: boolean,
   ): string[] {
     let updates: string[] = [];
     for (const nft of nfts) {
@@ -153,7 +154,7 @@ export class NftScamElasticService {
             nft.scamInfo.info,
           ),
         );
-      } else if (clearScamInfoIfEmpty) {
+      } else if (clearScamInfo) {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
@@ -171,6 +172,37 @@ export class NftScamElasticService {
           ),
         );
       }
+    }
+    return updates;
+  }
+
+  buildNftScamInfoDbToElasticBulkUpdate(nfts: NftScamEntity[]): string[] {
+    let updates: string[] = [];
+    for (const nft of nfts) {
+      updates.push(
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          nft.identifier,
+          'nft_scamInfoVersion',
+          'manual',
+        ),
+      );
+      updates.push(
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          nft.identifier,
+          'nft_scamInfoType',
+          nft.type,
+        ),
+      );
+      updates.push(
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          nft.identifier,
+          'nft_scamInfoDescription',
+          nft.info,
+        ),
+      );
     }
     return updates;
   }
