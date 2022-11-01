@@ -32,7 +32,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
               CollectionAssetModel.fromNft(a),
             )
           : null;
-        if (this.hasDefaultThumbnail(item)) {
+        if (this.hasDefaultThumbnailOrNoOwner(item)) {
           defaultNfts.push(item);
         } else {
           finalNfts.push(item);
@@ -47,7 +47,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     return response;
   }
 
-  private hasDefaultThumbnail(item: { key: string; value: any }) {
+  private hasDefaultThumbnailOrNoOwner(item: { key: string; value: any }) {
     return (
       (item.value &&
         item.value.filter((i) => i.thumbnailUrl.includes('default')).length >
