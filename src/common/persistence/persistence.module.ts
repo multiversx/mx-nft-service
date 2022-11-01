@@ -31,6 +31,7 @@ import { CommonModule } from 'src/common.module';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondCommunicationModule } from '../services/elrond-communication';
+import { NftScamsRepository } from 'src/db/reports-nft-scam';
 
 @Global()
 @Module({
@@ -44,6 +45,7 @@ import { ElrondCommunicationModule } from '../services/elrond-communication';
     TypeOrmModule.forFeature([MarketplaceRepository]),
     TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
     TypeOrmModule.forFeature([ReportNftsRepository]),
+    TypeOrmModule.forFeature([NftScamsRepository]),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
     TypeOrmModule.forFeature([NotificationsRepository]),
