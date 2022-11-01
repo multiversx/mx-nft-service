@@ -3,7 +3,7 @@ import { RedisCacheService } from 'src/common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
-import { Asset } from '../models';
+import { Asset, NftTypeEnum } from '../models';
 
 @Injectable()
 export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
@@ -23,7 +23,7 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
         item.value = assetsIdentifiers[item.key]
           ? Asset.fromNft(assetsIdentifiers[item.key][0])
           : null;
-        if (this.hasDefaultThumbnail(item)) {
+        if (this.hasDefaultThumbnailOrNoOwner(item)) {
           defaultNfts.push(item);
         } else {
           finalNfts.push(item);
@@ -39,11 +39,14 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
     return response;
   }
 
-  private hasDefaultThumbnail(item: { key: string; value: any }) {
+  private hasDefaultThumbnailOrNoOwner(item: { key: string; value: any }) {
     return (
-      item.value &&
-      item.value.media &&
-      item.value.media[0].thumbnailUrl.includes('default')
+      (item.value &&
+        item.value.media &&
+        item.value.media[0].thumbnailUrl.includes('default')) ||
+      (item.value &&
+        item.value.type === NftTypeEnum.NonFungibleESDT &&
+        !item.value.owner)
     );
   }
 }

@@ -72,6 +72,8 @@ export class Collection {
   artistFollowersCount: number;
   @Field(() => [CollectionNftTrait], { nullable: 'itemsAndList' })
   traits: CollectionNftTrait[];
+  @Field({ nullable: true })
+  preferredRankAlgorithm: string;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -113,6 +115,7 @@ export class Collection {
       artistFollowersCount: followersCount,
       nftsCount: collectionApi.count,
       traits: CollectionNftTrait.fromCollectionTraits(collectionApi.traits),
+      preferredRankAlgorithm: collectionApi.assets?.preferredRankAlgorithm,
     });
   }
 }

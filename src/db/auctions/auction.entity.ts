@@ -131,6 +131,11 @@ export class AuctionEntity extends BaseEntity {
         auction.min_bid.valueOf().toString(),
         decimals,
       ),
+      maxBid: auction.max_bid?.valueOf()?.toString() || '0',
+      maxBidDenominated: BigNumberUtils.denominateAmount(
+        auction.max_bid?.valueOf()?.toString() || '0',
+        decimals,
+      ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: parseInt(auction.deadline.valueOf().toString()),
       identifier: `${auction.auctioned_tokens.token_identifier

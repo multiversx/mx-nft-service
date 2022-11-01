@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
+import { NftTypeEnum } from 'src/modules/assets/models';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -30,7 +31,7 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
               CollectionAssetModel.fromNft(a),
             )
           : [];
-        if (this.hasDefaultThumbnail(item)) {
+        if (this.hasDefaultThumbnailOrNoOwner(item)) {
           defaultNfts.push(item);
         } else {
           finalNfts.push(item);
@@ -46,10 +47,14 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
     return response;
   }
 
-  private hasDefaultThumbnail(item: { key: string; value: any }) {
+  private hasDefaultThumbnailOrNoOwner(item: { key: string; value: any }) {
     return (
-      item.value &&
-      item.value.filter((i) => i.thumbnailUrl.includes('default')).length > 0
+      (item.value &&
+        item.value.filter((i) => i.thumbnailUrl.includes('default')).length >
+          0) ||
+      (item.value &&
+        item.value.type === NftTypeEnum.NonFungibleESDT &&
+        !item.value.owner)
     );
   }
 }
