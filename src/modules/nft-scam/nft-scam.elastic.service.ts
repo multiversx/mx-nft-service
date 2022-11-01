@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants } from 'src/config';
+import { ScamInfoTypeEnum } from '../assets/models';
 
 @Injectable()
 export class NftScamElasticService {
@@ -64,6 +65,44 @@ export class NftScamElasticService {
           exception: error?.message,
         });
       }
+    }
+  }
+
+  async setNftScamInfoManuallyInElastic(
+    identifier: string,
+    type?: ScamInfoTypeEnum,
+    info?: string,
+  ): Promise<void> {
+    try {
+      const updates = [
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoVersion',
+          'manual',
+        ),
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoType',
+          type ?? null,
+        ),
+        this.elasticService.buildBulkUpdate<string>(
+          'tokens',
+          identifier,
+          'nft_scamInfoDescription',
+          info ?? null,
+        ),
+      ];
+      await this.elasticService.bulkRequest('tokens', updates);
+    } catch (error) {
+      this.logger.error(
+        'Error when manually setting nft scam info in Elastic',
+        {
+          path: `${NftScamElasticService.name}.${this.setNftScamInfoManuallyInElastic.name}`,
+          exception: error?.message,
+        },
+      );
     }
   }
 

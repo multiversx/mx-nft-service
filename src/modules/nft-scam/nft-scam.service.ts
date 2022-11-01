@@ -112,6 +112,37 @@ export class NftScamService {
     );
   }
 
+  async manuallySetNftScamInfo(
+    identifier: string,
+    type: ScamInfoTypeEnum,
+    info: string,
+  ): Promise<boolean> {
+    await Promise.all([
+      this.persistenceService.saveOrUpdateNftScamInfo(
+        identifier,
+        'manual',
+        new ScamInfo({
+          type: ScamInfoTypeEnum[type],
+          info: info,
+        }),
+      ),
+      this.nftScamElasticService.setNftScamInfoManuallyInElastic(
+        identifier,
+        type,
+        info,
+      ),
+    ]);
+    return true;
+  }
+
+  async manuallyClearNftScamInfo(identifier: string): Promise<boolean> {
+    await Promise.all([
+      this.persistenceService.deleteNftScamInfo(identifier),
+      this.nftScamElasticService.setNftScamInfoManuallyInElastic(identifier),
+    ]);
+    return true;
+  }
+
   private async validateOrUpdateScamInfoDataForNoScamNft(
     elrondApiAbout: ElrondApiAbout,
     nftFromApi: Nft,
