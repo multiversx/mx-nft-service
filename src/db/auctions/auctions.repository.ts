@@ -101,7 +101,7 @@ export class AuctionsRepository {
     queryBuilder
       .select('a.*')
       .addSelect(
-        'IF(ord.priceAmountDenominated, ord.priceAmountDenominated, minBidDenominated) as startBid',
+        'IF(MAX(`ord`.`priceAmountDenominated`), MAX(`ord`.`priceAmountDenominated`), minBidDenominated) as startBid',
       )
       .innerJoin(
         `(SELECT FIRST_VALUE(id) OVER (PARTITION BY identifier ORDER BY IF(price, price, minBidDenominated) ASC) AS id
@@ -110,7 +110,7 @@ export class AuctionsRepository {
         'a.id = t.id',
       )
       .leftJoin('orders', 'ord', 'ord.auctionId=a.id')
-      .groupBy('a.id, ord.priceAmountDenominated');
+      .groupBy('a.id');
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     if (currentPriceSort) {
