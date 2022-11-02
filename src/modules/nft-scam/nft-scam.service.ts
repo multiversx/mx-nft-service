@@ -8,6 +8,7 @@ import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
 import { NftScamElasticService } from './nft-scam.elastic.service';
 import { NftScamRelatedData } from './nft-scam-data.model';
+import { elasticDict } from 'src/config';
 
 @Injectable()
 export class NftScamService {
@@ -22,6 +23,7 @@ export class NftScamService {
   async validateOrUpdateNftScamInfo(
     identifier: string,
     nftScamRelatedData?: NftScamRelatedData,
+    clearManualScamInfo: boolean = false,
   ): Promise<boolean> {
     const [nftFromApi, nftFromElastic, nftFromDb, elrondApiAbout]: [
       Nft,
@@ -30,8 +32,14 @@ export class NftScamService {
       ElrondApiAbout,
     ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
 
-    if (nftFromDb?.version === 'manual') {
-      if (nftFromElastic.nft_scamInfoVersion !== 'manual') {
+    if (
+      nftFromDb?.version === elasticDict.scamInfo.manualVersionValue &&
+      !clearManualScamInfo
+    ) {
+      if (
+        nftFromElastic.nft_scamInfoVersion !==
+        elasticDict.scamInfo.manualVersionValue
+      ) {
         this.nftScamElasticService.updateBulkNftScamInfoInElastic(
           this.nftScamElasticService.buildNftScamInfoDbToElasticBulkUpdate([
             nftFromDb,
@@ -168,11 +176,7 @@ export class NftScamService {
   }
 
   async manuallyClearNftScamInfo(identifier: string): Promise<boolean> {
-    await Promise.all([
-      this.persistenceService.deleteNftScamInfo(identifier),
-      this.nftScamElasticService.setNftScamInfoManuallyInElastic(identifier),
-    ]);
-    return true;
+    return await this.validateOrUpdateNftScamInfo(identifier, {}, true);
   }
 
   private async validateOrUpdateScamInfoDataForNoScamNft(
