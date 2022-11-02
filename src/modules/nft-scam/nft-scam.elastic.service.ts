@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
-import { constants, elasticDict } from 'src/config';
+import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
 
@@ -79,19 +79,19 @@ export class NftScamElasticService {
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           identifier,
-          elasticDict.scamInfo.versionKey,
-          elasticDict.scamInfo.manualVersionValue,
+          elasticDictionary.scamInfo.versionKey,
+          elasticDictionary.scamInfo.manualVersionValue,
         ),
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           identifier,
-          elasticDict.scamInfo.typeKey,
+          elasticDictionary.scamInfo.typeKey,
           type ?? null,
         ),
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           identifier,
-          elasticDict.scamInfo.infoKey,
+          elasticDictionary.scamInfo.infoKey,
           info ?? null,
         ),
       ];
@@ -107,19 +107,20 @@ export class NftScamElasticService {
     }
   }
 
-  getAllNftsWithScamInfoFromElasticQuery(): ElasticQuery {
-    let query = ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withFields([
-        elasticDict.scamInfo.versionKey,
-        elasticDict.scamInfo.typeKey,
-        elasticDict.scamInfo.infoKey,
-      ])
-      .withPagination({
-        from: 0,
-        size: constants.getNftsFromElasticBatchSize,
-      });
-    return query;
+  async getAllCollectionsFromElastic(): Promise<string[]> {
+    const query = this.getAllCollectionsFromElasticQuery();
+    let collections: string[] = [];
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'token',
+      query,
+      async (items) => {
+        collections = collections.concat([
+          ...new Set(items.map((i) => i.token)),
+        ]);
+      },
+    );
+    return collections;
   }
 
   buildNftScamInfoBulkUpdate(
@@ -133,7 +134,7 @@ export class NftScamElasticService {
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           nft.identifier,
-          elasticDict.scamInfo.versionKey,
+          elasticDictionary.scamInfo.versionKey,
           version,
         ),
       );
@@ -142,7 +143,7 @@ export class NftScamElasticService {
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
             nft.identifier,
-            elasticDict.scamInfo.typeKey,
+            elasticDictionary.scamInfo.typeKey,
             nft.scamInfo.type,
           ),
         );
@@ -150,7 +151,7 @@ export class NftScamElasticService {
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
             nft.identifier,
-            elasticDict.scamInfo.infoKey,
+            elasticDictionary.scamInfo.infoKey,
             nft.scamInfo.info,
           ),
         );
@@ -159,7 +160,7 @@ export class NftScamElasticService {
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
             nft.identifier,
-            elasticDict.scamInfo.typeKey,
+            elasticDictionary.scamInfo.typeKey,
             null,
           ),
         );
@@ -167,7 +168,7 @@ export class NftScamElasticService {
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
             nft.identifier,
-            elasticDict.scamInfo.infoKey,
+            elasticDictionary.scamInfo.infoKey,
             null,
           ),
         );
@@ -183,7 +184,7 @@ export class NftScamElasticService {
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           nft.identifier,
-          elasticDict.scamInfo.versionKey,
+          elasticDictionary.scamInfo.versionKey,
           'manual',
         ),
       );
@@ -191,7 +192,7 @@ export class NftScamElasticService {
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           nft.identifier,
-          elasticDict.scamInfo.typeKey,
+          elasticDictionary.scamInfo.typeKey,
           nft.type,
         ),
       );
@@ -199,7 +200,7 @@ export class NftScamElasticService {
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           nft.identifier,
-          elasticDict.scamInfo.infoKey,
+          elasticDictionary.scamInfo.infoKey,
           nft.info,
         ),
       );
@@ -214,9 +215,9 @@ export class NftScamElasticService {
         QueryType.Match('identifier', identifier, QueryOperator.AND),
       )
       .withFields([
-        elasticDict.scamInfo.versionKey,
-        elasticDict.scamInfo.typeKey,
-        elasticDict.scamInfo.infoKey,
+        elasticDictionary.scamInfo.versionKey,
+        elasticDictionary.scamInfo.typeKey,
+        elasticDictionary.scamInfo.infoKey,
       ])
       .withPagination({
         from: 0,
@@ -250,9 +251,9 @@ export class NftScamElasticService {
         (type) => QueryType.Match('type', type),
       )
       .withFields([
-        elasticDict.scamInfo.versionKey,
-        elasticDict.scamInfo.typeKey,
-        elasticDict.scamInfo.infoKey,
+        elasticDictionary.scamInfo.versionKey,
+        elasticDictionary.scamInfo.typeKey,
+        elasticDictionary.scamInfo.infoKey,
       ])
       .withPagination({
         from: 0,

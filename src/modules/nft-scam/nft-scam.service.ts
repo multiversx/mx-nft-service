@@ -8,7 +8,7 @@ import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamEntity } from 'src/db/reports-nft-scam';
 import { NftScamElasticService } from './nft-scam.elastic.service';
 import { NftScamRelatedData } from './nft-scam-data.model';
-import { elasticDict } from 'src/config';
+import { elasticDictionary } from 'src/config';
 
 @Injectable()
 export class NftScamService {
@@ -33,12 +33,12 @@ export class NftScamService {
     ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
 
     if (
-      nftFromDb?.version === elasticDict.scamInfo.manualVersionValue &&
+      nftFromDb?.version === elasticDictionary.scamInfo.manualVersionValue &&
       !clearManualScamInfo
     ) {
       if (
         nftFromElastic.nft_scamInfoVersion !==
-        elasticDict.scamInfo.manualVersionValue
+        elasticDictionary.scamInfo.manualVersionValue
       ) {
         this.nftScamElasticService.updateBulkNftScamInfoInElastic(
           this.nftScamElasticService.buildNftScamInfoDbToElasticBulkUpdate([
@@ -92,20 +92,8 @@ export class NftScamService {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
 
-          const collectionsQuery =
-            this.nftScamElasticService.getAllCollectionsFromElasticQuery();
-
-          let collections: string[] = [];
-          await this.elrondElasticService.getScrollableList(
-            'tokens',
-            'token',
-            collectionsQuery,
-            async (collectionsBatch) => {
-              collections = collections.concat(
-                collectionsBatch.map((c) => c.token),
-              );
-            },
-          );
+          const collections =
+            await this.nftScamElasticService.getAllCollectionsFromElastic();
 
           for (let i = 0; i < collections.length; i++) {
             await this.validateOrUpdateAllNftsScamInfForCollection(

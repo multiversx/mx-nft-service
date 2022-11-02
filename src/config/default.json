@@ -78,7 +78,7 @@
     "updateAllNftTraitsBatchSize": 10000,
     "getNftsForScamInfoBatchSize": 50
   },
-  "elasticDict": {
+  "elasticDictionary": {
     "scamInfo": {
       "versionKey": "nft_scamInfoVersion",
       "typeKey": "nft_scamInfoType",

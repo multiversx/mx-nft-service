@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, ElrondElasticService } from 'src/common';
-import { constants, elasticDict } from 'src/config';
+import { constants, elasticDictionary } from 'src/config';
 import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
@@ -64,12 +64,12 @@ export class NftScamUpdaterService {
       .withMustExistCondition('token')
       .withMustExistCondition('nonce')
       .withMustNotCondition(
-        QueryType.Match(elasticDict.scamInfo.versionKey, version),
+        QueryType.Match(elasticDictionary.scamInfo.versionKey, version),
       )
       .withMustNotCondition(
         QueryType.Match(
-          elasticDict.scamInfo.versionKey,
-          elasticDict.scamInfo.manualVersionValue,
+          elasticDictionary.scamInfo.versionKey,
+          elasticDictionary.scamInfo.manualVersionValue,
         ),
       )
       .withMustMultiShouldCondition(
