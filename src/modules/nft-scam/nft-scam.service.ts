@@ -80,6 +80,7 @@ export class NftScamService {
     await Locker.lock(
       'updateAllNftsScamInfos: Update scam info for all existing NFTs',
       async () => {
+        let collectionsBatch: string[] = [];
         try {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
@@ -94,8 +95,11 @@ export class NftScamService {
             'token',
             collectionsQuery,
             async (collections) => {
+              collectionsBatch = collections.map(
+                (collection) => collection.token,
+              );
               await this.validateOrUpdateAllNftsScamInfForCollectionsBatch(
-                collections.map((collection) => collection.token),
+                collectionsBatch,
                 elrondApiAbout,
               );
             },
@@ -108,10 +112,11 @@ export class NftScamService {
           );
         } catch (error) {
           this.logger.error(
-            'Error when updating/validating scam info for all NFTs',
+            `Error when updating/validating scam info for all NFTs. Last collections to process: ${collectionsBatch}`,
             {
               path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
               exception: error?.message,
+              collectionsBatch: collectionsBatch,
             },
           );
         }
