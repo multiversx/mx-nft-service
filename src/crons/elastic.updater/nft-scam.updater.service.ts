@@ -18,7 +18,7 @@ export class NftScamUpdaterService {
   async handleUpdateScamInfoWhereNotSetOrOutdated(): Promise<void> {
     try {
       await Locker.lock(
-        `handleValidateTokenTraits`,
+        `handleUpdateScamInfoWhereNotSetOrOutdated`,
         async () => {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
