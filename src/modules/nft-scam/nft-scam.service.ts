@@ -80,7 +80,6 @@ export class NftScamService {
     await Locker.lock(
       'updateAllNftsScamInfos: Update scam info for all existing NFTs',
       async () => {
-        let collectionsBatch: string[] = [];
         try {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
@@ -88,35 +87,34 @@ export class NftScamService {
           const collectionsQuery =
             this.nftScamElasticService.getAllCollectionsFromElasticQuery();
 
-          let totalProcessedScamInfo = 0;
-
+          let collections: string[] = [];
           await this.elrondElasticService.getScrollableList(
             'tokens',
             'token',
             collectionsQuery,
-            async (collections) => {
-              collectionsBatch = collections.map(
-                (collection) => collection.token,
-              );
-              await this.validateOrUpdateAllNftsScamInfForCollectionsBatch(
-                collectionsBatch,
-                elrondApiAbout,
+            async (collectionsBatch) => {
+              collections = collections.concat(
+                collectionsBatch.map((c) => c.token),
               );
             },
           );
-          this.logger.log(
-            `Processed NFT Scam for ${totalProcessedScamInfo} NFTs`,
-            {
-              path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
-            },
-          );
+
+          for (let i = 0; i < collections.length; i++) {
+            await this.validateOrUpdateAllNftsScamInfForCollection(
+              collections[i],
+              elrondApiAbout,
+            );
+          }
+
+          this.logger.log(`Processed NFT Scam for ${collections.length} NFTs`, {
+            path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
+          });
         } catch (error) {
           this.logger.error(
-            `Error when updating/validating scam info for all NFTs. Last collections to process: ${collectionsBatch}`,
+            `Error when updating/validating scam info for all NFTs`,
             {
               path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
               exception: error?.message,
-              collectionsBatch: collectionsBatch,
             },
           );
         }
@@ -125,27 +123,25 @@ export class NftScamService {
     );
   }
 
-  async validateOrUpdateAllNftsScamInfForCollectionsBatch(
-    collections: string[],
+  async validateOrUpdateAllNftsScamInfForCollection(
+    collection: string,
     elrondApiAbout: ElrondApiAbout,
   ): Promise<void> {
-    for (let i = 0; i < collections.length; i++) {
-      const nftsQuery =
-        this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
-          collections[i],
-        );
-      await this.elrondElasticService.getScrollableList(
-        'tokens',
-        'identifier',
-        nftsQuery,
-        async (nftsBatch) => {
-          await this.validateOrUpdateNftsScamInfoBatch(
-            nftsBatch,
-            elrondApiAbout,
-          );
-        },
+    this.logger.log(`Processing scamInfo for ${collection}...`, {
+      path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfForCollection.name}`,
+    });
+    const nftsQuery =
+      this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
+        collection,
       );
-    }
+    await this.elrondElasticService.getScrollableList(
+      'tokens',
+      'identifier',
+      nftsQuery,
+      async (nftsBatch) => {
+        await this.validateOrUpdateNftsScamInfoBatch(nftsBatch, elrondApiAbout);
+      },
+    );
   }
 
   async manuallySetNftScamInfo(
