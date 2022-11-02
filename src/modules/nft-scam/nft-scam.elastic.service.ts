@@ -256,7 +256,7 @@ export class NftScamElasticService {
       ])
       .withPagination({
         from: 0,
-        size: constants.getCollectionsFromElasticBatchSize,
+        size: constants.getNftsForScamInfoBatchSize,
       });
   }
 }
