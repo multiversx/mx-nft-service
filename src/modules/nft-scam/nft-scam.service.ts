@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
 import { ElrondApiAbout } from 'src/common/services/elrond-communication/models/elrond-api-about.model';
-import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { ScamInfoTypeEnum } from '../assets/models';
@@ -30,6 +29,17 @@ export class NftScamService {
       NftScamEntity,
       ElrondApiAbout,
     ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
+
+    if (nftFromDb?.version === 'manual') {
+      if (nftFromElastic.nft_scamInfoVersion !== 'manual') {
+        this.nftScamElasticService.updateBulkNftScamInfoInElastic(
+          this.nftScamElasticService.buildNftScamInfoDbToElasticBulkUpdate([
+            nftFromDb,
+          ]),
+        );
+      }
+      return true;
+    }
 
     if (!nftFromApi.scamInfo) {
       await this.validateOrUpdateScamInfoDataForNoScamNft(
@@ -310,6 +320,10 @@ export class NftScamService {
         this.elrondApiService.getBulkNftScamInfo(identifiers, true),
         this.persistenceService.getBulkNftScamInfo(identifiers),
       ]);
+
+    if (!nftsFromApi || nftsFromApi.length === 0) {
+      return;
+    }
 
     for (let i = 0; i < nftsFromApi?.length; i++) {
       const nftFromApi = nftsFromApi[i];
