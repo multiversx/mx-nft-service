@@ -92,7 +92,7 @@ export class NftRarityService {
   }
 
   async updateCollectionRarities(collectionTicker: string): Promise<boolean> {
-    this.logger.log(`${collectionTicker} - Updating rarities...`);
+    this.logger.log(`Updating rarities for ${collectionTicker}...`);
     try {
       const [isCollectionTooBig, nftsCount] = await this.isCollectionTooBig(
         collectionTicker,
