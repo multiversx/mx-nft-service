@@ -21,7 +21,6 @@ import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
 import { ElrondStats } from './models/elrond-stats.model';
 import { ElrondApiAbout } from './models/elrond-api-about.model';
-import { NftTypeEnum } from 'src/modules/assets/models';
 
 @Injectable()
 export class ElrondApiService {
