@@ -334,10 +334,12 @@ export class AuctionsGetterService {
         (x) => x.marketplaceKey === marketplaceFilter,
       );
 
-      priceRange = await this.computePriceRange(
-        allAuctions,
-        paymentTokenFilter ?? elrondConfig.egld,
-      );
+      if (!paymentTokenFilter) {
+        priceRange = await this.computePriceRange(
+          allAuctions,
+          paymentTokenFilter ?? elrondConfig.egld,
+        );
+      }
     }
 
     if (sort) {
