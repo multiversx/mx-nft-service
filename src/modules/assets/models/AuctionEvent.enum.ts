@@ -14,6 +14,7 @@ export enum ExternalAuctionEventEnum {
   UpdatePrice = 'updatePrice',
   AcceptOffer = 'acceptOffer',
   UpdateOffer = 'update_offer_event',
+  AcceptGlobalOffer = 'acceptGlobalOffer',
 }
 
 export enum ElrondNftsSwapAuctionEventEnum {
