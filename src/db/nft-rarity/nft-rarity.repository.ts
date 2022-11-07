@@ -45,11 +45,10 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
 
   async getBulkRarities(identifiers: string[]): Promise<NftRarityEntity[]> {
     return await this.createQueryBuilder()
-      .select('*')
       .where(`identifier IN(:identifiers)`, {
         identifiers: identifiers,
       })
-      .execute();
+      .getMany();
   }
 
   async findNftRarityByCollection(
