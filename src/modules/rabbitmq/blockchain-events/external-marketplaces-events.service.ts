@@ -387,19 +387,17 @@ export class ExternalMarketplaceEventsService {
             acceptGlobalOfferMarketplace.key === XOXNO_KEY &&
             topicsAcceptGlobalOffer.auctionId > 0
           ) {
-            let updatePriceAuction =
+            let auction =
               await this.auctionsGetterService.getAuctionByIdAndMarketplace(
                 topicsAcceptGlobalOffer.auctionId,
                 acceptGlobalOfferMarketplace.key,
               );
 
-            if (updatePriceAuction) {
-              updatePriceAuction.status = AuctionStatusEnum.Closed;
-              updatePriceAuction.modifiedDate = new Date(
-                new Date().toUTCString(),
-              );
+            if (auction) {
+              auction.status = AuctionStatusEnum.Closed;
+              auction.modifiedDate = new Date(new Date().toUTCString());
               this.auctionsService.updateAuction(
-                updatePriceAuction,
+                auction,
                 ExternalAuctionEventEnum.AcceptGlobalOffer,
               );
             }
