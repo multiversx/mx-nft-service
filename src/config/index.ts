@@ -24,3 +24,5 @@ export const constants = config.get('constants');
 export const genericDescriptions = config.get('genericDescriptions');
 
 export const ports = config.get('ports');
+
+export const elasticDictionary = config.get('elasticDictionary');

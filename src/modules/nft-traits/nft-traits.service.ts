@@ -596,7 +596,7 @@ export class NftTraitsService {
           let collectionsNftsCountDict = {};
 
           while (true) {
-            const [[nftsBatch, lastTimestamp], nftsFromElasticDict] =
+            const [[nftsBatch, lastTimestamp], nftsFromelasticDictionary] =
               await Promise.all([
                 this.apiService.getNftsWithAttributesBeforeTimestamp(
                   beforeTimestamp,
@@ -637,7 +637,7 @@ export class NftTraitsService {
                   : [],
               });
 
-              let nftFromElastic = nftsFromElasticDict[nft.identifier];
+              let nftFromElastic = nftsFromelasticDictionary[nft.identifier];
               if (!nftFromElastic) {
                 nftFromElastic = await this.getNftValuesFromElastic(
                   nft.identifier,
