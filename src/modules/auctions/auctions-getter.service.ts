@@ -308,6 +308,12 @@ export class AuctionsGetterService {
       );
     }
 
+    if (marketplaceFilter) {
+      allAuctions = allAuctions.filter(
+        (x) => x.marketplaceKey === marketplaceFilter,
+      );
+    }
+
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
     if (paymentTokenFilter) {
       const paymentToken = await this.usdPriceService.getToken(
@@ -321,23 +327,13 @@ export class AuctionsGetterService {
         paymentTokenFilter,
         paymentToken,
       );
-
       allAuctions = this.filterByPriceRange(
         queryRequest,
         paymentToken,
         allAuctions,
       );
-    }
-
-    if (marketplaceFilter) {
-      allAuctions = allAuctions.filter(
-        (x) => x.marketplaceKey === marketplaceFilter,
-      );
-
-      priceRange = await this.computePriceRange(
-        allAuctions,
-        paymentTokenFilter ?? elrondConfig.egld,
-      );
+    } else {
+      priceRange = await this.computePriceRange(allAuctions, elrondConfig.egld);
     }
 
     if (sort) {
