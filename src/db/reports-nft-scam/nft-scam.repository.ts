@@ -20,7 +20,7 @@ export class NftScamsRepository extends Repository<NftScamEntity> {
       .where(`identifier IN(:identifiers)`, {
         identifiers: identifiers,
       })
-      .execute();
+      .getMany();
   }
 
   async findNftScamByIdentifier(identifier: string): Promise<NftScamEntity[]> {

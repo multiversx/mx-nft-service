@@ -1,11 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ElrondApiService,
-  ElrondElasticService,
-  RedisCacheService,
-} from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig, constants } from 'src/config';
+import { ElrondApiService, ElrondElasticService } from 'src/common';
+import { constants, elasticDictionary } from 'src/config';
 import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Locker } from 'src/utils/locker';
@@ -13,24 +8,17 @@ import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
 
 @Injectable()
 export class NftScamUpdaterService {
-  private readonly persistentRedisClient: Redis.Redis;
-
   constructor(
     private readonly nftScamService: NftScamService,
-    private readonly redisCacheService: RedisCacheService,
     private readonly elasticService: ElrondElasticService,
     private readonly elrondApiService: ElrondApiService,
     private readonly logger: Logger,
-  ) {
-    this.persistentRedisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async handleUpdateScamInfoWhereNotSetOrOutdated(): Promise<void> {
     try {
       await Locker.lock(
-        `handleValidateTokenTraits`,
+        `handleUpdateScamInfoWhereNotSetOrOutdated`,
         async () => {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
@@ -75,8 +63,15 @@ export class NftScamUpdaterService {
     return ElasticQuery.create()
       .withMustExistCondition('token')
       .withMustExistCondition('nonce')
-      .withMustNotCondition(QueryType.Match('nft_scamInfoVersion', version))
-      .withMustNotCondition(QueryType.Match('nft_scamInfoVersion', 'manual'))
+      .withMustNotCondition(
+        QueryType.Match(elasticDictionary.scamInfo.versionKey, version),
+      )
+      .withMustNotCondition(
+        QueryType.Match(
+          elasticDictionary.scamInfo.versionKey,
+          elasticDictionary.scamInfo.manualVersionValue,
+        ),
+      )
       .withMustMultiShouldCondition(
         [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
         (type) => QueryType.Match('type', type),

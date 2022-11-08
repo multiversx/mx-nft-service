@@ -10,9 +10,15 @@ import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { NftTraitsModule } from '../nft-traits/nft-traits.module';
-import { NftScamModule } from '../nft-scam/nft-scam.module';
 
 @Module({
+  imports: [
+    CommonModule,
+    CacheEventsPublisherModule,
+    ElrondCommunicationModule,
+    NftRarityModuleGraph,
+    NftTraitsModule,
+  ],
   providers: [
     AdminOperationsResolver,
     FlagNftService,
@@ -20,14 +26,6 @@ import { NftScamModule } from '../nft-scam/nft-scam.module';
     AssetsRedisHandler,
     AssetByIdentifierService,
     NsfwUpdaterService,
-  ],
-  imports: [
-    CommonModule,
-    CacheEventsPublisherModule,
-    ElrondCommunicationModule,
-    NftRarityModuleGraph,
-    NftTraitsModule,
-    NftScamModule,
   ],
   exports: [FlagNftService],
 })

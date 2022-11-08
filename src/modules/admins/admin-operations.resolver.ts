@@ -14,7 +14,6 @@ export class AdminOperationsResolver {
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
-    private readonly nftScamService: NftScamService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -57,34 +56,12 @@ export class AdminOperationsResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(GqlAdminAuthGuard)
-  async updateAllCollectionRarities(): Promise<boolean> {
-    try {
-      this.nftRarityService.updateAllCollectionsRarities();
-      return true;
-    } catch (error) {
-      throw new ApolloError(error);
-    }
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
   async validateCollectionRarities(
     @Args('collectionTicker')
     collectionTicker: string,
   ): Promise<boolean> {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
-    } catch (error) {
-      throw new ApolloError(error);
-    }
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
-  async validateAllCollectionRarities(): Promise<boolean> {
-    try {
-      await this.nftRarityService.validateAllCollectionsRarities();
-      return true;
     } catch (error) {
       throw new ApolloError(error);
     }
@@ -113,31 +90,6 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
-    } catch (error) {
-      throw new ApolloError(error);
-    }
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
-  updateAllCollectionTraits(): boolean {
-    this.nftTraitService.updateAllCollectionTraits();
-    return true;
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
-  updateAllNftTraits(): boolean {
-    this.nftTraitService.updateAllNftTraits();
-    return true;
-  }
-
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
-  async updateAllNftScam(): Promise<boolean> {
-    try {
-      this.nftScamService.validateOrUpdateAllNftsScamInfo();
-      return true;
     } catch (error) {
       throw new ApolloError(error);
     }
