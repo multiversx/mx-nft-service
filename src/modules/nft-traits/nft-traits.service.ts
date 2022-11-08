@@ -32,6 +32,7 @@ export class NftTraitsService {
   ) {}
 
   async updateCollectionTraits(collectionTicker: string): Promise<boolean> {
+    this.logger.log(`Updating traits for ${collectionTicker}...`);
     try {
       const [collectionTraitSummaryFromDb, nftsCount]: [
         CollectionTraitSummary,
