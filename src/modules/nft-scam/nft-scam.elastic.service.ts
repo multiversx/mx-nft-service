@@ -3,7 +3,7 @@ import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
-import { NftScamEntity } from 'src/db/reports-nft-scam';
+import { NftScamInfoModel } from './models/nft-scam-info.model';
 
 @Injectable()
 export class NftScamElasticService {
@@ -38,14 +38,13 @@ export class NftScamElasticService {
 
   async setBulkNftScamInfoInElastic(
     nfts: Nft[],
-    version: string,
     clearScamInfoIfEmpty?: boolean,
   ): Promise<void> {
     if (nfts.length > 0) {
       try {
         await this.elasticService.bulkRequest(
           'tokens',
-          this.buildNftScamInfoBulkUpdate(nfts, version, clearScamInfoIfEmpty),
+          this.buildNftScamInfoBulkUpdate(nfts, clearScamInfoIfEmpty),
         );
       } catch (error) {
         this.logger.error('Error when bulk updating nft scam info in Elastic', {
@@ -76,12 +75,12 @@ export class NftScamElasticService {
   ): Promise<void> {
     try {
       const updates = [
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          elasticDictionary.scamInfo.versionKey,
-          elasticDictionary.scamInfo.manualVersionValue,
-        ),
+        // this.elasticService.buildBulkUpdate<string>(
+        //   'tokens',
+        //   identifier,
+        //   elasticDictionary.scamInfo.versionKey,
+        //   elasticDictionary.scamInfo.manualVersionValue,
+        // ),
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           identifier,
@@ -123,21 +122,9 @@ export class NftScamElasticService {
     return collections;
   }
 
-  buildNftScamInfoBulkUpdate(
-    nfts: Nft[],
-    version: string,
-    clearScamInfo?: boolean,
-  ): string[] {
+  buildNftScamInfoBulkUpdate(nfts: Nft[], clearScamInfo?: boolean): string[] {
     let updates: string[] = [];
     for (const nft of nfts) {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          nft.identifier,
-          elasticDictionary.scamInfo.versionKey,
-          version,
-        ),
-      );
       if (nft.scamInfo) {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
@@ -177,23 +164,23 @@ export class NftScamElasticService {
     return updates;
   }
 
-  buildNftScamInfoDbToElasticBulkUpdate(nfts: NftScamEntity[]): string[] {
+  buildNftScamInfoDbToElasticBulkUpdate(nfts: NftScamInfoModel[]): string[] {
     let updates: string[] = [];
     for (const nft of nfts) {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          nft.identifier,
-          elasticDictionary.scamInfo.versionKey,
-          'manual',
-        ),
-      );
+      // updates.push(
+      //   this.elasticService.buildBulkUpdate<string>(
+      //     'tokens',
+      //     nft.identifier,
+      //     elasticDictionary.scamInfo.versionKey,
+      //     'manual',
+      //   ),
+      // );
       updates.push(
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           nft.identifier,
           elasticDictionary.scamInfo.typeKey,
-          nft.type,
+          nft.type ?? null,
         ),
       );
       updates.push(
@@ -201,7 +188,7 @@ export class NftScamElasticService {
           'tokens',
           nft.identifier,
           elasticDictionary.scamInfo.infoKey,
-          nft.info,
+          nft.info ?? null,
         ),
       );
     }
@@ -215,7 +202,7 @@ export class NftScamElasticService {
         QueryType.Match('identifier', identifier, QueryOperator.AND),
       )
       .withFields([
-        elasticDictionary.scamInfo.versionKey,
+        'identifier',
         elasticDictionary.scamInfo.typeKey,
         elasticDictionary.scamInfo.infoKey,
       ])
@@ -251,7 +238,8 @@ export class NftScamElasticService {
         (type) => QueryType.Match('type', type),
       )
       .withFields([
-        elasticDictionary.scamInfo.versionKey,
+        //elasticDictionary.scamInfo.versionKey,
+        'identifier',
         elasticDictionary.scamInfo.typeKey,
         elasticDictionary.scamInfo.infoKey,
       ])

@@ -1,5 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
+import { constants } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
@@ -38,12 +39,13 @@ import {
 } from 'src/db/notifications';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
-import { NftScamEntity, NftScamsRepository } from 'src/db/reports-nft-scam';
+import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
 import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
@@ -63,13 +65,13 @@ export class PersistenceService {
     private readonly marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private readonly marketplaceRepository: MarketplaceRepository,
     private readonly reportNftsRepository: ReportNftsRepository,
-    private readonly nftScamRepository: NftScamsRepository,
     private readonly nftsFlagsRepository: NftsFlagsRepository,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
     private readonly traitRepositoryService: TraitRepositoryService,
+    private readonly nftScamInfoRepositoryService: NftScamInfoRepositoryService,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -973,53 +975,60 @@ export class PersistenceService {
     version: string,
     scamInfo?: ScamInfo,
   ): Promise<void> {
-    await this.nftScamRepository.saveOrUpdateBulkNftScams([
-      new NftScamEntity({
+    let doc: NftScamInfoModel = { identifier: identifier, version: version };
+    if (scamInfo) {
+      doc = { ...doc, type: scamInfo.type, info: scamInfo.info };
+    }
+    const res = await this.nftScamInfoRepositoryService.findOneAndReplace(
+      {
         identifier: identifier,
-        version: version,
-        type: scamInfo?.type ?? undefined,
-        info: scamInfo?.info ?? undefined,
-      }),
-    ]);
+      },
+      doc,
+    );
+    if (!res) {
+      await this.nftScamInfoRepositoryService.create(doc);
+    }
   }
 
-  async saveOrUpdateBulkNftScamInfo(
+  async saveOrUpdateBulkNftScamInfoVersion(
     nfts: Nft[],
     version: string,
   ): Promise<void> {
     if (!nfts || nfts.length === 0) {
       return;
     }
-    const nftScams = nfts.map(
-      (nft) =>
-        new NftScamEntity({
-          identifier: nft.identifier,
-          version: version,
-          type: nft.scamInfo?.type ?? undefined,
-          info: nft.scamInfo?.info ?? undefined,
-        }),
+    await this.nftScamInfoRepositoryService.saveOrUpdateVersionBulk(
+      nfts.map((nft) => nft.identifier),
+      version,
     );
-    await this.nftScamRepository.saveOrUpdateBulkNftScams(nftScams);
   }
 
   async deleteNftScamInfo(identifier: string): Promise<void> {
-    await this.nftScamRepository.delete({
+    await this.nftScamInfoRepositoryService.findOneAndDelete({
       identifier: identifier,
     });
   }
 
-  async deleteBulkNftScamInfo(identifiers: string[]): Promise<void> {
-    if (!identifiers || identifiers.length === 0) {
-      return;
-    }
-    await this.nftScamRepository.deleteBulkNftScamInfo(identifiers);
+  async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamInfoModel[]> {
+    return await this.nftScamInfoRepositoryService.getManyByIdentifiers(
+      identifiers,
+    );
   }
 
-  async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamEntity[]> {
-    return await this.nftScamRepository.getBulkNftScams(identifiers);
+  async getNftScamInfo(
+    identifier: string,
+  ): Promise<NftScamInfoModel | undefined> {
+    return await this.nftScamInfoRepositoryService.findOne({
+      identifier: identifier,
+    });
   }
 
-  async getNftScamInfo(identifier: string): Promise<NftScamEntity | undefined> {
-    return await this.nftScamRepository.findOne({ identifier: identifier });
+  async getBulkOutdatedNftScamInfo(
+    currentVersion: string,
+  ): Promise<NftScamInfoModel[]> {
+    return await this.nftScamInfoRepositoryService.getBulkOutdated(
+      currentVersion,
+      constants.getNftsForScamInfoBatchSize,
+    );
   }
 }

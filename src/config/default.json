@@ -80,7 +80,6 @@
   },
   "elasticDictionary": {
     "scamInfo": {
-      "versionKey": "nft_scamInfoVersion",
       "typeKey": "nft_scamInfoType",
       "infoKey": "nft_scamInfoDescription",
       "manualVersionValue": "manual"

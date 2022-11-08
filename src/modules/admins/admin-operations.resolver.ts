@@ -6,7 +6,6 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
-import { NftScamService } from '../nft-scam/nft-scam.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
