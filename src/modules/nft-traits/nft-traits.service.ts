@@ -450,7 +450,7 @@ export class NftTraitsService {
         identifier: identifier,
         traits: Array.isArray(metadata?.attributes)
           ? metadata?.attributes
-              ?.filter((a) => a.trait_type && a.value)
+              ?.filter((a) => (a.trait_type || a.name) && a.value)
               ?.map(NftTrait.fromNftMetadataAttribute)
           : [],
       });
@@ -631,7 +631,7 @@ export class NftTraitsService {
                 identifier: nft.identifier,
                 traits: Array.isArray(nft.metadata.attributes)
                   ? nft.metadata?.attributes
-                      ?.filter((a) => a.trait_type && a.value)
+                      ?.filter((a) => (a.trait_type || a.name) && a.value)
                       ?.map(NftTrait.fromNftMetadataAttribute)
                   : [],
               });

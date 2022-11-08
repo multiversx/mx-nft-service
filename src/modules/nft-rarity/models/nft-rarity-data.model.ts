@@ -75,15 +75,19 @@ export class NftRarityData {
         continue;
       }
 
-      for (const [key, value] of Object.entries(
+      for (const [key, attribute] of Object.entries(
         nft.temporaryMetadata.attributes,
       )) {
-        if (value.trait_type === undefined || value.value === undefined) {
+        if (
+          (attribute.trait_type === undefined &&
+            attribute.name === undefined) ||
+          attribute.value === undefined
+        ) {
           continue;
         }
 
-        const traitType = String(value.trait_type);
-        const traitValue = String(value.value);
+        const traitType = String(attribute.trait_type ?? attribute.value);
+        const traitValue = String(attribute.value);
 
         if (traitValue.toLowerCase() === 'none' || traitValue === '') {
           continue;

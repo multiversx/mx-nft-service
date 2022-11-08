@@ -14,14 +14,17 @@ export class Metadata {
   }
 
   static fromNftMetadata(metadata: NftMetadata) {
-    return metadata
-      ? new Metadata({
-          description: metadata?.description,
-          attributes: metadata?.attributes
-            ? AttributeType.fromMetadataAttributes(metadata.attributes)
-            : null,
-        })
-      : null;
+    if (!metadata) {
+      return null;
+    }
+    const metadataBody =
+      typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
+    return new Metadata({
+      description: metadataBody?.description,
+      attributes: metadataBody?.attributes
+        ? AttributeType.fromMetadataAttributes(metadataBody.attributes)
+        : null,
+    });
   }
 }
 
@@ -36,18 +39,21 @@ export class AttributeType {
   static fromMetadataAttributes(attributes: [{ [key: string]: string }]) {
     const res: AttributeType[] = [];
     if (Array.isArray(attributes)) {
-      for (const pair of attributes) {
-        if (pair === Object(pair)) {
+      for (const attribute of attributes) {
+        if (attribute === Object(attribute)) {
           let data: KeyValueType[] = [];
-          if (pair['trait_type'] && pair['value']) {
+          if (
+            (attribute['trait_type'] || attribute['value']) &&
+            attribute['value']
+          ) {
             data.push(
               new KeyValueType({
                 key: 'trait_type',
-                value: pair['trait_type'],
+                value: attribute['trait_type'] ?? attribute['name'],
               }),
               new KeyValueType({
                 key: 'value',
-                value: pair['value'],
+                value: attribute['value'],
               }),
             );
             res.push(new AttributeType({ attribute: data }));
