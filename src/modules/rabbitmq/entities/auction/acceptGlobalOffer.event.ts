@@ -1,12 +1,12 @@
 import { GenericEvent } from '../generic.event';
-import { AcceptOfferEventsTopics } from './acceptOffer.event.topics';
+import { AcceptGlobalOfferEventsTopics } from './acceptGlobalOffer.event.topics';
 
 export class AcceptGlobalOfferEvent extends GenericEvent {
-  private decodedTopics: AcceptOfferEventsTopics;
+  private decodedTopics: AcceptGlobalOfferEventsTopics;
 
   constructor(init?: Partial<GenericEvent>) {
     super(init);
-    this.decodedTopics = new AcceptOfferEventsTopics(this.topics);
+    this.decodedTopics = new AcceptGlobalOfferEventsTopics(this.topics);
   }
 
   getTopics() {
