@@ -32,9 +32,7 @@ export class NftScamService {
       NftScamInfoModel,
       ElrondApiAbout,
     ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
-    // todo: check if this works
-    let scamInfoVersion = elrondApiAbout.scamInfoVersion ?? 'test';
-    console.log(`scamInfoVersion ${scamInfoVersion}`);
+    let scamInfoVersion = elrondApiAbout.scamInfoVersion;
 
     if (
       nftFromDb?.version === elasticDictionary.scamInfo.manualVersionValue &&
@@ -85,7 +83,6 @@ export class NftScamService {
         try {
           const elrondApiAbout =
             await this.elrondApiService.getElrondApiAbout();
-
           const scamInfoVersion = elrondApiAbout.scamInfoVersion;
 
           const collections =
@@ -99,7 +96,7 @@ export class NftScamService {
           }
 
           this.logger.log(
-            `Processed NFT Scam for ${collections.length} collections`,
+            `Processed NFT Scam Info for ${collections.length} collections`,
             {
               path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfo.name}`,
             },
@@ -257,7 +254,7 @@ export class NftScamService {
     ] = await this.filterOutdatedNfts(nftsFromElastic, scamInfoVersion);
 
     const elasticUpdates = this.nftScamElasticService
-      .buildNftScamInfoBulkUpdate(nftsScamOutdatedInElastic, true)
+      .buildNftScamInfoBulkUpdate(nftsScamOutdatedInElastic)
       .concat(
         this.nftScamElasticService.buildNftScamInfoBulkUpdate(
           nftsNoScamOutdatedInElastic,
