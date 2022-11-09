@@ -66,8 +66,8 @@ export class OffersResolver extends BaseResolver(Offer) {
     };
   }
 
-  @ResolveField('from', () => Account)
-  async from(@Parent() order: Offer) {
+  @ResolveField('owner', () => Account)
+  async owner(@Parent() order: Offer) {
     const { ownerAddress } = order;
 
     if (!ownerAddress) return null;
@@ -78,10 +78,8 @@ export class OffersResolver extends BaseResolver(Offer) {
   @ResolveField('asset', () => Asset)
   async asset(@Parent() order: Offer) {
     const { identifier } = order;
-    const auctions = await this.assetsProvider.load(identifier);
-    return auctions?.value !== undefined
-      ? Auction.fromEntity(auctions.value)
-      : null;
+    const asset = await this.assetsProvider.load(identifier);
+    return asset?.value ?? null;
   }
 
   @Mutation(() => TransactionNode)
