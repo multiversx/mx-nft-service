@@ -12,6 +12,7 @@ import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -98,6 +99,14 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
+
+      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+        const { collection } = getCollectionAndNonceFromIdentifier(identifier);
+        nftsToDelete.push(identifier);
+        collectionsToUpdate.push(collection);
+        continue;
+      }
+
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
@@ -109,10 +118,6 @@ export class ElasticUpdatesEventsService {
         nft.type === NftTypeEnum.SemiFungibleESDT
       ) {
         collectionsToUpdate.push(nft.collection);
-
-        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-          nftsToDelete.push(nft.identifier);
-        }
       }
     }
 
@@ -140,6 +145,12 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const identifier = `${createTopics.collection}-${createTopics.nonce}`;
+
+      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+        nftsToDelete.push(identifier);
+        continue;
+      }
+
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
@@ -150,11 +161,7 @@ export class ElasticUpdatesEventsService {
         nft.type === NftTypeEnum.NonFungibleESDT ||
         nft.type === NftTypeEnum.SemiFungibleESDT
       ) {
-        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-          nftsToDelete.push(nft.identifier);
-        } else {
-          nftsToUpdate.push(nft.identifier);
-        }
+        nftsToUpdate.push(nft.identifier);
       }
     }
 
