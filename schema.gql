@@ -925,10 +925,10 @@ type Offer {
   boughtTokensNo: String
   creationDate: Int
   endDate: Int
-  from: Account
   id: ID!
   identifier: String!
   marketplaceKey: String!
+  owner: Account
   ownerAddress: String!
   price: Price!
   status: OfferStatusEnum!
