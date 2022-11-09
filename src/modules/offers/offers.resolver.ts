@@ -19,7 +19,6 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { NftMarketplaceAbiService } from '../auctions';
 import { Account } from '../account-stats/models';
-import { FiltersExpression, Sorting } from '../common/filters/filtersTypes';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
@@ -29,12 +28,15 @@ import { AssetsProvider } from '../assets';
 import { Asset } from '../assets/models';
 import { AcceptOfferArgs } from './models/AcceptOfferArgs';
 import { AcceptOfferRequest } from './models/AcceptOfferRequest';
+import { OffersFilters } from './models/Offers-Filters';
+import { OffersService } from './offers.service';
 
 @Resolver(() => Offer)
 export class OffersResolver extends BaseResolver(Offer) {
   constructor(
     private accountsProvider: AccountsProvider,
     private assetsProvider: AssetsProvider,
+    private offersService: OffersService,
     private nftAbiService: NftMarketplaceAbiService,
   ) {
     super();
@@ -42,16 +44,18 @@ export class OffersResolver extends BaseResolver(Offer) {
 
   @Query(() => OffersResponse)
   async offers(
-    @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
-    filters,
-    @Args({ name: 'sorting', type: () => [Sorting], nullable: true })
-    sorting,
+    @Args({ name: 'filters', type: () => OffersFilters, nullable: true })
+    filters: OffersFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [orders, count] = [[], 0];
-    const page = connectionFromArraySlice(orders, pagination, {
+    const [offers, count] = await this.offersService.getOffers(
+      filters,
+      offset,
+      limit,
+    );
+    const page = connectionFromArraySlice(offers, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
     });

@@ -973,6 +973,33 @@ enum OfferStatusEnum {
   Closed
 }
 
+input OffersFilters {
+  """
+  The nft identifier for the offers
+  """
+  identifier: String
+
+  """
+  The marketplace key for the offers
+  """
+  marketplaceKey: String
+
+  """
+  The owner of the offer
+  """
+  ownerAddress: String
+
+  """
+  The payment token for the offers
+  """
+  priceToken: String
+
+  """
+  The offer status
+  """
+  status: String
+}
+
 type OffersResponse {
   edges: [OfferEdge!]
   pageData: PageData
