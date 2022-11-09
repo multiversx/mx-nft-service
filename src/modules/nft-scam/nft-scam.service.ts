@@ -25,7 +25,6 @@ export class NftScamService {
     nftScamRelatedData?: NftScamRelatedData,
     clearManualScamInfo: boolean = false,
   ): Promise<boolean> {
-    console.log(identifier);
     const [nftFromApi, nftFromElastic, nftFromDb, elrondApiAbout]: [
       Nft,
       any,
@@ -179,8 +178,6 @@ export class NftScamService {
       !nftFromDb || nftFromDb.type || nftFromDb.version !== scamInfoVersion;
 
     let updatePromises = [];
-
-    console.log(clearScamInfoInElastic, updateScamInfoInDb);
 
     if (updateScamInfoInDb) {
       updatePromises.push(
