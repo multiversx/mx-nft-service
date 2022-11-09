@@ -23,7 +23,7 @@ export class Offer {
   ownerAddress: string;
 
   @Field(() => Account, { nullable: true })
-  from: Account;
+  owner: Account;
 
   @Field(() => Asset, { nullable: true })
   asset: Asset;
