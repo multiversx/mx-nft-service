@@ -101,9 +101,6 @@ export class ElasticUpdatesEventsService {
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
-        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-          nftsToDelete.push(nft.identifier);
-        }
         continue;
       }
 
@@ -146,9 +143,6 @@ export class ElasticUpdatesEventsService {
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
-        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-          nftsToDelete.push(nft.identifier);
-        }
         continue;
       }
 
