@@ -38,6 +38,7 @@ import {
   NotificationsRepository,
 } from 'src/db/notifications';
 import { OfferEntity, OffersRepository } from 'src/db/offers';
+import { OffersFiltersForDb } from 'src/db/offers/offers.filter';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
@@ -943,6 +944,17 @@ export class PersistenceService {
     return await this.execute(
       this.getOfferById.name,
       this.offersRepository.getOfferById(id),
+    );
+  }
+
+  async getOffers(
+    filters?: OffersFiltersForDb,
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[OfferEntity[], number]> {
+    return await this.execute(
+      this.getOffers.name,
+      this.offersRepository.getActiveOffers(filters, offset, limit),
     );
   }
 
