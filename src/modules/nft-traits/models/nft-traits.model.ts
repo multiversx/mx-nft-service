@@ -14,9 +14,11 @@ export class NftTrait {
   }
 
   static fromNftMetadataAttribute(attribute: { [key: string]: string }) {
-    return attribute && attribute.trait_type && attribute.value
+    return attribute &&
+      (attribute.trait_type || attribute.name) &&
+      attribute.value
       ? new NftTrait({
-          name: attribute.trait_type,
+          name: attribute.trait_type ?? attribute.name,
           value: attribute.value,
         })
       : null;
@@ -49,18 +51,26 @@ export class NftTraits {
       return null;
     }
 
+    if (typeof nft.metadata === 'string') {
+      nft.metadata = JSON.parse(nft.metadata);
+    }
+
     let newNft: NftTraits = new NftTraits({
       identifier: nft.identifier,
       traits: [],
     });
 
     if (nft?.metadata?.attributes) {
-      for (const [key, value] of Object.entries(nft.metadata.attributes)) {
-        if (value.trait_type === undefined || value.value === undefined) {
+      for (const [key, attribute] of Object.entries(nft.metadata.attributes)) {
+        if (
+          (attribute.trait_type === undefined &&
+            attribute.name === undefined) ||
+          attribute.value === undefined
+        ) {
           continue;
         }
-        const traitName = String(value.trait_type);
-        const traitValue = String(value.value);
+        const traitName = String(attribute.trait_type ?? attribute.name);
+        const traitValue = String(attribute.value);
         newNft.traits.push(
           new NftTrait({
             name: traitName,

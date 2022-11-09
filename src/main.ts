@@ -18,7 +18,7 @@ import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-sca
 import { ports } from './config';
 
 async function bootstrap() {
-  BigNumber.config({ EXPONENTIAL_AT: [-30, 30] });
+  BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
   if (process.env.ENABLE_PUBLIC_API === 'true') {
     await startPublicApp();
   }
