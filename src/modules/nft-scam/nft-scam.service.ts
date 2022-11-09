@@ -32,7 +32,7 @@ export class NftScamService {
       NftScamInfoModel,
       ElrondApiAbout,
     ] = await this.getNftsAndElrondAbout(identifier, nftScamRelatedData);
-    let scamInfoVersion = elrondApiAbout.scamInfoVersion;
+    const scamInfoVersion = elrondApiAbout.scamInfoVersion;
 
     if (
       nftFromDb?.version === elasticDictionary.scamInfo.manualVersionValue &&

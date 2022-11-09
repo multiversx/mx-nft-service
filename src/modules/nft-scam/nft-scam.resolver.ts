@@ -10,7 +10,7 @@ export class NftScamResolver {
   constructor(private readonly nftScamService: NftScamService) {}
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   async validateOrUpdateNftScamInfo(
     @Args('identifier') identifier: string,
   ): Promise<boolean> {
@@ -22,7 +22,7 @@ export class NftScamResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   async setNftScamInfo(
     @Args('identifier') identifier: string,
     @Args({ name: 'type', type: () => ScamInfoTypeEnum })
@@ -41,7 +41,7 @@ export class NftScamResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(GqlAdminAuthGuard)
+  @UseGuards(GqlAdminAuthGuard)
   async clearNftScamInfo(
     @Args('identifier') identifier: string,
   ): Promise<boolean> {
