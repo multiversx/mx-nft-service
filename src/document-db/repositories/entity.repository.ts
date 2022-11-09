@@ -51,6 +51,25 @@ export abstract class EntityRepository<T extends Document> {
     );
   }
 
+  async findOneAndReplace(
+    entityFilterQuery: FilterQuery<T>,
+    replaceEntityData: UpdateQuery<any>,
+    projection?: Record<string, unknown>,
+  ): Promise<T | null> {
+    return this.entityModel.findOneAndReplace(
+      entityFilterQuery,
+      replaceEntityData,
+      {
+        new: true,
+        projection: {
+          _id: 0,
+          __v: 0,
+          ...projection,
+        },
+      },
+    );
+  }
+
   async findOneAndDelete(entityFilterQuery: FilterQuery<T>): Promise<T | null> {
     return await this.entityModel.findOneAndDelete(entityFilterQuery);
   }

@@ -31,7 +31,11 @@ import { CommonModule } from 'src/common.module';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondCommunicationModule } from '../services/elrond-communication';
-import { NftScamsRepository } from 'src/db/reports-nft-scam';
+import {
+  NftScamInfoModel,
+  NftScamInfoSchema,
+} from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 
 @Global()
 @Module({
@@ -45,7 +49,6 @@ import { NftScamsRepository } from 'src/db/reports-nft-scam';
     TypeOrmModule.forFeature([MarketplaceRepository]),
     TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
     TypeOrmModule.forFeature([ReportNftsRepository]),
-    TypeOrmModule.forFeature([NftScamsRepository]),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
     TypeOrmModule.forFeature([NotificationsRepository]),
@@ -69,6 +72,12 @@ import { NftScamsRepository } from 'src/db/reports-nft-scam';
         schema: CollectionTraitSummarySchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: NftScamInfoModel.name,
+        schema: NftScamInfoSchema,
+      },
+    ]),
     ElrondCommunicationModule,
   ],
   providers: [
@@ -78,6 +87,7 @@ import { NftScamsRepository } from 'src/db/reports-nft-scam';
     CollectionStatsRepository,
     AuctionsRepository,
     TraitRepositoryService,
+    NftScamInfoRepositoryService,
   ],
   exports: [PersistenceService, UsdPriceService],
 })
