@@ -70,7 +70,7 @@ export class ElasticUpdatesEventsService {
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
-        return;
+        continue;
       }
 
       if (
@@ -101,7 +101,10 @@ export class ElasticUpdatesEventsService {
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
-        return;
+        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+          nftsToDelete.push(nft.identifier);
+        }
+        continue;
       }
 
       if (
@@ -143,17 +146,20 @@ export class ElasticUpdatesEventsService {
       const nft = await this.assetByIdentifierService.getAsset(identifier);
 
       if (!nft || Object.keys(nft).length === 0) {
-        return;
+        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+          nftsToDelete.push(nft.identifier);
+        }
+        continue;
       }
 
       if (
         nft.type === NftTypeEnum.NonFungibleESDT ||
         nft.type === NftTypeEnum.SemiFungibleESDT
       ) {
-        nftsToUpdate.push(nft.identifier);
-
         if (event.identifier === NftEventEnum.ESDTNFTBurn) {
           nftsToDelete.push(nft.identifier);
+        } else {
+          nftsToUpdate.push(nft.identifier);
         }
       }
     }
