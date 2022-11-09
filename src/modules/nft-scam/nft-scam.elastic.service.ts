@@ -75,12 +75,6 @@ export class NftScamElasticService {
   ): Promise<void> {
     try {
       const updates = [
-        // this.elasticService.buildBulkUpdate<string>(
-        //   'tokens',
-        //   identifier,
-        //   elasticDictionary.scamInfo.versionKey,
-        //   elasticDictionary.scamInfo.manualVersionValue,
-        // ),
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
           identifier,
@@ -167,14 +161,6 @@ export class NftScamElasticService {
   buildNftScamInfoDbToElasticBulkUpdate(nfts: NftScamInfoModel[]): string[] {
     let updates: string[] = [];
     for (const nft of nfts) {
-      // updates.push(
-      //   this.elasticService.buildBulkUpdate<string>(
-      //     'tokens',
-      //     nft.identifier,
-      //     elasticDictionary.scamInfo.versionKey,
-      //     'manual',
-      //   ),
-      // );
       updates.push(
         this.elasticService.buildBulkUpdate<string>(
           'tokens',
@@ -238,7 +224,6 @@ export class NftScamElasticService {
         (type) => QueryType.Match('type', type),
       )
       .withFields([
-        //elasticDictionary.scamInfo.versionKey,
         'identifier',
         elasticDictionary.scamInfo.typeKey,
         elasticDictionary.scamInfo.infoKey,

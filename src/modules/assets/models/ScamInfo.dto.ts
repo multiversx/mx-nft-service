@@ -28,7 +28,7 @@ export class ScamInfo {
     nftFromElastic: any,
   ): boolean {
     return (
-      !nftFromElastic[elasticDictionary.scamInfo.typeKey] ||
+      //!nftFromElastic[elasticDictionary.scamInfo.typeKey] ||
       nftFromApi.scamInfo.type !==
         nftFromElastic[elasticDictionary.scamInfo.typeKey] ||
       nftFromApi.scamInfo.info !==
