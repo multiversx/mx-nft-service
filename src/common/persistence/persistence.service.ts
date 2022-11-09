@@ -1019,13 +1019,4 @@ export class PersistenceService {
       identifier: identifier,
     });
   }
-
-  async getBulkOutdatedNftScamInfo(
-    currentVersion: string,
-  ): Promise<NftScamInfoModel[]> {
-    return await this.nftScamInfoRepositoryService.getBulkOutdated(
-      currentVersion,
-      constants.getNftsForScamInfoBatchSize,
-    );
-  }
 }

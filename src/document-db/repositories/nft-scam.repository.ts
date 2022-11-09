@@ -48,15 +48,4 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
   ): Promise<NftScamInfoModel[]> {
     return await this.entityModel.find({ identifier: { $in: identifiers } });
   }
-
-  async getBulkOutdated(
-    currentVersion: string,
-    limit: number,
-  ): Promise<NftScamInfoModel[]> {
-    return await this.entityModel
-      .find({
-        version: { $ne: currentVersion },
-      })
-      .limit(limit);
-  }
 }
