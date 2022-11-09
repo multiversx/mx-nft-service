@@ -6,6 +6,7 @@ import {
   NftScamInfoModel,
   NftScamInfoDocument,
 } from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { Nft } from 'src/common';
 
 @Injectable()
 export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDocument> {
@@ -16,20 +17,25 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
     super(nftScamInfoModel);
   }
 
-  async saveOrUpdateVersionBulk(
-    identifiers: string[],
-    version: string,
-  ): Promise<void> {
-    const updates: any = identifiers.map((identifier) => {
+  async saveOrUpdateBulk(nfts: Nft[], scamInfoVersion: string): Promise<void> {
+    const updates: any = nfts.map((nft) => {
+      let update: any = {
+        identifier: nft.identifier,
+        version: scamInfoVersion,
+      };
+      if (nft.scamInfo) {
+        update = {
+          ...update,
+          type: nft.scamInfo.type,
+          info: nft.scamInfo.info,
+        };
+      }
       return {
         updateOne: {
           filter: {
-            identifier: identifier,
+            identifier: nft.identifier,
           },
-          update: {
-            identifier: identifier,
-            version: version,
-          },
+          update,
           upsert: true,
         },
       };

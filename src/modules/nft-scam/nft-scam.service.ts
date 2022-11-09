@@ -261,7 +261,7 @@ export class NftScamService {
 
     await Promise.all([
       this.nftScamElasticService.updateBulkNftScamInfoInElastic(elasticUpdates),
-      this.persistenceService.saveOrUpdateBulkNftScamInfoVersion(
+      this.persistenceService.saveOrUpdateBulkNftScamInfo(
         nftsOutdatedOrMissingFromDb,
         scamInfoVersion,
       ),

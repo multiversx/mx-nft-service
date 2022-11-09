@@ -990,17 +990,14 @@ export class PersistenceService {
     }
   }
 
-  async saveOrUpdateBulkNftScamInfoVersion(
+  async saveOrUpdateBulkNftScamInfo(
     nfts: Nft[],
     version: string,
   ): Promise<void> {
     if (!nfts || nfts.length === 0) {
       return;
     }
-    await this.nftScamInfoRepositoryService.saveOrUpdateVersionBulk(
-      nfts.map((nft) => nft.identifier),
-      version,
-    );
+    await this.nftScamInfoRepositoryService.saveOrUpdateBulk(nfts, version);
   }
 
   async deleteNftScamInfo(identifier: string): Promise<void> {
