@@ -3,7 +3,6 @@ import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
-import { NftScamInfoModel } from './models/nft-scam-info.model';
 
 @Injectable()
 export class NftScamElasticService {
@@ -154,29 +153,6 @@ export class NftScamElasticService {
           ),
         );
       }
-    }
-    return updates;
-  }
-
-  buildNftScamInfoDbToElasticBulkUpdate(nfts: NftScamInfoModel[]): string[] {
-    let updates: string[] = [];
-    for (const nft of nfts) {
-      updates.push(
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          nft.identifier,
-          elasticDictionary.scamInfo.typeKey,
-          nft.type ?? null,
-        ),
-      );
-      updates.push(
-        this.elasticService.buildBulkUpdate<string>(
-          'tokens',
-          nft.identifier,
-          elasticDictionary.scamInfo.infoKey,
-          nft.info ?? null,
-        ),
-      );
     }
     return updates;
   }
