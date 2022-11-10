@@ -846,26 +846,6 @@ type NotificationsResponse {
   pageInfo: NotificationPageInfo
 }
 
-type Offer {
-  asset: Asset
-  boughtTokensNo: String
-  creationDate: Int
-  endDate: Int
-  id: ID!
-  identifier: String!
-  marketplaceKey: String!
-  owner: Account
-  ownerAddress: String!
-  price: Price!
-  status: OfferStatusEnum!
-}
-
-enum OfferStatusEnum {
-  Accepted
-  Active
-  Closed
-}
-
 enum Operation {
   BETWEEN
   EQ
