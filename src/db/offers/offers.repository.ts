@@ -53,7 +53,7 @@ export class OffersRepository extends Repository<OfferEntity> {
     return await this.save(offer);
   }
 
-  async updateOrderWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
+  async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
     offer.status = status;
     offer.modifiedDate = new Date(new Date().toUTCString());
 
@@ -76,7 +76,7 @@ export class OffersRepository extends Repository<OfferEntity> {
       const indexOf = offers.findIndex((o) => o.id === order.id);
       if (indexOf === count - 1) {
         await this.delete(offers[indexOf].id);
-        await this.updateOrderWithStatus(
+        await this.updateOfferWithStatus(
           offers[indexOf - 1],
           OfferStatusEnum.Active,
         );
@@ -84,14 +84,6 @@ export class OffersRepository extends Repository<OfferEntity> {
         await this.delete(offers[indexOf].id);
       }
     }
-  }
-
-  async deleteOrdersByAuctionId(auctionIds: number[]) {
-    return await this.createQueryBuilder()
-      .delete()
-      .from(OfferEntity)
-      .where('auctionId in (:ids)', { ids: auctionIds })
-      .execute();
   }
 
   private async triggerCacheInvalidation(
