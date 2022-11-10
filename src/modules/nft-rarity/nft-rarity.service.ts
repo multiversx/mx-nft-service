@@ -318,11 +318,10 @@ export class NftRarityService {
       (nft) => nft.hasRarity === undefined,
     ).length;
 
-    if (
-      nftsWithAttributesCount === 0 &&
-      unprocessedNftsCount === 0 &&
-      dbNfts.length === 0
-    ) {
+    const collectionHasNoRarities =
+      nftsWithAttributesCount === 0 && unprocessedNftsCount === 0;
+
+    if (collectionHasNoRarities && dbNfts.length === 0) {
       return true;
     }
 
