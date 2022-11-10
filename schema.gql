@@ -40,6 +40,7 @@ type AccountStats {
   creations: String
   likes: String
   marketplaceKey: String
+  offers: String
   orders: String
 }
 
@@ -613,6 +614,7 @@ type ExploreNftsStats {
   allNftsCount: Int!
   buyNowCount: Int!
   liveAuctionsCount: Int!
+  offersCount: Int!
 }
 
 type ExploreStats {

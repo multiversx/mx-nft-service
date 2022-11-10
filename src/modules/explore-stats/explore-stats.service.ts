@@ -15,6 +15,7 @@ import {
   buyNowAuctionRequest,
   runningAuctionRequest,
 } from '../auctions/auctionsRequest';
+import { OffersService } from '../offers/offers.service';
 
 @Injectable()
 export class ExploreStatsService {
@@ -23,6 +24,7 @@ export class ExploreStatsService {
     private cachingService: CachingService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
+    private offersService: OffersService,
     private apiService: ElrondApiService,
   ) {
     this.redisClient = this.cachingService.getClient(
@@ -66,11 +68,13 @@ export class ExploreStatsService {
       await this.auctionsService.getAuctionsGroupByIdentifier(
         runningAuctionRequest,
       );
+    const [, offersCount] = await this.offersService.getOffers();
 
     return new ExploreNftsStats({
       allNftsCount,
       buyNowCount,
       liveAuctionsCount,
+      offersCount,
     });
   }
 
