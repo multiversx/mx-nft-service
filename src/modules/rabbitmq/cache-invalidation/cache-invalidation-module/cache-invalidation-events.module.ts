@@ -4,11 +4,12 @@ import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.cachi
 import { IsAssetLikedRedisHandler } from 'src/modules/assets/loaders/asset-is-liked.redis-handler';
 import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
+import { OffersCachingModule } from 'src/modules/offers/caching/offers-caching.module';
 import { OrdersCachingModule } from 'src/modules/orders/caching/orders-caching.module';
 import { CacheInvalidationEventsService } from './cache-invalidation-events.service';
 
 @Module({
-  imports: [AuctionsCachingModule, OrdersCachingModule],
+  imports: [AuctionsCachingModule, OrdersCachingModule, OffersCachingModule],
   providers: [
     CacheInvalidationEventsService,
     NotificationsCachingService,
