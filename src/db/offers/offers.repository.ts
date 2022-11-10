@@ -1,10 +1,21 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { OfferEntity } from '.';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersFiltersForDb } from './offers.filter';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 
 @EntityRepository(OfferEntity)
 export class OffersRepository extends Repository<OfferEntity> {
+  constructor(
+    private cacheEventsPublisherService: CacheEventsPublisherService,
+  ) {
+    super();
+  }
+
   async getActiveOffers(
     filters?: OffersFiltersForDb,
     offset: number = 0,
@@ -38,13 +49,16 @@ export class OffersRepository extends Repository<OfferEntity> {
   }
 
   async saveOffer(offer: OfferEntity) {
+    await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
     return await this.save(offer);
   }
 
-  async updateOrderWithStatus(order: OfferEntity, status: OfferStatusEnum) {
-    order.status = status;
-    order.modifiedDate = new Date(new Date().toUTCString());
-    return await this.save(order);
+  async updateOrderWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
+    offer.status = status;
+    offer.modifiedDate = new Date(new Date().toUTCString());
+
+    await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
+    return await this.save(offer);
   }
 
   async rollbackOffersByHash(blockHash: string) {
@@ -78,6 +92,19 @@ export class OffersRepository extends Repository<OfferEntity> {
       .from(OfferEntity)
       .where('auctionId in (:ids)', { ids: auctionIds })
       .execute();
+  }
+
+  private async triggerCacheInvalidation(
+    identifier: string,
+    ownerAddress: string,
+  ) {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        id: identifier,
+        type: CacheEventTypeEnum.UpdateOffer,
+        address: ownerAddress,
+      }),
+    );
   }
 
   private getOffersFilter(filters?: OffersFiltersForDb) {
