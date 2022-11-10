@@ -25,6 +25,7 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
 import { CollectionsGetterService } from './collections-getter.service';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-collection-for-owner.redis-handler';
+import { DocumentDbModule } from 'src/document-db/document-db.module';
 
 @Module({
   providers: [
@@ -56,6 +57,7 @@ import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-
   imports: [
     forwardRef(() => ElrondCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
+    DocumentDbModule,
   ],
   exports: [
     CollectionsTransactionsService,
