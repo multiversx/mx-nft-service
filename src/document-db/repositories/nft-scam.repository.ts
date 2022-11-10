@@ -23,7 +23,10 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
     version: string,
     scamInfo?: ScamInfo,
   ): Promise<void> {
-    let doc: NftScamInfoModel = { identifier: identifier, version: version };
+    let doc: NftScamInfoModel = {
+      identifier: identifier,
+      version: version,
+    };
     if (scamInfo) {
       doc = { ...doc, type: scamInfo.type, info: scamInfo.info };
     }

@@ -13,6 +13,7 @@ import {
   NftScamInfoSchema,
 } from 'src/modules/nft-scam/models/nft-scam-info.model';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
+import { DocumentDbService } from './document-db.service';
 
 @Global()
 @Module({
@@ -41,7 +42,11 @@ import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-s
       },
     ]),
   ],
-  providers: [TraitRepositoryService, NftScamInfoRepositoryService],
-  exports: [TraitRepositoryService, NftScamInfoRepositoryService],
+  providers: [
+    DocumentDbService,
+    TraitRepositoryService,
+    NftScamInfoRepositoryService,
+  ],
+  exports: [DocumentDbService],
 })
 export class DocumentDbModule {}
