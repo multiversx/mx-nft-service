@@ -56,10 +56,7 @@ export class Offer {
           price: new Price({
             amount: offer.priceAmount,
             nonce: offer.priceNonce,
-            token:
-              offer?.priceToken === elrondConfig.egld
-                ? elrondConfig.egld
-                : offer?.priceToken,
+            token: offer?.priceToken,
             timestamp: DateUtils.getTimestamp(offer.creationDate),
           }),
           status: offer.status,
