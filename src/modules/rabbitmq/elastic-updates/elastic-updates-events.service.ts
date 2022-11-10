@@ -11,8 +11,8 @@ import * as Redis from 'ioredis';
 import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -24,7 +24,7 @@ export class ElasticUpdatesEventsService {
     private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftScamInfoService: NftScamService,
-    private readonly persistenceService: PersistenceService,
+    private readonly nftScamInfoRepositoryService: NftScamInfoRepositoryService,
     private readonly redisCacheService: RedisCacheService,
   ) {
     this.rarityRedisClient = this.redisCacheService.getClient(
@@ -168,7 +168,7 @@ export class ElasticUpdatesEventsService {
     nftsToUpdate = [...new Set(nftsToUpdate)];
 
     const deletes: Promise<any>[] = nftsToDelete.map((n) => {
-      return this.persistenceService.deleteNftScamInfo(n);
+      return this.nftScamInfoRepositoryService.deleteNftScamInfo(n);
     });
 
     nftsToUpdate.map(

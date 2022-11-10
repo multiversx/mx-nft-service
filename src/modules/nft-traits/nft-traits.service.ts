@@ -19,15 +19,15 @@ import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetsQuery } from '../assets';
 import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Sort } from '../common/filters/filtersTypes';
+import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
 
 @Injectable()
 export class NftTraitsService {
   constructor(
     private readonly apiService: ElrondApiService,
     private readonly elasticService: ElrondElasticService,
-    private readonly persistenceService: PersistenceService,
+    private readonly traitRepositoryService: TraitRepositoryService,
     private readonly logger: Logger,
   ) {}
 
@@ -43,7 +43,7 @@ export class NftTraitsService {
       ]);
 
       if (this.isCollectionTooBig(collectionTicker, nftsCount)) {
-        await this.persistenceService.updateTraitSummaryLastUpdated(
+        await this.traitRepositoryService.updateTraitSummaryLastUpdated(
           collectionTicker,
         );
         await this.setCollectionTraitsFlagInElastic(collectionTicker);
@@ -63,7 +63,7 @@ export class NftTraitsService {
         this.logger.log(`${collectionTicker} - VALID`, {
           path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
         });
-        await this.persistenceService.updateTraitSummaryLastUpdated(
+        await this.traitRepositoryService.updateTraitSummaryLastUpdated(
           collectionTicker,
         );
         await this.setCollectionTraitsFlagInElastic(collectionTicker);
@@ -71,7 +71,7 @@ export class NftTraitsService {
       }
 
       if (!areCollectionSummariesIdentical || !collectionTraitSummaryFromDb) {
-        await this.persistenceService.saveOrUpdateTraitSummary(
+        await this.traitRepositoryService.saveOrUpdateTraitSummary(
           collectionTraitSummary,
         );
         await this.setCollectionTraitsFlagInElastic(collectionTicker);
@@ -232,7 +232,9 @@ export class NftTraitsService {
       ]);
 
     if (this.isCollectionTooBig(collection, nftsCount)) {
-      await this.persistenceService.updateTraitSummaryLastUpdated(collection);
+      await this.traitRepositoryService.updateTraitSummaryLastUpdated(
+        collection,
+      );
       await this.setCollectionTraitsFlagInElastic(collection);
       return false;
     }
@@ -289,7 +291,9 @@ export class NftTraitsService {
     ).addNftTraitsToCollection(nftTraitsFromApi.traits);
     await Promise.all([
       this.setNftsTraitsInElastic([nftTraitsFromApi]),
-      this.persistenceService.saveOrUpdateTraitSummary(traitSummaryFromElastic),
+      this.traitRepositoryService.saveOrUpdateTraitSummary(
+        traitSummaryFromElastic,
+      ),
     ]);
     return true;
   }
@@ -468,7 +472,7 @@ export class NftTraitsService {
     collection: string,
   ): Promise<CollectionTraitSummary> {
     const collectionTraitSummary =
-      await this.persistenceService.getTraitSummary(collection);
+      await this.traitRepositoryService.getTraitSummary(collection);
     return (
       collectionTraitSummary ??
       new CollectionTraitSummary({ identifier: collection, traitTypes: {} })

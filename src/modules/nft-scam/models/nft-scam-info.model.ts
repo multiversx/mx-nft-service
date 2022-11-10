@@ -1,4 +1,3 @@
-import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { ScamInfoTypeEnum } from 'src/modules/assets/models';

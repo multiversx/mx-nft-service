@@ -15,4 +15,40 @@ export class TraitRepositoryService extends EntityRepository<CollectionTraitSumm
   ) {
     super(collectionTraitSummaryModel);
   }
+
+  async getTraitSummary(collection: string): Promise<CollectionTraitSummary> {
+    return await this.findOne({
+      identifier: collection,
+    });
+  }
+
+  async saveOrUpdateTraitSummary(
+    traitSummary: CollectionTraitSummary,
+  ): Promise<void> {
+    traitSummary = traitSummary.updateTimestamp();
+    const res = await this.findOneAndUpdate(
+      {
+        identifier: traitSummary.identifier,
+      },
+      traitSummary,
+    );
+    if (!res) {
+      await this.create(traitSummary);
+    }
+  }
+
+  async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
+    const res = await this.findOneAndUpdate(
+      { identifier: collection },
+      { lastUpdated: new Date().getTime() },
+    );
+    if (!res) {
+      await this.create(
+        new CollectionTraitSummary({
+          identifier: collection,
+          lastUpdated: new Date().getTime(),
+        }),
+      );
+    }
+  }
 }

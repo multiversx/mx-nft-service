@@ -13,19 +13,19 @@ export class ApiConfigService {
     return value;
   }
 
-  getNftTraitSummariesDbUrl(): string {
+  getMongoDbUrl(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_URL');
   }
 
-  getNftTraitSummariesDatabase(): string {
+  getMongoDbName(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_DATABASE');
   }
 
-  getNftTraitSummariesUsername(): string {
+  getMongoDbUsername(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_USERNAME');
   }
 
-  getNftTraitSummariesPassword(): string {
+  getMongoDbPassword(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_PASSWORD');
   }
 }
