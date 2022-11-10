@@ -71,12 +71,12 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
 
   private async saveOrUpdateBulk(
     nfts: Nft[],
-    scamInfoVersion: string,
+    scamEngineVersion: string,
   ): Promise<void> {
     const updates: any = nfts.map((nft) => {
       let update: any = {
         identifier: nft.identifier,
-        version: scamInfoVersion,
+        version: scamEngineVersion,
       };
       if (nft.scamInfo) {
         update = {
