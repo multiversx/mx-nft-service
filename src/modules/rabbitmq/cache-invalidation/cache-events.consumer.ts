@@ -85,6 +85,9 @@ export class CacheEventsConsumer {
         await this.cacheSetterAdminService.setCacheKey(event);
         break;
       }
+      case CacheEventTypeEnum.UpdateOffer:
+        await this.cacheInvalidationService.invalidateAuction(event);
+        break;
     }
   }
 }

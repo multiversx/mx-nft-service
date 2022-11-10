@@ -5,6 +5,8 @@ import {
   ADDRESS_ERROR,
   NFT_IDENTIFIER_RGX,
   NFT_IDENTIFIER_ERROR,
+  COLLECTION_IDENTIFIER_ERROR,
+  COLLECTION_IDENTIFIER_RGX,
 } from 'src/utils/constants';
 import { OfferStatusEnum } from './Offer-status.enum';
 
@@ -25,6 +27,16 @@ export class OffersFilters {
     description: 'The nft identifier for the offers',
   })
   identifier: string;
+
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+  })
+  @Field(() => String, {
+    nullable: true,
+    description: 'The collection identifier for the offers',
+  })
+  collectionIdentifier: string;
 
   @IsOptional()
   @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
