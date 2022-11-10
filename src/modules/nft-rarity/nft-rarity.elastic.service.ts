@@ -74,8 +74,6 @@ export class NftRarityElasticService {
       outdatedNfts = nfts;
     }
 
-    console.log(`outdatedNfts.length ${outdatedNfts.length}`);
-
     try {
       await this.elasticService.bulkRequest(
         'tokens',
@@ -224,9 +222,10 @@ export class NftRarityElasticService {
         .withMustCondition(
           QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
         )
-        .withMustCondition(
-          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        )
+        // TODO(whiteListedStorage)
+        // .withMustCondition(
+        //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+        // )
         .withFields([
           'nonce',
           'nft_hasRarity',
@@ -523,9 +522,6 @@ export class NftRarityElasticService {
       .withMustCondition(
         QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
       )
-      .withMustCondition(
-        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-      )
       .withMustMultiShouldCondition(
         [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
         (type) => QueryType.Match('type', type),
@@ -535,5 +531,9 @@ export class NftRarityElasticService {
         from: 0,
         size: constants.getNftsFromElasticBatchSize,
       });
+    // TODO(whiteListedStorage)
+    // .withMustCondition(
+    //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+    // )
   }
 }

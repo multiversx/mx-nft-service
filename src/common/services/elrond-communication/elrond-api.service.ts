@@ -529,7 +529,7 @@ export class ElrondApiService {
         query = query.addNonceAfter(start).addNonceBefore(end);
       }
 
-      const url = `collections/${collection}/nfts${query.build(false)}`;
+      const url = `collections/${collection}/nfts${query.build()}`;
 
       const nfts = await this.doGetGeneric(
         this.getScrollableNftsByCollectionAfterNonce.name,
