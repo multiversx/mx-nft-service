@@ -442,8 +442,8 @@ export class AuctionsRepository {
   }
 
   async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
     marketplaceKey: string,
-    identifier?: string,
   ): Promise<AuctionEntity> {
     return await this.auctionsRepository.findOne({
       where: [
