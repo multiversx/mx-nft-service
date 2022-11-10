@@ -829,8 +829,10 @@ type NotificationPageInfo {
 }
 
 enum NotificationTypeEnum {
+  Bought
   Ended
   Outbidded
+  Sold
   Won
 }
 
@@ -842,6 +844,26 @@ type NotificationsResponse {
   edges: [NotificationEdge!]
   pageData: PageData
   pageInfo: NotificationPageInfo
+}
+
+type Offer {
+  asset: Asset
+  boughtTokensNo: String
+  creationDate: Int
+  endDate: Int
+  id: ID!
+  identifier: String!
+  marketplaceKey: String!
+  owner: Account
+  ownerAddress: String!
+  price: Price!
+  status: OfferStatusEnum!
+}
+
+enum OfferStatusEnum {
+  Accepted
+  Active
+  Closed
 }
 
 enum Operation {
