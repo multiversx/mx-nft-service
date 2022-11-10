@@ -39,17 +39,12 @@ import {
 } from 'src/db/notifications';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
-import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
-import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
-import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
-import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
-import { Nft, NftTag } from '../services/elrond-communication/models/nft.dto';
+import { NftTag } from '../services/elrond-communication/models/nft.dto';
 
 @Injectable()
 export class PersistenceService {
@@ -70,8 +65,6 @@ export class PersistenceService {
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
-    private readonly traitRepositoryService: TraitRepositoryService,
-    private readonly nftScamInfoRepositoryService: NftScamInfoRepositoryService,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -932,91 +925,5 @@ export class PersistenceService {
       this.getMostLikedAssetsIdentifiers.name,
       this.assetsLikesRepository.getMostLikedAssetsIdentifiers(offset, limit),
     );
-  }
-
-  async getTraitSummary(collection: string): Promise<CollectionTraitSummary> {
-    return await this.traitRepositoryService.findOne({
-      identifier: collection,
-    });
-  }
-
-  async saveOrUpdateTraitSummary(
-    traitSummary: CollectionTraitSummary,
-  ): Promise<void> {
-    traitSummary = traitSummary.updateTimestamp();
-    const res = await this.traitRepositoryService.findOneAndUpdate(
-      {
-        identifier: traitSummary.identifier,
-      },
-      traitSummary,
-    );
-    if (!res) {
-      await this.traitRepositoryService.create(traitSummary);
-    }
-  }
-
-  async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
-    const res = await this.traitRepositoryService.findOneAndUpdate(
-      { identifier: collection },
-      { lastUpdated: new Date().getTime() },
-    );
-    if (!res) {
-      await this.traitRepositoryService.create(
-        new CollectionTraitSummary({
-          identifier: collection,
-          lastUpdated: new Date().getTime(),
-        }),
-      );
-    }
-  }
-
-  async saveOrUpdateNftScamInfo(
-    identifier: string,
-    version: string,
-    scamInfo?: ScamInfo,
-  ): Promise<void> {
-    let doc: NftScamInfoModel = { identifier: identifier, version: version };
-    if (scamInfo) {
-      doc = { ...doc, type: scamInfo.type, info: scamInfo.info };
-    }
-    const res = await this.nftScamInfoRepositoryService.findOneAndReplace(
-      {
-        identifier: identifier,
-      },
-      doc,
-    );
-    if (!res) {
-      await this.nftScamInfoRepositoryService.create(doc);
-    }
-  }
-
-  async saveOrUpdateBulkNftScamInfo(
-    nfts: Nft[],
-    version: string,
-  ): Promise<void> {
-    if (!nfts || nfts.length === 0) {
-      return;
-    }
-    await this.nftScamInfoRepositoryService.saveOrUpdateBulk(nfts, version);
-  }
-
-  async deleteNftScamInfo(identifier: string): Promise<void> {
-    await this.nftScamInfoRepositoryService.findOneAndDelete({
-      identifier: identifier,
-    });
-  }
-
-  async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamInfoModel[]> {
-    return await this.nftScamInfoRepositoryService.getManyByIdentifiers(
-      identifiers,
-    );
-  }
-
-  async getNftScamInfo(
-    identifier: string,
-  ): Promise<NftScamInfoModel | undefined> {
-    return await this.nftScamInfoRepositoryService.findOne({
-      identifier: identifier,
-    });
   }
 }
