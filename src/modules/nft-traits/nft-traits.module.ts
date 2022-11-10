@@ -3,14 +3,14 @@ import { ElrondCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { CollectionsModuleGraph } from 'src/modules/nftCollections/collections.module';
 import { NftTraitsService } from './nft-traits.service';
-import { PersistenceModule } from 'src/common/persistence/persistence.module';
+import { DocumentDbModule } from 'src/document-db/document-db.module';
 
 @Module({
   imports: [
     CollectionsModuleGraph,
     ElrondCommunicationModule,
     CommonModule,
-    PersistenceModule,
+    DocumentDbModule,
   ],
   providers: [NftTraitsService],
   exports: [NftTraitsService],
