@@ -19,23 +19,10 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
-import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
-import {
-  CollectionTraitSummary,
-  CollectionTraitSummarySchema,
-} from 'src/modules/nft-traits/models/collection-traits.model';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { CommonModule } from 'src/common.module';
-import { ApiConfigService } from 'src/utils/api.config.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondCommunicationModule } from '../services/elrond-communication';
-import {
-  NftScamInfoModel,
-  NftScamInfoSchema,
-} from 'src/modules/nft-scam/models/nft-scam-info.model';
-import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 
 @Global()
 @Module({
@@ -55,29 +42,6 @@ import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-s
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
     CacheEventsPublisherModule,
-    MongooseModule.forRootAsync({
-      imports: [CommonModule],
-      useFactory: async (configService: ApiConfigService) => ({
-        uri: `${configService.getNftTraitSummariesDbUrl()}`,
-        dbName: configService.getNftTraitSummariesDatabase(),
-        user: configService.getNftTraitSummariesUsername(),
-        pass: configService.getNftTraitSummariesPassword(),
-        tlsAllowInvalidCertificates: true,
-      }),
-      inject: [ApiConfigService],
-    }),
-    MongooseModule.forFeature([
-      {
-        name: CollectionTraitSummary.name,
-        schema: CollectionTraitSummarySchema,
-      },
-    ]),
-    MongooseModule.forFeature([
-      {
-        name: NftScamInfoModel.name,
-        schema: NftScamInfoSchema,
-      },
-    ]),
     ElrondCommunicationModule,
   ],
   providers: [
@@ -86,8 +50,6 @@ import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-s
     AccountStatsRepository,
     CollectionStatsRepository,
     AuctionsRepository,
-    TraitRepositoryService,
-    NftScamInfoRepositoryService,
   ],
   exports: [PersistenceService, UsdPriceService],
 })
