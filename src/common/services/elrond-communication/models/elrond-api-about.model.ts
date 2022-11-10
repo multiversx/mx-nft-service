@@ -4,7 +4,7 @@ export class ElrondApiAbout {
   network: string;
   cluster: string;
   version: string;
-  scamInfoVersion: string;
+  scamEngineVersion: string;
 
   constructor(init?: Partial<ElrondApiAbout>) {
     Object.assign(this, init);
