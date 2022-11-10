@@ -363,7 +363,7 @@ export class NftRarityService {
       let allNfts: NftRarityData[] = [];
       let nfts: NftRarityData[];
 
-      await this.elrondApiService.getScrollableNftsByCollectionAfterNonce(
+      await this.elrondApiService.getScrollableNftsByCollectionAfterNonceDesc(
         collectionTicker,
         'identifier,nonce,metadata,score,rank,rarities,timestamp',
         async (nftsBatch) => {
