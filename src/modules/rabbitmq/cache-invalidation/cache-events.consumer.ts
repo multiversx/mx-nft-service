@@ -56,6 +56,9 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.AssetLike:
         await this.cacheInvalidationService.invalidateAssetLike(event);
         break;
+      case CacheEventTypeEnum.UpdateOffer:
+        await this.cacheInvalidationService.invalidateAuction(event);
+        break;
     }
   }
 }

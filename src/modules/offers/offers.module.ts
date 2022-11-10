@@ -10,6 +10,7 @@ import { AssetsModuleGraph } from '../assets/assets.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
+import { OffersCachingModule } from './caching/offers-caching.module';
 
 @Module({
   providers: [
@@ -23,6 +24,7 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
   ],
   imports: [
     ElrondCommunicationModule,
+    OffersCachingModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => AssetsModuleGraph),

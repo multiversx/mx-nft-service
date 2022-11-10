@@ -19,7 +19,6 @@ import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
-import BigNumber from 'bignumber.js';
 import { elrondConfig } from 'src/config';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
