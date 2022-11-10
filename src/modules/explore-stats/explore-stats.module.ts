@@ -4,6 +4,7 @@ import { ExploreStatsResolver } from './explore-stats.resolver';
 import { ExploreStatsService } from './explore-stats.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
+import { OffersModuleGraph } from '../offers/offers.module';
 
 @Module({
   providers: [ExploreStatsService, ExploreStatsResolver],
@@ -11,6 +12,7 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
     ElrondCommunicationModule,
     CollectionsModuleGraph,
     AuctionsModuleGraph,
+    OffersModuleGraph,
   ],
   exports: [ExploreStatsService],
 })
