@@ -467,7 +467,7 @@ export class ExternalMarketplaceEventsService {
         identifier: auction.identifier,
         ownerAddress: order.ownerAddress,
         status: NotificationStatusEnum.Active,
-        type: NotificationTypeEnum.Sold,
+        type: NotificationTypeEnum.Bought,
         name: assetName,
         marketplaceKey: auction.marketplaceKey,
       }),
