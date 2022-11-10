@@ -50,10 +50,10 @@ export class OffersService {
     return [offers.map((o) => Offer.fromEntity(o)), count];
   }
 
-  private async getOffersForAddress(
+  public async getOffersForAddress(
     filters: OffersFilters,
-    offset: number,
-    limit: number,
+    offset: number = 0,
+    limit: number = 10,
   ): Promise<[Offer[], number]> {
     let [offers] = await this.offersCachingService.getOrSetOffersForAddress(
       filters.ownerAddress,
