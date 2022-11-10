@@ -142,25 +142,25 @@ export class NftMarketplaceAbiService {
     );
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(collection);
+    if (!marketplace) {
+      return;
+    }
 
     const contract = await this.contract.getContract(marketplace.address);
-
-    if (marketplace) {
-      return contract.methodsExplicit
-        .sendOffer(
-          await this.getCreateOfferArgs(
-            collection,
-            nonce,
-            request,
-            marketplace.key,
-          ),
-        )
-        .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
-        .withChainID(elrondConfig.chainID)
-        .withGasLimit(gas.bid)
-        .buildTransaction()
-        .toPlainObject(new Address(ownerAddress));
-    }
+    return contract.methodsExplicit
+      .sendOffer(
+        await this.getCreateOfferArgs(
+          collection,
+          nonce,
+          request,
+          marketplace.key,
+        ),
+      )
+      .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.bid)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async withdrawOffer(
@@ -168,21 +168,22 @@ export class NftMarketplaceAbiService {
     offerId: number,
   ): Promise<TransactionNode> {
     const offer = await this.offersService.getOfferById(offerId);
-
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(
-        offer.collection,
+        offer?.collection,
       );
-    if (marketplace) {
-      const contract = await this.contract.getContract(marketplace.address);
-      return contract.methodsExplicit
-        .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-        .withValue(TokenPayment.egldFromAmount(0))
-        .withChainID(elrondConfig.chainID)
-        .withGasLimit(gas.withdraw)
-        .buildTransaction()
-        .toPlainObject(new Address(ownerAddress));
+
+    if (!marketplace) {
+      return;
     }
+    const contract = await this.contract.getContract(marketplace.address);
+    return contract.methodsExplicit
+      .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
+      .withValue(TokenPayment.egldFromAmount(0))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async acceptOffer(
@@ -205,22 +206,25 @@ export class NftMarketplaceAbiService {
   ): Promise<TransactionNode> {
     const offer = await this.offersService.getOfferById(offerId);
 
-    if (offer) {
-      const marketplace =
-        await this.marketplaceService.getMarketplaceByCollection(
-          offer?.collection,
-        );
-      if (marketplace) {
-        const contract = await this.contract.getContract(marketplace.address);
-        return contract.methodsExplicit
-          .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-          .withValue(TokenPayment.egldFromAmount(0))
-          .withChainID(elrondConfig.chainID)
-          .withGasLimit(gas.withdraw)
-          .buildTransaction()
-          .toPlainObject(new Address(ownerAddress));
-      }
+    if (!offer) {
+      return;
     }
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(
+        offer.collection,
+      );
+
+    if (!marketplace) {
+      return;
+    }
+    const contract = await this.contract.getContract(marketplace.address);
+    return contract.methodsExplicit
+      .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
+      .withValue(TokenPayment.egldFromAmount(0))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   private async acceptAndWithdrawOffer(
@@ -230,25 +234,30 @@ export class NftMarketplaceAbiService {
   ): Promise<TransactionNode> {
     const offer = await this.offersService.getOfferById(offerId);
     const auction = await this.auctionsService.getAuctionById(auctionId);
-    if (offer && auction && ownerAddress === auction.ownerAddress) {
-      const marketplace =
-        await this.marketplaceService.getMarketplaceByCollection(
-          offer?.collection,
-        );
-      if (marketplace) {
-        const contract = await this.contract.getContract(marketplace.address);
-        return contract.methodsExplicit
-          .withdrawAuctionAndAcceptOffer([
-            new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-            new U64Value(new BigNumber(offer.marketplaceOfferId)),
-          ])
-          .withValue(TokenPayment.egldFromAmount(0))
-          .withChainID(elrondConfig.chainID)
-          .withGasLimit(gas.withdraw)
-          .buildTransaction()
-          .toPlainObject(new Address(ownerAddress));
-      }
+    if (!offer || !auction || ownerAddress !== auction?.ownerAddress) {
+      return;
     }
+
+    const marketplace =
+      await this.marketplaceService.getMarketplaceByCollection(
+        offer.collection,
+      );
+
+    if (!marketplace) {
+      return;
+    }
+
+    const contract = await this.contract.getContract(marketplace.address);
+    return contract.methodsExplicit
+      .withdrawAuctionAndAcceptOffer([
+        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+        new U64Value(new BigNumber(offer.marketplaceOfferId)),
+      ])
+      .withValue(TokenPayment.egldFromAmount(0))
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async endAuction(
