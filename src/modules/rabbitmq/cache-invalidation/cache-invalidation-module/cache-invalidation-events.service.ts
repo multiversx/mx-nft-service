@@ -4,6 +4,7 @@ import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.cachi
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
+import { OffersCachingService } from 'src/modules/offers/caching/offers-caching.service';
 import { OrdersCachingService } from 'src/modules/orders/caching/orders-caching.service';
 import { ChangedEvent } from '../events/changed.event';
 
@@ -16,6 +17,7 @@ export class CacheInvalidationEventsService {
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private assetsLikesCachingService: AssetsLikesCachingService,
     private assetsHistoryCachingService: AssetsHistoryCachingService,
+    private offersCachingService: OffersCachingService,
   ) {}
 
   async invalidateAuction(payload: ChangedEvent) {
@@ -59,5 +61,9 @@ export class CacheInvalidationEventsService {
 
   async invalidateAssetHistory(identifier: string) {
     await this.assetsHistoryCachingService.invalidateCache(identifier);
+  }
+    
+  async invalidateOffers(payload: ChangedEvent) {
+    this.offersCachingService.invalidateCache(payload.id, payload.address);
   }
 }

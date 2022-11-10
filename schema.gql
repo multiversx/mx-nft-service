@@ -915,6 +915,9 @@ enum OfferStatusEnum {
 }
 
 input OffersFilters {
+  """The collection identifier for the offers"""
+  collectionIdentifier: String
+
   """The nft identifier for the offers"""
   identifier: String
 
