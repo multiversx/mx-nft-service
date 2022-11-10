@@ -57,4 +57,8 @@ export class OffersFilters {
     description: 'The offer status',
   })
   status: OfferStatusEnum;
+
+  constructor(init?: Partial<OffersFilters>) {
+    Object.assign(this, init);
+  }
 }
