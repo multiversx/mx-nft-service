@@ -346,10 +346,6 @@ export class NftScamService {
       if (
         ScamInfo.areElasticAndDbScamInfoDifferent(nftFromElastic, nftFromDb)
       ) {
-        console.log(
-          nftFromElastic[elasticDictionary.scamInfo.typeKey],
-          nftFromDb.type,
-        );
         nftsToMigrateFromDbToElastic.push(nftFromDb);
       }
     }
