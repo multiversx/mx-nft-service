@@ -178,7 +178,7 @@ export class NftScamElasticService {
             'tokens',
             nftFromDb.identifier,
             elasticDictionary.scamInfo.infoKey,
-            nftFromDb.info,
+            null,
           ),
         );
       } else {
@@ -195,7 +195,7 @@ export class NftScamElasticService {
             'tokens',
             nftFromDb.identifier,
             elasticDictionary.scamInfo.infoKey,
-            null,
+            nftFromDb.info,
           ),
         );
       }
