@@ -4,6 +4,7 @@ import { CommonModule } from 'src/common.module';
 import { CollectionsModuleGraph } from 'src/modules/nftCollections/collections.module';
 import { NftTraitsService } from './nft-traits.service';
 import { DocumentDbModule } from 'src/document-db/document-db.module';
+import { NftTraitsElasticService } from './nft-traits.elastic.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { DocumentDbModule } from 'src/document-db/document-db.module';
     CommonModule,
     DocumentDbModule,
   ],
-  providers: [NftTraitsService],
-  exports: [NftTraitsService],
+  providers: [NftTraitsService, NftTraitsElasticService],
+  exports: [NftTraitsService, NftTraitsElasticService],
 })
 export class NftTraitsModule {}

@@ -32,6 +32,15 @@ export class DocumentDbService {
     );
   }
 
+  async deleteTraitSummary(
+    collection: string,
+  ): Promise<CollectionTraitSummary> {
+    return await this.execute(
+      this.getTraitSummary.name,
+      this.traitRepositoryService.findOneAndDelete({ identifier: collection }),
+    );
+  }
+
   async saveOrUpdateTraitSummary(
     traitSummary: CollectionTraitSummary,
   ): Promise<void> {
