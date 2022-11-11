@@ -286,7 +286,7 @@ export class NftScamService {
     const [nftsOutdatedOrMissingFromDb, nftsToMigrateFromDbToElastic]: [
       Nft[],
       NftScamInfoModel[],
-    ] = await this.filterMissingNftsFromDbOrOutdatedInElastic(
+    ] = await this.getMissingNftsFromDbOrOutdatedInElastic(
       nftsFromElastic,
       scamEngineVersion,
     );
@@ -311,7 +311,7 @@ export class NftScamService {
     ];
   }
 
-  private async filterMissingNftsFromDbOrOutdatedInElastic(
+  private async getMissingNftsFromDbOrOutdatedInElastic(
     nftsFromElastic: any,
     scamEngineVersion: string,
   ): Promise<[Nft[], NftScamInfoModel[]]> {
