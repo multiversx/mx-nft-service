@@ -182,9 +182,6 @@ export class NftRarityElasticService {
         .withMustCondition(
           QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
         )
-        .withMustCondition(
-          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        )
         .withFields([
           'nonce',
           'nft_rank_custom',
