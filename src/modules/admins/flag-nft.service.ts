@@ -264,7 +264,7 @@ export class FlagNftService {
             this.elasticUpdater.buildPutMultipleMappingsBody([
               {
                 key: 'nft_nsfw_mark',
-                value: 'long',
+                value: 'float',
               },
             ]),
           );
