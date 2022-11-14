@@ -377,6 +377,9 @@ export class NftRarityService {
         },
         collectionNftsCount,
       );
+      if (allNfts.length === 0) {
+        return [[], []];
+      }
       allNfts = this.sortDescNftsByNonce(allNfts);
 
       const preferredAlgorithm =
