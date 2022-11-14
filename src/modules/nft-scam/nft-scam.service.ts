@@ -291,7 +291,10 @@ export class NftScamService {
       scamEngineVersion,
     );
 
-    if (nftsOutdatedOrMissingFromDb.length === 0) {
+    if (
+      !nftsOutdatedOrMissingFromDb ||
+      nftsOutdatedOrMissingFromDb.length === 0
+    ) {
       return [[], [], [], nftsToMigrateFromDbToElastic];
     }
 
