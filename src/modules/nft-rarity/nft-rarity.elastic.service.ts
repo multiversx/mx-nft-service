@@ -359,7 +359,12 @@ export class NftRarityElasticService {
       'token',
       query,
       async (items) => {
-        collections = collections.concat([...new Set(items)]);
+        const collectionsWithRarityFlags = items.map((collection) =>
+          CollectionFromElastic.fromElastic(collection),
+        );
+        collections = collections.concat([
+          ...new Set(collectionsWithRarityFlags),
+        ]);
       },
     );
     return collections;
