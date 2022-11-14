@@ -75,9 +75,6 @@ export class FlagNftService {
         .withMustCondition(
           QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
         )
-        .withMustCondition(
-          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        )
         .withPagination({ from: 0, size: 10000 });
       await this.elasticUpdater.getScrollableList(
         'tokens',

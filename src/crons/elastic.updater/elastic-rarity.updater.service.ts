@@ -13,13 +13,13 @@ export class ElasticRarityUpdaterService {
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
-  async handleValidateAllNftTraitValues() {
+  async handleValidateAllCollectionsRarities() {
     await this.rarityUpdaterService.handleValidateAllTokenRarities();
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
-  async handleUpdateTokenRaritiesCronJob() {
-    await this.rarityUpdaterService.handleUpdateTokenRarities(
+  async handleUpdateTokenRaritiesWhereNotSetCronJob() {
+    await this.rarityUpdaterService.handleUpdateTokenRaritiesWhereNotSet(
       cronJobs.rarity.colectionRaritiesToUpdateEvery10s,
     );
   }
@@ -27,12 +27,5 @@ export class ElasticRarityUpdaterService {
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleProcessTokenRarityQueueCronJob() {
     await this.rarityUpdaterService.processTokenRarityQueue();
-  }
-
-  @Cron(CronExpression.EVERY_30_MINUTES)
-  async handleValidateTokenRaritiesCronJob() {
-    await this.rarityUpdaterService.handleValidateTokenRarities(
-      cronJobs.rarity.collectionRaritiesToValidateEvery30m,
-    );
   }
 }
