@@ -36,9 +36,6 @@ export class NsfwUpdaterService {
       .withMustCondition(
         QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
       )
-      .withMustCondition(
-        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-      )
       .withPagination({ from: 0, size: 10000 });
 
     await this.elasticService.getScrollableList(
@@ -66,9 +63,6 @@ export class NsfwUpdaterService {
       )
       .withMustCondition(
         QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-      )
-      .withMustCondition(
-        QueryType.Nested('data', { 'data.whiteListedStorage': true }),
       )
       .withPagination({ from: 0, size: 10000 });
 
