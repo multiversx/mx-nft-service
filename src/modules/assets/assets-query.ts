@@ -127,7 +127,8 @@ export class AssetsQuery {
   }
 
   build(addDefaultQuery: boolean = true): string {
-    // TODO: handle whitelisting in a different way
+    // TODO(whiteListedStorage): handle whitelisting in a different way
+    // then uncomment where TODO(whiteListedStorage)
     // const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
     const defaultQuery = 'hasUris=true&type=NonFungibleESDT,SemiFungibleESDT,';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)

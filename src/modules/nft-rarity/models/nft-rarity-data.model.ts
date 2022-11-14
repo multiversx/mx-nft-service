@@ -11,6 +11,7 @@ export class NftRarityData {
   DNA?: number[];
 
   rarities: Rarity;
+  hasRarity?: boolean;
 
   constructor(init?: Partial<NftRarityData>) {
     Object.assign(this, init);
@@ -41,6 +42,7 @@ export class NftRarityData {
           nonce: nft.nonce,
           temporaryMetadata: undefined,
           rarities: Rarity.fromElasticNftRarity(nft),
+          hasRarity: nft.nft_hasRarity,
         })
       : null;
   }
