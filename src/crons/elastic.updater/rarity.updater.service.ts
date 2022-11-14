@@ -49,9 +49,6 @@ export class RarityUpdaterService {
             .withMustCondition(
               QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
             )
-            .withMustCondition(
-              QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-            )
             .withMustMultiShouldCondition(
               [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
               (type) => QueryType.Match('type', type),
