@@ -194,17 +194,16 @@ export class AuctionsRepository {
     } else if (queryRequest.sorting) {
       return this.getAuctions(queryRequest);
     }
-    const endDate = DateUtils.getCurrentTimestampPlus(12);
     const defaultAuctionsQuery = getDefaultAuctionsForIdentifierQuery(
+      queryRequest,
       identifier,
-      endDate,
       queryRequest.limit,
       queryRequest.offset,
       queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
     );
     const sqlAuctionsCount = getDefaultAuctionsForIdentifierQueryCount(
+      queryRequest,
       identifier,
-      endDate,
       queryRequest.filters?.filters?.find((x) => x.field === 'status')?.values,
     );
     const [auctions, count, priceRange] = await Promise.all([

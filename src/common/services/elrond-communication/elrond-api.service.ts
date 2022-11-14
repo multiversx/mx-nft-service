@@ -498,41 +498,32 @@ export class ElrondApiService {
     return this.filterUniqueNftsByNonce(nfts);
   }
 
-  async getScrollableNftsByCollectionAfterNonce(
+  async getScrollableNftsByCollectionAfterNonceDesc(
     collection: string,
     fields: string = 'identifier,nonce,timestamp',
     action: (nfts: Nft[]) => Promise<boolean | any>,
     collectionNftsCount: number,
-    startNonce: number = 1,
-    endNonce: number = constants.nftsCountThresholdForTraitAndRarityIndexing,
   ): Promise<void> {
     const batchSize = constants.getNftsFromApiBatchSize;
 
     let nftsCount = 0;
-    let lastEnd = startNonce ? startNonce - 1 : 0;
+    let lastMinNonce;
     let actionResult: boolean;
 
     do {
-      const start = lastEnd + 1;
-      let end;
-
-      if (startNonce !== undefined && endNonce !== undefined) {
-        end = Math.min(endNonce, start + batchSize - 1);
-      } else {
-        end = start + batchSize - 1;
-      }
+      const nonceBefore = lastMinNonce - 1;
 
       let query = new AssetsQuery()
         .addPageSize(0, batchSize)
         .addQuery(`fields=${fields}`);
-      if (collectionNftsCount > batchSize || startNonce || endNonce) {
-        query = query.addNonceAfter(start).addNonceBefore(end);
+      if (collectionNftsCount > batchSize && nonceBefore) {
+        query = query.addNonceBefore(nonceBefore);
       }
 
-      const url = `collections/${collection}/nfts${query.build(false)}`;
+      const url = `collections/${collection}/nfts${query.build()}`;
 
       const nfts = await this.doGetGeneric(
-        this.getScrollableNftsByCollectionAfterNonce.name,
+        this.getScrollableNftsByCollectionAfterNonceDesc.name,
         url,
       );
 
@@ -540,10 +531,10 @@ export class ElrondApiService {
 
       actionResult = await action(nfts);
 
-      lastEnd = end;
+      lastMinNonce = nfts[nfts.length - 1].nonce;
     } while (
       nftsCount < collectionNftsCount &&
-      (endNonce ? lastEnd < endNonce : true) &&
+      lastMinNonce !== 1 &&
       actionResult !== false
     );
   }
