@@ -13,7 +13,7 @@ import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
-import { getAllCollectionsFromElasticQuery } from './nft-traits.elastic.requests';
+import { getAllCollectionsFromElasticQuery } from './nft-traits.elastic.queries';
 
 @Injectable()
 export class NftTraitsService {

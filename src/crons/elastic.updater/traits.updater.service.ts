@@ -12,7 +12,7 @@ import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elast
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
   getCollectionsWithTraitSummaryFromElasticQuery,
-} from 'src/modules/nft-traits/nft-traits.elastic.requests';
+} from 'src/modules/nft-traits/nft-traits.elastic.queries';
 
 @Injectable()
 export class TraitsUpdaterService {

@@ -5,7 +5,7 @@ import {
   getAllEncodedNftValuesFromElasticBeforeTimestampQuery,
   getAllEncodedNftValuesFromElasticQuery,
   getNftWithTraitValuesFromElasticQuery,
-} from './nft-traits.elastic.requests';
+} from './nft-traits.elastic.queries';
 
 @Injectable()
 export class NftTraitsElasticService {
