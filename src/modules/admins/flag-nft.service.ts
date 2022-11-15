@@ -4,6 +4,7 @@ import { ElrondElasticService, NftMedia } from 'src/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { NftFlagsEntity } from 'src/db/nftFlags';
+import { Locker } from 'src/utils/locker';
 import { AssetByIdentifierService } from '../assets';
 import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
@@ -28,7 +29,9 @@ export class FlagNftService {
     private nsfwUpdateService: NsfwUpdaterService,
     private readonly cacheEventPublisherService: CacheEventsPublisherService,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.setElasticNftFlagMapping();
+  }
 
   public async updateNftFlag(identifier: string) {
     try {
@@ -249,5 +252,29 @@ export class FlagNftService {
     }
 
     return media;
+  }
+
+  private async setElasticNftFlagMapping(): Promise<void> {
+    await Locker.lock(
+      'setElasticNftFlagMapping',
+      async () => {
+        try {
+          await this.elasticUpdater.putMappings(
+            'tokens',
+            this.elasticUpdater.buildPutMultipleMappingsBody([
+              {
+                key: 'nft_nsfw_mark',
+                value: 'float',
+              },
+            ]),
+          );
+        } catch (error) {
+          this.logger.error('Error when trying to map nsfw Elastic types', {
+            path: `$${FlagNftService.name}.${this.setElasticNftFlagMapping.name}`,
+          });
+        }
+      },
+      false,
+    );
   }
 }

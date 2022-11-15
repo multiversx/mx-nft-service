@@ -107,7 +107,7 @@ export class NftRarityService {
         ),
       ]);
 
-      if (allNfts?.length === 0) {
+      if (!allNfts || allNfts.length === 0) {
         this.logger.log(
           `${collectionTicker} - No NFTs => update collection rarity flag`,
           {
@@ -377,6 +377,9 @@ export class NftRarityService {
         },
         collectionNftsCount,
       );
+      if (allNfts.length === 0) {
+        return [[], []];
+      }
       allNfts = this.sortDescNftsByNonce(allNfts);
 
       const preferredAlgorithm =
@@ -396,7 +399,7 @@ export class NftRarityService {
       return [allNfts, []];
     } catch (error) {
       this.logger.error(`Error when getting all collection NFTs from API`, {
-        path: 'NftRarityService.getAllCollectionNftsFromAPI',
+        path: `${NftRarityService.name}.${this.getAllCollectionNftsWithCustomRanksFromAPI.name}`,
         exception: error?.message,
         collection: collectionTicker,
       });

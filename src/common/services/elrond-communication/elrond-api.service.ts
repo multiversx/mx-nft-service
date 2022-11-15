@@ -528,6 +528,10 @@ export class ElrondApiService {
         url,
       );
 
+      if (!nfts || nfts.length === 0) {
+        break;
+      }
+
       nftsCount += nfts.length;
 
       actionResult = await action(nfts);
