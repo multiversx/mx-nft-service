@@ -50,6 +50,7 @@ import { SmartContractArtistsService } from '../artists/smart-contract-artist.se
 import { AssetsLikesCachingService } from './assets-likes.caching.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
+import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.service';
 
 @Module({
   providers: [
@@ -97,6 +98,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     InternalMarketplaceProvider,
     InternalMarketplaceRedisHandler,
     NftTraitsService,
+    NftTraitsElasticService,
   ],
   imports: [
     ElrondCommunicationModule,
