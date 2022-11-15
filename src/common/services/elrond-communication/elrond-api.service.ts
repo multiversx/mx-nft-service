@@ -207,7 +207,7 @@ export class ElrondApiService {
       this.getNftMetadataByIdentifierForQuery.name,
       url,
     );
-    return res.metadata;
+    return res?.metadata;
   }
 
   async getOwnersForIdentifier(
