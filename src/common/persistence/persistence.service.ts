@@ -1,5 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
+import { constants } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';

@@ -12,6 +12,7 @@ import { NftRarityData } from './models/nft-rarity-data.model';
 import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
+import { CollectionFromElastic } from './models/collection-from-elastic.model';
 
 @Injectable()
 export class NftRarityElasticService {
@@ -23,7 +24,12 @@ export class NftRarityElasticService {
   async setCollectionRarityFlagInElastic(
     collection: string,
     hasRarities: boolean,
+    currentFlagValue?: boolean,
   ): Promise<void> {
+    if (hasRarities === currentFlagValue) {
+      return;
+    }
+
     try {
       const updateBody = this.elasticService.buildUpdateBody<boolean>(
         'nft_hasRarities',
@@ -47,32 +53,65 @@ export class NftRarityElasticService {
   async setNftRaritiesInElastic(
     nfts: NftRarityEntity[] | NftRarityData[],
     hasRarities: boolean = true,
+    nftsFromElastic?: NftRarityData[],
   ): Promise<void> {
-    if (nfts.length > 0) {
-      try {
-        await this.elasticService.bulkRequest(
-          'tokens',
-          this.buildNftRaritiesBulkUpdate(nfts, hasRarities),
-          '?timeout=1m',
+    if (!nfts || nfts.length === 0) {
+      return;
+    }
+
+    let outdatedNfts = [];
+    if (nftsFromElastic) {
+      for (let i = 0; i < nfts.length; i++) {
+        const nftFromElastic = nftsFromElastic.find(
+          (nft) => nft.identifier === nfts[i].identifier,
         );
-      } catch (error) {
-        this.logger.error('Error when bulk updating nft rarities Elastic', {
-          path: 'NftRarityService.setNftRaritiesInElastic',
-          exception: error?.message,
-        });
+
+        if (nftFromElastic.hasRarity !== hasRarities) {
+          outdatedNfts.push(nfts[i]);
+        }
       }
+    } else {
+      outdatedNfts = nfts;
+    }
+
+    try {
+      await this.elasticService.bulkRequest(
+        'tokens',
+        this.buildNftRaritiesBulkUpdate(outdatedNfts, hasRarities),
+        '?timeout=1m',
+      );
+    } catch (error) {
+      this.logger.error('Error when bulk updating nft rarities Elastic', {
+        path: 'NftRarityService.setNftRaritiesInElastic',
+        exception: error?.message,
+      });
     }
   }
 
   async setNftCustomRanksInElastic(
     collection: string,
     customRanks: CustomRank[],
+    nftsFromElastic?: any,
   ): Promise<void> {
+    let outdatedRanks = [];
+    if (nftsFromElastic) {
+      for (let i = 0; i < customRanks.length; i++) {
+        const nftFromElastic = nftsFromElastic.find(
+          (nft) => nft.identifier === customRanks[i].identifier,
+        );
+        if (nftFromElastic.nft_rank_custom !== customRanks[i].rank) {
+          outdatedRanks.push(customRanks[i]);
+        }
+      }
+    } else {
+      outdatedRanks = customRanks;
+    }
+
     if (customRanks.length > 0) {
       try {
         await this.elasticService.bulkRequest(
           'tokens',
-          this.buildNftCustomRanksBulkUpdate(collection, customRanks),
+          this.buildNftCustomRanksBulkUpdate(collection, outdatedRanks),
           '?timeout=1m',
         );
       } catch (error) {
@@ -141,6 +180,7 @@ export class NftRarityElasticService {
         .withMustCondition(
           QueryType.Match('token', collectionTicker, QueryOperator.AND),
         )
+        .withFields(['nft_hasRarities'])
         .withPagination({
           from: 0,
           size: 1,
@@ -182,11 +222,13 @@ export class NftRarityElasticService {
         .withMustCondition(
           QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
         )
-        .withMustCondition(
-          QueryType.Nested('data', { 'data.whiteListedStorage': true }),
-        )
+        // TODO(whiteListedStorage)
+        // .withMustCondition(
+        //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+        // )
         .withFields([
           'nonce',
+          'nft_hasRarity',
           'nft_rank_custom',
           'nft_score_openRarity',
           'nft_rank_openRarity',
@@ -301,6 +343,27 @@ export class NftRarityElasticService {
       async (items) => {
         collections = collections.concat([
           ...new Set(items.map((i) => i.token)),
+        ]);
+      },
+    );
+    return collections;
+  }
+
+  async getAllCollectionsWithRarityFlagsFromElastic(): Promise<
+    CollectionFromElastic[]
+  > {
+    const query = this.getAllCollectionsWithRarityFlagsFromElasticQuery();
+    let collections: CollectionFromElastic[] = [];
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'token',
+      query,
+      async (items) => {
+        const collectionsWithRarityFlags = items.map((collection) =>
+          CollectionFromElastic.fromElastic(collection),
+        );
+        collections = collections.concat([
+          ...new Set(collectionsWithRarityFlags),
         ]);
       },
     );
@@ -435,9 +498,47 @@ export class NftRarityElasticService {
         [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
         (type) => QueryType.Match('type', type),
       )
+      .withFields(['token'])
       .withPagination({
         from: 0,
         size: constants.getCollectionsFromElasticBatchSize,
       });
+  }
+
+  getAllCollectionsWithRarityFlagsFromElasticQuery(): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('token')
+      .withMustNotExistCondition('nonce')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withFields(['token', 'nft_hasRarities'])
+      .withPagination({
+        from: 0,
+        size: constants.getCollectionsFromElasticBatchSize,
+      });
+  }
+
+  getAllNftsWhereRarityNotComputedFromElasticQuery(): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('nonce')
+      .withMustNotCondition(QueryType.Exists('nft_hasRarity'))
+      .withMustCondition(
+        QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
+      )
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withFields(['token'])
+      .withPagination({
+        from: 0,
+        size: constants.getNftsFromElasticBatchSize,
+      });
+    // TODO(whiteListedStorage)
+    // .withMustCondition(
+    //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
+    // )
   }
 }
