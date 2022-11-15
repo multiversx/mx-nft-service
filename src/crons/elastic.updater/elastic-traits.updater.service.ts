@@ -32,4 +32,11 @@ export class ElasticTraitsUpdaterService {
   async handleProcessTokenRarityQueueCronJob() {
     await this.traitsUpdaterService.processTokenTraitsQueue();
   }
+
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async handleValidateTokenTraitsCronJob() {
+    await this.traitsUpdaterService.handleValidateTokenTraits(
+      cronJobs.traits.collectionTraitsToValidateEvery5m,
+    );
+  }
 }

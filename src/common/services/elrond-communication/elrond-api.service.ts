@@ -464,7 +464,7 @@ export class ElrondApiService {
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    let lastEnd: number; // = startNonce ? startNonce : 1;
+    let lastEnd: number;
 
     do {
       const start = lastEnd ? lastEnd + 1 : startNonce;

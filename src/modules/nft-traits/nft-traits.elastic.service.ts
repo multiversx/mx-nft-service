@@ -149,7 +149,6 @@ export class NftTraitsElasticService {
           );
         },
       );
-
     } catch (error) {
       this.logger.error(
         `Error when getting all NFT trait values from Elastic`,
@@ -314,6 +313,26 @@ export class NftTraitsElasticService {
         size: Math.min(
           constants.getCollectionsFromElasticBatchSize,
           maxCollectionsToUpdate,
+        ),
+      });
+  }
+
+  getCollectionsWithTraitSummaryFromElasticQuery(
+    maxCollectionsToValidate: number,
+  ): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustExistCondition('token')
+      .withMustNotExistCondition('nonce')
+      .withMustCondition(QueryType.Match('nft_hasTraitSummary', true))
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withPagination({
+        from: 0,
+        size: Math.min(
+          constants.getCollectionsFromElasticBatchSize,
+          maxCollectionsToValidate,
         ),
       });
   }
