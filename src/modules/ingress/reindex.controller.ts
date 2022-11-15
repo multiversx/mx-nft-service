@@ -18,6 +18,11 @@ export class ReindexController {
     await this.nsfwRService.updateNsfwWhereNone();
   }
 
+  @Post('/trigger-nsfw-clean-reindex')
+  async triggerNsfwReindexFromDb(): Promise<void> {
+    return await this.nsfwRService.cleanReindexing();
+  }
+
   @Post('/trigger-rarity-reindex')
   async triggerRarityReindex(): Promise<void> {
     this.rarityUpdaterService.handleReindexAllTokenRarities();
