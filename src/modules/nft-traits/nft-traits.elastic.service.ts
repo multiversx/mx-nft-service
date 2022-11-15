@@ -1,16 +1,11 @@
-import {
-  ElasticQuery,
-  QueryType,
-  QueryOperator,
-  RangeLowerThanOrEqual,
-  RangeGreaterThan,
-  ElasticSortOrder,
-} from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
-import { NftTypeEnum } from '../assets/models';
 import { EncodedNftValues, NftTraits } from './models/nft-traits.model';
-import { constants } from 'src/config';
+import {
+  getAllEncodedNftValuesFromElasticBeforeTimestampQuery,
+  getAllEncodedNftValuesFromElasticQuery,
+  getNftWithTraitValuesFromElasticQuery,
+} from './nft-traits.elastic.requests';
 
 @Injectable()
 export class NftTraitsElasticService {
@@ -18,36 +13,6 @@ export class NftTraitsElasticService {
     private readonly elasticService: ElrondElasticService,
     private readonly logger: Logger,
   ) {}
-
-  private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {
-    let updates: string[] = [];
-    nfts.forEach((nft) => {
-      const payload = this.elasticService.buildBulkUpdate<string[]>(
-        'tokens',
-        nft.identifier,
-        'nft_traitValues',
-        nft.traits.map((t) => EncodedNftValues.encode(t)),
-      );
-      updates.push(payload);
-    });
-    return updates;
-  }
-
-  private buildNftEncodedValuesBulkUpdate(
-    encodedNftValues: EncodedNftValues[],
-  ): string[] {
-    let updates: string[] = [];
-    encodedNftValues.forEach((nft) => {
-      const payload = this.elasticService.buildBulkUpdate<string[]>(
-        'tokens',
-        nft.identifier,
-        'nft_traitValues',
-        nft.encodedValues ?? [],
-      );
-      updates.push(payload);
-    });
-    return updates;
-  }
 
   async setNftsTraitsInElastic(nfts: NftTraits[]): Promise<void> {
     if (nfts.length > 0) {
@@ -89,7 +54,7 @@ export class NftTraitsElasticService {
     let nftValues: string[] = [];
 
     try {
-      const query = this.getNftWithTraitValuesFromElasticQuery(identifier);
+      const query = getNftWithTraitValuesFromElasticQuery(identifier);
 
       await this.elasticService.getScrollableList(
         'tokens',
@@ -119,7 +84,7 @@ export class NftTraitsElasticService {
     let encodedNftValues: EncodedNftValues[] = [];
 
     try {
-      const query = this.getAllEncodedNftValuesFromElasticQuery(
+      const query = getAllEncodedNftValuesFromElasticQuery(
         collection,
         startNonce - 1,
         endNonce,
@@ -191,9 +156,7 @@ export class NftTraitsElasticService {
     let dict: { [key: string]: string[] } = {};
     try {
       const query =
-        this.getAllEncodedNftValuesFromElasticBeforeTimestampQuery(
-          beforeTimestamp,
-        );
+        getAllEncodedNftValuesFromElasticBeforeTimestampQuery(beforeTimestamp);
 
       await this.elasticService.getScrollableList(
         'tokens',
@@ -216,124 +179,33 @@ export class NftTraitsElasticService {
     return dict;
   }
 
-  getAllEncodedNftValuesFromElasticQuery(
-    collection: string,
-    startNonce?: number,
-    endNonce?: number,
-  ): ElasticQuery {
-    let query = ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withMustCondition(
-        QueryType.Match('token', collection, QueryOperator.AND),
-      )
-      .withFields(['nft_traitValues', 'nonce'])
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withPagination({
-        from: 0,
-        size: constants.getNftsFromElasticBatchSize,
-      });
-    if (startNonce !== undefined && endNonce !== undefined) {
-      query = query.withRangeFilter(
-        'nonce',
-        new RangeGreaterThan(startNonce),
-        new RangeLowerThanOrEqual(endNonce),
+  private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {
+    let updates: string[] = [];
+    nfts.forEach((nft) => {
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        'tokens',
+        nft.identifier,
+        'nft_traitValues',
+        nft.traits.map((t) => EncodedNftValues.encode(t)),
       );
-    }
-    return query;
+      updates.push(payload);
+    });
+    return updates;
   }
 
-  getAllEncodedNftValuesFromElasticBeforeTimestampQuery(
-    beforeTimestamp?: number,
-  ): ElasticQuery {
-    let query = ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withFields(['nft_traitValues', 'timestamp', 'identifier'])
-      .withRangeFilter('timestamp', new RangeLowerThanOrEqual(beforeTimestamp))
-      .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withPagination({
-        from: 0,
-        size: constants.getNftsFromElasticBatchSize,
-      });
-
-    return query;
-  }
-
-  getAllCollectionsFromElasticQuery(): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('token')
-      .withMustNotExistCondition('nonce')
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withPagination({
-        from: 0,
-        size: constants.getCollectionsFromElasticBatchSize,
-      });
-  }
-
-  getNftWithTraitValuesFromElasticQuery(identifier: string): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('nonce')
-      .withMustCondition(
-        QueryType.Match('identifier', identifier, QueryOperator.AND),
-      )
-      .withFields(['nft_traitValues'])
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withPagination({
-        from: 0,
-        size: 1,
-      });
-  }
-
-  getCollectionsWhereTraitsFlagNotSetFromElasticQuery(
-    maxCollectionsToUpdate: number,
-  ): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('token')
-      .withMustNotExistCondition('nonce')
-      .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withFields(['token'])
-      .withPagination({
-        from: 0,
-        size: Math.min(
-          constants.getCollectionsFromElasticBatchSize,
-          maxCollectionsToUpdate,
-        ),
-      });
-  }
-
-  getCollectionsWithTraitSummaryFromElasticQuery(
-    maxCollectionsToValidate: number,
-  ): ElasticQuery {
-    return ElasticQuery.create()
-      .withMustExistCondition('token')
-      .withMustNotExistCondition('nonce')
-      .withMustCondition(QueryType.Match('nft_hasTraitSummary', true))
-      .withMustMultiShouldCondition(
-        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-        (type) => QueryType.Match('type', type),
-      )
-      .withPagination({
-        from: 0,
-        size: Math.min(
-          constants.getCollectionsFromElasticBatchSize,
-          maxCollectionsToValidate,
-        ),
-      });
+  private buildNftEncodedValuesBulkUpdate(
+    encodedNftValues: EncodedNftValues[],
+  ): string[] {
+    let updates: string[] = [];
+    encodedNftValues.forEach((nft) => {
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        'tokens',
+        nft.identifier,
+        'nft_traitValues',
+        nft.encodedValues ?? [],
+      );
+      updates.push(payload);
+    });
+    return updates;
   }
 }

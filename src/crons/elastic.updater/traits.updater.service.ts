@@ -5,10 +5,14 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
+import {
+  getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
+  getCollectionsWithTraitSummaryFromElasticQuery,
+} from 'src/modules/nft-traits/nft-traits.elastic.requests';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -36,7 +40,7 @@ export class TraitsUpdaterService {
         `handleValidateTokenTraits`,
         async () => {
           const query: ElasticQuery =
-            this.nftTraitsElasticService.getCollectionsWithTraitSummaryFromElasticQuery(
+            getCollectionsWithTraitSummaryFromElasticQuery(
               maxCollectionsToValidate,
             );
 
@@ -88,10 +92,9 @@ export class TraitsUpdaterService {
         async () => {
           let collectionsToUpdate: string[] = [];
 
-          const query =
-            this.nftTraitsElasticService.getCollectionsWhereTraitsFlagNotSetFromElasticQuery(
-              maxCollectionsToUpdate,
-            );
+          const query = getCollectionsWhereTraitsFlagNotSetFromElasticQuery(
+            maxCollectionsToUpdate,
+          );
 
           await this.elasticService.getScrollableList(
             'tokens',

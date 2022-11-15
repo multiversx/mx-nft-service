@@ -13,6 +13,7 @@ import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
+import { getAllCollectionsFromElasticQuery } from './nft-traits.elastic.requests';
 
 @Injectable()
 export class NftTraitsService {
@@ -199,8 +200,7 @@ export class NftTraitsService {
     await Locker.lock(
       'updateAllCollectionTraits: Update traits for all existing collections',
       async () => {
-        const query =
-          this.nftTraitsElasticService.getAllCollectionsFromElasticQuery();
+        const query = getAllCollectionsFromElasticQuery();
 
         try {
           let collections: string[] = [];
