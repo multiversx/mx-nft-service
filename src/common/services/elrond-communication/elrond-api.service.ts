@@ -200,13 +200,14 @@ export class ElrondApiService {
 
   async getNftMetadataByIdentifierForQuery(
     identifier: string,
-    query: string = 'extract=metadata&withOwner=true&withSupply=true',
+    query: string = 'fields=metadata&withOwner=true&withSupply=true',
   ): Promise<NftMetadata> {
     const url = `nfts/${identifier}${new AssetsQuery(query).build()}`;
-    return await this.doGetGeneric(
+    const res = await this.doGetGeneric(
       this.getNftMetadataByIdentifierForQuery.name,
       url,
     );
+    return res?.metadata;
   }
 
   async getOwnersForIdentifier(
@@ -463,16 +464,16 @@ export class ElrondApiService {
     let nfts: Nft[] = [];
     let batch: Nft[] = [];
 
-    let lastEnd = startNonce ? startNonce - 1 : 0;
+    let lastEnd: number;
 
     do {
-      const start = lastEnd + 1;
-      let end;
+      const start = lastEnd ? lastEnd + 1 : startNonce;
+      let end: number;
 
       if (startNonce !== undefined && endNonce !== undefined) {
-        end = Math.min(endNonce, start + batchSize - 1);
+        end = Math.min(endNonce, start + batchSize);
       } else {
-        end = start + batchSize - 1;
+        end = start + batchSize;
       }
 
       const query = new AssetsQuery()
