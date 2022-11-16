@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Auction,
   AuctionAbi,
@@ -8,8 +8,6 @@ import {
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { PerformanceProfiler } from '../metrics/performance.profiler';
 import { MetricsCollector } from '../metrics/metrics.collector';
 import { AuctionEventEnum } from '../assets/models';
@@ -19,7 +17,6 @@ import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
-import BigNumber from 'bignumber.js';
 import { elrondConfig } from 'src/config';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
@@ -30,7 +27,7 @@ export class AuctionsSetterService {
     private assetByIdentifierService: AssetByIdentifierService,
     private persistenceService: PersistenceService,
     private usdPriceService: UsdPriceService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
 
   async saveAuction(

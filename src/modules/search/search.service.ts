@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   ElrondApiService,
   ElrondIdentityService,
@@ -6,8 +6,6 @@ import {
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
@@ -25,7 +23,7 @@ export class SearchService {
   constructor(
     private accountsService: ElrondIdentityService,
     private apiService: ElrondApiService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private collectionsGetterService: CollectionsGetterService,
   ) {

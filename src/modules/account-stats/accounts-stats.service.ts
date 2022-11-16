@@ -1,7 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService } from 'src/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
@@ -15,7 +13,7 @@ export class AccountsStatsService {
     private persistenceService: PersistenceService,
     private collectionsService: CollectionsGetterService,
     private apiService: ElrondApiService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
     private marketplacesService: MarketplacesService,
   ) {}

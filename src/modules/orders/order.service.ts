@@ -1,9 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { OrderEntity } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { NotificationEntity } from 'src/db/notifications';
 import { NotificationTypeEnum } from '../notifications/models/Notification-type.enum';
@@ -24,7 +22,7 @@ import { elrondConfig } from 'src/config';
 export class OrdersService {
   constructor(
     private persistenceService: PersistenceService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private ordersCachingService: OrdersCachingService,
     private notificationsService: NotificationsService,
     private assetByIdentifierService: AssetByIdentifierService,

@@ -1,9 +1,7 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { Logger } from 'winston';
 import * as Agent from 'agentkeepalive';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { elrondConfig } from 'src/config';
 import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
 
@@ -12,7 +10,7 @@ export class ElrondPrivateApiService {
   private privateApiProvider: ApiNetworkProvider;
 
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,

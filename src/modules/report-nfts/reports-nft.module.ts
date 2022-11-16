@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ElrondCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
@@ -7,7 +7,7 @@ import { ReportNftsResolver } from './report-nfts.resolver';
 import { ReportNftsService } from './report-nfts.service';
 
 @Module({
-  providers: [ReportNftsService, ReportNftsResolver],
+  providers: [Logger, ReportNftsService, ReportNftsResolver],
   imports: [
     CommonModule,
     forwardRef(() => ElrondCommunicationModule),

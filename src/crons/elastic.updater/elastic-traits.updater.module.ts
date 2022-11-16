@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import * as ormconfig from './../../ormconfig';
@@ -14,7 +14,7 @@ import { ElasticTraitsUpdaterService } from './elastic-traits.updater.service';
     NftTraitsModule,
     CachingModule,
   ],
-  providers: [ElasticTraitsUpdaterService, TraitsUpdaterService],
+  providers: [Logger, ElasticTraitsUpdaterService, TraitsUpdaterService],
   exports: [ElasticTraitsUpdaterService, TraitsUpdaterService],
 })
 export class ElasticTraitsUpdaterModule {}

@@ -1,5 +1,4 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { FeaturedCollectionsResolver } from './featured-collections.resolver';
 import { FeaturedNftsResolver } from './featured-nfts.resolver';
@@ -7,6 +6,7 @@ import { FeaturedService } from './featured.service';
 
 @Module({
   providers: [
+    Logger,
     FeaturedService,
     FeaturedNftsResolver,
     FeaturedCollectionsResolver,

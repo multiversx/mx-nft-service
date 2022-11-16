@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { NftEventsService } from './nft-events.service';
 import { NftEventsConsumer } from './nft-events.consumer';
 import { RevertEventsConsumer } from './revert-events.consumer';
@@ -47,6 +47,7 @@ import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
     NftScamModule,
   ],
   providers: [
+    Logger,
     NftEventsConsumer,
     NftEventsService,
     ExternalMarketplaceEventsService,
