@@ -23,7 +23,6 @@ import { CacheEventsPublisherModule } from '../cache-invalidation/cache-invalida
 import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-events.consumer';
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
-import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { FeedEventsSenderService } from './feed-events.service';
 import { UsdPriceModuleGraph } from 'src/modules/usdPrice/usd-price.module';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
@@ -39,6 +38,7 @@ import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
+import { MarketplaceEventsService } from './marketplace-events.service';
 
 @Module({
   imports: [
@@ -68,7 +68,7 @@ import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.ha
     UpdatePriceEventHandler,
     NftEventsConsumer,
     NftEventsService,
-    ExternalMarketplaceEventsService,
+    MarketplaceEventsService,
     ElrondSwapMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
