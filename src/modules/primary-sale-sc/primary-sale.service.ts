@@ -204,7 +204,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
-        TimeConstants.oneMinute,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
