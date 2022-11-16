@@ -32,24 +32,26 @@ export class AcceptOfferEventHandler {
     this.logger.log(
       `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
     );
-    if (
-      acceptOfferMarketplace.key === XOXNO_KEY &&
-      topicsAcceptOffer.auctionId > 0
-    ) {
-      let updatePriceAuction =
-        await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-          topicsAcceptOffer.auctionId,
-          acceptOfferMarketplace.key,
-        );
 
-      if (updatePriceAuction) {
-        updatePriceAuction.status = AuctionStatusEnum.Closed;
-        updatePriceAuction.modifiedDate = new Date(new Date().toUTCString());
-        this.auctionsService.updateAuction(
-          updatePriceAuction,
-          ExternalAuctionEventEnum.AcceptOffer,
-        );
-      }
+    if (
+      acceptOfferMarketplace.key !== XOXNO_KEY ||
+      topicsAcceptOffer.auctionId <= 0
+    ) {
+      return;
     }
+
+    let updatePriceAuction =
+      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+        topicsAcceptOffer.auctionId,
+        acceptOfferMarketplace.key,
+      );
+    if (updatePriceAuction) return;
+
+    updatePriceAuction.status = AuctionStatusEnum.Closed;
+    updatePriceAuction.modifiedDate = new Date(new Date().toUTCString());
+    this.auctionsService.updateAuction(
+      updatePriceAuction,
+      ExternalAuctionEventEnum.AcceptOffer,
+    );
   }
 }
