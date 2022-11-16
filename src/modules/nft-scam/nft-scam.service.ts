@@ -285,7 +285,7 @@ export class NftScamService {
       ]);
 
     if (!nftsFromApi || nftsFromApi.length === 0) {
-      return;
+      return [[], [], []];
     }
 
     for (let i = 0; i < nftsFromApi?.length; i++) {
