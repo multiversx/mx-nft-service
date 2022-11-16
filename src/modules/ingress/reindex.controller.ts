@@ -15,7 +15,7 @@ export class ReindexController {
 
   @Post('/trigger-nsfw-reindex')
   async triggerNsfwReindex(): Promise<void> {
-    await this.nsfwRService.updateNsfwWhereNone();
+    return await this.nsfwRService.updateNsfwWhereNone();
   }
 
   @Post('/trigger-nsfw-clean-reindex')
@@ -25,21 +25,21 @@ export class ReindexController {
 
   @Post('/trigger-rarity-reindex')
   async triggerRarityReindex(): Promise<void> {
-    this.rarityUpdaterService.handleReindexAllTokenRarities();
+    return this.rarityUpdaterService.handleReindexAllTokenRarities();
   }
 
   @Post('/trigger-rarity-validation')
   async triggerRarityValidation(): Promise<void> {
-    this.rarityUpdaterService.handleValidateAllTokenRarities();
+    return this.rarityUpdaterService.handleValidateAllTokenRarities();
   }
 
   @Post('/trigger-traits-reindex')
   async triggerTraitsReindex(): Promise<void> {
-    this.nftTraitsService.updateAllCollectionTraits();
+    return this.nftTraitsService.updateAllCollectionTraits();
   }
 
   @Post('/trigger-scam-reindex')
   async triggerScamReindex(): Promise<void> {
-    this.nftScamService.validateOrUpdateAllNftsScamInfo();
+    return this.nftScamService.validateOrUpdateAllNftsScamInfo();
   }
 }
