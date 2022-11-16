@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
+import { ElrondApiService, Nft } from 'src/common';
 import { CollectionTraitSummary } from './models/collection-traits.model';
 import {
   NftTrait,
