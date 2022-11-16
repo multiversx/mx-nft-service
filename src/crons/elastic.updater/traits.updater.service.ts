@@ -1,14 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
-import { cacheConfig, constants } from 'src/config';
+import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, QueryType } from '@elrondnetwork/erdnest';
-import { NftTypeEnum } from 'src/modules/assets/models';
+import { ElasticQuery } from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
+import {
+  getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
+  getCollectionsWithTraitSummaryFromElasticQuery,
+} from 'src/modules/nft-traits/nft-traits.elastic.queries';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -19,6 +23,7 @@ export class TraitsUpdaterService {
     private readonly nftTraitsService: NftTraitsService,
     private readonly redisCacheService: RedisCacheService,
     private readonly elasticService: ElrondElasticService,
+    private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly logger: Logger,
   ) {
     this.traitsQueueRedisClient = this.redisCacheService.getClient(
@@ -34,21 +39,10 @@ export class TraitsUpdaterService {
       await Locker.lock(
         `handleValidateTokenTraits`,
         async () => {
-          const query: ElasticQuery = ElasticQuery.create()
-            .withMustExistCondition('token')
-            .withMustNotExistCondition('nonce')
-            .withMustCondition(QueryType.Match('nft_hasTraitSummary', true))
-            .withMustMultiShouldCondition(
-              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-              (type) => QueryType.Match('type', type),
-            )
-            .withPagination({
-              from: 0,
-              size: Math.min(
-                constants.getCollectionsFromElasticBatchSize,
-                maxCollectionsToValidate,
-              ),
-            });
+          const query: ElasticQuery =
+            getCollectionsWithTraitSummaryFromElasticQuery(
+              maxCollectionsToValidate,
+            );
 
           const lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
@@ -98,21 +92,9 @@ export class TraitsUpdaterService {
         async () => {
           let collectionsToUpdate: string[] = [];
 
-          const query = ElasticQuery.create()
-            .withMustExistCondition('token')
-            .withMustNotExistCondition('nonce')
-            .withMustNotCondition(QueryType.Match('nft_hasTraitSummary', true))
-            .withMustMultiShouldCondition(
-              [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-              (type) => QueryType.Match('type', type),
-            )
-            .withPagination({
-              from: 0,
-              size: Math.min(
-                constants.getCollectionsFromElasticBatchSize,
-                maxCollectionsToUpdate,
-              ),
-            });
+          const query = getCollectionsWhereTraitsFlagNotSetFromElasticQuery(
+            maxCollectionsToUpdate,
+          );
 
           await this.elasticService.getScrollableList(
             'tokens',
