@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AuctionEventEnum,
+  ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
@@ -13,6 +14,7 @@ import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
+import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -28,6 +30,7 @@ export class MarketplaceEventsService {
     private updatePriceEventHandler: UpdatePriceEventHandler,
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
+    private swapUpdateEventHandler: SwapUpdateEventHandler,
   ) {}
 
   public async handleNftAuctionEvents(
@@ -38,6 +41,7 @@ export class MarketplaceEventsService {
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
+        case ElrondNftsSwapAuctionEventEnum.Bid:
           await this.bidEventHandler.handle(event, hash, marketplaceType);
 
           break;
@@ -56,6 +60,7 @@ export class MarketplaceEventsService {
           await this.buyEventHandler.handle(event, hash, marketplaceType);
           break;
         case AuctionEventEnum.WithdrawEvent:
+        case ElrondNftsSwapAuctionEventEnum.WithdrawSwap:
           if (
             Buffer.from(event.topics[0], 'base64').toString() ===
             ExternalAuctionEventEnum.UpdateOffer
@@ -80,6 +85,7 @@ export class MarketplaceEventsService {
           break;
         case AuctionEventEnum.AuctionTokenEvent:
         case ExternalAuctionEventEnum.Listing:
+        case ElrondNftsSwapAuctionEventEnum.NftSwap:
           await this.startAuctionEventHandler.handle(
             event,
             hash,
@@ -111,6 +117,14 @@ export class MarketplaceEventsService {
           break;
         case ExternalAuctionEventEnum.AcceptGlobalOffer:
           await this.acceptGlobalOfferEventHandler.handle(
+            event,
+            hash,
+            marketplaceType,
+          );
+          break;
+        case ElrondNftsSwapAuctionEventEnum.NftSwapUpdate:
+        case ElrondNftsSwapAuctionEventEnum.NftSwapExtend:
+          await this.swapUpdateEventHandler.handle(
             event,
             hash,
             marketplaceType,

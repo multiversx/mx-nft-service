@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -10,6 +11,7 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { BuySftEvent } from '../../entities/auction';
+import { ElrondSwapBuyEvent } from '../../entities/auction/elrondnftswap/elrondswap-buy.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 
 @Injectable()
@@ -24,8 +26,7 @@ export class BuyEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const buySftEvent = new BuySftEvent(event);
-    const buySftTopics = buySftEvent.getTopics();
+    const { buySftEvent, buySftTopics } = this.getEventAndTopics(event);
 
     const buyMarketplace: Marketplace =
       await this.marketplaceService.getMarketplaceByType(
@@ -43,42 +44,53 @@ export class BuyEventHandler {
         parseInt(buySftTopics.auctionId, 16),
         buyMarketplace.key,
       );
-    if (buyAuction) {
-      const result = await this.auctionsGetterService.getAvailableTokens(
+    if (!buyAuction) return;
+
+    const result = await this.auctionsGetterService.getAvailableTokens(
+      buyAuction.id,
+    );
+    const totalRemaining = result
+      ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
+      : 0;
+    if (totalRemaining === 0) {
+      this.auctionsService.updateAuctionStatus(
         buyAuction.id,
-      );
-      const totalRemaining = result
-        ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
-        : 0;
-      if (totalRemaining === 0) {
-        this.auctionsService.updateAuctionStatus(
-          buyAuction.id,
-          AuctionStatusEnum.Ended,
-          hash,
-          AuctionStatusEnum.Ended,
-        );
-      }
-      const orderSft = await this.ordersService.createOrderForSft(
-        new CreateOrderArgs({
-          ownerAddress: buySftTopics.currentWinner,
-          auctionId: buyAuction.id,
-          priceToken: buyAuction.paymentToken,
-          priceAmount: buySftTopics.bid,
-          priceNonce: buyAuction.paymentNonce,
-          blockHash: hash,
-          status: OrderStatusEnum.Bought,
-          boughtTokens: buySftTopics.boughtTokens,
-          marketplaceKey: buyMarketplace.key,
-        }),
-      );
-      await this.feedEventsSenderService.sendBuyEvent(
-        buySftTopics.currentWinner,
-        buySftTopics.bid,
-        buySftTopics.boughtTokens,
-        orderSft,
-        buyAuction,
-        buyMarketplace,
+        AuctionStatusEnum.Ended,
+        hash,
+        AuctionStatusEnum.Ended,
       );
     }
+    const orderSft = await this.ordersService.createOrderForSft(
+      new CreateOrderArgs({
+        ownerAddress: buySftTopics.currentWinner,
+        auctionId: buyAuction.id,
+        priceToken: buyAuction.paymentToken,
+        priceAmount: buySftTopics.bid,
+        priceNonce: buyAuction.paymentNonce,
+        blockHash: hash,
+        status: OrderStatusEnum.Bought,
+        boughtTokens: buySftTopics.boughtTokens,
+        marketplaceKey: buyMarketplace.key,
+      }),
+    );
+    await this.feedEventsSenderService.sendBuyEvent(
+      buySftTopics.currentWinner,
+      buySftTopics.bid,
+      buySftTopics.boughtTokens,
+      orderSft,
+      buyAuction,
+      buyMarketplace,
+    );
+  }
+
+  private getEventAndTopics(event: any) {
+    if (event.identifier === ElrondNftsSwapAuctionEventEnum.Purchase) {
+      const buySftEvent = new ElrondSwapBuyEvent(event);
+      const buySftTopics = buySftEvent.getTopics();
+      return { buySftEvent, buySftTopics };
+    }
+    const buySftEvent = new BuySftEvent(event);
+    const buySftTopics = buySftEvent.getTopics();
+    return { buySftEvent, buySftTopics };
   }
 }

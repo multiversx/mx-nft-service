@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -11,6 +12,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { BidEvent } from '../../entities/auction';
+import { ElrondSwapBidEvent } from '../../entities/auction/elrondnftswap/elrondswap-bid.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 
 @Injectable()
@@ -26,8 +28,7 @@ export class BidEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const bidEvent = new BidEvent(event);
-    const topics = bidEvent.getTopics();
+    const { bidEvent, topics } = this.getEventAndTopics(event);
     const bidMarketplace: Marketplace =
       await this.marketplaceService.getMarketplaceByType(
         bidEvent.getAddress(),
@@ -44,38 +45,51 @@ export class BidEventHandler {
         parseInt(topics.auctionId, 16),
         bidMarketplace.key,
       );
-    if (auction) {
-      const activeOrder = await this.ordersService.getActiveOrderForAuction(
-        auction.id,
-      );
+    if (!auction) return;
 
-      if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
-        return;
-      }
-      const order = await this.ordersService.updateAuctionOrders(
-        new CreateOrderArgs({
-          ownerAddress: topics.currentWinner,
-          auctionId: auction.id,
-          priceToken: auction.paymentToken,
-          priceAmount: topics.currentBid,
-          priceNonce: auction.paymentNonce,
-          blockHash: hash,
-          status: OrderStatusEnum.Active,
-          marketplaceKey: bidMarketplace.key,
-        }),
-        activeOrder,
-      );
-      await this.feedEventsSenderService.sendBidEvent(auction, topics, order);
-      if (auction.maxBidDenominated === order.priceAmountDenominated) {
-        this.notificationsService.updateNotificationStatus([auction?.id]);
-        this.notificationsService.addNotifications(auction, order);
-        this.auctionsService.updateAuctionStatus(
-          auction.id,
-          AuctionStatusEnum.Claimable,
-          hash,
-          AuctionStatusEnum.Claimable,
-        );
-      }
+    const activeOrder = await this.ordersService.getActiveOrderForAuction(
+      auction.id,
+    );
+    if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
+      return;
     }
+
+    const order = await this.ordersService.updateAuctionOrders(
+      new CreateOrderArgs({
+        ownerAddress: topics.currentWinner,
+        auctionId: auction.id,
+        priceToken: auction.paymentToken,
+        priceAmount: topics.currentBid,
+        priceNonce: auction.paymentNonce,
+        blockHash: hash,
+        status: OrderStatusEnum.Active,
+        marketplaceKey: bidMarketplace.key,
+      }),
+      activeOrder,
+    );
+    await this.feedEventsSenderService.sendBidEvent(auction, topics, order);
+    if (auction.maxBidDenominated === order.priceAmountDenominated) {
+      this.notificationsService.updateNotificationStatus([auction?.id]);
+      this.notificationsService.addNotifications(auction, order);
+      this.auctionsService.updateAuctionStatus(
+        auction.id,
+        marketplaceType === MarketplaceTypeEnum.Internal
+          ? AuctionStatusEnum.Claimable
+          : AuctionStatusEnum.Ended,
+        hash,
+        event.identifier,
+      );
+    }
+  }
+
+  private getEventAndTopics(event: any) {
+    if (event.identifier === ElrondNftsSwapAuctionEventEnum.Bid) {
+      const bidEvent = new ElrondSwapBidEvent(event);
+      const topics = bidEvent.getTopics();
+      return { bidEvent, topics };
+    }
+    const bidEvent = new BidEvent(event);
+    const topics = bidEvent.getTopics();
+    return { bidEvent, topics };
   }
 }

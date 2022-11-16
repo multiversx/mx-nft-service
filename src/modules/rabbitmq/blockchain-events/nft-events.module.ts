@@ -26,7 +26,6 @@ import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.m
 import { FeedEventsSenderService } from './feed-events.service';
 import { UsdPriceModuleGraph } from 'src/modules/usdPrice/usd-price.module';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
 import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
 import { BuyEventHandler } from './handlers/buy-event.handler';
@@ -39,6 +38,7 @@ import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { MarketplaceEventsService } from './marketplace-events.service';
+import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 
 @Module({
   imports: [
@@ -66,10 +66,10 @@ import { MarketplaceEventsService } from './marketplace-events.service';
     AcceptOfferEventHandler,
     ChangePriceEventHandler,
     UpdatePriceEventHandler,
+    SwapUpdateEventHandler,
     NftEventsConsumer,
     NftEventsService,
     MarketplaceEventsService,
-    ElrondSwapMarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,

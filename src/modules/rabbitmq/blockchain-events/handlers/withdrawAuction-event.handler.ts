@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AuctionEventEnum } from 'src/modules/assets/models';
+import {
+  AuctionEventEnum,
+  ElrondNftsSwapAuctionEventEnum,
+} from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -9,6 +12,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { WithdrawEvent } from '../../entities/auction';
+import { ElrondSwapWithdrawEvent } from '../../entities/auction/elrondnftswap/elrondswap-withdraw.event';
 
 @Injectable()
 export class WithdrawAuctionEventHandler {
@@ -20,8 +24,7 @@ export class WithdrawAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const withdraw = new WithdrawEvent(event);
-    const topicsWithdraw = withdraw.getTopics();
+    const { withdraw, topicsWithdraw } = this.getEventAndTopics(event);
     const withdrawMarketplace: Marketplace =
       await this.marketplaceService.getMarketplaceByType(
         withdraw.getAddress(),
@@ -47,5 +50,16 @@ export class WithdrawAuctionEventHandler {
       hash,
       AuctionEventEnum.WithdrawEvent,
     );
+  }
+
+  private getEventAndTopics(event: any) {
+    if (event.identifier === ElrondNftsSwapAuctionEventEnum.WithdrawSwap) {
+      const withdraw = new ElrondSwapWithdrawEvent(event);
+      const topicsWithdraw = withdraw.getTopics();
+      return { withdraw, topicsWithdraw };
+    }
+    const withdraw = new WithdrawEvent(event);
+    const topicsWithdraw = withdraw.getTopics();
+    return { withdraw, topicsWithdraw };
   }
 }
