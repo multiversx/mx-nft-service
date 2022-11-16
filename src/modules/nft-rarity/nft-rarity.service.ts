@@ -19,9 +19,7 @@ export class NftRarityService {
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
-  )
-  {
-    this.logger.log('test', { test: true }, { test1: true }, { test2: true });
+  ) {
     this.nftRarityElasticService.setElasticRarityMappings();
   }
 
