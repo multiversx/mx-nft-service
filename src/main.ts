@@ -22,15 +22,14 @@ import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-e
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
-import winston, { format, transports } from 'winston';
-
+import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 
 const logTransports: Transport[] = [
-  new transports.Console({
-    format: format.combine(
-      format.timestamp(),
-      nestWinstonModuleUtilities.format.nestLike(),
+  new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
     ),
   }),
 ];
@@ -158,6 +157,7 @@ async function startPublicApp() {
     WinstonModule.createLogger({
       exitOnError: false,
       transports: logTransports,
+      format: winston.format.json(),
     }),
   );
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
