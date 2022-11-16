@@ -13,13 +13,11 @@ import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
-import { getAllCollectionsFromElasticQuery } from './nft-traits.elastic.queries';
 
 @Injectable()
 export class NftTraitsService {
   constructor(
     private readonly apiService: ElrondApiService,
-    private readonly elasticService: ElrondElasticService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly documentDbService: DocumentDbService,
     private readonly logger: Logger,
@@ -200,21 +198,9 @@ export class NftTraitsService {
     await Locker.lock(
       'updateAllCollectionTraits: Update traits for all existing collections',
       async () => {
-        const query = getAllCollectionsFromElasticQuery();
-
         try {
-          let collections: string[] = [];
-
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              collections = collections.concat([
-                ...new Set(items.map((i) => i.token)),
-              ]);
-            },
-          );
+          let collections: string[] =
+            await this.nftTraitsElasticService.getAllCollectionsFromElastic();
 
           this.logger.log(
             `Total collections to be validated - ${collections.length}`,
