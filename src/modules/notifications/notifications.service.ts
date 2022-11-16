@@ -206,7 +206,7 @@ export class NotificationsService {
     ];
   }
 
-  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
       const asset = await this.assetByIdentifierService.getAsset(
         auction.identifier,

@@ -1,251 +1,138 @@
 import { ElrondApiService } from 'src/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { AuctionEntity } from 'src/db/auctions';
-import { NotificationEntity } from 'src/db/notifications';
-import { OrderEntity } from 'src/db/orders';
 import {
   AuctionEventEnum,
+  ExternalAuctionEventEnum,
   NftEventEnum,
   NftTypeEnum,
 } from 'src/modules/assets/models';
-import {
-  AuctionsSetterService,
-  AuctionsGetterService,
-} from 'src/modules/auctions';
-import { AuctionStatusEnum } from 'src/modules/auctions/models';
-import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
-import { NotificationStatusEnum } from 'src/modules/notifications/models';
-import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
-import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
-import { OrdersService } from 'src/modules/orders/order.service';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../cache-invalidation/events/changed.event';
-import {
-  BidEvent,
-  BuySftEvent,
-  WithdrawEvent,
-  EndAuctionEvent,
-  AuctionTokenEvent,
-} from '../entities/auction';
 import { MintEvent } from '../entities/auction/mint.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
+import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
+import { EndAuctionEventHandler } from './handlers/endAuction-event.handler';
+import { BidEventHandler } from './handlers/bid-event.handler';
+import { BuyEventHandler } from './handlers/buy-event.handler';
+import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
+import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
+import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
+import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 
 @Injectable()
 export class NftEventsService {
-  private readonly logger = new Logger(NftEventsService.name);
+  private readonly logger = new Logger(StartAuctionEventHandler.name);
+
   constructor(
-    private auctionsService: AuctionsSetterService,
-    private auctionsGetterService: AuctionsGetterService,
-    private ordersService: OrdersService,
-    private notificationsService: NotificationsService,
+    private startAuctionEventHandler: StartAuctionEventHandler,
+    private endAuctionEventHandler: EndAuctionEventHandler,
+    private withdrawAuctionEventHandler: WithdrawAuctionEventHandler,
+    private bidEventHandler: BidEventHandler,
+    private buyEventHandler: BuyEventHandler,
+    private changePriceEventHandler: ChangePriceEventHandler,
+    private updatePriceEventHandler: UpdatePriceEventHandler,
+    private acceptOfferEventHandler: AcceptOfferEventHandler,
+    private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private feedEventsSenderService: FeedEventsSenderService,
     private elrondApi: ElrondApiService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
-    private readonly marketplaceService: MarketplacesService,
   ) {}
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
-          const bidEvent = new BidEvent(event);
-          const topics = bidEvent.getTopics();
-          const bidMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topics.collection,
-              bidEvent.getAddress(),
-            );
-
-          if (!bidMarketplace) return;
-          this.logger.log(
-            `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
+          await this.bidEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.Internal,
           );
-          const auction =
-            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topics.auctionId, 16),
-              bidMarketplace.key,
-            );
-          if (auction) {
-            const order = await this.ordersService.createOrder(
-              new CreateOrderArgs({
-                ownerAddress: topics.currentWinner,
-                auctionId: auction.id,
-                priceToken: auction.paymentToken,
-                priceAmount: topics.currentBid,
-                priceNonce: auction.paymentNonce,
-                blockHash: hash,
-                status: OrderStatusEnum.Active,
-                marketplaceKey: bidMarketplace.key,
-              }),
-            );
-            await this.feedEventsSenderService.sendBidEvent(
-              auction,
-              topics,
-              order,
-            );
-            if (auction.maxBidDenominated === order.priceAmountDenominated) {
-              this.notificationsService.updateNotificationStatus([auction?.id]);
-              this.addNotifications(auction, order);
-              this.auctionsService.updateAuctionStatus(
-                auction.id,
-                AuctionStatusEnum.Claimable,
-                hash,
-                AuctionStatusEnum.Claimable,
-              );
-            }
-          }
+
           break;
         case AuctionEventEnum.BuySftEvent:
-          const buySftEvent = new BuySftEvent(event);
-          const buySftTopics = buySftEvent.getTopics();
-
-          const buyMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              buySftTopics.collection,
-              buySftEvent.getAddress(),
+        case ExternalAuctionEventEnum.Buy:
+        case ExternalAuctionEventEnum.BulkBuy:
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ExternalAuctionEventEnum.UpdateOffer
+          ) {
+            this.logger.log(
+              `Update Offer event detected for hash '${hash}' at buy external marketplace, ignore it for the moment`,
             );
-
-          if (!buyMarketplace) return;
-          this.logger.log(
-            `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
-          );
-          const buyAuction =
-            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(buySftTopics.auctionId, 16),
-              buyMarketplace.key,
-            );
-          if (buyAuction) {
-            const result = await this.auctionsGetterService.getAvailableTokens(
-              buyAuction.id,
-            );
-            const totalRemaining = result
-              ? result[0]?.availableTokens -
-                parseFloat(buySftTopics.boughtTokens)
-              : 0;
-            if (totalRemaining === 0) {
-              this.auctionsService.updateAuctionStatus(
-                buyAuction.id,
-                AuctionStatusEnum.Ended,
-                hash,
-                AuctionStatusEnum.Ended,
-              );
-            }
-            const orderSft = await this.ordersService.createOrderForSft(
-              new CreateOrderArgs({
-                ownerAddress: buySftTopics.currentWinner,
-                auctionId: buyAuction.id,
-                priceToken: buyAuction.paymentToken,
-                priceAmount: buySftTopics.bid,
-                priceNonce: buyAuction.paymentNonce,
-                blockHash: hash,
-                status: OrderStatusEnum.Bought,
-                boughtTokens: buySftTopics.boughtTokens,
-                marketplaceKey: buyMarketplace.key,
-              }),
-            );
-            await this.feedEventsSenderService.sendBuyEvent(
-              buySftTopics.currentWinner,
-              buySftTopics.bid,
-              buySftTopics.boughtTokens,
-              orderSft,
-              buyAuction,
-              buyMarketplace,
-            );
+            return;
           }
+          await this.buyEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.Internal,
+          );
           break;
         case AuctionEventEnum.WithdrawEvent:
-          const withdraw = new WithdrawEvent(event);
-          const topicsWithdraw = withdraw.getTopics();
-          const withdrawMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsWithdraw.collection,
-              withdraw.getAddress(),
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ExternalAuctionEventEnum.UpdateOffer
+          ) {
+            this.logger.log(
+              `Update Offer event detected for hash '${hash}' at withdraw marketplace, ignore it for the moment`,
             );
-          if (!withdrawMarketplace) return;
-
-          this.logger.log(
-            `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
-          );
-          const withdrawAuction =
-            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topicsWithdraw.auctionId, 16),
-              withdrawMarketplace.key,
-            );
-
-          this.auctionsService.updateAuctionStatus(
-            withdrawAuction.id,
-            AuctionStatusEnum.Closed,
+            return;
+          }
+          await this.withdrawAuctionEventHandler.handle(
+            event,
             hash,
-            AuctionEventEnum.WithdrawEvent,
+            MarketplaceTypeEnum.Internal,
           );
           break;
         case AuctionEventEnum.EndAuctionEvent:
-          const endAuctionEvent = new EndAuctionEvent(event);
-          const topicsEndAuction = endAuctionEvent.getTopics();
-          const endMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsEndAuction.collection,
-              endAuctionEvent.getAddress(),
-            );
-
-          if (!endMarketplace) return;
-          this.logger.log(
-            `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
-          );
-          const endAuction =
-            await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-              parseInt(topicsEndAuction.auctionId, 16),
-              endMarketplace.key,
-            );
-
-          this.auctionsService.updateAuctionStatus(
-            endAuction.id,
-            AuctionStatusEnum.Ended,
+          await this.endAuctionEventHandler.handle(
+            event,
             hash,
-            AuctionEventEnum.EndAuctionEvent,
+            MarketplaceTypeEnum.Internal,
           );
-          this.notificationsService.updateNotificationStatus([endAuction.id]);
-          this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
-          await this.feedEventsSenderService.sendWonAuctionEvent(
-            topicsEndAuction,
-            endAuction,
-            endMarketplace,
-          );
-
           break;
         case AuctionEventEnum.AuctionTokenEvent:
-          const auctionToken = new AuctionTokenEvent(event);
-          const topicsAuctionToken = auctionToken.getTopics();
-          const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
-          const auctionTokenMarketplace: Marketplace =
-            await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-              topicsAuctionToken.collection,
-              auctionToken.getAddress(),
-            );
-
-          if (!auctionTokenMarketplace) return;
-          this.logger.log(
-            `Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`,
-          );
-          const startAuction = await this.auctionsService.saveAuction(
-            parseInt(topicsAuctionToken.auctionId, 16),
-            startAuctionIdentifier,
-            auctionTokenMarketplace,
+        case ExternalAuctionEventEnum.Listing:
+          await this.startAuctionEventHandler.handle(
+            event,
             hash,
+            MarketplaceTypeEnum.Internal,
           );
-          if (startAuction) {
-            await this.feedEventsSenderService.sendStartAuctionEvent(
-              topicsAuctionToken,
-              startAuction,
-              auctionTokenMarketplace,
-            );
-          }
+          break;
+
+        case ExternalAuctionEventEnum.ChangePrice:
+          await this.changePriceEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.External,
+          );
+          break;
+        case ExternalAuctionEventEnum.UpdatePrice:
+          await this.updatePriceEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.External,
+          );
+          break;
+
+        case ExternalAuctionEventEnum.AcceptOffer:
+          await this.acceptOfferEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.External,
+          );
+          break;
+        case ExternalAuctionEventEnum.AcceptGlobalOffer:
+          await this.acceptGlobalOfferEventHandler.handle(
+            event,
+            hash,
+            MarketplaceTypeEnum.External,
+          );
           break;
       }
     }
@@ -313,30 +200,5 @@ export class NftEventsService {
         type: eventType,
       }),
     );
-  }
-
-  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
-    const asset = await this.elrondApi.getNftByIdentifier(auction.identifier);
-    const assetName = asset ? asset.name : '';
-    this.notificationsService.saveNotifications([
-      new NotificationEntity({
-        auctionId: auction.id,
-        identifier: auction.identifier,
-        ownerAddress: auction.ownerAddress,
-        status: NotificationStatusEnum.Active,
-        type: NotificationTypeEnum.Ended,
-        name: assetName,
-        marketplaceKey: auction.marketplaceKey,
-      }),
-      new NotificationEntity({
-        auctionId: auction.id,
-        identifier: auction.identifier,
-        ownerAddress: order.ownerAddress,
-        status: NotificationStatusEnum.Active,
-        type: NotificationTypeEnum.Won,
-        name: assetName,
-        marketplaceKey: auction.marketplaceKey,
-      }),
-    ]);
   }
 }

@@ -123,6 +123,20 @@ export class MarketplacesService {
     );
   }
 
+  async getMarketplaceByType(
+    contractAddress: string,
+    marketplaceType: MarketplaceTypeEnum,
+    collectionIdentifier?: string,
+  ): Promise<Marketplace> {
+    if (marketplaceType === MarketplaceTypeEnum.Internal) {
+      return await this.getMarketplaceByCollectionAndAddress(
+        collectionIdentifier,
+        contractAddress,
+      );
+    }
+    return await this.getMarketplaceByAddress(contractAddress);
+  }
+
   async getCollectionsByMarketplace(marketplaceKey: string): Promise<string[]> {
     return await this.cacheService.getCollectionsByMarketplace(
       () => this.getCollectionsByMarketplaceFromDb(marketplaceKey),
