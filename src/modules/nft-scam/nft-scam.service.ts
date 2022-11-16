@@ -279,10 +279,6 @@ export class NftScamService {
     nftsFromElastic: any,
     scamEngineVersion: string,
   ): Promise<[Nft[], Nft[], Nft[], NftScamInfoModel[]]> {
-    if (!nftsFromElastic || nftsFromElastic.length === 0) {
-      return;
-    }
-
     const [nftsOutdatedOrMissingFromDb, nftsToMigrateFromDbToElastic]: [
       Nft[],
       NftScamInfoModel[],
@@ -327,7 +323,7 @@ export class NftScamService {
       await this.documentDbService.getBulkNftScamInfo(identifiers);
 
     if (!nftsFromElastic || nftsFromElastic.length === 0) {
-      return;
+      return [[], []];
     }
 
     let missingOrOutdatedNftsInDb: string[] = [];
