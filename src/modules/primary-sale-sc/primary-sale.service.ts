@@ -204,7 +204,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
-        5 * TimeConstants.oneMinute,
+        TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -241,7 +241,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.isWhitelistedMap(address),
-        5 * TimeConstants.oneMinute,
+        TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {

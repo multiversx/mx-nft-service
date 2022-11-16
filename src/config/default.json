@@ -76,7 +76,7 @@
     "getCollectionsFromElasticBatchSize": 100,
     "nftsCountThresholdForTraitAndRarityIndexing": 100000,
     "updateAllNftTraitsBatchSize": 10000,
-    "getNftsForScamInfoBatchSize": 50,
+    "getNftsForScamInfoBatchSize": 100,
     "elasticMaxBatch": 10000,
     "dbBatch": 1000
   },

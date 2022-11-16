@@ -47,4 +47,14 @@ export class ScamInfo {
       nftFromApi.scamInfo.info !== nftFromDb.info
     );
   }
+
+  static areElasticAndDbScamInfoDifferent(
+    nftFromElastic: any,
+    nftFromDb: NftScamInfoModel,
+  ): boolean {
+    return (
+      nftFromDb?.type !== nftFromElastic[elasticDictionary.scamInfo.typeKey] ||
+      (!nftFromDb.type && nftFromElastic?.[elasticDictionary.scamInfo.typeKey])
+    );
+  }
 }
