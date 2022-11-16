@@ -39,6 +39,7 @@ export class FlagNftService {
 
       const nftMedia = this.getNftMedia(nft);
       if (!nftMedia) {
+        this.logger.log(`No media exists for ${identifier}`);
         return false;
       }
 
@@ -234,12 +235,7 @@ export class FlagNftService {
   }
 
   private getNftMedia(nft: Asset): NftMedia | undefined {
-    if (
-      !nft ||
-      !nft.media ||
-      nft.media.length === 0 ||
-      nft.isWhitelistedStorage === false
-    ) {
+    if (!nft || !nft.media || nft.media.length === 0) {
       return undefined;
     }
 
