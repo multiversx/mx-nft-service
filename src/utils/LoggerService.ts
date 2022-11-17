@@ -88,7 +88,8 @@ export class LoggerService implements LS {
               }`,
           ),
         )
-      : combine(timestamp(), colorize({ all: true }));
+      : //combine(timestamp(), colorize({ all: true }));
+        combine(timestamp(), nestWinstonModuleUtilities.format.nestLike());
 
     const logTransports: Transport[] = [
       new winston.transports.Console({

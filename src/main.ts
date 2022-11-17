@@ -30,11 +30,13 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
+    rabbitMq.useLogger(new LoggerService());
     await rabbitMq.listen(6014);
   }
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
+    privateApp.useLogger(new LoggerService());
     await privateApp.listen(
       parseInt(process.env.PRIVATE_PORT),
       process.env.PRIVATE_LISTEN_ADDRESS,
@@ -43,6 +45,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
     const cacheEvents = await NestFactory.createMicroservice(CacheEventsModule);
+    cacheEvents.useLogger(new LoggerService());
     await cacheEvents.listen();
   }
 
@@ -50,32 +53,37 @@ async function bootstrap() {
     let processorApp = await NestFactory.createMicroservice(
       ClaimableAuctionsModule,
     );
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen();
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
-
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(process.env.CACHE_PORT);
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(process.env.NSFW_PORT);
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.rarity);
   }
 
   if (process.env.ENABLE_TRAITS_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticTraitsUpdaterModule);
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.traits);
   }
 
   if (process.env.ENABLE_SCAM_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNftScamUpdaterModule);
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.scamInfo);
   }
 
@@ -95,7 +103,7 @@ async function bootstrap() {
       },
     },
   );
-
+  pubSubApp.useLogger(new LoggerService());
   pubSubApp.listen();
 
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
