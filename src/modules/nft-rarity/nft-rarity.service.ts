@@ -12,7 +12,6 @@ import { constants } from 'src/config';
 @Injectable()
 export class NftRarityService {
   constructor(
-    // here new Logger("test"),
     private readonly logger: Logger,
     private readonly elrondApiService: ElrondApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
@@ -20,10 +19,6 @@ export class NftRarityService {
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
   ) {
-    this.logger.error({ asdf: 'ok', message: 'neahhh' });
-    //this.logger.error('contexttest');
-    //this.logger.error('test', { private: true, eyau: false, num: 11 });
-    this.logger.log('test', { test: true });
     this.nftRarityElasticService.setElasticRarityMappings();
   }
 

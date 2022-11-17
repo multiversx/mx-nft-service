@@ -136,13 +136,8 @@ async function bootstrap() {
 bootstrap();
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
-    //logger: WinstonModule.createLogger({ transports: logTransports() }),
     logger: new LoggerService(),
   });
-  //app.useLogger(new LoggerService());
-
-  const logger = new Logger('main');
-  logger.log('eyau faaa'), { checkIt: true };
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
