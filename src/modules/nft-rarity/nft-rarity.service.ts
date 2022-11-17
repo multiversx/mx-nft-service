@@ -20,8 +20,9 @@ export class NftRarityService {
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
   ) {
-    this.logger.error('contexttest');
-    this.logger.error('test', { private: true, eyau: false, num: 11 });
+    this.logger.error({ asdf: 'ok', message: 'neahhh' });
+    //this.logger.error('contexttest');
+    //this.logger.error('test', { private: true, eyau: false, num: 11 });
     this.logger.log('test', { test: true });
     this.nftRarityElasticService.setElasticRarityMappings();
   }

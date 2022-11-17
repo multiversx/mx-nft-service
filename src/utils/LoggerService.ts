@@ -53,12 +53,10 @@ export class LoggerService implements LS {
     let log = {};
     if (typeof message === 'string') {
       log['message'] = message;
-    } else {
-      log = {
-        level: message.level,
-        message: message.message,
-        timestamp: message.timestamp,
-      };
+    } else if (typeof message === 'object') {
+      for (const [key, value] of Object.entries(message)) {
+        log[key] = value;
+      }
     }
     if (fields) {
       if (typeof fields === 'object') {
@@ -92,7 +90,7 @@ export class LoggerService implements LS {
         )
       : combine(
           timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
-          prettyPrint({ colorize: true }),
+          //prettyPrint({ colorize: true }),
         );
 
     const logTransports: Transport[] = [
