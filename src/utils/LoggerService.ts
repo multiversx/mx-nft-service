@@ -21,7 +21,7 @@ import { Fields } from '@jenyus-org/nestjs-graphql-utils';
 var os = require('os');
 
 export class LoggerService implements LS {
-  private logger;
+  private logger: LS;
 
   constructor() {
     this.logger = WinstonModule.createLogger({
@@ -33,14 +33,14 @@ export class LoggerService implements LS {
   log(message: any, fields?: any) {
     this.logger.log(this.toPrettyJson(message, fields));
   }
-  info(message: any, fields?: any) {
-    this.logger.info(this.toPrettyJson(message, fields));
-  }
+  // info(message: any, fields?: any) {
+  //   this.logger.(this.toPrettyJson(message, fields));
+  // }
   error(message: any, fields?: any) {
     this.logger.error(this.toPrettyJson(message, fields));
   }
   warn(message: any, fields?: any) {
-    this.logger.warning(this.toPrettyJson(message, fields));
+    this.logger.warn(this.toPrettyJson(message, fields));
   }
   debug(message: any, fields?: any) {
     this.logger.debug(this.toPrettyJson(message, fields));
@@ -78,7 +78,7 @@ export class LoggerService implements LS {
     const format = logPretty
       ? combine(
           colorize({ all: true }),
-          timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
+          timestamp(),
           printf(
             (info) =>
               `[${info.timestamp}] ${info.level}: ${info.message} ${
@@ -88,10 +88,7 @@ export class LoggerService implements LS {
               }`,
           ),
         )
-      : combine(
-          timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
-          //prettyPrint({ colorize: true }),
-        );
+      : combine(timestamp(), colorize({ all: true }));
 
     const logTransports: Transport[] = [
       new winston.transports.Console({
