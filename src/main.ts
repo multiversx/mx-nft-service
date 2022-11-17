@@ -23,6 +23,7 @@ import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-trai
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
 import * as winston from 'winston';
+const { combine, timestamp, json, colorize, align, printf } = winston.format;
 import * as Transport from 'winston-transport';
 
 const logTransports: Transport[] = [
@@ -157,10 +158,17 @@ async function startPublicApp() {
   app.useLogger(
     WinstonModule.createLogger({
       exitOnError: false,
-      transports: logTransports,
-      format: winston.format.combine(
-        winston.format.json(),
-        winston.format.colorize(),
+      //transports: logTransports,
+      transports: [new winston.transports.Console()],
+      format: combine(
+        colorize({ all: true }),
+        align(),
+        timestamp(),
+        json(),
+        printf(
+          (info) =>
+            `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
+        ),
       ),
     }),
   );

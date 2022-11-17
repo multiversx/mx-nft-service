@@ -13,13 +13,20 @@ import { constants } from 'src/config';
 @Injectable()
 export class NftRarityService {
   constructor(
-    private readonly logger: Logger,
+    // here new Logger("test"),
+    private readonly logger: Logger = new Logger(NftRarityService.name),
     private readonly elrondApiService: ElrondApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
   ) {
+    this.logger.log('test', { test: true }, { test1: true }, { test2: true });
+    this.logger.log('ttttt', [
+      { ttttt: true },
+      { ttttt2: true },
+      { ttttt3: true },
+    ]);
     this.nftRarityElasticService.setElasticRarityMappings();
   }
 
