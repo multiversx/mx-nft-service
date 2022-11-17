@@ -8,29 +8,37 @@ const {
   printf,
   splat,
   simple,
+  prettyPrint,
 } = winston.format;
 import * as Transport from 'winston-transport';
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+} from 'nest-winston';
 
 export const logTransports = () => {
-  const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
   const logFile = process.env.LOG_FILE ?? false;
+  const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
 
   const logTransports: Transport[] = [
     new winston.transports.Console({
       format: combine(
-        colorize({ all: true }),
-        align(),
+        //colorize({ all: true }),
+        //nestWinstonModuleUtilities.format.nestLike(),
         timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
-        simple(),
-        splat(),
-        printf(
-          (info) =>
-            `[${info.timestamp}] ${info.level}: ${info.message} ${
-              typeof info.context === 'object'
-                ? ' - ' + JSON.stringify(info.context)
-                : ''
-            }`,
-        ),
+        //json(),
+        prettyPrint({ colorize: true }),
+        //align(),
+        //simple(),
+        //splat(),
+        // printf(
+        //   (info) =>
+        //     `[${info.timestamp}] ${info.level}: ${info.message} ${
+        //       typeof info.context === 'object'
+        //         ? ' - ' + JSON.stringify(info.context)
+        //         : ''
+        //     }`,
+        // ),
       ),
     }),
   ];

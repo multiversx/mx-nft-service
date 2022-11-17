@@ -19,7 +19,8 @@ import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-trai
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
 import { WinstonModule } from 'nest-winston';
-import { logTransports } from './utils/logTransports';
+//import { logTransports } from './utils/logTransports';
+import { LoggerService } from './utils/LoggerService';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -127,8 +128,13 @@ async function bootstrap() {
 bootstrap();
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
-    logger: WinstonModule.createLogger({ transports: logTransports() }),
+    //logger: WinstonModule.createLogger({ transports: logTransports() }),
+    logger: new LoggerService(),
   });
+  //app.useLogger(new LoggerService());
+
+  const logger = new Logger('main');
+  logger.log('eyau faaa'), { checkIt: true };
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
