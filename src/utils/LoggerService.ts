@@ -1,12 +1,11 @@
 import { LoggerService as LS } from '@nestjs/common';
 import * as winston from 'winston';
-const { combine, timestamp, json, colorize, align, printf } = winston.format;
+const { combine, timestamp, printf } = winston.format;
 import * as Transport from 'winston-transport';
 import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
-var os = require('os');
 
 export class LoggerService implements LS {
   private logger: LS;
@@ -20,9 +19,6 @@ export class LoggerService implements LS {
   log(message: any, fields?: any) {
     this.logger.log(this.toPrettyJson(message, fields));
   }
-  // info(message: any, fields?: any) {
-  //   this.logger.(this.toPrettyJson(message, fields));
-  // }
   error(message: any, fields?: any) {
     this.logger.error(this.toPrettyJson(message, fields));
   }
