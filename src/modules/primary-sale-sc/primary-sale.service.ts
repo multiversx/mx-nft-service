@@ -215,6 +215,28 @@ export class PrimarySaleService {
     }
   }
 
+  async getClaimStatus(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<[boolean, number]> {
+    const contract = await this.contract.getContract(
+      process.env.HOLORIDE_PRIMARY_SC,
+    );
+    let myTicketsInteraction = <Interaction>(
+      contract.methodsExplicit.claimers([
+        new TokenIdentifierValue(collectionIdentifier),
+      ])
+    );
+
+    const response = await this.getFirstQueryResult(myTicketsInteraction);
+    const addresses: Address[] = response?.firstValue?.valueOf();
+    const claimmers = addresses.map((x) => x.bech32());
+    if (claimmers.includes(address)) {
+      return [true, TimeConstants.oneHour];
+    }
+    return [false, TimeConstants.oneSecond];
+  }
+
   async getMyTicketsMap(
     collectionIdentifier: string,
     address: string,
@@ -246,6 +268,33 @@ export class PrimarySaleService {
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {
         path: this.isWhitelisted.name,
+        exception: err,
+      });
+    }
+  }
+
+  async hasClaimedTickets(
+    collectionIdentifier: string,
+    address: string,
+  ): Promise<boolean> {
+    try {
+      const cacheKey = generateCacheKeyFromParams('hasClaimedTickets', address);
+      const cachedValue = await this.redisCacheService.get(
+        this.redisClient,
+        cacheKey,
+      );
+      if (cachedValue) {
+        return cachedValue;
+      }
+      const [value, ttl] = await this.getClaimStatus(
+        collectionIdentifier,
+        address,
+      );
+      await this.redisCacheService.set(this.redisClient, cacheKey, value, ttl);
+      return value;
+    } catch (err) {
+      this.logger.error('An error occurred while getting has claimed status.', {
+        path: this.hasClaimedTickets.name,
         exception: err,
       });
     }
