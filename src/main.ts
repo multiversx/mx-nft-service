@@ -18,8 +18,6 @@ import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-e
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
-import { WinstonModule } from 'nest-winston';
-//import { logTransports } from './utils/logTransports';
 import { LoggerService } from './utils/LoggerService';
 
 async function bootstrap() {

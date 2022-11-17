@@ -80,14 +80,13 @@ export class LoggerService implements LS {
           maxsize: 100000,
           level: logLevel,
           format: combine(
-            align(),
             timestamp(),
-            json(),
+
             printf(
               (info) =>
                 `[${info.timestamp}] ${info.level}: ${
                   info.message
-                } ${JSON.stringify(info.context)}`,
+                } ${JSON.stringify(info)}`,
             ),
           ),
         }),
