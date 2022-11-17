@@ -23,31 +23,77 @@ import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-trai
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
 import * as winston from 'winston';
-const { combine, timestamp, json, colorize, align, printf } = winston.format;
+const {
+  combine,
+  timestamp,
+  json,
+  colorize,
+  align,
+  printf,
+  prettyPrint,
+  cli,
+  splat,
+  simple,
+  
+} = winston.format;
 import * as Transport from 'winston-transport';
+
+const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
+const logFile = process.env.LOG_FILE;
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.json(),
-      nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
+    // format: winston.format.combine(
+    //   winston.format.timestamp(),
+    //   winston.format.json(),
+    //   nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
+    // ),
+    format: combine(
+      //colorize({ all: true }),
+      //align(),
+      //timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
+      json(),
+      //printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
+      //splat(),
+      // ${
+      //   info.context ? ' => ' + JSON.stringify(info.context) : ''
+      // }`,
+      //prettyPrint({ colorize: true, depth: 0 }),
     ),
   }),
+  // new winston.transports.Http({
+
+  //   format: combine(
+  //     colorize({ all: true }),
+  //     align(),
+  //     timestamp(),
+  //     json(),
+  //     printf(
+  //       (info) =>
+  //         `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
+  //     ),
+  //   ),
+  // }),
+  logFile
+    ? new winston.transports.File({
+        filename: logFile,
+        dirname: 'logs',
+        maxsize: 100000,
+        level: logLevel,
+        format: combine(
+          align(),
+          timestamp(),
+          json(),
+          printf(
+            (info) =>
+              `[${info.timestamp}] ${info.level}: ${
+                info.message
+              } ${JSON.stringify(info.context)}`,
+          ),
+        ),
+      })
+    : undefined,
 ];
-
-const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
-
-if (!!process.env.LOG_FILE) {
-  logTransports.push(
-    new winston.transports.File({
-      filename: process.env.LOG_FILE,
-      dirname: 'logs',
-      maxsize: 100000,
-      level: logLevel,
-    }),
-  );
-}
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -158,18 +204,18 @@ async function startPublicApp() {
   app.useLogger(
     WinstonModule.createLogger({
       exitOnError: false,
-      //transports: logTransports,
-      transports: [new winston.transports.Console()],
-      format: combine(
-        colorize({ all: true }),
-        align(),
-        timestamp(),
-        json(),
-        printf(
-          (info) =>
-            `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
-        ),
-      ),
+      transports: logTransports,
+      //transports: [new winston.transports.Console()],
+      // format: combine(
+      //   colorize({ all: true }),
+      //   align(),
+      //   timestamp(),
+      //   json(),
+      //   printf(
+      //     (info) =>
+      //       `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
+      //   ),
+      // ),
     }),
   );
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
