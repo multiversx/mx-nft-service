@@ -63,7 +63,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getStatusMap(collectionIdentifier),
-        TimeConstants.oneHour,
+        TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting the status.', {
