@@ -13,77 +13,12 @@ import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
-import * as winston from 'winston';
-const {
-  combine,
-  timestamp,
-  json,
-  colorize,
-  align,
-  printf,
-  prettyPrint,
-  cli,
-  splat,
-  simple,
-} = winston.format;
-import * as Transport from 'winston-transport';
-
-const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
-const logFile = process.env.LOG_FILE ?? false;
-
-const logTransports: Transport[] = [
-  new winston.transports.Console({
-    // format: winston.format.combine(
-    //   winston.format.timestamp(),
-    //   winston.format.json(),
-    //   nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
-    // ),
-    format: combine(
-      colorize({ all: true }),
-      align(),
-      timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
-      printf(
-        (info) =>
-          `[${info.timestamp}] ${info.level}: ${info.message} ${
-            typeof info.context === 'object'
-              ? ' - ' + JSON.stringify(info.context)
-              : ''
-          }`,
-      ),
-    ),
-  }),
-];
-
-if (logFile) {
-  logTransports.push(
-    new winston.transports.File({
-      filename: logFile,
-      dirname: 'logs',
-      maxsize: 100000,
-      level: logLevel,
-      format: combine(
-        align(),
-        timestamp(),
-        json(),
-        printf(
-          (info) =>
-            `[${info.timestamp}] ${info.level}: ${
-              info.message
-            } ${JSON.stringify(info.context)}`,
-        ),
-      ),
-    }),
-  );
-}
+import { LoggerService } from './utils/LoggerService';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -190,24 +125,10 @@ async function bootstrap() {
 
 bootstrap();
 async function startPublicApp() {
-  const app = await NestFactory.create(AppModule);
-  app.useLogger(
-    WinstonModule.createLogger({
-      exitOnError: false,
-      transports: logTransports,
-      //transports: [new winston.transports.Console()],
-      // format: combine(
-      //   colorize({ all: true }),
-      //   align(),
-      //   timestamp(),
-      //   json(),
-      //   printf(
-      //     (info) =>
-      //       `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
-      //   ),
-      // ),
-    }),
-  );
+  const app = await NestFactory.create(AppModule, {
+    logger: new LoggerService(),
+  });
+
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
   app.useGlobalPipes(
