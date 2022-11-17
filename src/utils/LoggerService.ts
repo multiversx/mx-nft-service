@@ -58,7 +58,7 @@ export class LoggerService implements LS {
     const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
 
     const format = combine(
-      timestamp(),
+      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       nestWinstonModuleUtilities.format.nestLike(),
     );
 
@@ -76,8 +76,7 @@ export class LoggerService implements LS {
           maxsize: 100000,
           level: logLevel,
           format: combine(
-            timestamp(),
-
+            timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
             printf(
               (info) =>
                 `[${info.timestamp}] ${info.level}: ${

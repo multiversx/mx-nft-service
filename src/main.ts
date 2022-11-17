@@ -31,7 +31,6 @@ async function bootstrap() {
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
-    privateApp.useLogger(new LoggerService());
     await privateApp.listen(
       parseInt(process.env.PRIVATE_PORT),
       process.env.PRIVATE_LISTEN_ADDRESS,
