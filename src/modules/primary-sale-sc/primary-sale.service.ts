@@ -179,7 +179,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getTimestampsMap(collectionIdentifier),
-        TimeConstants.oneHour,
+        5 * TimeConstants.oneMinute,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
