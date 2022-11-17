@@ -102,7 +102,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getPricePerTicketMap(collectionIdentifier),
-        TimeConstants.oneHour,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting price per ticket.', {
@@ -139,7 +139,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getMaxNftPerWalletMap(collectionIdentifier),
-        TimeConstants.oneHour,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error(
