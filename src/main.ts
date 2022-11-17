@@ -18,7 +18,8 @@ import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-e
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
-import { LoggerService } from './utils/LoggerService';
+import { WinstonModule } from 'nest-winston';
+import { logTransports } from './utils/logTransports';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -126,7 +127,7 @@ async function bootstrap() {
 bootstrap();
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
-    logger: new LoggerService(),
+    logger: WinstonModule.createLogger({ transports: logTransports() }),
   });
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
