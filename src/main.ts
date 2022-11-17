@@ -34,12 +34,11 @@ const {
   cli,
   splat,
   simple,
-  
 } = winston.format;
 import * as Transport from 'winston-transport';
 
 const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
-const logFile = process.env.LOG_FILE;
+const logFile = process.env.LOG_FILE ?? false;
 
 const logTransports: Transport[] = [
   new winston.transports.Console({
@@ -51,49 +50,36 @@ const logTransports: Transport[] = [
     format: combine(
       //colorize({ all: true }),
       //align(),
-      //timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
+      timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
       json(),
       //printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
-      //splat(),
-      // ${
-      //   info.context ? ' => ' + JSON.stringify(info.context) : ''
-      // }`,
-      //prettyPrint({ colorize: true, depth: 0 }),
     ),
   }),
-  // new winston.transports.Http({
-
-  //   format: combine(
-  //     colorize({ all: true }),
-  //     align(),
-  //     timestamp(),
-  //     json(),
-  //     printf(
-  //       (info) =>
-  //         `[${info.timestamp}] ${info.level}: ${info.message} ${info.context}`,
-  //     ),
-  //   ),
-  // }),
-  logFile
-    ? new winston.transports.File({
-        filename: logFile,
-        dirname: 'logs',
-        maxsize: 100000,
-        level: logLevel,
-        format: combine(
-          align(),
-          timestamp(),
-          json(),
-          printf(
-            (info) =>
-              `[${info.timestamp}] ${info.level}: ${
-                info.message
-              } ${JSON.stringify(info.context)}`,
-          ),
-        ),
-      })
-    : undefined,
 ];
+// ${
+//   info.context ? ' => ' + JSON.stringify(info.context) : ''
+// }
+if (logFile) {
+  logTransports.push(
+    new winston.transports.File({
+      filename: logFile,
+      dirname: 'logs',
+      maxsize: 100000,
+      level: logLevel,
+      format: combine(
+        align(),
+        timestamp(),
+        json(),
+        printf(
+          (info) =>
+            `[${info.timestamp}] ${info.level}: ${
+              info.message
+            } ${JSON.stringify(info.context)}`,
+        ),
+      ),
+    }),
+  );
+}
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
