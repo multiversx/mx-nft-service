@@ -29,6 +29,7 @@ const logTransports: Transport[] = [
   new winston.transports.Console({
     format: winston.format.combine(
       winston.format.timestamp(),
+      winston.format.json(),
       nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
     ),
   }),
@@ -157,7 +158,10 @@ async function startPublicApp() {
     WinstonModule.createLogger({
       exitOnError: false,
       transports: logTransports,
-      format: winston.format.json(),
+      format: winston.format.combine(
+        winston.format.json(),
+        winston.format.colorize(),
+      ),
     }),
   );
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
