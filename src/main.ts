@@ -48,17 +48,21 @@ const logTransports: Transport[] = [
     //   nestWinstonModuleUtilities.format.nestLike('', { prettyPrint: true }),
     // ),
     format: combine(
-      //colorize({ all: true }),
-      //align(),
+      colorize({ all: true }),
+      align(),
       timestamp({ format: 'DD-MM-YY HH:mm:ss' }),
-      json(),
-      //printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
+      printf(
+        (info) =>
+          `[${info.timestamp}] ${info.level}: ${info.message} ${
+            typeof info.context === 'object'
+              ? ' - ' + JSON.stringify(info.context)
+              : ''
+          }`,
+      ),
     ),
   }),
 ];
-// ${
-//   info.context ? ' => ' + JSON.stringify(info.context) : ''
-// }
+
 if (logFile) {
   logTransports.push(
     new winston.transports.File({
