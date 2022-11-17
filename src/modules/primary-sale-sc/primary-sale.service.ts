@@ -278,7 +278,11 @@ export class PrimarySaleService {
     address: string,
   ): Promise<boolean> {
     try {
-      const cacheKey = generateCacheKeyFromParams('hasClaimedTickets', address);
+      const cacheKey = generateCacheKeyFromParams(
+        'hasClaimedTickets',
+        address,
+        collectionIdentifier,
+      );
       const cachedValue = await this.redisCacheService.get(
         this.redisClient,
         cacheKey,
