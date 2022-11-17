@@ -2,10 +2,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
-import {
-  MicroserviceOptions,
-  Transport as RedisTransport,
-} from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
@@ -51,13 +48,11 @@ async function bootstrap() {
     let processorApp = await NestFactory.createMicroservice(
       ClaimableAuctionsModule,
     );
-    processorApp.useLogger(new LoggerService());
     await processorApp.listen();
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
-    processorApp.useLogger(new LoggerService());
     await processorApp.listen(process.env.CACHE_PORT);
   }
 
@@ -90,7 +85,7 @@ async function bootstrap() {
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
     PubSubListenerModule,
     {
-      transport: RedisTransport.REDIS,
+      transport: Transport.REDIS,
       options: {
         url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
         retryAttempts: 100,
@@ -101,7 +96,6 @@ async function bootstrap() {
       },
     },
   );
-  pubSubApp.useLogger(new LoggerService());
   pubSubApp.listen();
 
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
