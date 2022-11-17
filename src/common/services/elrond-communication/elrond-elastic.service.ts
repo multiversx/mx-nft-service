@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
@@ -19,7 +17,7 @@ export class ElrondElasticService {
   private readonly url = process.env.ELROND_ELASTICSEARCH;
   constructor(
     private readonly apiService: ApiService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
 
   async getNftHistory(

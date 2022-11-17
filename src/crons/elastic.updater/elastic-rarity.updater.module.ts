@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
 import { CachingModule } from 'src/common/services/caching/caching.module';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
@@ -14,7 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     NftRarityModuleGraph,
     CachingModule,
   ],
-  providers: [ElasticRarityUpdaterService, RarityUpdaterService],
+  providers: [Logger, ElasticRarityUpdaterService, RarityUpdaterService],
   exports: [ElasticRarityUpdaterService, RarityUpdaterService],
 })
 export class ElasticRarityUpdaterModule {}

@@ -1,10 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
@@ -16,7 +14,7 @@ export class CollectionsStatsService {
   constructor(
     private persistenceService: PersistenceService,
     private apiService: ElrondApiService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { CollectionsModuleGraph } from 'src/modules/nftCollections/collections.module';
@@ -13,7 +13,7 @@ import { NftTraitsElasticService } from './nft-traits.elastic.service';
     CommonModule,
     DocumentDbModule,
   ],
-  providers: [NftTraitsService, NftTraitsElasticService],
+  providers: [Logger, NftTraitsService, NftTraitsElasticService],
   exports: [NftTraitsService, NftTraitsElasticService],
 })
 export class NftTraitsModule {}

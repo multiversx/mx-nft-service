@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
 import { PinataService } from './pinata.service';
 
 @Module({
-  providers: [PinataService],
+  providers: [Logger, PinataService],
   imports: [ElrondCommunicationModule],
   exports: [PinataService],
 })

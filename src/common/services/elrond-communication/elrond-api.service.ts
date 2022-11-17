@@ -1,10 +1,8 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Nft, NftMetadata, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { Logger } from 'winston';
 import * as Agent from 'agentkeepalive';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { constants, elrondConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
@@ -27,7 +25,7 @@ export class ElrondApiService {
   private apiProvider: ApiNetworkProvider;
 
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,

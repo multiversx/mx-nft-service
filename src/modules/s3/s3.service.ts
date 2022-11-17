@@ -1,13 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Readable } from 'stream';
-import { Logger } from 'winston';
 
 @Injectable()
 export class S3Service {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
   AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 

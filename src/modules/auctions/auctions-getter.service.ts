@@ -1,9 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Auction } from './models';
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
@@ -14,7 +12,6 @@ import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { Constants } from '@elrondnetwork/erdnest';
 import { cacheConfig, elrondConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
-import BigNumber from 'bignumber.js';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
@@ -37,7 +34,7 @@ export class AuctionsGetterService {
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
     private readonly usdPriceService: UsdPriceService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,

@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import BigNumber from 'bignumber.js';
 import {
@@ -29,7 +29,6 @@ import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PrimarySale } from './models/PrimarySale.dto';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 
@@ -45,7 +44,7 @@ export class PrimarySaleService {
   constructor(
     private elrondProxyService: ElrondProxyService,
     private redisCacheService: RedisCacheService,
-    @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
+    private logger: Logger,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,

@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationsResolver } from './notifications.resolver';
 import { ElrondCommunicationModule } from 'src/common';
@@ -10,6 +10,7 @@ import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache
 
 @Module({
   providers: [
+    Logger,
     NotificationsService,
     NotificationsCachingService,
     NotificationsResolver,

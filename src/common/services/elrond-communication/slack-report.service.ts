@@ -1,14 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { removeCredentialsFromUrl } from 'src/utils/helpers';
-import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 
 @Injectable()
 export class SlackReportService {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private readonly apiService: ApiService,
   ) {}
 

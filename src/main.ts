@@ -2,7 +2,10 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import {
+  MicroserviceOptions,
+  Transport as RedisTransport,
+} from '@nestjs/microservices';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
@@ -10,12 +13,12 @@ import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
 import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
 import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
+import { LoggerService } from './utils/LoggerService';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -25,12 +28,13 @@ async function bootstrap() {
 
   if (process.env.ENABLE_RABBITMQ === 'true') {
     const rabbitMq = await NestFactory.create(RabbitMqProcessorModule);
-    rabbitMq.useLogger(rabbitMq.get(WINSTON_MODULE_NEST_PROVIDER));
+    rabbitMq.useLogger(new LoggerService());
     await rabbitMq.listen(6014);
   }
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
+    privateApp.useLogger(new LoggerService());
     await privateApp.listen(
       parseInt(process.env.PRIVATE_PORT),
       process.env.PRIVATE_LISTEN_ADDRESS,
@@ -39,7 +43,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
     const cacheEvents = await NestFactory.createMicroservice(CacheEventsModule);
-    cacheEvents.useLogger(cacheEvents.get(WINSTON_MODULE_NEST_PROVIDER));
+    cacheEvents.useLogger(new LoggerService());
     await cacheEvents.listen();
   }
 
@@ -47,36 +51,37 @@ async function bootstrap() {
     let processorApp = await NestFactory.createMicroservice(
       ClaimableAuctionsModule,
     );
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen();
   }
 
   if (process.env.ENABLE_CACHE_WARMER === 'true') {
     let processorApp = await NestFactory.create(CacheWarmerModule);
-
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(process.env.CACHE_PORT);
   }
 
   if (process.env.ENABLE_NSFW_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNsfwUpdaterModule);
-    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(process.env.NSFW_PORT);
   }
 
   if (process.env.ENABLE_RARITY_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticRarityUpdaterModule);
-    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.rarity);
   }
 
   if (process.env.ENABLE_TRAITS_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticTraitsUpdaterModule);
-    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.traits);
   }
 
   if (process.env.ENABLE_SCAM_CRONJOBS === 'true') {
     let processorApp = await NestFactory.create(ElasticNftScamUpdaterModule);
-    processorApp.useLogger(processorApp.get(WINSTON_MODULE_NEST_PROVIDER));
+    processorApp.useLogger(new LoggerService());
     await processorApp.listen(ports.scamInfo);
   }
 
@@ -85,7 +90,7 @@ async function bootstrap() {
   const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
     PubSubListenerModule,
     {
-      transport: Transport.REDIS,
+      transport: RedisTransport.REDIS,
       options: {
         url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
         retryAttempts: 100,
@@ -96,7 +101,7 @@ async function bootstrap() {
       },
     },
   );
-
+  pubSubApp.useLogger(new LoggerService());
   pubSubApp.listen();
 
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
@@ -128,8 +133,10 @@ async function bootstrap() {
 
 bootstrap();
 async function startPublicApp() {
-  const app = await NestFactory.create(AppModule);
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  const app = await NestFactory.create(AppModule, {
+    logger: new LoggerService(),
+  });
+
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
   app.useGlobalPipes(

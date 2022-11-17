@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { ReportNftEntity } from 'src/db/reportNft';
 import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -10,7 +8,7 @@ export class ReportNftsService {
   constructor(
     private persistenceService: PersistenceService,
     private slackReport: SlackReportService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
   ) {}
 
   async addReport(identifier: string, address: string): Promise<boolean> {
