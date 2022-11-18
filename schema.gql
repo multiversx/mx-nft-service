@@ -962,8 +962,11 @@ input PrimarySaleFilter {
 }
 
 enum PrimarySaleStatusEnum {
+  BetweenPeriod
   ClaimPeriod
+  EndedPeriod
   NonePeriod
+  NotStarted
   SalePeriod
 }
 

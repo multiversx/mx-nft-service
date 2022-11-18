@@ -28,10 +28,11 @@ import {
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
-import { PrimarySale } from './models/PrimarySale.dto';
+import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class PrimarySaleService {
@@ -55,16 +56,8 @@ export class PrimarySaleService {
 
   async getStatus(collectionIdentifier: string): Promise<PrimarySale> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'primarySaleCollectionStatus',
-        collectionIdentifier,
-      );
-      return await this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        () => this.getStatusMap(collectionIdentifier),
-        TimeConstants.oneSecond,
-      );
+      const saleTime = await this.getTimestamps(collectionIdentifier);
+      return await this.getStatusMap(collectionIdentifier, saleTime);
     } catch (err) {
       this.logger.error('An error occurred while getting the status.', {
         path: this.getStatus.name,
@@ -74,20 +67,52 @@ export class PrimarySaleService {
     }
   }
 
-  async getStatusMap(collectionIdentifier: string): Promise<PrimarySale> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let price = <Interaction>(
-      contract.methodsExplicit.status([
-        BytesValue.fromUTF8(collectionIdentifier),
-      ])
-    );
+  async getStatusMap(
+    collectionIdentifier: string,
+    saleTime: PrimarySaleTime,
+  ): Promise<PrimarySale> {
+    if (saleTime.startSale > DateUtils.getCurrentTimestamp()) {
+      return new PrimarySale({
+        status: PrimarySaleStatusEnum.NotStarted,
+        collectionIdentifier: collectionIdentifier,
+      });
+    }
+    if (
+      saleTime.startSale <= DateUtils.getCurrentTimestamp() &&
+      saleTime.endSale > DateUtils.getCurrentTimestamp()
+    ) {
+      return new PrimarySale({
+        status: PrimarySaleStatusEnum.SalePeriod,
+        collectionIdentifier: collectionIdentifier,
+      });
+    }
 
-    const response = await this.getFirstQueryResult(price);
-    const status = response.firstValue.valueOf().name;
+    if (
+      saleTime.endSale <= DateUtils.getCurrentTimestamp() &&
+      saleTime.startClaim > DateUtils.getCurrentTimestamp()
+    ) {
+      return new PrimarySale({
+        status: PrimarySaleStatusEnum.BetweenPeriod,
+        collectionIdentifier: collectionIdentifier,
+      });
+    }
+    if (
+      saleTime.startClaim <= DateUtils.getCurrentTimestamp() &&
+      saleTime.endClaim > DateUtils.getCurrentTimestamp()
+    ) {
+      return new PrimarySale({
+        status: PrimarySaleStatusEnum.ClaimPeriod,
+        collectionIdentifier: collectionIdentifier,
+      });
+    }
+    if (saleTime.endClaim <= DateUtils.getCurrentTimestamp()) {
+      return new PrimarySale({
+        status: PrimarySaleStatusEnum.EndedPeriod,
+        collectionIdentifier: collectionIdentifier,
+      });
+    }
     return new PrimarySale({
-      status: status,
+      status: PrimarySaleStatusEnum.NonePeriod,
       collectionIdentifier: collectionIdentifier,
     });
   }
@@ -169,7 +194,7 @@ export class PrimarySaleService {
     return response.firstValue.valueOf().toFixed();
   }
 
-  async getTimestamps(collectionIdentifier: string): Promise<string> {
+  async getTimestamps(collectionIdentifier: string): Promise<PrimarySaleTime> {
     try {
       const cacheKey = generateCacheKeyFromParams(
         'primarySaleTimestamp',
