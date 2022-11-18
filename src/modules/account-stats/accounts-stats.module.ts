@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { AccountsStatsResolver } from './accounts-stats.resolver';
 import { AccountsStatsService } from './accounts-stats.service';
@@ -9,6 +9,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 
 @Module({
   providers: [
+    Logger,
     AccountsStatsService,
     AccountsStatsCachingService,
     AccountsStatsResolver,

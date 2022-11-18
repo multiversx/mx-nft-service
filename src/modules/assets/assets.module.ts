@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import {
   AssetsTransactionService,
   AssetsGetterService,
@@ -54,6 +54,7 @@ import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.servic
 
 @Module({
   providers: [
+    Logger,
     AssetsTransactionService,
     AssetsGetterService,
     AssetByIdentifierService,

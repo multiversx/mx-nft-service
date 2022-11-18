@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { OrdersService } from './order.service';
 import { OrdersResolver } from './orders.resolver';
 import { ElrondCommunicationModule } from 'src/common';
@@ -19,6 +19,7 @@ import { UsdPriceModuleGraph } from '../usdPrice/usd-price.module';
 
 @Module({
   providers: [
+    Logger,
     OrdersService,
     OrdersResolver,
     AuctionProvider,

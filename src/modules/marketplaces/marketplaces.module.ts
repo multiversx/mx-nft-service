@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { MarketplacesService } from './marketplaces.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
@@ -12,6 +12,7 @@ import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
 
 @Module({
   providers: [
+    Logger,
     MarketplacesResolver,
     MarketplacesService,
     MarketplacesCachingService,

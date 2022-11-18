@@ -39,7 +39,6 @@ import { NftScamModule } from './modules/nft-scam/nft-scam.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',

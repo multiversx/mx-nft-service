@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import {
   AuctionsSetterService,
   NftMarketplaceAbiService,
@@ -34,6 +34,7 @@ import { UsdPriceService } from '../usdPrice/usd-price.service';
 
 @Module({
   providers: [
+    Logger,
     AuctionsSetterService,
     AuctionsCachingService,
     AuctionsGetterService,
