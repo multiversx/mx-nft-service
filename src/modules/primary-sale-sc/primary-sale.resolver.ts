@@ -48,6 +48,19 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
 
   @Query(() => Boolean)
   @UseGuards(GqlAuthGuard)
+  async hasClaimedTickets(
+    @Args({ name: 'collectionIdentifier', type: () => String })
+    collectionIdentifier: string,
+    @User() user: any,
+  ): Promise<boolean> {
+    return await this.primarySaleService.hasClaimedTickets(
+      collectionIdentifier,
+      user.publicKey,
+    );
+  }
+
+  @Query(() => Boolean)
+  @UseGuards(GqlAuthGuard)
   async isWhitelisted(@User() user: any): Promise<boolean> {
     return await this.primarySaleService.isWhitelisted(user.publicKey);
   }
