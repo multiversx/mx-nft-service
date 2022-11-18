@@ -962,8 +962,11 @@ input PrimarySaleFilter {
 }
 
 enum PrimarySaleStatusEnum {
+  BetweenPeriod
   ClaimPeriod
+  EndedPeriod
   NonePeriod
+  NotStarted
   SalePeriod
 }
 
@@ -1009,6 +1012,7 @@ type Query {
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: Boolean!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
