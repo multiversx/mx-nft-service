@@ -3,7 +3,7 @@ import { BuySftActionArgs } from '..';
 export class BuySftRequest {
   auctionId: number;
   identifier: string;
-  tokenIdentifier?: string;
+  tokenIdentifier: string;
   price: string;
   quantity: string;
   constructor(init?: Partial<BuySftRequest>) {

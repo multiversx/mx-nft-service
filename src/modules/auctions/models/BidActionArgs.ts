@@ -1,5 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
+import { elrondConfig } from 'src/config';
 import {
   EGLD_OR_ESDT_TOKEN_RGX,
   ESDT_TOKEN_ERROR,
@@ -20,12 +21,11 @@ export class BidActionArgs {
   @Field(() => String)
   identifier: string;
 
-  @IsOptional()
   @Matches(RegExp(EGLD_OR_ESDT_TOKEN_RGX), {
     message: ESDT_TOKEN_ERROR,
   })
-  @Field(() => String, { nullable: true })
-  tokenIdentifier?: string;
+  @Field(() => String)
+  tokenIdentifier: string = elrondConfig.egld;
 
   @Field(() => String)
   price: string;
@@ -42,12 +42,11 @@ export class BuySftActionArgs {
   @Field(() => String)
   identifier: string;
 
-  @IsOptional()
   @Matches(RegExp(EGLD_OR_ESDT_TOKEN_RGX), {
     message: ESDT_TOKEN_ERROR,
   })
-  @Field(() => String, { nullable: true })
-  tokenIdentifier?: string;
+  @Field(() => String)
+  tokenIdentifier: string = elrondConfig.egld;
 
   @Matches(RegExp(NUMERIC_RGX), { message: `Price ${NUMERIC_ERROR}` })
   @Field(() => String)

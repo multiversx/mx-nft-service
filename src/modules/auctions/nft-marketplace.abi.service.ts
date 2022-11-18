@@ -98,8 +98,7 @@ export class NftMarketplaceAbiService {
       request.auctionId,
     );
 
-    return request.tokenIdentifier &&
-      request.tokenIdentifier !== elrondConfig.egld
+    return request.tokenIdentifier !== elrondConfig.egld
       ? contract.methodsExplicit
           .bid([
             new U64Value(new BigNumber(auction.marketplaceAuctionId)),
@@ -179,8 +178,7 @@ export class NftMarketplaceAbiService {
       request.auctionId,
     );
 
-    return request.tokenIdentifier &&
-      request.tokenIdentifier !== elrondConfig.egld
+    return request.tokenIdentifier !== elrondConfig.egld
       ? contract.methodsExplicit
           .buySft([
             new U64Value(new BigNumber(auction.marketplaceAuctionId)),
