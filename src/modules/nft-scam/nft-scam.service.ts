@@ -118,9 +118,7 @@ export class NftScamService {
     collection: string,
     scamEngineVersion: string,
   ): Promise<void> {
-    this.logger.log(`Processing scamInfo for ${collection}...`, {
-      path: `${NftScamService.name}.${this.validateOrUpdateAllNftsScamInfoForCollection.name}`,
-    });
+    this.logger.log(`Processing scamInfo for ${collection}...`);
     const nftsQuery =
       this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
         collection,
