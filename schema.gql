@@ -64,6 +64,7 @@ enum ArtistSortingEnum {
 }
 
 type Asset {
+  aggregatorUrl: String!
   artist: Account
   attributes: String!
 

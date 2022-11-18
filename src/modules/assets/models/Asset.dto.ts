@@ -91,6 +91,8 @@ export class Asset {
   isNsfw: boolean;
   @Field(() => [Marketplace], { nullable: true })
   marketplaces: [Marketplace];
+  @Field(() => String)
+  aggregatorUrl: string;
   @Field(() => Rarity, { nullable: true })
   rarity: Rarity;
   @Field(() => CollectionBranding, { nullable: true })
