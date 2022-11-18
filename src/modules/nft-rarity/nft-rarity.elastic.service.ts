@@ -324,7 +324,7 @@ export class NftRarityElasticService {
           this.logger.error(
             'Error when trying to map Elastic types for rarity variables',
             {
-              path: 'NftRarityService.setElasticRarityMappings',
+              path: `${NftRarityElasticService.name}.${this.setElasticRarityMappings.name}`,
             },
           );
         }
