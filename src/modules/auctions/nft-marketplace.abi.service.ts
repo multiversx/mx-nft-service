@@ -97,24 +97,37 @@ export class NftMarketplaceAbiService {
     const { contract, auction } = await this.configureTransactionData(
       request.auctionId,
     );
-    const tokenPayment = request.tokenIdentifier
-      ? TokenPayment.fungibleFromBigInteger(
-          request.tokenIdentifier,
-          new BigNumber(request.price),
-        )
-      : TokenPayment.egldFromBigInteger(request.price);
 
-    return contract.methodsExplicit
-      .bid([
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-      ])
-      .withSingleESDTTransfer(tokenPayment)
-      .withChainID(elrondConfig.chainID)
-      .withGasLimit(gas.bid)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+    return request.tokenIdentifier
+      ? contract.methodsExplicit
+          .bid([
+            new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+            BytesValue.fromUTF8(collection),
+            BytesValue.fromHex(nonce),
+          ])
+          .withSingleESDTTransfer(
+            TokenPayment.fungibleFromBigInteger(
+              request.tokenIdentifier,
+              new BigNumber(request.price),
+            ),
+          )
+          .withChainID(elrondConfig.chainID)
+          .withGasLimit(gas.bid)
+          .buildTransaction()
+          .toPlainObject(new Address(ownerAddress))
+      : contract
+          .call({
+            func: new ContractFunction('bid'),
+            value: TokenPayment.egldFromBigInteger(request.price),
+            args: [
+              new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+              BytesValue.fromUTF8(collection),
+              BytesValue.fromHex(nonce),
+            ],
+            gasLimit: gas.bid,
+            chainID: elrondConfig.chainID,
+          })
+          .toPlainObject(new Address(ownerAddress));
   }
 
   async withdraw(
@@ -164,24 +177,36 @@ export class NftMarketplaceAbiService {
     const { contract, auction } = await this.configureTransactionData(
       request.auctionId,
     );
-    const tokenPayment = request.tokenIdentifier
-      ? TokenPayment.fungibleFromBigInteger(
-          request.tokenIdentifier,
-          new BigNumber(request.price),
-        )
-      : TokenPayment.egldFromBigInteger(request.price);
 
-    return contract.methodsExplicit
-      .buySft([
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-      ])
-      .withSingleESDTTransfer(tokenPayment)
-      .withChainID(elrondConfig.chainID)
-      .withGasLimit(gas.buySft)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+    return request.tokenIdentifier
+      ? contract.methodsExplicit
+          .buySft([
+            new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+            BytesValue.fromUTF8(collection),
+            BytesValue.fromHex(nonce),
+          ])
+          .withSingleESDTTransfer(
+            TokenPayment.fungibleFromBigInteger(
+              request.tokenIdentifier,
+              new BigNumber(request.price),
+            ),
+          )
+          .withChainID(elrondConfig.chainID)
+          .withGasLimit(gas.buySft)
+          .buildTransaction()
+          .toPlainObject(new Address(ownerAddress))
+      : contract
+          .call({
+            func: new ContractFunction('buySft'),
+            value: TokenPayment.egldFromBigInteger(request.price),
+            args: this.getBuySftArguments(
+              request,
+              auction.marketplaceAuctionId,
+            ),
+            gasLimit: gas.buySft,
+            chainID: elrondConfig.chainID,
+          })
+          .toPlainObject(new Address(ownerAddress));
   }
 
   async getAuctionQuery(
