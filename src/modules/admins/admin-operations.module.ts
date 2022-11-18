@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AdminOperationsResolver } from './admin-operations.resolver';
 import { ElrondCommunicationModule } from 'src/common';
 import { FlagNftService } from './flag-nft.service';
@@ -20,6 +20,7 @@ import { NftTraitsModule } from '../nft-traits/nft-traits.module';
     NftTraitsModule,
   ],
   providers: [
+    Logger,
     AdminOperationsResolver,
     FlagNftService,
     VerifyContentService,

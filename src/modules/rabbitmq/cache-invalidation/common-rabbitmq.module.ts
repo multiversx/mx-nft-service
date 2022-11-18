@@ -1,5 +1,5 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
 import { RabbitModuleConfig } from '../rabbit-config';
 import { RabbitPublisherService } from '../rabbit.publisher';
@@ -31,7 +31,7 @@ export class CommonRabbitModule {
           },
         }),
       ],
-      providers: [RabbitPublisherService],
+      providers: [Logger, RabbitPublisherService],
       exports: [RabbitPublisherService],
     };
   }

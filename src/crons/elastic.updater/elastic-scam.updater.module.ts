@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common.module';
 import { DocumentDbModule } from 'src/document-db/document-db.module';
@@ -14,7 +14,7 @@ import { NftScamUpdaterService } from './nft-scam.updater.service';
     NftScamModule,
     DocumentDbModule,
   ],
-  providers: [ElasticScamUpdaterService, NftScamUpdaterService],
+  providers: [Logger, ElasticScamUpdaterService, NftScamUpdaterService],
   exports: [ElasticScamUpdaterService, NftScamUpdaterService],
 })
 export class ElasticNftScamUpdaterModule {}

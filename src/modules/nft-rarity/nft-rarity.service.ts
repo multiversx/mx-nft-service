@@ -9,16 +9,15 @@ import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
 import { NftRarityElasticService } from './nft-rarity.elastic.service';
 import { constants } from 'src/config';
-
 @Injectable()
 export class NftRarityService {
   constructor(
+    private readonly logger: Logger,
     private readonly elrondApiService: ElrondApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
-    private readonly logger: Logger,
   ) {
     this.nftRarityElasticService.setElasticRarityMappings();
   }

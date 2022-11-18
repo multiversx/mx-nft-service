@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common.module';
 import { NsfwUpdaterService } from './crons/elastic.updater/nsfw.updater.service';
@@ -22,7 +22,7 @@ import * as ormconfig from './ormconfig';
     NftScamModule,
     NftTraitsModule,
   ],
-  providers: [NsfwUpdaterService, RarityUpdaterService],
+  providers: [Logger, NsfwUpdaterService, RarityUpdaterService],
   controllers: [MetricsController, ReindexController],
   exports: [NsfwUpdaterService, RarityUpdaterService],
 })

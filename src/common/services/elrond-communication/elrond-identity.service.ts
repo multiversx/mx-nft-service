@@ -1,7 +1,5 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { removeCredentialsFromUrl } from 'src/utils/helpers';
-import { Logger } from 'winston';
 import { ApiService } from './api.service';
 import { Privacy } from './models';
 import { AccountIdentity } from './models/account.identity';
@@ -9,7 +7,7 @@ import { AccountIdentity } from './models/account.identity';
 @Injectable()
 export class ElrondIdentityService {
   constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private readonly apiService: ApiService,
   ) {}
 

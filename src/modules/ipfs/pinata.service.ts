@@ -1,9 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { fileStorage } from 'src/config';
 import { UploadToIpfsResult } from './ipfs.model';
 import { FileContent } from './file.content';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
 const axios = require('axios');
 
@@ -11,9 +9,7 @@ const FormData = require('form-data');
 
 @Injectable()
 export class PinataService {
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
+  constructor(private readonly logger: Logger) {}
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/pinning/pinFileToIPFS`;

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ElrondCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
@@ -14,6 +14,7 @@ import { NftRarityService } from './nft-rarity.service';
 @Module({
   imports: [CollectionsModuleGraph, ElrondCommunicationModule, CommonModule],
   providers: [
+    Logger,
     NftRarityService,
     NftRarityElasticService,
     NftRarityComputeService,

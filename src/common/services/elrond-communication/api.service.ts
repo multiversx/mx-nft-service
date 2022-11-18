@@ -1,11 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import * as Agent from 'agentkeepalive';
 import { elrondConfig } from 'src/config';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
 import { ApiSettings } from './models/api-settings';
 import { removeCredentialsFromUrl } from 'src/utils/helpers';
 
@@ -14,9 +12,7 @@ export class ApiService {
   private readonly defaultTimeout: number = 30000;
   private keepaliveAgent: Agent | undefined | null = null;
 
-  constructor(
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {}
+  constructor(private readonly logger: Logger) {}
 
   private getKeepAliveAgent(): Agent | undefined {
     if (this.keepaliveAgent === null) {
