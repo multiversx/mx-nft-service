@@ -21,11 +21,12 @@ export class QueryRequest {
   }
 
   getFilter(name: string): Filter | undefined {
-    return this.filters.filters.find((x) => x.field === name);
+    return this.filters?.filters?.find((x) => x.field === name);
   }
 
   getFilterName(name: string): string | undefined {
-    const values = this.filters.filters.find((x) => x.field === name)?.values;
+    const values = this.filters?.filters?.find((x) => x.field === name)?.values;
+
     if (!values || values.length === 0) {
       return undefined;
     }
