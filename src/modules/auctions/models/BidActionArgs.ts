@@ -1,6 +1,8 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
 import {
+  COLLECTION_IDENTIFIER_RGX,
+  ESDT_TOKEN_ERROR,
   NFT_IDENTIFIER_ERROR,
   NFT_IDENTIFIER_RGX,
   NUMERIC_ERROR,
@@ -17,6 +19,14 @@ export class BidActionArgs {
   })
   @Field(() => String)
   identifier: string;
+
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: ESDT_TOKEN_ERROR,
+  })
+  @Field(() => String, { nullable: true })
+  tokenIdentifier?: string;
+
   @Field(() => String)
   price: string;
 }
@@ -31,6 +41,13 @@ export class BuySftActionArgs {
   })
   @Field(() => String)
   identifier: string;
+
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: ESDT_TOKEN_ERROR,
+  })
+  @Field(() => String, { nullable: true })
+  tokenIdentifier?: string;
 
   @Matches(RegExp(NUMERIC_RGX), { message: `Price ${NUMERIC_ERROR}` })
   @Field(() => String)
