@@ -474,7 +474,7 @@ export class NftTraitsService {
                 const logMssage = nftFromElastic
                   ? 'Not identical traits'
                   : 'Missing NFT from Elastic';
-                this.logger.log(`${nft.identifier} - logMssage`);
+                this.logger.log(`${nft.identifier} - ${logMssage}`);
                 await this.updateNftTraits(nft.identifier);
                 totalProcessedNfts++;
                 continue;
