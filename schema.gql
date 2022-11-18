@@ -285,6 +285,7 @@ input BidActionArgs {
   auctionId: Int!
   identifier: String!
   price: String!
+  tokenIdentifier: String = "EGLD"
 }
 
 input BuyRandomNftActionArgs {
@@ -311,6 +312,7 @@ input BuySftActionArgs {
   identifier: String!
   price: String!
   quantity: String
+  tokenIdentifier: String = "EGLD"
 }
 
 input BuyTicketsArgs {
