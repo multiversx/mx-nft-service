@@ -228,6 +228,11 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return null;
   }
 
+  @ResolveField(() => String)
+  aggregatorUrl(@Parent() asset: Asset): string {
+    return `${process.env.ELROND_MARKETPLACE}\\nfts\\${asset.identifier}`;
+  }
+
   @ResolveField(() => Metadata)
   metadata(@Parent() asset: Asset) {
     if (!asset?.metadata) {
