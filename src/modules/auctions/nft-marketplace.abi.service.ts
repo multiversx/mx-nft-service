@@ -97,23 +97,24 @@ export class NftMarketplaceAbiService {
     const { contract, auction } = await this.configureTransactionData(
       request.auctionId,
     );
-    let bid = contract.call({
-      func: new ContractFunction('bid'),
-      value: request.tokenIdentifier
-        ? TokenPayment.fungibleFromBigInteger(
-            request.tokenIdentifier,
-            new BigNumber(request.price),
-          )
-        : TokenPayment.egldFromBigInteger(request.price),
-      args: [
+    const tokenPayment = request.tokenIdentifier
+      ? TokenPayment.fungibleFromBigInteger(
+          request.tokenIdentifier,
+          new BigNumber(request.price),
+        )
+      : TokenPayment.egldFromBigInteger(request.price);
+
+    return contract.methodsExplicit
+      .bid([
         new U64Value(new BigNumber(auction.marketplaceAuctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
-      ],
-      gasLimit: gas.bid,
-      chainID: elrondConfig.chainID,
-    });
-    return bid.toPlainObject(new Address(ownerAddress));
+      ])
+      .withSingleESDTTransfer(tokenPayment)
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.bid)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async withdraw(
@@ -157,22 +158,30 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      request.identifier,
+    );
     const { contract, auction } = await this.configureTransactionData(
       request.auctionId,
     );
-    let buySftAfterEndAuction = contract.call({
-      func: new ContractFunction('buySft'),
-      value: request.tokenIdentifier
-        ? TokenPayment.fungibleFromBigInteger(
-            request.tokenIdentifier,
-            new BigNumber(request.price),
-          )
-        : TokenPayment.egldFromBigInteger(request.price),
-      args: this.getBuySftArguments(request, auction.marketplaceAuctionId),
-      gasLimit: gas.buySft,
-      chainID: elrondConfig.chainID,
-    });
-    return buySftAfterEndAuction.toPlainObject(new Address(ownerAddress));
+    const tokenPayment = request.tokenIdentifier
+      ? TokenPayment.fungibleFromBigInteger(
+          request.tokenIdentifier,
+          new BigNumber(request.price),
+        )
+      : TokenPayment.egldFromBigInteger(request.price);
+
+    return contract.methodsExplicit
+      .buySft([
+        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+        BytesValue.fromUTF8(collection),
+        BytesValue.fromHex(nonce),
+      ])
+      .withSingleESDTTransfer(tokenPayment)
+      .withChainID(elrondConfig.chainID)
+      .withGasLimit(gas.buySft)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 
   async getAuctionQuery(
