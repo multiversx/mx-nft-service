@@ -13,7 +13,6 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsProvider } from '../assets/loaders/assets.loader';
-import { Selections } from '@jenyus-org/nestjs-graphql-utils';
 import { Account } from '../account-stats/models';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import {
@@ -37,6 +36,7 @@ import { elrondConfig } from 'src/config';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
+import { Fields } from '../common/fields.decorator';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -191,10 +191,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('asset', () => Asset)
-  async asset(
-    @Parent() auction: Auction,
-    @Selections('asset', ['*.']) fields: string[],
-  ) {
+  async asset(@Parent() auction: Auction, @Fields() fields: string[]) {
     const { identifier } = auction;
     if (this.hasToResolveAsset(fields)) {
       const asset = await this.assetsProvider.load(identifier);
@@ -218,7 +215,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @ResolveField('topBidder', () => Account)
   async topBidder(
     @Parent() auction: Auction,
-    @Selections('topBidder', ['*.']) fields: string[],
+    @Fields('topBidder', ['*.']) fields: string[],
   ) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
@@ -242,7 +239,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   @ResolveField('owner', () => Account)
   async owner(
     @Parent() auction: Auction,
-    @Selections('owner', ['*.']) fields: string[],
+    @Fields('owner', ['*.']) fields: string[],
   ) {
     const { ownerAddress } = auction;
 

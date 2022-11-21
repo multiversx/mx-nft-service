@@ -9,8 +9,7 @@ import {
   AddLikeArgs,
   RemoveLikeArgs,
 } from './models';
-import { GraphQLUpload } from 'apollo-server-express';
-import { FileUpload } from 'graphql-upload';
+import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/gql.auth-guard';
