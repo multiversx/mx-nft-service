@@ -348,7 +348,6 @@ export class PrimarySaleService {
       queryResponse?.returnData && queryResponse.returnData.length > 0
         ? new Boolean(queryResponse.returnData[0].base64ToHex()).valueOf()
         : false;
-    console.log({ value });
     if (value === false) {
       return {
         isWhitelisted: false,
