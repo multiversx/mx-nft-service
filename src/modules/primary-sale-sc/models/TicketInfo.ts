@@ -24,3 +24,15 @@ export class TicketInfo {
       : undefined;
   }
 }
+
+@ObjectType()
+export class WhitelistedInfo {
+  @Field(() => Boolean)
+  isWhitelisted: boolean;
+  @Field(() => String, { nullable: true })
+  message: string;
+
+  constructor(init?: Partial<TicketInfo>) {
+    Object.assign(this, init);
+  }
+}
