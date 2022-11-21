@@ -54,7 +54,7 @@
     "stopNFTCreate": 60000000,
     "transferNFTCreateRole": 60000000,
     "addBurnQuantity": 200000,
-    "buyTickets": 16000000,
+    "buyTickets": 36000000,
     "nftBurn": 10000000
   },
   "cronJobs": {
@@ -76,7 +76,7 @@
     "getCollectionsFromElasticBatchSize": 100,
     "nftsCountThresholdForTraitAndRarityIndexing": 100000,
     "updateAllNftTraitsBatchSize": 10000,
-    "getNftsForScamInfoBatchSize": 50,
+    "getNftsForScamInfoBatchSize": 100,
     "elasticMaxBatch": 10000,
     "dbBatch": 1000
   },

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondElasticService, Nft } from 'src/common';
+import { ElrondApiService, Nft } from 'src/common';
 import { CollectionTraitSummary } from './models/collection-traits.model';
 import {
   NftTrait,
@@ -13,13 +13,11 @@ import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
-import { getAllCollectionsFromElasticQuery } from './nft-traits.elastic.queries';
 
 @Injectable()
 export class NftTraitsService {
   constructor(
     private readonly apiService: ElrondApiService,
-    private readonly elasticService: ElrondElasticService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly documentDbService: DocumentDbService,
     private readonly logger: Logger,
@@ -40,9 +38,7 @@ export class NftTraitsService {
         if (collectionTraitSummaryFromDb) {
           await this.documentDbService.deleteTraitSummary(collectionTicker);
         }
-        this.logger.log(`${collectionTicker} - VALID`, {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-        });
+        this.logger.log(`${collectionTicker} - VALID`);
         return false;
       }
 
@@ -66,9 +62,7 @@ export class NftTraitsService {
         collectionTraitSummary.isIdenticalTo(collectionTraitSummaryFromDb);
 
       if (notIdenticalNftsCount === 0 && areCollectionSummariesIdentical) {
-        this.logger.log(`${collectionTicker} - VALID`, {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-        });
+        this.logger.log(`${collectionTicker} - VALID`);
         await this.documentDbService.updateTraitSummaryLastUpdated(
           collectionTicker,
         );
@@ -87,9 +81,6 @@ export class NftTraitsService {
         );
         this.logger.log(
           `${collectionTicker} - Updated collection trait summary`,
-          {
-            path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-          },
         );
         return true;
       }
@@ -175,9 +166,6 @@ export class NftTraitsService {
     if (notIdenticalNftsCount > 0) {
       this.logger.log(
         `${collection} - Updated ${notIdenticalNftsCount}/${lastNonce} NFTs`,
-        {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-        },
       );
     }
 
@@ -200,21 +188,9 @@ export class NftTraitsService {
     await Locker.lock(
       'updateAllCollectionTraits: Update traits for all existing collections',
       async () => {
-        const query = getAllCollectionsFromElasticQuery();
-
         try {
-          let collections: string[] = [];
-
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              collections = collections.concat([
-                ...new Set(items.map((i) => i.token)),
-              ]);
-            },
-          );
+          let collections: string[] =
+            await this.nftTraitsElasticService.getAllCollectionsFromElastic();
 
           this.logger.log(
             `Total collections to be validated - ${collections.length}`,
@@ -264,9 +240,7 @@ export class NftTraitsService {
     }
 
     if (nftTraitsFromApi && !areIdenticalTraits) {
-      this.logger.log(`${identifier} - MINT/UPDATE`, {
-        path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
-      });
+      this.logger.log(`${identifier} - MINT/UPDATE`);
       const traitSummaryFromDb: CollectionTraitSummary =
         await this.getCollectionTraitSummaryFromDb(collection);
       return await this.mintCollectionNft(
@@ -283,10 +257,6 @@ export class NftTraitsService {
     ) {
       this.logger.log(
         `${identifier} - Unknown missmatch cause => update collection trait summary`,
-        {
-          path: `${NftTraitsService.name}.${this.updateNftTraits.name}`,
-          identifier: identifier,
-        },
       );
       return await this.updateCollectionTraits(collection);
     }
@@ -427,11 +397,7 @@ export class NftTraitsService {
   private isCollectionTooBig(collection: string, nftsCount: number): boolean {
     if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
       this.logger.log(
-        `${collection} - Collection NFTs count bigger than threshold`,
-        {
-          path: `${NftTraitsService.name}.${this.updateCollectionTraits.name}`,
-          nftsCount: nftsCount,
-        },
+        `${collection} - Collection NFTs count bigger than threshold (${nftsCount} > ${constants.nftsCountThresholdForTraitAndRarityIndexing})`,
       );
       return true;
     }
@@ -508,10 +474,7 @@ export class NftTraitsService {
                 const logMssage = nftFromElastic
                   ? 'Not identical traits'
                   : 'Missing NFT from Elastic';
-                this.logger.log(logMssage, {
-                  path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
-                  identifier: nft.identifier,
-                });
+                this.logger.log(`${nft.identifier} - ${logMssage}`);
                 await this.updateNftTraits(nft.identifier);
                 totalProcessedNfts++;
                 continue;
@@ -523,9 +486,6 @@ export class NftTraitsService {
             if (lastTimestamp === beforeTimestamp) {
               this.logger.log(
                 `Processed ${totalProcessedNfts} in ${iterations} iterations of ${batchSize} NFTs`,
-                {
-                  path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
-                },
               );
               break;
             }

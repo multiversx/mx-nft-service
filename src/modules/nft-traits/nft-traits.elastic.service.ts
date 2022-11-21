@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
 import { EncodedNftValues, NftTraits } from './models/nft-traits.model';
 import {
+  getAllCollectionsFromElasticQuery,
   getAllEncodedNftValuesFromElasticBeforeTimestampQuery,
   getAllEncodedNftValuesFromElasticQuery,
   getNftWithTraitValuesFromElasticQuery,
@@ -177,6 +178,22 @@ export class NftTraitsElasticService {
       );
     }
     return dict;
+  }
+
+  async getAllCollectionsFromElastic(): Promise<string[]> {
+    const query = getAllCollectionsFromElasticQuery();
+    let collections: string[] = [];
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'token',
+      query,
+      async (items) => {
+        collections = collections.concat([
+          ...new Set(items.map((i) => i.token)),
+        ]);
+      },
+    );
+    return collections;
   }
 
   private buildNftTraitsBulkUpdate(nfts: NftTraits[]): string[] {

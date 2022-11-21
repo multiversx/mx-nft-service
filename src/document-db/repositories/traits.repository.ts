@@ -17,9 +17,11 @@ export class TraitRepositoryService extends EntityRepository<CollectionTraitSumm
   }
 
   async getTraitSummary(collection: string): Promise<CollectionTraitSummary> {
-    return await this.findOne({
-      identifier: collection,
-    });
+    return CollectionTraitSummary.fromMongoDbObject(
+      await this.findOne({
+        identifier: collection,
+      }),
+    );
   }
 
   async saveOrUpdateTraitSummary(
@@ -30,10 +32,10 @@ export class TraitRepositoryService extends EntityRepository<CollectionTraitSumm
       {
         identifier: traitSummary.identifier,
       },
-      traitSummary,
+      traitSummary.toMongoDbObject(),
     );
     if (!res) {
-      await this.create(traitSummary);
+      await this.create(traitSummary.toMongoDbObject());
     }
   }
 

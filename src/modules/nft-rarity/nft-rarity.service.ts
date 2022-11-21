@@ -9,16 +9,15 @@ import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
 import { NftRarityElasticService } from './nft-rarity.elastic.service';
 import { constants } from 'src/config';
-
 @Injectable()
 export class NftRarityService {
   constructor(
+    private readonly logger: Logger,
     private readonly elrondApiService: ElrondApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
     private readonly assetRarityRedisHandler: AssetRarityInfoRedisHandler,
-    private readonly logger: Logger,
   ) {
     this.nftRarityElasticService.setElasticRarityMappings();
   }
@@ -110,10 +109,6 @@ export class NftRarityService {
       if (!allNfts || allNfts.length === 0) {
         this.logger.log(
           `${collectionTicker} - No NFTs => update collection rarity flag`,
-          {
-            path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
-            collection: collectionTicker,
-          },
         );
         await this.nftRarityElasticService.setCollectionRarityFlagInElastic(
           collectionTicker,
@@ -137,10 +132,6 @@ export class NftRarityService {
       if (nftsWithAttributes?.length === 0) {
         this.logger.log(
           `${collectionTicker} - Collection has no indexed/valid attributes)`,
-          {
-            path: `${NftRarityService.name}.${this.updateCollectionRarities.name}`,
-            collection: collectionTicker,
-          },
         );
         await this.nftRarityElasticService.setCollectionRarityFlagInElastic(
           collectionTicker,
@@ -157,10 +148,7 @@ export class NftRarityService {
       );
 
       if (!rarities) {
-        this.logger.log(`No rarities were computed`, {
-          path: 'NftRarityService.updateRarities',
-          collection: collectionTicker,
-        });
+        this.logger.log(`${collectionTicker} - No rarities were computed`);
         await this.nftRarityElasticService.setNftRaritiesInElastic(
           nftsWithAttributes,
           false,
@@ -293,10 +281,6 @@ export class NftRarityService {
   ): Promise<void> {
     this.logger.log(
       `${collectionTicker} - Elastic rarities missing => migration from DB`,
-      {
-        path: `${NftRarityService.name}.${this.migrateRaritiesFromDbToElastic.name}`,
-        collection: collectionTicker,
-      },
     );
     await Promise.all([
       this.nftRarityElasticService.setCollectionRarityFlagInElastic(
@@ -432,11 +416,7 @@ export class NftRarityService {
     }
     if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
       this.logger.log(
-        `${collection} - Collection NFTs count bigger than threshold`,
-        {
-          path: `${NftRarityService.name}.${this.isCollectionTooBig.name}`,
-          nftsCount: nftsCount,
-        },
+        `${collection} - Collection NFTs count bigger than threshold ${nftsCount} > ${constants.nftsCountThresholdForTraitAndRarityIndexing}`,
       );
       return [true, nftsCount];
     }

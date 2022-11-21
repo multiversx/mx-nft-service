@@ -10,7 +10,7 @@
     "contractCrate": {
       "name": "primary-sales-sc",
       "version": "0.0.0",
-      "git_version": "675e153-modified"
+      "git_version": "a452248-modified"
     },
     "framework": {
       "name": "elrond-wasm",
@@ -152,6 +152,16 @@
       ]
     },
     {
+      "name": "payment_token",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "EgldOrEsdtTokenIdentifier"
+        }
+      ]
+    },
+    {
       "name": "buyer_users",
       "mutability": "readonly",
       "inputs": [
@@ -233,6 +243,22 @@
       ]
     },
     {
+      "name": "claimers",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "nft_collection",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
       "name": "all_tickets",
       "mutability": "readonly",
       "inputs": [
@@ -248,6 +274,25 @@
       "outputs": [
         {
           "type": "List<TicketInfo>"
+        }
+      ]
+    },
+    {
+      "name": "payback",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "caller",
+          "type": "Address"
+        },
+        {
+          "name": "nft_collection",
+          "type": "TokenIdentifier"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
         }
       ]
     },

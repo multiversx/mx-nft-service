@@ -1,6 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -18,7 +16,7 @@ export class FeaturedService {
   constructor(
     private apiService: ElrondApiService,
     private persistenceService: PersistenceService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
     this.redisClient = this.redisCacheService.getClient(

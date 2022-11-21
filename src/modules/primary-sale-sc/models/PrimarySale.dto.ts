@@ -26,6 +26,9 @@ export class PrimarySale {
 export enum PrimarySaleStatusEnum {
   ClaimPeriod = 'ClaimPeriod',
   SalePeriod = 'SalePeriod',
+  EndedPeriod = 'EndedPeriod',
+  BetweenPeriod = 'BetweenPeriod',
+  NotStarted = 'NotStarted',
   NonePeriod = 'NonePeriod',
 }
 registerEnumType(PrimarySaleStatusEnum, {

@@ -98,6 +98,24 @@ export class CollectionTraitSummary {
 
     return true;
   }
+
+  toMongoDbObject(): any {
+    return {
+      ...this,
+      traitTypes: JSON.stringify(this.traitTypes),
+    };
+  }
+
+  static fromMongoDbObject(entry: any): CollectionTraitSummary {
+    if (typeof entry?.traitTypes === 'string') {
+      return new CollectionTraitSummary({
+        identifier: entry.identifier,
+        lastUpdated: entry.lastUpdated,
+        traitTypes: JSON.parse(entry.traitTypes),
+      });
+    }
+    return entry;
+  }
 }
 
 @ObjectType()

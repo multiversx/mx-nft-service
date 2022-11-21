@@ -3,6 +3,7 @@ import { ElrondElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
+import { NftScamInfoModel } from './models/nft-scam-info.model';
 
 @Injectable()
 export class NftScamElasticService {
@@ -150,6 +151,51 @@ export class NftScamElasticService {
             nft.identifier,
             elasticDictionary.scamInfo.infoKey,
             null,
+          ),
+        );
+      }
+    }
+    return updates;
+  }
+
+  buildNftScamInfoDbToElasticMigrationBulkUpdate(
+    nftsFromDb: NftScamInfoModel[],
+    nftsFromElastic: any,
+  ): string[] {
+    let updates: string[] = [];
+    for (const nftFromDb of nftsFromDb) {
+      if (!nftFromDb && nftsFromElastic[elasticDictionary.scamInfo.typeKey]) {
+        updates.push(
+          this.elasticService.buildBulkUpdate<string>(
+            'tokens',
+            nftFromDb.identifier,
+            elasticDictionary.scamInfo.typeKey,
+            null,
+          ),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<string>(
+            'tokens',
+            nftFromDb.identifier,
+            elasticDictionary.scamInfo.infoKey,
+            null,
+          ),
+        );
+      } else {
+        updates.push(
+          this.elasticService.buildBulkUpdate<string>(
+            'tokens',
+            nftFromDb.identifier,
+            elasticDictionary.scamInfo.typeKey,
+            nftFromDb.type,
+          ),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<string>(
+            'tokens',
+            nftFromDb.identifier,
+            elasticDictionary.scamInfo.infoKey,
+            nftFromDb.info,
           ),
         );
       }

@@ -64,6 +64,7 @@ export const getAllCollectionsFromElasticQuery = (): ElasticQuery => {
       [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
       (type) => QueryType.Match('type', type),
     )
+    .withFields(['token'])
     .withPagination({
       from: 0,
       size: constants.getCollectionsFromElasticBatchSize,

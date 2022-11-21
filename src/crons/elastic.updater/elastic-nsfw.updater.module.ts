@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common.module';
 import { AdminOperationsModuleGraph } from 'src/modules/admins/admin-operations.module';
@@ -14,7 +14,7 @@ import * as ormconfig from './../../ormconfig';
     AdminOperationsModuleGraph,
     CacheEventsPublisherModule,
   ],
-  providers: [ElasticNsfwUpdaterService, NsfwUpdaterService],
+  providers: [Logger, ElasticNsfwUpdaterService, NsfwUpdaterService],
   exports: [ElasticNsfwUpdaterService, NsfwUpdaterService],
 })
 export class ElasticNsfwUpdaterModule {}

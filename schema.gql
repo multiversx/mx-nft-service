@@ -64,6 +64,7 @@ enum ArtistSortingEnum {
 }
 
 type Asset {
+  aggregatorUrl: String!
   artist: Account
   attributes: String!
 
@@ -285,6 +286,7 @@ input BidActionArgs {
   auctionId: Int!
   identifier: String!
   price: String!
+  tokenIdentifier: String = "EGLD"
 }
 
 input BuyRandomNftActionArgs {
@@ -311,6 +313,7 @@ input BuySftActionArgs {
   identifier: String!
   price: String!
   quantity: String
+  tokenIdentifier: String = "EGLD"
 }
 
 input BuyTicketsArgs {
@@ -962,8 +965,11 @@ input PrimarySaleFilter {
 }
 
 enum PrimarySaleStatusEnum {
+  BetweenPeriod
   ClaimPeriod
+  EndedPeriod
   NonePeriod
+  NotStarted
   SalePeriod
 }
 
@@ -1009,6 +1015,7 @@ type Query {
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: Boolean!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
