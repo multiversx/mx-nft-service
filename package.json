@@ -27,6 +27,7 @@
     "revert-migrations": "npm run typeorm migration:revert"
   },
   "dependencies": {
+    "@apollo/server": "^4.1.1",
     "@elastic/elasticsearch": "^7.12.0",
     "@elrondnetwork/erdjs": "10.2.8",
     "@elrondnetwork/erdjs-network-providers": "1.1.3",
