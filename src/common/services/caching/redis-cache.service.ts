@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import * as Redis from 'ioredis';
-import { RedisService } from 'nestjs-redis';
+import Redis, { RedisOptions } from 'ioredis';
+import { cacheConfig } from 'src/config';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { generateCacheKey } from 'src/utils/generate-cache-key';
@@ -10,14 +10,29 @@ import { promisify } from 'util';
 @Injectable()
 export class RedisCacheService {
   private DEFAULT_TTL = 300;
-  constructor(
-    private readonly logger: Logger,
-    private readonly redisService: RedisService,
-  ) {}
+  private clients: { [key: string]: Redis } = {};
+  private redisOptions: RedisOptions = {
+    host: process.env.REDIS_URL,
+    port: parseInt(process.env.REDIS_PORT),
+    password: process.env.REDIS_PASSWORD,
+  };
+
+  constructor(private readonly logger: Logger) {}
 
   getClient(clientName: string): Redis.Redis {
-    return this.redisService.getClient(clientName);
+    if (this.clients[clientName]) {
+      return this.clients[clientName];
+    }
+
+    const options: RedisOptions = {
+      ...this.redisOptions,
+      name: clientName,
+      db: this.getClientDb(clientName),
+    };
+    this.clients[clientName] = new Redis(options);
+    return this.clients[clientName];
   }
+
   async get(
     client: Redis.Redis,
     key: string,
@@ -441,6 +456,35 @@ export class RedisCacheService {
         region,
       });
       return null;
+    }
+  }
+
+  private getClientDb(client: string): number {
+    switch (client) {
+      case cacheConfig.auctionsRedisClientName: {
+        return cacheConfig.auctionsDbName;
+      }
+      case cacheConfig.assetsRedisClientName: {
+        return cacheConfig.assetsDbName;
+      }
+      case cacheConfig.ordersRedisClientName: {
+        return cacheConfig.ordersDbName;
+      }
+      case cacheConfig.persistentRedisClientName: {
+        return cacheConfig.persistentDbName;
+      }
+      case cacheConfig.collectionsRedisClientName: {
+        return cacheConfig.collectionsDbName;
+      }
+      case cacheConfig.rarityQueueClientName: {
+        return cacheConfig.rarityQueueDbName;
+      }
+      case cacheConfig.traitsQueueClientName: {
+        return cacheConfig.traitsQueueDbName;
+      }
+      default: {
+        return 0;
+      }
     }
   }
 }
