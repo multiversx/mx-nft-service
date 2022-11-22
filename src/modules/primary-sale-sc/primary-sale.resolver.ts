@@ -17,7 +17,7 @@ import { User } from '../auth/user';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
-import { TicketInfo } from './models/TicketInfo';
+import { TicketInfo, WhitelistedInfo } from './models/TicketInfo';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -59,9 +59,11 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     );
   }
 
-  @Query(() => Boolean)
+  @Query(() => WhitelistedInfo)
   @UseGuards(GqlAuthGuard)
-  async isWhitelisted(@User() user: any): Promise<boolean> {
+  async isWhitelisted(
+    @User() user: any,
+  ): Promise<{ isWhitelisted: boolean; message: string }> {
     return await this.primarySaleService.isWhitelisted(user.publicKey);
   }
 
