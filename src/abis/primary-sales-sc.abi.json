@@ -10,7 +10,7 @@
     "contractCrate": {
       "name": "primary-sales-sc",
       "version": "0.0.0",
-      "git_version": "a452248-modified"
+      "git_version": "6a13673"
     },
     "framework": {
       "name": "elrond-wasm",
@@ -736,6 +736,10 @@
         {
           "name": "winner_nonce",
           "type": "u64"
+        },
+        {
+          "name": "price",
+          "type": "BigUint"
         }
       ]
     },
