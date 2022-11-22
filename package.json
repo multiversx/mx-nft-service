@@ -55,6 +55,7 @@
     "cache-manager": "^3.6.1",
     "cache-manager-redis-store": "^2.0.0",
     "clarifai-nodejs-grpc": "^8.0.0",
+    "class-transformer": "^0.4.0",
     "class-validator": "0.13.2",
     "config": "^3.3.6",
     "dataloader": "^2.0.0",
