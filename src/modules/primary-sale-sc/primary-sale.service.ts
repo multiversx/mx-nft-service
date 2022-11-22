@@ -203,7 +203,7 @@ export class PrimarySaleService {
         this.redisClient,
         cacheKey,
         () => this.getTimestampsMap(collectionIdentifier),
-        5 * TimeConstants.oneMinute,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -280,14 +280,16 @@ export class PrimarySaleService {
     return myTickets?.map((t) => TicketInfo.fromAbi(t));
   }
 
-  async isWhitelisted(address: string): Promise<boolean> {
+  async isWhitelisted(
+    address: string,
+  ): Promise<{ isWhitelisted: boolean; message: string }> {
     try {
       const cacheKey = generateCacheKeyFromParams('isWhitelisted', address);
       return await this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
         () => this.isWhitelistedMap(address),
-        TimeConstants.oneMinute,
+        5 * TimeConstants.oneSecond,
       );
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {
@@ -328,7 +330,9 @@ export class PrimarySaleService {
     }
   }
 
-  async isWhitelistedMap(address: string): Promise<boolean> {
+  async isWhitelistedMap(
+    address: string,
+  ): Promise<{ isWhitelisted: boolean; message?: string }> {
     const contract = getSmartContract(process.env.HOLORIDE_WHITELIST_SC);
     const func = new ContractFunction('in_whitelist');
     const args = [new AddressValue(new Address(address))];
@@ -340,9 +344,19 @@ export class PrimarySaleService {
       .getService()
       .queryContract(query);
 
-    return queryResponse?.returnData && queryResponse.returnData.length > 0
-      ? new Boolean(queryResponse.returnData[0].base64ToHex()).valueOf()
-      : false;
+    const value =
+      queryResponse?.returnData && queryResponse.returnData.length > 0
+        ? new Boolean(queryResponse.returnData[0].base64ToHex()).valueOf()
+        : false;
+    if (value === false) {
+      return {
+        isWhitelisted: false,
+        message: process.env.HOLORIDE_WHITELIST_MSG,
+      };
+    }
+    return {
+      isWhitelisted: true,
+    };
   }
 
   async getTimestampsMap(
