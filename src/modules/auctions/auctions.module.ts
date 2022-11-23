@@ -31,6 +31,7 @@ import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader'
 import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { ComplexityPlugin } from 'src/utils/plugins/ComplexityPlugin';
 
 @Module({
   providers: [
@@ -59,6 +60,7 @@ import { UsdPriceService } from '../usdPrice/usd-price.service';
     MarketplaceRedisHandler,
     CachingService,
     UsdPriceService,
+    ComplexityPlugin,
   ],
   imports: [
     ElrondCommunicationModule,

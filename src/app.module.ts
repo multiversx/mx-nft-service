@@ -32,6 +32,8 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { NftScamModule } from './modules/nft-scam/nft-scam.module';
+import { ComplexityPlugin } from './utils/plugins/ComplexityPlugin';
+import { GraphQLSchemaHost } from '@nestjs/graphql';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { NftScamModule } from './modules/nft-scam/nft-scam.module';
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
+      //plugins: [new ComplexityPlugin()],
       introspection: process.env.NODE_ENV !== 'production',
       playground: true,
       sortSchema: true,

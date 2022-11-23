@@ -51,7 +51,9 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     super();
   }
 
-  @Query(() => AuctionResponse)
+  @Query(() => AuctionResponse, {
+    complexity: ({ childComplexity, args }) => childComplexity * args.length,
+  })
   async auctions(
     @Args({
       name: 'filters',
@@ -112,7 +114,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     };
   }
 
-  @Query(() => AuctionResponse)
+  @Query(() => AuctionResponse, { complexity: 1 })
   async auctionsSortByBids(
     @Args({ name: 'filters', type: () => FiltersExpression, nullable: true })
     filters,
@@ -145,7 +147,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     };
   }
 
-  @Query(() => PriceRange)
+  @Query(() => PriceRange, { complexity: 1 })
   async priceRange(
     @Args({
       name: 'filters',
@@ -160,7 +162,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     return PriceRange.fromEntity(minBid, maxBid);
   }
 
-  @Query(() => AuctionResponse)
+  @Query(() => AuctionResponse, { complexity: 1 })
   @UseGuards(GqlAuthGuard)
   async myClaimableAuctions(
     @User() user: any,
@@ -190,7 +192,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     );
   }
 
-  @ResolveField('asset', () => Asset)
+  @ResolveField('asset', () => Asset, { complexity: 1 })
   async asset(@Parent() auction: Auction, @Fields() fields: string[]) {
     const { identifier } = auction;
     if (this.hasToResolveAsset(fields)) {
@@ -201,7 +203,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     return new Asset({ identifier: identifier });
   }
 
-  @ResolveField('topBid', () => Price)
+  @ResolveField('topBid', () => Price, { complexity: 1 })
   async topBid(@Parent() auction: Auction) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
@@ -212,7 +214,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       : null;
   }
 
-  @ResolveField('topBidder', () => Account)
+  @ResolveField('topBidder', () => Account, { complexity: 1 })
   async topBidder(
     @Parent() auction: Auction,
     @Fields('topBidder', ['*.']) fields: string[],
@@ -226,7 +228,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       : null;
   }
 
-  @ResolveField('availableTokens', () => Int)
+  @ResolveField('availableTokens', () => Int, { complexity: 1 })
   async availableTokens(@Parent() auction: Auction) {
     const { id, nrAuctionedTokens, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) {
@@ -236,7 +238,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     return nrAuctionedTokens;
   }
 
-  @ResolveField('owner', () => Account)
+  @ResolveField('owner', () => Account, { complexity: 1 })
   async owner(
     @Parent() auction: Auction,
     @Fields('owner', ['*.']) fields: string[],
@@ -247,7 +249,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     return await this.getAccount(fields, ownerAddress);
   }
 
-  @ResolveField('marketplace', () => Marketplace)
+  @ResolveField('marketplace', () => Marketplace, { complexity: 1 })
   async marketplace(@Parent() auction: Auction) {
     const { marketplaceKey, identifier, id, marketplaceAuctionId } = auction;
     let asset: Asset;
@@ -271,7 +273,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       : null;
   }
 
-  @Query(() => [Token])
+  @Query(() => [Token], { complexity: 1 })
   async currentPaymentTokens(
     @Args({
       name: 'filters',
