@@ -32,6 +32,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { NftScamModule } from './modules/nft-scam/nft-scam.module';
+import { ComplexityPlugin } from './modules/common/complexity.plugin';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { NftScamModule } from './modules/nft-scam/nft-scam.module';
       introspection: process.env.NODE_ENV !== 'production',
       playground: true,
       sortSchema: true,
+      plugins: [new ComplexityPlugin()],
       formatError: (error: GraphQLError) => {
         const graphQLFormattedError: GraphQLFormattedError = {
           ...error,
@@ -53,7 +55,10 @@ import { NftScamModule } from './modules/nft-scam/nft-scam.module';
         };
         console.error(graphQLFormattedError);
 
-        return graphQLFormattedError;
+        return {
+          ...graphQLFormattedError,
+          extensions: { ...graphQLFormattedError.extensions, exception: null },
+        };
       },
     }),
     CommonModule,
