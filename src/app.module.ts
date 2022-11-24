@@ -55,7 +55,10 @@ import { ComplexityPlugin } from './modules/common/complexity.plugin';
         };
         console.error(graphQLFormattedError);
 
-        return graphQLFormattedError;
+        return {
+          ...graphQLFormattedError,
+          extensions: { ...graphQLFormattedError.extensions, exception: null },
+        };
       },
     }),
     CommonModule,
