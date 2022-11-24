@@ -226,7 +226,7 @@ export class NotificationsService {
           new NotificationEntity({
             auctionId: auction.id,
             identifier: auction.identifier,
-            ownerAddress: order[0].ownerAddress,
+            ownerAddress: order.ownerAddress,
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Won,
             name: assetName,

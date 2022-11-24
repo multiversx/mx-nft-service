@@ -63,22 +63,11 @@ export class StartAuctionEventHandler {
     hash: string,
   ) {
     if (auctionTokenMarketplace.key === ELRONDNFTSWAP_KEY) {
-      const asset = await this.assetByIdentifierService.getAsset(
+      return await this.handleElrondSwapAuction(
         startAuctionIdentifier,
-      );
-
-      const paymentToken = await this.usdPriceService.getToken(
-        topicsAuctionToken.paymentToken,
-      );
-      return await this.auctionsService.saveAuctionEntity(
-        AuctionEntity.fromWithdrawTopics(
-          topicsAuctionToken,
-          asset.tags?.toString(),
-          hash,
-          auctionTokenMarketplace.key,
-          paymentToken?.decimals,
-        ),
-        asset.tags,
+        topicsAuctionToken,
+        hash,
+        auctionTokenMarketplace,
       );
     }
     return await this.auctionsService.saveAuction(
@@ -86,6 +75,31 @@ export class StartAuctionEventHandler {
       startAuctionIdentifier,
       auctionTokenMarketplace,
       hash,
+    );
+  }
+
+  private async handleElrondSwapAuction(
+    startAuctionIdentifier: string,
+    topicsAuctionToken: any,
+    hash: string,
+    auctionTokenMarketplace: Marketplace,
+  ) {
+    const asset = await this.assetByIdentifierService.getAsset(
+      startAuctionIdentifier,
+    );
+
+    const paymentToken = await this.usdPriceService.getToken(
+      topicsAuctionToken.paymentToken,
+    );
+    return await this.auctionsService.saveAuctionEntity(
+      AuctionEntity.fromWithdrawTopics(
+        topicsAuctionToken,
+        asset.tags?.toString(),
+        hash,
+        auctionTokenMarketplace.key,
+        paymentToken?.decimals,
+      ),
+      asset.tags,
     );
   }
 
