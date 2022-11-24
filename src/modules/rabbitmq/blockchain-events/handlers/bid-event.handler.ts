@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -11,6 +10,7 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { BidEvent } from '../../entities/auction';
 import { ElrondSwapBidEvent } from '../../entities/auction/elrondnftswap/elrondswap-bid.event';
 import { FeedEventsSenderService } from '../feed-events.service';
@@ -28,14 +28,21 @@ export class BidEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { bidEvent, topics } = this.getEventAndTopics(event);
-    const bidMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
+    let [bidEvent, topics] = [undefined, undefined];
+    let bidMarketplace: Marketplace;
+    if (marketplaceType === MarketplaceTypeEnum.External) {
+      bidMarketplace = await this.marketplaceService.getMarketplaceByAddress(
+        event.address,
+      );
+      [bidEvent, topics] = this.getEventAndTopics(event, bidMarketplace.key);
+    } else {
+      [bidEvent, topics] = this.getEventAndTopics(event);
+      bidMarketplace = await this.marketplaceService.getMarketplaceByType(
         bidEvent.getAddress(),
         marketplaceType,
         topics.collection,
       );
-
+    }
     if (!bidMarketplace) return;
     this.logger.log(
       `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
@@ -82,14 +89,14 @@ export class BidEventHandler {
     }
   }
 
-  private getEventAndTopics(event: any) {
-    if (event.identifier === ElrondNftsSwapAuctionEventEnum.Bid) {
+  private getEventAndTopics(event: any, marketplaceKey?: string) {
+    if (marketplaceKey && marketplaceKey === ELRONDNFTSWAP_KEY) {
       const bidEvent = new ElrondSwapBidEvent(event);
       const topics = bidEvent.getTopics();
-      return { bidEvent, topics };
+      return [bidEvent, topics];
     }
     const bidEvent = new BidEvent(event);
     const topics = bidEvent.getTopics();
-    return { bidEvent, topics };
+    return [bidEvent, topics];
   }
 }
