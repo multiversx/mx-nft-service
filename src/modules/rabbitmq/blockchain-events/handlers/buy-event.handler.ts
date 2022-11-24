@@ -26,7 +26,7 @@ export class BuyEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { buySftEvent, buySftTopics } = this.getEventAndTopics(event);
+    const { buySftEvent, buySftTopics } = this.getEventAndTopics(event, hash);
 
     const buyMarketplace: Marketplace =
       await this.marketplaceService.getMarketplaceByType(
@@ -83,8 +83,17 @@ export class BuyEventHandler {
     );
   }
 
-  private getEventAndTopics(event: any) {
+  private getEventAndTopics(event: any, hash: string) {
     if (event.identifier === ElrondNftsSwapAuctionEventEnum.Purchase) {
+      if (
+        Buffer.from(event.topics[0], 'base64').toString() ===
+        ElrondNftsSwapAuctionEventEnum.UpdateListing
+      ) {
+        this.logger.log(
+          `Update Listing event detected for hash '${hash}' at Purchase external marketplace ${event.address}, ignore it for the moment`,
+        );
+        return;
+      }
       const buySftEvent = new ElrondSwapBuyEvent(event);
       const buySftTopics = buySftEvent.getTopics();
       return { buySftEvent, buySftTopics };

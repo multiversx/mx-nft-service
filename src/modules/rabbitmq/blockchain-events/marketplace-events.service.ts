@@ -48,12 +48,15 @@ export class MarketplaceEventsService {
         case AuctionEventEnum.BuySftEvent:
         case ExternalAuctionEventEnum.Buy:
         case ExternalAuctionEventEnum.BulkBuy:
+        case ElrondNftsSwapAuctionEventEnum.Purchase:
           if (
             Buffer.from(event.topics[0], 'base64').toString() ===
-            ExternalAuctionEventEnum.UpdateOffer
+              ExternalAuctionEventEnum.UpdateOffer ||
+            Buffer.from(event.topics[0], 'base64').toString() ===
+              ElrondNftsSwapAuctionEventEnum.UpdateListing
           ) {
             this.logger.log(
-              `Update Offer event detected for hash '${hash}' at buy external marketplace, ignore it for the moment`,
+              `${event.topics[0]} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`,
             );
             return;
           }
@@ -66,7 +69,7 @@ export class MarketplaceEventsService {
             ExternalAuctionEventEnum.UpdateOffer
           ) {
             this.logger.log(
-              `Update Offer event detected for hash '${hash}' at withdraw marketplace, ignore it for the moment`,
+              `${event.topics[0]} event detected for hash '${hash}' for marketplace ${event.addreses}, ignore it for the moment`,
             );
             return;
           }
