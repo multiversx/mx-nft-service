@@ -5,6 +5,7 @@ import {
   fromGlobalId,
 } from 'graphql-relay';
 import { Field, Int, InputType } from '@nestjs/graphql';
+import { IsOptional, Max } from 'class-validator';
 
 type PagingMeta =
   | { pagingType: 'forward'; after?: string; first: number }
@@ -76,9 +77,13 @@ export default class ConnectionArgs implements ConnectionArguments {
   @Field({ nullable: true, description: 'Paginate after opaque cursor' })
   public after?: ConnectionCursor;
 
+  @IsOptional()
+  @Max(100)
   @Field(() => Int, { nullable: true, description: 'Paginate first' })
   public first?: number = 10;
 
+  @IsOptional()
+  @Max(100)
   @Field(() => Int, { nullable: true, description: 'Paginate last' })
   public last?: number;
 
