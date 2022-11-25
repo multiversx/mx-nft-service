@@ -118,4 +118,9 @@ export class CacheInfo {
     key: 'mostLikedAssets',
     ttl: TimeConstants.oneDay,
   };
+
+  static AssetHistory: CacheInfo = {
+    key: 'assetHistory',
+    ttl: TimeConstants.oneDay,
+  };
 }
