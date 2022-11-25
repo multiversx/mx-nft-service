@@ -239,10 +239,8 @@ export class NftTraitsService {
       });
     }
 
-    if (
-      nftTraitsFromApi &&
-      (!nftTraitValuesFromElastic || !areIdenticalTraits)
-    ) {
+    const noNftTraitsInElastic = !nftTraitValuesFromElastic?.length;
+    if (nftTraitsFromApi.hasTraits() && noNftTraitsInElastic) {
       this.logger.log(`${identifier} - MINT`);
       const traitSummaryFromDb: CollectionTraitSummary =
         await this.getCollectionTraitSummaryFromDb(collection);
@@ -253,13 +251,12 @@ export class NftTraitsService {
         }),
         nftTraitsFromApi,
       );
-    } else if (!nftTraitsFromApi || !areIdenticalTraits) {
+    } else if (!areIdenticalTraits) {
       this.logger.log(
         `${identifier} - Outdated traits => update collection trait summary`,
       );
       return await this.updateCollectionTraits(collection);
     }
-
     return false;
   }
 
