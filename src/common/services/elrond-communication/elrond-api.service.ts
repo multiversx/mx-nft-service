@@ -731,14 +731,6 @@ export class ElrondApiService {
     );
   }
 
-  async getCollectionType(ticker: string): Promise<string> {
-    const collection = await this.doGetGeneric(
-      this.getCollectionCustomRanks.name,
-      `collections/${ticker}?fields=type`,
-    );
-    return collection.type;
-  }
-
   async getElrondStats(): Promise<ElrondStats> {
     const stats = await this.doGetGeneric(this.getElrondStats.name, 'stats');
     return new ElrondStats(stats);

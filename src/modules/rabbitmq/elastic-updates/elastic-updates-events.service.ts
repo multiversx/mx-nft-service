@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
+import { Asset, NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { MintEvent } from '../entities/auction/mint.event';
@@ -66,37 +66,11 @@ export class ElasticUpdatesEventsService {
 
     for (let event of events) {
       event = this.convertToMatchingEventType(event);
-
       const topics = event.getTopics();
       const collection = topics.collection;
-      const identifier = `${collection}-${topics.nonce}`;
 
-      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-        if (!collectionTypes[collection]) {
-          collectionTypes[collection] = await this.getCollectionType(
-            collection,
-          );
-        }
-        if (
-          collectionTypes[collection] === NftTypeEnum.NonFungibleESDT ||
-          collectionTypes[collection] === NftTypeEnum.SemiFungibleESDT
-        ) {
-          nftsOrCollectionsToUpdate.push(topics.collection);
-        }
-        continue;
-      }
-
-      const nft = await this.assetByIdentifierService.getAsset(identifier);
-      collectionTypes[collection] = nft.type;
-
-      if (!nft || Object.keys(nft).length === 0) {
-        continue;
-      }
-
-      if (
-        nft.type === NftTypeEnum.NonFungibleESDT ||
-        nft.type === NftTypeEnum.SemiFungibleESDT
-      ) {
+      if (await this.isCollectionOfNftsOrSfts(collection, collectionTypes)) {
+        const identifier = `${collection}-${topics.nonce}`;
         nftsOrCollectionsToUpdate.push(identifier);
       }
     }
@@ -119,36 +93,33 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const collection = createTopics.collection;
-      const identifier = `${collection}-${createTopics.nonce}`;
 
-      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-        if (!collectionTypes[collection]) {
-          collectionTypes[collection] = await this.getCollectionType(
-            collection,
-          );
-        }
-        if (
-          collectionTypes[collection] === NftTypeEnum.NonFungibleESDT ||
-          collectionTypes[collection] === NftTypeEnum.SemiFungibleESDT
-        ) {
-          nftsToDelete.push(identifier);
+      if (await this.isCollectionOfNftsOrSfts(collection, collectionTypes)) {
+        const identifier = `${collection}-${createTopics.nonce}`;
+        let nft: Asset;
+
+        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+          if (
+            await this.isNftOrNoMoreSftQuantity(
+              collection,
+              identifier,
+              collectionTypes,
+            )
+          ) {
+            nftsToDelete.push(identifier);
+          }
           collectionsToUpdate.push(collection);
+          continue;
         }
-        continue;
-      }
 
-      const nft = await this.assetByIdentifierService.getAsset(identifier);
-      collectionTypes[collection] = nft.type;
+        nft = await this.assetByIdentifierService.getAsset(identifier);
+        collectionTypes.collection = nft.type;
 
-      if (!nft || Object.keys(nft).length === 0) {
-        continue;
-      }
+        if (!nft || Object.keys(nft).length === 0) {
+          continue;
+        }
 
-      if (
-        nft.type === NftTypeEnum.NonFungibleESDT ||
-        nft.type === NftTypeEnum.SemiFungibleESDT
-      ) {
-        collectionsToUpdate.push(nft.collection);
+        collectionsToUpdate.push(collection);
       }
     }
 
@@ -177,35 +148,32 @@ export class ElasticUpdatesEventsService {
       const mintEvent = new MintEvent(event);
       const createTopics = mintEvent.getTopics();
       const collection = createTopics.collection;
-      const identifier = `${collection}-${createTopics.nonce}`;
 
-      if (event.identifier === NftEventEnum.ESDTNFTBurn) {
-        if (!collectionTypes[collection]) {
-          collectionTypes[collection] = await this.getCollectionType(
-            collection,
-          );
+      if (await this.isCollectionOfNftsOrSfts(collection, collectionTypes)) {
+        const identifier = `${collection}-${createTopics.nonce}`;
+        let nft: Asset;
+
+        if (event.identifier === NftEventEnum.ESDTNFTBurn) {
+          if (
+            await this.isNftOrNoMoreSftQuantity(
+              collection,
+              identifier,
+              collectionTypes,
+            )
+          ) {
+            nftsToDelete.push(identifier);
+          }
+          continue;
         }
-        if (
-          collectionTypes[collection] === NftTypeEnum.NonFungibleESDT ||
-          collectionTypes[collection] === NftTypeEnum.SemiFungibleESDT
-        ) {
-          nftsToDelete.push(identifier);
+
+        nft = await this.assetByIdentifierService.getAsset(identifier);
+        collectionTypes.collection = nft.type;
+
+        if (!nft || Object.keys(nft).length === 0) {
+          continue;
         }
-        continue;
-      }
 
-      const nft = await this.assetByIdentifierService.getAsset(identifier);
-      collectionTypes[collection] = nft.type;
-
-      if (!nft || Object.keys(nft).length === 0) {
-        continue;
-      }
-
-      if (
-        nft.type === NftTypeEnum.NonFungibleESDT ||
-        nft.type === NftTypeEnum.SemiFungibleESDT
-      ) {
-        nftsToUpdate.push(nft.identifier);
+        nftsToUpdate.push(identifier);
       }
     }
 
@@ -270,10 +238,17 @@ export class ElasticUpdatesEventsService {
     return event;
   }
 
-  public async getCollectionType(ticker: string): Promise<string> {
+  private async getCollectionType(ticker: string): Promise<string> {
     const cacheKey = this.getCollectionTypeCacheKey(ticker);
-    const getCollectionType = () =>
-      this.elrondApiService.getCollectionType(ticker);
+    const getCollectionType = async () => {
+      const collection =
+        await this.elrondApiService.getCollectionByIdentifierForQuery(
+          ticker,
+          'fields=type',
+        );
+      return collection.type;
+    };
+
     const collectionType = await this.redisCacheService.getOrSet(
       this.redisClient,
       cacheKey,
@@ -281,6 +256,51 @@ export class ElasticUpdatesEventsService {
       CacheInfo.CollectionTypes.ttl,
     );
     return collectionType;
+  }
+
+  private async isCollectionOfNftsOrSfts(
+    collection: string,
+    collectionTypes: { [key: string]: string },
+  ): Promise<boolean> {
+    if (!collectionTypes.collection) {
+      collectionTypes.collection = await this.getCollectionType(collection);
+    }
+    if (
+      collectionTypes.collection === NftTypeEnum.NonFungibleESDT ||
+      collectionTypes.collection === NftTypeEnum.SemiFungibleESDT
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  private async isCollectionOfNfts(
+    collection: string,
+    collectionTypes: { [key: string]: string },
+  ): Promise<boolean> {
+    if (!collectionTypes.collection) {
+      collectionTypes.collection = await this.getCollectionType(collection);
+    }
+    if (collectionTypes.collection === NftTypeEnum.NonFungibleESDT) {
+      return true;
+    }
+    return false;
+  }
+
+  private async isNftOrNoMoreSftQuantity(
+    collection: string,
+    identifier: string,
+    collectionTypes: { [key: string]: string },
+  ): Promise<boolean> {
+    if (await this.isCollectionOfNfts(collection, collectionTypes)) {
+      return true;
+    } else {
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
+      if (!nft) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private getCollectionTypeCacheKey(ticker: string) {
