@@ -8,6 +8,9 @@ export enum AssetActionEnum {
   EndedAuction = 'EndedAuction',
   ClosedAuction = 'ClosedAuction',
   Bought = 'Bought',
+  AcceptedOffer = 'AcceptedOffer',
+  Staked = 'Staked',
+  Unstaked = 'Unstaked',
 }
 
 registerEnumType(AssetActionEnum, {

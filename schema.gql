@@ -107,13 +107,16 @@ type Asset {
 }
 
 enum AssetActionEnum {
+  AcceptedOffer
   Added
   Bought
   ClosedAuction
   Created
   EndedAuction
   Received
+  Staked
   StartedAuction
+  Unstaked
 }
 
 type AssetEdge {

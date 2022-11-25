@@ -27,20 +27,13 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       filters.identifier,
     );
-    let [historyLog] = [[], 0];
-    await this.assetsHistoryService.getHistoryLog(
+    const historyLog = await this.assetsHistoryService.getOrSetHistoryLog(
       collection,
       nonce,
       pagination.first,
       pagination.timestamp,
-      historyLog,
     );
-
-    return this.mapResponse(
-      historyLog || [],
-      pagination.timestamp,
-      pagination.first,
-    );
+    return this.mapResponse(historyLog, pagination.timestamp, pagination.first);
   }
 
   private mapResponse(
