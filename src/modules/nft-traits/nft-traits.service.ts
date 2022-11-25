@@ -239,8 +239,11 @@ export class NftTraitsService {
       });
     }
 
-    if (nftTraitsFromApi && !areIdenticalTraits) {
-      this.logger.log(`${identifier} - MINT/UPDATE`);
+    if (
+      nftTraitsFromApi &&
+      (!nftTraitValuesFromElastic || !areIdenticalTraits)
+    ) {
+      this.logger.log(`${identifier} - MINT`);
       const traitSummaryFromDb: CollectionTraitSummary =
         await this.getCollectionTraitSummaryFromDb(collection);
       return await this.mintCollectionNft(
@@ -250,13 +253,9 @@ export class NftTraitsService {
         }),
         nftTraitsFromApi,
       );
-    } else if (
-      nftTraitsFromApi &&
-      nftTraitValuesFromElastic &&
-      !areIdenticalTraits
-    ) {
+    } else if (!nftTraitsFromApi || !areIdenticalTraits) {
       this.logger.log(
-        `${identifier} - Unknown missmatch cause => update collection trait summary`,
+        `${identifier} - Outdated traits => update collection trait summary`,
       );
       return await this.updateCollectionTraits(collection);
     }
