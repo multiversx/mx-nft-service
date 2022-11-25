@@ -83,6 +83,13 @@ export class NftTraits {
     return newNft;
   }
 
+  hasTraits(): boolean {
+    if (this.traits?.length > 0) {
+      return true;
+    }
+    return false;
+  }
+
   isIdenticalTo(
     encodedNftValues2: EncodedNftValues,
   ): [boolean, EncodedNftValues] {
