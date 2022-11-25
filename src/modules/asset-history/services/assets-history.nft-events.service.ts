@@ -12,7 +12,7 @@ export class AssetsHistoryNftEventService {
     eventType: string,
     mainEvent: any,
   ): AssetHistoryLogInput {
-    const encodedNonce = Buffer.from(nonce, 'hex').toString('base64'); //BinaryUtils.base64Encode(nonce);
+    const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
 
     switch (eventType) {
       case NftEventEnum.ESDTNFTAddQuantity: {

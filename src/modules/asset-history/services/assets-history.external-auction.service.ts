@@ -42,7 +42,7 @@ export class AssetsHistoryExternalAuctionService {
         });
       }
       case ExternalAuctionEventEnum.BulkBuy: {
-        const encodedNonce = Buffer.from(nonce, 'hex').toString('base64'); //BinaryUtils.base64Encode(nonce);
+        const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
         const buyNftEvent = mainEvent._source.events.find(
           (event) =>
             event.identifier === eventType && event.topics[2] === encodedNonce,
