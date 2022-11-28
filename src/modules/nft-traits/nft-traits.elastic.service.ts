@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
+import { CollectionWithTraitsFlag } from './models/collection-with-traits-flag.model';
 import { EncodedNftValues, NftTraits } from './models/nft-traits.model';
 import {
   getAllCollectionsFromElasticQuery,
+  getAllCollectionsWithTraitsFlagFromElasticQuery,
   getAllEncodedNftValuesFromElasticBeforeTimestampQuery,
   getAllEncodedNftValuesFromElasticQuery,
   getNftWithTraitValuesFromElasticQuery,
@@ -190,6 +192,32 @@ export class NftTraitsElasticService {
       async (items) => {
         collections = collections.concat([
           ...new Set(items.map((i) => i.token)),
+        ]);
+      },
+    );
+    return collections;
+  }
+
+  async getAllCollectionsWithTraitsFlagFromElastic(): Promise<
+    CollectionWithTraitsFlag[]
+  > {
+    const query = getAllCollectionsWithTraitsFlagFromElasticQuery();
+    let collections: CollectionWithTraitsFlag[] = [];
+    await this.elasticService.getScrollableList(
+      'tokens',
+      'token',
+      query,
+      async (items) => {
+        collections = collections.concat([
+          ...new Set(
+            items.map(
+              (i) =>
+                new CollectionWithTraitsFlag({
+                  identifier: i.token,
+                  hasTraitsFlagSet: i.nft_hasTraitSummary,
+                }),
+            ),
+          ),
         ]);
       },
     );

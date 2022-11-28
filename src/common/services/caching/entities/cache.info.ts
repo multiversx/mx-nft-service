@@ -123,4 +123,9 @@ export class CacheInfo {
     key: 'assetHistory',
     ttl: TimeConstants.oneDay,
   };
+
+  static CollectionTypes: CacheInfo = {
+    key: 'collectionType',
+    ttl: TimeConstants.oneHour,
+  };
 }
