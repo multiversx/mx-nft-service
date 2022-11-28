@@ -12,6 +12,9 @@ export class AssetsHistoryNftEventService {
     eventType: string,
     mainEvent: any,
   ): AssetHistoryLogInput {
+    const event = mainEvent._source.events.find(
+      (event) => event.identifier === eventType,
+    );
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
     const transferEvent = mainEvent._source.events.find(
       (event) =>
@@ -33,9 +36,9 @@ export class AssetsHistoryNftEventService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Created,
-          address: mainEvent._source.address,
-          itemsCount: mainEvent._source.events[0].topics[2],
-          sender: transferEvent.topics[3]?.base64ToBech32(),
+          address: event.address,
+          itemsCount: event.topics[2],
+          sender: transferEvent?.topics[3]?.base64ToBech32(),
         });
       }
       case NftEventEnum.ESDTNFTTransfer: {
