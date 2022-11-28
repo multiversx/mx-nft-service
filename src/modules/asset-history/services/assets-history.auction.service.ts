@@ -7,34 +7,35 @@ export class AssetsHistoryAuctionService {
   constructor() {}
 
   mapAuctionEventLog(eventType: string, mainEvent: any): AssetHistoryLogInput {
+    const event = mainEvent._source.events.find(
+      (event) => event.identifier === eventType,
+    );
     switch (eventType) {
       case AuctionEventEnum.AuctionTokenEvent: {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: mainEvent._source.events[1].address,
-          itemsCount: mainEvent._source.events[0].topics[2],
-          sender: mainEvent._source.events[1].topics[5].base64ToBech32(),
+          address: event.address,
+          itemsCount: event.topics[2],
+          sender: event.topics[5].base64ToBech32(),
         });
       }
       case AuctionEventEnum.WithdrawEvent: {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.ClosedAuction,
-          address:
-            mainEvent._source.events[1].topics[5]?.base64ToBech32() || '',
-          itemsCount: mainEvent._source.events[1].topics[4],
+          address: event.topics[5]?.base64ToBech32() || '',
+          itemsCount: event.topics[4],
         });
       }
       case AuctionEventEnum.EndAuctionEvent: {
-        const [, , , , itemsCount, address, price] =
-          mainEvent._source.events[1].topics;
+        const [, , , , itemsCount, address, price] = event.topics;
         if (price) {
           return new AssetHistoryLogInput({
             event: mainEvent,
             action: AssetActionEnum.Bought,
             address: address.base64ToBech32(),
-            itemsCount: mainEvent._source.events[0].topics[2],
+            itemsCount: itemsCount,
             price: price,
           });
         } else {
@@ -48,8 +49,7 @@ export class AssetsHistoryAuctionService {
         }
       }
       case AuctionEventEnum.BuySftEvent: {
-        const [, , , , itemsCount, address, price] =
-          mainEvent._source.events[1].topics;
+        const [, , , , itemsCount, address, price] = event.topics;
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,

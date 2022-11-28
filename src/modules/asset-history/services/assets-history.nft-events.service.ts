@@ -13,6 +13,12 @@ export class AssetsHistoryNftEventService {
     mainEvent: any,
   ): AssetHistoryLogInput {
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
+    const transferEvent = mainEvent._source.events.find(
+      (event) =>
+        (event.identifier === NftEventEnum.ESDTNFTTransfer ||
+          event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
+        event.topics[1] === encodedNonce,
+    );
 
     switch (eventType) {
       case NftEventEnum.ESDTNFTAddQuantity: {
@@ -24,12 +30,6 @@ export class AssetsHistoryNftEventService {
         });
       }
       case NftEventEnum.ESDTNFTCreate: {
-        const transferEvent = mainEvent._source.events.find(
-          (event) =>
-            (event.topics[1] === encodedNonce &&
-              event.identifier === NftEventEnum.ESDTNFTTransfer) ||
-            event.identifier === NftEventEnum.MultiESDTNFTTransfer,
-        );
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Created,
@@ -39,10 +39,6 @@ export class AssetsHistoryNftEventService {
         });
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        const transferEvent = mainEvent._source.events.find(
-          (event) =>
-            event.identifier === eventType && event.topics[1] === encodedNonce,
-        );
         if (
           mainEvent._source.address === mainEvent?._source.events[0].address &&
           transferEvent.topics[3].base64ToBech32() !==
@@ -58,13 +54,8 @@ export class AssetsHistoryNftEventService {
         }
       }
       case NftEventEnum.MultiESDTNFTTransfer: {
-        const transferEvent = mainEvent._source.events.find(
-          (event) =>
-            event.identifier === eventType && event.topics[1] === encodedNonce,
-        );
         const senderAddress = transferEvent.address;
         const receiverAddress = transferEvent.topics[3].base64ToBech32();
-
         if (senderAddress !== receiverAddress) {
           return new AssetHistoryLogInput({
             event: mainEvent,
@@ -76,12 +67,6 @@ export class AssetsHistoryNftEventService {
         }
       }
       default: {
-        const transferEvent = mainEvent._source.events.find(
-          (event) =>
-            event.topics[1] === encodedNonce &&
-            (event.identifier === NftEventEnum.ESDTNFTTransfer ||
-              event.identifier === NftEventEnum.MultiESDTNFTTransfer),
-        );
         return this.mapNftEventLog(nonce, transferEvent.identifier, mainEvent);
       }
     }
