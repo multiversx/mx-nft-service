@@ -78,8 +78,7 @@ export class MarketplacesService {
     let allMarketplaces = await this.getAllMarketplaces();
 
     const externalMarketplaces = allMarketplaces?.items?.filter(
-      (m) =>
-        m.type === MarketplaceTypeEnum.External && m.key !== ELRONDNFTSWAP_KEY,
+      (m) => m.type === MarketplaceTypeEnum.External,
     );
 
     return externalMarketplaces.map((m) => m.address);

@@ -1,3 +1,4 @@
+import { U64Value } from '@elrondnetwork/erdjs';
 import { elrondConfig } from 'src/config';
 import {
   AuctionTypeEnum,
@@ -56,7 +57,7 @@ export class AuctionEntity extends BaseEntity {
   ownerAddress: string;
 
   @Column()
-  minBidDiff: string;
+  minBidDiff: string = '0';
 
   @Column()
   minBid: string;
@@ -137,7 +138,7 @@ export class AuctionEntity extends BaseEntity {
         decimals,
       ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
-      endDate: parseInt(auction.deadline.valueOf().toString()),
+      endDate: AuctionEntity.getEndDate(auction.deadline),
       identifier: `${auction.auctioned_tokens.token_identifier
         .valueOf()
         .toString()}-${nominateVal(
@@ -171,7 +172,6 @@ export class AuctionEntity extends BaseEntity {
       paymentNonce: parseInt(auction.payment_token_nonce.valueOf().toString()),
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
-      // minBidDiff: auction.min_bid_diff.valueOf().toString(),
       minBidDenominated: BigNumberUtils.denominateAmount(
         auction.min_bid.valueOf().toString(),
         decimals,
@@ -182,7 +182,7 @@ export class AuctionEntity extends BaseEntity {
         decimals,
       ),
       startDate: parseInt(auction.start_time.valueOf().toString()),
-      endDate: parseInt(auction.deadline.valueOf().toString()),
+      endDate: AuctionEntity.getEndDate(auction.deadline),
       identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
         parseInt(auction.auctioned_token_nonce.valueOf().toString()),
       )}`,
@@ -229,7 +229,6 @@ export class AuctionEntity extends BaseEntity {
       paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
-      // minBidDiff: auction.min_bid_diff.valueOf().toString(),
       minBidDenominated: BigNumberUtils.denominateAmount(
         topicsAuctionToken.price,
         decimals,
@@ -253,5 +252,15 @@ export class AuctionEntity extends BaseEntity {
       blockHash: hash,
       marketplaceKey: marketplaceKey,
     });
+  }
+
+  private static getEndDate(deadline: U64Value): number {
+    if (
+      parseInt(deadline.valueOf().toString()) >
+      DateUtils.getCurrentTimestampPlusYears(15)
+    ) {
+      return DateUtils.getCurrentTimestampPlusYears(15);
+    }
+    return parseInt(deadline.valueOf().toString());
   }
 }
