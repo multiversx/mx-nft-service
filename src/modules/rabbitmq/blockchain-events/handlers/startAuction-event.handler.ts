@@ -111,7 +111,7 @@ export class StartAuctionEventHandler {
         parseInt(topicsAuctionToken.auctionType) ===
         ElrondSwapAuctionTypeEnum.Swap
       ) {
-        return;
+        return { auctionToken: null, topicsAuctionToken: null };
       }
       return { auctionToken, topicsAuctionToken };
     }

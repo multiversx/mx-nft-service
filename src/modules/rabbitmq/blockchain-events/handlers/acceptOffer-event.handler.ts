@@ -45,7 +45,7 @@ export class AcceptOfferEventHandler {
         topicsAcceptOffer.auctionId,
         acceptOfferMarketplace.key,
       );
-    if (updatePriceAuction) return;
+    if (!updatePriceAuction) return;
 
     updatePriceAuction.status = AuctionStatusEnum.Closed;
     updatePriceAuction.modifiedDate = new Date(new Date().toUTCString());
