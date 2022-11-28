@@ -433,7 +433,7 @@ export class NftMarketplaceAbiService {
 
     return contract.methodsExplicit
       .bid([
-        new U64Value(marketplaceAuctionId),
+        new U64Value(new BigNumber(marketplaceAuctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
       ])
