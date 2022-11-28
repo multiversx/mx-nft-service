@@ -68,29 +68,6 @@ export class AssetsHistoryExternalAuctionService {
           sender: buyNftEvent.address,
         });
       }
-      case ExternalAuctionEventEnum.AcceptOffer: {
-        const senderAddress = event.address;
-        const addresses = this.getAddressesFromTopics(
-          event.topics,
-          senderAddress,
-        );
-        return new AssetHistoryLogInput({
-          event: mainEvent,
-          action: AssetActionEnum.AcceptedOffer,
-          address: addresses[0],
-          itemsCount: event.topics[4],
-          sender: senderAddress,
-        });
-      }
-      case ExternalAuctionEventEnum.AcceptGlobalOffer: {
-        return new AssetHistoryLogInput({
-          event: mainEvent,
-          action: AssetActionEnum.AcceptedOffer,
-          address: event.topics[2].base64ToBech32(),
-          itemsCount: event.topics[4],
-          sender: event.address,
-        });
-      }
     }
   }
 
