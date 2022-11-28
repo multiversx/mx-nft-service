@@ -13,6 +13,7 @@ import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
+import { CollectionWithTraitsFlag } from './models/collection-with-traits-flag.model';
 
 @Injectable()
 export class NftTraitsService {
@@ -23,7 +24,10 @@ export class NftTraitsService {
     private readonly logger: Logger,
   ) {}
 
-  async updateCollectionTraits(collectionTicker: string): Promise<boolean> {
+  async updateCollectionTraits(
+    collectionTicker: string,
+    hasTraitsFlagSet?: boolean,
+  ): Promise<boolean> {
     this.logger.log(`Validating/updating traits for ${collectionTicker}...`);
     try {
       const [collectionTraitSummaryFromDb, nftsCount]: [
@@ -38,9 +42,11 @@ export class NftTraitsService {
         if (collectionTraitSummaryFromDb) {
           await this.documentDbService.deleteTraitSummary(collectionTicker);
         }
-        await this.nftTraitsElasticService.setCollectionTraitsFlagInElastic(
-          collectionTicker,
-        );
+        if (!hasTraitsFlagSet) {
+          await this.nftTraitsElasticService.setCollectionTraitsFlagInElastic(
+            collectionTicker,
+          );
+        }
         this.logger.log(`${collectionTicker} - VALID`);
         return false;
       }
@@ -192,15 +198,18 @@ export class NftTraitsService {
       'updateAllCollectionTraits: Update traits for all existing collections',
       async () => {
         try {
-          let collections: string[] =
-            await this.nftTraitsElasticService.getAllCollectionsFromElastic();
+          let collections: CollectionWithTraitsFlag[] =
+            await this.nftTraitsElasticService.getAllCollectionsWithTraitsFlagFromElastic();
 
           this.logger.log(
             `Total collections to be validated - ${collections.length}`,
           );
 
           for (const collection of collections) {
-            await this.updateCollectionTraits(collection);
+            await this.updateCollectionTraits(
+              collection.identifier,
+              collection.hasTraitsFlagSet,
+            );
           }
         } catch (error) {
           this.logger.error('Error when updating all collections', {
