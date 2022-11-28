@@ -38,6 +38,9 @@ export class NftTraitsService {
         if (collectionTraitSummaryFromDb) {
           await this.documentDbService.deleteTraitSummary(collectionTicker);
         }
+        await this.nftTraitsElasticService.setCollectionTraitsFlagInElastic(
+          collectionTicker,
+        );
         this.logger.log(`${collectionTicker} - VALID`);
         return false;
       }
