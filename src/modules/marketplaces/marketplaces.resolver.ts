@@ -56,4 +56,12 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
       ? await this.nftAbiService.getIsPaused(address)
       : null;
   }
+
+  @ResolveField(() => [String])
+  async acceptedCollectionIdentifiers(@Parent() contractInfo: Marketplace) {
+    const { key, type } = contractInfo;
+    return key && type === MarketplaceTypeEnum.Internal
+      ? await this.marketplaceService.getCollectionsByMarketplace(key)
+      : null;
+  }
 }

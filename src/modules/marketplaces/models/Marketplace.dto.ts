@@ -32,6 +32,9 @@ export class Marketplace {
   @Field(() => [String], { nullable: true })
   acceptedPaymentTokens: string[];
 
+  @Field(() => [String], { nullable: true })
+  acceptedCollectionIdentifiers: string[];
+
   @Field({ nullable: true })
   isPaused: boolean;
 
@@ -49,7 +52,6 @@ export class Marketplace {
     if (!entity || Object.keys(entity).length <= 0) {
       return null;
     }
-    console.log({ entity });
     return new Marketplace({
       address: entity.address,
       name: entity.name,

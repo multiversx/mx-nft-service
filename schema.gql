@@ -689,6 +689,7 @@ type KeyValueType {
 }
 
 type Marketplace {
+  acceptedCollectionIdentifiers: [String!]
   acceptedPaymentTokens: [String!]
   address: String!
   isPaused: Boolean
