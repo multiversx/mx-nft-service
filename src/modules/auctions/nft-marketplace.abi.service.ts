@@ -77,8 +77,10 @@ export class NftMarketplaceAbiService {
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(collection);
 
-    if (!marketplace)
+    if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
+    }
+
     if (
       marketplace.acceptedPaymentTokens &&
       !marketplace.acceptedPaymentTokens.includes(args.paymentToken)
