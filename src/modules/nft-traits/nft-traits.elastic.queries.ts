@@ -71,6 +71,22 @@ export const getAllCollectionsFromElasticQuery = (): ElasticQuery => {
     });
 };
 
+export const getAllCollectionsWithTraitsFlagFromElasticQuery =
+  (): ElasticQuery => {
+    return ElasticQuery.create()
+      .withMustExistCondition('token')
+      .withMustNotExistCondition('nonce')
+      .withMustMultiShouldCondition(
+        [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
+        (type) => QueryType.Match('type', type),
+      )
+      .withFields(['token', 'nft_hasTraitSummary'])
+      .withPagination({
+        from: 0,
+        size: constants.getCollectionsFromElasticBatchSize,
+      });
+  };
+
 export const getNftWithTraitValuesFromElasticQuery = (
   identifier: string,
 ): ElasticQuery => {
