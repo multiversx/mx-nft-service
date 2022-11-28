@@ -119,6 +119,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneDay,
   };
 
+  static AssetHistory: CacheInfo = {
+    key: 'assetHistory',
+    ttl: TimeConstants.oneDay,
+  };
+
   static CollectionTypes: CacheInfo = {
     key: 'collectionType',
     ttl: TimeConstants.oneHour,

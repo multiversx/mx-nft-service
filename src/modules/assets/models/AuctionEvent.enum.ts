@@ -36,6 +36,13 @@ export enum NftEventEnum {
   ESDTNFTUpdateAttributes = 'ESDTNFTUpdateAttributes',
 }
 
+export enum NftEventTypeEnum {
+  NftEventEnum = 'NftEventEnum',
+  AuctionEventEnum = 'AuctionEventEnum',
+  ExternalAuctionEventEnum = 'ExternalAuctionEventEnum',
+  ElrondNftsSwapAuctionEventEnum = 'ElrondNftsSwapAuctionEventEnum',
+}
+
 export enum MinterEventEnum {
   brandCreated = 'brandCreated',
   callBack = 'callBack',
