@@ -259,8 +259,8 @@ export class NftScamService {
       )
       .concat(
         this.nftScamElasticService.buildNftScamInfoDbToElasticMigrationBulkUpdate(
-          nftsFromElastic,
           nftsToMigrateFromDbToElastic,
+          nftsFromElastic,
         ),
       );
 
