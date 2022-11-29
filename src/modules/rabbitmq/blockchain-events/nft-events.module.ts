@@ -34,7 +34,6 @@ import { StartAuctionEventHandler } from './handlers/startAuction-event.handler'
 import { EndAuctionEventHandler } from './handlers/endAuction-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
-import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { MarketplaceEventsService } from './marketplace-events.service';
@@ -64,7 +63,6 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     WithdrawAuctionEventHandler,
     AcceptGlobalOfferEventHandler,
     AcceptOfferEventHandler,
-    ChangePriceEventHandler,
     UpdatePriceEventHandler,
     SwapUpdateEventHandler,
     NftEventsConsumer,

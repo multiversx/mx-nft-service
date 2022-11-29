@@ -10,7 +10,6 @@ import { BidEventHandler } from './handlers/bid-event.handler';
 import { BuyEventHandler } from './handlers/buy-event.handler';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
-import { ChangePriceEventHandler } from './handlers/changePrice-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
@@ -26,7 +25,6 @@ export class MarketplaceEventsService {
     private withdrawAuctionEventHandler: WithdrawAuctionEventHandler,
     private bidEventHandler: BidEventHandler,
     private buyEventHandler: BuyEventHandler,
-    private changePriceEventHandler: ChangePriceEventHandler,
     private updatePriceEventHandler: UpdatePriceEventHandler,
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
@@ -95,14 +93,7 @@ export class MarketplaceEventsService {
             marketplaceType,
           );
           break;
-
         case ExternalAuctionEventEnum.ChangePrice:
-          await this.changePriceEventHandler.handle(
-            event,
-            hash,
-            marketplaceType,
-          );
-          break;
         case ExternalAuctionEventEnum.UpdatePrice:
           await this.updatePriceEventHandler.handle(
             event,

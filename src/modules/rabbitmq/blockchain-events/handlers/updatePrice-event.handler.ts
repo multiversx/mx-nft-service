@@ -88,21 +88,21 @@ export class UpdatePriceEventHandler {
   }
 
   private updateAuctionPrice(
-    changePriceAuction: AuctionEntity,
+    updatedAuction: AuctionEntity,
     newBid: string,
     hash: string,
     decimals: number = elrondConfig.decimals,
   ) {
-    changePriceAuction.minBid = newBid;
-    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+    updatedAuction.minBid = newBid;
+    updatedAuction.minBidDenominated = BigNumberUtils.denominateAmount(
       newBid,
       decimals,
     );
-    changePriceAuction.maxBid = newBid;
-    changePriceAuction.maxBidDenominated = BigNumberUtils.denominateAmount(
+    updatedAuction.maxBid = newBid;
+    updatedAuction.maxBidDenominated = BigNumberUtils.denominateAmount(
       newBid,
       decimals,
     );
-    changePriceAuction.blockHash = hash;
+    updatedAuction.blockHash = hash;
   }
 }
