@@ -6,6 +6,7 @@ import {
   ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
   NftEventEnum,
+  StakeNftEventsEnum,
   Price,
   NftEventTypeEnum,
 } from '../assets/models';
@@ -19,6 +20,7 @@ import { AssetHistoryInput } from './models/asset-history-log-input';
 import { AssetsHistoryExternalAuctionService } from './services/assets-history.external-auction.service';
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
+import { AssetsHistoryStakeEventsService } from './services/assets-history.stake.service';
 
 @Injectable()
 export class AssetsHistoryService {
@@ -31,6 +33,7 @@ export class AssetsHistoryService {
     private readonly assetsHistoryAuctionService: AssetsHistoryAuctionService,
     private readonly assetsHistoryExternalAuctionService: AssetsHistoryExternalAuctionService,
     private readonly assetsHistoryElrondNftsSwapEventsService: AssetsHistoryElrondNftsSwapEventsService,
+    private readonly assetsHistoryStakeEventsService: AssetsHistoryStakeEventsService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -144,6 +147,17 @@ export class AssetsHistoryService {
         );
         break;
       }
+      case NftEventTypeEnum.StakeNftEventsEnum: {
+        this.addHistoryLog(
+          historyLog,
+          this.assetsHistoryStakeEventsService.mapStakeEventLog(
+            nonce,
+            eventType,
+            mainEvent,
+          ),
+        );
+        break;
+      }
     }
   }
 
@@ -242,6 +256,13 @@ export class AssetsHistoryService {
         ) {
           return [
             NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum,
+            eventIdentifier,
+            relatedEvents[i],
+          ];
+        }
+        if (Object.values(StakeNftEventsEnum).includes(eventIdentifier)) {
+          return [
+            NftEventTypeEnum.StakeNftEventsEnum,
             eventIdentifier,
             relatedEvents[i],
           ];

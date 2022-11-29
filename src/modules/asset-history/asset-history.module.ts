@@ -9,6 +9,7 @@ import { AssetsHistoryAuctionService } from './services/assets-history.auction.s
 import { AssetsHistoryExternalAuctionService } from './services/assets-history.external-auction.service';
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
+import { AssetsHistoryStakeEventsService } from './services/assets-history.stake.service';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-hist
     AssetsHistoryAuctionService,
     AssetsHistoryExternalAuctionService,
     AssetsHistoryElrondNftsSwapEventsService,
+    AssetsHistoryStakeEventsService,
   ],
   imports: [forwardRef(() => ElrondCommunicationModule)],
 })

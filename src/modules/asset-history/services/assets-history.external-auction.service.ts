@@ -50,6 +50,25 @@ export class AssetsHistoryExternalAuctionService {
           sender: event.address,
         });
       }
+      case ExternalAuctionEventEnum.BuyNft: {
+        const senderAddress = event.address;
+        const addresses = this.getAddressesFromTopics(
+          event.topics,
+          senderAddress,
+        );
+        const quantity =
+          event.topics.length === 7
+            ? mainEvent._source.events[0].topics[4]
+            : mainEvent._source.events[0].topics[7];
+
+        return new AssetHistoryLogInput({
+          event: mainEvent,
+          action: AssetActionEnum.Bought,
+          address: addresses[0],
+          itemsCount: quantity,
+          sender: senderAddress,
+        });
+      }
       case ExternalAuctionEventEnum.BulkBuy: {
         const buyNftEvent = mainEvent._source.events.find(
           (event) =>
@@ -66,6 +85,29 @@ export class AssetsHistoryExternalAuctionService {
           address: addresses[0],
           itemsCount: mainEvent._source.events[0].topics[4],
           sender: buyNftEvent.address,
+        });
+      }
+      case ExternalAuctionEventEnum.AcceptOffer: {
+        const senderAddress = event.address;
+        const addresses = this.getAddressesFromTopics(
+          event.topics,
+          senderAddress,
+        );
+        return new AssetHistoryLogInput({
+          event: mainEvent,
+          action: AssetActionEnum.AcceptedOffer,
+          address: addresses[0],
+          itemsCount: mainEvent._source.events[0].topics[4],
+          sender: event.address,
+        });
+      }
+      case ExternalAuctionEventEnum.AcceptGlobalOffer: {
+        return new AssetHistoryLogInput({
+          event: mainEvent,
+          action: AssetActionEnum.AcceptedOffer,
+          address: event.topics[2].base64ToBech32(),
+          itemsCount: event.topics[4],
+          sender: event.address,
         });
       }
     }
