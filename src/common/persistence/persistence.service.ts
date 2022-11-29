@@ -768,6 +768,15 @@ export class PersistenceService {
     );
   }
 
+  async getLastAuctionIdForMarketplace(
+    marketplaceKey: string,
+  ): Promise<number> {
+    return await this.execute(
+      this.getLastAuctionIdForMarketplace.name,
+      this.auctionsRepository.getLastAuctionIdForMarketplace(marketplaceKey),
+    );
+  }
+
   async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
     return await this.execute(
       this.getBulkAuctions.name,
@@ -782,6 +791,19 @@ export class PersistenceService {
     return await this.execute(
       this.getAuctionByMarketplace.name,
       this.auctionsRepository.getAuctionByMarketplace(id, marketplaceKey),
+    );
+  }
+
+  async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.execute(
+      this.getAuctionByIdentifierAndMarketplace.name,
+      this.auctionsRepository.getAuctionByIdentifierAndMarketplace(
+        identifier,
+        marketplaceKey,
+      ),
     );
   }
 
