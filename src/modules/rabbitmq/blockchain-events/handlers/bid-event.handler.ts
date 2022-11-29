@@ -29,28 +29,28 @@ export class BidEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     let [bidEvent, topics] = [undefined, undefined];
-    let bidMarketplace: Marketplace;
+    let marketplace: Marketplace;
     if (marketplaceType === MarketplaceTypeEnum.External) {
-      bidMarketplace = await this.marketplaceService.getMarketplaceByAddress(
+      marketplace = await this.marketplaceService.getMarketplaceByAddress(
         event.address,
       );
-      [bidEvent, topics] = this.getEventAndTopics(event, bidMarketplace.key);
+      [bidEvent, topics] = this.getEventAndTopics(event, marketplace.key);
     } else {
       [bidEvent, topics] = this.getEventAndTopics(event);
-      bidMarketplace = await this.marketplaceService.getMarketplaceByType(
+      marketplace = await this.marketplaceService.getMarketplaceByType(
         bidEvent.getAddress(),
         marketplaceType,
         topics.collection,
       );
     }
-    if (!bidMarketplace) return;
+    if (!marketplace) return;
     this.logger.log(
-      `Bid event detected for hash '${hash}' and marketplace '${bidMarketplace?.name}'`,
+      `Bid event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(topics.auctionId, 16),
-        bidMarketplace.key,
+        marketplace.key,
       );
     if (!auction) return;
 
@@ -70,7 +70,7 @@ export class BidEventHandler {
         priceNonce: auction.paymentNonce,
         blockHash: hash,
         status: OrderStatusEnum.Active,
-        marketplaceKey: bidMarketplace.key,
+        marketplaceKey: marketplace.key,
       }),
       activeOrder,
     );

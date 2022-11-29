@@ -24,22 +24,21 @@ export class WithdrawAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { withdraw, topicsWithdraw } = this.getEventAndTopics(event);
-    const withdrawMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        withdraw.getAddress(),
-        marketplaceType,
-        topicsWithdraw.collection,
-      );
-    if (!withdrawMarketplace) return;
+    const { withdraw, topics } = this.getEventAndTopics(event);
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      withdraw.getAddress(),
+      marketplaceType,
+      topics.collection,
+    );
+    if (!marketplace) return;
 
     this.logger.log(
-      `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
+      `Withdraw event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topicsWithdraw.auctionId, 16),
-        withdrawMarketplace.key,
+        parseInt(topics.auctionId, 16),
+        marketplace.key,
       );
 
     if (!auction) return;
@@ -55,11 +54,11 @@ export class WithdrawAuctionEventHandler {
   private getEventAndTopics(event: any) {
     if (event.identifier === ElrondNftsSwapAuctionEventEnum.WithdrawSwap) {
       const withdraw = new ElrondSwapWithdrawEvent(event);
-      const topicsWithdraw = withdraw.getTopics();
-      return { withdraw, topicsWithdraw };
+      const topics = withdraw.getTopics();
+      return { withdraw, topics };
     }
     const withdraw = new WithdrawEvent(event);
-    const topicsWithdraw = withdraw.getTopics();
-    return { withdraw, topicsWithdraw };
+    const topics = withdraw.getTopics();
+    return { withdraw, topics };
   }
 }

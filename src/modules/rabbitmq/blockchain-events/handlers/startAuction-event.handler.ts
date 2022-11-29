@@ -25,78 +25,77 @@ export class StartAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { auctionToken, topicsAuctionToken } = this.getEventAndTopics(event);
-    if (!auctionToken && !topicsAuctionToken) return;
+    const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
+    if (!auctionTokenEvent && !topics) return;
 
-    const startAuctionIdentifier = `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`;
-    const auctionTokenMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        auctionToken.getAddress(),
-        marketplaceType,
-        topicsAuctionToken.collection,
-      );
-
-    if (!auctionTokenMarketplace) return;
-    this.logger.log(
-      `Auction listing event detected for hash '${hash}' and marketplace '${auctionTokenMarketplace?.name}'`,
+    const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      auctionTokenEvent.getAddress(),
+      marketplaceType,
+      topics.collection,
     );
-    const startAuction = await this.saveAuction(
-      topicsAuctionToken,
-      startAuctionIdentifier,
-      auctionTokenMarketplace,
+
+    if (!marketplace) return;
+    this.logger.log(
+      `Auction listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+    );
+    const auction = await this.saveAuction(
+      topics,
+      auctionIdentifier,
+      marketplace,
       hash,
     );
 
-    if (!startAuction) return;
+    if (!auction) return;
 
     await this.feedEventsSenderService.sendStartAuctionEvent(
-      topicsAuctionToken,
-      startAuction,
-      auctionTokenMarketplace,
+      topics,
+      auction,
+      marketplace,
     );
   }
 
   private async saveAuction(
-    topicsAuctionToken: any,
-    startAuctionIdentifier: string,
-    auctionTokenMarketplace: Marketplace,
+    topics: any,
+    auctionIdentifier: string,
+    marketplace: Marketplace,
     hash: string,
   ) {
-    if (auctionTokenMarketplace.key === ELRONDNFTSWAP_KEY) {
+    if (marketplace.key === ELRONDNFTSWAP_KEY) {
       return await this.handleElrondSwapAuction(
-        startAuctionIdentifier,
-        topicsAuctionToken,
+        auctionIdentifier,
+        topics,
         hash,
-        auctionTokenMarketplace,
+        marketplace,
       );
     }
     return await this.auctionsService.saveAuction(
-      parseInt(topicsAuctionToken.auctionId, 16),
-      startAuctionIdentifier,
-      auctionTokenMarketplace,
+      parseInt(topics.auctionId, 16),
+      auctionIdentifier,
+      marketplace,
       hash,
     );
   }
 
   private async handleElrondSwapAuction(
-    startAuctionIdentifier: string,
-    topicsAuctionToken: any,
+    auctionIdentifier: string,
+    topics: any,
     hash: string,
-    auctionTokenMarketplace: Marketplace,
+    auctionTokenEventMarketplace: Marketplace,
   ) {
     const asset = await this.assetByIdentifierService.getAsset(
-      startAuctionIdentifier,
+      auctionIdentifier,
     );
 
     const paymentToken = await this.usdPriceService.getToken(
-      topicsAuctionToken.paymentToken,
+      topics.paymentToken,
     );
     return await this.auctionsService.saveAuctionEntity(
       AuctionEntity.fromWithdrawTopics(
-        topicsAuctionToken,
+        topics,
         asset.tags?.toString(),
         hash,
-        auctionTokenMarketplace.key,
+        auctionTokenEventMarketplace.key,
         paymentToken?.decimals,
       ),
       asset.tags,
@@ -105,18 +104,15 @@ export class StartAuctionEventHandler {
 
   private getEventAndTopics(event: any) {
     if (event.identifier === ElrondNftsSwapAuctionEventEnum.NftSwap) {
-      const auctionToken = new ElrondSwapAuctionEvent(event);
-      const topicsAuctionToken = auctionToken.getTopics();
-      if (
-        parseInt(topicsAuctionToken.auctionType) ===
-        ElrondSwapAuctionTypeEnum.Swap
-      ) {
-        return { auctionToken: null, topicsAuctionToken: null };
+      const auctionTokenEvent = new ElrondSwapAuctionEvent(event);
+      const topics = auctionTokenEvent.getTopics();
+      if (parseInt(topics.auctionType) === ElrondSwapAuctionTypeEnum.Swap) {
+        return { auctionTokenEvent: null, topics: null };
       }
-      return { auctionToken, topicsAuctionToken };
+      return { auctionTokenEvent, topics };
     }
-    const auctionToken = new AuctionTokenEvent(event);
-    const topicsAuctionToken = auctionToken.getTopics();
-    return { auctionToken, topicsAuctionToken };
+    const auctionTokenEvent = new AuctionTokenEvent(event);
+    const topics = auctionTokenEvent.getTopics();
+    return { auctionTokenEvent, topics };
   }
 }

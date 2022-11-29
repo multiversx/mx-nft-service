@@ -26,23 +26,22 @@ export class BuyEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { buySftEvent, buySftTopics } = this.getEventAndTopics(event, hash);
+    const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
 
-    const buyMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        buySftEvent.getAddress(),
-        marketplaceType,
-        buySftTopics.collection,
-      );
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      buySftEvent.getAddress(),
+      marketplaceType,
+      topics.collection,
+    );
 
-    if (!buyMarketplace) return;
+    if (!marketplace) return;
     this.logger.log(
-      `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
+      `Buy event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(buySftTopics.auctionId, 16),
-        buyMarketplace.key,
+        parseInt(topics.auctionId, 16),
+        marketplace.key,
       );
     if (!auction) return;
 
@@ -50,7 +49,7 @@ export class BuyEventHandler {
       auction.id,
     );
     const totalRemaining = result
-      ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
+      ? result[0]?.availableTokens - parseFloat(topics.boughtTokens)
       : 0;
     if (totalRemaining === 0) {
       this.auctionsService.updateAuctionStatus(
@@ -62,24 +61,24 @@ export class BuyEventHandler {
     }
     const orderSft = await this.ordersService.createOrderForSft(
       new CreateOrderArgs({
-        ownerAddress: buySftTopics.currentWinner,
+        ownerAddress: topics.currentWinner,
         auctionId: auction.id,
         priceToken: auction.paymentToken,
-        priceAmount: buySftTopics.bid,
+        priceAmount: topics.bid,
         priceNonce: auction.paymentNonce,
         blockHash: hash,
         status: OrderStatusEnum.Bought,
-        boughtTokens: buySftTopics.boughtTokens,
-        marketplaceKey: buyMarketplace.key,
+        boughtTokens: topics.boughtTokens,
+        marketplaceKey: marketplace.key,
       }),
     );
     await this.feedEventsSenderService.sendBuyEvent(
-      buySftTopics.currentWinner,
-      buySftTopics.bid,
-      buySftTopics.boughtTokens,
+      topics.currentWinner,
+      topics.bid,
+      topics.boughtTokens,
       orderSft,
       auction,
-      buyMarketplace,
+      marketplace,
     );
   }
 
@@ -95,11 +94,11 @@ export class BuyEventHandler {
         return;
       }
       const buySftEvent = new ElrondSwapBuyEvent(event);
-      const buySftTopics = buySftEvent.getTopics();
-      return { buySftEvent, buySftTopics };
+      const topics = buySftEvent.getTopics();
+      return { buySftEvent, topics };
     }
     const buySftEvent = new BuySftEvent(event);
-    const buySftTopics = buySftEvent.getTopics();
-    return { buySftEvent, buySftTopics };
+    const topics = buySftEvent.getTopics();
+    return { buySftEvent, topics };
   }
 }

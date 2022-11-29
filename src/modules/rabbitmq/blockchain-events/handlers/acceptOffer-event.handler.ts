@@ -22,27 +22,23 @@ export class AcceptOfferEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const acceptOfferEvent = new AcceptOfferEvent(event);
-    const topicsAcceptOffer = acceptOfferEvent.getTopics();
-    const acceptOfferMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        acceptOfferEvent.getAddress(),
-        marketplaceType,
-        topicsAcceptOffer.collection,
-      );
+    const topics = acceptOfferEvent.getTopics();
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      acceptOfferEvent.getAddress(),
+      marketplaceType,
+      topics.collection,
+    );
     this.logger.log(
-      `Accept Offer event detected for hash '${hash}' and marketplace '${acceptOfferMarketplace?.name}'`,
+      `Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
 
-    if (
-      acceptOfferMarketplace.key !== XOXNO_KEY ||
-      topicsAcceptOffer.auctionId <= 0
-    ) {
+    if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
       return;
     }
 
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-      topicsAcceptOffer.auctionId,
-      acceptOfferMarketplace.key,
+      topics.auctionId,
+      marketplace.key,
     );
     if (!auction) return;
 

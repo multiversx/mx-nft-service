@@ -28,22 +28,21 @@ export class EndAuctionEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const endAuctionEvent = new EndAuctionEvent(event);
-    const topicsEndAuction = endAuctionEvent.getTopics();
-    const endMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        endAuctionEvent.getAddress(),
-        marketplaceType,
-        topicsEndAuction.collection,
-      );
+    const topics = endAuctionEvent.getTopics();
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      endAuctionEvent.getAddress(),
+      marketplaceType,
+      topics.collection,
+    );
 
-    if (!endMarketplace) return;
+    if (!marketplace) return;
     this.logger.log(
-      `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
+      `End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topicsEndAuction.auctionId, 16),
-        endMarketplace.key,
+        parseInt(topics.auctionId, 16),
+        marketplace.key,
       );
 
     if (!auction) return;
@@ -57,9 +56,9 @@ export class EndAuctionEventHandler {
     this.notificationsService.updateNotificationStatus([auction.id]);
     this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
     await this.feedEventsSenderService.sendWonAuctionEvent(
-      topicsEndAuction,
+      topics,
       auction,
-      endMarketplace,
+      marketplace,
     );
   }
 }

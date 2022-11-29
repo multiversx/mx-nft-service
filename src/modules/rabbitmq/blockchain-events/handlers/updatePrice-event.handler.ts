@@ -28,24 +28,20 @@ export class UpdatePriceEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const updatePriceEvent = new UpdatePriceEvent(event);
-    const topicsUpdatePrice = updatePriceEvent.getTopics();
-    const updatePriceMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        updatePriceEvent.getAddress(),
-        marketplaceType,
-        topicsUpdatePrice.collection,
-      );
+    const topics = updatePriceEvent.getTopics();
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      updatePriceEvent.getAddress(),
+      marketplaceType,
+      topics.collection,
+    );
     this.logger.log(
-      `Update price event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
+      `Update price event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-      parseInt(topicsUpdatePrice.auctionId, 16),
-      updatePriceMarketplace.key,
+      parseInt(topics.auctionId, 16),
+      marketplace.key,
     );
-    let newPrice: string = await this.getNewPrice(
-      updatePriceMarketplace,
-      topicsUpdatePrice,
-    );
+    let newPrice: string = await this.getNewPrice(marketplace, topics);
     if (auction && newPrice) {
       const paymentToken = await this.usdPriceService.getToken(
         auction.paymentToken,

@@ -25,22 +25,21 @@ export class SwapUpdateEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const updateEvent = new ElrondSwapUpdateEvent(event);
-    const topicsUpdate = updateEvent.getTopics();
-    const changePriceMarketplace: Marketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        updateEvent.getAddress(),
-        marketplaceType,
-      );
+    const topics = updateEvent.getTopics();
+    const marketplace = await this.marketplaceService.getMarketplaceByType(
+      updateEvent.getAddress(),
+      marketplaceType,
+    );
     this.logger.log(
-      `Udpdate auction event detected for hash '${hash}' and marketplace '${changePriceMarketplace?.name}'`,
+      `Udpdate auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-      parseInt(topicsUpdate.auctionId, 16),
-      changePriceMarketplace.key,
+      parseInt(topics.auctionId, 16),
+      marketplace.key,
     );
 
     if (auction) {
-      this.updateAuctionPrice(auction, topicsUpdate, hash);
+      this.updateAuctionPrice(auction, topics, hash);
 
       this.auctionsService.updateAuction(
         auction,
