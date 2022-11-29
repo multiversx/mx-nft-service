@@ -78,8 +78,7 @@ export class MarketplacesService {
     let allMarketplaces = await this.getAllMarketplaces();
 
     const externalMarketplaces = allMarketplaces?.items?.filter(
-      (m) =>
-        m.type === MarketplaceTypeEnum.External && m.key !== ELRONDNFTSWAP_KEY,
+      (m) => m.type === MarketplaceTypeEnum.External,
     );
 
     return externalMarketplaces.map((m) => m.address);
@@ -121,6 +120,20 @@ export class MarketplacesService {
       () => this.getMarketplaceByCollectionFromDb(collection),
       collection,
     );
+  }
+
+  async getMarketplaceByType(
+    contractAddress: string,
+    marketplaceType: MarketplaceTypeEnum,
+    collectionIdentifier?: string,
+  ): Promise<Marketplace> {
+    if (marketplaceType === MarketplaceTypeEnum.Internal) {
+      return await this.getMarketplaceByCollectionAndAddress(
+        collectionIdentifier,
+        contractAddress,
+      );
+    }
+    return await this.getMarketplaceByAddress(contractAddress);
   }
 
   async getCollectionsByMarketplace(marketplaceKey: string): Promise<string[]> {
