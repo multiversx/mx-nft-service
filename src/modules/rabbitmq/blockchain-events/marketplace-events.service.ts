@@ -47,14 +47,13 @@ export class MarketplaceEventsService {
         case ExternalAuctionEventEnum.Buy:
         case ExternalAuctionEventEnum.BulkBuy:
         case ElrondNftsSwapAuctionEventEnum.Purchase:
+          const eventName = Buffer.from(event.topics[0], 'base64').toString();
           if (
-            Buffer.from(event.topics[0], 'base64').toString() ===
-              ExternalAuctionEventEnum.UpdateOffer ||
-            Buffer.from(event.topics[0], 'base64').toString() ===
-              ElrondNftsSwapAuctionEventEnum.UpdateListing
+            eventName === ExternalAuctionEventEnum.UpdateOffer ||
+            eventName === ElrondNftsSwapAuctionEventEnum.UpdateListing
           ) {
             this.logger.log(
-              `${event.topics[0]} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`,
+              `${eventName} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`,
             );
             return;
           }
