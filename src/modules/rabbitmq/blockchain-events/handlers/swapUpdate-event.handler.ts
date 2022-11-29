@@ -34,24 +34,23 @@ export class SwapUpdateEventHandler {
     this.logger.log(
       `Udpdate auction event detected for hash '${hash}' and marketplace '${changePriceMarketplace?.name}'`,
     );
-    let changePriceAuction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topicsUpdate.auctionId, 16),
-        changePriceMarketplace.key,
-      );
+    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+      parseInt(topicsUpdate.auctionId, 16),
+      changePriceMarketplace.key,
+    );
 
-    if (changePriceAuction) {
-      this.updateAuctionPrice(changePriceAuction, topicsUpdate, hash);
+    if (auction) {
+      this.updateAuctionPrice(auction, topicsUpdate, hash);
 
       this.auctionsService.updateAuction(
-        changePriceAuction,
+        auction,
         ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
       );
     }
   }
 
   private async updateAuctionPrice(
-    changePriceAuction: AuctionEntity,
+    auction: AuctionEntity,
     topics: {
       seller: string;
       collection: string;
@@ -64,16 +63,16 @@ export class SwapUpdateEventHandler {
     hash: string,
   ) {
     const paymentToken = await this.usdPriceService.getToken(
-      changePriceAuction.paymentToken,
+      auction.paymentToken,
     );
     const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
-    changePriceAuction.minBid = topics.price;
-    changePriceAuction.minBidDenominated = BigNumberUtils.denominateAmount(
+    auction.minBid = topics.price;
+    auction.minBidDenominated = BigNumberUtils.denominateAmount(
       topics.price,
       decimals,
     );
-    changePriceAuction.endDate = topics.deadline;
-    changePriceAuction.nrAuctionedTokens = topics.nrAuctionTokens;
-    changePriceAuction.blockHash = hash;
+    auction.endDate = topics.deadline;
+    auction.nrAuctionedTokens = topics.nrAuctionTokens;
+    auction.blockHash = hash;
   }
 }

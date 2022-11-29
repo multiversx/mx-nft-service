@@ -40,17 +40,16 @@ export class AcceptOfferEventHandler {
       return;
     }
 
-    let updatePriceAuction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        topicsAcceptOffer.auctionId,
-        acceptOfferMarketplace.key,
-      );
-    if (!updatePriceAuction) return;
+    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+      topicsAcceptOffer.auctionId,
+      acceptOfferMarketplace.key,
+    );
+    if (!auction) return;
 
-    updatePriceAuction.status = AuctionStatusEnum.Closed;
-    updatePriceAuction.modifiedDate = new Date(new Date().toUTCString());
+    auction.status = AuctionStatusEnum.Closed;
+    auction.modifiedDate = new Date(new Date().toUTCString());
     this.auctionsService.updateAuction(
-      updatePriceAuction,
+      auction,
       ExternalAuctionEventEnum.AcceptOffer,
     );
   }

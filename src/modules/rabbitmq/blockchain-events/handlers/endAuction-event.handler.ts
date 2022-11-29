@@ -40,25 +40,25 @@ export class EndAuctionEventHandler {
     this.logger.log(
       `End auction event detected for hash '${hash}' and marketplace '${endMarketplace?.name}'`,
     );
-    const endAuction =
+    const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(topicsEndAuction.auctionId, 16),
         endMarketplace.key,
       );
 
-    if (!endAuction) return;
+    if (!auction) return;
 
     this.auctionsService.updateAuctionStatus(
-      endAuction.id,
+      auction.id,
       AuctionStatusEnum.Ended,
       hash,
       AuctionEventEnum.EndAuctionEvent,
     );
-    this.notificationsService.updateNotificationStatus([endAuction.id]);
-    this.ordersService.updateOrder(endAuction.id, OrderStatusEnum.Bought);
+    this.notificationsService.updateNotificationStatus([auction.id]);
+    this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
     await this.feedEventsSenderService.sendWonAuctionEvent(
       topicsEndAuction,
-      endAuction,
+      auction,
       endMarketplace,
     );
   }

@@ -39,22 +39,22 @@ export class BuyEventHandler {
     this.logger.log(
       `Buy event detected for hash '${hash}' and marketplace '${buyMarketplace?.name}'`,
     );
-    const buyAuction =
+    const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(buySftTopics.auctionId, 16),
         buyMarketplace.key,
       );
-    if (!buyAuction) return;
+    if (!auction) return;
 
     const result = await this.auctionsGetterService.getAvailableTokens(
-      buyAuction.id,
+      auction.id,
     );
     const totalRemaining = result
       ? result[0]?.availableTokens - parseFloat(buySftTopics.boughtTokens)
       : 0;
     if (totalRemaining === 0) {
       this.auctionsService.updateAuctionStatus(
-        buyAuction.id,
+        auction.id,
         AuctionStatusEnum.Ended,
         hash,
         AuctionStatusEnum.Ended,
@@ -63,10 +63,10 @@ export class BuyEventHandler {
     const orderSft = await this.ordersService.createOrderForSft(
       new CreateOrderArgs({
         ownerAddress: buySftTopics.currentWinner,
-        auctionId: buyAuction.id,
-        priceToken: buyAuction.paymentToken,
+        auctionId: auction.id,
+        priceToken: auction.paymentToken,
         priceAmount: buySftTopics.bid,
-        priceNonce: buyAuction.paymentNonce,
+        priceNonce: auction.paymentNonce,
         blockHash: hash,
         status: OrderStatusEnum.Bought,
         boughtTokens: buySftTopics.boughtTokens,
@@ -78,7 +78,7 @@ export class BuyEventHandler {
       buySftTopics.bid,
       buySftTopics.boughtTokens,
       orderSft,
-      buyAuction,
+      auction,
       buyMarketplace,
     );
   }

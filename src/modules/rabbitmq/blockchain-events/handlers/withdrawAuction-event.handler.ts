@@ -36,16 +36,16 @@ export class WithdrawAuctionEventHandler {
     this.logger.log(
       `Withdraw event detected for hash '${hash}' and marketplace '${withdrawMarketplace?.name}'`,
     );
-    const withdrawAuction =
+    const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(topicsWithdraw.auctionId, 16),
         withdrawMarketplace.key,
       );
 
-    if (!withdrawAuction) return;
+    if (!auction) return;
 
     this.auctionsService.updateAuctionStatus(
-      withdrawAuction.id,
+      auction.id,
       AuctionStatusEnum.Closed,
       hash,
       AuctionEventEnum.WithdrawEvent,

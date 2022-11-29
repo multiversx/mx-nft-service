@@ -38,28 +38,22 @@ export class UpdatePriceEventHandler {
     this.logger.log(
       `Update price event detected for hash '${hash}' and marketplace '${updatePriceMarketplace?.name}'`,
     );
-    let updatePriceAuction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topicsUpdatePrice.auctionId, 16),
-        updatePriceMarketplace.key,
-      );
+    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+      parseInt(topicsUpdatePrice.auctionId, 16),
+      updatePriceMarketplace.key,
+    );
     let newPrice: string = await this.getNewPrice(
       updatePriceMarketplace,
       topicsUpdatePrice,
     );
-    if (updatePriceAuction && newPrice) {
+    if (auction && newPrice) {
       const paymentToken = await this.usdPriceService.getToken(
-        updatePriceAuction.paymentToken,
+        auction.paymentToken,
       );
-      this.updateAuctionPrice(
-        updatePriceAuction,
-        newPrice,
-        hash,
-        paymentToken?.decimals,
-      );
+      this.updateAuctionPrice(auction, newPrice, hash, paymentToken?.decimals);
 
       this.auctionsService.updateAuction(
-        updatePriceAuction,
+        auction,
         ExternalAuctionEventEnum.UpdatePrice,
       );
     }
