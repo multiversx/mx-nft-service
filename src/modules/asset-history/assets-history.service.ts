@@ -44,7 +44,7 @@ export class AssetsHistoryService {
     collection: string,
     nonce: string,
     limit: number,
-    timestamp: string | number, // = DateUtils.getCurrentTimestamp(),
+    timestamp: string | number,
   ): Promise<AssetHistoryLog[]> {
     const cacheKey = this.getAssetHistoryCacheKey(
       collection,
@@ -89,15 +89,6 @@ export class AssetsHistoryService {
       }
     }
 
-    if (historyLog.length < limit && totalHits > 0) {
-      return await this.getHistoryLog(
-        collection,
-        nonce,
-        limit,
-        elasticTimestamp,
-        historyLog,
-      );
-    }
     return historyLog;
   }
 

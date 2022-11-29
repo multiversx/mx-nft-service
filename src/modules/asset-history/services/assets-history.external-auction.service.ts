@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   AssetActionEnum,
   ExternalAuctionEventEnum,
+  NftEventEnum,
 } from 'src/modules/assets/models';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
@@ -14,23 +15,31 @@ export class AssetsHistoryExternalAuctionService {
     eventType: string,
     mainEvent: any,
   ): AssetHistoryLogInput {
+    const event = mainEvent._source.events.find(
+      (event) => event.identifier === eventType,
+    );
+    const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
+    const transferEvent = mainEvent._source.events.find(
+      (event) =>
+        (event.identifier === NftEventEnum.ESDTNFTTransfer ||
+          event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
+        event.topics[1] === encodedNonce,
+    );
+
     switch (eventType) {
       case ExternalAuctionEventEnum.Listing: {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: mainEvent._source.events[0].topics[3].base64ToBech32(),
-          itemsCount: mainEvent._source.events[0].topics[2],
-          sender: mainEvent._source.events[1].address,
+          address: event.address,
+          itemsCount: transferEvent.topics[2],
+          sender: transferEvent.topics[3].base64ToBech32(),
         });
       }
       case ExternalAuctionEventEnum.Buy: {
-        const buyNftEvent = mainEvent._source.events.find(
-          (event) => event.identifier === eventType,
-        );
-        const senderAddress = buyNftEvent.address;
+        const senderAddress = event.address;
         const addresses = this.getAddressesFromTopics(
-          buyNftEvent.topics,
+          event.topics,
           senderAddress,
         );
         return new AssetHistoryLogInput({
@@ -38,20 +47,17 @@ export class AssetsHistoryExternalAuctionService {
           action: AssetActionEnum.Bought,
           address: addresses[0],
           itemsCount: mainEvent._source.events[0].topics[4],
-          sender: buyNftEvent.address,
+          sender: event.address,
         });
       }
       case ExternalAuctionEventEnum.BuyNft: {
-        const buyNftEvent = mainEvent._source.events.find(
-          (event) => event.identifier === eventType,
-        );
-        const senderAddress = buyNftEvent.address;
+        const senderAddress = event.address;
         const addresses = this.getAddressesFromTopics(
-          buyNftEvent.topics,
+          event.topics,
           senderAddress,
         );
         const quantity =
-          buyNftEvent.topics.length === 7
+          event.topics.length === 7
             ? mainEvent._source.events[0].topics[4]
             : mainEvent._source.events[0].topics[7];
 
@@ -60,11 +66,10 @@ export class AssetsHistoryExternalAuctionService {
           action: AssetActionEnum.Bought,
           address: addresses[0],
           itemsCount: quantity,
-          sender: buyNftEvent.address,
+          sender: senderAddress,
         });
       }
       case ExternalAuctionEventEnum.BulkBuy: {
-        const encodedNonce = Buffer.from(nonce, 'hex').toString('base64'); //BinaryUtils.base64Encode(nonce);
         const buyNftEvent = mainEvent._source.events.find(
           (event) =>
             event.identifier === eventType && event.topics[2] === encodedNonce,
@@ -74,7 +79,6 @@ export class AssetsHistoryExternalAuctionService {
           buyNftEvent.topics,
           senderAddress,
         );
-
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
@@ -84,12 +88,9 @@ export class AssetsHistoryExternalAuctionService {
         });
       }
       case ExternalAuctionEventEnum.AcceptOffer: {
-        const acceptOfferEvent = mainEvent._source.events.find(
-          (event) => event.identifier === eventType,
-        );
-        const senderAddress = acceptOfferEvent.address;
+        const senderAddress = event.address;
         const addresses = this.getAddressesFromTopics(
-          acceptOfferEvent.topics,
+          event.topics,
           senderAddress,
         );
         return new AssetHistoryLogInput({
@@ -97,19 +98,16 @@ export class AssetsHistoryExternalAuctionService {
           action: AssetActionEnum.AcceptedOffer,
           address: addresses[0],
           itemsCount: mainEvent._source.events[0].topics[4],
-          sender: acceptOfferEvent.address,
+          sender: event.address,
         });
       }
       case ExternalAuctionEventEnum.AcceptGlobalOffer: {
-        const acceptEvent = mainEvent._source.events.find(
-          (event) => event.identifier === eventType,
-        );
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.AcceptedOffer,
-          address: acceptEvent.topics[2].base64ToBech32(),
-          itemsCount: acceptEvent.topics[4],
-          sender: acceptEvent.address,
+          address: event.topics[2].base64ToBech32(),
+          itemsCount: event.topics[4],
+          sender: event.address,
         });
       }
     }
@@ -123,11 +121,7 @@ export class AssetsHistoryExternalAuctionService {
     const possibleAddresses = topics?.filter((topic) => topic.length === 44);
 
     for (let i = 0; i < possibleAddresses?.length; i++) {
-      try {
-        addresses.push(possibleAddresses[i].base64ToBech32());
-      } catch {
-        // ignore
-      }
+      addresses.push(possibleAddresses[i].base64ToBech32());
     }
 
     if (differentThanAddress) {
