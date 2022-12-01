@@ -8,12 +8,15 @@ import { MarketplacesResponse } from './models';
 import { NftMarketplaceAbiService } from '../auctions/nft-marketplace.abi.service';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
 
 @Resolver(() => Marketplace)
 export class MarketplacesResolver extends BaseResolver(Marketplace) {
   constructor(
     private marketplaceService: MarketplacesService,
     private nftAbiService: NftMarketplaceAbiService,
+    private paymentService: UsdPriceService,
   ) {
     super();
   }
@@ -63,5 +66,19 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
     return key && type === MarketplaceTypeEnum.Internal
       ? await this.marketplaceService.getCollectionsByMarketplace(key)
       : null;
+  }
+
+  @ResolveField(() => [Token])
+  async acceptedPaymentTokens(@Parent() contractInfo: Marketplace) {
+    const { acceptedPaymentIdentifiers } = contractInfo;
+    if (!acceptedPaymentIdentifiers) return null;
+    let response: Token[] = [];
+    for (const payment of acceptedPaymentIdentifiers) {
+      const paymentData = await this.paymentService.getToken(payment);
+      if (paymentData) {
+        response.push(paymentData);
+      }
+    }
+    return response;
   }
 }

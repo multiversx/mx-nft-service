@@ -82,8 +82,8 @@ export class NftMarketplaceAbiService {
     }
 
     if (
-      marketplace.acceptedPaymentTokens &&
-      !marketplace.acceptedPaymentTokens.includes(args.paymentToken)
+      marketplace.acceptedPaymentIdentifiers &&
+      !marketplace.acceptedPaymentIdentifiers.includes(args.paymentToken)
     ) {
       throw new BadRequestError('Unaccepted payment token');
     }
