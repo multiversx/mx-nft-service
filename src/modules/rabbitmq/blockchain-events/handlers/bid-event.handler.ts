@@ -80,9 +80,7 @@ export class BidEventHandler {
       this.notificationsService.addNotifications(auction, order);
       this.auctionsService.updateAuctionStatus(
         auction.id,
-        marketplaceType === MarketplaceTypeEnum.Internal
-          ? AuctionStatusEnum.Claimable
-          : AuctionStatusEnum.Ended,
+        AuctionStatusEnum.Ended,
         hash,
         event.identifier,
       );
