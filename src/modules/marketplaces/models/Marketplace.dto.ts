@@ -29,6 +29,12 @@ export class Marketplace {
   @Field({ nullable: true })
   marketplaceCutPercentage: string;
 
+  @Field(() => [String], { nullable: true })
+  acceptedPaymentTokens: string[];
+
+  @Field(() => [String], { nullable: true })
+  acceptedCollectionIdentifiers: string[];
+
   @Field({ nullable: true })
   isPaused: boolean;
 
@@ -49,6 +55,9 @@ export class Marketplace {
     return new Marketplace({
       address: entity.address,
       name: entity.name,
+      acceptedPaymentTokens: entity.acceptedPaymentTokens
+        ? entity.acceptedPaymentTokens.split(',').filter((i) => i)
+        : null,
       url: Marketplace.getMarketplaceUrl(
         identifier,
         entity,

@@ -42,6 +42,7 @@ import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
+import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -75,25 +76,51 @@ export class NftMarketplaceAbiService {
     const { collection } = getCollectionAndNonceFromIdentifier(args.identifier);
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(collection);
-    if (marketplace) {
-      let createAuctionTx = contract.call({
-        func: new ContractFunction('ESDTNFTTransfer'),
-        value: TokenPayment.egldFromAmount(0),
-        args: this.getCreateAuctionArgs(args, marketplace.address),
-        gasLimit: gas.startAuction,
-        chainID: elrondConfig.chainID,
-      });
-      return createAuctionTx.toPlainObject(new Address(ownerAddress));
+
+    if (!marketplace) {
+      throw new BadRequestError('No marketplace available for this collection');
     }
+
+    if (
+      marketplace.acceptedPaymentTokens &&
+      !marketplace.acceptedPaymentTokens.includes(args.paymentToken)
+    ) {
+      throw new BadRequestError('Unaccepted payment token');
+    }
+
+    let createAuctionTx = contract.call({
+      func: new ContractFunction('ESDTNFTTransfer'),
+      value: TokenPayment.egldFromAmount(0),
+      args: this.getCreateAuctionArgs(args, marketplace.address),
+      gasLimit: gas.startAuction,
+      chainID: elrondConfig.chainID,
+    });
+    return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
 
   async bid(
     ownerAddress: string,
     request: BidRequest,
   ): Promise<TransactionNode> {
-    return request.tokenIdentifier !== elrondConfig.egld
-      ? await this.bidWithEsdt(ownerAddress, request)
-      : await this.bidWithEgld(ownerAddress, request);
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
+    if (request.paymentTokenIdentifier !== auction.paymentToken)
+      throw new BadRequestError('Unaccepted payment token');
+
+    return request.paymentTokenIdentifier !== elrondConfig.egld
+      ? await this.bidWithEsdt(
+          ownerAddress,
+          request,
+          contract,
+          auction.marketplaceAuctionId,
+        )
+      : await this.bidWithEgld(
+          ownerAddress,
+          request,
+          contract,
+          auction.marketplaceAuctionId,
+        );
   }
 
   async withdraw(
@@ -137,9 +164,25 @@ export class NftMarketplaceAbiService {
     ownerAddress: string,
     request: BuySftRequest,
   ): Promise<TransactionNode> {
-    return request.tokenIdentifier !== elrondConfig.egld
-      ? await this.buySftWithEsdt(ownerAddress, request)
-      : await this.buySftWithEgld(ownerAddress, request);
+    const { contract, auction } = await this.configureTransactionData(
+      request.auctionId,
+    );
+    if (request.paymentTokenIdentifier !== auction.paymentToken)
+      throw new BadRequestError('Unaccepted payment token');
+
+    return request.paymentTokenIdentifier !== elrondConfig.egld
+      ? await this.buySftWithEsdt(
+          ownerAddress,
+          request,
+          contract,
+          auction.marketplaceAuctionId,
+        )
+      : await this.buySftWithEgld(
+          ownerAddress,
+          request,
+          contract,
+          auction.marketplaceAuctionId,
+        );
   }
 
   async getAuctionQuery(
@@ -358,12 +401,11 @@ export class NftMarketplaceAbiService {
   private async bidWithEgld(
     ownerAddress: string,
     request: BidRequest,
+    contract: SmartContract,
+    marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
-    );
-    const { contract, auction } = await this.configureTransactionData(
-      request.auctionId,
     );
 
     return contract
@@ -371,7 +413,7 @@ export class NftMarketplaceAbiService {
         func: new ContractFunction('bid'),
         value: TokenPayment.egldFromBigInteger(request.price),
         args: [
-          new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+          new U64Value(new BigNumber(marketplaceAuctionId)),
           BytesValue.fromUTF8(collection),
           BytesValue.fromHex(nonce),
         ],
@@ -384,23 +426,22 @@ export class NftMarketplaceAbiService {
   private async bidWithEsdt(
     ownerAddress: string,
     request: BidRequest,
+    contract: SmartContract,
+    marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       request.identifier,
     );
-    const { contract, auction } = await this.configureTransactionData(
-      request.auctionId,
-    );
 
     return contract.methodsExplicit
       .bid([
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
+        new U64Value(new BigNumber(marketplaceAuctionId)),
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
       ])
       .withSingleESDTTransfer(
         TokenPayment.fungibleFromBigInteger(
-          request.tokenIdentifier,
+          request.paymentTokenIdentifier,
           new BigNumber(request.price),
         ),
       )
@@ -413,19 +454,14 @@ export class NftMarketplaceAbiService {
   private async buySftWithEgld(
     ownerAddress: string,
     request: BuySftRequest,
+    contract: SmartContract,
+    marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
-    const { contract, auction } = await this.configureTransactionData(
-      request.auctionId,
-    );
-
     return contract
       .call({
         func: new ContractFunction('buySft'),
         value: TokenPayment.egldFromBigInteger(request.price),
-        args: this.getBuySftArguments(request, auction.marketplaceAuctionId),
+        args: this.getBuySftArguments(request, marketplaceAuctionId),
         gasLimit: gas.buySft,
         chainID: elrondConfig.chainID,
       })
@@ -435,19 +471,14 @@ export class NftMarketplaceAbiService {
   private async buySftWithEsdt(
     ownerAddress: string,
     request: BuySftRequest,
+    contract: SmartContract,
+    marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
-    const { contract, auction } = await this.configureTransactionData(
-      request.auctionId,
-    );
-
     return contract.methodsExplicit
-      .buySft(this.getBuySftArguments(request, auction.marketplaceAuctionId))
+      .buySft(this.getBuySftArguments(request, marketplaceAuctionId))
       .withSingleESDTTransfer(
         TokenPayment.fungibleFromBigInteger(
-          request.tokenIdentifier,
+          request.paymentTokenIdentifier,
           new BigNumber(request.price),
         ),
       )
