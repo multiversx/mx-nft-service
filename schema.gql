@@ -836,8 +836,10 @@ type NotificationPageInfo {
 }
 
 enum NotificationTypeEnum {
+  Bought
   Ended
   Outbidded
+  Sold
   Won
 }
 
