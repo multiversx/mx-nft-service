@@ -135,6 +135,9 @@ export class CollectionNftTrait {
     if (!traits) {
       return undefined;
     }
+    if (typeof traits === 'string') {
+      traits = JSON.parse(traits);
+    }
     let convertedTraits: CollectionNftTrait[] = [];
     for (const [traitName, trait] of Object.entries(traits)) {
       convertedTraits.push(
