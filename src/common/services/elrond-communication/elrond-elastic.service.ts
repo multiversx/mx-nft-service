@@ -166,7 +166,7 @@ export class ElrondElasticService {
       ];
     } catch (e) {
       this.logger.error('Fail to get logs', {
-        path: 'elrond-elastic.service.getNftHistory',
+        path: `${ElrondElasticService.name}.${this.getAddressHistory.name}`,
         exception: e.toString(),
       });
       return [[], 0, 0];
