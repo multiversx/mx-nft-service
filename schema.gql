@@ -285,8 +285,8 @@ enum AuctionTypeEnum {
 input BidActionArgs {
   auctionId: Int!
   identifier: String!
+  paymentTokenIdentifier: String = "EGLD"
   price: String!
-  tokenIdentifier: String = "EGLD"
 }
 
 input BuyRandomNftActionArgs {
@@ -311,9 +311,9 @@ input BuyRandomNftActionArgs {
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
+  paymentTokenIdentifier: String = "EGLD"
   price: String!
   quantity: String
-  tokenIdentifier: String = "EGLD"
 }
 
 input BuyTicketsArgs {
@@ -689,6 +689,8 @@ type KeyValueType {
 }
 
 type Marketplace {
+  acceptedCollectionIdentifiers: [String!]
+  acceptedPaymentTokens: [Token!]
   address: String!
   isPaused: Boolean
   key: ID!
@@ -834,8 +836,10 @@ type NotificationPageInfo {
 }
 
 enum NotificationTypeEnum {
+  Bought
   Ended
   Outbidded
+  Sold
   Won
 }
 

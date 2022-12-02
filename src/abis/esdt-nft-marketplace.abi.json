@@ -1,16 +1,16 @@
 {
   "buildInfo": {
     "rustc": {
-      "version": "1.62.0-nightly",
-      "commitHash": "4ca19e09d302a4cbde14f9cb1bc109179dc824cd",
-      "commitDate": "2022-04-19",
+      "version": "1.66.0-nightly",
+      "commitHash": "a24a020e6d926dffe6b472fc647978f92269504e",
+      "commitDate": "2022-10-18",
       "channel": "Nightly",
-      "short": "rustc 1.62.0-nightly (4ca19e09d 2022-04-19)"
+      "short": "rustc 1.66.0-nightly (a24a020e6 2022-10-18)"
     },
     "contractCrate": {
       "name": "esdt-nft-marketplace",
       "version": "0.0.0",
-      "git_version": "e54d8c5"
+      "git_version": "31baa00"
     },
     "framework": {
       "name": "elrond-wasm",
@@ -23,6 +23,11 @@
       {
         "name": "bid_cut_percentage",
         "type": "u64"
+      },
+      {
+        "name": "tokens_to_whitelist",
+        "type": "variadic<EgldOrEsdtTokenIdentifier>",
+        "multi_arg": true
       }
     ],
     "outputs": []
@@ -233,6 +238,43 @@
       "outputs": [
         {
           "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "addTokensToWhitelist",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "tokens_to_add",
+          "type": "variadic<EgldOrEsdtTokenIdentifier>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeTokensFromWhitelist",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "tokens_to_remove",
+          "type": "variadic<EgldOrEsdtTokenIdentifier>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getWhitelistedTokens",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<EgldOrEsdtTokenIdentifier>",
+          "multi_result": true
         }
       ]
     },

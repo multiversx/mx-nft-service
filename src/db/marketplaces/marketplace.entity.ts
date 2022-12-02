@@ -21,6 +21,9 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ length: 20 })
   type: MarketplaceTypeEnum;
 
+  @Column({ nullable: true })
+  acceptedPaymentTokens: string;
+
   @OneToMany(
     () => MarketplaceCollectionEntity,
     (collection) => collection.marketplace,

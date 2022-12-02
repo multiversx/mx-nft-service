@@ -1,5 +1,3 @@
-import { Address } from '@elrondnetwork/erdjs';
-
 export class UpdatePriceEventsTopics {
   private collection: string;
   private nonce: string;

@@ -86,6 +86,16 @@ export class AssetsHistoryService {
       }
     }
 
+    if (historyLog.length < limit && totalHits > 0) {
+      return await this.getHistoryLog(
+        collection,
+        nonce,
+        limit,
+        elasticTimestamp,
+        historyLog,
+      );
+    }
+
     return historyLog;
   }
 

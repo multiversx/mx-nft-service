@@ -23,13 +23,21 @@ import { CacheEventsPublisherModule } from '../cache-invalidation/cache-invalida
 import { ElasiticUpdatesConsumer } from '../elastic-updates/elastic-updates-events.consumer';
 import { ElasticUpdatesEventsService } from '../elastic-updates/elastic-updates-events.service';
 import { MarketplacesModuleGraph } from 'src/modules/marketplaces/marketplaces.module';
-import { ExternalMarketplaceEventsService } from './external-marketplaces-events.service';
 import { FeedEventsSenderService } from './feed-events.service';
 import { UsdPriceModuleGraph } from 'src/modules/usdPrice/usd-price.module';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ElrondSwapMarketplaceEventsService } from './elrondswap-marketplaces-events.service';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
 import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
+import { BuyEventHandler } from './handlers/buy-event.handler';
+import { BidEventHandler } from './handlers/bid-event.handler';
+import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
+import { EndAuctionEventHandler } from './handlers/endAuction-event.handler';
+import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
+import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
+import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
+import { MarketplaceEventsService } from './marketplace-events.service';
+import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 
 @Module({
   imports: [
@@ -48,10 +56,18 @@ import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
   ],
   providers: [
     Logger,
+    BuyEventHandler,
+    BidEventHandler,
+    StartAuctionEventHandler,
+    EndAuctionEventHandler,
+    WithdrawAuctionEventHandler,
+    AcceptGlobalOfferEventHandler,
+    AcceptOfferEventHandler,
+    UpdatePriceEventHandler,
+    SwapUpdateEventHandler,
     NftEventsConsumer,
     NftEventsService,
-    ExternalMarketplaceEventsService,
-    ElrondSwapMarketplaceEventsService,
+    MarketplaceEventsService,
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,

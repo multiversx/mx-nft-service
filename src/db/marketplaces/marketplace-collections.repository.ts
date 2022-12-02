@@ -14,6 +14,8 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceColl
       .addSelect('m.url as url')
       .addSelect('m.address as address')
       .addSelect('m.key as `key`')
+      .addSelect('m.type as `type`')
+      .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
       .where(
         `mc.collectionIdentifier = '${collection}' and m.address= '${address}'`,
@@ -33,6 +35,8 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceColl
       .addSelect('m.url as url')
       .addSelect('m.address as address')
       .addSelect('m.key as `key`')
+      .addSelect('m.type as `type`')
+      .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
       .where(`mc.collectionIdentifier = '${collection}'`)
       .execute();
@@ -47,6 +51,8 @@ export class MarketplaceCollectionsRepository extends Repository<MarketplaceColl
       .addSelect('m.url as url')
       .addSelect('m.address as address')
       .addSelect('m.key as `key`')
+      .addSelect('m.type as `type`')
+      .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
       .where('mc.collectionIdentifier IN(:...collectionIdentifiers)', {
         collectionIdentifiers: collectionIdentifiers,
