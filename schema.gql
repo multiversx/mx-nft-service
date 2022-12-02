@@ -694,6 +694,7 @@ type Marketplace {
   address: String!
   isPaused: Boolean
   key: ID!
+  lastIndexTimestamp: Float
   marketplaceCutPercentage: String
   name: String!
   type: MarketplaceTypeEnum!

@@ -15,6 +15,14 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
     });
   }
 
+  async getMarketplaceByKey(key: string): Promise<MarketplaceEntity> {
+    return await this.findOne({
+      where: {
+        key,
+      },
+    });
+  }
+
   async getMarketplacesByKeys(
     marketplaceKeys: string[],
   ): Promise<MarketplaceEntity[]> {
@@ -37,5 +45,16 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
         addresses: addresses,
       })
       .execute();
+  }
+
+  async updateMarketplaceLastIndexTimestamp(
+    address: string,
+    lastIndexTimestamp: number,
+  ): Promise<void> {
+    console.log(`update ${address} with ${lastIndexTimestamp}`);
+    await this.update(
+      { address: address },
+      { latest_index_timestamp: lastIndexTimestamp },
+    );
   }
 }

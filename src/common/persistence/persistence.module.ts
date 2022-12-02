@@ -23,6 +23,7 @@ import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidat
 import { PersistenceService } from './persistence.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { ElrondCommunicationModule } from '../services/elrond-communication';
+import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 
 @Global()
 @Module({
@@ -41,6 +42,7 @@ import { ElrondCommunicationModule } from '../services/elrond-communication';
     TypeOrmModule.forFeature([NotificationsRepository]),
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
+    TypeOrmModule.forFeature([MarketplaceEventsRepository]),
     CacheEventsPublisherModule,
     ElrondCommunicationModule,
   ],

@@ -30,6 +30,9 @@ export class MarketplaceEntity extends BaseEntity {
   )
   collections: MarketplaceCollectionEntity[];
 
+  @Column({ nullable: true })
+  latest_index_timestamp: number;
+
   constructor(init?: Partial<MarketplaceEntity>) {
     super();
     Object.assign(this, init);
