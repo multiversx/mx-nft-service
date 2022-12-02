@@ -71,7 +71,6 @@ export class MarketplacesResolver extends BaseResolver(Marketplace) {
   @ResolveField(() => [Token])
   async acceptedPaymentTokens(@Parent() contractInfo: Marketplace) {
     const { acceptedPaymentIdentifiers } = contractInfo;
-    console.log({ acceptedPaymentIdentifiers });
     if (!acceptedPaymentIdentifiers) return null;
     let response: Token[] = [];
     for (const payment of acceptedPaymentIdentifiers) {
