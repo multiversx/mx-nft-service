@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import {
@@ -29,8 +30,10 @@ export class Marketplace {
   @Field({ nullable: true })
   marketplaceCutPercentage: string;
 
-  @Field(() => [String], { nullable: true })
-  acceptedPaymentTokens: string[];
+  acceptedPaymentIdentifiers: string[];
+
+  @Field(() => [Token], { nullable: true })
+  acceptedPaymentTokens: Token[];
 
   @Field(() => [String], { nullable: true })
   acceptedCollectionIdentifiers: string[];
@@ -55,7 +58,7 @@ export class Marketplace {
     return new Marketplace({
       address: entity.address,
       name: entity.name,
-      acceptedPaymentTokens: entity.acceptedPaymentTokens
+      acceptedPaymentIdentifiers: entity.acceptedPaymentTokens
         ? entity.acceptedPaymentTokens.split(',').filter((i) => i)
         : null,
       url: Marketplace.getMarketplaceUrl(
