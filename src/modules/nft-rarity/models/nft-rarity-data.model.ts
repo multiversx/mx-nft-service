@@ -22,14 +22,17 @@ export class NftRarityData {
       return undefined;
     }
 
+    if (typeof nft.metadata === 'string') {
+      try {
+        nft.metadata = JSON.parse(nft.metadata);
+      } catch {}
+    }
+
     return nft
       ? new NftRarityData({
           identifier: nft.identifier,
           nonce: nft.nonce,
-          temporaryMetadata:
-            typeof nft.metadata === 'string'
-              ? JSON.parse(nft.metadata)
-              : nft.metadata,
+          temporaryMetadata: nft.metadata,
           rarities: Rarity.fromNftRarity(nft),
         })
       : null;
