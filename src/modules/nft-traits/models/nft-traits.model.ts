@@ -52,7 +52,9 @@ export class NftTraits {
     }
 
     if (typeof nft.metadata === 'string') {
-      nft.metadata = JSON.parse(nft.metadata);
+      try {
+        nft.metadata = JSON.parse(nft.metadata);
+      } catch {}
     }
 
     let newNft: NftTraits = new NftTraits({
