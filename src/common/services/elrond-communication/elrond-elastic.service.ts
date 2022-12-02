@@ -152,7 +152,6 @@ export class ElrondElasticService {
         },
       ],
     };
-    console.log(JSON.stringify(body));
     try {
       const response = await this.apiService.post(url, body);
       const data: SearchResponse = response?.data;
