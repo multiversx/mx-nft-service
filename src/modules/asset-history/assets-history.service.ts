@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondElasticService, RedisCacheService } from 'src/common';
-import { cacheConfig, elrondConfig } from 'src/config';
+import { ElrondElasticService } from 'src/common';
+import { elrondConfig } from 'src/config';
 import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
@@ -11,31 +11,23 @@ import {
 } from '../assets/models';
 import { AssetHistoryLog } from './models';
 import BigNumber from 'bignumber.js';
-import * as Redis from 'ioredis';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AssetsHistoryAuctionService } from './services/assets-history.auction.service';
 import { AssetHistoryInput } from './models/asset-history-log-input';
 import { AssetsHistoryExternalAuctionService } from './services/assets-history.external-auction.service';
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
+import { AssetsHistoryCachingService } from './assets-history-caching.service';
 
 @Injectable()
 export class AssetsHistoryService {
-  private redisClient: Redis.Redis;
-
   constructor(
     private readonly elasticService: ElrondElasticService,
-    private readonly redisCacheService: RedisCacheService,
     private readonly assetsHistoryNftEventService: AssetsHistoryNftEventService,
     private readonly assetsHistoryAuctionService: AssetsHistoryAuctionService,
     private readonly assetsHistoryExternalAuctionService: AssetsHistoryExternalAuctionService,
     private readonly assetsHistoryElrondNftsSwapEventsService: AssetsHistoryElrondNftsSwapEventsService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private readonly assetsHistoryCachingService: AssetsHistoryCachingService,
+  ) {}
 
   async getOrSetHistoryLog(
     collection: string,
@@ -43,19 +35,14 @@ export class AssetsHistoryService {
     limit: number,
     timestamp: string | number,
   ): Promise<AssetHistoryLog[]> {
-    const cacheKey = this.getAssetHistoryCacheKey(
+    const getOrSetHistoryLog = async () =>
+      await this.getHistoryLog(collection, nonce, limit, timestamp);
+    return await this.assetsHistoryCachingService.getOrSetHistoryLog(
       collection,
       nonce,
       limit,
       timestamp,
-    );
-    const getOrSetHistoryLog = async () =>
-      await this.getHistoryLog(collection, nonce, limit, timestamp);
-    return await this.redisCacheService.getOrSet(
-      this.redisClient,
-      cacheKey,
       getOrSetHistoryLog,
-      CacheInfo.AssetHistory.ttl,
     );
   }
 
@@ -264,20 +251,5 @@ export class AssetsHistoryService {
       res[index]._source.events[0].identifier,
       res[index],
     ];
-  }
-
-  private getAssetHistoryCacheKey(
-    collection: string,
-    nonce: string,
-    limit?: number,
-    timestamp?: string | number,
-  ) {
-    return generateCacheKeyFromParams(
-      CacheInfo.AssetHistory.key,
-      collection,
-      nonce,
-      limit,
-      timestamp,
-    );
   }
 }

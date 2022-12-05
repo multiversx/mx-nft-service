@@ -25,7 +25,10 @@ export class CacheEventsConsumer {
   async consume(event: ChangedEvent): Promise<void> {
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
-        await this.assetsRedisHandler.clearKey(event.id);
+        await Promise.all([
+          this.assetsRedisHandler.clearKey(event.id),
+          this.cacheInvalidationService.invaldiateAssetHistory(event.id),
+        ]);
         break;
 
       case CacheEventTypeEnum.AssetsRefresh:
@@ -38,7 +41,10 @@ export class CacheEventsConsumer {
         break;
 
       case CacheEventTypeEnum.UpdateAuction:
-        await this.cacheInvalidationService.invalidateAuction(event);
+        await Promise.all([
+          this.cacheInvalidationService.invalidateAuction(event),
+          this.cacheInvalidationService.invaldiateAssetHistory(event.id),
+        ]);
         break;
 
       case CacheEventTypeEnum.UpdateOrder:
