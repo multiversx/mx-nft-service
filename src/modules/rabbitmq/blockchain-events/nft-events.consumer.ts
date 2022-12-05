@@ -69,7 +69,7 @@ export class NftEventsConsumer {
         nftAuctionEvents.hash,
       );
 
-      await this.marketplaceEventsIndexingService.reindexLatestMarketplaceEvents(
+      await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
         internalMarketplaceEvents.concat(externalMarketplaceEvents),
       );
     }

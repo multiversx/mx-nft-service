@@ -19,7 +19,7 @@ export class MarketplaceEventsIndexingService {
     private readonly elrondElasticService: ElrondElasticService,
   ) {}
 
-  async reindexLatestMarketplaceEvents(events: any[]): Promise<void> {
+  async reindexLatestMarketplacesEvents(events: any[]): Promise<void> {
     const marketplaces: string[] = [
       ...new Set(events.map((event) => String(event.address))),
     ];
