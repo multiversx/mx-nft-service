@@ -49,7 +49,7 @@ export class AuctionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCachingForPaymentTokensCollections() {
     await Locker.lock(
       'Payment tokens auctions',
