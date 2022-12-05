@@ -50,6 +50,22 @@ export class AssetsHistoryExternalAuctionService {
           sender: event.address,
         });
       }
+      case ExternalAuctionEventEnum.BuyNft: {
+        const senderAddress = event.address;
+        const addresses = this.getAddressesFromTopics(
+          event.topics,
+          senderAddress,
+        );
+        const quantity =
+          event.topics.length === 7 ? event.topics[4] : event.topics[7];
+        return new AssetHistoryLogInput({
+          event: mainEvent,
+          action: AssetActionEnum.Bought,
+          address: addresses[0],
+          itemsCount: quantity,
+          sender: senderAddress,
+        });
+      }
       case ExternalAuctionEventEnum.BulkBuy: {
         const buyNftEvent = mainEvent._source.events.find(
           (event) =>
