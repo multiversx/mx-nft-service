@@ -711,6 +711,14 @@ export class AuctionsGetterService {
       );
       if (token) {
         mappedTokens.push({ ...token, activeAuctions: payment.activeAuctions });
+      } else {
+        const token = await this.usdPriceService.getToken(payment.paymentToken);
+        if (token) {
+          mappedTokens.push({
+            ...token,
+            activeAuctions: payment.activeAuctions,
+          });
+        }
       }
     }
 
