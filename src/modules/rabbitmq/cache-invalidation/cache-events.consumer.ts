@@ -27,7 +27,7 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.OwnerChanged:
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.cacheInvalidationService.invaldiateAssetHistory(event.id),
+          this.cacheInvalidationService.invalidateAssetHistory(event.id),
         ]);
         break;
 
@@ -43,7 +43,7 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.UpdateAuction:
         await Promise.all([
           this.cacheInvalidationService.invalidateAuction(event),
-          this.cacheInvalidationService.invaldiateAssetHistory(event.id),
+          this.cacheInvalidationService.invalidateAssetHistory(event.id),
         ]);
         break;
 

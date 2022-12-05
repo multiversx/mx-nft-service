@@ -57,7 +57,7 @@ export class CacheInvalidationEventsService {
     this.assetsLikesCachingService.invalidateCache(payload.id, payload.address);
   }
 
-  async invaldiateAssetHistory(identifier: string) {
+  async invalidateAssetHistory(identifier: string) {
     await this.assetsHistoryCachingService.invalidateCache(identifier);
   }
 }
