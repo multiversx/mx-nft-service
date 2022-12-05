@@ -7,26 +7,37 @@ import { ElrondElasticService } from 'src/common';
 import { constants } from 'src/config';
 import { HitResponse } from 'src/common/services/elrond-communication/models/elastic-search';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
+import { MarketplacesCachingService } from './marketplaces-caching.service';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class MarketplaceReindexEventsService {
   constructor(
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,
+    private readonly marketplacesCachingService: MarketplacesCachingService,
     private readonly elrondElasticService: ElrondElasticService,
   ) {}
 
-  async reindexAllMarketplaceEvents(
-    beforeTimestamp?: number,
-    afterTimestamp?: number,
-  ): Promise<void> {
-    const [marketplaces, marketplacesCount] =
-      await this.persistenceService.getMarketplaces();
+  async reindexLatestMarketplaceEvents(events: any[]): Promise<void> {
+    const marketplaces: string[] = [
+      ...new Set(events.map((event) => String(event.address))),
+    ];
     for (let i = 0; i < marketplaces.length; i++) {
+      const [
+        marketplaceKey,
+        marketplaceAddress,
+        marketplaceLastIndexTimestamp,
+      ] = await this.getMarketplaceKeyAddressAndLastIndexTimestamp(
+        new MarketplaceFilters({ marketplaceAddress: marketplaces[i] }),
+      );
       await this.reindexMarketplaceEvents(
-        new MarketplaceFilters({ marketplaceAddress: marketplaces[i].address }),
-        beforeTimestamp,
-        afterTimestamp,
+        new MarketplaceFilters({
+          marketplaceAddress,
+          marketplaceKey,
+        }),
+        DateUtils.getCurrentTimestamp(),
+        marketplaceLastIndexTimestamp,
       );
     }
   }
@@ -36,6 +47,7 @@ export class MarketplaceReindexEventsService {
     beforeTimestamp?: number,
     afterTimestamp?: number,
     stopIfDuplicates?: boolean,
+    marketplaceLastIndexTimestamp?: number,
   ): Promise<[number, number]> {
     if (!filters.marketplaceAddress && !filters.marketplaceKey) {
       throw new Error('Marketplace Address or Key should be provided.');
@@ -45,8 +57,17 @@ export class MarketplaceReindexEventsService {
       throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
     }
 
-    const [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
-      await this.getMarketplaceKeyAddressAndLastIndexTimestamp(filters);
+    let marketplaceAddress = filters.marketplaceAddress;
+    let marketplaceKey = filters.marketplaceKey;
+
+    if (
+      marketplaceAddress ||
+      marketplaceKey ||
+      !marketplaceLastIndexTimestamp
+    ) {
+      [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
+        await this.getMarketplaceKeyAddressAndLastIndexTimestamp(filters);
+    }
 
     const size = constants.getLogsFromElasticBatchSize;
     let newestTimestamp: number;
@@ -90,6 +111,7 @@ export class MarketplaceReindexEventsService {
         marketplaceAddress,
         newestTimestamp,
       );
+      await this.marketplacesCachingService.invalidateMarketplacesCache();
     }
 
     return [newestTimestamp, oldestTimestamp];
@@ -125,7 +147,9 @@ export class MarketplaceReindexEventsService {
     return [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp];
   }
 
-  private async getMarketplaceAddressByKey(marketplaceKey): Promise<string> {
+  private async getMarketplaceAddressByKey(
+    marketplaceKey: string,
+  ): Promise<string> {
     const marketplaces = await this.marketplaceService.getMarketplaceByKey(
       marketplaceKey,
     );

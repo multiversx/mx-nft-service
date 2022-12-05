@@ -51,7 +51,6 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
     address: string,
     lastIndexTimestamp: number,
   ): Promise<void> {
-    console.log(`update ${address} with ${lastIndexTimestamp}`);
     await this.update(
       { address: address },
       { latest_index_timestamp: lastIndexTimestamp },

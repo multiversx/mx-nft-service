@@ -28,6 +28,6 @@ import { MarketplaceReindexEventsService } from './marketplaces-reindex-events.s
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
   ],
-  exports: [MarketplacesService],
+  exports: [MarketplacesService, MarketplaceReindexEventsService],
 })
 export class MarketplacesModuleGraph {}

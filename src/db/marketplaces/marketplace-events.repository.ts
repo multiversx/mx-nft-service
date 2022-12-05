@@ -18,14 +18,12 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
         i * constants.dbBatch,
         (i + 1) * constants.dbBatch,
       );
-      console.log(batch.length, marketplaceEvents.length);
       const res = await this.createQueryBuilder()
         .insert()
         .into('marketplace_events')
         .values(batch)
         .orIgnore()
         .execute();
-
       savedRecords += res?.identifiers.filter(
         (identifier) => identifier,
       ).length;
