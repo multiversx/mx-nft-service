@@ -11,7 +11,7 @@ import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
-export class MarketplaceReindexEventsService {
+export class MarketplaceEventsIndexingService {
   constructor(
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,

@@ -14,8 +14,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
-import { MarketplaceReindexEventsService } from 'src/modules/marketplaces/marketplaces-reindex-events.service';
-import { MarketplaceFilters } from 'src/modules/marketplaces/models/Marketplace.Filter';
+import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -31,7 +30,6 @@ export class MarketplaceEventsService {
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private swapUpdateEventHandler: SwapUpdateEventHandler,
-    private marketplaceReindexEventsService: MarketplaceReindexEventsService,
   ) {}
 
   public async handleNftAuctionEvents(

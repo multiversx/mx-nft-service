@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
-import { MarketplaceReindexEventsService } from 'src/modules/marketplaces/marketplaces-reindex-events.service';
+import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
@@ -13,7 +13,7 @@ export class NftEventsConsumer {
   constructor(
     private readonly nftEventsService: NftEventsService,
     private readonly marketplaceEventsService: MarketplaceEventsService,
-    private readonly marketplaceReindexEventsService: MarketplaceReindexEventsService,
+    private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -38,10 +38,6 @@ export class NftEventsConsumer {
       const externalMarketplaceEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) =>
           externalMarketplaces.includes(e.address) === true,
-      );
-
-      await this.marketplaceReindexEventsService.reindexLatestMarketplaceEvents(
-        internalMarketplaceEvents.concat(externalMarketplaceEvents),
       );
 
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
@@ -71,6 +67,10 @@ export class NftEventsConsumer {
           (e: { address: any }) => minters.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
+      );
+
+      await this.marketplaceEventsIndexingService.reindexLatestMarketplaceEvents(
+        internalMarketplaceEvents.concat(externalMarketplaceEvents),
       );
     }
   }
