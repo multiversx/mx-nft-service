@@ -1,4 +1,4 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
@@ -16,6 +16,7 @@ import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-trai
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
+import { graphqlUploadExpress } from 'graphql-upload';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -129,6 +130,7 @@ async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
   });
+  app.use(graphqlUploadExpress());
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 

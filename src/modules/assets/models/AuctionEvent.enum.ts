@@ -9,6 +9,7 @@ export enum AuctionEventEnum {
 export enum ExternalAuctionEventEnum {
   Listing = 'listing',
   Buy = 'buy',
+  BuyNft = 'buyNft',
   BulkBuy = 'bulkBuy',
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
@@ -34,6 +35,13 @@ export enum NftEventEnum {
   ESDTNFTCreate = 'ESDTNFTCreate',
   ESDTNFTBurn = 'ESDTNFTBurn',
   ESDTNFTUpdateAttributes = 'ESDTNFTUpdateAttributes',
+}
+
+export enum NftEventTypeEnum {
+  NftEventEnum = 'NftEventEnum',
+  AuctionEventEnum = 'AuctionEventEnum',
+  ExternalAuctionEventEnum = 'ExternalAuctionEventEnum',
+  ElrondNftsSwapAuctionEventEnum = 'ElrondNftsSwapAuctionEventEnum',
 }
 
 export enum MinterEventEnum {

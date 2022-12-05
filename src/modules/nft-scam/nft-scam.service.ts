@@ -170,7 +170,7 @@ export class NftScamService {
     nftFromDb: NftScamInfoModel,
   ): Promise<void> {
     const clearScamInfoInElastic =
-      nftFromElastic[elasticDictionary.scamInfo.typeKey];
+      nftFromElastic?.[elasticDictionary.scamInfo.typeKey];
 
     const updateScamInfoInDb =
       !nftFromDb || nftFromDb.type || nftFromDb.version !== scamEngineVersion;
@@ -259,8 +259,8 @@ export class NftScamService {
       )
       .concat(
         this.nftScamElasticService.buildNftScamInfoDbToElasticMigrationBulkUpdate(
-          nftsFromElastic,
           nftsToMigrateFromDbToElastic,
+          nftsFromElastic,
         ),
       );
 
@@ -371,7 +371,7 @@ export class NftScamService {
 
       if (!nftFromApi.scamInfo) {
         const updateScamInfoInElastic =
-          nftFromElastic[elasticDictionary.scamInfo.typeKey];
+          nftFromElastic?.[elasticDictionary.scamInfo.typeKey];
 
         if (updateScamInfoInElastic) {
           nftsNoScamOutdatedInElastic.push(nftFromApi);

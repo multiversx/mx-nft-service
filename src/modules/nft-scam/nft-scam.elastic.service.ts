@@ -163,12 +163,18 @@ export class NftScamElasticService {
     nftsFromElastic: any,
   ): string[] {
     let updates: string[] = [];
-    for (const nftFromDb of nftsFromDb) {
-      if (!nftFromDb && nftsFromElastic[elasticDictionary.scamInfo.typeKey]) {
+    for (let i = 0; i < nftsFromDb.length; i++) {
+      const nftFromElastic = nftsFromElastic.find(
+        (nft) => nft.identifier === nftsFromDb[i].identifier,
+      );
+      if (
+        !nftsFromDb[i] &&
+        nftFromElastic?.[elasticDictionary.scamInfo.typeKey]
+      ) {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nftFromDb.identifier,
+            nftsFromDb[i].identifier,
             elasticDictionary.scamInfo.typeKey,
             null,
           ),
@@ -176,7 +182,7 @@ export class NftScamElasticService {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nftFromDb.identifier,
+            nftsFromDb[i].identifier,
             elasticDictionary.scamInfo.infoKey,
             null,
           ),
@@ -185,17 +191,17 @@ export class NftScamElasticService {
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nftFromDb.identifier,
+            nftsFromDb[i].identifier,
             elasticDictionary.scamInfo.typeKey,
-            nftFromDb.type,
+            nftsFromDb[i].type,
           ),
         );
         updates.push(
           this.elasticService.buildBulkUpdate<string>(
             'tokens',
-            nftFromDb.identifier,
+            nftsFromDb[i].identifier,
             elasticDictionary.scamInfo.infoKey,
-            nftFromDb.info,
+            nftsFromDb[i].info,
           ),
         );
       }

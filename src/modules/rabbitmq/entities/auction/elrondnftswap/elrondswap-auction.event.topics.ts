@@ -6,6 +6,7 @@ import {
   TokenIdentifierType,
   U64Type,
 } from '@elrondnetwork/erdjs';
+import { NumberUtils } from '@elrondnetwork/erdnest';
 
 export class ElrondSwapAuctionTopics {
   private auctionId: string;
@@ -35,10 +36,7 @@ export class ElrondSwapAuctionTopics {
     this.paymentToken = token.token_type;
     this.paymentTokenNonce = token.nonce;
     this.auctionType = Buffer.from(rawTopics[8], 'base64').toString('hex');
-    this.deadline = parseInt(
-      Buffer.from(rawTopics[9], 'base64').toString('hex'),
-      16,
-    );
+    this.deadline = parseInt(NumberUtils.numberDecode(rawTopics[9] ?? '00'));
   }
 
   toPlainObject() {

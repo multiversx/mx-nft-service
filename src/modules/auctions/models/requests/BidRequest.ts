@@ -3,7 +3,7 @@ import { BidActionArgs } from '../BidActionArgs';
 export class BidRequest {
   auctionId: number;
   identifier: string;
-  tokenIdentifier: string;
+  paymentTokenIdentifier: string;
   price: string;
   constructor(init?: Partial<BidRequest>) {
     Object.assign(this, init);
@@ -13,7 +13,7 @@ export class BidRequest {
     return new BidRequest({
       identifier: bidArgs.identifier,
       auctionId: bidArgs.auctionId,
-      tokenIdentifier: bidArgs.tokenIdentifier,
+      paymentTokenIdentifier: bidArgs.paymentTokenIdentifier,
       price: bidArgs.price,
     });
   }

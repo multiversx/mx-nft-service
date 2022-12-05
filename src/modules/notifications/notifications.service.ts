@@ -88,6 +88,13 @@ export class NotificationsService {
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
     try {
       await this.persistenceService.saveNotifications(notifications);
+      await this.cacheEventsPublisher.publish(
+        new ChangedEvent({
+          id: notifications?.map((n) => n.ownerAddress),
+          type: CacheEventTypeEnum.UpdateNotifications,
+          extraInfo: { marketplaceKey: notifications[0].marketplaceKey },
+        }),
+      );
     } catch (error) {
       this.logger.error(
         'An error occurred while trying to update notifications status.',
@@ -206,7 +213,7 @@ export class NotificationsService {
     ];
   }
 
-  private async addNotifications(auction: AuctionEntity, order: OrderEntity) {
+  public async addNotifications(auction: AuctionEntity, order: OrderEntity) {
     try {
       const asset = await this.assetByIdentifierService.getAsset(
         auction.identifier,
@@ -226,7 +233,7 @@ export class NotificationsService {
           new NotificationEntity({
             auctionId: auction.id,
             identifier: auction.identifier,
-            ownerAddress: order[0].ownerAddress,
+            ownerAddress: order.ownerAddress,
             status: NotificationStatusEnum.Active,
             type: NotificationTypeEnum.Won,
             name: assetName,

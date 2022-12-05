@@ -25,7 +25,7 @@ export class BidActionArgs {
     message: ESDT_TOKEN_ERROR,
   })
   @Field(() => String)
-  tokenIdentifier: string = elrondConfig.egld;
+  paymentTokenIdentifier: string = elrondConfig.egld;
 
   @Field(() => String)
   price: string;
@@ -46,7 +46,7 @@ export class BuySftActionArgs {
     message: ESDT_TOKEN_ERROR,
   })
   @Field(() => String)
-  tokenIdentifier: string = elrondConfig.egld;
+  paymentTokenIdentifier: string = elrondConfig.egld;
 
   @Matches(RegExp(NUMERIC_RGX), { message: `Price ${NUMERIC_ERROR}` })
   @Field(() => String)
