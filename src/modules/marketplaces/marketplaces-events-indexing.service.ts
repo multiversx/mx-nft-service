@@ -46,17 +46,13 @@ export class MarketplaceEventsIndexingService {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
       }
 
-      const size = constants.getLogsFromElasticBatchSize;
-      let newestTimestamp: number;
-      let oldestTimestamp: number;
-
-      [newestTimestamp, oldestTimestamp] = await this.getEventsAndSaveToDb(
-        marketplaceAddress,
-        size,
-        beforeTimestamp,
-        afterTimestamp,
-        stopIfDuplicates,
-      );
+      const [newestTimestamp, oldestTimestamp] =
+        await this.getEventsAndSaveToDb(
+          marketplaceAddress,
+          beforeTimestamp,
+          afterTimestamp,
+          stopIfDuplicates,
+        );
 
       if (
         !marketplaceLastIndexTimestamp ||
@@ -80,7 +76,6 @@ export class MarketplaceEventsIndexingService {
 
   private async getEventsAndSaveToDb(
     marketplaceAddress: string,
-    size: number,
     newestTimestamp: number,
     oldestTimestamp: number,
     stopIfDuplicates?: boolean,
@@ -89,7 +84,7 @@ export class MarketplaceEventsIndexingService {
       const [batch, batchSize, timestamp] =
         await this.elrondElasticService.getAddressHistory(
           marketplaceAddress,
-          size,
+          constants.getLogsFromElasticBatchSize,
           oldestTimestamp,
           newestTimestamp,
         );
