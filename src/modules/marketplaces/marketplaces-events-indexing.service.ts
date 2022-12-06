@@ -115,7 +115,7 @@ export class MarketplaceEventsIndexingService {
         );
 
         if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
-          return;
+          return false;
         }
       },
     );
