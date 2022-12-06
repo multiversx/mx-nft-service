@@ -5,6 +5,7 @@ import { NsfwUpdaterService } from './crons/elastic.updater/nsfw.updater.service
 import { RarityUpdaterService } from './crons/elastic.updater/rarity.updater.service';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
 import { ReindexController } from './modules/ingress/reindex.controller';
+import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { MetricsController } from './modules/metrics/metrics.controller';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
 import { NftScamModule } from './modules/nft-scam/nft-scam.module';
@@ -21,6 +22,7 @@ import * as ormconfig from './ormconfig';
     CacheEventsPublisherModule,
     NftScamModule,
     NftTraitsModule,
+    MarketplacesModuleGraph,
   ],
   providers: [Logger, NsfwUpdaterService, RarityUpdaterService],
   controllers: [MetricsController, ReindexController],

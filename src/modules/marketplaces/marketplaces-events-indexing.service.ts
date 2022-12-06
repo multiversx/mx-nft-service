@@ -19,9 +19,23 @@ export class MarketplaceEventsIndexingService {
     private readonly elrondElasticService: ElrondElasticService,
   ) {}
 
+  async reindexAllMarketplaceEvents(
+    beforeTimestamp?: number,
+    afterTimestamp?: number,
+  ): Promise<void> {
+    const [marketplaces] = await this.persistenceService.getMarketplaces();
+    for (let i = 0; i < marketplaces.length; i++) {
+      await this.reindexMarketplaceEvents(
+        new MarketplaceFilters({ marketplaceAddress: marketplaces[i].address }),
+        beforeTimestamp,
+        afterTimestamp,
+      );
+    }
+  }
+
   async reindexLatestMarketplacesEvents(events: any[]): Promise<void> {
     const marketplaces: string[] = [
-      ...new Set(events.map((event) => String(event.address))),
+      ...new Set(events.map((event) => event.address)),
     ];
     for (let i = 0; i < marketplaces.length; i++) {
       const [
