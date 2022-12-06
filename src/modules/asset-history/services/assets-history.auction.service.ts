@@ -7,7 +7,7 @@ export class AssetsHistoryAuctionService {
   constructor() {}
 
   mapAuctionEventLog(eventType: string, mainEvent: any): AssetHistoryLogInput {
-    const event = mainEvent._source.events.find(
+    const event = mainEvent.events.find(
       (event) => event.identifier === eventType,
     );
     switch (eventType) {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElrondElasticService } from 'src/common';
-import { elrondConfig } from 'src/config';
+import { constants, elrondConfig } from 'src/config';
 import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
@@ -17,11 +17,17 @@ import { AssetsHistoryExternalAuctionService } from './services/assets-history.e
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
 import { AssetsHistoryCachingService } from './assets-history-caching.service';
+import {
+  ElasticQuery,
+  ElasticSortOrder,
+  QueryType,
+  RangeLowerThan,
+} from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class AssetsHistoryService {
   constructor(
-    private readonly elasticService: ElrondElasticService,
+    private readonly elrondElasticService: ElrondElasticService,
     private readonly assetsHistoryNftEventService: AssetsHistoryNftEventService,
     private readonly assetsHistoryAuctionService: AssetsHistoryAuctionService,
     private readonly assetsHistoryExternalAuctionService: AssetsHistoryExternalAuctionService,
@@ -33,15 +39,15 @@ export class AssetsHistoryService {
     collection: string,
     nonce: string,
     limit: number,
-    timestamp: string | number,
+    beforeTimestamp: number,
   ): Promise<AssetHistoryLog[]> {
     const getOrSetHistoryLog = async () =>
-      await this.getHistoryLog(collection, nonce, limit, timestamp);
+      await this.getHistoryLog(collection, nonce, limit, beforeTimestamp);
     return await this.assetsHistoryCachingService.getOrSetHistoryLog(
       collection,
       nonce,
       limit,
-      timestamp,
+      beforeTimestamp,
       getOrSetHistoryLog,
     );
   }
@@ -50,20 +56,53 @@ export class AssetsHistoryService {
     collection: string,
     nonce: string,
     limit: number,
-    timestamp: string | number,
+    beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
+    console.log('no t from cache');
     let elasticLogs = [];
-    let totalHits = 0;
-    let elasticTimestamp = 0;
+    const encodedCollection = Buffer.from(collection).toString('base64');
+    const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
 
-    [elasticLogs, totalHits, elasticTimestamp] =
-      await this.elasticService.getNftHistory(
-        Buffer.from(collection).toString('base64'),
-        Buffer.from(nonce, 'hex').toString('base64'),
-        limit,
-        timestamp,
-      );
+    const query = ElasticQuery.create()
+      .withMustCondition(
+        QueryType.Nested('events', {
+          'events.topics': encodedCollection,
+        }),
+      )
+      .withMustCondition(
+        QueryType.Nested('events', {
+          'events.topics': encodedNonce,
+        }),
+      )
+      .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
+      .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
+      .withPagination({
+        from: 0,
+        size: constants.getLogsFromElasticBatchSize,
+      });
+
+    await this.elrondElasticService.getScrollableList(
+      'logs',
+      'identifier',
+      query,
+      async (logs) => {
+        for (let i = 0; i < logs.length; i++) {
+          for (let j = 0; j < logs[i].events.length; j++) {
+            if (
+              logs[i].events[j].topics?.[0] === encodedCollection &&
+              logs[i].events[j].topics?.[1] === encodedNonce
+            ) {
+              elasticLogs.push(logs[i]);
+            }
+          }
+        }
+
+        if (elasticLogs.length >= limit) {
+          return false;
+        }
+      },
+    );
 
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
@@ -73,15 +112,15 @@ export class AssetsHistoryService {
       }
     }
 
-    if (historyLog.length < limit && totalHits > 0) {
-      return await this.getHistoryLog(
-        collection,
-        nonce,
-        limit,
-        elasticTimestamp,
-        historyLog,
-      );
-    }
+    // if (historyLog.length < limit && totalHits > 0) {
+    //   return await this.getHistoryLog(
+    //     collection,
+    //     nonce,
+    //     limit,
+    //     elasticTimestamp,
+    //     historyLog,
+    //   );
+    // }
 
     return historyLog;
   }
@@ -172,17 +211,17 @@ export class AssetsHistoryService {
         action: input.action,
         address: input.address,
         senderAddress: input.sender,
-        transactionHash: input.event._source.originalTxHash
-          ? input.event._source.originalTxHash
-          : input.event._id,
-        actionDate: input.event._source.timestamp || '',
+        transactionHash: input.event.originalTxHash
+          ? input.event.originalTxHash
+          : input.event.identifier,
+        actionDate: input.event.timestamp || '',
         itemCount: itemCountString ? itemCountString.toString() : undefined,
         price: totalPrice
           ? new Price({
               nonce: 0,
               token: elrondConfig.egld,
               amount: totalPrice.toFixed(),
-              timestamp: input.event._source.timestamp,
+              timestamp: input.event.timestamp,
             })
           : undefined,
       }),
@@ -190,20 +229,20 @@ export class AssetsHistoryService {
   }
 
   private getEventType(res: any, index: number): [string, string, any] {
-    if (res[index]._source.originalTxHash) {
+    if (res[index].originalTxHash) {
       return [undefined, undefined, undefined];
     }
 
-    const eventId = res[index]._id;
+    const eventId = res[index].identifier;
 
     const relatedEvents = res.filter(
       (eventObject) =>
-        eventObject._id === eventId ||
-        eventObject._source.originalTxHash === eventId,
+        eventObject.identifier === eventId ||
+        eventObject.originalTxHash === eventId,
     );
 
     for (let i = 0; i < relatedEvents?.length; i++) {
-      const events = relatedEvents[i]._source.events;
+      const events = relatedEvents[i].events;
 
       for (let j = 0; j < events.length; j++) {
         const eventIdentifier = events[j].identifier;
@@ -248,7 +287,7 @@ export class AssetsHistoryService {
 
     return [
       NftEventTypeEnum.NftEventEnum,
-      res[index]._source.events[0].identifier,
+      res[index].events[0].identifier,
       res[index],
     ];
   }
