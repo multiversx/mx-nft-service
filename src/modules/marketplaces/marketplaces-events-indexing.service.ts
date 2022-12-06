@@ -9,6 +9,7 @@ import { HitResponse } from 'src/common/services/elrond-communication/models/ela
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { DateUtils } from 'src/utils/date-utils';
+import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -24,14 +25,22 @@ export class MarketplaceEventsIndexingService {
     beforeTimestamp?: number,
     afterTimestamp?: number,
   ): Promise<void> {
-    const [marketplaces] = await this.persistenceService.getMarketplaces();
-    for (let i = 0; i < marketplaces.length; i++) {
-      await this.reindexMarketplaceEvents(
-        new MarketplaceFilters({ marketplaceAddress: marketplaces[i].address }),
-        beforeTimestamp,
-        afterTimestamp,
-      );
-    }
+    await Locker.lock(
+      'reindexAllMarketplaceEvents',
+      async () => {
+        const [marketplaces] = await this.persistenceService.getMarketplaces();
+        for (let i = 0; i < marketplaces.length; i++) {
+          await this.reindexMarketplaceEvents(
+            new MarketplaceFilters({
+              marketplaceAddress: marketplaces[i].address,
+            }),
+            beforeTimestamp,
+            afterTimestamp,
+          );
+        }
+      },
+      true,
+    );
   }
 
   async reindexLatestMarketplacesEvents(events: any[]): Promise<void> {
@@ -77,8 +86,8 @@ export class MarketplaceEventsIndexingService {
       let marketplaceKey = filters.marketplaceKey;
 
       if (
-        marketplaceAddress ||
-        marketplaceKey ||
+        !marketplaceAddress ||
+        !marketplaceKey ||
         !marketplaceLastIndexTimestamp
       ) {
         [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
