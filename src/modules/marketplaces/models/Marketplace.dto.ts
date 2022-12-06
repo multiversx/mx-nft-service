@@ -73,7 +73,7 @@ export class Marketplace {
       ),
       key: entity.key,
       type: entity.type,
-      lastIndexTimestamp: entity.latest_index_timestamp,
+      lastIndexTimestamp: entity.lastIndexTimestamp,
     });
   }
 

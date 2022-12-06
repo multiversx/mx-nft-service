@@ -3,20 +3,20 @@ import { BaseEntity } from 'src/db/base-entity';
 import { Column, Entity, Index, Unique } from 'typeorm';
 
 @Entity('marketplace_events')
-@Unique('MarketplaceEventsEntity_UQ_EVENT', ['tx_hash', 'order'])
+@Unique('MarketplaceEventsEntity_UQ_EVENT', ['txHash', 'order'])
 export class MarketplaceEventsEntity extends BaseEntity {
   @Column({ length: 64 })
-  tx_hash: string;
+  txHash: string;
 
   @Column()
   order: number;
 
   @Column({ length: 64, nullable: true })
-  original_tx_hash?: string;
+  originalTxHash?: string;
 
-  @Index('marketplace_key')
-  @Column({ length: 20 })
-  marketplace_key: string;
+  @Index('marketplace_address')
+  @Column({ length: 62 })
+  marketplaceAddress: string;
 
   @Column()
   timestamp: number;
