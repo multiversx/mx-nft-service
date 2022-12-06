@@ -49,20 +49,16 @@ export class MarketplaceEventsIndexingService {
       const size = constants.getLogsFromElasticBatchSize;
       let newestTimestamp: number;
       let oldestTimestamp: number;
-      let stop: boolean;
 
-      do {
-        [stop, newestTimestamp, oldestTimestamp] =
-          await this.getEventsBatchAndSaveToDb(
-            marketplaceAddress,
-            size,
-            newestTimestamp,
-            oldestTimestamp,
-            stopIfDuplicates,
-            beforeTimestamp,
-            afterTimestamp,
-          );
-      } while (!stop);
+      [newestTimestamp, oldestTimestamp] = await this.getEventsAndSaveToDb(
+        marketplaceAddress,
+        size,
+        newestTimestamp,
+        oldestTimestamp,
+        stopIfDuplicates,
+        beforeTimestamp,
+        afterTimestamp,
+      );
 
       if (
         !marketplaceLastIndexTimestamp ||
@@ -84,7 +80,7 @@ export class MarketplaceEventsIndexingService {
     }
   }
 
-  private async getEventsBatchAndSaveToDb(
+  private async getEventsAndSaveToDb(
     marketplaceAddress: string,
     size: number,
     newestTimestamp: number,
@@ -92,37 +88,37 @@ export class MarketplaceEventsIndexingService {
     stopIfDuplicates?: boolean,
     beforeTimestamp?: number,
     afterTimestamp?: number,
-  ): Promise<[boolean, number, number]> {
-    let stop = false;
+  ): Promise<[number, number]> {
+    do {
+      const [batch, batchSize, timestamp] =
+        await this.elrondElasticService.getAddressHistory(
+          marketplaceAddress,
+          size,
+          oldestTimestamp ?? beforeTimestamp,
+          afterTimestamp,
+        );
 
-    const [batch, batchSize, timestamp] =
-      await this.elrondElasticService.getAddressHistory(
+      if (batchSize === 0) {
+        break;
+      }
+
+      oldestTimestamp = timestamp;
+
+      if (!newestTimestamp) {
+        newestTimestamp = batch[0]._source.timestamp;
+      }
+
+      const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
+        batch,
         marketplaceAddress,
-        size,
-        oldestTimestamp ?? beforeTimestamp,
-        afterTimestamp,
       );
 
-    if (batchSize === 0) {
-      stop = true;
-    }
+      if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+        break;
+      }
+    } while (true);
 
-    oldestTimestamp = timestamp;
-
-    if (!newestTimestamp) {
-      newestTimestamp = batch[0]._source.timestamp;
-    }
-
-    const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
-      batch,
-      marketplaceAddress,
-    );
-
-    if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
-      stop = true;
-    }
-
-    return [stop, newestTimestamp, oldestTimestamp];
+    return [newestTimestamp, oldestTimestamp];
   }
 
   private async getMarketplaceLastIndexTimestamp(
