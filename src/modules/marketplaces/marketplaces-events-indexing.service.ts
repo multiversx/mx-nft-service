@@ -76,17 +76,20 @@ export class MarketplaceEventsIndexingService {
 
   private async getEventsAndSaveToDb(
     marketplaceAddress: string,
-    newestTimestamp: number,
-    oldestTimestamp: number,
+    beforeTimestamp: number,
+    afterTimestamp: number,
     stopIfDuplicates?: boolean,
   ): Promise<[number, number]> {
+    let oldestTimestamp: number;
+    let newestTimestamp: number;
+
     do {
       const [batch, batchSize, timestamp] =
         await this.elrondElasticService.getAddressHistory(
           marketplaceAddress,
           constants.getLogsFromElasticBatchSize,
-          oldestTimestamp,
-          newestTimestamp,
+          oldestTimestamp ?? beforeTimestamp,
+          afterTimestamp,
         );
 
       if (batchSize === 0) {
