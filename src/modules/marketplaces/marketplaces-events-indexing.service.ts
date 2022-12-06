@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -13,6 +13,7 @@ import { DateUtils } from 'src/utils/date-utils';
 @Injectable()
 export class MarketplaceEventsIndexingService {
   constructor(
+    private readonly logger: Logger,
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,
     private readonly marketplacesCachingService: MarketplacesCachingService,
@@ -63,72 +64,80 @@ export class MarketplaceEventsIndexingService {
     stopIfDuplicates?: boolean,
     marketplaceLastIndexTimestamp?: number,
   ): Promise<[number, number]> {
-    if (!filters.marketplaceAddress && !filters.marketplaceKey) {
-      throw new Error('Marketplace Address or Key should be provided.');
-    }
+    try {
+      if (!filters.marketplaceAddress && !filters.marketplaceKey) {
+        throw new Error('Marketplace Address or Key should be provided.');
+      }
 
-    if (beforeTimestamp < afterTimestamp) {
-      throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
-    }
+      if (beforeTimestamp < afterTimestamp) {
+        throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
+      }
 
-    let marketplaceAddress = filters.marketplaceAddress;
-    let marketplaceKey = filters.marketplaceKey;
+      let marketplaceAddress = filters.marketplaceAddress;
+      let marketplaceKey = filters.marketplaceKey;
 
-    if (
-      marketplaceAddress ||
-      marketplaceKey ||
-      !marketplaceLastIndexTimestamp
-    ) {
-      [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
-        await this.getMarketplaceKeyAddressAndLastIndexTimestamp(filters);
-    }
+      if (
+        marketplaceAddress ||
+        marketplaceKey ||
+        !marketplaceLastIndexTimestamp
+      ) {
+        [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
+          await this.getMarketplaceKeyAddressAndLastIndexTimestamp(filters);
+      }
 
-    const size = constants.getLogsFromElasticBatchSize;
-    let newestTimestamp: number;
-    let oldestTimestamp: number;
+      const size = constants.getLogsFromElasticBatchSize;
+      let newestTimestamp: number;
+      let oldestTimestamp: number;
 
-    do {
-      const [batch, batchSize, timestamp] =
-        await this.elrondElasticService.getAddressHistory(
+      do {
+        const [batch, batchSize, timestamp] =
+          await this.elrondElasticService.getAddressHistory(
+            marketplaceAddress,
+            size,
+            oldestTimestamp ?? beforeTimestamp,
+            afterTimestamp,
+          );
+
+        if (batchSize === 0) {
+          break;
+        }
+
+        oldestTimestamp = timestamp;
+
+        if (!newestTimestamp) {
+          newestTimestamp = batch[0]._source.timestamp;
+        }
+
+        const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
+          batch,
+          marketplaceKey,
           marketplaceAddress,
-          size,
-          oldestTimestamp ?? beforeTimestamp,
-          afterTimestamp,
         );
 
-      if (batchSize === 0) {
-        break;
+        if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+          break;
+        }
+      } while (true);
+
+      if (
+        !marketplaceLastIndexTimestamp ||
+        newestTimestamp > marketplaceLastIndexTimestamp
+      ) {
+        await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
+          marketplaceAddress,
+          newestTimestamp,
+        );
+        await this.marketplacesCachingService.invalidateMarketplacesCache();
       }
 
-      oldestTimestamp = timestamp;
-
-      if (!newestTimestamp) {
-        newestTimestamp = batch[0]._source.timestamp;
-      }
-
-      const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
-        batch,
-        marketplaceKey,
-        marketplaceAddress,
-      );
-
-      if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
-        break;
-      }
-    } while (true);
-
-    if (
-      !marketplaceLastIndexTimestamp ||
-      newestTimestamp > marketplaceLastIndexTimestamp
-    ) {
-      await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
-        marketplaceAddress,
-        newestTimestamp,
-      );
-      await this.marketplacesCachingService.invalidateMarketplacesCache();
+      return [newestTimestamp, oldestTimestamp];
+    } catch (error) {
+      this.logger.error(`Error when trying to reindex marketplace events`, {
+        path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
+        error: error.message,
+        marketplace: filters.marketplaceKey ?? filters.marketplaceAddress,
+      });
     }
-
-    return [newestTimestamp, oldestTimestamp];
   }
 
   private async getMarketplaceKeyAddressAndLastIndexTimestamp(
