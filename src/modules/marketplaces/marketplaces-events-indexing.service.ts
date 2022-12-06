@@ -161,25 +161,19 @@ export class MarketplaceEventsIndexingService {
     let marketplaceEvents: MarketplaceEventsEntity[] = [];
 
     for (let i = 0; i < batch.length; i++) {
-      const log = batch[i];
-      const txHash = log._id;
-      const originalTxHash = log._source.originalTxHash;
-      const events = log._source.events;
-      const timestamp = log._source.timestamp;
-
-      for (let j = 0; j < events.length; j++) {
-        const event = events[j];
+      for (let j = 0; j < batch[i]._source.events.length; j++) {
+        const event = batch[i]._source.events[j];
 
         if (event.address !== marketplaceAddress) {
           continue;
         }
 
         const marketplaceEvent = new MarketplaceEventsEntity({
-          txHash: txHash,
-          originalTxHash: originalTxHash,
+          txHash: batch[i]._id,
+          originalTxHash: batch[i]._source.originalTxHash,
           order: event.order,
           marketplaceAddress: marketplaceAddress,
-          timestamp: timestamp,
+          timestamp: batch[i]._source.timestamp,
           data: event,
         });
         marketplaceEvents.push(marketplaceEvent);
