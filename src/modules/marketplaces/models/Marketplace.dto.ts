@@ -41,8 +41,7 @@ export class Marketplace {
   @Field({ nullable: true })
   isPaused: boolean;
 
-  @Field({ nullable: true })
-  lastIndexTimestamp: number;
+  lastIndexTimestamp?: number;
 
   constructor(init?: Partial<Marketplace>) {
     Object.assign(this, init);
