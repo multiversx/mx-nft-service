@@ -407,13 +407,6 @@ export class PersistenceService {
     );
   }
 
-  async getMarketplacesByKey(key: string): Promise<MarketplaceEntity> {
-    return await this.execute(
-      this.getMarketplacesByKey.name,
-      this.marketplaceRepository.getMarketplaceByKey(key),
-    );
-  }
-
   async updateMarketplaceLastIndexTimestampByAddress(
     address: string,
     lastIndexTimestamp: number,

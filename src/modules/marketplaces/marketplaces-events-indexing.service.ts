@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
-import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
 import { ElrondElasticService } from 'src/common';
@@ -28,12 +27,13 @@ export class MarketplaceEventsIndexingService {
     await Locker.lock(
       'reindexAllMarketplaceEvents',
       async () => {
-        const [marketplaces] = await this.persistenceService.getMarketplaces();
-        for (let i = 0; i < marketplaces.length; i++) {
+        let [marketplaces] = await this.persistenceService.getMarketplaces();
+        let marketplaceAddresses = [
+          ...new Set(marketplaces.map((marketplace) => marketplace.address)),
+        ];
+        for (let i = 0; i < marketplaceAddresses.length; i++) {
           await this.reindexMarketplaceEvents(
-            new MarketplaceFilters({
-              marketplaceAddress: marketplaces[i].address,
-            }),
+            marketplaceAddresses[i],
             beforeTimestamp,
             afterTimestamp,
           );
@@ -48,18 +48,10 @@ export class MarketplaceEventsIndexingService {
       ...new Set(events.map((event) => event.address)),
     ];
     for (let i = 0; i < marketplaces.length; i++) {
-      const [
-        marketplaceKey,
-        marketplaceAddress,
-        marketplaceLastIndexTimestamp,
-      ] = await this.getMarketplaceKeyAddressAndLastIndexTimestamp(
-        new MarketplaceFilters({ marketplaceAddress: marketplaces[i] }),
-      );
+      const marketplaceLastIndexTimestamp =
+        await this.getMarketplaceLastIndexTimestamp(marketplaces[i]);
       await this.reindexMarketplaceEvents(
-        new MarketplaceFilters({
-          marketplaceAddress,
-          marketplaceKey,
-        }),
+        marketplaces[i],
         DateUtils.getCurrentTimestamp(),
         marketplaceLastIndexTimestamp,
       );
@@ -67,31 +59,15 @@ export class MarketplaceEventsIndexingService {
   }
 
   async reindexMarketplaceEvents(
-    filters: MarketplaceFilters,
+    marketplaceAddress: string,
     beforeTimestamp?: number,
     afterTimestamp?: number,
     stopIfDuplicates?: boolean,
     marketplaceLastIndexTimestamp?: number,
   ): Promise<[number, number]> {
     try {
-      if (!filters.marketplaceAddress && !filters.marketplaceKey) {
-        throw new Error('Marketplace Address or Key should be provided.');
-      }
-
       if (beforeTimestamp < afterTimestamp) {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
-      }
-
-      let marketplaceAddress = filters.marketplaceAddress;
-      let marketplaceKey = filters.marketplaceKey;
-
-      if (
-        !marketplaceAddress ||
-        !marketplaceKey ||
-        !marketplaceLastIndexTimestamp
-      ) {
-        [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
-          await this.getMarketplaceKeyAddressAndLastIndexTimestamp(filters);
       }
 
       const size = constants.getLogsFromElasticBatchSize;
@@ -119,7 +95,6 @@ export class MarketplaceEventsIndexingService {
 
         const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
           batch,
-          marketplaceKey,
           marketplaceAddress,
         );
 
@@ -141,56 +116,24 @@ export class MarketplaceEventsIndexingService {
 
       return [newestTimestamp, oldestTimestamp];
     } catch (error) {
-      this.logger.error(`Error when trying to reindex marketplace events`, {
+      this.logger.error('Error when reindexing marketplace events', {
         path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
-        error: error.message,
-        marketplace: filters.marketplaceKey ?? filters.marketplaceAddress,
+        marketplaceAddress: marketplaceAddress,
       });
     }
   }
 
-  private async getMarketplaceKeyAddressAndLastIndexTimestamp(
-    filters: MarketplaceFilters,
-  ): Promise<[string, string, number]> {
-    let marketplaceAddress = filters.marketplaceAddress;
-    let marketplaceKey = filters.marketplaceKey;
-    let marketplaceLastIndexTimestamp: number;
-
-    if (!marketplaceAddress) {
-      marketplaceAddress = await this.getMarketplaceAddressByKey(
-        marketplaceKey,
-      );
-    }
-
-    [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp] =
-      await this.getMarketplaceKeyAndLastIndexTimestamp(marketplaceAddress);
-
-    return [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp];
-  }
-
-  private async getMarketplaceKeyAndLastIndexTimestamp(
+  private async getMarketplaceLastIndexTimestamp(
     marketplaceAddress: string,
-  ): Promise<[string, string, number]> {
+  ): Promise<number> {
     const marketplace = await this.marketplaceService.getMarketplaceByAddress(
       marketplaceAddress,
     );
-    const marketplaceKey = marketplace.key;
-    const marketplaceLastIndexTimestamp = marketplace.lastIndexTimestamp;
-    return [marketplaceKey, marketplaceAddress, marketplaceLastIndexTimestamp];
-  }
-
-  private async getMarketplaceAddressByKey(
-    marketplaceKey: string,
-  ): Promise<string> {
-    const marketplaces = await this.marketplaceService.getMarketplaceByKey(
-      marketplaceKey,
-    );
-    return marketplaces[0];
+    return marketplace.lastIndexTimestamp;
   }
 
   private async saveEventsToDb(
     batch: HitResponse[],
-    marketplaceKey: string,
     marketplaceAddress: string,
   ): Promise<[number, number]> {
     let marketplaceEvents: MarketplaceEventsEntity[] = [];
@@ -210,10 +153,10 @@ export class MarketplaceEventsIndexingService {
         }
 
         const marketplaceEvent = new MarketplaceEventsEntity({
-          tx_hash: txHash,
-          original_tx_hash: originalTxHash,
+          txHash: txHash,
+          originalTxHash: originalTxHash,
           order: event.order,
-          marketplace_key: marketplaceKey,
+          marketplaceAddress: marketplaceAddress,
           timestamp: timestamp,
           data: event,
         });

@@ -39,7 +39,7 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
   ): Promise<MarketplaceEventsEntity[]> {
     return await this.find({
       where: {
-        marketplace_key: marketplaceKey,
+        marketplaceAddress: marketplaceKey,
         timestamp: MoreThan(afterTimestamp) && LessThan(beforeTimestamp),
       },
     });
