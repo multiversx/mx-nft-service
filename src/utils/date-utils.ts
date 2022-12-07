@@ -41,8 +41,10 @@ export class DateUtils {
     return d.toISOString();
   }
 
-  static isIsoToday(isoDate: string): boolean {
-    if (new Date(isoDate).getDate() === new Date().getDate()) {
+  static isTimestampToday(timestamp: number): boolean {
+    var today = new Date().setHours(0, 0, 0, 0) / 1000;
+    var thatDay = new Date(timestamp * 1000).setHours(0, 0, 0, 0) / 1000;
+    if (today === thatDay) {
       return true;
     }
   }

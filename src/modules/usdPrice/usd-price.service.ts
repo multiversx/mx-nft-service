@@ -116,13 +116,8 @@ export class UsdPriceService {
     return null;
   }
 
-  async getCachedEgldHistoricalPrice(
-    timestamp: number | string,
-  ): Promise<string> {
-    const isoDateOnly =
-      typeof timestamp === 'number'
-        ? DateUtils.timestampToIsoStringWithoutTime(timestamp)
-        : timestamp;
+  async getCachedEgldHistoricalPrice(timestamp: number): Promise<string> {
+    const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(
       elrondConfig.wegld,
       isoDateOnly,
@@ -132,7 +127,7 @@ export class UsdPriceService {
       cacheKey,
       async () =>
         await this.elrondToolsService.getEgldHistoricalPrice(isoDateOnly),
-      DateUtils.isIsoToday(isoDateOnly)
+      DateUtils.isTimestampToday(timestamp)
         ? TimeConstants.oneDay
         : CacheInfo.TokenHistoricalPrice.ttl,
     );
@@ -143,7 +138,7 @@ export class UsdPriceService {
     timestamp: number,
   ): Promise<string> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
-    const egldPriceUsd = await this.getCachedEgldHistoricalPrice(isoDateOnly);
+    const egldPriceUsd = await this.getCachedEgldHistoricalPrice(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(
       firstToken,
       isoDateOnly,
@@ -157,7 +152,7 @@ export class UsdPriceService {
           isoDateOnly,
           egldPriceUsd,
         ),
-      DateUtils.isIsoToday(isoDateOnly)
+      DateUtils.isTimestampToday(timestamp)
         ? TimeConstants.oneDay
         : CacheInfo.TokenHistoricalPrice.ttl,
     );
