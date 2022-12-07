@@ -116,7 +116,30 @@ export class UsdPriceService {
     return null;
   }
 
-  async getCachedEgldHistoricalPrice(timestamp: number): Promise<string> {
+  async getTokenPriceUsd(
+    token: string,
+    amount: string,
+    timestamp: number,
+  ): Promise<string> {
+    if (token === elrondConfig.egld) {
+      return computeUsdAmount(
+        await this.getCachedEgldHistoricalPrice(timestamp),
+        amount,
+        elrondConfig.decimals,
+      );
+    }
+
+    const tokenPriceUsd = await this.getCachedTokenHistoricalPriceByEgld(
+      token,
+      timestamp,
+    );
+    const tokenData = await this.getCachedTokenData(token);
+    return computeUsdAmount(tokenPriceUsd, amount, tokenData.decimals);
+  }
+
+  private async getCachedEgldHistoricalPrice(
+    timestamp: number,
+  ): Promise<string> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(
       elrondConfig.wegld,
@@ -133,22 +156,19 @@ export class UsdPriceService {
     );
   }
 
-  async getCachedTokenHistoricalPriceByEgld(
-    firstToken: string,
+  private async getCachedTokenHistoricalPriceByEgld(
+    token: string,
     timestamp: number,
   ): Promise<string> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const egldPriceUsd = await this.getCachedEgldHistoricalPrice(timestamp);
-    const cacheKey = this.getTokenHistoricalPriceCacheKey(
-      firstToken,
-      isoDateOnly,
-    );
+    const cacheKey = this.getTokenHistoricalPriceCacheKey(token, isoDateOnly);
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       cacheKey,
       async () =>
         await this.elrondToolsService.getTokenHistoricalPriceByEgld(
-          firstToken,
+          token,
           isoDateOnly,
           egldPriceUsd,
         ),
@@ -159,9 +179,9 @@ export class UsdPriceService {
   }
 
   private getTokenHistoricalPriceCacheKey(
-    tokenIdentifier: string,
+    token: string,
     isoDateOnly: string,
   ): string {
-    return generateCacheKeyFromParams(tokenIdentifier, isoDateOnly);
+    return generateCacheKeyFromParams(token, isoDateOnly);
   }
 }

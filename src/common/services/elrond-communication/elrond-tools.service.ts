@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { elrondConfig } from 'src/config';
-import { computeUsdAmount } from 'src/utils/helpers';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import * as Agent from 'agentkeepalive';
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { nominateAmount } from 'src/utils/formatters';
 import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class ElrondToolsService {
@@ -53,23 +52,18 @@ export class ElrondToolsService {
   }
 
   async getTokenHistoricalPriceByEgld(
-    firstToken: string,
+    token: string,
     isoDateOnly: string,
     cachedEgldPriceUsd?: string,
   ): Promise<string> {
     const priceInEgld = await this.getTokenPriceByTimestamp(
-      firstToken,
+      token,
       elrondConfig.wegld,
       isoDateOnly,
     );
     const egldPriceUsd =
       cachedEgldPriceUsd ?? (await this.getEgldHistoricalPrice(isoDateOnly));
-    const usdAmount = computeUsdAmount(
-      egldPriceUsd,
-      priceInEgld,
-      elrondConfig.decimals,
-    );
-    return nominateAmount(usdAmount);
+    return new BigNumber(priceInEgld).multipliedBy(egldPriceUsd).toFixed();
   }
 
   private getTokenPriceByTimestampQuery(
@@ -99,7 +93,7 @@ export class ElrondToolsService {
       isoDateOnly,
     );
     const res = await this.doPost(this.getTokenPriceByTimestamp.name, query);
-    return res.data.trading.pair.price[0].last;
+    return res.data.trading.pair.price[0].last.toFixed(20);
   }
 
   private async getConfig(): Promise<AxiosRequestConfig> {
