@@ -1,7 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { ElrondApiService } from './elrond-api.service';
-import { ElrondDataService } from './elrond-data.service';
 import { ElrondElasticService } from './elrond-elastic.service';
 import { ElrondFeedService } from './elrond-feed.service';
 import { ElrondIdentityService } from './elrond-identity.service';
@@ -20,7 +19,6 @@ import { SlackReportService } from './slack-report.service';
     ElrondStatsService,
     ElrondElasticService,
     ElrondIdentityService,
-    ElrondDataService,
     ElrondFeedService,
     SlackReportService,
   ],
@@ -32,7 +30,6 @@ import { SlackReportService } from './slack-report.service';
     ElrondApiService,
     ElrondPrivateApiService,
     ElrondIdentityService,
-    ElrondDataService,
     ElrondFeedService,
     SlackReportService,
   ],
