@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { ElrondApiService, ElrondToolsService } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import * as Redis from 'ioredis';
@@ -8,6 +8,8 @@ import { TimeConstants } from 'src/utils/time-utils';
 import { cacheConfig, elrondConfig } from 'src/config';
 import denominate from 'src/utils/formatters';
 import { computeUsdAmount } from 'src/utils/helpers';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class UsdPriceService {
@@ -16,6 +18,7 @@ export class UsdPriceService {
   constructor(
     private cacheService: CachingService,
     private readonly elrondApiService: ElrondApiService,
+    private readonly elrondToolsService: ElrondToolsService,
   ) {
     this.persistentRedisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -111,5 +114,55 @@ export class UsdPriceService {
       return usdAmount;
     }
     return null;
+  }
+
+  async getCachedEgldHistoricalPrice(
+    timestamp: number | string,
+  ): Promise<string> {
+    const isoDateOnly =
+      typeof timestamp === 'number'
+        ? DateUtils.timestampToIsoStringWithoutTime(timestamp)
+        : timestamp;
+    const cacheKey = this.getTokenHistoricalPriceCacheKey(
+      elrondConfig.wegld,
+      isoDateOnly,
+    );
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      cacheKey,
+      async () =>
+        await this.elrondToolsService.getEgldHistoricalPrice(isoDateOnly),
+      CacheInfo.TokenHistoricalPrice.ttl,
+    );
+  }
+
+  async getCachedTokenHistoricalPriceByEgld(
+    firstToken: string,
+    timestamp: number,
+  ): Promise<string> {
+    const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
+    const egldPriceUsd = await this.getCachedEgldHistoricalPrice(isoDateOnly);
+    const cacheKey = this.getTokenHistoricalPriceCacheKey(
+      firstToken,
+      isoDateOnly,
+    );
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      cacheKey,
+      async () =>
+        await this.elrondToolsService.getTokenHistoricalPriceByEgld(
+          firstToken,
+          isoDateOnly,
+          egldPriceUsd,
+        ),
+      CacheInfo.TokenHistoricalPrice.ttl,
+    );
+  }
+
+  private getTokenHistoricalPriceCacheKey(
+    tokenIdentifier: string,
+    isoDateOnly: string,
+  ): string {
+    return generateCacheKeyFromParams(tokenIdentifier, isoDateOnly);
   }
 }

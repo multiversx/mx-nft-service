@@ -28,4 +28,18 @@ export class ApiConfigService {
   getMongoDbPassword(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_PASSWORD');
   }
+
+  getNativeAuthKey(): string {
+    return this.getGenericConfig<string>('NATIVE_AUTH_PEM_KEY');
+  }
+
+  getApiUrl(): string {
+    return this.getGenericConfig<string>('ELROND_API');
+  }
+
+  getKeepAliveTimeoutDownstream(): number {
+    return parseInt(
+      this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
+    );
+  }
 }
