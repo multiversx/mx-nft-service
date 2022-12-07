@@ -6,6 +6,7 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -13,6 +14,7 @@ export class AdminOperationsResolver {
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
+    private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -89,6 +91,31 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async reindexMarketplaceEvents(
+    @Args('marketplaceAddress')
+    marketplaceAddress: string,
+    @Args('beforeTimestamp', { nullable: true })
+    beforeTimestamp?: number,
+    @Args('afterTimestamp', { nullable: true })
+    afterTimestamp?: number,
+    @Args('stopIfDuplicates', { nullable: true })
+    stopIfDuplicates?: boolean,
+  ): Promise<boolean> {
+    try {
+      await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
+        marketplaceAddress,
+        beforeTimestamp,
+        afterTimestamp,
+        stopIfDuplicates,
+      );
+      return true;
     } catch (error) {
       throw new ApolloError(error);
     }

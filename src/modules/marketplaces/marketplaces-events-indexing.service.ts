@@ -14,6 +14,7 @@ import {
   RangeGreaterThan,
   RangeLowerThan,
 } from '@elrondnetwork/erdnest';
+import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -24,6 +25,31 @@ export class MarketplaceEventsIndexingService {
     private readonly marketplacesCachingService: MarketplacesCachingService,
     private readonly elrondElasticService: ElrondElasticService,
   ) {}
+
+  async reindexAllMarketplaceEvents(
+    beforeTimestamp?: number,
+    afterTimestamp?: number,
+    stopIfDuplicates?: boolean,
+  ): Promise<void> {
+    await Locker.lock(
+      'reindexAllMarketplaceEvents',
+      async () => {
+        let [marketplaces] = await this.persistenceService.getMarketplaces();
+        let marketplaceAddresses = [
+          ...new Set(marketplaces.map((marketplace) => marketplace.address)),
+        ];
+        for (let i = 0; i < marketplaceAddresses.length; i++) {
+          await this.reindexMarketplaceEvents(
+            marketplaceAddresses[i],
+            beforeTimestamp,
+            afterTimestamp,
+            stopIfDuplicates,
+          );
+        }
+      },
+      true,
+    );
+  }
 
   async reindexLatestMarketplacesEvents(events: any[]): Promise<void> {
     const marketplaces: string[] = [
