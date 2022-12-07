@@ -40,4 +40,10 @@ export class DateUtils {
     d.setUTCHours(0, 0, 0, 0);
     return d.toISOString();
   }
+
+  static isIsoToday(isoDate: string): boolean {
+    if (new Date(isoDate).getDate() === new Date().getDate()) {
+      return true;
+    }
+  }
 }

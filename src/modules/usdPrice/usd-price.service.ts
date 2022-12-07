@@ -132,7 +132,9 @@ export class UsdPriceService {
       cacheKey,
       async () =>
         await this.elrondToolsService.getEgldHistoricalPrice(isoDateOnly),
-      CacheInfo.TokenHistoricalPrice.ttl,
+      DateUtils.isIsoToday(isoDateOnly)
+        ? TimeConstants.oneDay
+        : CacheInfo.TokenHistoricalPrice.ttl,
     );
   }
 
@@ -155,7 +157,9 @@ export class UsdPriceService {
           isoDateOnly,
           egldPriceUsd,
         ),
-      CacheInfo.TokenHistoricalPrice.ttl,
+      DateUtils.isIsoToday(isoDateOnly)
+        ? TimeConstants.oneDay
+        : CacheInfo.TokenHistoricalPrice.ttl,
     );
   }
 
