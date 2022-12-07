@@ -4,10 +4,16 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
 import { ElrondElasticService } from 'src/common';
 import { constants } from 'src/config';
-import { HitResponse } from 'src/common/services/elrond-communication/models/elastic-search';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { DateUtils } from 'src/utils/date-utils';
+import {
+  ElasticQuery,
+  ElasticSortOrder,
+  QueryType,
+  RangeGreaterThan,
+  RangeLowerThan,
+} from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
 
 @Injectable()
@@ -64,19 +70,18 @@ export class MarketplaceEventsIndexingService {
     afterTimestamp?: number,
     stopIfDuplicates?: boolean,
     marketplaceLastIndexTimestamp?: number,
-  ): Promise<[number, number]> {
+  ): Promise<void> {
     try {
       if (beforeTimestamp < afterTimestamp) {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
       }
 
-      const [newestTimestamp, oldestTimestamp] =
-        await this.getEventsAndSaveToDb(
-          marketplaceAddress,
-          beforeTimestamp,
-          afterTimestamp,
-          stopIfDuplicates,
-        );
+      const [newestTimestamp] = await this.getEventsAndSaveToDb(
+        marketplaceAddress,
+        beforeTimestamp,
+        afterTimestamp,
+        stopIfDuplicates,
+      );
 
       if (
         !marketplaceLastIndexTimestamp ||
@@ -88,8 +93,6 @@ export class MarketplaceEventsIndexingService {
         );
         await this.marketplacesCachingService.invalidateMarketplacesCache();
       }
-
-      return [newestTimestamp, oldestTimestamp];
     } catch (error) {
       this.logger.error('Error when reindexing marketplace events', {
         path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
@@ -100,38 +103,46 @@ export class MarketplaceEventsIndexingService {
 
   private async getEventsAndSaveToDb(
     marketplaceAddress: string,
-    newestTimestamp: number,
-    oldestTimestamp: number,
+    beforeTimestamp: number,
+    afterTimestamp: number,
     stopIfDuplicates?: boolean,
   ): Promise<[number, number]> {
-    do {
-      const [batch, batchSize, timestamp] =
-        await this.elrondElasticService.getAddressHistory(
+    let oldestTimestamp: number;
+    let newestTimestamp: number;
+
+    const query = ElasticQuery.create()
+      .withMustCondition(
+        QueryType.Nested('events', { 'events.address': marketplaceAddress }),
+      )
+      .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
+      .withRangeFilter('timestamp', new RangeGreaterThan(afterTimestamp))
+      .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
+      .withPagination({
+        from: 0,
+        size: constants.getLogsFromElasticBatchSize,
+      });
+
+    await this.elrondElasticService.getScrollableList(
+      'logs',
+      'identifier',
+      query,
+      async (events) => {
+        if (!newestTimestamp) {
+          newestTimestamp = events[0].timestamp;
+        }
+
+        oldestTimestamp = events[events.length - 1].timestamp;
+
+        const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
+          events,
           marketplaceAddress,
-          constants.getLogsFromElasticBatchSize,
-          oldestTimestamp,
-          newestTimestamp,
         );
 
-      if (batchSize === 0) {
-        break;
-      }
-
-      oldestTimestamp = timestamp;
-
-      if (!newestTimestamp) {
-        newestTimestamp = batch[0]._source.timestamp;
-      }
-
-      const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
-        batch,
-        marketplaceAddress,
-      );
-
-      if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
-        break;
-      }
-    } while (true);
+        if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+          return false;
+        }
+      },
+    );
 
     return [newestTimestamp, oldestTimestamp];
   }
@@ -146,25 +157,25 @@ export class MarketplaceEventsIndexingService {
   }
 
   private async saveEventsToDb(
-    batch: HitResponse[],
+    batch: any,
     marketplaceAddress: string,
   ): Promise<[number, number]> {
     let marketplaceEvents: MarketplaceEventsEntity[] = [];
 
     for (let i = 0; i < batch.length; i++) {
-      for (let j = 0; j < batch[i]._source.events.length; j++) {
-        const event = batch[i]._source.events[j];
+      for (let j = 0; j < batch[i].events.length; j++) {
+        const event = batch[i].events[j];
 
         if (event.address !== marketplaceAddress) {
           continue;
         }
 
         const marketplaceEvent = new MarketplaceEventsEntity({
-          txHash: batch[i]._id,
-          originalTxHash: batch[i]._source.originalTxHash,
+          txHash: batch[i].identifier,
+          originalTxHash: batch[i].originalTxHash,
           order: event.order,
           marketplaceAddress: marketplaceAddress,
-          timestamp: batch[i]._source.timestamp,
+          timestamp: batch[i].timestamp,
           data: event,
         });
         marketplaceEvents.push(marketplaceEvent);
