@@ -65,6 +65,13 @@ export class MarketplacesCachingService {
     );
   }
 
+  public async invalidateMarketplacesCache() {
+    await this.cacheService.deleteInCache(
+      this.redisClient,
+      CacheInfo.AllMarketplaces.key,
+    );
+  }
+
   public async invalidateCache() {
     await this.cacheService.deleteInCache(
       this.redisClient,
