@@ -72,6 +72,7 @@ export class MarketplaceEventsIndexingService {
     } catch (error) {
       this.logger.error('Error when reindexing marketplace events', {
         path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
+        error: error.message,
         marketplaceAddress: marketplaceAddress,
       });
     }
@@ -103,6 +104,10 @@ export class MarketplaceEventsIndexingService {
       'identifier',
       query,
       async (events) => {
+        if (!events || events.length === 0) {
+          return false;
+        }
+
         if (!newestTimestamp) {
           newestTimestamp = events[0].timestamp;
         }
