@@ -15,9 +15,9 @@ export class AssetsHistoryAuctionService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: event.address,
+          address: event.topics[5].base64ToBech32(),
           itemsCount: event.topics[2],
-          sender: event.topics[5].base64ToBech32(),
+          sender: event.address,
         });
       }
       case AuctionEventEnum.WithdrawEvent: {
