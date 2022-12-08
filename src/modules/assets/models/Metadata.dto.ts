@@ -43,7 +43,8 @@ export class AttributeType {
         if (attribute === Object(attribute)) {
           let data: KeyValueType[] = [];
           if (
-            (attribute['trait_type'] || attribute['name']) &&
+            (attribute['trait_type'] !== undefined ||
+              attribute['name'] !== undefined) &&
             attribute['value'] !== undefined
           ) {
             data.push(
