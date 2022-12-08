@@ -792,7 +792,7 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
-  updateNftTraits(identifier: String!): Boolean!
+  updateNftTraits(identifier: String!): UpdateNfttraitsResponse!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
@@ -1211,6 +1211,12 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
+}
+
+enum UpdateNfttraitsResponse {
+  CollectionTraitsUpdated
+  NftTraitsUpdated
+  NftTraitsValid
 }
 
 """The `Upload` scalar type represents a file upload."""

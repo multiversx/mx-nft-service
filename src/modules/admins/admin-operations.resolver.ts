@@ -6,6 +6,7 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { UpdateNfttraitsResponse } from '../nft-traits/models/update-nft-traits-response';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -81,12 +82,12 @@ export class AdminOperationsResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UpdateNfttraitsResponse)
   @UseGuards(GqlAdminAuthGuard)
   async updateNftTraits(
     @Args('identifier')
     identifier: string,
-  ): Promise<boolean> {
+  ): Promise<UpdateNfttraitsResponse> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {

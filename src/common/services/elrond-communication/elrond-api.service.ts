@@ -24,9 +24,7 @@ import { ElrondApiAbout } from './models/elrond-api-about.model';
 export class ElrondApiService {
   private apiProvider: ApiNetworkProvider;
 
-  constructor(
-    private readonly logger: Logger,
-  ) {
+  constructor(private readonly logger: Logger) {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,
       maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
@@ -701,6 +699,7 @@ export class ElrondApiService {
   }
 
   async getCollectionNftsCount(ticker: string): Promise<number> {
+    console.log('getCollectionNftsCount...', ticker);
     return await this.doGetGeneric(
       this.getCollectionNftsCount.name,
       `collections/${ticker}/nfts/count`,
