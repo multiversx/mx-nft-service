@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { elrondConfig } from 'src/config';
 import { ApiConfigService } from 'src/utils/api.config.service';
-import { PerformanceProfiler } from '@elrondnetwork/erdnest';
-import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
 import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
@@ -88,7 +86,6 @@ export class ElrondToolsService {
   }
 
   private async doPost(name: string, query: any): Promise<any> {
-    const profiler = new PerformanceProfiler(name);
     try {
       const config = await this.getConfig();
 
@@ -99,12 +96,6 @@ export class ElrondToolsService {
         error: error.message,
         path: `${ElrondToolsService.name}.${this.doPost.name}`,
       });
-    } finally {
-      profiler.stop();
-      MetricsCollector.setExternalCall(
-        ElrondToolsService.name,
-        profiler.duration,
-      );
     }
   }
 }
