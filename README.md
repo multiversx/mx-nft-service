@@ -1,4 +1,4 @@
-GraphQl service to provide informations regarding nfts and auctions on Elrond Blockchain
+GraphQl service to provide informations regarding nfts and auctions on MultiversX Blockchain
 
 ## Dependencies
 
@@ -13,7 +13,7 @@ After running the sample, you can stop the Docker container with `docker-compose
 
 ## Available Scripts
 
-This is an Elrond project built on Nest.js framework.
+This is an MultiversX project built on Nest.js framework.
 
 ### `npm run start:prod`
 
