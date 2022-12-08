@@ -11,7 +11,11 @@ export class MarketplaceEventsIndexingInput {
     input: MarketplaceEventsIndexingArgs,
   ): MarketplaceEventsIndexingInput {
     return new MarketplaceEventsIndexingInput({
-      ...input,
+      marketplaceAddress: input.marketplaceAddress,
+      beforeTimestamp: input.beforeTimestamp,
+      afterTimestamp: input.afterTimestamp,
+      stopIfDuplicates: input.stopIfDuplicates,
+      marketplaceLastIndexTimestamp: input.marketplaceLastIndexTimestamp,
     });
   }
 
