@@ -123,6 +123,9 @@ async function bootstrap() {
   logger.log(
     `Elastic nft scams are active: ${process.env.ENABLE_SCAM_CRONJOBS}`,
   );
+  logger.log(
+    `Marketplace events indexing is active: ${process.env.ENABLE_MARKETPLACE_EVENTS}`,
+  );
 }
 
 bootstrap();

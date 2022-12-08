@@ -46,4 +46,10 @@ export class ApiConfigService {
       this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
     );
   }
+
+  isReindexMarketplaceEventsFlagActive(): boolean {
+    return (
+      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
+    );
+  }
 }
