@@ -21,18 +21,22 @@ Runs the app in the production mode.
 Make requests to [http://localhost:3005/graphql](http://localhost:3005/graphql).
 
 ## Running the app
+1. At the root folder run (make sure you have node v16.x.x)
 
+```bash
+$ npm install
+```
+2. Create .env file from .env.example (all flags are disabled by default)
+
+3. Start the app
 ```bash
 # development debug mode
 $ npm run start:debug
-
 # development mode
 $ npm run start:dev
-
 # production mode
 $ npm run start:prod
 ```
-
 It depends on the following external systems:
 - gateway: 
   - interaction with the indexed marketplace
@@ -43,10 +47,20 @@ It depends on the following external systems:
 - api: 
   - to get information regarding nfts and collections
   - docs: [https://docs.elrond.com/sdk-and-tools/rest-api/api-elrond-com](https://docs.elrond.com/sdk-and-tools/rest-api/api-elrond-com)
-
 It uses on the following internal systems:
 - redis: used to cache various data, for performance purposes
 - rabbitmq: pub/sub for sending mainly NFT process information
+
+A service instance can be started with the following behavior:
+
+- public API: provides graphQL queries for the consumers
+- private API: used to report prometheus metrics & health checks
+- rabbitMq: used to report prometheus metrics & health checks
+- claimable auctions: update status for auctions in db for auctions that reached deadline
+- cache warmer: used to proactively fetch data & pushes it to cache, to improve performance & scalability
+- cache invalidation - uses rabbitMq to invalidate cache an multiple instances
+- elastic updater: used to attach various extra information to items in the elasticsearch, for not having to fetch associated data from other external systems when performing listing requests
+- multiple cronjobs: update data in elastic service for nsfw, rarity, traits, scam
 
 It depends on the following optional external systems:
 - events notifier rabbitmq: queue that pushes logs & events which are handled internally e.g. to trigger auctions indexing
