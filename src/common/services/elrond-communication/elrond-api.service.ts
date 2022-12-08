@@ -24,9 +24,7 @@ import { ElrondApiAbout } from './models/elrond-api-about.model';
 export class ElrondApiService {
   private apiProvider: ApiNetworkProvider;
 
-  constructor(
-    private readonly logger: Logger,
-  ) {
+  constructor(private readonly logger: Logger) {
     const keepAliveOptions = {
       maxSockets: elrondConfig.keepAliveMaxSockets,
       maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,

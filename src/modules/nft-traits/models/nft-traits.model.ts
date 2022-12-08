@@ -15,8 +15,8 @@ export class NftTrait {
 
   static fromNftMetadataAttribute(attribute: { [key: string]: string }) {
     return attribute &&
-      (attribute.trait_type || attribute.name) &&
-      attribute.value
+      (attribute.trait_type !== undefined || attribute.name !== undefined) &&
+      attribute.value !== undefined
       ? new NftTrait({
           name: attribute.trait_type ?? attribute.name,
           value: attribute.value,

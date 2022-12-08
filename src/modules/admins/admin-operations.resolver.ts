@@ -9,6 +9,7 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
 import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
 import { MarketplaceEventsIndexingRequest } from '../marketplaces/models/MarketplaceEventsIndexingRequest';
+import { UpdateNftTraitsResponse } from '../nft-traits/models/update-nft-traits-response';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -85,12 +86,12 @@ export class AdminOperationsResolver {
     }
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => UpdateNftTraitsResponse)
   @UseGuards(GqlAdminAuthGuard)
   async updateNftTraits(
     @Args('identifier')
     identifier: string,
-  ): Promise<boolean> {
+  ): Promise<UpdateNftTraitsResponse> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
