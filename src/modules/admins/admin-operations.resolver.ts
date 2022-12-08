@@ -100,12 +100,12 @@ export class AdminOperationsResolver {
   @Mutation(() => Boolean)
   @UseGuards(GqlAdminAuthGuard)
   async reindexMarketplaceEvents(
-    @Args('args')
-    args: MarketplaceEventsIndexingArgs,
+    @Args('input')
+    input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
     try {
       await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
-        args,
+        input,
       );
       return true;
     } catch (error) {

@@ -72,21 +72,21 @@ export class MarketplaceEventsIndexingService {
   }
 
   async reindexMarketplaceEvents(
-    args: MarketplaceEventsIndexingArgs,
+    input: MarketplaceEventsIndexingArgs,
   ): Promise<void> {
     try {
-      if (args.beforeTimestamp < args.afterTimestamp) {
+      if (input.beforeTimestamp < input.afterTimestamp) {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
       }
 
-      const [newestTimestamp] = await this.getEventsAndSaveToDb(args);
+      const [newestTimestamp] = await this.getEventsAndSaveToDb(input);
 
       if (
-        !args.marketplaceLastIndexTimestamp ||
-        newestTimestamp > args.marketplaceLastIndexTimestamp
+        !input.marketplaceLastIndexTimestamp ||
+        newestTimestamp > input.marketplaceLastIndexTimestamp
       ) {
         await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
-          args.marketplaceAddress,
+          input.marketplaceAddress,
           newestTimestamp,
         );
         await this.marketplacesCachingService.invalidateMarketplacesCache();
@@ -95,13 +95,13 @@ export class MarketplaceEventsIndexingService {
       this.logger.error('Error when reindexing marketplace events', {
         path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
         error: error.message,
-        marketplaceAddress: args.marketplaceAddress,
+        marketplaceAddress: input.marketplaceAddress,
       });
     }
   }
 
   private async getEventsAndSaveToDb(
-    args: MarketplaceEventsIndexingArgs,
+    input: MarketplaceEventsIndexingArgs,
   ): Promise<[number, number]> {
     let oldestTimestamp: number;
     let newestTimestamp: number;
@@ -109,11 +109,11 @@ export class MarketplaceEventsIndexingService {
     const query = ElasticQuery.create()
       .withMustCondition(
         QueryType.Nested('events', {
-          'events.address': args.marketplaceAddress,
+          'events.address': input.marketplaceAddress,
         }),
       )
-      .withRangeFilter('timestamp', new RangeLowerThan(args.beforeTimestamp))
-      .withRangeFilter('timestamp', new RangeGreaterThan(args.afterTimestamp))
+      .withRangeFilter('timestamp', new RangeLowerThan(input.beforeTimestamp))
+      .withRangeFilter('timestamp', new RangeGreaterThan(input.afterTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
       .withPagination({
         from: 0,
@@ -137,10 +137,10 @@ export class MarketplaceEventsIndexingService {
 
         const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
           events,
-          args.marketplaceAddress,
+          input.marketplaceAddress,
         );
 
-        if (args.stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+        if (input.stopIfDuplicates && savedItemsCount !== totalEventsCount) {
           return false;
         }
       },
