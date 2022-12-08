@@ -699,7 +699,6 @@ export class ElrondApiService {
   }
 
   async getCollectionNftsCount(ticker: string): Promise<number> {
-    console.log('getCollectionNftsCount...', ticker);
     return await this.doGetGeneric(
       this.getCollectionNftsCount.name,
       `collections/${ticker}/nfts/count`,
