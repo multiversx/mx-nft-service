@@ -8,6 +8,7 @@ import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
 import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
+import { MarketplaceEventsIndexingInput } from '../marketplaces/models/MarketplaceEventsIndexingInput';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -105,7 +106,7 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
-        input,
+        MarketplaceEventsIndexingInput.fromMarketplaceEventsIndexingArgs(input),
       );
       return true;
     } catch (error) {

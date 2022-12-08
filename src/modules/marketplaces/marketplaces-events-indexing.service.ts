@@ -15,7 +15,7 @@ import {
   RangeLowerThan,
 } from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
-import { MarketplaceEventsIndexingArgs } from './models/MarketplaceEventsIndexingArgs';
+import { MarketplaceEventsIndexingInput } from './models/MarketplaceEventsIndexingInput';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -41,7 +41,7 @@ export class MarketplaceEventsIndexingService {
         ];
         for (let i = 0; i < marketplaceAddresses.length; i++) {
           await this.reindexMarketplaceEvents(
-            new MarketplaceEventsIndexingArgs({
+            new MarketplaceEventsIndexingInput({
               marketplaceAddress: marketplaceAddresses[i],
               beforeTimestamp,
               afterTimestamp,
@@ -62,7 +62,7 @@ export class MarketplaceEventsIndexingService {
       const marketplaceLastIndexTimestamp =
         await this.getMarketplaceLastIndexTimestamp(marketplaces[i]);
       await this.reindexMarketplaceEvents(
-        new MarketplaceEventsIndexingArgs({
+        new MarketplaceEventsIndexingInput({
           marketplaceAddress: marketplaces[i],
           beforeTimestamp: DateUtils.getCurrentTimestamp(),
           afterTimestamp: marketplaceLastIndexTimestamp,
@@ -72,7 +72,7 @@ export class MarketplaceEventsIndexingService {
   }
 
   async reindexMarketplaceEvents(
-    input: MarketplaceEventsIndexingArgs,
+    input: MarketplaceEventsIndexingInput,
   ): Promise<void> {
     try {
       if (input.beforeTimestamp < input.afterTimestamp) {
@@ -101,7 +101,7 @@ export class MarketplaceEventsIndexingService {
   }
 
   private async getEventsAndSaveToDb(
-    input: MarketplaceEventsIndexingArgs,
+    input: MarketplaceEventsIndexingInput,
   ): Promise<[number, number]> {
     let oldestTimestamp: number;
     let newestTimestamp: number;

@@ -792,7 +792,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
-  reindexMarketplaceEvents(args: MarketplaceEventsIndexingArgs!): Boolean!
+  reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!

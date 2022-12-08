@@ -16,8 +16,4 @@ export class MarketplaceEventsIndexingArgs {
 
   @Field(() => Number, { nullable: true })
   marketplaceLastIndexTimestamp: number;
-
-  constructor(init?: Partial<MarketplaceEventsIndexingArgs>) {
-    Object.assign(this, init);
-  }
 }
