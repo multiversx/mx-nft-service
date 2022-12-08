@@ -385,7 +385,11 @@ export class NftTraitsService {
         identifier: identifier,
         traits: Array.isArray(metadata?.attributes)
           ? metadata?.attributes
-              ?.filter((a) => (a.trait_type || a.name) && a.value !== undefined)
+              ?.filter(
+                (a) =>
+                  (a.trait_type !== undefined || a.name !== undefined) &&
+                  a.value !== undefined,
+              )
               ?.map(NftTrait.fromNftMetadataAttribute)
           : [],
       });
@@ -471,7 +475,9 @@ export class NftTraitsService {
                   ? nft.metadata?.attributes
                       ?.filter(
                         (a) =>
-                          (a.trait_type || a.name) && a.value !== undefined,
+                          (a.trait_type !== undefined ||
+                            a.name !== undefined) &&
+                          a.value !== undefined,
                       )
                       ?.map(NftTrait.fromNftMetadataAttribute)
                   : [],
