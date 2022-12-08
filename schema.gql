@@ -705,6 +705,14 @@ type MarketplaceEdge {
   node: Marketplace
 }
 
+input MarketplaceEventsIndexingArgs {
+  afterTimestamp: Float
+  beforeTimestamp: Float
+  marketplaceAddress: String!
+  marketplaceLastIndexTimestamp: Float
+  stopIfDuplicates: Boolean
+}
+
 input MarketplaceFilters {
   marketplaceAddress: String
   marketplaceKey: String
@@ -784,7 +792,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
-  reindexMarketplaceEvents(afterTimestamp: Float, beforeTimestamp: Float, marketplaceAddress: String!, stopIfDuplicates: Boolean): Boolean!
+  reindexMarketplaceEvents(args: MarketplaceEventsIndexingArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!

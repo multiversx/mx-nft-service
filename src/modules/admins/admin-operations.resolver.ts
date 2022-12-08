@@ -7,6 +7,7 @@ import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
+import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -99,21 +100,12 @@ export class AdminOperationsResolver {
   @Mutation(() => Boolean)
   @UseGuards(GqlAdminAuthGuard)
   async reindexMarketplaceEvents(
-    @Args('marketplaceAddress')
-    marketplaceAddress: string,
-    @Args('beforeTimestamp', { nullable: true })
-    beforeTimestamp?: number,
-    @Args('afterTimestamp', { nullable: true })
-    afterTimestamp?: number,
-    @Args('stopIfDuplicates', { nullable: true })
-    stopIfDuplicates?: boolean,
+    @Args('args')
+    args: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
     try {
       await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
-        marketplaceAddress,
-        beforeTimestamp,
-        afterTimestamp,
-        stopIfDuplicates,
+        args,
       );
       return true;
     } catch (error) {
