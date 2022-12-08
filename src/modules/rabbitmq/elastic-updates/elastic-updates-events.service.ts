@@ -116,12 +116,12 @@ export class ElasticUpdatesEventsService {
       }
 
       nft = await this.assetByIdentifierService.getAsset(identifier);
-      collectionTypes.collection = nft.type;
 
       if (!nft || Object.keys(nft).length === 0) {
         continue;
       }
 
+      collectionTypes.collection = nft.type;
       collectionsToUpdate.push(collection);
     }
 
@@ -172,12 +172,12 @@ export class ElasticUpdatesEventsService {
       }
 
       nft = await this.assetByIdentifierService.getAsset(identifier);
-      collectionTypes.collection = nft.type;
 
       if (!nft || Object.keys(nft).length === 0) {
         continue;
       }
 
+      collectionTypes.collection = nft.type;
       nftsToUpdate.push(identifier);
     }
 
