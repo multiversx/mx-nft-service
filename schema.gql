@@ -792,7 +792,7 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
-  updateNftTraits(identifier: String!): UpdateNfttraitsResponse!
+  updateNftTraits(identifier: String!): UpdateNftTraitsResponse!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
@@ -1213,7 +1213,7 @@ input TransferNftCreateRoleArgs {
   ownerAddress: String!
 }
 
-enum UpdateNfttraitsResponse {
+enum UpdateNftTraitsResponse {
   CollectionTraitsUpdated
   NftTraitsUpdated
   NftTraitsValid

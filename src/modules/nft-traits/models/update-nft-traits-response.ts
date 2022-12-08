@@ -7,5 +7,5 @@ export enum UpdateNftTraitsResponse {
 }
 
 registerEnumType(UpdateNftTraitsResponse, {
-  name: 'UpdateNfttraitsResponse',
+  name: 'UpdateNftTraitsResponse',
 });
