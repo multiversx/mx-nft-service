@@ -92,3 +92,7 @@ export function timestampToEpochAndRound(
 
   return [Math.trunc(epoch), Math.trunc(round)];
 }
+
+export async function sleep(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
