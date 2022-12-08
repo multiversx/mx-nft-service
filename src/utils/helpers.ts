@@ -92,3 +92,10 @@ export function timestampToEpochAndRound(
 
   return [Math.trunc(epoch), Math.trunc(round)];
 }
+export async function executeWhenPossible(fn: any): Promise<any> {
+  return new Promise((resolve, _) => {
+    setTimeout(() => {
+      resolve(fn());
+    }, 0);
+  });
+}

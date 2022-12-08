@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NftRarityEntity } from 'src/db/nft-rarity';
+import { executeWhenPossible } from 'src/utils/helpers';
 import { JaccardDistancesRarityService } from './algorithms/jaccard-distances.service';
 import { OpenRarityService } from './algorithms/open-rarity.service';
 import { TraitAndStatisticalRarityService } from './algorithms/trait-and-statistical-rarity.service';
@@ -20,25 +21,30 @@ export class NftRarityComputeService {
     nfts: NftRarityData[],
   ): Promise<NftRarityEntity[]> {
     const jdRarities: { [key: string]: { [key: string]: number } } =
-      await this.jaccardDistancesService.computeJaccardDistancesRarities(nfts);
+      await executeWhenPossible(() =>
+        this.jaccardDistancesService.computeJaccardDistancesRarities(nfts),
+      );
 
     const dnaSummary: {
       [key: string]: { [key: string]: { [key: string]: number } };
-    } = this.computeDNASummary(nfts, collectionSize);
+    } = await executeWhenPossible(() =>
+      this.computeDNASummary(nfts, collectionSize),
+    );
 
-    const openRarities = this.openRarityService.computeOpenRarities(
-      nfts,
-      dnaSummary,
+    const openRarities = await executeWhenPossible(() =>
+      this.openRarityService.computeOpenRarities(nfts, dnaSummary),
     );
 
     const tsrRarities: { [key: string]: { [key: string]: number } } =
-      await this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(
-        nfts,
-        dnaSummary,
-        [
-          RarityAlgorithmsEnum.TraitRarity,
-          RarityAlgorithmsEnum.StatisticalRarity,
-        ],
+      await executeWhenPossible(() =>
+        this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(
+          nfts,
+          dnaSummary,
+          [
+            RarityAlgorithmsEnum.TraitRarity,
+            RarityAlgorithmsEnum.StatisticalRarity,
+          ],
+        ),
       );
 
     return nfts.map((nft) => {
@@ -61,12 +67,12 @@ export class NftRarityComputeService {
     });
   }
 
-  private computeDNASummary(
+  private async computeDNASummary(
     nfts: NftRarityData[],
     collectionSize: number,
-  ): {
+  ): Promise<{
     [key: string]: { [key: string]: { [key: string]: number } };
-  } {
+  }> {
     let dnaSummary = {};
 
     for (const nft of nfts) {
