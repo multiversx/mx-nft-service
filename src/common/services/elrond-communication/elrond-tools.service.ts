@@ -1,43 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { elrondConfig } from 'src/config';
-import axios, { AxiosRequestConfig } from 'axios';
 import { ApiConfigService } from 'src/utils/api.config.service';
-import * as Agent from 'agentkeepalive';
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
 import BigNumber from 'bignumber.js';
+import { ApiService } from './api.service';
+import { ApiSettings } from './models/api-settings';
 
 @Injectable()
 export class ElrondToolsService {
   private url: string;
-  private config: AxiosRequestConfig;
   private nativeAuthSigner: NativeAuthSigner;
 
   constructor(
     private readonly logger: Logger,
     private readonly apiConfigService: ApiConfigService,
+    private readonly apiService: ApiService,
   ) {
-    this.url = process.env.ELROND_TOOLS;
-
-    const keepAliveOptions = {
-      maxSockets: elrondConfig.keepAliveMaxSockets,
-      maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
-      timeout: this.apiConfigService.getKeepAliveTimeoutDownstream(),
-      freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
-      keepAlive: true,
-    };
-    const httpAgent = new Agent(keepAliveOptions);
-    const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
-
-    this.config = {
-      timeout: elrondConfig.proxyTimeout,
-      httpAgent: elrondConfig.keepAlive ? httpAgent : null,
-      httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
-    };
-
+    this.url = this.apiConfigService.getToolsUrl();
     this.nativeAuthSigner = new NativeAuthSigner({
-      host: 'nft-service',
+      host: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
       privateKey: this.apiConfigService.getNativeAuthKey(),
     });
@@ -93,17 +76,14 @@ export class ElrondToolsService {
       isoDateOnly,
     );
     const res = await this.doPost(this.getTokenPriceByTimestamp.name, query);
+
     return res.data.trading.pair.price[0].last.toFixed(20);
   }
 
-  private async getConfig(): Promise<AxiosRequestConfig> {
+  private async getConfig(): Promise<ApiSettings> {
     const accessTokenInfo = await this.nativeAuthSigner.getToken();
     return {
-      ...this.config,
-      headers: {
-        Authorization: `Bearer ${accessTokenInfo.token}`,
-        authorization: `Bearer ${accessTokenInfo.token}`,
-      },
+      authorization: `Bearer ${accessTokenInfo.token}`,
     };
   }
 
@@ -111,7 +91,8 @@ export class ElrondToolsService {
     const profiler = new PerformanceProfiler(name);
     try {
       const config = await this.getConfig();
-      const response = await axios.post(this.url, { query }, config);
+
+      const response = await this.apiService.post(this.url, { query }, config);
       return response.data;
     } catch (error) {
       this.logger.error(`Error when trying to get run ${name}`, {

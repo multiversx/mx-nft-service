@@ -36,9 +36,9 @@ export class DateUtils {
   }
 
   static timestampToIsoStringWithoutTime(timestamp: number): string {
-    let d = new Date(timestamp * 1000);
-    d.setUTCHours(0, 0, 0, 0);
-    return d.toISOString();
+    let date = new Date(timestamp * 1000);
+    date.setUTCHours(0, 0, 0, 0);
+    return date.toISOString();
   }
 
   static isTimestampToday(timestamp: number): boolean {

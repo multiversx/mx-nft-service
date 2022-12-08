@@ -37,6 +37,10 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('ELROND_API');
   }
 
+  getToolsUrl(): string {
+    return this.getGenericConfig<string>('ELROND_TOOLS');
+  }
+
   getKeepAliveTimeoutDownstream(): number {
     return parseInt(
       this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),

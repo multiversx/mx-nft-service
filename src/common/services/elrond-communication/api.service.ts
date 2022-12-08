@@ -33,7 +33,9 @@ export class ApiService {
   }
 
   private getConfig(settings: ApiSettings): AxiosRequestConfig {
-    const headers = {};
+    const headers = {
+      origin: 'NftService',
+    };
     if (settings.authorization) {
       headers['authorization'] = settings.authorization;
     }
