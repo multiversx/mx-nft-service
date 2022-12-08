@@ -59,7 +59,6 @@ export class AssetsHistoryService {
     beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
-    console.log('no t from cache');
     let elasticLogs = [];
     const encodedCollection = Buffer.from(collection).toString('base64');
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
@@ -111,16 +110,6 @@ export class AssetsHistoryService {
         this.mapLogs(nonce, elasticLogs, index, historyLog);
       }
     }
-
-    // if (historyLog.length < limit && totalHits > 0) {
-    //   return await this.getHistoryLog(
-    //     collection,
-    //     nonce,
-    //     limit,
-    //     elasticTimestamp,
-    //     historyLog,
-    //   );
-    // }
 
     return historyLog;
   }
