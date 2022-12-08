@@ -109,6 +109,11 @@ export class CacheInfo {
     ttl: 10 * TimeConstants.oneMinute,
   };
 
+  static TokenHistoricalPrice: CacheInfo = {
+    key: 'tokenHistoricalPrice',
+    ttl: 30 * TimeConstants.oneDay,
+  };
+
   static CurrentPaymentTokens: CacheInfo = {
     key: 'currentPaymentTokens',
     ttl: 30 * TimeConstants.oneMinute,

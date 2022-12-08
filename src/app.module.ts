@@ -33,6 +33,7 @@ import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.m
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { NftScamModule } from './modules/nft-scam/nft-scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
+import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
 
 @Module({
   imports: [

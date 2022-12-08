@@ -44,7 +44,7 @@
     "@nestjs/schedule": "1.1.0",
     "@nestjs/typeorm": "8.0.3",
     "@types/cache-manager": "3.4.0",
-    "agentkeepalive": "4.1.4",
+    "agentkeepalive": "4.2.1",
     "amqp-connection-manager": "3.7.0",
     "amqplib": "0.8.0",
     "apollo-server": "3.11.1",
