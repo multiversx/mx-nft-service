@@ -1,11 +1,11 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum UpdateNfttraitsResponse {
+export enum UpdateNftTraitsResponse {
   NftTraitsValid = 'NftTraitsValid',
   NftTraitsUpdated = 'NftTraitsUpdated',
   CollectionTraitsUpdated = 'CollectionTraitsUpdated',
 }
 
-registerEnumType(UpdateNfttraitsResponse, {
+registerEnumType(UpdateNftTraitsResponse, {
   name: 'UpdateNfttraitsResponse',
 });

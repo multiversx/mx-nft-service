@@ -14,7 +14,7 @@ import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
 import { CollectionWithTraitsFlag } from './models/collection-with-traits-flag.model';
-import { UpdateNfttraitsResponse } from './models/update-nft-traits-response';
+import { UpdateNftTraitsResponse } from './models/update-nft-traits-response';
 
 @Injectable()
 export class NftTraitsService {
@@ -226,7 +226,7 @@ export class NftTraitsService {
   async updateNftTraits(
     identifier: string,
     nftsCount?: number,
-  ): Promise<UpdateNfttraitsResponse> {
+  ): Promise<UpdateNftTraitsResponse> {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     let [nftTraitsFromApi, nftTraitValuesFromElastic] = await Promise.all([
       this.getCollectionNftMetadataFromAPI(identifier),
@@ -238,7 +238,7 @@ export class NftTraitsService {
     }
 
     if (this.isCollectionTooBig(collection, nftsCount)) {
-      return UpdateNfttraitsResponse.NftTraitsValid;
+      return UpdateNftTraitsResponse.NftTraitsValid;
     }
 
     const areIdenticalTraits = this.areIdenticalTraits(
@@ -264,7 +264,7 @@ export class NftTraitsService {
         }),
         nftTraitsFromApi,
       );
-      return UpdateNfttraitsResponse.NftTraitsUpdated;
+      return UpdateNftTraitsResponse.NftTraitsUpdated;
     } else if (
       nftTraitsFromApi &&
       nftTraitValuesFromElastic &&
@@ -274,10 +274,10 @@ export class NftTraitsService {
         `${identifier} - Unknown missmatch cause => update collection trait summary`,
       );
       await this.updateCollectionTraits(collection);
-      return UpdateNfttraitsResponse.CollectionTraitsUpdated;
+      return UpdateNftTraitsResponse.CollectionTraitsUpdated;
     }
 
-    return UpdateNfttraitsResponse.NftTraitsValid;
+    return UpdateNftTraitsResponse.NftTraitsValid;
   }
 
   async mintCollectionNft(
@@ -433,7 +433,7 @@ export class NftTraitsService {
           let collectionsUpdatedDictionary: { [key: string]: boolean } = {};
 
           while (true) {
-            const [[nftsBatch, lastTimestamp], nftsFromelasticDictionary] =
+            const [[nftsBatch, lastTimestamp], nftsFromElasticDictionary] =
               await Promise.all([
                 this.apiService.getNftsWithAttributesBeforeTimestamp(
                   beforeTimestamp,
@@ -478,7 +478,7 @@ export class NftTraitsService {
               });
 
               let nftTraitsFromElastic =
-                nftsFromelasticDictionary[nft.identifier];
+                nftsFromElasticDictionary[nft.identifier];
               if (!nftTraitsFromElastic) {
                 nftTraitsFromElastic =
                   await this.nftTraitsElasticService.getNftValuesFromElastic(
@@ -501,7 +501,7 @@ export class NftTraitsService {
                   collectionsNftsCountDictionary[collection],
                 );
                 if (
-                  response === UpdateNfttraitsResponse.CollectionTraitsUpdated
+                  response === UpdateNftTraitsResponse.CollectionTraitsUpdated
                 ) {
                   if (collectionsUpdatedDictionary[collection]) {
                     throw new Error(
