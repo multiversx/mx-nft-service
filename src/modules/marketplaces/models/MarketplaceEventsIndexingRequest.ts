@@ -1,6 +1,6 @@
 import { MarketplaceEventsIndexingArgs } from './MarketplaceEventsIndexingArgs';
 
-export class MarketplaceEventsIndexingInput {
+export class MarketplaceEventsIndexingRequest {
   marketplaceAddress: string;
   beforeTimestamp?: number;
   afterTimestamp?: number;
@@ -9,8 +9,8 @@ export class MarketplaceEventsIndexingInput {
 
   static fromMarketplaceEventsIndexingArgs(
     input: MarketplaceEventsIndexingArgs,
-  ): MarketplaceEventsIndexingInput {
-    return new MarketplaceEventsIndexingInput({
+  ): MarketplaceEventsIndexingRequest {
+    return new MarketplaceEventsIndexingRequest({
       marketplaceAddress: input.marketplaceAddress,
       beforeTimestamp: input.beforeTimestamp,
       afterTimestamp: input.afterTimestamp,
@@ -19,7 +19,7 @@ export class MarketplaceEventsIndexingInput {
     });
   }
 
-  constructor(init?: Partial<MarketplaceEventsIndexingInput>) {
+  constructor(init?: Partial<MarketplaceEventsIndexingRequest>) {
     Object.assign(this, init);
   }
 }
