@@ -5,6 +5,7 @@ import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.au
 import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
+import { getFilePathFromDist } from 'src/utils/helpers';
 
 @Injectable()
 export class ElrondToolsService {
@@ -20,7 +21,7 @@ export class ElrondToolsService {
     this.nativeAuthSigner = new NativeAuthSigner({
       host: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
-      privateKey: this.apiConfigService.getNativeAuthKey(),
+      signerPrivateKeyPath: getFilePathFromDist(elrondConfig.pemFileName),
     });
   }
 
@@ -74,7 +75,6 @@ export class ElrondToolsService {
       isoDateOnly,
     );
     const res = await this.doPost(this.getTokenPriceByTimestamp.name, query);
-
     return res.data.trading.pair.price[0].last.toFixed(20);
   }
 
@@ -88,7 +88,6 @@ export class ElrondToolsService {
   private async doPost(name: string, query: any): Promise<any> {
     try {
       const config = await this.getConfig();
-
       const response = await this.apiService.post(this.url, { query }, config);
       return response.data;
     } catch (error) {

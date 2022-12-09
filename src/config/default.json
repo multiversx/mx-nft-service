@@ -17,7 +17,8 @@
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
     "egld": "EGLD",
-    "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag"
+    "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
+    "pemFileName": "wallet.pem"
   },
   "caching": {
     "ordersRedisClientName": "orders",
