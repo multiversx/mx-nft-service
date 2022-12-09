@@ -25,10 +25,10 @@ export class Auction {
   @Field(() => Account, { nullable: true })
   owner: Account;
 
-  @Field(() => AuctionStatusEnum, { nullable: true })
+  @Field(() => AuctionStatusEnum)
   status: AuctionStatusEnum;
 
-  @Field(() => AuctionTypeEnum, { nullable: true })
+  @Field(() => AuctionTypeEnum)
   type: AuctionTypeEnum;
 
   @Field(() => String)
@@ -46,7 +46,7 @@ export class Auction {
   @Field(() => Int, { nullable: true })
   availableTokens: number;
 
-  @Field(() => Asset, { nullable: true })
+  @Field(() => Asset)
   asset: Asset;
 
   @Field(() => Price)
