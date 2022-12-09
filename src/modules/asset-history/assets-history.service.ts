@@ -103,6 +103,8 @@ export class AssetsHistoryService {
       },
     );
 
+    elasticLogs = [...new Set(elasticLogs)];
+
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
         break;
