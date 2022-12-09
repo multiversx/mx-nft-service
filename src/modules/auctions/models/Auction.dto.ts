@@ -19,7 +19,7 @@ export class Auction {
   @Field(() => Int)
   marketplaceAuctionId: number;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String)
   ownerAddress: string;
 
   @Field(() => Account, { nullable: true })
