@@ -91,7 +91,7 @@ export class NftRarityData {
           continue;
         }
 
-        const traitType = String(attribute.trait_type ?? attribute.value);
+        const traitType = String(attribute.trait_type ?? attribute.name);
         const traitValue = String(attribute.value);
 
         if (traitValue.toLowerCase() === 'none' || traitValue === '') {
