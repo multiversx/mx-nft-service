@@ -22,10 +22,9 @@ export class Token {
   static fromElrondApiToken(token: any): Token {
     return new Token({
       identifier: token.id,
-      symbol: token.symbol,
+      symbol: token.ticker,
       name: token.name,
-      priceUsd: token.price,
-      decimals: token.decimals ?? undefined,
+      decimals: token.decimals,
     });
   }
 }
