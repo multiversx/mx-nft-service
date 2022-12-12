@@ -14,6 +14,8 @@ import {
   RangeGreaterThan,
   RangeLowerThan,
 } from '@elrondnetwork/erdnest';
+import { Locker } from 'src/utils/locker';
+import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -25,6 +27,33 @@ export class MarketplaceEventsIndexingService {
     private readonly elrondElasticService: ElrondElasticService,
   ) {}
 
+  async reindexAllMarketplaceEvents(
+    beforeTimestamp?: number,
+    afterTimestamp?: number,
+    stopIfDuplicates?: boolean,
+  ): Promise<void> {
+    await Locker.lock(
+      'reindexAllMarketplaceEvents',
+      async () => {
+        let [marketplaces] = await this.persistenceService.getMarketplaces();
+        let marketplaceAddresses = [
+          ...new Set(marketplaces.map((marketplace) => marketplace.address)),
+        ];
+        for (let i = 0; i < marketplaceAddresses.length; i++) {
+          await this.reindexMarketplaceEvents(
+            new MarketplaceEventsIndexingRequest({
+              marketplaceAddress: marketplaceAddresses[i],
+              beforeTimestamp,
+              afterTimestamp,
+              stopIfDuplicates,
+            }),
+          );
+        }
+      },
+      true,
+    );
+  }
+
   async reindexLatestMarketplacesEvents(events: any[]): Promise<void> {
     const marketplaces: string[] = [
       ...new Set(events.map((event) => event.address)),
@@ -33,38 +62,31 @@ export class MarketplaceEventsIndexingService {
       const marketplaceLastIndexTimestamp =
         await this.getMarketplaceLastIndexTimestamp(marketplaces[i]);
       await this.reindexMarketplaceEvents(
-        marketplaces[i],
-        DateUtils.getCurrentTimestamp(),
-        marketplaceLastIndexTimestamp,
+        new MarketplaceEventsIndexingRequest({
+          marketplaceAddress: marketplaces[i],
+          beforeTimestamp: DateUtils.getCurrentTimestamp(),
+          afterTimestamp: marketplaceLastIndexTimestamp,
+        }),
       );
     }
   }
 
   async reindexMarketplaceEvents(
-    marketplaceAddress: string,
-    beforeTimestamp?: number,
-    afterTimestamp?: number,
-    stopIfDuplicates?: boolean,
-    marketplaceLastIndexTimestamp?: number,
+    input: MarketplaceEventsIndexingRequest,
   ): Promise<void> {
     try {
-      if (beforeTimestamp < afterTimestamp) {
+      if (input.beforeTimestamp < input.afterTimestamp) {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
       }
 
-      const [newestTimestamp] = await this.getEventsAndSaveToDb(
-        marketplaceAddress,
-        beforeTimestamp,
-        afterTimestamp,
-        stopIfDuplicates,
-      );
+      const [newestTimestamp] = await this.getEventsAndSaveToDb(input);
 
       if (
-        !marketplaceLastIndexTimestamp ||
-        newestTimestamp > marketplaceLastIndexTimestamp
+        !input.marketplaceLastIndexTimestamp ||
+        newestTimestamp > input.marketplaceLastIndexTimestamp
       ) {
         await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
-          marketplaceAddress,
+          input.marketplaceAddress,
           newestTimestamp,
         );
         await this.marketplacesCachingService.invalidateMarketplacesCache();
@@ -73,26 +95,25 @@ export class MarketplaceEventsIndexingService {
       this.logger.error('Error when reindexing marketplace events', {
         path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
         error: error.message,
-        marketplaceAddress: marketplaceAddress,
+        marketplaceAddress: input.marketplaceAddress,
       });
     }
   }
 
   private async getEventsAndSaveToDb(
-    marketplaceAddress: string,
-    beforeTimestamp: number,
-    afterTimestamp: number,
-    stopIfDuplicates?: boolean,
+    input: MarketplaceEventsIndexingRequest,
   ): Promise<[number, number]> {
     let oldestTimestamp: number;
     let newestTimestamp: number;
 
     const query = ElasticQuery.create()
       .withMustCondition(
-        QueryType.Nested('events', { 'events.address': marketplaceAddress }),
+        QueryType.Nested('events', {
+          'events.address': input.marketplaceAddress,
+        }),
       )
-      .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
-      .withRangeFilter('timestamp', new RangeGreaterThan(afterTimestamp))
+      .withRangeFilter('timestamp', new RangeLowerThan(input.beforeTimestamp))
+      .withRangeFilter('timestamp', new RangeGreaterThan(input.afterTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
       .withPagination({
         from: 0,
@@ -116,10 +137,10 @@ export class MarketplaceEventsIndexingService {
 
         const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
           events,
-          marketplaceAddress,
+          input.marketplaceAddress,
         );
 
-        if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+        if (input.stopIfDuplicates && savedItemsCount !== totalEventsCount) {
           return false;
         }
       },
