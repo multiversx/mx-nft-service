@@ -15,11 +15,11 @@ export class AssetsHistoryExternalAuctionService {
     eventType: string,
     mainEvent: any,
   ): AssetHistoryLogInput {
-    const event = mainEvent._source.events.find(
+    const event = mainEvent.events.find(
       (event) => event.identifier === eventType,
     );
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
-    const transferEvent = mainEvent._source.events.find(
+    const transferEvent = mainEvent.events.find(
       (event) =>
         (event.identifier === NftEventEnum.ESDTNFTTransfer ||
           event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
@@ -46,7 +46,7 @@ export class AssetsHistoryExternalAuctionService {
           event: mainEvent,
           action: AssetActionEnum.Bought,
           address: addresses[0],
-          itemsCount: mainEvent._source.events[0].topics[4],
+          itemsCount: mainEvent.events[0].topics[4],
           sender: event.address,
         });
       }
@@ -67,7 +67,7 @@ export class AssetsHistoryExternalAuctionService {
         });
       }
       case ExternalAuctionEventEnum.BulkBuy: {
-        const buyNftEvent = mainEvent._source.events.find(
+        const buyNftEvent = mainEvent.events.find(
           (event) =>
             event.identifier === eventType && event.topics[2] === encodedNonce,
         );
@@ -80,7 +80,7 @@ export class AssetsHistoryExternalAuctionService {
           event: mainEvent,
           action: AssetActionEnum.Bought,
           address: addresses[0],
-          itemsCount: mainEvent._source.events[0].topics[4],
+          itemsCount: mainEvent.events[0].topics[4],
           sender: buyNftEvent.address,
         });
       }

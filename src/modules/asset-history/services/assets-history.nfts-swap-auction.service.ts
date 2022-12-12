@@ -18,13 +18,13 @@ export class AssetsHistoryElrondNftsSwapEventsService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: mainEvent._source.events[0].topics[3].base64ToBech32(),
-          itemsCount: mainEvent._source.events[0].topics[2],
-          sender: mainEvent._source.events[1].address,
+          address: mainEvent.events[0].topics[3].base64ToBech32(),
+          itemsCount: mainEvent.events[0].topics[2],
+          sender: mainEvent.events[1].address,
         });
       }
       case ElrondNftsSwapAuctionEventEnum.WithdrawSwap: {
-        const withdrawSwap = mainEvent._source.events.find(
+        const withdrawSwap = mainEvent.events.find(
           (event) => event.identifier === eventType,
         );
         const quantity = withdrawSwap.topics[4];
@@ -38,7 +38,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
         });
       }
       case ElrondNftsSwapAuctionEventEnum.Purchase: {
-        const purchaseEvent = mainEvent._source.events.find(
+        const purchaseEvent = mainEvent.events.find(
           (event) => event.identifier === eventType,
         );
         return new AssetHistoryLogInput({
