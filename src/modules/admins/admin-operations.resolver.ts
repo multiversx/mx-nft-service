@@ -6,6 +6,9 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
+import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
+import { MarketplaceEventsIndexingRequest } from '../marketplaces/models/MarketplaceEventsIndexingRequest';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -13,6 +16,7 @@ export class AdminOperationsResolver {
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
+    private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -89,6 +93,22 @@ export class AdminOperationsResolver {
   ): Promise<boolean> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAdminAuthGuard)
+  async reindexMarketplaceEvents(
+    @Args('input')
+    input: MarketplaceEventsIndexingArgs,
+  ): Promise<boolean> {
+    try {
+      await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
+        MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(input),
+      );
+      return true;
     } catch (error) {
       throw new ApolloError(error);
     }
