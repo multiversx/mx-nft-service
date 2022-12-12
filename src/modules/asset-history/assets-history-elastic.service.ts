@@ -10,9 +10,7 @@ import { constants } from 'src/config';
 
 @Injectable()
 export class AssetsHistoryElasticService {
-  constructor(
-    private readonly elrondElasticService: ElrondElasticService, // @Inject(forwardRef(() => AssetsHistoryService)) // private readonly assetsHistoryService: AssetsHistoryService,
-  ) {}
+  constructor(private readonly elrondElasticService: ElrondElasticService) {}
 
   async getHistoryLog(
     collection: string,
