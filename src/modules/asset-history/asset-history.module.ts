@@ -10,6 +10,7 @@ import { AssetsHistoryExternalAuctionService } from './services/assets-history.e
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
 import { AssetsHistoryCachingService } from './assets-history-caching.service';
+import { AssetsHistoryElasticService } from './assets-history-elastic.service';
 
 @Module({
   providers: [
@@ -24,6 +25,7 @@ import { AssetsHistoryCachingService } from './assets-history-caching.service';
     AssetsHistoryExternalAuctionService,
     AssetsHistoryElrondNftsSwapEventsService,
     AssetsHistoryCachingService,
+    AssetsHistoryElasticService,
   ],
   imports: [forwardRef(() => ElrondCommunicationModule)],
 })

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
-import { constants, elrondConfig } from 'src/config';
+import { elrondConfig } from 'src/config';
 import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
@@ -17,22 +16,17 @@ import { AssetsHistoryExternalAuctionService } from './services/assets-history.e
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
 import { AssetsHistoryCachingService } from './assets-history-caching.service';
-import {
-  ElasticQuery,
-  ElasticSortOrder,
-  QueryType,
-  RangeLowerThan,
-} from '@elrondnetwork/erdnest';
+import { AssetsHistoryElasticService } from './assets-history-elastic.service';
 
 @Injectable()
 export class AssetsHistoryService {
   constructor(
-    private readonly elrondElasticService: ElrondElasticService,
     private readonly assetsHistoryNftEventService: AssetsHistoryNftEventService,
     private readonly assetsHistoryAuctionService: AssetsHistoryAuctionService,
     private readonly assetsHistoryExternalAuctionService: AssetsHistoryExternalAuctionService,
     private readonly assetsHistoryElrondNftsSwapEventsService: AssetsHistoryElrondNftsSwapEventsService,
     private readonly assetsHistoryCachingService: AssetsHistoryCachingService,
+    private readonly assetsHistoryElasticService: AssetsHistoryElasticService,
   ) {}
 
   async getOrSetHistoryLog(
@@ -42,7 +36,7 @@ export class AssetsHistoryService {
     beforeTimestamp: number,
   ): Promise<AssetHistoryLog[]> {
     const getOrSetHistoryLog = async () =>
-      await this.getHistoryLog(collection, nonce, limit, beforeTimestamp);
+      await this.getAndMapHistoryLog(collection, nonce, limit, beforeTimestamp);
     return await this.assetsHistoryCachingService.getOrSetHistoryLog(
       collection,
       nonce,
@@ -52,58 +46,19 @@ export class AssetsHistoryService {
     );
   }
 
-  private async getHistoryLog(
+  private async getAndMapHistoryLog(
     collection: string,
     nonce: string,
     limit: number,
     beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
-    let elasticLogs = [];
-    const encodedCollection = Buffer.from(collection).toString('base64');
-    const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
-
-    const query = ElasticQuery.create()
-      .withMustCondition(
-        QueryType.Nested('events', {
-          'events.topics': encodedCollection,
-        }),
-      )
-      .withMustCondition(
-        QueryType.Nested('events', {
-          'events.topics': encodedNonce,
-        }),
-      )
-      .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
-      .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
-      .withPagination({
-        from: 0,
-        size: constants.getLogsFromElasticBatchSize,
-      });
-
-    await this.elrondElasticService.getScrollableList(
-      'logs',
-      'identifier',
-      query,
-      async (logs) => {
-        for (let i = 0; i < logs.length; i++) {
-          for (let j = 0; j < logs[i].events.length; j++) {
-            if (
-              logs[i].events[j].topics?.[0] === encodedCollection &&
-              logs[i].events[j].topics?.[1] === encodedNonce
-            ) {
-              elasticLogs.push(logs[i]);
-            }
-          }
-        }
-
-        if (elasticLogs.length >= limit) {
-          return false;
-        }
-      },
+    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(
+      collection,
+      nonce,
+      limit,
+      beforeTimestamp,
     );
-
-    elasticLogs = [...new Set(elasticLogs)];
 
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
