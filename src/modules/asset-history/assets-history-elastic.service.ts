@@ -45,16 +45,16 @@ export class AssetsHistoryElasticService {
       'identifier',
       query,
       async (logs) => {
-        for (let i = 0; i < logs.length; i++) {
-          for (let j = 0; j < logs[i].events.length; j++) {
-            if (
-              logs[i].events[j].topics?.[0] === encodedCollection &&
-              logs[i].events[j].topics?.[1] === encodedNonce
-            ) {
-              elasticLogs.push(logs[i]);
-            }
+        logs.map((log) => {
+          const anyMatchingEvent = log.events.find(
+            (event) =>
+              event.topics?.[0] === encodedCollection &&
+              event.topics?.[1] === encodedNonce,
+          );
+          if (anyMatchingEvent) {
+            elasticLogs.push(log);
           }
-        }
+        });
 
         if (elasticLogs.length >= limit) {
           return false;
