@@ -21,7 +21,7 @@ export function getCollectionStats(
     COUNT(DISTINCT(a.id)) AS activeAuctions,
     a.collection AS activeIdentifier
     FROM auctions a
-    LEFT JOIN orders o ON o.auctionId = a.id AND o.status = 'Active' 
+    LEFT JOIN orders o ON o.auctionId = a.id AND (o.status ='Active' OR o.status = 'Bought')
     WHERE a.collection  = '${identifier}' AND a.status = 'Running' AND a.paymentToken='${paymentToken}' ${getMarketplaceKeyFilter(
     'a',
     marketplaceKey,
