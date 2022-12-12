@@ -121,7 +121,7 @@ export class ElasticUpdatesEventsService {
         continue;
       }
 
-      collectionTypes.collection = nft.type;
+      collectionTypes[collection] = nft.type;
       collectionsToUpdate.push(collection);
     }
 
@@ -177,7 +177,7 @@ export class ElasticUpdatesEventsService {
         continue;
       }
 
-      collectionTypes.collection = nft.type;
+      collectionTypes[collection] = nft.type;
       nftsToUpdate.push(identifier);
     }
 
@@ -266,12 +266,12 @@ export class ElasticUpdatesEventsService {
     collection: string,
     collectionTypes: { [key: string]: string },
   ): Promise<boolean> {
-    if (!collectionTypes.collection) {
-      collectionTypes.collection = await this.getCollectionType(collection);
+    if (!collectionTypes[collection]) {
+      collectionTypes[collection] = await this.getCollectionType(collection);
     }
     if (
-      collectionTypes.collection === NftTypeEnum.NonFungibleESDT ||
-      collectionTypes.collection === NftTypeEnum.SemiFungibleESDT
+      collectionTypes[collection] === NftTypeEnum.NonFungibleESDT ||
+      collectionTypes[collection] === NftTypeEnum.SemiFungibleESDT
     ) {
       return true;
     }
@@ -282,10 +282,10 @@ export class ElasticUpdatesEventsService {
     collection: string,
     collectionTypes: { [key: string]: string },
   ): Promise<boolean> {
-    if (!collectionTypes.collection) {
-      collectionTypes.collection = await this.getCollectionType(collection);
+    if (!collectionTypes[collection]) {
+      collectionTypes[collection] = await this.getCollectionType(collection);
     }
-    if (collectionTypes.collection === NftTypeEnum.NonFungibleESDT) {
+    if (collectionTypes[collection] === NftTypeEnum.NonFungibleESDT) {
       return true;
     }
     return false;
