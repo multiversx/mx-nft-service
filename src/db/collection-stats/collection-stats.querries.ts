@@ -1,7 +1,9 @@
+import { elrondConfig } from 'src/config';
+
 export function getCollectionStats(
   identifier: string,
   marketplaceKey: string = undefined,
-  paymentToken: string = 'EGLD',
+  paymentToken: string = elrondConfig.egld,
 ) {
   return `
   WITH

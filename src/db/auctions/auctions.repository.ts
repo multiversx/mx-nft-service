@@ -397,7 +397,7 @@ export class AuctionsRepository {
       'a',
     );
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
-    const paymentToken = paymentTokenFilter ?? 'EGLD';
+    const paymentToken = paymentTokenFilter ?? elrondConfig.egld;
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder
