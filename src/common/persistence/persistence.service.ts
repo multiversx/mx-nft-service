@@ -29,6 +29,8 @@ import {
   MarketplaceEntity,
 } from 'src/db/marketplaces';
 import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplace-collections.repository';
+import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
+import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { NftRarityEntity } from 'src/db/nft-rarity/nft-rarity.entity';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
@@ -65,6 +67,7 @@ export class PersistenceService {
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
+    private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -401,6 +404,19 @@ export class PersistenceService {
     return await this.execute(
       this.getMarketplacesByAddresses.name,
       this.marketplaceRepository.getMarketplacesByAddresses(addresses),
+    );
+  }
+
+  async updateMarketplaceLastIndexTimestampByAddress(
+    address: string,
+    lastIndexTimestamp: number,
+  ): Promise<void> {
+    await this.execute(
+      this.updateMarketplaceLastIndexTimestampByAddress.name,
+      this.marketplaceRepository.updateMarketplaceLastIndexTimestamp(
+        address,
+        lastIndexTimestamp,
+      ),
     );
   }
 
@@ -924,6 +940,24 @@ export class PersistenceService {
     return await this.execute(
       this.getMostLikedAssetsIdentifiers.name,
       this.assetsLikesRepository.getMostLikedAssetsIdentifiers(offset, limit),
+    );
+  }
+
+  async saveOrIgnoreMarketplacesBulk(
+    events: MarketplaceEventsEntity[],
+  ): Promise<number> {
+    return await this.marketplaceEventsRepository.saveOrIgnoreBulk(events);
+  }
+
+  async getMarketplaceEvents(
+    marketplaceKey: string,
+    beforeTimestamp: number,
+    afterTimestamp: number,
+  ): Promise<MarketplaceEventsEntity[]> {
+    return await this.marketplaceEventsRepository.getByMarketplaceAndTimestamps(
+      marketplaceKey,
+      beforeTimestamp,
+      afterTimestamp,
     );
   }
 }

@@ -9,6 +9,7 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { CommonModule } from 'src/common.module';
 import { MarketplaceProvider } from './loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
+import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing.service';
 
 @Module({
   providers: [
@@ -19,6 +20,7 @@ import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
     NftMarketplaceAbiService,
     MarketplaceProvider,
     MarketplaceRedisHandler,
+    MarketplaceEventsIndexingService,
   ],
   imports: [
     PubSubListenerModule,
@@ -26,6 +28,6 @@ import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
   ],
-  exports: [MarketplacesService],
+  exports: [MarketplacesService, MarketplaceEventsIndexingService],
 })
 export class MarketplacesModuleGraph {}

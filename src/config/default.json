@@ -80,7 +80,8 @@
     "getNftsForScamInfoBatchSize": 100,
     "elasticMaxBatch": 10000,
     "dbBatch": 1000,
-    "complexityLevel": 200
+    "complexityLevel": 200,
+    "getLogsFromElasticBatchSize": 1000
   },
   "elasticDictionary": {
     "scamInfo": {

@@ -41,6 +41,8 @@ export class Marketplace {
   @Field({ nullable: true })
   isPaused: boolean;
 
+  lastIndexTimestamp?: number;
+
   constructor(init?: Partial<Marketplace>) {
     Object.assign(this, init);
   }
@@ -70,6 +72,7 @@ export class Marketplace {
       ),
       key: entity.key,
       type: entity.type,
+      lastIndexTimestamp: entity.lastIndexTimestamp,
     });
   }
 

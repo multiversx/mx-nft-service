@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
+import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
@@ -12,6 +13,7 @@ export class NftEventsConsumer {
   constructor(
     private readonly nftEventsService: NftEventsService,
     private readonly marketplaceEventsService: MarketplaceEventsService,
+    private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
@@ -29,6 +31,15 @@ export class NftEventsConsumer {
       const externalMarketplaces =
         await this.marketplaceService.getExternalMarketplacesAddreses();
 
+      const internalMarketplaceEvents = nftAuctionEvents?.events?.filter(
+        (e: { address: any }) =>
+          internalMarketplaces.includes(e.address) === true,
+      );
+      const externalMarketplaceEvents = nftAuctionEvents?.events?.filter(
+        (e: { address: any }) =>
+          externalMarketplaces.includes(e.address) === true,
+      );
+
       const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
@@ -42,28 +53,24 @@ export class NftEventsConsumer {
         nftAuctionEvents.hash,
       );
       await this.marketplaceEventsService.handleNftAuctionEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { address: any }) =>
-            internalMarketplaces.includes(e.address) === true,
-        ),
+        internalMarketplaceEvents,
         nftAuctionEvents.hash,
         MarketplaceTypeEnum.Internal,
       );
-
       await this.marketplaceEventsService.handleNftAuctionEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { address: any }) =>
-            externalMarketplaces.includes(e.address) === true,
-        ),
+        externalMarketplaceEvents,
         nftAuctionEvents.hash,
         MarketplaceTypeEnum.External,
       );
-
       await this.minterEventsService.handleNftMinterEvents(
         nftAuctionEvents?.events?.filter(
           (e: { address: any }) => minters.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
+      );
+
+      await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
+        internalMarketplaceEvents.concat(externalMarketplaceEvents),
       );
     }
   }

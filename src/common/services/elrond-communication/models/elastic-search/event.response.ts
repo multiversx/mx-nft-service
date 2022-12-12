@@ -3,4 +3,5 @@ export interface EventResponse {
   identifier: string;
   topics: string[];
   data: string;
+  order: number;
 }
