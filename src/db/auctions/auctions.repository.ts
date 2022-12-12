@@ -251,8 +251,8 @@ export class AuctionsRepository {
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND a.marketplaceKey = :marketplaceKey
-        ((o.ownerAddress = :address AND o.status='active'))`,
+        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND a.marketplaceKey = :marketplaceKey AND
+        (o.ownerAddress = :address AND o.status='active')`,
         {
           address: address,
           marketplaceKey: marketplaceKey,
