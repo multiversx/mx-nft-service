@@ -34,4 +34,18 @@ export class ApiConfigService {
       this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
     );
   }
+
+  getApiUrl(): string {
+    return this.getGenericConfig<string>('ELROND_API');
+  }
+
+  getToolsUrl(): string {
+    return this.getGenericConfig<string>('ELROND_TOOLS');
+  }
+
+  getKeepAliveTimeoutDownstream(): number {
+    return parseInt(
+      this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
+    );
+  }
 }

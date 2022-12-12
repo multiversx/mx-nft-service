@@ -92,3 +92,10 @@ export function timestampToEpochAndRound(
 
   return [Math.trunc(epoch), Math.trunc(round)];
 }
+
+export function getFilePathFromDist(filename: string): string {
+  return `${__dirname.substring(
+    0,
+    __dirname.lastIndexOf('dist/') + 5,
+  )}${filename}`;
+}

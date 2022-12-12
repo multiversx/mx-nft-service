@@ -98,6 +98,7 @@ async function bootstrap() {
   );
   pubSubApp.listen();
 
+  logger.log(`Public API active: ${process.env.ENABLE_PUBLIC_API}`);
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
   logger.log(
     `Claimable job is active: ${process.env.ENABLE_CLAIMABLE_AUCTIONS}`,
