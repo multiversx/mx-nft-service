@@ -38,6 +38,22 @@ export class TokensWarmerService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
+  async updateDexTokens() {
+    await Locker.lock(
+      'DEX Tokens invalidations',
+      async () => {
+        const tokens = await this.elrondApiService.getAllDexTokens();
+        await this.invalidateKey(
+          CacheInfo.AllDexTokens.key,
+          tokens,
+          CacheInfo.AllDexTokens.ttl,
+        );
+      },
+      true,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
   async updateEgldTokens() {
     await Locker.lock(
       'Egld Token invalidation',

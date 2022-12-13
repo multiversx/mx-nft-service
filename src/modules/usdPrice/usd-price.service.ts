@@ -24,29 +24,18 @@ export class UsdPriceService {
     );
   }
 
-  public async getCachedTokens(): Promise<Token[]> {
+  public async getAllCachedTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllTokens.key,
-      async () => await this.elrondApiService.getAllTokens(),
+      async () => await this.setAllCachedTokens(),
       CacheInfo.AllTokens.ttl,
     );
   }
 
-  private async getCachedTokenData(
-    tokenId: string,
-  ): Promise<Token | undefined> {
-    const tokens = await this.getCachedTokens();
-    const token = tokens.find((t) => t.identifier === tokenId);
-    if (token) {
-      return token;
-    }
-    return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
-      `token_${tokenId}`,
-      async () => await this.elrondApiService.getTokenData(tokenId),
-      CacheInfo.AllTokens.ttl,
-    );
+  public async getCachedTokenData(tokenId: string): Promise<Token> {
+    const tokens = await this.getAllCachedTokens();
+    return tokens.find((token) => token.identifier === tokenId);
   }
 
   private async getEgldCachedTokenData() {
@@ -62,7 +51,13 @@ export class UsdPriceService {
     if (tokenId === elrondConfig.egld || tokenId === elrondConfig.wegld) {
       return await this.getCachedEgldHistoricalPrice();
     }
-    return await this.getCachedTokenHistoricalPriceByEgld(tokenId);
+
+    const dexTokens = await this.getDexCachedTokens();
+    const token = dexTokens.find((token) => token.identifier === tokenId);
+    return (
+      token.priceUsd ??
+      (await this.getCachedTokenHistoricalPriceByEgld(tokenId))
+    );
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
@@ -91,6 +86,28 @@ export class UsdPriceService {
     );
     const tokenData = await this.getCachedTokenData(token);
     return computeUsdAmount(tokenPriceUsd, amount, tokenData.decimals);
+  }
+
+  private async setAllCachedTokens(): Promise<Token[]> {
+    let [apiTokens, dexTokens] = await Promise.all([
+      this.elrondApiService.getAllTokens(),
+      this.getDexCachedTokens(),
+    ]);
+    dexTokens.map((dexToken) => {
+      apiTokens.find(
+        (apiToken) => apiToken.identifier === dexToken.identifier,
+      ).priceUsd = dexToken.priceUsd;
+    });
+    return apiTokens;
+  }
+
+  private async getDexCachedTokens(): Promise<Token[]> {
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.AllDexTokens.key,
+      async () => await this.elrondApiService.getAllDexTokens(),
+      CacheInfo.AllDexTokens.ttl,
+    );
   }
 
   private async getCachedEgldHistoricalPrice(

@@ -695,7 +695,7 @@ export class AuctionsGetterService {
         marketplaceKey,
         collectionIdentifier,
       ),
-      this.usdPriceService.getCachedTokens(),
+      this.usdPriceService.getAllCachedTokens(),
     ]);
 
     let mappedTokens = [];

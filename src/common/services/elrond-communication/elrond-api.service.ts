@@ -616,6 +616,14 @@ export class ElrondApiService {
     );
   }
 
+  async getAllDexTokens(): Promise<Token[]> {
+    const allTokens = await this.doGetGeneric(
+      this.getAllDexTokens.name,
+      'mex/tokens?size=10000',
+    );
+    return allTokens.map((t) => Token.fromElrondApiDexToken(t));
+  }
+
   async getAllTokens(): Promise<Token[]> {
     const allTokens = await this.doGetGeneric(
       this.getAllTokens.name,
