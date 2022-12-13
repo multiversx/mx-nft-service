@@ -89,8 +89,9 @@ export class MarketplaceEventsIndexingService {
       const [newestTimestamp] = await this.getEventsAndSaveToDb(input);
 
       if (
-        !input.marketplaceLastIndexTimestamp ||
-        newestTimestamp > input.marketplaceLastIndexTimestamp
+        newestTimestamp &&
+        (!input.marketplaceLastIndexTimestamp ||
+          newestTimestamp > input.marketplaceLastIndexTimestamp)
       ) {
         await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
           input.marketplaceAddress,
