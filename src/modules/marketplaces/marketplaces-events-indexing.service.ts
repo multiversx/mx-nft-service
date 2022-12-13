@@ -60,7 +60,7 @@ export class MarketplaceEventsIndexingService {
     ];
     marketplaces.map(async (marketplace) => {
       await Locker.lock(
-        `reindexLatestMarketplaceEvents for ${marketplace}`,
+        `${this.reindexLatestMarketplacesEvents.name} for ${marketplace}`,
         async () => {
           const marketplaceLastIndexTimestamp =
             await this.getMarketplaceLastIndexTimestamp(marketplace);
