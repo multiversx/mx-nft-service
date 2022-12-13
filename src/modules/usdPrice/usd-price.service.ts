@@ -6,7 +6,6 @@ import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { cacheConfig, elrondConfig } from 'src/config';
-import denominate from 'src/utils/formatters';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
@@ -50,7 +49,20 @@ export class UsdPriceService {
     );
   }
 
+  private async getEgldCachedTokenData() {
+    const token = await this.getCachedTokenData(elrondConfig.wegld);
+    return new Token({
+      ...token,
+      identifier: elrondConfig.egld,
+      symbol: elrondConfig.egld,
+      name: elrondConfig.egld,
+    });
+  }
+
   async getToken(tokenId: string): Promise<Token | null> {
+    if (tokenId === elrondConfig.egld) {
+      return await this.getEgldCachedTokenData();
+    }
     return await this.getCachedTokenData(tokenId);
   }
 
