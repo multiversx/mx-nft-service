@@ -69,6 +69,7 @@ export class MarketplaceEventsIndexingService {
               marketplaceAddress: marketplace,
               beforeTimestamp: DateUtils.getCurrentTimestamp(),
               afterTimestamp: marketplaceLastIndexTimestamp,
+              stopIfDuplicates: true,
             }),
           );
         },
