@@ -25,7 +25,9 @@ export class ElrondToolsService {
     });
   }
 
-  async getEgldHistoricalPrice(isoDateOnly: string): Promise<string> {
+  async getEgldHistoricalPrice(
+    isoDateOnly: string,
+  ): Promise<string | undefined> {
     return await this.getTokenPriceByTimestamp(
       elrondConfig.wegld,
       elrondConfig.usdc,
@@ -37,12 +39,16 @@ export class ElrondToolsService {
     token: string,
     isoDateOnly: string,
     cachedEgldPriceUsd?: string,
-  ): Promise<string> {
+  ): Promise<string | undefined> {
+    console.log('token', token);
     const priceInEgld = await this.getTokenPriceByTimestamp(
       token,
       elrondConfig.wegld,
       isoDateOnly,
     );
+    if (!priceInEgld) {
+      return;
+    }
     const egldPriceUsd =
       cachedEgldPriceUsd ?? (await this.getEgldHistoricalPrice(isoDateOnly));
     return new BigNumber(priceInEgld).multipliedBy(egldPriceUsd).toFixed();
@@ -68,14 +74,14 @@ export class ElrondToolsService {
     firstToken: string,
     secondToken: string,
     isoDateOnly: string,
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     const query = this.getTokenPriceByTimestampQuery(
       firstToken,
       secondToken,
       isoDateOnly,
     );
     const res = await this.doPost(this.getTokenPriceByTimestamp.name, query);
-    return res.data.trading.pair.price[0].last.toFixed(20);
+    return res?.data?.trading?.pair?.price?.[0]?.last?.toFixed(20) ?? undefined;
   }
 
   private async getConfig(): Promise<ApiSettings> {

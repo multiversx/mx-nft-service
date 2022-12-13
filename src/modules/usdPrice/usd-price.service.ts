@@ -49,15 +49,16 @@ export class UsdPriceService {
     );
   }
 
-  async getTokenCurrentPrice(tokenId: string): Promise<string> {
+  async getTokenCurrentPrice(tokenId: string): Promise<string | undefined> {
     if (tokenId === elrondConfig.egld || tokenId === elrondConfig.wegld) {
       return await this.getCachedEgldHistoricalPrice();
     }
 
     const dexTokens = await this.getDexCachedTokens();
     const token = dexTokens.find((token) => token.identifier === tokenId);
+
     return (
-      token.priceUsd ??
+      token?.priceUsd ??
       (await this.getCachedTokenHistoricalPriceByEgld(tokenId))
     );
   }
@@ -83,6 +84,9 @@ export class UsdPriceService {
       token,
       timestamp,
     );
+    if (!tokenPriceUsd) {
+      return;
+    }
     const tokenData = await this.getCachedTokenData(token);
     return computeUsdAmount(tokenPriceUsd, amount, tokenData.decimals);
   }
@@ -148,7 +152,7 @@ export class UsdPriceService {
   private async getCachedTokenHistoricalPriceByEgld(
     token: string,
     timestamp: number = DateUtils.getCurrentTimestamp(),
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const egldPriceUsd = await this.getCachedEgldHistoricalPrice(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(token, isoDateOnly);

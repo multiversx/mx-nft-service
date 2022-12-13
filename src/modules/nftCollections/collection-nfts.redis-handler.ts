@@ -72,7 +72,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     let nftsGroupByCollection: { [key: string]: any[] } = {};
 
     for (const nfts of nftsResponse) {
-      nftsGroupByCollection[nfts[0]?.collection] = nfts;
+      nftsGroupByCollection[nfts?.[0]?.collection] = nfts;
     }
     return nftsGroupByCollection;
   }
