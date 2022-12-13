@@ -64,6 +64,16 @@ export class UsdPriceService {
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
+    if (tokenId === elrondConfig.egld) {
+      return new Token({
+        identifier: elrondConfig.egld,
+        symbol: elrondConfig.egld,
+        name: elrondConfig.egld,
+        decimals: elrondConfig.decimals,
+        priceUsd: await this.getCachedEgldHistoricalPrice(),
+      });
+    }
+
     return await this.getCachedTokenData(tokenId);
   }
 
