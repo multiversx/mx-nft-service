@@ -35,16 +35,18 @@ export class UsdPriceService {
 
   public async getCachedTokenData(tokenId: string): Promise<Token> {
     const tokens = await this.getAllCachedTokens();
-    return tokens.find((token) => token.identifier === tokenId);
-  }
+    const token = tokens.find((token) => token.identifier === tokenId);
+    if (token) {
+      return token;
+    }
 
-  private async getEgldCachedTokenData() {
-    return new Token({
-      identifier: elrondConfig.egld,
-      symbol: elrondConfig.egld,
-      name: elrondConfig.egld,
-      decimals: elrondConfig.decimals,
-    });
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      `token_${tokenId}`,
+      async () => await this.elrondApiService.getTokenData(tokenId),
+      CacheInfo.AllTokens.ttl,
+      TimeConstants.oneMinute,
+    );
   }
 
   async getTokenCurrentPrice(tokenId: string): Promise<string> {
@@ -61,9 +63,6 @@ export class UsdPriceService {
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
-    if (tokenId === elrondConfig.egld) {
-      return await this.getEgldCachedTokenData();
-    }
     return await this.getCachedTokenData(tokenId);
   }
 
@@ -72,7 +71,7 @@ export class UsdPriceService {
     amount: string,
     timestamp: number = DateUtils.getTimestamp(),
   ): Promise<string> {
-    if (token === elrondConfig.egld) {
+    if (token === elrondConfig.egld || token === elrondConfig.wegld) {
       return computeUsdAmount(
         await this.getCachedEgldHistoricalPrice(timestamp),
         amount,
@@ -89,16 +88,24 @@ export class UsdPriceService {
   }
 
   private async setAllCachedTokens(): Promise<Token[]> {
-    let [apiTokens, dexTokens] = await Promise.all([
+    let [apiTokens, dexTokens, egldPriceUSD] = await Promise.all([
       this.elrondApiService.getAllTokens(),
       this.getDexCachedTokens(),
+      this.getCachedEgldHistoricalPrice(),
     ]);
     dexTokens.map((dexToken) => {
       apiTokens.find(
         (apiToken) => apiToken.identifier === dexToken.identifier,
       ).priceUsd = dexToken.priceUsd;
     });
-    return apiTokens;
+    const egldToken: Token = new Token({
+      identifier: elrondConfig.egld,
+      symbol: elrondConfig.egld,
+      name: elrondConfig.egld,
+      decimals: elrondConfig.decimals,
+      priceUsd: egldPriceUSD,
+    });
+    return apiTokens.concat([egldToken]);
   }
 
   private async getDexCachedTokens(): Promise<Token[]> {
