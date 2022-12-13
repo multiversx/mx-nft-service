@@ -50,13 +50,19 @@ export class UsdPriceService {
   }
 
   private async getEgldCachedTokenData() {
-    const token = await this.getCachedTokenData(elrondConfig.wegld);
     return new Token({
-      ...token,
       identifier: elrondConfig.egld,
       symbol: elrondConfig.egld,
       name: elrondConfig.egld,
+      decimals: elrondConfig.decimals,
     });
+  }
+
+  async getTokenCurrentPrice(tokenId: string): Promise<string> {
+    if (tokenId === elrondConfig.egld || tokenId === elrondConfig.wegld) {
+      return await this.getCachedEgldHistoricalPrice();
+    }
+    return await this.getCachedTokenHistoricalPriceByEgld(tokenId);
   }
 
   async getToken(tokenId: string): Promise<Token | null> {
@@ -88,8 +94,17 @@ export class UsdPriceService {
   }
 
   private async getCachedEgldHistoricalPrice(
-    timestamp: number,
+    timestamp?: number,
   ): Promise<string> {
+    if (!timestamp || DateUtils.isTimestampToday(timestamp)) {
+      return await this.cacheService.getOrSetCache(
+        this.persistentRedisClient,
+        CacheInfo.EgldToken.key,
+        async () => await this.elrondApiService.getEgldPriceFromEconomics(),
+        CacheInfo.EgldToken.ttl,
+      );
+    }
+
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(
       elrondConfig.wegld,
@@ -108,7 +123,7 @@ export class UsdPriceService {
 
   private async getCachedTokenHistoricalPriceByEgld(
     token: string,
-    timestamp: number,
+    timestamp: number = DateUtils.getCurrentTimestamp(),
   ): Promise<string> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const egldPriceUsd = await this.getCachedEgldHistoricalPrice(timestamp);
