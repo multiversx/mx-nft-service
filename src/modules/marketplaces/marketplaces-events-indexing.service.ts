@@ -67,7 +67,6 @@ export class MarketplaceEventsIndexingService {
           await this.reindexMarketplaceEvents(
             new MarketplaceEventsIndexingRequest({
               marketplaceAddress: marketplace,
-              beforeTimestamp: DateUtils.getCurrentTimestamp(),
               afterTimestamp: marketplaceLastIndexTimestamp,
               stopIfDuplicates: true,
             }),
