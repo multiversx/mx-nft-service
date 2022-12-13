@@ -37,6 +37,7 @@ import { XOXNO_KEY } from 'src/utils/constants';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { Fields } from '../common/fields.decorator';
+import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -161,9 +162,9 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   }
 
   @Query(() => AuctionResponse)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtAuthenticateGuard)
   async myClaimableAuctions(
-    @User() user: any,
+    @Jwt('address') address: string,
     @Args({
       name: 'filters',
       type: () => MyClaimableAuctionsFilters,
@@ -178,7 +179,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       await this.auctionsGetterService.getClaimableAuctions(
         limit,
         offset,
-        user.publicKey,
+        address,
         filters?.marketplaceKey,
       );
     return PageResponse.mapResponse<Auction>(

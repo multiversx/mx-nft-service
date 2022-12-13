@@ -1,12 +1,11 @@
-import { Resolver, Args, Mutation, Int } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { IssueCampaignArgs, BuyRandomNftActionArgs, Campaign } from './models';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../auth/user';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
+import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 
 @Resolver(() => Campaign)
 export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
@@ -15,22 +14,22 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtAuthenticateGuard)
   async issueCampaign(
     @Args('input') input: IssueCampaignArgs,
-    @User() user: any,
+    @Jwt('address') address: string,
   ): Promise<TransactionNode> {
     const request = IssueCampaignRequest.fromArgs(input);
-    return await this.nftMinterService.issueToken(user.publicKey, request);
+    return await this.nftMinterService.issueToken(address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtAuthenticateGuard)
   async buyRandomNft(
     @Args('input') input: BuyRandomNftActionArgs,
-    @User() user: any,
+    @Jwt('address') address: string,
   ): Promise<TransactionNode> {
     const request = BuyRequest.fromArgs(input);
-    return await this.nftMinterService.buyRandomNft(user.publicKey, request);
+    return await this.nftMinterService.buyRandomNft(address, request);
   }
 }

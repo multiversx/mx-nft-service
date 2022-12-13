@@ -5,9 +5,8 @@ import { NotificationsResponse, Notification } from './models';
 import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { User } from '../auth/user';
 import { NotificationsFilters } from './models/Notifications.Filter';
+import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 
 @Resolver(() => Notification)
 export class NotificationsResolver extends BaseResolver(Notification) {
@@ -16,18 +15,18 @@ export class NotificationsResolver extends BaseResolver(Notification) {
   }
 
   @Query(() => NotificationsResponse)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtAuthenticateGuard)
   async notifications(
     @Args({ name: 'filters', type: () => NotificationsFilters, nullable: true })
     filters: NotificationsFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
-    @User() user: any,
+    @Jwt('address') address: string,
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [notifications, count] =
       await this.notificationsService.getNotifications(
-        user.publicKey,
+        address,
         filters?.marketplaceKey,
       );
     const page = connectionFromArraySlice(notifications, pagination, {

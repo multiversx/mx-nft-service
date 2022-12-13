@@ -17,6 +17,9 @@ import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-sca
 import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
 import { graphqlUploadExpress } from 'graphql-upload';
+import { JwtAuthenticateGlobalGuard } from '@elrondnetwork/erdnest';
+import { ApiConfigService } from './utils/api.config.service';
+import { ErdnestConfigServiceImpl } from './utils/erdnest.config.service.implementation';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -138,6 +141,12 @@ async function startPublicApp() {
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
+  const apiConfigService = app.get<ApiConfigService>(ApiConfigService);
+  app.useGlobalGuards(
+    new JwtAuthenticateGlobalGuard(
+      new ErdnestConfigServiceImpl(apiConfigService),
+    ),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
