@@ -31,7 +31,6 @@ export class JwtAuthenticateGuard implements CanActivate {
       request.auth = {
         address: address,
       };
-      console.log(111111111);
       return true;
     }
     const authorization: string = request.headers['authorization'];
