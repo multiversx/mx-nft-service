@@ -155,6 +155,16 @@ export class PersistenceService {
     );
   }
 
+  async getBiddingBalance(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<[{ biddingBalance: string; priceToken: string }]> {
+    return await this.execute(
+      this.getBiddingBalance.name,
+      this.accountStatsRepository.getBiddingBalance(address, marketplaceKey),
+    );
+  }
+
   async getOnwerAccountStats(
     address: string,
     marketplaceKey: string = null,
