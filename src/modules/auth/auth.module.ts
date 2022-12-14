@@ -1,7 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
+import { ApiConfigService } from 'src/utils/api.config.service';
+import {
+  CachingService,
+  CachingModuleOptions,
+  LocalCacheService,
+  MetricsService,
+} from '@elrondnetwork/erdnest';
 
 @Module({
   imports: [
@@ -10,7 +16,20 @@ import { JwtStrategy } from './jwt.strategy';
       secret: process.env.JWT_SECRET_KEY,
     }),
   ],
-  providers: [JwtStrategy],
-  exports: [PassportModule],
+  providers: [
+    ApiConfigService,
+    CachingService,
+    CachingModuleOptions,
+    LocalCacheService,
+    MetricsService,
+  ],
+  exports: [
+    PassportModule,
+    ApiConfigService,
+    CachingService,
+    CachingModuleOptions,
+    LocalCacheService,
+    MetricsService,
+  ],
 })
 export class AuthModule {}

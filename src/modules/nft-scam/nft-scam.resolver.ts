@@ -4,13 +4,14 @@ import { NftScamService } from './nft-scam.service';
 import { ApolloError } from 'apollo-server-express';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { ScamInfoTypeEnum } from '../assets/models';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 
 @Resolver(() => Boolean)
 export class NftScamResolver {
   constructor(private readonly nftScamService: NftScamService) {}
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async validateOrUpdateNftScamInfo(
     @Args('identifier') identifier: string,
   ): Promise<boolean> {
@@ -22,7 +23,7 @@ export class NftScamResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async setNftScamInfo(
     @Args('identifier') identifier: string,
     @Args({ name: 'type', type: () => ScamInfoTypeEnum })
@@ -41,7 +42,7 @@ export class NftScamResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async clearNftScamInfo(
     @Args('identifier') identifier: string,
   ): Promise<boolean> {

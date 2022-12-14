@@ -48,4 +48,12 @@ export class ApiConfigService {
       this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
     );
   }
+
+  getSecurityAdmins(): string[] {
+    return this.getGenericConfig<string[]>('ADMINS');
+  }
+
+  getJwtSecret(): string {
+    return this.getGenericConfig<string>('JWT_SECRET_KEY');
+  }
 }
