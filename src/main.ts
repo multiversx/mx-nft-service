@@ -141,12 +141,6 @@ async function startPublicApp() {
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
-  const apiConfigService = app.get<ApiConfigService>(ApiConfigService);
-  app.useGlobalGuards(
-    new JwtAuthenticateGlobalGuard(
-      new ErdnestConfigServiceImpl(apiConfigService),
-    ),
-  );
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

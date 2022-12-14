@@ -1,6 +1,8 @@
-import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/nativeAuth';
+import { UserAuthResult } from '../auth/user';
 import { BaseResolver } from '../common/base.resolver';
 import { ReportNft } from './report-nft.dto';
 import { ReportNftInput } from './report-nft.input';
@@ -13,11 +15,11 @@ export class ReportNftsResolver extends BaseResolver(ReportNft) {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   addReport(
     @Args('input', { type: () => ReportNftInput }) input: ReportNftInput,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
-    return this.reportNfts.addReport(input.identifier, address);
+    return this.reportNfts.addReport(input.identifier, user.address);
   }
 }

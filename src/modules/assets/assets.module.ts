@@ -51,6 +51,7 @@ import { AssetsLikesCachingService } from './assets-likes.caching.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   providers: [
@@ -105,6 +106,7 @@ import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.servic
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CollectionsModuleGraph),
+    forwardRef(() => AuthModule),
     IpfsModule,
     PersistenceModule,
   ],

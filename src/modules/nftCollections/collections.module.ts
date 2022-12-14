@@ -27,6 +27,7 @@ import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-coll
 import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-collection-for-owner.redis-handler';
 import { DocumentDbModule } from 'src/document-db/document-db.module';
 import { CommonModule } from 'src/common.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   providers: [
@@ -59,6 +60,7 @@ import { CommonModule } from 'src/common.module';
     forwardRef(() => ElrondCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => CommonModule),
+    forwardRef(() => AuthModule),
     DocumentDbModule,
   ],
   exports: [

@@ -17,6 +17,9 @@ import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo, WhitelistedInfo } from './models/TicketInfo';
 import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
+import { UserAuthResult } from '../auth/user';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/nativeAuth';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -33,37 +36,37 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   }
 
   @Query(() => [TicketInfo])
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async myTickets(
     @Args({ name: 'collectionIdentifier', type: () => String })
     collectionIdentifier: string,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TicketInfo[]> {
     return await this.primarySaleService.getMyTickets(
       collectionIdentifier,
-      address,
+      user.address,
     );
   }
 
   @Query(() => Boolean)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async hasClaimedTickets(
     @Args({ name: 'collectionIdentifier', type: () => String })
     collectionIdentifier: string,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
     return await this.primarySaleService.hasClaimedTickets(
       collectionIdentifier,
-      address,
+      user.address,
     );
   }
 
   @Query(() => WhitelistedInfo)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async isWhitelisted(
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<{ isWhitelisted: boolean; message: string }> {
-    return await this.primarySaleService.isWhitelisted(address);
+    return await this.primarySaleService.isWhitelisted(user.address);
   }
 
   @ResolveField('price', () => String)
@@ -97,22 +100,22 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async buyTickets(
     @Args('input', { type: () => BuyTicketsArgs })
     input: BuyTicketsArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.primarySaleService.buyTicket(address, input);
+    return await this.primarySaleService.buyTicket(user.address, input);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async claimTicket(
     @Args('input', { type: () => ClaimTicketsArgs })
     input: ClaimTicketsArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.primarySaleService.claim(address, input);
+    return await this.primarySaleService.claim(user.address, input);
   }
 }

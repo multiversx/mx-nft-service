@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CampaignsQueriesResolver } from './campaigns-queries.resolver';
 import { ElrondCommunicationModule } from 'src/common';
 import { CampaignsMutationsResolver } from './campaigns-mutations.resolver';
@@ -6,6 +6,7 @@ import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsService } from './campaigns.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { CommonModule } from 'src/common.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   providers: [
@@ -14,7 +15,12 @@ import { CommonModule } from 'src/common.module';
     NftMinterAbiService,
     CampaignsService,
   ],
-  imports: [PubSubListenerModule, ElrondCommunicationModule, CommonModule],
+  imports: [
+    PubSubListenerModule,
+    ElrondCommunicationModule,
+    CommonModule,
+    forwardRef(() => AuthModule),
+  ],
   exports: [CampaignsService],
 })
 export class CampaignsModuleGraph {}

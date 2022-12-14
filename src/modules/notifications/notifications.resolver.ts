@@ -7,6 +7,9 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
 import { NotificationsFilters } from './models/Notifications.Filter';
 import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/nativeAuth';
+import { UserAuthResult } from '../auth/user';
 
 @Resolver(() => Notification)
 export class NotificationsResolver extends BaseResolver(Notification) {
@@ -15,18 +18,18 @@ export class NotificationsResolver extends BaseResolver(Notification) {
   }
 
   @Query(() => NotificationsResponse)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async notifications(
     @Args({ name: 'filters', type: () => NotificationsFilters, nullable: true })
     filters: NotificationsFilters,
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ) {
     const { limit, offset } = pagination.pagingParams();
     const [notifications, count] =
       await this.notificationsService.getNotifications(
-        address,
+        user.address,
         filters?.marketplaceKey,
       );
     const page = connectionFromArraySlice(notifications, pagination, {

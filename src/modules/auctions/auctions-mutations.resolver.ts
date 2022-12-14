@@ -14,7 +14,9 @@ import {
   BidRequest,
   BuySftRequest,
 } from './models/requests';
-import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/nativeAuth';
+import { UserAuthResult } from '../auth/user';
 
 @Resolver(() => Auction)
 export class AuctionsMutationsResolver extends BaseResolver(Auction) {
@@ -23,50 +25,50 @@ export class AuctionsMutationsResolver extends BaseResolver(Auction) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async createAuction(
     @Args('input', { type: () => CreateAuctionArgs }) input: CreateAuctionArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateAuctionRequest.fromArgs(input);
-    return await this.nftAbiService.createAuction(address, request);
+    return await this.nftAbiService.createAuction(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async endAuction(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.endAuction(address, auctionId);
+    return await this.nftAbiService.endAuction(user.address, auctionId);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async bid(
     @Args('input', { type: () => BidActionArgs }) input: BidActionArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = BidRequest.fromArgs(input);
-    return await this.nftAbiService.bid(address, request);
+    return await this.nftAbiService.bid(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async buySft(
     @Args('input', { type: () => BuySftActionArgs }) input: BuySftActionArgs,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = BuySftRequest.fromArgs(input);
-    return await this.nftAbiService.buySft(address, request);
+    return await this.nftAbiService.buySft(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtAuthenticateGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async withdraw(
     @Args({ name: 'auctionId', type: () => Int }) auctionId: number,
-    @Jwt('address') address: string,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdraw(address, auctionId);
+    return await this.nftAbiService.withdraw(user.address, auctionId);
   }
 }
