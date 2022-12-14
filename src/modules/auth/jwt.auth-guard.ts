@@ -22,7 +22,18 @@ export class JwtAuthenticateGuard implements CanActivate {
       const ctx = GqlExecutionContext.create(context);
       request = ctx.getContext().req;
     }
-
+    if (
+      (process.env.NODE_ENV === 'development' ||
+        process.env.NODE_ENV === 'test') &&
+      !!request.headers['x-nft-address']
+    ) {
+      const address = request.headers['x-nft-address'];
+      request.auth = {
+        address: address,
+      };
+      console.log(111111111);
+      return true;
+    }
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       return false;
