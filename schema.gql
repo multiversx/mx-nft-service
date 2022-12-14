@@ -28,6 +28,7 @@ type AccountStats {
   address: ID
   auctions: String
   biddingBalance: String
+  biddingBalances: [Price!]
   claimable: String
   collected: String
   collections: String

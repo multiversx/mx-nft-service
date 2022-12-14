@@ -3,6 +3,7 @@ import { EntityManager, EntityRepository } from 'typeorm';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AccountStatsEntity } from './account-stats';
 import {
+  getBiddingBalanceQuery,
   getOwnerAccountStatsForMarketplaceQuery,
   getOwnerAccountStatsQuery,
   getPublicAccountStatsForMarketplaceQuery,
@@ -27,6 +28,15 @@ export class AccountStatsRepository {
     );
 
     return response?.length > 0 ? response[0] : new AccountStatsEntity();
+  }
+
+  async getBiddingBalance(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<[{ biddingBalance: string; priceToken: string }]> {
+    return await this.manager.query(
+      getBiddingBalanceQuery(address, marketplaceKey),
+    );
   }
 
   async getOnwerAccountStats(

@@ -1,3 +1,5 @@
+import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
+
 export function getPublicAccountStatsQuery(address: string) {
   return `
   WITH 
@@ -61,6 +63,21 @@ FROM
   LEFT JOIN ordersCount b ON b.ownerAddress = '${address}'
   LEFT JOIN biddingBalanceOrders bb ON bb.orderAddress = '${address}'
   ) temp
+  `;
+}
+
+export function getBiddingBalanceQuery(
+  address: string,
+  marketplaceKey: string,
+) {
+  return `
+  SELECT SUM(o.priceAmountDenominated) AS biddingBalance, o.ownerAddress AS orderAddress, o.priceToken
+      FROM orders o WHERE o.ownerAddress = '${address}'
+            AND o.status ='Active' ${getMarketplaceKeyFilter(
+              'o',
+              marketplaceKey,
+            )}
+      GROUP BY priceToken 
   `;
 }
 

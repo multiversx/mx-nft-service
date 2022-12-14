@@ -9,6 +9,7 @@ import {
 import { AccountStats } from './models/Account-Stats.dto';
 import { AccountsStatsService } from './accounts-stats.service';
 import { AccountStatsFilter } from './models/Account-Stats.Filter';
+import { Price } from '../assets/models';
 
 @Resolver(() => AccountStats)
 export class AccountsStatsResolver {
@@ -35,6 +36,16 @@ export class AccountsStatsResolver {
   async claimable(@Parent() stats: AccountStats) {
     const { address, marketplaceKey } = stats;
     const claimableCount = await this.accountsStatsService.getClaimableCount(
+      address,
+      marketplaceKey,
+    );
+    return claimableCount || 0;
+  }
+
+  @ResolveField(() => [Price])
+  async biddingBalances(@Parent() stats: AccountStats) {
+    const { address, marketplaceKey } = stats;
+    const claimableCount = await this.accountsStatsService.getBiddingBalance(
       address,
       marketplaceKey,
     );
