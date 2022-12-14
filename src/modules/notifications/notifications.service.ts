@@ -31,15 +31,9 @@ export class NotificationsService {
     address: string,
     marketplaceKey: string = undefined,
   ): Promise<[Notification[], number]> {
-    if (marketplaceKey) {
-      return this.notificationCachingService.getNotificationsForMarketplace(
-        address,
-        marketplaceKey,
-        () => this.getNotificationsForMarketplace(address, marketplaceKey),
-      );
-    }
-    return this.notificationCachingService.getAllNotifications(address, () =>
-      this.getMappedNotifications(address),
+    return this.notificationCachingService.getAllNotifications(
+      `${address}_${marketplaceKey}`,
+      () => this.getMappedNotifications(address, marketplaceKey),
     );
   }
 
@@ -183,24 +177,12 @@ export class NotificationsService {
     );
   }
 
-  private async getMappedNotifications(address: string) {
-    const [notificationsEntities, count] =
-      await this.persistenceService.getNotificationsForAddress(address);
-
-    return [
-      notificationsEntities.map((notification) =>
-        Notification.fromEntity(notification),
-      ),
-      count,
-    ];
-  }
-
-  private async getNotificationsForMarketplace(
+  private async getMappedNotifications(
     address: string,
     marketplaceKey: string,
   ) {
     const [notificationsEntities, count] =
-      await this.persistenceService.getNotificationsForMarketplace(
+      await this.persistenceService.getNotificationsForAddress(
         address,
         marketplaceKey,
       );
