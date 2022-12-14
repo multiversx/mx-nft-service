@@ -9,7 +9,7 @@ import { NotificationsFilters } from './models/Notifications.Filter';
 import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
-import { UserAuthResult } from '../auth/user';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Notification)
 export class NotificationsResolver extends BaseResolver(Notification) {

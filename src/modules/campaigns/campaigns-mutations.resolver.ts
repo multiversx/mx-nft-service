@@ -7,7 +7,7 @@ import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
-import { UserAuthResult } from '../auth/user';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Campaign)
 export class CampaignsMutationsResolver extends BaseResolver(Campaign) {

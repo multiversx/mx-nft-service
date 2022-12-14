@@ -16,7 +16,7 @@ import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo, WhitelistedInfo } from './models/TicketInfo';
-import { UserAuthResult } from '../auth/user';
+import { UserAuthResult } from '../auth/userAuthResult';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
 

@@ -16,7 +16,7 @@ import {
 } from './models/requests';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
-import { UserAuthResult } from '../auth/user';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Auction)
 export class AuctionsMutationsResolver extends BaseResolver(Auction) {

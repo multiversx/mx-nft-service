@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import {
   CachingService,
@@ -18,7 +17,6 @@ import {
     }),
   ],
   providers: [
-    JwtStrategy,
     ApiConfigService,
     CachingService,
     CachingModuleOptions,
