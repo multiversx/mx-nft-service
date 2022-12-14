@@ -16,7 +16,6 @@ export class NotificationsRepository extends Repository<NotificationEntity> {
         ${getMarketplaceKeyFilter('not', marketplaceKey)}`,
         {
           address: address,
-          marketplaceKey: marketplaceKey,
         },
       )
       .limit(defaultSize)
