@@ -45,7 +45,6 @@ export class UsdPriceService {
       `token_${tokenId}`,
       async () => await this.elrondApiService.getTokenData(tokenId),
       CacheInfo.AllTokens.ttl,
-      TimeConstants.oneMinute,
     );
   }
 
@@ -54,7 +53,7 @@ export class UsdPriceService {
       return await this.getCachedEgldHistoricalPrice();
     }
 
-    const dexTokens = await this.getDexCachedTokens();
+    const dexTokens = await this.getCachedDexTokens();
     const token = dexTokens.find((token) => token.identifier === tokenId);
 
     return (
@@ -103,8 +102,8 @@ export class UsdPriceService {
 
   private async setAllCachedTokens(): Promise<Token[]> {
     let [apiTokens, dexTokens, egldPriceUSD] = await Promise.all([
-      this.elrondApiService.getAllTokens(),
-      this.getDexCachedTokens(),
+      this.getCachedApiTokens(),
+      this.getCachedDexTokens(),
       this.getCachedEgldHistoricalPrice(),
     ]);
     dexTokens.map((dexToken) => {
@@ -122,7 +121,7 @@ export class UsdPriceService {
     return apiTokens.concat([egldToken]);
   }
 
-  private async getDexCachedTokens(): Promise<Token[]> {
+  private async getCachedDexTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllDexTokens.key,
@@ -131,16 +130,29 @@ export class UsdPriceService {
     );
   }
 
+  private async getCachedApiTokens(): Promise<Token[]> {
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.AllApiTokens.key,
+      async () => await this.elrondApiService.getAllTokens(),
+      CacheInfo.AllApiTokens.ttl,
+    );
+  }
+
+  private async getCachedEgldPrice(): Promise<string> {
+    return await this.cacheService.getOrSetCache(
+      this.persistentRedisClient,
+      CacheInfo.EgldToken.key,
+      async () => await this.elrondApiService.getEgldPriceFromEconomics(),
+      CacheInfo.EgldToken.ttl,
+    );
+  }
+
   private async getCachedEgldHistoricalPrice(
     timestamp?: number,
   ): Promise<string> {
     if (!timestamp || DateUtils.isTimestampToday(timestamp)) {
-      return await this.cacheService.getOrSetCache(
-        this.persistentRedisClient,
-        CacheInfo.EgldToken.key,
-        async () => await this.elrondApiService.getEgldPriceFromEconomics(),
-        CacheInfo.EgldToken.ttl,
-      );
+      return await this.getCachedEgldPrice();
     }
 
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);

@@ -40,7 +40,6 @@ export class ElrondToolsService {
     isoDateOnly: string,
     cachedEgldPriceUsd?: string,
   ): Promise<string | undefined> {
-    console.log('token', token);
     const priceInEgld = await this.getTokenPriceByTimestamp(
       token,
       elrondConfig.wegld,
