@@ -17,7 +17,7 @@ import {
   StopNftCreateRequest,
 } from './models/requests';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
-import { AuthUser } from '../auth/nativeAuth';
+import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/user';
 
 @Resolver(() => Collection)

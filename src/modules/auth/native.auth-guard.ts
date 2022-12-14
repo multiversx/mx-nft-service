@@ -50,8 +50,6 @@ export class NativeAuthGuard implements CanActivate {
       request = ctx.getContext().req;
     }
 
-    // const host = new URL(request.headers['origin']).hostname;
-
     const authorization: string = request.headers['authorization'];
     if (!authorization) {
       throw new UnauthorizedException();

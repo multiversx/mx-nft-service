@@ -4,7 +4,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
 import { CachingModule } from './common/services/caching/caching.module';
 import { ApiConfigService } from './utils/api.config.service';
-import { DynamicModuleUtils } from './utils/dynamic.module-utils';
 
 @Module({
   imports: [
@@ -13,17 +12,7 @@ import { DynamicModuleUtils } from './utils/dynamic.module-utils';
     ConfigModule,
     ElrondCommunicationModule,
   ],
-  exports: [
-    ElrondCommunicationModule,
-    CachingModule,
-    ApiConfigService,
-    DynamicModuleUtils.getNestJsApiConfigService(),
-    Logger,
-  ],
-  providers: [
-    ApiConfigService,
-    DynamicModuleUtils.getNestJsApiConfigService(),
-    Logger,
-  ],
+  exports: [ElrondCommunicationModule, CachingModule, ApiConfigService, Logger],
+  providers: [ApiConfigService, Logger],
 })
 export class CommonModule {}

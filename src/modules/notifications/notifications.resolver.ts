@@ -8,7 +8,7 @@ import { UseGuards } from '@nestjs/common';
 import { NotificationsFilters } from './models/Notifications.Filter';
 import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
-import { AuthUser } from '../auth/nativeAuth';
+import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/user';
 
 @Resolver(() => Notification)

@@ -37,7 +37,7 @@ import { Token } from 'src/common/services/elrond-communication/models/Token.mod
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { Fields } from '../common/fields.decorator';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
-import { AuthUser } from '../auth/nativeAuth';
+import { AuthUser } from '../auth/authUser';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {

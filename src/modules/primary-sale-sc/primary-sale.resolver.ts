@@ -16,10 +16,9 @@ import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo, WhitelistedInfo } from './models/TicketInfo';
-import { Jwt, JwtAuthenticateGuard } from '@elrondnetwork/erdnest';
 import { UserAuthResult } from '../auth/user';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
-import { AuthUser } from '../auth/nativeAuth';
+import { AuthUser } from '../auth/authUser';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
