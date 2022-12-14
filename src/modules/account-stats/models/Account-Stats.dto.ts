@@ -10,7 +10,7 @@ export class AccountStats {
   @Field({ nullable: true })
   biddingBalance: string;
   @Field(() => [Price], { nullable: true })
-  biddingBalances: Price[];
+  biddings: Price[];
   @Field({ nullable: true })
   creations: string;
   @Field({ nullable: true })

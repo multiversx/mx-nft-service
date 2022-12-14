@@ -43,7 +43,7 @@ export class AccountsStatsResolver {
   }
 
   @ResolveField(() => [Price])
-  async biddingBalances(@Parent() stats: AccountStats) {
+  async biddings(@Parent() stats: AccountStats) {
     const { address, marketplaceKey } = stats;
     const claimableCount = await this.accountsStatsService.getBiddingBalance(
       address,
