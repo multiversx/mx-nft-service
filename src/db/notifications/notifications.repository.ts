@@ -1,33 +1,22 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { NotificationEntity } from '.';
 import { NotificationStatusEnum } from 'src/modules/notifications/models';
+import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
 
 @EntityRepository(NotificationEntity)
 export class NotificationsRepository extends Repository<NotificationEntity> {
   async getNotificationsForAddress(
     address: string,
-  ): Promise<[NotificationEntity[], number]> {
-    const defaultSize = 100;
-    return await this.createQueryBuilder('not')
-      .where(`not.ownerAddress = :address and not.status='active'`, {
-        address: address,
-      })
-      .limit(defaultSize)
-      .orderBy('id', 'DESC')
-      .getManyAndCount();
-  }
-
-  async getNotificationsForMarketplace(
-    address: string,
-    merketplaceKey: string,
+    marketplaceKey: string,
   ): Promise<[NotificationEntity[], number]> {
     const defaultSize = 100;
     return await this.createQueryBuilder('not')
       .where(
-        `not.ownerAddress = :address AND not.status='active' AND not.marketplaceKey = :marketplaceKey`,
+        `not.ownerAddress = :address AND not.status='active' 
+        ${getMarketplaceKeyFilter('not', marketplaceKey)}`,
         {
           address: address,
-          marketplaceKey: merketplaceKey,
+          marketplaceKey: marketplaceKey,
         },
       )
       .limit(defaultSize)

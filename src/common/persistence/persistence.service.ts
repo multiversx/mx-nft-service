@@ -520,22 +520,13 @@ export class PersistenceService {
 
   async getNotificationsForAddress(
     address: string,
+    marketplaceKey: string,
   ): Promise<[NotificationEntity[], number]> {
     return await this.execute(
       this.getNotificationsForAddress.name,
-      this.notificationRepository.getNotificationsForAddress(address),
-    );
-  }
-
-  async getNotificationsForMarketplace(
-    address: string,
-    merketplaceKey: string,
-  ): Promise<[NotificationEntity[], number]> {
-    return await this.execute(
-      this.getNotificationsForMarketplace.name,
-      this.notificationRepository.getNotificationsForMarketplace(
+      this.notificationRepository.getNotificationsForAddress(
         address,
-        merketplaceKey,
+        marketplaceKey,
       ),
     );
   }
@@ -702,22 +693,11 @@ export class PersistenceService {
     limit: number = 10,
     offset: number = 0,
     address: string,
-  ): Promise<[AuctionEntity[], number]> {
-    return await this.execute(
-      this.getClaimableAuctions.name,
-      this.auctionsRepository.getClaimableAuctions(limit, offset, address),
-    );
-  }
-
-  async getClaimableAuctionsForMarketplaceKey(
-    limit: number = 10,
-    offset: number = 0,
-    address: string,
     marketplaceKey: string,
   ): Promise<[AuctionEntity[], number]> {
     return await this.execute(
       this.getClaimableAuctions.name,
-      this.auctionsRepository.getClaimableAuctionsForMarketplaceKey(
+      this.auctionsRepository.getClaimableAuctions(
         limit,
         offset,
         address,
