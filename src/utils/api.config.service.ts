@@ -29,6 +29,12 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_PASSWORD');
   }
 
+  isReindexMarketplaceEventsFlagActive(): boolean {
+    return (
+      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
+    );
+  }
+
   getApiUrl(): string {
     return this.getGenericConfig<string>('ELROND_API');
   }

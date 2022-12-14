@@ -1,4 +1,5 @@
 import { elrondConfig } from 'src/config';
+import { getMarketplaceKeyFilter } from './sqlUtils';
 
 export function getCollectionStats(
   identifier: string,
@@ -35,13 +36,4 @@ export function getCollectionStats(
     LEFT JOIN activeAuctions aa ON aa.activeIdentifier = '${identifier}'
     ) temp
   `;
-}
-
-function getMarketplaceKeyFilter(
-  alias: string,
-  marketplaceKey: string,
-): string {
-  return marketplaceKey
-    ? `AND ${alias}.marketplaceKey = '${marketplaceKey}'`
-    : '';
 }
