@@ -8,6 +8,7 @@ import {
   LocalCacheService,
   MetricsService,
 } from '@elrondnetwork/erdnest';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import {
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
     }),
+    ConfigModule,
   ],
   providers: [
     ApiConfigService,
