@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ApiConfigService } from 'src/utils/api.config.service';
+import { AuthUtils } from './auth.utils';
 
 @Injectable()
 export class NativeAuthGuard implements CanActivate {
@@ -50,15 +51,7 @@ export class NativeAuthGuard implements CanActivate {
       request = ctx.getContext().req;
     }
 
-    if (
-      (process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'test') &&
-      !!request.headers['x-nft-address']
-    ) {
-      const address = request.headers['x-nft-address'];
-      request.auth = {
-        address: address,
-      };
+    if (AuthUtils.bypassAuthorizationOnTestnet(request)) {
       return true;
     }
 

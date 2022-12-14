@@ -7,6 +7,7 @@ import {
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verify } from 'jsonwebtoken';
 import { ApiConfigService } from 'src/utils/api.config.service';
+import { AuthUtils } from './auth.utils';
 
 @Injectable()
 export class JwtAuthenticateGuard implements CanActivate {
@@ -22,15 +23,7 @@ export class JwtAuthenticateGuard implements CanActivate {
       const ctx = GqlExecutionContext.create(context);
       request = ctx.getContext().req;
     }
-    if (
-      (process.env.NODE_ENV === 'development' ||
-        process.env.NODE_ENV === 'test') &&
-      !!request.headers['x-nft-address']
-    ) {
-      const address = request.headers['x-nft-address'];
-      request.auth = {
-        address: address,
-      };
+    if (AuthUtils.bypassAuthorizationOnTestnet(request)) {
       return true;
     }
     const authorization: string = request.headers['authorization'];
