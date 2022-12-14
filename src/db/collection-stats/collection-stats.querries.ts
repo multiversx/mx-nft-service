@@ -1,9 +1,10 @@
+import { elrondConfig } from 'src/config';
 import { getMarketplaceKeyFilter } from './sqlUtils';
 
 export function getCollectionStats(
   identifier: string,
   marketplaceKey: string = undefined,
-  paymentToken: string = 'EGLD',
+  paymentToken: string = elrondConfig.egld,
 ) {
   return `
   WITH

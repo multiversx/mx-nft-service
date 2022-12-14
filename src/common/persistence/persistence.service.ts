@@ -1,6 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
-import { constants } from 'src/config';
+import { constants, elrondConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
@@ -230,7 +230,7 @@ export class PersistenceService {
   async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = 'EGLD',
+    paymentToken: string = elrondConfig.egld,
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getCollectionStats.name,
