@@ -564,7 +564,7 @@ export class ElrondApiService {
       size,
       ['identifier', 'metadata', 'timestamp'],
     );
-    nfts = nfts.filter((nft) => nft.metadata?.attributes);
+    nfts = nfts?.filter((nft) => nft.metadata?.attributes);
     return [nfts, lastTimestamp];
   }
 
