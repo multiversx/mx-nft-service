@@ -12,11 +12,7 @@ export class UsdPriceResolver extends BaseResolver(Price) {
 
   @ResolveField(() => String)
   async usdAmount(@Parent() price: Price) {
-    return this.usdPriceService.getUsdAmountDenom(
-      price.token,
-      price.amount,
-      price.timestamp,
-    );
+    return this.usdPriceService.getUsdAmountDenom(price.token, price.amount);
   }
 
   @ResolveField(() => Token)
