@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElrondApiService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { cacheConfig, elrondConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
@@ -25,7 +25,7 @@ export class CollectionsStatsService {
   async getStats(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = 'EGLD',
+    paymentToken: string = elrondConfig.egld,
   ): Promise<CollectionStatsEntity> {
     try {
       const cacheKey = this.getStatsCacheKey(
@@ -62,7 +62,7 @@ export class CollectionsStatsService {
   private getStatsCacheKey(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = 'EGLD',
+    paymentToken: string = elrondConfig.egld,
   ) {
     return generateCacheKeyFromParams(
       'collection_stats',

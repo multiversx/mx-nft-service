@@ -10,7 +10,6 @@ import { BaseResolver } from '../common/base.resolver';
 import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
 import { Asset, Price } from '../assets/models';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsProvider } from '../assets/loaders/assets.loader';
 import { Account } from '../account-stats/models';
@@ -23,7 +22,7 @@ import {
 import { AuctionCustomFilter } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
 import { QueryRequest } from '../common/filters/QueryRequest';
-import { User } from '../auth/user';
+import { UserAuthResult } from '../auth/userAuthResult';
 import { AvailableTokensForAuctionProvider } from './loaders/available-tokens-auction.loader';
 import { LastOrdersProvider } from '../orders/loaders/last-order.loader';
 import { AuctionsGetterService } from './auctions-getter.service';
@@ -37,6 +36,8 @@ import { XOXNO_KEY } from 'src/utils/constants';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { Fields } from '../common/fields.decorator';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/authUser';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {
@@ -161,9 +162,9 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   }
 
   @Query(() => AuctionResponse)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async myClaimableAuctions(
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
     @Args({
       name: 'filters',
       type: () => MyClaimableAuctionsFilters,
@@ -178,7 +179,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       await this.auctionsGetterService.getClaimableAuctions(
         limit,
         offset,
-        user.publicKey,
+        user.address,
         filters?.marketplaceKey,
       );
     return PageResponse.mapResponse<Auction>(

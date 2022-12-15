@@ -12,16 +12,17 @@ import {
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { ContentValidation } from './content.validation.service';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../auth/user';
 import {
   CreateNftRequest,
   UpdateQuantityRequest,
   TransferNftRequest,
 } from './models/requests';
 import { AuthorizationHeader } from '../auth/authorization-header';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/authUser';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {
@@ -34,21 +35,18 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async createNft(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateNftRequest.fromArgs(input, file);
-    return await this.assetsTransactionService.createNft(
-      user.publicKey,
-      request,
-    );
+    return await this.assetsTransactionService.createNft(user.address, request);
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async verifyContent(
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
   ): Promise<Boolean> {
@@ -66,70 +64,70 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async addSftQuantity(
     @Args('input', { type: () => HandleQuantityArgs })
     input: HandleQuantityArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTAddQuantity');
     return await this.assetsTransactionService.updateQuantity(
-      user.publicKey,
+      user.address,
       request,
     );
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async burnQuantity(
     @Args('input', { type: () => HandleQuantityArgs })
     input: HandleQuantityArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
     return await this.assetsTransactionService.burnQuantity(
-      user.publicKey,
+      user.address,
       request,
     );
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async transferNft(
     @Args('input', { type: () => TransferNftArgs }) input: TransferNftArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = TransferNftRequest.fromArgs(input);
     return await this.assetsTransactionService.transferNft(
-      user.publicKey,
+      user.address,
       request,
     );
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   addLike(
     @Args('input', { type: () => AddLikeArgs }) input: AddLikeArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
     return this.assetsLikesService.addLike(
       input.identifier,
-      user.publicKey,
+      user.address,
       authorizationHeader,
     );
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   removeLike(
     @Args('input', { type: () => RemoveLikeArgs }) input: RemoveLikeArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
     return this.assetsLikesService.removeLike(
       input.identifier,
-      user.publicKey,
+      user.address,
       authorizationHeader,
     );
   }

@@ -28,19 +28,6 @@ export class NotificationsCachingService {
     );
   }
 
-  async getNotificationsForMarketplace(
-    address: string,
-    marketplaceKey: string,
-    getNotifications: () => any,
-  ): Promise<[Notification[], number]> {
-    return this.redisCacheService.getOrSet(
-      this.redisClient,
-      this.getNotificationsCacheKey(`${address}_${marketplaceKey}`),
-      () => getNotifications(),
-      TimeConstants.oneDay,
-    );
-  }
-
   public clearMultipleCache(addresses: string[], marketplaceKey: string) {
     this.redisCacheService.delMultiple(
       this.redisClient,

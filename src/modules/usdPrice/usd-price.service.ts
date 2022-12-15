@@ -6,7 +6,6 @@ import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { cacheConfig, elrondConfig } from 'src/config';
-import denominate from 'src/utils/formatters';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
