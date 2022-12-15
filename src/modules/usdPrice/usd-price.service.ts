@@ -80,7 +80,7 @@ export class UsdPriceService {
     token: string,
     amount: string,
     timestamp: number = DateUtils.getTimestamp(),
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     if (token === elrondConfig.egld || token === elrondConfig.wegld) {
       return computeUsdAmount(
         await this.getCachedEgldHistoricalPrice(timestamp),
