@@ -1,5 +1,6 @@
 import { isEmpty, map } from 'lodash';
 import { elrondConfig } from 'src/config';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import denominate from 'src/utils/formatters';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import { Filter, FiltersExpression, Operation, Operator } from './filtersTypes';
@@ -45,12 +46,10 @@ export default class WhereBuilder<Entity> {
     if (['priceAmount', 'minBid', 'maxBid'].includes(filter.field)) {
       filterName = `${filter.field}Denominated`;
       filterValues = filter.values.map((value) =>
-        denominate({
-          input: value,
-          denomination: elrondConfig.decimals,
-          decimals: 2,
-          showLastNonZeroDecimal: true,
-        }).replace(',', ''),
+        BigNumberUtils.denominateAmount(
+          value,
+          elrondConfig.decimals,
+        ).toString(),
       );
     }
     const sqlParamName = this.queryBuilderName
