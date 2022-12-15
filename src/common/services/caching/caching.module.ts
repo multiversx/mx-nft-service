@@ -12,7 +12,14 @@ import { RedisCacheService } from './redis-cache.service';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => CommonModule), CacheModule.register()],
+  imports: [
+    forwardRef(() => CommonModule),
+    CacheModule.register({
+      host: process.env.REDIS_URL,
+      port: parseInt(process.env.REDIS_PORT),
+      password: process.env.REDIS_PASSWORD,
+    }),
+  ],
   providers: [Logger, CachingService, LocalCacheService, RedisCacheService],
   exports: [CachingService, LocalCacheService, RedisCacheService],
 })
