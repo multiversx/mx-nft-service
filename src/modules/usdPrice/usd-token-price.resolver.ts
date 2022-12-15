@@ -13,7 +13,7 @@ export class UsdTokenPriceResolver extends BaseResolver(Token) {
   async priceUsd(@Parent() token: Token) {
     return (
       token.priceUsd ??
-      (await this.usdPriceService.getTokenCurrentPrice(token.identifier))
+      (await this.usdPriceService.getTokenPriceUsd(token.identifier))
     );
   }
 }
