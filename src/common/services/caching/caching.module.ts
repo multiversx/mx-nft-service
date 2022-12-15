@@ -1,3 +1,4 @@
+import { CachingModuleOptions } from '@elrondnetwork/erdnest';
 import {
   forwardRef,
   Global,
@@ -12,7 +13,15 @@ import { RedisCacheService } from './redis-cache.service';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => CommonModule), CacheModule.register()],
+  imports: [
+    forwardRef(() => CommonModule),
+    CacheModule.register(
+      new CachingModuleOptions({
+        url: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+      }),
+    ),
+  ],
   providers: [Logger, CachingService, LocalCacheService, RedisCacheService],
   exports: [CachingService, LocalCacheService, RedisCacheService],
 })

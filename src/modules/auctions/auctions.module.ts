@@ -33,6 +33,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { AuthModule } from '../auth/auth.module';
 import { OffersModuleGraph } from '../offers/offers.module';
+import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   providers: [
@@ -71,6 +72,7 @@ import { OffersModuleGraph } from '../offers/offers.module';
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => AuthModule),
     forwardRef(() => OffersModuleGraph),
+    DynamicModuleUtils.getCachingModule(),
   ],
   exports: [
     AuctionsSetterService,

@@ -27,6 +27,10 @@ export class ApiConfigService {
     return redisUrl;
   }
 
+  getRedisPort(): number {
+    return this.getGenericConfig<number>('REDIS_PORT');
+  }
+
   getMongoDbName(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_DATABASE');
   }
