@@ -1,4 +1,3 @@
-import { CachingService } from '@elrondnetwork/erdnest';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import { JwtAuthenticateGuard } from './jwt.auth-guard';
@@ -6,17 +5,11 @@ import { NativeAuthGuard } from './native.auth-guard';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
-  constructor(
-    private readonly apiConfigService: ApiConfigService,
-    private readonly cachingService: CachingService,
-  ) {}
+  constructor(private readonly apiConfigService: ApiConfigService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.apiConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(
-      this.apiConfigService,
-      this.cachingService,
-    );
+    const nativeAuthGuard = new NativeAuthGuard(this.apiConfigService);
 
     const guards = [jwtGuard, nativeAuthGuard];
 

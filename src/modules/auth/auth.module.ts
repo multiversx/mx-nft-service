@@ -2,13 +2,7 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ApiConfigService } from 'src/utils/api.config.service';
-import {
-  CachingService,
-  CachingModuleOptions,
-  LocalCacheService,
-  MetricsService,
-} from '@elrondnetwork/erdnest';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -16,22 +10,8 @@ import { ConfigModule } from '@nestjs/config';
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
     }),
-    ConfigModule,
   ],
-  providers: [
-    ApiConfigService,
-    CachingService,
-    CachingModuleOptions,
-    LocalCacheService,
-    MetricsService,
-  ],
-  exports: [
-    PassportModule,
-    ApiConfigService,
-    CachingService,
-    CachingModuleOptions,
-    LocalCacheService,
-    MetricsService,
-  ],
+  providers: [ApiConfigService, ConfigService],
+  exports: [PassportModule, ApiConfigService],
 })
 export class AuthModule {}
