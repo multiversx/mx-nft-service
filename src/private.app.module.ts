@@ -14,6 +14,7 @@ import { ScamModule } from './modules/scam/scam.module';
 import { NftTraitsModule } from './modules/nft-traits/nft-traits.module';
 import { CacheEventsPublisherModule } from './modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import * as ormconfig from './ormconfig';
+import { DynamicModuleUtils } from './utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import * as ormconfig from './ormconfig';
     NftTraitsModule,
     MarketplacesModuleGraph,
     AuthModule,
+    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [Logger, NsfwUpdaterService, RarityUpdaterService],
   controllers: [MetricsController, ReindexController, CachingController],

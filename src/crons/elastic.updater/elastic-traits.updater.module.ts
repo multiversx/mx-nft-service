@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NftTraitsModule } from 'src/modules/nft-traits/nft-traits.module';
 import { TraitsUpdaterService } from './traits.updater.service';
 import { ElasticTraitsUpdaterService } from './elastic-traits.updater.service';
+import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ElasticTraitsUpdaterService } from './elastic-traits.updater.service';
     CommonModule,
     NftTraitsModule,
     CachingModule,
+    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [Logger, ElasticTraitsUpdaterService, TraitsUpdaterService],
   exports: [ElasticTraitsUpdaterService, TraitsUpdaterService],

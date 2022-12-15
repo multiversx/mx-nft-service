@@ -4,6 +4,7 @@ import { CommonModule } from 'src/common.module';
 import { DocumentDbModule } from 'src/document-db/document-db.module';
 import { ScamModule } from 'src/modules/scam/scam.module';
 import ormconfig from 'src/ormconfig';
+import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 import { ElasticScamUpdaterService } from './elastic-scam.service';
 import { NftScamUpdaterService } from './nft-scam.updater.service';
 
@@ -13,6 +14,7 @@ import { NftScamUpdaterService } from './nft-scam.updater.service';
     CommonModule,
     ScamModule,
     DocumentDbModule,
+    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [Logger, ElasticScamUpdaterService, NftScamUpdaterService],
   exports: [ElasticScamUpdaterService, NftScamUpdaterService],
