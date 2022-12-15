@@ -27,6 +27,18 @@ export class AccountsStatsCachingService {
     );
   }
 
+  public async getBiddingBalance(
+    key: string,
+    getBiddingBalanceStats: () => any,
+  ): Promise<[{ biddingBalance: string; priceToken: string }]> {
+    return this.redisCacheService.getOrSet(
+      this.redisClient,
+      this.getBiddingBalanceCacheKey(key),
+      () => getBiddingBalanceStats(),
+      5 * TimeConstants.oneMinute,
+    );
+  }
+
   public async getStatsForOwner(
     address: string,
     getAccountStats: () => any,
@@ -120,6 +132,10 @@ export class AccountsStatsCachingService {
       this.redisClient,
       this.getClaimableCacheKey(address),
     );
+    await this.redisCacheService.delByPattern(
+      this.redisClient,
+      this.getBiddingBalanceCacheKey(address),
+    );
     return await this.redisCacheService.delByPattern(
       this.redisClient,
       this.getStatsCacheKey(`owner_${address}`),
@@ -128,6 +144,10 @@ export class AccountsStatsCachingService {
 
   private getStatsCacheKey(address: string) {
     return generateCacheKeyFromParams('account_stats', address);
+  }
+
+  private getBiddingBalanceCacheKey(key: string) {
+    return generateCacheKeyFromParams('account_bidding', key);
   }
 
   private getCollectedCacheKey(address: string) {

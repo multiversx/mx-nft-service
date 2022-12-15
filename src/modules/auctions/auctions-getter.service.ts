@@ -170,22 +170,13 @@ export class AuctionsGetterService {
     address: string,
     marketplaceKey: string,
   ) {
-    let [auctions, count] = [[], 0];
-    if (marketplaceKey) {
-      [auctions, count] =
-        await this.persistenceService.getClaimableAuctionsForMarketplaceKey(
-          limit,
-          offset,
-          address,
-          marketplaceKey,
-        );
-    } else {
-      [auctions, count] = await this.persistenceService.getClaimableAuctions(
-        limit,
-        offset,
-        address,
-      );
-    }
+    let [auctions, count] = await this.persistenceService.getClaimableAuctions(
+      limit,
+      offset,
+      address,
+      marketplaceKey,
+    );
+
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 

@@ -12,11 +12,11 @@ export class AssetsHistoryNftEventService {
     eventType: string,
     mainEvent: any,
   ): AssetHistoryLogInput {
-    const event = mainEvent._source.events.find(
+    const event = mainEvent.events.find(
       (event) => event.identifier === eventType,
     );
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
-    const transferEvent = mainEvent._source.events.find(
+    const transferEvent = mainEvent.events.find(
       (event) =>
         (event.identifier === NftEventEnum.ESDTNFTTransfer ||
           event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
@@ -28,8 +28,8 @@ export class AssetsHistoryNftEventService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Added,
-          address: mainEvent._source.address,
-          itemsCount: mainEvent._source.events[0].topics[2],
+          address: mainEvent.address,
+          itemsCount: mainEvent.events[0].topics[2],
         });
       }
       case NftEventEnum.ESDTNFTCreate: {
@@ -43,7 +43,7 @@ export class AssetsHistoryNftEventService {
       }
       case NftEventEnum.ESDTNFTTransfer: {
         if (
-          mainEvent._source.address === mainEvent?._source.events[0].address &&
+          mainEvent.address === mainEvent?.events[0].address &&
           transferEvent.topics[3].base64ToBech32() !==
             elrondConfig.nftMarketplaceAddress
         ) {

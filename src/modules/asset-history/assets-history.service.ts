@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
 import { elrondConfig } from 'src/config';
 import {
   AuctionEventEnum,
@@ -17,53 +16,49 @@ import { AssetsHistoryExternalAuctionService } from './services/assets-history.e
 import { AssetsHistoryNftEventService } from './services/assets-history.nft-events.service';
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
 import { AssetsHistoryCachingService } from './assets-history-caching.service';
+import { AssetsHistoryElasticService } from './assets-history-elastic.service';
 
 @Injectable()
 export class AssetsHistoryService {
   constructor(
-    private readonly elasticService: ElrondElasticService,
     private readonly assetsHistoryNftEventService: AssetsHistoryNftEventService,
     private readonly assetsHistoryAuctionService: AssetsHistoryAuctionService,
     private readonly assetsHistoryExternalAuctionService: AssetsHistoryExternalAuctionService,
     private readonly assetsHistoryElrondNftsSwapEventsService: AssetsHistoryElrondNftsSwapEventsService,
     private readonly assetsHistoryCachingService: AssetsHistoryCachingService,
+    private readonly assetsHistoryElasticService: AssetsHistoryElasticService,
   ) {}
 
   async getOrSetHistoryLog(
     collection: string,
     nonce: string,
     limit: number,
-    timestamp: string | number,
+    beforeTimestamp: number,
   ): Promise<AssetHistoryLog[]> {
     const getOrSetHistoryLog = async () =>
-      await this.getHistoryLog(collection, nonce, limit, timestamp);
+      await this.getAndMapHistoryLog(collection, nonce, limit, beforeTimestamp);
     return await this.assetsHistoryCachingService.getOrSetHistoryLog(
       collection,
       nonce,
       limit,
-      timestamp,
+      beforeTimestamp,
       getOrSetHistoryLog,
     );
   }
 
-  private async getHistoryLog(
+  private async getAndMapHistoryLog(
     collection: string,
     nonce: string,
     limit: number,
-    timestamp: string | number,
+    beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
-    let elasticLogs = [];
-    let totalHits = 0;
-    let elasticTimestamp = 0;
-
-    [elasticLogs, totalHits, elasticTimestamp] =
-      await this.elasticService.getNftHistory(
-        Buffer.from(collection).toString('base64'),
-        Buffer.from(nonce, 'hex').toString('base64'),
-        limit,
-        timestamp,
-      );
+    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(
+      collection,
+      nonce,
+      limit,
+      beforeTimestamp,
+    );
 
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
@@ -71,16 +66,6 @@ export class AssetsHistoryService {
       } else {
         this.mapLogs(nonce, elasticLogs, index, historyLog);
       }
-    }
-
-    if (historyLog.length < limit && totalHits > 0) {
-      return await this.getHistoryLog(
-        collection,
-        nonce,
-        limit,
-        elasticTimestamp,
-        historyLog,
-      );
     }
 
     return historyLog;
@@ -172,17 +157,17 @@ export class AssetsHistoryService {
         action: input.action,
         address: input.address,
         senderAddress: input.sender,
-        transactionHash: input.event._source.originalTxHash
-          ? input.event._source.originalTxHash
-          : input.event._id,
-        actionDate: input.event._source.timestamp || '',
+        transactionHash: input.event.originalTxHash
+          ? input.event.originalTxHash
+          : input.event.identifier,
+        actionDate: input.event.timestamp || '',
         itemCount: itemCountString ? itemCountString.toString() : undefined,
         price: totalPrice
           ? new Price({
               nonce: 0,
               token: elrondConfig.egld,
               amount: totalPrice.toFixed(),
-              timestamp: input.event._source.timestamp,
+              timestamp: input.event.timestamp,
             })
           : undefined,
       }),
@@ -190,20 +175,20 @@ export class AssetsHistoryService {
   }
 
   private getEventType(res: any, index: number): [string, string, any] {
-    if (res[index]._source.originalTxHash) {
+    if (res[index].originalTxHash) {
       return [undefined, undefined, undefined];
     }
 
-    const eventId = res[index]._id;
+    const eventId = res[index].identifier;
 
     const relatedEvents = res.filter(
       (eventObject) =>
-        eventObject._id === eventId ||
-        eventObject._source.originalTxHash === eventId,
+        eventObject.identifier === eventId ||
+        eventObject.originalTxHash === eventId,
     );
 
     for (let i = 0; i < relatedEvents?.length; i++) {
-      const events = relatedEvents[i]._source.events;
+      const events = relatedEvents[i].events;
 
       for (let j = 0; j < events.length; j++) {
         const eventIdentifier = events[j].identifier;
@@ -248,7 +233,7 @@ export class AssetsHistoryService {
 
     return [
       NftEventTypeEnum.NftEventEnum,
-      res[index]._source.events[0].identifier,
+      res[index].events[0].identifier,
       res[index],
     ];
   }

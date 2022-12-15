@@ -6,6 +6,10 @@ import { AccountsStatsCachingService } from './accounts-stats.caching.service';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import { Price } from '../assets/models';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import { elrondConfig } from 'src/config';
 
 @Injectable()
 export class AccountsStatsService {
@@ -16,6 +20,7 @@ export class AccountsStatsService {
     private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
     private marketplacesService: MarketplacesService,
+    private usdPriceService: UsdPriceService,
   ) {}
 
   async getStats(
@@ -28,48 +33,33 @@ export class AccountsStatsService {
     } else return this.getPublicStats(address, marketplaceKey);
   }
 
-  private async getPublicStats(
+  async getBiddingBalance(
     address: string,
     marketplaceKey: string = null,
-  ): Promise<AccountStatsEntity> {
+  ): Promise<Price[]> {
     try {
       const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
-      return this.accountStatsCachingService.getPublicStats(key, () =>
-        this.persistenceService.getPublicAccountStats(address, marketplaceKey),
+      const response = await this.accountStatsCachingService.getBiddingBalance(
+        key,
+        () =>
+          this.persistenceService.getBiddingBalance(address, marketplaceKey),
       );
+      let biddings: Price[] = [];
+      for (const price of response) {
+        await this.mapPrice(price, biddings);
+      }
+      return biddings;
     } catch (err) {
       this.logger.error(
-        'An error occurred while getting stats for public account',
+        'An error occurred while getting bidding balance for account',
         {
-          path: 'AccountsStatsService.getPublicStats',
-          address,
-          exception: err?.message,
-        },
-      );
-      return new AccountStatsEntity();
-    }
-  }
-
-  private async getStatsForOwner(
-    address: string,
-    marketplaceKey: string = null,
-  ): Promise<AccountStatsEntity> {
-    try {
-      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
-      return this.accountStatsCachingService.getStatsForOwner(key, () =>
-        this.persistenceService.getOnwerAccountStats(address, marketplaceKey),
-      );
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while getting stats for owner account',
-        {
-          path: 'AccountsStatsService.getStatsForOwner',
+          path: this.getBiddingBalance.name,
           address,
           marketplaceKey,
           exception: err?.message,
         },
       );
-      return new AccountStatsEntity();
+      return;
     }
   }
 
@@ -176,6 +166,70 @@ export class AccountsStatsService {
         exception: err?.message,
       });
       return null;
+    }
+  }
+
+  private async mapPrice(
+    price: { biddingBalance: string; priceToken: string },
+    biddings: Price[],
+  ) {
+    const paymentToken = await this.usdPriceService.getToken(price.priceToken);
+
+    biddings.push(
+      new Price({
+        amount: BigNumberUtils.nominateAmount(
+          price.biddingBalance,
+          paymentToken.decimals ?? elrondConfig.decimals,
+        ),
+        token: price.priceToken,
+
+        tokenData: paymentToken,
+      }),
+    );
+  }
+
+  private async getPublicStats(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<AccountStatsEntity> {
+    try {
+      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
+      return this.accountStatsCachingService.getPublicStats(key, () =>
+        this.persistenceService.getPublicAccountStats(address, marketplaceKey),
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting stats for public account',
+        {
+          path: 'AccountsStatsService.getPublicStats',
+          address,
+          exception: err?.message,
+        },
+      );
+      return new AccountStatsEntity();
+    }
+  }
+
+  private async getStatsForOwner(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<AccountStatsEntity> {
+    try {
+      const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
+      return this.accountStatsCachingService.getStatsForOwner(key, () =>
+        this.persistenceService.getOnwerAccountStats(address, marketplaceKey),
+      );
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while getting stats for owner account',
+        {
+          path: 'AccountsStatsService.getStatsForOwner',
+          address,
+          marketplaceKey,
+          exception: err?.message,
+        },
+      );
+      return new AccountStatsEntity();
     }
   }
 }

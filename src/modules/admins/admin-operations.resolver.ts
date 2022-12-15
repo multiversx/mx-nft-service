@@ -6,9 +6,11 @@ import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
 import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
+import { UpdateNftTraitsResponse } from '../nft-traits/models/update-nft-traits-response';
 import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
 import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
 import { MarketplaceEventsIndexingRequest } from '../marketplaces/models/MarketplaceEventsIndexingRequest';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -20,7 +22,7 @@ export class AdminOperationsResolver {
   ) {}
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   flagNft(
     @Args('input', { type: () => FlagNftInput }) input: FlagNftInput,
   ): Promise<boolean> {
@@ -31,7 +33,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   flagCollection(
     @Args('input', { type: () => FlagCollectionInput })
     input: FlagCollectionInput,
@@ -43,7 +45,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async updateCollectionRarities(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -58,7 +60,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async validateCollectionRarities(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -71,7 +73,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async updateCollectionTraits(
     @Args('collectionTicker')
     collectionTicker: string,
@@ -85,12 +87,12 @@ export class AdminOperationsResolver {
     }
   }
 
-  @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @Mutation(() => UpdateNftTraitsResponse)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async updateNftTraits(
     @Args('identifier')
     identifier: string,
-  ): Promise<boolean> {
+  ): Promise<UpdateNftTraitsResponse> {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
@@ -99,14 +101,16 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async reindexMarketplaceEvents(
     @Args('input')
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
     try {
       await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
-        MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(input),
+        MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
+          input,
+        ),
       );
       return true;
     } catch (error) {

@@ -1,7 +1,10 @@
+import { elrondConfig } from 'src/config';
+import { getMarketplaceKeyFilter } from './sqlUtils';
+
 export function getCollectionStats(
   identifier: string,
   marketplaceKey: string = undefined,
-  paymentToken: string = 'EGLD',
+  paymentToken: string = elrondConfig.egld,
 ) {
   return `
   WITH
@@ -21,7 +24,7 @@ export function getCollectionStats(
     COUNT(DISTINCT(a.id)) AS activeAuctions,
     a.collection AS activeIdentifier
     FROM auctions a
-    LEFT JOIN orders o ON o.auctionId = a.id 
+    LEFT JOIN orders o ON o.auctionId = a.id AND (o.status ='Active' OR o.status = 'Bought')
     WHERE a.collection  = '${identifier}' AND a.status = 'Running' AND a.paymentToken='${paymentToken}' ${getMarketplaceKeyFilter(
     'a',
     marketplaceKey,
@@ -33,13 +36,4 @@ export function getCollectionStats(
     LEFT JOIN activeAuctions aa ON aa.activeIdentifier = '${identifier}'
     ) temp
   `;
-}
-
-function getMarketplaceKeyFilter(
-  alias: string,
-  marketplaceKey: string,
-): string {
-  return marketplaceKey
-    ? `AND ${alias}.marketplaceKey = '${marketplaceKey}'`
-    : '';
 }

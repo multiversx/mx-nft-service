@@ -3,6 +3,7 @@ import { NftEventEnum } from 'src/modules/assets/models';
 import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { ApiConfigService } from 'src/utils/api.config.service';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { MinterEventsService } from './minter-events.service';
@@ -11,6 +12,7 @@ import { NftEventsService } from './nft-events.service';
 @Injectable()
 export class NftEventsConsumer {
   constructor(
+    private readonly apiConfigService: ApiConfigService,
     private readonly nftEventsService: NftEventsService,
     private readonly marketplaceEventsService: MarketplaceEventsService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
@@ -69,9 +71,11 @@ export class NftEventsConsumer {
         nftAuctionEvents.hash,
       );
 
-      await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
-        internalMarketplaceEvents.concat(externalMarketplaceEvents),
-      );
+      if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
+        await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
+          internalMarketplaceEvents.concat(externalMarketplaceEvents),
+        );
+      }
     }
   }
 }

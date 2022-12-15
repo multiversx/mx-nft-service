@@ -58,17 +58,23 @@ export class MarketplaceEventsIndexingService {
     const marketplaces: string[] = [
       ...new Set(events.map((event) => event.address)),
     ];
-    for (let i = 0; i < marketplaces.length; i++) {
-      const marketplaceLastIndexTimestamp =
-        await this.getMarketplaceLastIndexTimestamp(marketplaces[i]);
-      await this.reindexMarketplaceEvents(
-        new MarketplaceEventsIndexingRequest({
-          marketplaceAddress: marketplaces[i],
-          beforeTimestamp: DateUtils.getCurrentTimestamp(),
-          afterTimestamp: marketplaceLastIndexTimestamp,
-        }),
+    marketplaces.map(async (marketplace) => {
+      await Locker.lock(
+        `${this.reindexLatestMarketplacesEvents.name} for ${marketplace}`,
+        async () => {
+          const marketplaceLastIndexTimestamp =
+            await this.getMarketplaceLastIndexTimestamp(marketplace);
+          await this.reindexMarketplaceEvents(
+            new MarketplaceEventsIndexingRequest({
+              marketplaceAddress: marketplace,
+              afterTimestamp: marketplaceLastIndexTimestamp,
+              stopIfDuplicates: true,
+            }),
+          );
+        },
+        true,
       );
-    }
+    });
   }
 
   async reindexMarketplaceEvents(
@@ -82,8 +88,9 @@ export class MarketplaceEventsIndexingService {
       const [newestTimestamp] = await this.getEventsAndSaveToDb(input);
 
       if (
-        !input.marketplaceLastIndexTimestamp ||
-        newestTimestamp > input.marketplaceLastIndexTimestamp
+        newestTimestamp &&
+        (!input.marketplaceLastIndexTimestamp ||
+          newestTimestamp > input.marketplaceLastIndexTimestamp)
       ) {
         await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
           input.marketplaceAddress,

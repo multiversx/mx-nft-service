@@ -11,6 +11,7 @@ import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.servi
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
     NftRarityModuleGraph,
     NftTraitsModule,
     MarketplacesModuleGraph,
+    AuthModule,
   ],
   providers: [
     Logger,

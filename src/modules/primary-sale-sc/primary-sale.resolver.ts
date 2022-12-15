@@ -10,14 +10,15 @@ import {
 import { BaseResolver } from '../common/base.resolver';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { PrimarySaleService } from './primary-sale.service';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../auth/user';
 import { PrimarySale } from './models/PrimarySale.dto';
 import { PrimarySaleFilter } from './models/Primary-sale.Filter';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo, WhitelistedInfo } from './models/TicketInfo';
+import { UserAuthResult } from '../auth/userAuthResult';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/authUser';
 
 @Resolver(() => PrimarySale)
 export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
@@ -34,37 +35,37 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   }
 
   @Query(() => [TicketInfo])
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async myTickets(
     @Args({ name: 'collectionIdentifier', type: () => String })
     collectionIdentifier: string,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TicketInfo[]> {
     return await this.primarySaleService.getMyTickets(
       collectionIdentifier,
-      user.publicKey,
+      user.address,
     );
   }
 
   @Query(() => Boolean)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async hasClaimedTickets(
     @Args({ name: 'collectionIdentifier', type: () => String })
     collectionIdentifier: string,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
     return await this.primarySaleService.hasClaimedTickets(
       collectionIdentifier,
-      user.publicKey,
+      user.address,
     );
   }
 
   @Query(() => WhitelistedInfo)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async isWhitelisted(
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<{ isWhitelisted: boolean; message: string }> {
-    return await this.primarySaleService.isWhitelisted(user.publicKey);
+    return await this.primarySaleService.isWhitelisted(user.address);
   }
 
   @ResolveField('price', () => String)
@@ -98,22 +99,22 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async buyTickets(
     @Args('input', { type: () => BuyTicketsArgs })
     input: BuyTicketsArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.primarySaleService.buyTicket(user.publicKey, input);
+    return await this.primarySaleService.buyTicket(user.address, input);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async claimTicket(
     @Args('input', { type: () => ClaimTicketsArgs })
     input: ClaimTicketsArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.primarySaleService.claim(user.publicKey, input);
+    return await this.primarySaleService.claim(user.address, input);
   }
 }
