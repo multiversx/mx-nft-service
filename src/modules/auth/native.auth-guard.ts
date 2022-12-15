@@ -1,4 +1,3 @@
-import { CachingService } from '@elrondnetwork/erdnest';
 import { NativeAuthServer } from '@elrondnetwork/native-auth-server';
 import {
   Injectable,
@@ -16,31 +15,10 @@ export class NativeAuthGuard implements CanActivate {
   private readonly logger: Logger;
   private readonly authServer: NativeAuthServer;
 
-  constructor(
-    apiConfigService: ApiConfigService,
-    cachingService: CachingService,
-  ) {
+  constructor(apiConfigService: ApiConfigService) {
     this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       apiUrl: apiConfigService.getApiUrl(),
-      cache: {
-        getValue: async function <T>(key: string): Promise<T | undefined> {
-          if (key === 'block:timestamp:latest') {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            return new Date().getTime() / 1000;
-          }
-
-          return await cachingService.getCache<T>(key);
-        },
-        setValue: async function <T>(
-          key: string,
-          value: T,
-          ttl: number,
-        ): Promise<void> {
-          await cachingService.setCache(key, value, ttl);
-        },
-      },
     });
   }
 
