@@ -6,10 +6,11 @@ import {
   CachingModuleOptions,
   LocalCacheService,
   MetricsService,
+  ElrondCachingModule,
+  RedisCacheModuleOptions,
 } from '@elrondnetwork/erdnest';
 import { ConfigService } from '@nestjs/config';
 import { ApiConfigService } from '../common/api-config/api.config.service';
-import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -17,7 +18,13 @@ import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
     }),
-    DynamicModuleUtils.getCachingModule(),
+    ElrondCachingModule.forRoot(
+      new RedisCacheModuleOptions({
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+      }),
+    ),
   ],
   providers: [ApiConfigService, ConfigService, Logger],
   exports: [PassportModule, ApiConfigService, Logger],

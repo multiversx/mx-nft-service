@@ -6,7 +6,6 @@ import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidat
 import { ElasticNsfwUpdaterService } from './elastic-nsfw.updater.service';
 import { NsfwUpdaterService } from './nsfw.updater.service';
 import * as ormconfig from './../../ormconfig';
-import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
     CommonModule,
     AdminOperationsModuleGraph,
     CacheEventsPublisherModule,
-    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [Logger, ElasticNsfwUpdaterService, NsfwUpdaterService],
   exports: [ElasticNsfwUpdaterService, NsfwUpdaterService],

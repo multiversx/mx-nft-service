@@ -19,7 +19,6 @@ export class ApiConfigService {
 
   getRedisUrl(): string {
     const redisUrl = this.getGenericConfig<string>('REDIS_URL');
-    console.log({ redisUrl });
     if (!redisUrl) {
       throw new Error('No redis url present');
     }

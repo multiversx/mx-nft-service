@@ -20,7 +20,6 @@ export class RedisCacheService {
   constructor(private readonly logger: Logger) {}
 
   getClient(clientName: string): Redis.Redis {
-    console.log('Redis ', this.redisOptions, process.env.REDIS_URL);
     if (this.clients[clientName]) {
       return this.clients[clientName];
     }

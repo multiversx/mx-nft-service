@@ -6,7 +6,6 @@ import { ElasticRarityUpdaterService } from './elastic-rarity.updater.service';
 import { RarityUpdaterService } from './rarity.updater.service';
 import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
     CommonModule,
     NftRarityModuleGraph,
     CachingModule,
-    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [Logger, ElasticRarityUpdaterService, RarityUpdaterService],
   exports: [ElasticRarityUpdaterService, RarityUpdaterService],
