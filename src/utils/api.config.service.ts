@@ -17,6 +17,15 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_URL');
   }
 
+  getRedisUrl(): string {
+    const redisUrl = this.getGenericConfig<string>('REDIS_URL');
+    if (!redisUrl) {
+      throw new Error('No redis url present');
+    }
+
+    return redisUrl;
+  }
+
   getMongoDbName(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_DATABASE');
   }
