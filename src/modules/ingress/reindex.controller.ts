@@ -15,6 +15,14 @@ export class ReindexController {
     private marketplacesEventsIndexingService: MarketplaceEventsIndexingService,
   ) {}
 
+  @Post('/trigger-reindex-all') async triggerAllReindexes(): Promise<void> {
+    await this.triggerNsfwReindex();
+    await this.triggerScamReindex();
+    await this.triggerTraitsReindex();
+    await this.triggerRarityValidation();
+    await this.triggerLatestMarketplacesEventsReindex();
+  }
+
   @Post('/trigger-nsfw-reindex')
   async triggerNsfwReindex(): Promise<void> {
     return await this.nsfwRService.updateNsfwWhereNone();
@@ -45,8 +53,8 @@ export class ReindexController {
     return this.nftScamService.validateOrUpdateAllNftsScamInfo();
   }
 
-  @Post('/trigger-marketplaces-events-reindex')
-  async triggerMarketplacesEventsReindex(): Promise<void> {
+  @Post('/trigger-latest-marketplaces-events-reindex')
+  async triggerLatestMarketplacesEventsReindex(): Promise<void> {
     return this.marketplacesEventsIndexingService.reindexAllMarketplaceEvents();
   }
 }

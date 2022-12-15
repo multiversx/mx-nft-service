@@ -28,9 +28,9 @@ export class MarketplaceEventsIndexingService {
   ) {}
 
   async reindexAllMarketplaceEvents(
+    stopIfDuplicates: boolean = true,
     beforeTimestamp?: number,
     afterTimestamp?: number,
-    stopIfDuplicates?: boolean,
   ): Promise<void> {
     await Locker.lock(
       'reindexAllMarketplaceEvents',
