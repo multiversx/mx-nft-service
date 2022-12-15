@@ -436,6 +436,8 @@ export class NftTraitsService {
           let collectionsNftsCountDictionary: { [key: string]: number } = {};
           let collectionsUpdatedDictionary: { [key: string]: boolean } = {};
 
+          let failedRequestsDictionary: { [key: number]: boolean } = {};
+
           while (true) {
             const [[nftsBatch, lastTimestamp], nftsFromElasticDictionary] =
               await Promise.all([
@@ -448,6 +450,17 @@ export class NftTraitsService {
                   batchSize,
                 ),
               ]);
+
+            if (!nftsBatch) {
+              if (failedRequestsDictionary[beforeTimestamp]) {
+                throw new Error(
+                  `Multiple errors from API when getting NFTs before ${beforeTimestamp}`,
+                );
+              } else {
+                failedRequestsDictionary[beforeTimestamp] = true;
+              }
+              continue;
+            }
 
             for (const nft of nftsBatch) {
               const { collection } = getCollectionAndNonceFromIdentifier(
@@ -535,7 +548,7 @@ export class NftTraitsService {
           }
         } catch (error) {
           this.logger.error('Error when updating all collections', {
-            path: `${NftTraitsService.name}.${this.updateAllCollectionTraits.name}`,
+            path: `${NftTraitsService.name}.${this.updateAllNftTraits.name}`,
             exception: error?.message,
           });
         }
