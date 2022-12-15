@@ -8,6 +8,7 @@ import {
   LocalCacheService,
   MetricsService,
 } from '@elrondnetwork/erdnest';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import {
     CachingModuleOptions,
     LocalCacheService,
     MetricsService,
+    ConfigService,
   ],
   exports: [
     PassportModule,
