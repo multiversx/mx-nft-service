@@ -456,9 +456,8 @@ export class NftTraitsService {
                 throw new Error(
                   `Multiple errors from API when getting NFTs before ${beforeTimestamp}`,
                 );
-              } else {
-                failedRequestsDictionary[beforeTimestamp] = true;
               }
+              failedRequestsDictionary[beforeTimestamp] = true;
               continue;
             }
 
