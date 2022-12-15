@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   Logger,
 } from '@nestjs/common';
-import { ApiConfigService } from 'src/utils/api.config.service';
+import { ApiConfigService } from '../common/api-config/api.config.service';
 import { JwtAuthenticateGuard } from './jwt.auth-guard';
 import { NativeAuthGuard } from './native.auth-guard';
 

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verify } from 'jsonwebtoken';
-import { ApiConfigService } from 'src/utils/api.config.service';
+import { ApiConfigService } from '../common/api-config/api.config.service';
 import { AuthUtils } from './auth.utils';
 
 @Injectable()

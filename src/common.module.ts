@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MxCommunicationModule } from './common/services/mx-communication/mx-communication.module';
 import { CachingModule } from './common/services/caching/caching.module';
-import { ApiConfigService } from './utils/api.config.service';
+import { ApiConfigService } from './modules/common/api-config/api.config.service';
 
 @Module({
   imports: [
