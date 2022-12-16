@@ -8,11 +8,13 @@ import { rabbitExchanges } from './../rabbit-config';
 import { CacheInvalidationEventsModule } from './cache-invalidation-module/cache-invalidation-events.module';
 import { CacheEventsConsumer } from './cache-events.consumer';
 import { CommonRabbitModule } from './common-rabbitmq.module';
+import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module';
 
 @Module({
   imports: [
     CommonModule,
     CacheInvalidationEventsModule,
+    CacheAdminEventsModule,
     CommonRabbitModule.register(() => {
       return {
         exchange: rabbitExchanges.CACHE_INVALIDATION,
