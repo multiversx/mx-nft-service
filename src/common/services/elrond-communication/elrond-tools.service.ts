@@ -87,6 +87,7 @@ export class ElrondToolsService {
     const accessTokenInfo = await this.nativeAuthSigner.getToken();
     return {
       authorization: `Bearer ${accessTokenInfo.token}`,
+      timeout: 3000,
     };
   }
 

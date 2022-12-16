@@ -29,6 +29,10 @@ export class UsdPriceService {
     amount: string,
     timestamp?: number,
   ): Promise<string | undefined> {
+    if (amount === '0') {
+      return amount;
+    }
+
     if (token === elrondConfig.egld || token === elrondConfig.wegld) {
       return computeUsdAmount(
         await this.getEgldPrice(timestamp),
