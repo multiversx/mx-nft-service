@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { sleep } from 'src/utils/helpers';
 import { NftRarityData } from '../models/nft-rarity-data.model';
 
 // https://nftgo.medium.com/the-ultimate-guide-to-nftgos-new-rarity-model-3f2265dd0e23
@@ -70,10 +69,6 @@ export class JaccardDistancesRarityService {
         } else {
           jdSumArray[j] = jaccardDistance;
         }
-      }
-
-      if (i > 5000) {
-        await sleep(0.001);
       }
     }
 

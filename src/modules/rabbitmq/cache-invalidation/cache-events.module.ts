@@ -9,20 +9,36 @@ import { CacheInvalidationEventsModule } from './cache-invalidation-module/cache
 import { CacheEventsConsumer } from './cache-events.consumer';
 import { CommonRabbitModule } from './common-rabbitmq.module';
 import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module';
+import { ApiConfigService } from 'src/utils/api.config.service';
+import { ConfigService } from '@nestjs/config';
 
-@Module({
-  imports: [
+function getImports() {
+  const apiConfigService = new ApiConfigService(new ConfigService());
+
+  let imports: any = [
+    forwardRef(() => ElrondCommunicationModule),
     CommonModule,
     CacheInvalidationEventsModule,
     CacheAdminEventsModule,
-    CommonRabbitModule.register(() => {
-      return {
-        exchange: rabbitExchanges.CACHE_INVALIDATION,
-        uri: process.env.COMMON_RABBITMQ_URL,
-      };
-    }),
-    forwardRef(() => ElrondCommunicationModule),
-  ],
+  ];
+
+  if (!apiConfigService.isIndexerInstance()) {
+    imports.push(
+      CommonRabbitModule.register(() => {
+        return {
+          exchange: rabbitExchanges.CACHE_INVALIDATION,
+          uri: apiConfigService.getCommonRabbitMqUrl(),
+        };
+      }),
+    );
+  }
+
+  return imports;
+}
+const imports = getImports();
+
+@Module({
+  imports: imports,
   providers: [
     CacheEventsConsumer,
     AssetsRedisHandler,

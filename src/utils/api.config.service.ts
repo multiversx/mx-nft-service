@@ -29,12 +29,6 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_PASSWORD');
   }
 
-  isReindexMarketplaceEventsFlagActive(): boolean {
-    return (
-      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
-    );
-  }
-
   getApiUrl(): string {
     return this.getGenericConfig<string>('ELROND_API');
   }
@@ -49,11 +43,49 @@ export class ApiConfigService {
     );
   }
 
+  getCommonRabbitMqUrl(): string {
+    return this.getGenericConfig<string>('COMMON_RABBITMQ_URL');
+  }
+
   getSecurityAdmins(): string[] {
     return this.getGenericConfig<string[]>('ADMINS');
   }
 
   getJwtSecret(): string {
     return this.getGenericConfig<string>('JWT_SECRET_KEY');
+  }
+
+  isNsfwIndexerActive(): boolean {
+    return this.getGenericConfig<string>('ENABLE_NSFW_CRONJOBS') === 'true';
+  }
+
+  isRarityIndexerActive(): boolean {
+    return this.getGenericConfig<string>('ENABLE_RARITY_CRONJOBS') === 'true';
+  }
+
+  isTraitsIndexerActive(): boolean {
+    return this.getGenericConfig<string>('ENABLE_TRAITS_CRONJOBS') === 'true';
+  }
+
+  isScamInfoIndexerActive(): boolean {
+    return this.getGenericConfig<string>('ENABLE_SCAM_CRONJOBS') === 'true';
+  }
+
+  isMarketplaceEventsIndexerActive(): boolean {
+    return (
+      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
+    );
+  }
+
+  isIndexerInstance(): boolean {
+    if (
+      this.isNsfwIndexerActive() ||
+      this.isScamInfoIndexerActive() ||
+      this.isRarityIndexerActive() ||
+      this.isTraitsIndexerActive() ||
+      this.isMarketplaceEventsIndexerActive()
+    ) {
+      return true;
+    }
   }
 }
