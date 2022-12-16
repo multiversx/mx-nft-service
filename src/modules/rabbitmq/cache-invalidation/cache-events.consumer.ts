@@ -4,30 +4,34 @@ import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/lo
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
 import { rabbitExchanges, rabbitQueues } from './../rabbit-config';
 import { PublicRabbitConsumer } from './../rabbitmq.consumers';
+import { CacheInvalidationAdminService } from './cache-admin-module/cache-admin-invalidation.service';
+import { CacheSetterAdminService } from './cache-admin-module/cache-admin-setter.service';
 import { CacheInvalidationEventsService } from './cache-invalidation-module/cache-invalidation-events.service';
 import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 
 @Injectable()
 export class CacheEventsConsumer {
   constructor(
+    private cacheSetterAdminService: CacheSetterAdminService,
+    private cacheInvalidationAdminService: CacheInvalidationAdminService,
     private assetsRedisHandler: AssetsRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
     private collectionAssets: CollectionAssetsRedisHandler,
-    private cacheInvalidationService: CacheInvalidationEventsService,
+    private cacheInvalidationEventsService: CacheInvalidationEventsService,
   ) {}
 
   @PublicRabbitConsumer({
     connection: 'common',
     exchange: rabbitExchanges.CACHE_INVALIDATION,
     queueName: rabbitQueues.CACHE_INVALIDATION,
-    disable: process.env.ENABLE_CACHE_INVALIDATION === 'true' ? false : true,
+    disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.cacheInvalidationService.invalidateAssetHistory(event.id),
+          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
         ]);
         break;
 
@@ -42,26 +46,40 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.UpdateAuction:
         await Promise.all([
-          this.cacheInvalidationService.invalidateAuction(event),
-          this.cacheInvalidationService.invalidateAssetHistory(event.id),
+          this.cacheInvalidationEventsService.invalidateAuction(event),
+          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
         ]);
         break;
 
       case CacheEventTypeEnum.UpdateOrder:
-        await this.cacheInvalidationService.invalidateOrder(event);
+        await this.cacheInvalidationEventsService.invalidateOrder(event);
         break;
 
       case CacheEventTypeEnum.UpdateNotifications:
-        await this.cacheInvalidationService.invalidateNotifications(event);
+        await this.cacheInvalidationEventsService.invalidateNotifications(
+          event,
+        );
         break;
 
       case CacheEventTypeEnum.UpdateOneNotification:
-        await this.cacheInvalidationService.invalidateOneNotification(event);
+        await this.cacheInvalidationEventsService.invalidateOneNotification(
+          event,
+        );
         break;
 
       case CacheEventTypeEnum.AssetLike:
-        await this.cacheInvalidationService.invalidateAssetLike(event);
+        await this.cacheInvalidationEventsService.invalidateAssetLike(event);
         break;
+
+      case CacheEventTypeEnum.DeleteCacheKeys: {
+        await this.cacheInvalidationAdminService.deleteCacheKeys(event);
+        break;
+      }
+
+      case CacheEventTypeEnum.SetCacheKey: {
+        await this.cacheSetterAdminService.setCacheKey(event);
+        break;
+      }
     }
   }
 }
