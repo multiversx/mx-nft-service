@@ -10,8 +10,8 @@ export class Token {
   name: string;
   @Field(() => String, { nullable: true })
   priceUsd?: string;
-  @Field(() => Number, { nullable: true })
-  decimals?: number;
+  @Field(() => Number)
+  decimals: number;
   @Field(() => Int, { nullable: true })
   activeAuctions?: number;
 
