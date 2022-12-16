@@ -337,6 +337,16 @@ export class AssetsGetterService {
     offset: number,
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
+    traits.map((trait) => {
+      if (
+        traits.find((t) => t.name === trait.name && t.value !== trait.value)
+      ) {
+        throw new Error(
+          'Traits filtering with more than one attribute per trait type is not currently supported',
+        );
+      }
+    });
+
     const [nfts, count] =
       await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(
         collection,
