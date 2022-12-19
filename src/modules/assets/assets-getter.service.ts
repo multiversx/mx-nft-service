@@ -338,11 +338,10 @@ export class AssetsGetterService {
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     for (let i = 0; i < traits.length; i++) {
-      if (
-        traits.find(
-          (t) => t.name === traits[i].name && t.value !== traits[i].value,
-        )
-      ) {
+      const multipleAttributesPerTraitFilter = traits.find(
+        (t) => t.name === traits[i].name && t.value !== traits[i].value,
+      );
+      if (multipleAttributesPerTraitFilter) {
         return new CollectionType({ items: [], count: 0 });
       }
     }
