@@ -99,9 +99,19 @@ export class CacheInfo {
     ttl: 5 * TimeConstants.oneMinute,
   };
 
+  static AllDexTokens: CacheInfo = {
+    key: 'allDexTokens',
+    ttl: 10 * TimeConstants.oneMinute,
+  };
+
+  static AllApiTokens: CacheInfo = {
+    key: 'allApiTokens',
+    ttl: 10 * TimeConstants.oneMinute,
+  };
+
   static AllTokens: CacheInfo = {
     key: 'allTokens',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: TimeConstants.oneMinute,
   };
 
   static EgldToken: CacheInfo = {
