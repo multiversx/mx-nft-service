@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ElrondCommunicationModule } from './common/services/elrond-communication/elrond-communication.module';
@@ -12,7 +12,7 @@ import { ApiConfigService } from './utils/api.config.service';
     ConfigModule,
     ElrondCommunicationModule,
   ],
-  exports: [ElrondCommunicationModule, CachingModule, ApiConfigService],
-  providers: [ApiConfigService],
+  exports: [ElrondCommunicationModule, CachingModule, ApiConfigService, Logger],
+  providers: [ApiConfigService, Logger],
 })
 export class CommonModule {}

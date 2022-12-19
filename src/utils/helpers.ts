@@ -92,3 +92,14 @@ export function timestampToEpochAndRound(
 
   return [Math.trunc(epoch), Math.trunc(round)];
 }
+
+export async function sleep(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function getFilePathFromDist(filename: string): string {
+  return `${__dirname.substring(
+    0,
+    __dirname.lastIndexOf('dist/') + 5,
+  )}${filename}`;
+}

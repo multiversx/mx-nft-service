@@ -17,7 +17,8 @@
     "keepAliveMaxFreeSockets": 10,
     "decimals": 18,
     "egld": "EGLD",
-    "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag"
+    "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
+    "pemFileName": "wallet.pem"
   },
   "caching": {
     "ordersRedisClientName": "orders",
@@ -79,7 +80,8 @@
     "getNftsForScamInfoBatchSize": 100,
     "elasticMaxBatch": 10000,
     "dbBatch": 1000,
-    "complexityLevel": 200
+    "complexityLevel": 200,
+    "getLogsFromElasticBatchSize": 1000
   },
   "elasticDictionary": {
     "scamInfo": {

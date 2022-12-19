@@ -28,6 +28,7 @@ type AccountStats {
   address: ID
   auctions: String
   biddingBalance: String
+  biddings: [Price!]
   claimable: String
   collected: String
   collections: String
@@ -705,6 +706,14 @@ type MarketplaceEdge {
   node: Marketplace
 }
 
+input MarketplaceEventsIndexingArgs {
+  afterTimestamp: Float
+  beforeTimestamp: Float
+  marketplaceAddress: String!
+  marketplaceLastIndexTimestamp: Float
+  stopIfDuplicates: Boolean
+}
+
 input MarketplaceFilters {
   marketplaceAddress: String
   marketplaceKey: String
@@ -784,6 +793,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+  reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
@@ -792,7 +802,7 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
-  updateNftTraits(identifier: String!): Boolean!
+  updateNftTraits(identifier: String!): UpdateNftTraitsResponse!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
@@ -1211,6 +1221,12 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
+}
+
+enum UpdateNftTraitsResponse {
+  CollectionTraitsUpdated
+  NftTraitsUpdated
+  NftTraitsValid
 }
 
 """The `Upload` scalar type represents a file upload."""

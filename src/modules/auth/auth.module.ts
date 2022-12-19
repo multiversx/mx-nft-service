@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
+import { ApiConfigService } from 'src/utils/api.config.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -10,7 +11,7 @@ import { JwtStrategy } from './jwt.strategy';
       secret: process.env.JWT_SECRET_KEY,
     }),
   ],
-  providers: [JwtStrategy],
-  exports: [PassportModule],
+  providers: [ApiConfigService, ConfigService],
+  exports: [PassportModule, ApiConfigService],
 })
 export class AuthModule {}

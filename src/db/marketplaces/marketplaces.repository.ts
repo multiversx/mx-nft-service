@@ -38,4 +38,14 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
       })
       .execute();
   }
+
+  async updateMarketplaceLastIndexTimestamp(
+    address: string,
+    lastIndexTimestamp: number,
+  ): Promise<void> {
+    await this.update(
+      { address: address },
+      { lastIndexTimestamp: lastIndexTimestamp },
+    );
+  }
 }

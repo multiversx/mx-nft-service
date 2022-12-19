@@ -10,6 +10,8 @@ import { AssetsRedisHandler } from '../assets/loaders/assets.redis-handler';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { NftTraitsModule } from '../nft-traits/nft-traits.module';
+import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { NftTraitsModule } from '../nft-traits/nft-traits.module';
     ElrondCommunicationModule,
     NftRarityModuleGraph,
     NftTraitsModule,
+    MarketplacesModuleGraph,
+    AuthModule,
   ],
   providers: [
     Logger,

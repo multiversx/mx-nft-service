@@ -200,4 +200,14 @@ export class MarketplacesService {
     const collections = await this.persistenceService.getAllCollections();
     return collections.map((c) => c.collectionIdentifier);
   }
+
+  async updateMarketplaceLastIndexTimestampByAddress(
+    address: string,
+    lastIndexTimestamp: number,
+  ): Promise<void> {
+    await this.persistenceService.updateMarketplaceLastIndexTimestampByAddress(
+      address,
+      lastIndexTimestamp,
+    );
+  }
 }

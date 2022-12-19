@@ -1,12 +1,13 @@
-import { Resolver, Args, Mutation, Int } from '@nestjs/graphql';
+import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { IssueCampaignArgs, BuyRandomNftActionArgs, Campaign } from './models';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
 import { TransactionNode } from '../common/transaction';
-import { User } from '../auth/user';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { AuthUser } from '../auth/authUser';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Campaign)
 export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
@@ -15,22 +16,22 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async issueCampaign(
     @Args('input') input: IssueCampaignArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = IssueCampaignRequest.fromArgs(input);
-    return await this.nftMinterService.issueToken(user.publicKey, request);
+    return await this.nftMinterService.issueToken(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async buyRandomNft(
     @Args('input') input: BuyRandomNftActionArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = BuyRequest.fromArgs(input);
-    return await this.nftMinterService.buyRandomNft(user.publicKey, request);
+    return await this.nftMinterService.buyRandomNft(user.address, request);
   }
 }
