@@ -13,6 +13,7 @@ import { UpdateAttributesEvent } from '../entities/auction/update-attributes.eve
 import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -28,6 +29,7 @@ export class ElasticUpdatesEventsService {
     private readonly documentDbService: DocumentDbService,
     private readonly redisCacheService: RedisCacheService,
     private readonly elrondApiService: ElrondApiService,
+    private slackReportService: SlackReportService,
   ) {
     this.rarityRedisClient = this.redisCacheService.getClient(
       cacheConfig.rarityQueueClientName,
@@ -195,7 +197,18 @@ export class ElasticUpdatesEventsService {
     await Promise.all(deletes);
   }
 
-  async addCollectionsToRarityQueue(
+  public async handleMarketplaceScUpgradeEvents(
+    scUpgradeEvents: any[],
+  ): Promise<void> {
+    const marketplaces = [...new Set(scUpgradeEvents.map((e) => e.address))];
+    await Promise.all(
+      marketplaces.map((marketplace) =>
+        this.slackReportService.sendScUpgradeNotification(marketplace),
+      ),
+    );
+  }
+
+  private async addCollectionsToRarityQueue(
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {

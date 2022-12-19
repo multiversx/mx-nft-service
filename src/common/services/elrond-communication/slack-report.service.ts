@@ -41,4 +41,31 @@ export class SlackReportService {
       return;
     }
   }
+
+  async sendScUpgradeNotification(marketplaceAddress: string): Promise<void> {
+    const url = process.env.SLACK_API;
+    try {
+      await this.apiService.post(
+        url,
+        {
+          channel: process.env.ALERT_CHANNEL,
+          text: `SCUpgrade event for ${marketplaceAddress} on ${process.env.NODE_ENV} environment :pepe_naruto:\n`,
+        },
+        new ApiSettings({
+          authorization: `Bearer ${process.env.REPORT_BEARER}`,
+        }),
+      );
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while sending slack notification for marketplace SCUpgrade event url ${removeCredentialsFromUrl(
+          url,
+        )}`,
+        {
+          path: 'SlackReportService.sendScUpgradeNotification',
+          marketplaceAddress,
+          exception: error.message,
+        },
+      );
+    }
+  }
 }
