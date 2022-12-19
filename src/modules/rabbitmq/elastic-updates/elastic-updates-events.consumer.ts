@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  MarketplaceEventEnum,
-  NftEventEnum,
-} from '../../assets/models/AuctionEvent.enum';
+import { NftEventEnum } from '../../assets/models/AuctionEvent.enum';
 import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 
@@ -24,23 +21,15 @@ export class ElasiticUpdatesConsumer {
         (e: { identifier: NftEventEnum }) =>
           e.identifier === NftEventEnum.ESDTNFTCreate,
       );
-      const burnNftEvents = events?.events?.filter(
+      const burnAndUpdateNftAttributesEvents = events?.events?.filter(
         (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTBurn,
-      );
-      const updateNftAttributesEvents = events?.events?.filter(
-        (e: { identifier: NftEventEnum }) =>
+          e.identifier === NftEventEnum.ESDTNFTBurn ||
           e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
       );
       const mintBurnAndUpdateNftAttributesEvents = [
         ...mintNftEvents,
-        ...burnNftEvents,
-        ...updateNftAttributesEvents,
+        ...burnAndUpdateNftAttributesEvents,
       ];
-      const scUpgradeEvents = events?.events?.filter(
-        (e: { identifier: MarketplaceEventEnum }) =>
-          e.identifier === MarketplaceEventEnum.SCUpgrade,
-      );
 
       await Promise.all([
         this.elasticUpdateService.handleNftMintEvents(
@@ -55,9 +44,6 @@ export class ElasiticUpdatesConsumer {
         ),
         this.elasticUpdateService.handleScamInfoForNftMintBurnAndUpdateEvents(
           mintBurnAndUpdateNftAttributesEvents,
-        ),
-        this.elasticUpdateService.handleMarketplaceScUpgradeEvents(
-          scUpgradeEvents,
         ),
       ]);
     }

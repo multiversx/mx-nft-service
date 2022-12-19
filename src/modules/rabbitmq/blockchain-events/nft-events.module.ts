@@ -38,6 +38,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
+import { MarketplaceScUpgradeEventHandler } from './handlers/marketplaceScUpgrade-event.handler';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
+    MarketplaceScUpgradeEventHandler,
   ],
   exports: [NftEventsService],
 })
