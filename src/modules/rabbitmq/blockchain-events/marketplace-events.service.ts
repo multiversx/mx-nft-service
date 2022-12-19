@@ -15,7 +15,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
-import { MarketplaceScUpgradeEventHandler } from './handlers/marketplaceScUpgrade-event.handler';
+import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -31,7 +31,7 @@ export class MarketplaceEventsService {
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private swapUpdateEventHandler: SwapUpdateEventHandler,
-    private marketplaceScUpgradeEventHandler: MarketplaceScUpgradeEventHandler,
+    private readonly slackReportService: SlackReportService,
   ) {}
 
   public async handleNftAuctionEvents(
@@ -127,8 +127,8 @@ export class MarketplaceEventsService {
           );
           break;
         case MarketplaceEventEnum.SCUpgrade: {
-          await this.marketplaceScUpgradeEventHandler.handleMarketplaceScUpgradeEvents(
-            event,
+          await this.slackReportService.sendScUpgradeNotification(
+            event.address,
           );
         }
       }

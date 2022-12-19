@@ -49,7 +49,7 @@ export class SlackReportService {
         url,
         {
           channel: process.env.ALERT_CHANNEL,
-          text: `SCUpgrade event for ${marketplaceAddress} on ${process.env.NODE_ENV} environment :pepe_naruto:\n`,
+          text: `SCUpgrade event for ${marketplaceAddress} on ${process.env.NODE_ENV} environment\n`,
         },
         new ApiSettings({
           authorization: `Bearer ${process.env.REPORT_BEARER}`,
