@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxElasticService, RedisCacheService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { Locker } from 'src/utils/locker';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import * as Redis from 'ioredis';
@@ -7,6 +7,7 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()
 export class RarityUpdaterService {
@@ -17,16 +18,9 @@ export class RarityUpdaterService {
     private readonly elasticService: MxElasticService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftRarityElasticService: NftRarityElasticService,
-    private readonly redisCacheService: RedisCacheService,
+    private readonly localRedisCacheService: LocalRedisCacheService,
     private readonly logger: Logger,
-  ) {
-    this.rarityQueueRedisClient = this.redisCacheService.getClient(
-      cacheConfig.rarityQueueClientName,
-    );
-    this.persistentRedisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async handleReindexAllTokenRarities(): Promise<void> {
     await this.nftRarityService.updateAllCollectionsRarities();
@@ -128,8 +122,7 @@ export class RarityUpdaterService {
       'processTokenRarityQueue: Update rarities for all collections in the rarities queue',
       async () => {
         const collectionsToUpdate: string[] =
-          await this.redisCacheService.popAllItemsFromList(
-            this.rarityQueueRedisClient,
+          await this.localRedisCacheService.popAllItemsFromList(
             this.getRarityQueueCacheKey(),
             true,
           );
@@ -148,8 +141,7 @@ export class RarityUpdaterService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.addItemsToList(
-        this.rarityQueueRedisClient,
+      await this.localRedisCacheService.addItemsToList(
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );

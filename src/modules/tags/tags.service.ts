@@ -1,27 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService, NftTag } from 'src/common';
-import { CachingService } from 'src/common/services/caching/caching.service';
 import { Tag } from './models';
 import { TagTypeEnum } from './models/Tag-type.enum';
 import { TagsFilter } from './models/Tags.Filter';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class TagsService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private persistenceService: PersistenceService,
     private cacheService: CachingService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getTags(
     offset: number = 0,
@@ -62,7 +55,6 @@ export class TagsService {
     filters: TagsFilter,
   ): Promise<[NftTag[], number]> {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       `${CacheInfo.NftTags.key}_${limit}_${offset}`,
       async () =>
         Promise.all([
@@ -82,7 +74,6 @@ export class TagsService {
       return await this.getAuctionTagsWithSearch(filters, offset, limit);
     } else {
       return await this.cacheService.getOrSetCache(
-        this.redisClient,
         CacheInfo.AuctionTags.key,
         async () => await this.getAuctionTagsFromDb(),
         CacheInfo.AuctionTags.ttl,

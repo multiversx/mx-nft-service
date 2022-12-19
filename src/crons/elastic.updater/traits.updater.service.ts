@@ -1,38 +1,29 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxElasticService, RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
+import { MxElasticService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery } from '@elrondnetwork/erdnest';
+import { ElasticQuery, RedisCacheService } from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
   getCollectionsWithTraitSummaryFromElasticQuery,
 } from 'src/modules/nft-traits/nft-traits.elastic.queries';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
+import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
 
 @Injectable()
 export class TraitsUpdaterService {
-  private readonly traitsQueueRedisClient: Redis.Redis;
-  private readonly persistentRedisClient: Redis.Redis;
-
   constructor(
     private readonly nftTraitsService: NftTraitsService,
+    private readonly localRedisCacheService: LocalRedisCacheService,
     private readonly redisCacheService: RedisCacheService,
     private readonly elasticService: MxElasticService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly logger: Logger,
-  ) {
-    this.traitsQueueRedisClient = this.redisCacheService.getClient(
-      cacheConfig.traitsQueueClientName,
-    );
-    this.persistentRedisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async handleValidateTokenTraits(maxCollectionsToValidate: number) {
     try {
@@ -180,8 +171,7 @@ export class TraitsUpdaterService {
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
         const tokensToUpdate: string[] =
-          await this.redisCacheService.popAllItemsFromList(
-            this.traitsQueueRedisClient,
+          await this.localRedisCacheService.popAllItemsFromList(
             this.getTraitsQueueCacheKey(),
             true,
           );
@@ -198,8 +188,7 @@ export class TraitsUpdaterService {
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.addItemsToList(
-        this.traitsQueueRedisClient,
+      await this.localRedisCacheService.addItemsToList(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
       );
@@ -209,7 +198,7 @@ export class TraitsUpdaterService {
   private async getLastValidatedCollectionIndex(): Promise<number> {
     return (
       Number.parseInt(
-        await this.persistentRedisClient.get(
+        await this.redisCacheService.get(
           this.getTraitsValidatorCounterCacheKey(),
         ),
       ) || 0
@@ -217,10 +206,9 @@ export class TraitsUpdaterService {
   }
 
   private async setLastValidatedCollectionIndex(index: number): Promise<void> {
-    await this.persistentRedisClient.set(
+    await this.redisCacheService.set(
       this.getTraitsValidatorCounterCacheKey(),
       index.toString(),
-      'EX',
       90 * TimeConstants.oneMinute,
     );
   }

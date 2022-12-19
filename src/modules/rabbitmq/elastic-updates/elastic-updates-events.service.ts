@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MxApiService, RedisCacheService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetByIdentifierService } from 'src/modules/assets';
@@ -7,19 +7,16 @@ import { Asset, NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { MintEvent } from '../entities/auction/mint.event';
-import * as Redis from 'ioredis';
 import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 import { NftScamService } from 'src/modules/scam/nft-scam.service';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
-  private readonly rarityRedisClient: Redis.Redis;
-  private readonly traitsRedisClient: Redis.Redis;
-  private redisClient: Redis.Redis;
-
   constructor(
     private readonly nftFlagsService: FlagNftService,
     private readonly assetByIdentifierService: AssetByIdentifierService,
@@ -28,17 +25,9 @@ export class ElasticUpdatesEventsService {
     private readonly documentDbService: DocumentDbService,
     private readonly redisCacheService: RedisCacheService,
     private readonly mxApiService: MxApiService,
-  ) {
-    this.rarityRedisClient = this.redisCacheService.getClient(
-      cacheConfig.rarityQueueClientName,
-    );
-    this.traitsRedisClient = this.redisCacheService.getClient(
-      cacheConfig.traitsQueueClientName,
-    );
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private readonly localRedisCacheService: LocalRedisCacheService,
+  ) {}
+
   public async handleNftMintEvents(
     mintEvents: any[],
     hash: string,
@@ -209,8 +198,7 @@ export class ElasticUpdatesEventsService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.addItemsToList(
-        this.rarityRedisClient,
+      await this.localRedisCacheService.addItemsToList(
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -223,8 +211,7 @@ export class ElasticUpdatesEventsService {
 
   async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.addItemsToList(
-        this.traitsRedisClient,
+      await this.localRedisCacheService.addItemsToList(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
       );
@@ -263,13 +250,21 @@ export class ElasticUpdatesEventsService {
       return collection.type;
     };
 
-    const collectionType = await this.redisCacheService.getOrSet(
-      this.redisClient,
+    const collectionType = await this.redisCacheService.getOrSet<string>(
       cacheKey,
-      getCollectionType,
+      () => this.getCollectionTypeFromApi(ticker),
       CacheInfo.CollectionTypes.ttl,
     );
     return collectionType;
+  }
+
+  private async getCollectionTypeFromApi(ticker: string): Promise<string> {
+    const collection =
+      await this.mxApiService.getCollectionByIdentifierForQuery(
+        ticker,
+        'fields=type',
+      );
+    return collection.type;
   }
 
   private async isCollectionOfNftsOrSfts(

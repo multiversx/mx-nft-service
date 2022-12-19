@@ -1,31 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxApiService, RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { MxApiService } from 'src/common';
 import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()
 export class AssetByIdentifierService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private localRedisCacheService: LocalRedisCacheService,
+  ) {}
 
   public async getAsset(identifier: string): Promise<Asset> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.redisCacheService.getOrSetWithDifferentTtl(
-        this.redisClient,
+      const asset = await this.localRedisCacheService.getOrSetWithDifferentTtl(
         cacheKey,
         getAsset,
       );

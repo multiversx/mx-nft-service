@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<string> {
-  constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, CacheInfo.NftScamInfo.key);
+  constructor(
+    redisCacheService: RedisCacheService,
+    localRedisCacheService: LocalRedisCacheService,
+  ) {
+    super(redisCacheService, 'asset_scam_info', localRedisCacheService);
   }
 
   mapValues(
@@ -37,7 +41,7 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
   batchScamInfo = async (keys: string[], data: any) => {
     const cacheKeys = this.getCacheKeys(keys);
     const getDataFromRedis: { key: string; value: any }[] =
-      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+      await this.redisCacheService.getMany(cacheKeys);
     const returnValues: { key: string; value: any }[] =
       this.mapReturnValues<string>(keys, getDataFromRedis);
     const getNotCachedKeys = returnValues
@@ -50,8 +54,7 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
         const cacheKeys = this.getCacheKeys(
           val.values.map((value) => value.key),
         );
-        await this.redisCacheService.batchSetCache(
-          this.redisClient,
+        await this.redisCacheService.setMany(
           cacheKeys,
           val.values,
           5 * TimeConstants.oneMinute,

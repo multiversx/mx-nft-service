@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
-import { CachingService } from 'src/common/services/caching/caching.service';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
   ExploreCollectionsStats,
@@ -16,21 +14,17 @@ import {
   runningAuctionRequest,
 } from '../auctions/auctionsRequest';
 import { OffersService } from '../offers/offers.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class ExploreStatsService {
-  private redisClient: Redis.Redis;
   constructor(
     private cachingService: CachingService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
     private apiService: MxApiService,
     private offersService: OffersService,
-  ) {
-    this.redisClient = this.cachingService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getExploreStats(): Promise<ExploreStats> {
     const [, collections] =
@@ -80,7 +74,6 @@ export class ExploreStatsService {
 
   async getOrSetTotalNftsCount(): Promise<number> {
     return await this.cachingService.getOrSetCache(
-      this.redisClient,
       CacheInfo.NftsCount.key,
       async () => await this.apiService.getNftsCount(),
       CacheInfo.NftsCount.ttl,

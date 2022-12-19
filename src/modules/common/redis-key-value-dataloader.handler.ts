@@ -1,52 +1,47 @@
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { Injectable, Logger } from '@nestjs/common';
-import * as Redis from 'ioredis';
-import { RedisCacheService } from 'src/common';
+import { LocalRedisCacheService } from 'src/common';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
-import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisValue } from './redis-value.dto';
 
 @Injectable()
 export abstract class RedisKeyValueDataloaderHandler<T> {
-  protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
+  protected localRedisCacheService: LocalRedisCacheService;
   private readonly logger: Logger;
   private cacheKeyName: string;
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
-    redisClientName = cacheConfig.persistentRedisClientName,
+    localRedisCacheService: LocalRedisCacheService,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.redisClient = this.redisCacheService.getClient(redisClientName);
+    this.localRedisCacheService = localRedisCacheService;
     this.logger = new Logger(RedisKeyValueDataloaderHandler.name);
   }
   abstract mapValues(keys: { key: T; value: any }[], dataKeys): RedisValue[];
 
   async clearKey(key: T): Promise<any> {
-    await this.redisCacheService.del(this.redisClient, this.getCacheKey(key));
+    await this.redisCacheService.delete(this.getCacheKey(key));
   }
 
   async clearMultipleKeys(keys: T[]): Promise<any> {
-    await this.redisCacheService.delMultiple(
-      this.redisClient,
+    await this.redisCacheService.deleteMany(
       keys.map((key) => this.getCacheKey(key)),
     );
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      this.getCacheKey(key),
-    );
+    await this.localRedisCacheService.delByPattern(this.getCacheKey(key));
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {
     try {
       const cacheKeys = this.getCacheKeys(keys);
       const getDataFromRedis: { key: T; value: any }[] =
-        await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+        await this.redisCacheService.getMany(cacheKeys);
       const returnValues: { key: T; value: any }[] = this.mapReturnValues<T>(
         keys,
         getDataFromRedis,
@@ -62,12 +57,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
           const cacheKeys = this.getCacheKeys(
             val.values.map((value) => value.key),
           );
-          await this.redisCacheService.batchSetCache(
-            this.redisClient,
-            cacheKeys,
-            val.values,
-            val.ttl,
-          );
+          await this.redisCacheService.setMany(cacheKeys, val.values, val.ttl);
         }
         return returnValues;
       }

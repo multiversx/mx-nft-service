@@ -6,7 +6,7 @@ import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { Constants } from '@elrondnetwork/erdnest';
@@ -27,7 +27,6 @@ import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
 @Injectable()
 export class AuctionsGetterService {
-  private redisClient: Redis.Redis;
   private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
@@ -35,14 +34,7 @@ export class AuctionsGetterService {
     private cacheService: CachingService,
     private readonly usdPriceService: UsdPriceService,
     private readonly logger: Logger,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-    this.auctionsRedisClient = this.cacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
+  ) {}
 
   async getAuctions(
     queryRequest: QueryRequest,
@@ -72,7 +64,6 @@ export class AuctionsGetterService {
 
       const [allAuctions, count, priceRange] =
         await this.cacheService.getOrSetCache(
-          this.redisClient,
           CacheInfo.TopAuctionsOrderByNoBids.key,
           async () => this.getTopAuctionsOrderByNoBids(),
           CacheInfo.TopAuctionsOrderByNoBids.ttl,
@@ -299,7 +290,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.auctionsRedisClient,
         `collectionAuctions:${collectionFilter}`,
         async () => await this.getAuctionsByCollection(collectionFilter),
         Constants.oneMinute() * 10,
@@ -370,7 +360,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.auctionsRedisClient,
         `paymentTokenAuctions:${paymentTokenFilter}`,
         async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
         Constants.oneMinute() * 10,
@@ -389,8 +378,13 @@ export class AuctionsGetterService {
     }
 
     const maxBidFilter = queryRequest.getFilter('maxBid');
-    if (maxBidFilter && maxBidFilter.values?.every((element) => element !== null)) {
-      allAuctions = allAuctions.filter((x) => x.maxBid.amount > maxBidFilter.values[0]);
+    if (
+      maxBidFilter &&
+      maxBidFilter.values?.every((element) => element !== null)
+    ) {
+      allAuctions = allAuctions.filter(
+        (x) => x.maxBid.amount > maxBidFilter.values[0],
+      );
     }
 
     const collectionFilter = queryRequest.getFilterName('collection');
@@ -491,7 +485,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
         CacheInfo.ActiveAuctions.key,
         async () => await this.getActiveAuctions(),
         CacheInfo.ActiveAuctions.ttl,
@@ -525,7 +518,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
         CacheInfo.BuyNowAuctions.key,
         async () => await this.getBuyNowAuctions(),
         CacheInfo.BuyNowAuctions.ttl,

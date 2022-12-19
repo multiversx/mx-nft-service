@@ -1,26 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { MxIdentityService } from 'src/common';
-import * as Redis from 'ioredis';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';
 import { ArtistFilters } from './models/Artists.Filter';
-import { cacheConfig } from 'src/config';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 
 @Injectable()
 export class ArtistsService {
-  private redisClient: Redis.Redis;
   constructor(
     private idService: MxIdentityService,
     private cachingService: CachingService,
     private collectionsGetterService: CollectionsGetterService,
-  ) {
-    this.redisClient = this.cachingService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getArtists(
     filters: ArtistFilters,
@@ -111,7 +104,6 @@ export class ArtistsService {
 
   async getOrSetAccount(address: string) {
     return this.cachingService.getOrSetCache(
-      this.redisClient,
       `${CacheInfo.Account.key}_${address}`,
       async () => this.getMappedAccountForRedis(address),
       CacheInfo.Account.ttl,

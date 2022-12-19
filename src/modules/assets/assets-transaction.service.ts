@@ -7,7 +7,7 @@ import {
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { MxApiService, getSmartContract, RedisCacheService } from 'src/common';
+import { MxApiService, getSmartContract } from 'src/common';
 import { cacheConfig, mxConfig, gas } from 'src/config';
 import {
   getCollectionAndNonceFromIdentifier,
@@ -26,25 +26,19 @@ import {
   TransferNftRequest,
 } from './models/requests';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import * as Redis from 'ioredis';
 import { TimeConstants } from 'src/utils/time-utils';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class AssetsTransactionService {
-  private redisClient: Redis.Redis;
-
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
     private mxApiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async updateQuantity(
     ownerAddress: string,
@@ -180,7 +174,6 @@ export class AssetsTransactionService {
       const cacheKey = this.getApproximateMxStatsCacheKey();
       const getMxStats = () => this.mxApiService.getMxStats();
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         getMxStats,
         TimeConstants.oneDay,

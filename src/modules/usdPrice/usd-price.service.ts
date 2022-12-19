@@ -1,28 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService, MxToolsService } from 'src/common';
-import { CachingService } from 'src/common/services/caching/caching.service';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { cacheConfig, mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
+import { CachingService } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class UsdPriceService {
-  private readonly persistentRedisClient: Redis.Redis;
-
   constructor(
     private cacheService: CachingService,
     private readonly mxApiService: MxApiService,
     private readonly mxToolsService: MxToolsService,
-  ) {
-    this.persistentRedisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getUsdAmountDenom(
     token: string,
@@ -51,7 +44,6 @@ export class UsdPriceService {
 
   public async getAllCachedTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       CacheInfo.AllTokens.key,
       async () => await this.setAllCachedTokens(),
       CacheInfo.AllTokens.ttl,
@@ -76,7 +68,6 @@ export class UsdPriceService {
     }
 
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       `token_${tokenId}`,
       async () => await this.mxApiService.getTokenData(tokenId),
       CacheInfo.AllTokens.ttl,
@@ -111,7 +102,6 @@ export class UsdPriceService {
     const egldPriceUsd = await this.getEgldHistoricalPrice(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(token, isoDateOnly);
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       cacheKey,
       async () =>
         await this.mxToolsService.getTokenHistoricalPriceByEgld(
@@ -148,7 +138,6 @@ export class UsdPriceService {
 
   private async getCachedDexTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       CacheInfo.AllDexTokens.key,
       async () => await this.mxApiService.getAllDexTokens(),
       CacheInfo.AllDexTokens.ttl,
@@ -157,7 +146,6 @@ export class UsdPriceService {
 
   private async getCachedApiTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       CacheInfo.AllApiTokens.key,
       async () => await this.mxApiService.getAllTokens(),
       CacheInfo.AllApiTokens.ttl,
@@ -173,7 +161,6 @@ export class UsdPriceService {
 
   private async getCurrentEgldPrice(): Promise<string> {
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       CacheInfo.EgldToken.key,
       async () => await this.mxApiService.getEgldPriceFromEconomics(),
       CacheInfo.EgldToken.ttl,
@@ -187,7 +174,6 @@ export class UsdPriceService {
       isoDateOnly,
     );
     return await this.cacheService.getOrSetCache(
-      this.persistentRedisClient,
       cacheKey,
       async () => await this.mxToolsService.getEgldHistoricalPrice(isoDateOnly),
       DateUtils.isTimestampToday(timestamp)

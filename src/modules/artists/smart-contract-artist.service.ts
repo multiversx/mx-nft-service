@@ -1,27 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as Redis from 'ioredis';
 import { MxApiService } from 'src/common';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { cacheConfig } from 'src/config';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
 export class SmartContractArtistsService {
-  private redisClient: Redis.Redis;
   constructor(
     private cachingService: CachingService,
     private mxApiService: MxApiService,
     private logger: Logger,
-  ) {
-    this.redisClient = this.cachingService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getOrSetArtistForScAddress(address: string) {
     return this.cachingService.getOrSetCache(
-      this.redisClient,
       `${CacheInfo.Artist.key}_${address}`,
       async () => this.getMappedArtistForScAddress(address),
       CacheInfo.Artist.ttl,
@@ -76,7 +68,6 @@ export class SmartContractArtistsService {
 
   private async getOrSetXoxnoScCount(address: string) {
     return this.cachingService.getOrSetCache(
-      this.redisClient,
       CacheInfo.XoxnoScCount.key,
       async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,

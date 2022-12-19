@@ -1,26 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AccountsStatsCachingService {
-  private redisClient: Redis.Redis;
-  constructor(private redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  constructor(private redisCacheService: RedisCacheService) {}
 
   public async getPublicStats(
     address: string,
     getAccountStats: () => any,
   ): Promise<AccountStatsEntity> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getStatsCacheKey(address),
       () => getAccountStats(),
       5 * TimeConstants.oneMinute,
@@ -32,7 +24,6 @@ export class AccountsStatsCachingService {
     getBiddingBalanceStats: () => any,
   ): Promise<[{ biddingBalance: string; priceToken: string }]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getBiddingBalanceCacheKey(key),
       () => getBiddingBalanceStats(),
       5 * TimeConstants.oneMinute,
@@ -44,7 +35,6 @@ export class AccountsStatsCachingService {
     getAccountStats: () => any,
   ): Promise<AccountStatsEntity> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getStatsCacheKey(`owner_${address}`),
       () => getAccountStats(),
       TimeConstants.oneHour,
@@ -56,7 +46,6 @@ export class AccountsStatsCachingService {
     getClaimableCount: () => any,
   ): Promise<number> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getClaimableCacheKey(address),
       () => getClaimableCount(),
       5 * TimeConstants.oneSecond,
@@ -68,7 +57,6 @@ export class AccountsStatsCachingService {
     getLikesCount: () => any,
   ): Promise<number> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getLikesCacheKey(address),
       () => getLikesCount(),
       5 * TimeConstants.oneSecond,
@@ -80,7 +68,6 @@ export class AccountsStatsCachingService {
     getCollectedCount: () => any,
   ): Promise<number> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getCollectedCacheKey(address),
       () => getCollectedCount(),
       5 * TimeConstants.oneSecond,
@@ -92,7 +79,6 @@ export class AccountsStatsCachingService {
     getCollectionsCount: () => any,
   ): Promise<number> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       generateCacheKeyFromParams('account_collections', address),
       () => getCollectionsCount(),
       5 * TimeConstants.oneSecond,
@@ -104,7 +90,6 @@ export class AccountsStatsCachingService {
     getCreationsCount: () => any,
   ): Promise<{ artist: string; nfts: number; collections: string[] }> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       generateCacheKeyFromParams('account_creations', address),
       () => getCreationsCount(),
       5 * TimeConstants.oneSecond,
@@ -112,16 +97,9 @@ export class AccountsStatsCachingService {
   }
 
   public async invalidateStats(address: string) {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getStatsCacheKey(address),
-    );
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getClaimableCacheKey(address),
-    );
-    await this.redisCacheService.del(
-      this.redisClient,
+    await this.redisCacheService.delete(this.getStatsCacheKey(address));
+    await this.redisCacheService.delete(this.getClaimableCacheKey(address));
+    await this.redisCacheService.delete(
       this.getStatsCacheKey(`owner_${address}`),
     );
   }

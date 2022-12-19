@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxApiService, MxElasticService, RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { MxApiService, MxElasticService } from 'src/common';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
 import { Asset, CollectionType } from './models';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
@@ -24,12 +22,12 @@ import {
   QueryConditionOptions,
   QueryOperator,
   QueryType,
+  RedisCacheService,
 } from '@elrondnetwork/erdnest';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 
 @Injectable()
 export class AssetsGetterService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private collectionsService: CollectionsGetterService,
@@ -42,11 +40,7 @@ export class AssetsGetterService {
     private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getAssetsForUser(
     address: string,
@@ -227,11 +221,9 @@ export class AssetsGetterService {
   ): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      const getAssets = () => this.getAllAssets(query, countQuery);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
-        getAssets,
+        () => this.getAllAssets(query, countQuery),
         5 * TimeConstants.oneSecond,
       );
     } catch (error) {

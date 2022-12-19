@@ -1,6 +1,8 @@
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { MxApiService, RedisCacheService } from 'src/common';
+import { MxApiService } from 'src/common';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
 import { RedisValue } from '../common/redis-value.dto';
@@ -13,8 +15,9 @@ export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedis
   constructor(
     redisCacheService: RedisCacheService,
     private apiService: MxApiService,
+    localRedisCacheService: LocalRedisCacheService,
   ) {
-    super(redisCacheService, 'collectionAssetsCount');
+    super(redisCacheService, 'collectionAssetsCount', localRedisCacheService);
   }
   mapValues(
     returnValues: { key: string; value: any }[],

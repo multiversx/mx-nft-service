@@ -1,57 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import * as Redis from 'ioredis';
-import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
+import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export abstract class RedisValueDataloaderHandler<T> {
-  protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
+  protected localRedisCacheService: LocalRedisCacheService;
   private cacheKeyName: string;
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
+    localRedisCacheService: LocalRedisCacheService,
     private ttl: number = TimeConstants.oneWeek,
-    redisClientName = cacheConfig.persistentRedisClientName,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.redisClient = this.redisCacheService.getClient(redisClientName);
+    this.localRedisCacheService = localRedisCacheService;
   }
   abstract mapValues(keys: T[], dataKeys): any;
 
   async clearKey(key: T): Promise<any> {
-    await this.redisCacheService.del(this.redisClient, this.getCacheKey(key));
+    await this.redisCacheService.delete(this.getCacheKey(key));
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      this.getCacheKey(key),
-    );
+    await this.localRedisCacheService.delByPattern(this.getCacheKey(key));
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {
     const cacheKeys = this.getCacheKeys(keys);
     let [redisKeys, values] = [cacheKeys, []];
-    const getDataFromRedis = await this.redisCacheService.batchGetCache(
-      this.redisClient,
-      cacheKeys,
-    );
+    const getDataFromRedis = await this.redisCacheService.getMany(cacheKeys);
     if (getDataFromRedis.includes(null)) {
       let data = createValueFunc();
       if (data instanceof Promise) {
         data = await data;
       }
       values = this.mapValues(keys, data);
-      await this.redisCacheService.batchSetCache(
-        this.redisClient,
-        redisKeys,
-        values,
-        this.ttl,
-      );
+      await this.redisCacheService.setMany(redisKeys, values, this.ttl);
       return values;
     }
     return getDataFromRedis;

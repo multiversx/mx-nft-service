@@ -1,28 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Locker } from 'src/utils/locker';
 import { cacheConfig } from 'src/config';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@elrondnetwork/erdnest';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
 @Injectable()
 export class AuctionsWarmerService {
-  private redisClient: Redis.Redis;
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
     private cacheService: CachingService,
     private marketplacesService: MarketplacesService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
+  ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
   async handleCachingForFeaturedCollections() {
@@ -129,7 +123,7 @@ export class AuctionsWarmerService {
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(this.redisClient, key, data, ttl);
+    await this.cacheService.setCache(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 

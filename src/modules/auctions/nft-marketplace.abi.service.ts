@@ -21,14 +21,8 @@ import {
   ResultsParser,
   SmartContract,
 } from '@elrondnetwork/erdjs';
-import { cacheConfig, mxConfig, gas } from '../../config';
-import {
-  MxProxyService,
-  getSmartContract,
-  RedisCacheService,
-  MxApiService,
-} from 'src/common';
-import * as Redis from 'ioredis';
+import { mxConfig, gas } from '../../config';
+import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
@@ -48,10 +42,10 @@ import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 
 @Injectable()
 export class NftMarketplaceAbiService {
-  private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
 
   private contract = new ContractLoader(
@@ -68,10 +62,6 @@ export class NftMarketplaceAbiService {
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-
     this.parser = new ResultsParser();
   }
 
@@ -438,7 +428,6 @@ export class NftMarketplaceAbiService {
         contractAddress,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getCutPercentageMap(contractAddress),
         TimeConstants.oneWeek,
@@ -457,7 +446,6 @@ export class NftMarketplaceAbiService {
   async getIsPaused(contractAddress: string): Promise<boolean> {
     try {
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         generateCacheKeyFromParams('isPaused', contractAddress),
         () => this.getIsPausedAbi(contractAddress),
         TimeConstants.oneWeek,

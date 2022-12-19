@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
+import { RedisCacheService } from '@elrondnetwork/erdnest';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { TimeConstants } from 'src/utils/time-utils';
+import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export class AssetsSupplyRedisHandler extends RedisKeyValueDataloaderHandler<string> {
-  constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'asset_supply');
+  constructor(
+    redisCacheService: RedisCacheService,
+    localRedisCacheService: LocalRedisCacheService,
+  ) {
+    super(redisCacheService, 'asset_supply', localRedisCacheService);
   }
 
   mapValues(
@@ -36,7 +40,7 @@ export class AssetsSupplyRedisHandler extends RedisKeyValueDataloaderHandler<str
   batchSupplyInfo = async (keys: string[], data: any) => {
     const cacheKeys = this.getCacheKeys(keys);
     const getDataFromRedis: { key: string; value: any }[] =
-      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+      await this.redisCacheService.getMany(cacheKeys);
     const returnValues: { key: string; value: any }[] =
       this.mapReturnValues<string>(keys, getDataFromRedis);
     const getNotCachedKeys = returnValues
@@ -49,12 +53,7 @@ export class AssetsSupplyRedisHandler extends RedisKeyValueDataloaderHandler<str
         const cacheKeys = this.getCacheKeys(
           val.values.map((value) => value.key),
         );
-        await this.redisCacheService.batchSetCache(
-          this.redisClient,
-          cacheKeys,
-          val.values,
-          val.ttl,
-        );
+        await this.redisCacheService.setMany(cacheKeys, val.values, val.ttl);
       }
       return returnValues;
     }
