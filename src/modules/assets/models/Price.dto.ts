@@ -28,7 +28,7 @@ export class Price {
     return entity
       ? new Price({
           token:
-            entity?.priceToken === 'EGLD'
+            entity?.priceToken === elrondConfig.egld
               ? elrondConfig.egld
               : entity?.priceToken,
           amount: entity?.priceAmount,

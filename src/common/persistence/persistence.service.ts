@@ -1,6 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
-import { constants } from 'src/config';
+import { constants, elrondConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
@@ -155,6 +155,16 @@ export class PersistenceService {
     );
   }
 
+  async getBiddingBalance(
+    address: string,
+    marketplaceKey: string = null,
+  ): Promise<[{ biddingBalance: string; priceToken: string }]> {
+    return await this.execute(
+      this.getBiddingBalance.name,
+      this.accountStatsRepository.getBiddingBalance(address, marketplaceKey),
+    );
+  }
+
   async getOnwerAccountStats(
     address: string,
     marketplaceKey: string = null,
@@ -220,7 +230,7 @@ export class PersistenceService {
   async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = 'EGLD',
+    paymentToken: string = elrondConfig.egld,
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getCollectionStats.name,
@@ -510,22 +520,13 @@ export class PersistenceService {
 
   async getNotificationsForAddress(
     address: string,
+    marketplaceKey: string,
   ): Promise<[NotificationEntity[], number]> {
     return await this.execute(
       this.getNotificationsForAddress.name,
-      this.notificationRepository.getNotificationsForAddress(address),
-    );
-  }
-
-  async getNotificationsForMarketplace(
-    address: string,
-    merketplaceKey: string,
-  ): Promise<[NotificationEntity[], number]> {
-    return await this.execute(
-      this.getNotificationsForMarketplace.name,
-      this.notificationRepository.getNotificationsForMarketplace(
+      this.notificationRepository.getNotificationsForAddress(
         address,
-        merketplaceKey,
+        marketplaceKey,
       ),
     );
   }
@@ -692,22 +693,11 @@ export class PersistenceService {
     limit: number = 10,
     offset: number = 0,
     address: string,
-  ): Promise<[AuctionEntity[], number]> {
-    return await this.execute(
-      this.getClaimableAuctions.name,
-      this.auctionsRepository.getClaimableAuctions(limit, offset, address),
-    );
-  }
-
-  async getClaimableAuctionsForMarketplaceKey(
-    limit: number = 10,
-    offset: number = 0,
-    address: string,
     marketplaceKey: string,
   ): Promise<[AuctionEntity[], number]> {
     return await this.execute(
       this.getClaimableAuctions.name,
-      this.auctionsRepository.getClaimableAuctionsForMarketplaceKey(
+      this.auctionsRepository.getClaimableAuctions(
         limit,
         offset,
         address,

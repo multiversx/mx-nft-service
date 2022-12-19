@@ -99,14 +99,29 @@ export class CacheInfo {
     ttl: 5 * TimeConstants.oneMinute,
   };
 
+  static AllDexTokens: CacheInfo = {
+    key: 'allDexTokens',
+    ttl: 10 * TimeConstants.oneMinute,
+  };
+
+  static AllApiTokens: CacheInfo = {
+    key: 'allApiTokens',
+    ttl: 10 * TimeConstants.oneMinute,
+  };
+
   static AllTokens: CacheInfo = {
     key: 'allTokens',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: TimeConstants.oneMinute,
   };
 
   static EgldToken: CacheInfo = {
     key: 'egldToken',
     ttl: 10 * TimeConstants.oneMinute,
+  };
+
+  static TokenHistoricalPrice: CacheInfo = {
+    key: 'tokenHistoricalPrice',
+    ttl: 30 * TimeConstants.oneDay,
   };
 
   static CurrentPaymentTokens: CacheInfo = {

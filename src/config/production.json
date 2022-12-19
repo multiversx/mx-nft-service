@@ -6,10 +6,10 @@
     "chainID": "1",
     "version": 1,
     "metaChainShardId": 4294967295,
-    "egld": "EGLD",
     "wegld": "WEGLD-bd4d79",
     "mex": "MEX-455c57",
     "lkmex": "LKMEX-aab910",
+    "usdc": "USDC-c76f1f",
     "burnNftActivationEpoch": 795
   },
   "fileStorage": {

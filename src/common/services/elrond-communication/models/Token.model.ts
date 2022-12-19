@@ -19,13 +19,21 @@ export class Token {
     Object.assign(this, init);
   }
 
-  static fromElrondApiToken(token: any): Token {
+  static fromElrondApiDexToken(token: any): Token {
     return new Token({
       identifier: token.id,
       symbol: token.symbol,
       name: token.name,
       priceUsd: token.price,
-      decimals: token.decimals ?? undefined,
+    });
+  }
+
+  static fromElrondApiToken(token: any): Token {
+    return new Token({
+      identifier: token.identifier,
+      symbol: token.ticker,
+      name: token.name,
+      decimals: token.decimals,
     });
   }
 }

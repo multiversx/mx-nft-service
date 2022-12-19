@@ -170,22 +170,13 @@ export class AuctionsGetterService {
     address: string,
     marketplaceKey: string,
   ) {
-    let [auctions, count] = [[], 0];
-    if (marketplaceKey) {
-      [auctions, count] =
-        await this.persistenceService.getClaimableAuctionsForMarketplaceKey(
-          limit,
-          offset,
-          address,
-          marketplaceKey,
-        );
-    } else {
-      [auctions, count] = await this.persistenceService.getClaimableAuctions(
-        limit,
-        offset,
-        address,
-      );
-    }
+    let [auctions, count] = await this.persistenceService.getClaimableAuctions(
+      limit,
+      offset,
+      address,
+      marketplaceKey,
+    );
+
     return [auctions?.map((element) => Auction.fromEntity(element)), count];
   }
 
@@ -690,20 +681,14 @@ export class AuctionsGetterService {
     marketplaceKey?: string,
     collectionIdentifier?: string,
   ): Promise<Token[]> {
-    const [currentPaymentTokenIds, allMexTokens, egldToken, lkmexToken] =
-      await Promise.all([
-        this.persistenceService.getCurrentPaymentTokenIdsWithCounts(
-          marketplaceKey,
-          collectionIdentifier,
-        ),
-        this.usdPriceService.getCachedMexTokensWithDecimals(),
-        this.usdPriceService.getToken(elrondConfig.egld),
-        this.usdPriceService.getToken(elrondConfig.lkmex),
-      ]);
+    const [currentPaymentTokenIds, allTokens] = await Promise.all([
+      this.persistenceService.getCurrentPaymentTokenIdsWithCounts(
+        marketplaceKey,
+        collectionIdentifier,
+      ),
+      this.usdPriceService.getAllCachedTokens(),
+    ]);
 
-    const allTokens: Token[] = allMexTokens
-      .concat(egldToken)
-      .concat(lkmexToken);
     let mappedTokens = [];
     for (const payment of currentPaymentTokenIds) {
       const token = allTokens.find(

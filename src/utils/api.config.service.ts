@@ -28,4 +28,32 @@ export class ApiConfigService {
   getMongoDbPassword(): string {
     return this.getGenericConfig<string>('NFT_TRAIT_SUMMARIES_DB_PASSWORD');
   }
+
+  isReindexMarketplaceEventsFlagActive(): boolean {
+    return (
+      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
+    );
+  }
+
+  getApiUrl(): string {
+    return this.getGenericConfig<string>('ELROND_API');
+  }
+
+  getToolsUrl(): string {
+    return this.getGenericConfig<string>('ELROND_TOOLS');
+  }
+
+  getKeepAliveTimeoutDownstream(): number {
+    return parseInt(
+      this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
+    );
+  }
+
+  getSecurityAdmins(): string[] {
+    return this.getGenericConfig<string[]>('ADMINS');
+  }
+
+  getJwtSecret(): string {
+    return this.getGenericConfig<string>('JWT_SECRET_KEY');
+  }
 }

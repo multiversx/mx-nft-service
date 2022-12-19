@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
+import { Price } from 'src/modules/assets/models/Price.dto';
 import { nominateAmount } from 'src/utils';
 
 @ObjectType()
@@ -8,6 +9,8 @@ export class AccountStats {
   address: string;
   @Field({ nullable: true })
   biddingBalance: string;
+  @Field(() => [Price], { nullable: true })
+  biddings: Price[];
   @Field({ nullable: true })
   creations: string;
   @Field({ nullable: true })

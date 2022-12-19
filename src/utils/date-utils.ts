@@ -1,5 +1,5 @@
 export class DateUtils {
-  static getTimestamp(date: Date): number {
+  static getTimestamp(date: Date = new Date()): number {
     return new Date(date).getTime() / 1000;
   }
 
@@ -33,5 +33,19 @@ export class DateUtils {
 
   static getDateFromTimestampWithoutTime(timestamp: number) {
     return new Date(timestamp * 1000).toJSON().slice(0, 10);
+  }
+
+  static timestampToIsoStringWithoutTime(timestamp: number): string {
+    let date = new Date(timestamp * 1000);
+    date.setUTCHours(0, 0, 0, 0);
+    return date.toISOString();
+  }
+
+  static isTimestampToday(timestamp: number): boolean {
+    var today = new Date().setHours(0, 0, 0, 0) / 1000;
+    var thatDay = new Date(timestamp * 1000).setHours(0, 0, 0, 0) / 1000;
+    if (today === thatDay) {
+      return true;
+    }
   }
 }

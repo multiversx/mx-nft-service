@@ -24,6 +24,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
 import { AuctionEntity } from './auction.entity';
 import { AuctionWithStartBid } from './auctionWithBidCount.dto';
 import { PriceRange } from './price-range';
@@ -226,33 +227,17 @@ export class AuctionsRepository {
     limit: number = 10,
     offset: number = 0,
     address: string,
-  ): Promise<[AuctionEntity[], number]> {
-    return await this.auctionsRepository
-      .createQueryBuilder('a')
-      .innerJoin('orders', 'o', 'o.auctionId=a.id')
-      .where(
-        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND 
-        ((o.ownerAddress = '${address}' AND o.status='active'))`,
-      )
-      .groupBy('a.id')
-      .orderBy('a.Id', 'DESC')
-      .offset(offset)
-      .limit(limit)
-      .getManyAndCount();
-  }
-
-  async getClaimableAuctionsForMarketplaceKey(
-    limit: number = 10,
-    offset: number = 0,
-    address: string,
     marketplaceKey: string,
   ): Promise<[AuctionEntity[], number]> {
     return await this.auctionsRepository
       .createQueryBuilder('a')
       .innerJoin('orders', 'o', 'o.auctionId=a.id')
       .where(
-        `a.status = '${AuctionStatusEnum.Claimable}' AND a.type <> 'SftOnePerPayment' AND a.marketplaceKey = :marketplaceKey
-        ((o.ownerAddress = :address AND o.status='active'))`,
+        `a.status = '${
+          AuctionStatusEnum.Claimable
+        }' AND a.type <> 'SftOnePerPayment'
+        ${getMarketplaceKeyFilter('a', marketplaceKey)} 
+        AND (o.ownerAddress = :address AND o.status='active')`,
         {
           address: address,
           marketplaceKey: marketplaceKey,
@@ -397,7 +382,7 @@ export class AuctionsRepository {
       'a',
     );
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
-    const paymentToken = paymentTokenFilter ?? 'EGLD';
+    const paymentToken = paymentTokenFilter ?? elrondConfig.egld;
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder
