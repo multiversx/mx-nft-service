@@ -7,7 +7,9 @@ import { VerifyContentService } from './verify-content.service';
 export class ContentValidation {
   private status: boolean = true;
   private verifyContentService: VerifyContentService;
-  constructor(private logger: Logger) {
+  private readonly logger: Logger;
+  constructor() {
+    this.logger = new Logger(ContentValidation.name);
     this.verifyContentService = new VerifyContentService();
   }
 
