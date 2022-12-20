@@ -50,6 +50,16 @@ export class NftRarityData {
       : null;
   }
 
+  private static fromDbNft(nft: NftRarityEntity): NftRarityData {
+    return nft
+      ? new NftRarityData({
+          identifier: nft.identifier,
+          nonce: nft.nonce,
+          rarities: Rarity.fromDbRarity(nft),
+        })
+      : null;
+  }
+
   static fromNfts(
     nfts: Nft[],
     traitTypeIndexes: number[] = [],
@@ -64,6 +74,10 @@ export class NftRarityData {
 
   static fromElasticNfts(nfts: any[]): NftRarityData[] {
     return this.computeDNA(nfts.map((nft) => this.fromElasticNft(nft)))[0];
+  }
+
+  static fromDbNfts(nfts: NftRarityEntity[]): NftRarityData[] {
+    return nfts.map((nft) => this.fromDbNft(nft));
   }
 
   static computeDNA(

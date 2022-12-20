@@ -119,7 +119,7 @@ export class NftRarityService {
       }
 
       const nftsWithoutAttributes = this.filterNftsWithoutAttributes(allNfts);
-      if (nftsWithoutAttributes) {
+      if (nftsWithoutAttributes?.length > 0) {
         await this.nftRarityElasticService.setNftRaritiesInElastic(
           nftsWithoutAttributes,
           false,
@@ -165,7 +165,7 @@ export class NftRarityService {
           hasRarities,
         ),
         this.nftRarityElasticService.setNftRaritiesInElastic(
-          rarities,
+          NftRarityData.fromDbNfts(rarities),
           true,
           allNftsFromElastic,
         ),
@@ -287,7 +287,9 @@ export class NftRarityService {
         collectionTicker,
         true,
       ),
-      this.nftRarityElasticService.setNftRaritiesInElastic(dbNfts),
+      this.nftRarityElasticService.setNftRaritiesInElastic(
+        NftRarityData.fromDbNfts(dbNfts),
+      ),
     ]);
   }
 
