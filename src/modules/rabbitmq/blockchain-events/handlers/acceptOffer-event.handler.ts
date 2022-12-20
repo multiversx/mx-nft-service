@@ -6,8 +6,9 @@ import {
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { OfferStatusEnum } from 'src/modules/offers/models';
+import { OffersService } from 'src/modules/offers/offers.service';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { AcceptOfferEvent } from '../../entities/auction/acceptOffer.event';
 
@@ -17,6 +18,7 @@ export class AcceptOfferEventHandler {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
+    private offersService: OffersService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -35,6 +37,16 @@ export class AcceptOfferEventHandler {
     if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
       return;
     }
+
+    const offer = await this.offersService.getOfferByIdAndMarketplace(
+      topics.offerId,
+      marketplace.key,
+    );
+
+    await this.offersService.saveOffer({
+      ...offer,
+      status: OfferStatusEnum.Accepted,
+    });
 
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       topics.auctionId,
