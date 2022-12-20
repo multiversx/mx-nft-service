@@ -11,6 +11,7 @@ import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache
 import { NotificationsModuleGraph } from '../notifications/notifications.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OffersCachingModule } from './caching/offers-caching.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   providers: [
@@ -28,6 +29,7 @@ import { OffersCachingModule } from './caching/offers-caching.module';
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => AssetsModuleGraph),
+    forwardRef(() => AuthModule),
     CacheEventsPublisherModule,
   ],
   exports: [OffersService],
