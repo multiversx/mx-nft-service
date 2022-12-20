@@ -8,6 +8,7 @@ export enum AuctionEventEnum {
 
 export enum ExternalAuctionEventEnum {
   Listing = 'listing',
+  ListNftOnMarketplace = 'listNftOnMarketplace',
   Buy = 'buy',
   BuyNft = 'buyNft',
   BulkBuy = 'bulkBuy',
@@ -16,6 +17,7 @@ export enum ExternalAuctionEventEnum {
   AcceptOffer = 'acceptOffer',
   UpdateOffer = 'update_offer_event',
   AcceptGlobalOffer = 'acceptGlobalOffer',
+  ClaimBackNft = 'claimBackNft',
 }
 
 export enum ElrondNftsSwapAuctionEventEnum {

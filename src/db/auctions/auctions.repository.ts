@@ -408,6 +408,18 @@ export class AuctionsRepository {
     return null;
   }
 
+  async getLastAuctionIdForMarketplace(
+    marketplaceKey: string,
+  ): Promise<number> {
+    const { marketplaceAuctionId } = await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('a.marketplaceAuctionId as marketplaceAuctionId')
+      .where({ marketplaceKey: marketplaceKey })
+      .orderBy('id', 'DESC')
+      .getRawOne();
+    return marketplaceAuctionId;
+  }
+
   async getBulkAuctions(auctionsIds: number[]): Promise<AuctionEntity[]> {
     return await this.auctionsRepository
       .createQueryBuilder('auctions')
@@ -427,6 +439,21 @@ export class AuctionsRepository {
       });
     }
     return null;
+  }
+
+  async getAuctionByIdentifierAndMarketplace(
+    identifier: string,
+    marketplaceKey: string,
+  ): Promise<AuctionEntity> {
+    return await this.auctionsRepository.findOne({
+      where: [
+        {
+          identifier: identifier,
+          marketplaceKey: marketplaceKey,
+          status: AuctionStatusEnum.Running,
+        },
+      ],
+    });
   }
 
   async getAuctionCountForIdentifiers(
@@ -525,40 +552,6 @@ export class AuctionsRepository {
     }
     await this.rollbackWithdrawAndEndAuction(auctions);
     await this.rollbackCreateAuction(auctions);
-  }
-
-  private getDefaultQueryRequest(
-    startDate: number,
-    endDate: number = null,
-  ): QueryRequest {
-    if (endDate) {
-      return new QueryRequest({
-        filters: {
-          childExpressions: undefined,
-          filters: [
-            { field: 'status', values: ['Running'], op: Operation.EQ },
-            { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
-            {
-              field: 'endDate',
-              values: [`${endDate ? endDate : startDate}`],
-              op: Operation.LE,
-            },
-            { field: 'endDate', values: ['1'], op: Operation.GE },
-          ],
-          operator: Operator.AND,
-        },
-      });
-    }
-    return new QueryRequest({
-      filters: {
-        childExpressions: undefined,
-        filters: [
-          { field: 'status', values: ['Running'], op: Operation.EQ },
-          { field: 'startDate', values: [`${startDate}`], op: Operation.LE },
-        ],
-        operator: Operator.AND,
-      },
-    });
   }
 
   private async getAuctionsForIdentifierSortByPrice(
