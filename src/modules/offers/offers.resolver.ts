@@ -8,7 +8,6 @@ import {
   Int,
 } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import { Auction } from '../auctions/models';
 import {
   CreateOfferArgs,
   CreateOfferRequest,
@@ -21,8 +20,6 @@ import { NftMarketplaceAbiService } from '../auctions';
 import { Account } from '../account-stats/models';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/gql.auth-guard';
-import { User } from '../auth/user';
 import { TransactionNode } from '../common/transaction';
 import { AssetsProvider } from '../assets';
 import { Asset } from '../assets/models';
@@ -30,6 +27,9 @@ import { AcceptOfferArgs } from './models/AcceptOfferArgs';
 import { AcceptOfferRequest } from './models/AcceptOfferRequest';
 import { OffersFilters } from './models/Offers-Filters';
 import { OffersService } from './offers.service';
+import { AuthUser } from '../auth/authUser';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Offer)
 export class OffersResolver extends BaseResolver(Offer) {
@@ -83,31 +83,31 @@ export class OffersResolver extends BaseResolver(Offer) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async sendOffer(
     @Args('input', { type: () => CreateOfferArgs }) input: CreateOfferArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateOfferRequest.fromArgs(input);
-    return await this.nftAbiService.createOffer(user.publicKey, request);
+    return await this.nftAbiService.createOffer(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async withdrawOffer(
     @Args({ name: 'offerId', type: () => Int }) offerId: number,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    return await this.nftAbiService.withdrawOffer(user.publicKey, offerId);
+    return await this.nftAbiService.withdrawOffer(user.address, offerId);
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async acceptOffer(
     @Args('input', { type: () => AcceptOfferArgs }) input: AcceptOfferArgs,
-    @User() user: any,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = AcceptOfferRequest.fromArgs(input);
-    return await this.nftAbiService.acceptOffer(user.publicKey, request);
+    return await this.nftAbiService.acceptOffer(user.address, request);
   }
 }

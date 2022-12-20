@@ -11,7 +11,8 @@ export class AcceptOfferEventsTopics {
   private paymentTokenNonce: number;
   private paymentAmount: string;
   private startdate: string;
-  private enddate: string;
+  private enddate: string;  
+  private auctionId: number;
 
   constructor(rawTopics: string[]) {
     this.offerId = parseInt(
@@ -42,6 +43,9 @@ export class AcceptOfferEventsTopics {
       Buffer.from(rawTopics[10], 'base64').toString('hex'),
       16,
     ).toString();
+    this.auctionId = parseInt(
+      BinaryUtils.tryBase64ToBigInt(rawTopics[14])?.toString() ?? '0',
+    );
   }
 
   toPlainObject() {
@@ -55,7 +59,8 @@ export class AcceptOfferEventsTopics {
       paymentTokenNonce: this.paymentTokenNonce,
       paymentAmount: this.paymentAmount,
       startdate: this.startdate,
-      enddate: this.enddate,
+      enddate: this.enddate,      
+      auctionId: this.auctionId,
     };
   }
 }
