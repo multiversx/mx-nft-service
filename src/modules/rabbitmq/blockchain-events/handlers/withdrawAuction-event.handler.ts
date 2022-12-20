@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AuctionEntity } from 'src/db/auctions';
 import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
+  ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
@@ -9,9 +11,9 @@ import {
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { WithdrawEvent } from '../../entities/auction';
+import { ClaimEvent } from '../../entities/auction/claim.event';
 import { ElrondSwapWithdrawEvent } from '../../entities/auction/elrondnftswap/elrondswap-withdraw.event';
 
 @Injectable()
@@ -25,6 +27,7 @@ export class WithdrawAuctionEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const { withdraw, topics } = this.getEventAndTopics(event);
+    let auction: AuctionEntity;
     const marketplace = await this.marketplaceService.getMarketplaceByType(
       withdraw.getAddress(),
       marketplaceType,
@@ -35,11 +38,19 @@ export class WithdrawAuctionEventHandler {
     this.logger.log(
       `Withdraw event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
-    const auction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+    if (topics.auctionId) {
+      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(topics.auctionId, 16),
         marketplace.key,
       );
+    } else {
+      const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+      auction =
+        await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(
+          auctionIdentifier,
+          marketplace.key,
+        );
+    }
 
     if (!auction) return;
 
@@ -57,6 +68,13 @@ export class WithdrawAuctionEventHandler {
       const topics = withdraw.getTopics();
       return { withdraw, topics };
     }
+
+    if (event.identifier === ExternalAuctionEventEnum.ClaimBackNft) {
+      const withdraw = new ClaimEvent(event);
+      const topics = withdraw.getTopics();
+      return { withdraw, topics };
+    }
+
     const withdraw = new WithdrawEvent(event);
     const topics = withdraw.getTopics();
     return { withdraw, topics };

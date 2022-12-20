@@ -1,16 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
+import { AuctionEntity } from 'src/db/auctions';
+import {
+  ElrondNftsSwapAuctionEventEnum,
+  ExternalAuctionEventEnum,
+} from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { CreateOrderArgs, OrderStatusEnum } from 'src/modules/orders/models';
 import { OrdersService } from 'src/modules/orders/order.service';
 import { BuySftEvent } from '../../entities/auction';
+import { ClaimEvent } from '../../entities/auction/claim.event';
 import { ElrondSwapBuyEvent } from '../../entities/auction/elrondnftswap/elrondswap-buy.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 
@@ -27,6 +31,7 @@ export class BuyEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
+    let auction: AuctionEntity;
 
     const marketplace = await this.marketplaceService.getMarketplaceByType(
       buySftEvent.getAddress(),
@@ -38,11 +43,20 @@ export class BuyEventHandler {
     this.logger.log(
       `Buy event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
-    const auction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+
+    if (topics.auctionId) {
+      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
         parseInt(topics.auctionId, 16),
         marketplace.key,
       );
+    } else {
+      const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+      auction =
+        await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(
+          auctionIdentifier,
+          marketplace.key,
+        );
+    }
     if (!auction) return;
 
     const result = await this.auctionsGetterService.getAvailableTokens(
@@ -64,7 +78,7 @@ export class BuyEventHandler {
         ownerAddress: topics.currentWinner,
         auctionId: auction.id,
         priceToken: auction.paymentToken,
-        priceAmount: topics.bid,
+        priceAmount: auction.minBid,
         priceNonce: auction.paymentNonce,
         blockHash: hash,
         status: OrderStatusEnum.Bought,
@@ -74,7 +88,7 @@ export class BuyEventHandler {
     );
     await this.feedEventsSenderService.sendBuyEvent(
       topics.currentWinner,
-      topics.bid,
+      auction.minBid,
       topics.boughtTokens,
       orderSft,
       auction,
@@ -94,6 +108,12 @@ export class BuyEventHandler {
         return;
       }
       const buySftEvent = new ElrondSwapBuyEvent(event);
+      const topics = buySftEvent.getTopics();
+      return { buySftEvent, topics };
+    }
+
+    if (event.identifier === ExternalAuctionEventEnum.BuyNft) {
+      const buySftEvent = new ClaimEvent(event);
       const topics = buySftEvent.getTopics();
       return { buySftEvent, topics };
     }

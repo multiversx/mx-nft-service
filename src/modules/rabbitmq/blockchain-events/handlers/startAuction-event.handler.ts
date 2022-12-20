@@ -1,23 +1,32 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { elrondConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
-import { AuctionsSetterService } from 'src/modules/auctions';
+import {
+  ElrondNftsSwapAuctionEventEnum,
+  ExternalAuctionEventEnum,
+} from 'src/modules/assets/models';
+import {
+  AuctionsGetterService,
+  AuctionsSetterService,
+} from 'src/modules/auctions';
 import { ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
+import { ELRONDNFTSWAP_KEY, ENEFTOR_KEY } from 'src/utils/constants';
 import { AuctionTokenEvent } from '../../entities/auction';
 import { ElrondSwapAuctionEvent } from '../../entities/auction/elrondnftswap/elrondswap-auction.event';
+import { ListNftEvent } from '../../entities/auction/listNft.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 
 @Injectable()
 export class StartAuctionEventHandler {
   private readonly logger = new Logger(StartAuctionEventHandler.name);
   constructor(
-    private auctionsService: AuctionsSetterService,
+    private auctionsSetterService: AuctionsSetterService,
+    private auctionsGetterService: AuctionsGetterService,
     private feedEventsSenderService: FeedEventsSenderService,
     private assetByIdentifierService: AssetByIdentifierService,
     private usdPriceService: UsdPriceService,
@@ -28,7 +37,6 @@ export class StartAuctionEventHandler {
     const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
     if (!auctionTokenEvent && !topics) return;
 
-    const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
     const marketplace = await this.marketplaceService.getMarketplaceByType(
       auctionTokenEvent.getAddress(),
       marketplaceType,
@@ -39,12 +47,7 @@ export class StartAuctionEventHandler {
     this.logger.log(
       `Auction listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
-    const auction = await this.saveAuction(
-      topics,
-      auctionIdentifier,
-      marketplace,
-      hash,
-    );
+    const auction = await this.saveAuction(topics, marketplace, hash);
 
     if (!auction) return;
 
@@ -57,19 +60,30 @@ export class StartAuctionEventHandler {
 
   private async saveAuction(
     topics: any,
-    auctionIdentifier: string,
     marketplace: Marketplace,
     hash: string,
   ) {
-    if (marketplace.key === ELRONDNFTSWAP_KEY) {
-      return await this.handleElrondSwapAuction(
+    const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+    if (
+      marketplace.key === ELRONDNFTSWAP_KEY ||
+      marketplace.key === ENEFTOR_KEY
+    ) {
+      if (topics.auctionId === '0') {
+        let auctionId =
+          await this.auctionsGetterService.getLastAuctionIdForMarketplace(
+            marketplace.key,
+          );
+        topics.auctionId = auctionId && auctionId > 0 ? auctionId++ : 1;
+      }
+      return await this.handleSaveAuctionFromTopics(
         auctionIdentifier,
         topics,
         hash,
         marketplace,
       );
     }
-    return await this.auctionsService.saveAuction(
+
+    return await this.auctionsSetterService.saveAuction(
       parseInt(topics.auctionId, 16),
       auctionIdentifier,
       marketplace,
@@ -77,26 +91,29 @@ export class StartAuctionEventHandler {
     );
   }
 
-  private async handleElrondSwapAuction(
+  private async handleSaveAuctionFromTopics(
     auctionIdentifier: string,
     topics: any,
     hash: string,
     auctionTokenEventMarketplace: Marketplace,
   ) {
+    let decimals = elrondConfig.decimals;
     const asset = await this.assetByIdentifierService.getAsset(
       auctionIdentifier,
     );
-
-    const paymentToken = await this.usdPriceService.getToken(
-      topics.paymentToken,
-    );
-    return await this.auctionsService.saveAuctionEntity(
+    if (topics.paymentToken !== elrondConfig.egld) {
+      const paymentToken = await this.usdPriceService.getToken(
+        topics.paymentToken,
+      );
+      decimals = paymentToken.decimals;
+    }
+    return await this.auctionsSetterService.saveAuctionEntity(
       AuctionEntity.fromWithdrawTopics(
         topics,
         asset.tags?.toString(),
         hash,
         auctionTokenEventMarketplace.key,
-        paymentToken?.decimals,
+        decimals,
       ),
       asset.tags,
     );
@@ -109,6 +126,12 @@ export class StartAuctionEventHandler {
       if (parseInt(topics.auctionType) === ElrondSwapAuctionTypeEnum.Swap) {
         return { auctionTokenEvent: null, topics: null };
       }
+      return { auctionTokenEvent, topics };
+    }
+
+    if (event.identifier === ExternalAuctionEventEnum.ListNftOnMarketplace) {
+      const auctionTokenEvent = new ListNftEvent(event);
+      const topics = auctionTokenEvent.getTopics();
       return { auctionTokenEvent, topics };
     }
     const auctionTokenEvent = new AuctionTokenEvent(event);
