@@ -69,6 +69,10 @@ export class AssetsHistoryNftEventService {
           });
         }
       }
+      case NftEventEnum.ESDTNFTBurn:
+      case NftEventEnum.ESDTNFTUpdateAttributes: {
+        break;
+      }
       default: {
         return this.mapNftEventLog(nonce, transferEvent.identifier, mainEvent);
       }

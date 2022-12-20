@@ -1,5 +1,5 @@
 export class DateUtils {
-  static getTimestamp(date: Date): number {
+  static getTimestamp(date: Date = new Date()): number {
     return new Date(date).getTime() / 1000;
   }
 

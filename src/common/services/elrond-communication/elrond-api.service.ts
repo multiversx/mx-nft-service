@@ -616,41 +616,20 @@ export class ElrondApiService {
     );
   }
 
-  async getAllMexTokens(): Promise<Token[]> {
+  async getAllDexTokens(): Promise<Token[]> {
     const allTokens = await this.doGetGeneric(
-      this.getAllMexTokens.name,
+      this.getAllDexTokens.name,
       'mex/tokens?size=10000',
     );
-    return allTokens.map((t) => Token.fromElrondApiToken(t));
+    return allTokens.map((t) => Token.fromElrondApiDexToken(t));
   }
 
-  async getAllMexTokensWithDecimals(): Promise<Token[]> {
-    const batchSize = constants.getTokensFromApiBatchSize;
-    const tokens: Token[] = await this.getAllMexTokens();
-
-    const tokenChunks = BatchUtils.splitArrayIntoChunks(tokens, batchSize);
-    for (const tokenChunk of tokenChunks) {
-      const identifiersParam = tokenChunk.map((t) => t.identifier).join(',');
-      const tokensWithDecimals = await this.doGetGeneric(
-        this.getAllMexTokensWithDecimals.name,
-        `tokens?identifiers=${identifiersParam}&fields=identifier,decimals&size=${tokenChunk.length}`,
-      );
-
-      if (!tokensWithDecimals) {
-        continue;
-      }
-
-      for (const tokenWithDecimals of tokensWithDecimals) {
-        const token = tokens.find(
-          (t) => t.identifier === tokenWithDecimals.identifier,
-        );
-        if (token) {
-          token.decimals = tokenWithDecimals.decimals;
-        }
-      }
-    }
-
-    return tokens;
+  async getAllTokens(): Promise<Token[]> {
+    const allTokens = await this.doGetGeneric(
+      this.getAllTokens.name,
+      'tokens?size=10000&fields=identifier,name,ticker,decimals',
+    );
+    return allTokens.map((t) => Token.fromElrondApiToken(t));
   }
 
   async getEgldPriceFromEconomics(): Promise<string> {
