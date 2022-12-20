@@ -100,6 +100,5 @@ export class Rarity {
     ) {
       return true;
     }
-    return false;
   }
 }
