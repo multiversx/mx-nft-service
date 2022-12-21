@@ -35,6 +35,10 @@ export class OfferEntity extends BaseEntity {
   @Index('offer_collection')
   collection: string;
 
+  @Column()
+  @Index('offer_end_date')
+  endDate: number;
+
   @Column({ nullable: true, length: 62 })
   boughtTokensNo: string;
 
@@ -80,6 +84,7 @@ export class OfferEntity extends BaseEntity {
       priceNonce: offerEventTopics.paymentTokenNonce,
       priceToken: offerEventTopics.paymentTokenIdentifier,
       status: status,
+      endDate: parseInt(offerEventTopics.enddate),
     });
   }
 }
