@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { OfferEntity } from '.';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersFiltersForDb } from './offers.filter';
@@ -7,11 +7,15 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
-@EntityRepository(OfferEntity)
+@Injectable()
 export class OffersRepository extends Repository<OfferEntity> {
   constructor(
     private cacheEventsPublisherService: CacheEventsPublisherService,
+    @InjectRepository(OfferEntity)
+    private offersRepository: Repository<OfferEntity>,
   ) {
     super();
   }
@@ -21,7 +25,8 @@ export class OffersRepository extends Repository<OfferEntity> {
     offset: number = 0,
     limit: number = 10,
   ): Promise<[OfferEntity[], number]> {
-    return await this.createQueryBuilder('offers')
+    return await this.offersRepository
+      .createQueryBuilder('offers')
       .where(this.getOffersFilter(filters))
       .offset(offset)
       .limit(limit)
@@ -29,7 +34,7 @@ export class OffersRepository extends Repository<OfferEntity> {
   }
 
   async getOfferById(id: number): Promise<OfferEntity> {
-    return await this.findOne({
+    return await this.offersRepository.findOne({
       where: [{ id: id }],
     });
   }
@@ -38,7 +43,7 @@ export class OffersRepository extends Repository<OfferEntity> {
     marketplaceOfferId: number,
     marketplaceKey: string,
   ): Promise<OfferEntity> {
-    return await this.findOne({
+    return await this.offersRepository.findOne({
       where: [
         {
           marketplaceOfferId: marketplaceOfferId,
@@ -50,7 +55,7 @@ export class OffersRepository extends Repository<OfferEntity> {
 
   async saveOffer(offer: OfferEntity) {
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
-    return await this.save(offer);
+    return await this.offersRepository.save(offer);
   }
 
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
@@ -58,7 +63,7 @@ export class OffersRepository extends Repository<OfferEntity> {
     offer.modifiedDate = new Date(new Date().toUTCString());
 
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
-    return await this.save(offer);
+    return await this.offersRepository.save(offer);
   }
 
   async rollbackOffersByHash(blockHash: string) {
@@ -71,17 +76,17 @@ export class OffersRepository extends Repository<OfferEntity> {
         new OffersFiltersForDb({ identifier: order.identifier }),
       );
       if (count === 1) {
-        return this.delete(offers[0].id);
+        return this.offersRepository.delete(offers[0].id);
       }
       const indexOf = offers.findIndex((o) => o.id === order.id);
       if (indexOf === count - 1) {
-        await this.delete(offers[indexOf].id);
+        await this.offersRepository.delete(offers[indexOf].id);
         await this.updateOfferWithStatus(
           offers[indexOf - 1],
           OfferStatusEnum.Active,
         );
       } else {
-        await this.delete(offers[indexOf].id);
+        await this.offersRepository.delete(offers[indexOf].id);
       }
     }
   }
@@ -109,7 +114,10 @@ export class OffersRepository extends Repository<OfferEntity> {
   }
 
   private getOffersByBlockHash(blockHash: string): Promise<OfferEntity[]> {
-    return this.createQueryBuilder().where({ blockHash: blockHash }).getMany();
+    return this.offersRepository
+      .createQueryBuilder()
+      .where({ blockHash: blockHash })
+      .getMany();
   }
 }
 
