@@ -39,6 +39,8 @@ import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.ha
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 import { OffersModuleGraph } from 'src/modules/offers/offers.module';
+import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 
 @Module({
   imports: [
@@ -65,6 +67,8 @@ import { OffersModuleGraph } from 'src/modules/offers/offers.module';
     WithdrawAuctionEventHandler,
     AcceptGlobalOfferEventHandler,
     SendOfferEventHandler,
+    AcceptOfferEventHandler,
+    WithdrawOfferEventHandler,
     UpdatePriceEventHandler,
     SwapUpdateEventHandler,
     NftEventsConsumer,
