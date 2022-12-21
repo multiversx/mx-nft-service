@@ -197,4 +197,9 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
       ))
     );
   }
+
+  @ResolveField(() => String)
+  aggregatorUrl(@Parent() collectionNode: Collection): string {
+    return `${process.env.ELROND_MARKETPLACE}/collections/${collectionNode.ticker}`;
+  }
 }

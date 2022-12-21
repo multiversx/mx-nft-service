@@ -396,6 +396,7 @@ input ClaimTicketsArgs {
 }
 
 type Collection {
+  aggregatorUrl: String!
   artist: Account
   artistAddress: String!
   artistFollowersCount: Int!
@@ -1187,7 +1188,7 @@ enum TierStatusEnum {
 
 type Token {
   activeAuctions: Int
-  decimals: Float
+  decimals: Float!
   identifier: String!
   name: String!
   priceUsd: String
