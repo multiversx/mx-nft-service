@@ -17,7 +17,7 @@ export class Price {
   @Field(() => Int)
   nonce: number;
 
-  @Field(() => Token, { nullable: true })
+  @Field(() => Token)
   tokenData: Token;
 
   constructor(init?: Partial<Price>) {

@@ -88,7 +88,7 @@ type Asset {
   marketplaces: [Marketplace!]
   media: [Media!]
   metadata: Metadata
-  name: String
+  name: String!
   nonce: Int!
   owner: Account
   ownerAddress: String
@@ -100,7 +100,7 @@ type Asset {
   thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
-  type: NftTypeEnum
+  type: NftTypeEnum!
   uris: [String!]!
   url: String @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
@@ -206,7 +206,7 @@ type AttributeType {
 }
 
 type Auction {
-  asset: Asset
+  asset: Asset!
   availableTokens: Int
   collection: String!
   creationDate: Int!
@@ -223,13 +223,13 @@ type Auction {
   nrAuctionedTokens: Int
   orders(pagination: ConnectionArgs): OrdersResponse
   owner: Account
-  ownerAddress: String
+  ownerAddress: String!
   startDate: Int!
-  status: AuctionStatusEnum
+  status: AuctionStatusEnum!
   tags: [String!]
   topBid: Price
   topBidder: Account
-  type: AuctionTypeEnum
+  type: AuctionTypeEnum!
 }
 
 enum AuctionCustomEnum {
@@ -396,6 +396,7 @@ input ClaimTicketsArgs {
 }
 
 type Collection {
+  aggregatorUrl: String!
   artist: Account
   artistAddress: String!
   artistFollowersCount: Int!
@@ -693,6 +694,7 @@ type Marketplace {
   acceptedCollectionIdentifiers: [String!]
   acceptedPaymentTokens: [Token!]
   address: String!
+  iconUrl: String!
   isPaused: Boolean
   key: ID!
   marketplaceCutPercentage: String
@@ -955,7 +957,7 @@ type Price {
   nonce: Int!
   timestamp: Int!
   token: ID!
-  tokenData: Token
+  tokenData: Token!
   usdAmount: String
 }
 
@@ -1187,11 +1189,11 @@ enum TierStatusEnum {
 
 type Token {
   activeAuctions: Int
-  decimals: Float
+  decimals: Float!
   identifier: String!
-  name: String
+  name: String!
   priceUsd: String
-  symbol: String
+  symbol: String!
 }
 
 input TokenFilter {

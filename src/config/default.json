@@ -18,7 +18,8 @@
     "decimals": 18,
     "egld": "EGLD",
     "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
-    "pemFileName": "wallet.pem"
+    "pemFileName": "wallet.pem",
+    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
   },
   "caching": {
     "ordersRedisClientName": "orders",
