@@ -693,6 +693,7 @@ type Marketplace {
   acceptedCollectionIdentifiers: [String!]
   acceptedPaymentTokens: [Token!]
   address: String!
+  iconUrl: String!
   isPaused: Boolean
   key: ID!
   marketplaceCutPercentage: String
@@ -1187,7 +1188,7 @@ enum TierStatusEnum {
 
 type Token {
   activeAuctions: Int
-  decimals: Float
+  decimals: Float!
   identifier: String!
   name: String!
   priceUsd: String
