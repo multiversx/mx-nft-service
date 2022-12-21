@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, Nft, RedisCacheService } from 'src/common';
+import { ElrondApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetByIdentifierService } from 'src/modules/assets';
@@ -195,7 +195,7 @@ export class ElasticUpdatesEventsService {
     await Promise.all(deletes);
   }
 
-  async addCollectionsToRarityQueue(
+  private async addCollectionsToRarityQueue(
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
