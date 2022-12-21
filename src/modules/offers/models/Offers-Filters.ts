@@ -38,8 +38,6 @@ export class OffersFilters {
   })
   collectionIdentifier: string;
 
-  @IsOptional()
-  @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
   @Field(() => String, {
     nullable: true,
     description: 'The marketplace key for the offers',
