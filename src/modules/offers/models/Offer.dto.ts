@@ -17,7 +17,7 @@ export class Offer {
   identifier: string;
 
   @Field(() => String, { nullable: true })
-  boughtTokensNo: string;
+  quantity: string;
 
   @Field(() => String)
   ownerAddress: string;
@@ -52,7 +52,7 @@ export class Offer {
       ? new Offer({
           id: offer.id,
           ownerAddress: offer.ownerAddress,
-          boughtTokensNo: offer.boughtTokensNo,
+          quantity: offer.boughtTokensNo,
           price: new Price({
             amount: offer.priceAmount,
             nonce: offer.priceNonce,

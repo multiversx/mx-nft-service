@@ -897,7 +897,6 @@ type NotificationsResponse {
 
 type Offer {
   asset: Asset
-  boughtTokensNo: String
   creationDate: Int
   endDate: Int
   id: ID!
@@ -906,6 +905,7 @@ type Offer {
   owner: Account
   ownerAddress: String!
   price: Price!
+  quantity: String
   status: OfferStatusEnum!
 }
 
