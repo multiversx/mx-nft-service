@@ -396,6 +396,7 @@ input ClaimTicketsArgs {
 }
 
 type Collection {
+  aggregatorUrl: String!
   artist: Account
   artistAddress: String!
   artistFollowersCount: Int!
