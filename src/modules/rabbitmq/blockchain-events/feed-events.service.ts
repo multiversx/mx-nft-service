@@ -13,6 +13,7 @@ import { Order } from 'src/modules/orders/models';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
 import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { OfferEntity } from 'src/db/offers';
 
 @Injectable()
 export class FeedEventsSenderService {
@@ -236,6 +237,63 @@ export class FeedEventsSenderService {
           tokenData: tokenData ?? undefined,
           auctionId: auction.id,
           marketplaceKey: auction.marketplaceKey,
+        },
+      }),
+    );
+  }
+
+  public async sendOfferEvent(offer: OfferEntity) {
+    const nft = await this.assetByIdentifierService.getAsset(offer.identifier);
+    const [tokenData, usdAmount] = await Promise.all([
+      this.usdPriceService.getToken(offer.priceToken),
+      this.usdPriceService.getUsdAmountDenom(
+        offer.priceToken,
+        offer.priceAmount,
+      ),
+    ]);
+
+    await this.accountFeedService.addFeed(
+      new Feed({
+        actor: offer.ownerAddress,
+        event: EventEnum.sendOffer,
+        reference: offer?.identifier,
+        extraInfo: {
+          offerId: offer.id,
+          nftName: nft?.name,
+          verified: nft?.verified ? true : false,
+          price: offer.priceAmount,
+          usdAmount: usdAmount ?? undefined,
+          tokenData: tokenData ?? undefined,
+          marketplaceKey: offer.marketplaceKey,
+        },
+      }),
+    );
+  }
+
+  public async sendAcceptOfferEvent(nftOwner: string, offer: OfferEntity) {
+    const nft = await this.assetByIdentifierService.getAsset(offer.identifier);
+    const [tokenData, usdAmount] = await Promise.all([
+      this.usdPriceService.getToken(offer.priceToken),
+      this.usdPriceService.getUsdAmountDenom(
+        offer.priceToken,
+        offer.priceAmount,
+      ),
+    ]);
+
+    await this.accountFeedService.addFeed(
+      new Feed({
+        actor: nftOwner,
+        event: EventEnum.acceptOffer,
+        reference: offer?.identifier,
+        extraInfo: {
+          offerId: offer.id,
+          nftName: nft?.name,
+          verified: nft?.verified ? true : false,
+          price: offer.priceAmount,
+          usdAmount: usdAmount ?? undefined,
+          tokenData: tokenData ?? undefined,
+          marketplaceKey: offer.marketplaceKey,
+          offerOwner: offer.ownerAddress,
         },
       }),
     );
