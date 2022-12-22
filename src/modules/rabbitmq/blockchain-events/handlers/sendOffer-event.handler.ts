@@ -5,12 +5,14 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { SendOfferEvent } from '../../entities/auction/sendOffer.event';
+import { FeedEventsSenderService } from '../feed-events.service';
 
 @Injectable()
 export class SendOfferEventHandler {
   private readonly logger = new Logger(SendOfferEventHandler.name);
   constructor(
-    private offersService: OffersService,
+    private readonly offersService: OffersService,
+    private readonly feedEventsSenderService: FeedEventsSenderService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -28,7 +30,7 @@ export class SendOfferEventHandler {
       `Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
 
-    await this.offersService.saveOffer(
+    const offer = await this.offersService.saveOffer(
       OfferEntity.fromEventTopics(
         topics,
         hash,
@@ -36,5 +38,8 @@ export class SendOfferEventHandler {
         OfferStatusEnum.Active,
       ),
     );
+
+    if (!offer) return;
+    await this.feedEventsSenderService.sendOfferEvent(offer);
   }
 }
