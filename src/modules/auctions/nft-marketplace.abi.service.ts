@@ -250,7 +250,6 @@ export class NftMarketplaceAbiService {
       return;
     }
 
-    console.log({ offerId, auctionId });
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(
         offer.collection,
