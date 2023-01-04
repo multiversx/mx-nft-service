@@ -7,6 +7,9 @@ export enum AuctionEventEnum {
   WithdrawOffer = 'withdrawOffer',
   AcceptOffer = 'acceptOffer',
   SendOffer = 'sendOffer',
+  WithdrawAuctionAndAcceptOffer = 'withdrawAuctionAndAcceptOffer',
+  Withdraw_event = 'withdraw_event',
+  Accept_offer_token_event = 'accept_offer_token_event',
 }
 
 export enum ExternalAuctionEventEnum {
