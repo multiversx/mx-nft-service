@@ -84,6 +84,10 @@ export class AssetsQuery {
     return this.addParamToQuery('isNsfw', false);
   }
 
+  withNftSftType(): this {
+    return this.addParamToQuery('type', 'NonFungibleESDT,SemiFungibleESDT');
+  }
+
   addNonceBefore(nonce: number): this {
     return this.addParamToQuery('nonceBefore', nonce);
   }
@@ -130,7 +134,7 @@ export class AssetsQuery {
     // TODO(whiteListedStorage): handle whitelisting in a different way
     // then uncomment where TODO(whiteListedStorage)
     // const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
-    const defaultQuery = 'hasUris=true&type=NonFungibleESDT,SemiFungibleESDT,';
+    const defaultQuery = 'hasUris=true';
     if (this.query.includes(defaultQuery) || !addDefaultQuery)
       return this.query;
     return this.addQuery(defaultQuery).build(false);
