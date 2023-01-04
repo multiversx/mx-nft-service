@@ -82,7 +82,8 @@ export class AssetsQuery {
   }
 
   withNsfwFlag(): this {
-    return this.addParamToQuery('isNsfw', false);
+    // return this.addParamToQuery('isNsfw', false);
+    return this;
   }
 
   withNftSftType(): this {
