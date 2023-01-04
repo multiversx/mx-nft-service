@@ -22,7 +22,9 @@ export class WithdrawOfferEventHandler {
       topics.collection,
     );
 
-    if (!marketplace) return;
+    if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
+      return;
+    }
     this.logger.log(
       `Withdraw Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
