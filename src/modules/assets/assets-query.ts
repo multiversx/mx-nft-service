@@ -14,7 +14,8 @@ export class AssetsQuery {
     paramName: string,
     paramValue: string | string[] | number | boolean,
   ): this {
-    if (!paramValue || !paramName) return this;
+    if (paramValue === undefined || paramValue === null || !paramName)
+      return this;
     this.query += `${
       this.query.length === 0 ? '?' : '&'
     }${paramName}=${paramValue}`;
