@@ -49,7 +49,6 @@ export class ElrondApiService {
 
   async doGetGeneric(name: string, resourceUrl: string): Promise<any> {
     try {
-      console.log({ resourceUrl });
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
       const response = await this.getService().doGetGeneric(resourceUrl);
       profiler.stop();
