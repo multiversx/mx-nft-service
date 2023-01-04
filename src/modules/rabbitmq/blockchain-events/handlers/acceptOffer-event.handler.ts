@@ -53,18 +53,21 @@ export class AcceptOfferEventHandler {
       status: OfferStatusEnum.Accepted,
     });
 
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-      topics.auctionId,
-      marketplace.key,
-    );
-    if (!auction) return;
+    if (topics.auctionId || topics.auctionId !== 0) {
+      let auction =
+        await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+          topics.auctionId,
+          marketplace.key,
+        );
+      if (!auction) return;
 
-    auction.status = AuctionStatusEnum.Closed;
-    auction.modifiedDate = new Date(new Date().toUTCString());
-    this.auctionsService.updateAuction(
-      auction,
-      ExternalAuctionEventEnum.AcceptOffer,
-    );
+      auction.status = AuctionStatusEnum.Closed;
+      auction.modifiedDate = new Date(new Date().toUTCString());
+      this.auctionsService.updateAuction(
+        auction,
+        ExternalAuctionEventEnum.AcceptOffer,
+      );
+    }
 
     await this.feedEventsSenderService.sendAcceptOfferEvent(
       topics.nftOwner,
