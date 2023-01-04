@@ -9,6 +9,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
+import { XOXNO_KEY } from 'src/utils/constants';
 import { AcceptOfferEvent } from '../../entities/auction/acceptOffer.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 
@@ -35,10 +36,12 @@ export class AcceptOfferEventHandler {
       `Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
 
-    // Add handle for external marketplaces
-    // if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
-    //   return;
-    // }
+    if (
+      marketplace.key !== XOXNO_KEY &&
+      marketplace.type === MarketplaceTypeEnum.External
+    ) {
+      return;
+    }
 
     const offer = await this.offersService.getOfferByIdAndMarketplace(
       topics.offerId,

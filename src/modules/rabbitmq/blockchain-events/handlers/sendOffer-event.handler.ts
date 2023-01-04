@@ -25,7 +25,10 @@ export class SendOfferEventHandler {
       topics.collection,
     );
 
-    if (!marketplace) return;
+    if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
+      return;
+    }
+
     this.logger.log(
       `Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
