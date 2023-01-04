@@ -82,6 +82,7 @@ export class AssetsQuery {
   }
 
   withNsfwFlag(): this {
+    // disable temporary
     // return this.addParamToQuery('isNsfw', false);
     return this;
   }
