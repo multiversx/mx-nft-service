@@ -61,7 +61,7 @@ export class Offer {
           }),
           status: offer.status,
           creationDate: DateUtils.getTimestamp(offer.creationDate),
-          endDate: DateUtils.getTimestamp(offer.modifiedDate),
+          endDate: offer.endDate,
           identifier: offer.identifier,
           marketplaceKey: offer.marketplaceKey,
         })
