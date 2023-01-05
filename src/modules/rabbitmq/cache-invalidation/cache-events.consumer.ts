@@ -71,6 +71,11 @@ export class CacheEventsConsumer {
         await this.cacheInvalidationEventsService.invalidateAssetLike(event);
         break;
 
+      case CacheEventTypeEnum.FeaturedCollections: {
+        await this.cacheInvalidationEventsService.invalidateFeaturedCollectionsCache();
+        break;
+      }
+
       case CacheEventTypeEnum.DeleteCacheKeys: {
         await this.cacheInvalidationAdminService.deleteCacheKeys(event);
         break;

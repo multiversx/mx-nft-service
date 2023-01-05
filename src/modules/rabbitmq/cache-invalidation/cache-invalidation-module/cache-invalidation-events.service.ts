@@ -3,6 +3,7 @@ import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-hi
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
+import { FeaturedCollectionsCachingService } from 'src/modules/featured/featured-caching.service';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
 import { OrdersCachingService } from 'src/modules/orders/caching/orders-caching.service';
 import { ChangedEvent } from '../events/changed.event';
@@ -16,6 +17,7 @@ export class CacheInvalidationEventsService {
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private assetsLikesCachingService: AssetsLikesCachingService,
     private assetsHistoryCachingService: AssetsHistoryCachingService,
+    private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
   ) {}
 
   async invalidateAuction(payload: ChangedEvent) {
@@ -59,5 +61,9 @@ export class CacheInvalidationEventsService {
 
   async invalidateAssetHistory(identifier: string) {
     await this.assetsHistoryCachingService.invalidateCache(identifier);
+  }
+
+  async invalidateFeaturedCollectionsCache(): Promise<void> {
+    await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 }
