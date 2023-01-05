@@ -103,14 +103,12 @@ type Asset {
   scamInfo: ScamInfo
   supply: String
   tags: [String!]
-  thumbnailUrl: String
-    @deprecated(reason: "This field will be removed in the next version")
+  thumbnailUrl: String @deprecated(reason: "This field will be removed in the next version")
   totalAvailableTokens: String
   totalRunningAuctions: String
   type: NftTypeEnum!
   uris: [String!]!
-  url: String
-    @deprecated(reason: "This field will be removed in the next version")
+  url: String @deprecated(reason: "This field will be removed in the next version")
   verified: Boolean!
   viewsCount: Int
 }
@@ -801,9 +799,8 @@ type MintPrice {
 }
 
 type Mutation {
-  addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
-  acceptOffer(offerId: Int!): TransactionNode!
   acceptOffer(input: AcceptOfferArgs!): TransactionNode!
+  addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -1122,14 +1119,8 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
-  marketplaces(
-    filters: MarketplaceFilters
-    pagination: ConnectionArgs
-  ): MarketplacesResponse!
-  myClaimableAuctions(
-    filters: MyClaimableAuctionsFilters
-    pagination: ConnectionArgs
-  ): AuctionResponse!
+  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
+  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   offers(filters: OffersFilters, pagination: ConnectionArgs): OffersResponse!
@@ -1327,9 +1318,7 @@ enum UpdateNftTraitsResponse {
   NftTraitsValid
 }
 
-"""
-The `Upload` scalar type represents a file upload.
-"""
+"""The `Upload` scalar type represents a file upload."""
 scalar Upload
 
 type WhitelistedInfo {
