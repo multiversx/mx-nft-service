@@ -26,6 +26,7 @@ import {
   MxProxyService,
   getSmartContract,
   RedisCacheService,
+  MxApiService,
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -46,7 +47,6 @@ import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
-import { AssetsGetterService } from '../assets';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -60,12 +60,12 @@ export class NftMarketplaceAbiService {
 
   constructor(
     private mxProxyService: MxProxyService,
+    private apiService: MxApiService,
     private auctionsService: AuctionsGetterService,
     private offersService: OffersService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
-    private assetsService: AssetsGetterService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -171,7 +171,7 @@ export class NftMarketplaceAbiService {
         ),
       )
       .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.bid)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
@@ -194,7 +194,7 @@ export class NftMarketplaceAbiService {
     return contract.methodsExplicit
       .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
       .withValue(TokenPayment.egldFromAmount(0))
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
@@ -233,7 +233,7 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const asset = await this.assetsService.getAssetByIdentifierAndAddress(
+    const asset = await this.apiService.getNftByIdentifierAndAddress(
       ownerAddress,
       offer.identifier,
     );
@@ -255,7 +255,7 @@ export class NftMarketplaceAbiService {
         ),
         Address.fromString(offer.ownerAddress),
       )
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
@@ -288,7 +288,7 @@ export class NftMarketplaceAbiService {
         new U64Value(new BigNumber(offer.marketplaceOfferId)),
       ])
       .withValue(TokenPayment.egldFromAmount(0))
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
