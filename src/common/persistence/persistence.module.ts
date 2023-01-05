@@ -45,7 +45,6 @@ import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-eve
     TypeOrmModule.forFeature([AuctionEntity]),
     TypeOrmModule.forFeature([OfferEntity]),
     TypeOrmModule.forFeature([MarketplaceEventsRepository]),
-    TypeOrmModule.forFeature([OffersRepository]),
     CacheEventsPublisherModule,
     MxCommunicationModule,
   ],
