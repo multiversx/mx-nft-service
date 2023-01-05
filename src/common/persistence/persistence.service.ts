@@ -317,7 +317,6 @@ export class PersistenceService {
     limit: number = 20,
     offset: number = 0,
   ): Promise<[FeaturedCollectionEntity[], number]> {
-    console.log('not from cache');
     return await this.execute(
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),

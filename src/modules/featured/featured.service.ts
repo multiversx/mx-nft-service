@@ -50,7 +50,7 @@ export class FeaturedService {
     }
   }
 
-  private getFeaturedNftsCacheKey(limit, offset) {
+  private getFeaturedNftsCacheKey(limit: number, offset: number) {
     return generateCacheKeyFromParams(
       CacheInfo.FeaturedNfts.key,
       limit,
@@ -64,7 +64,7 @@ export class FeaturedService {
     filters: FeaturedCollectionsFilter,
   ): Promise<[Collection[], number]> {
     try {
-      const cacheKey = this.getFeaturedCollectionsCacheKey();
+      const cacheKey = this.getFeaturedCollectionsCacheKey(limit, offset);
       const getFeaturedCollections = () =>
         this.persistenceService.getFeaturedCollections(limit, offset);
       let [featuredCollections, count] = await this.redisCacheService.getOrSet(
@@ -123,11 +123,17 @@ export class FeaturedService {
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
-    const cacheKey = this.getFeaturedCollectionsCacheKey();
-    await this.redisCacheService.del(this.redisClient, cacheKey);
+    await this.redisCacheService.delByPattern(
+      this.redisClient,
+      CacheInfo.FeaturedCollections.key,
+    );
   }
 
-  private getFeaturedCollectionsCacheKey() {
-    return generateCacheKeyFromParams(CacheInfo.FeaturedCollections.key);
+  private getFeaturedCollectionsCacheKey(limit: number, offset: number) {
+    return generateCacheKeyFromParams(
+      CacheInfo.FeaturedCollections.key,
+      limit,
+      offset,
+    );
   }
 }
