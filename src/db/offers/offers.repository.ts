@@ -1,4 +1,4 @@
-import { Repository, WhereExpressionBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { OfferEntity } from '.';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersFiltersForDb } from './offers.filter';

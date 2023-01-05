@@ -35,7 +35,6 @@ export class OffersService {
     offset: number,
     limit: number,
   ): Promise<[Offer[], number]> {
-    console.log({ filters });
     let [offers, count] = await this.offersCachingService.getOrSetOffers(
       filters,
       offset,
