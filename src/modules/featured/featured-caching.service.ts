@@ -21,10 +21,10 @@ export class FeaturedCollectionsCachingService {
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
-    limit: number,
-    offset: number,
+    limit?: number,
+    offset?: number,
   ): Promise<[FeaturedCollectionEntity[], number]> {
-    const cacheKey = this.getFeaturedCollectionsCacheKey(limit, offset);
+    const cacheKey = this.getFeaturedCollectionsCacheKey();
     return await this.redisCacheService.getOrSet(
       this.redisClient,
       cacheKey,
@@ -62,11 +62,7 @@ export class FeaturedCollectionsCachingService {
     );
   }
 
-  private getFeaturedCollectionsCacheKey(limit?: number, offset?: number) {
-    return generateCacheKeyFromParams(
-      CacheInfo.FeaturedCollections.key,
-      limit,
-      offset,
-    );
+  private getFeaturedCollectionsCacheKey() {
+    return generateCacheKeyFromParams(CacheInfo.FeaturedCollections.key);
   }
 }
