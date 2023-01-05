@@ -8,9 +8,9 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { Collection } from '../nftCollections/models';
 import CollectionResponse from '../nftCollections/models/CollectionResponse';
-import { FeaturedCollectionTypeEnum } from './FeatureCollectionType.enum';
 import { FeaturedCollectionsFilter } from './Featured-Collections.Filter';
 import { FeaturedService } from './featured.service';
+import { FeaturedCollectionsArgs } from './FeaturedCollectionsArgs';
 
 @Resolver(() => Asset)
 export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
@@ -44,12 +44,13 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   @Mutation(() => Boolean)
   async addFeaturedCollection(
-    @Args('collection')
-    collection: string,
-    @Args('type', { type: () => FeaturedCollectionTypeEnum })
-    type: FeaturedCollectionTypeEnum,
+    @Args('input')
+    input: FeaturedCollectionsArgs,
   ): Promise<boolean> {
-    return await this.featuredService.addFeaturedCollection(collection, type);
+    return await this.featuredService.addFeaturedCollection(
+      input.collection,
+      input.type,
+    );
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)

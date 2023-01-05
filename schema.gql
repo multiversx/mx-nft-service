@@ -612,6 +612,11 @@ enum FeaturedCollectionTypeEnum {
   Hero
 }
 
+input FeaturedCollectionsArgs {
+  collection: String!
+  type: FeaturedCollectionTypeEnum!
+}
+
 input FeaturedCollectionsFilter {
   type: FeaturedCollectionTypeEnum!
 }
@@ -777,7 +782,7 @@ type MintPrice {
 }
 
 type Mutation {
-  addFeaturedCollection(collection: String!, type: FeaturedCollectionTypeEnum!): Boolean!
+  addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
