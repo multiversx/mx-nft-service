@@ -55,6 +55,7 @@ import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplace
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
+    forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => OffersModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     UsdPriceModuleGraph,
@@ -92,9 +93,6 @@ import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplace
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
-    MarketplacesService,
-    MarketplacesCachingService,
-    MarketplaceEventsIndexingService,
   ],
   exports: [NftEventsService],
 })
