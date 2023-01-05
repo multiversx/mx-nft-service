@@ -23,6 +23,8 @@ export class CollectionAssetModel {
   constructor(init?: Partial<CollectionAssetModel>) {
     Object.assign(this, init);
   }
+  @Field(() => Boolean, { nullable: true })
+  isNsfw?: boolean;
 
   static fromNft(nft: Nft) {
     return nft
@@ -30,6 +32,7 @@ export class CollectionAssetModel {
           thumbnailUrl:
             nft.media?.length > 0 ? nft.media[0].thumbnailUrl : null,
           identifier: nft.identifier,
+          isNsfw: nft.isNsfw,
         })
       : null;
   }
