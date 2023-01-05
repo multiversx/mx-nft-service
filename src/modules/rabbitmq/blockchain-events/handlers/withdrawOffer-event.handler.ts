@@ -38,6 +38,7 @@ export class WithdrawOfferEventHandler {
     await this.offersService.saveOffer({
       ...withdrawOffer,
       status: OfferStatusEnum.Closed,
+      modifiedDate: new Date(new Date().toUTCString()),
     });
   }
 }
