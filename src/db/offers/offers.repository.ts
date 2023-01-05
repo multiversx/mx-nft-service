@@ -174,8 +174,11 @@ export class InFilterBuilder {
   addFilter(filterName: string, filterValue): this {
     if (filterValue && Array.isArray(filterValue)) {
       this.queryFilter =
-        this.queryFilter +
-        `${filterName} IN(${filterValue.map((value) => `'${value}'`)})`;
+        this.queryFilter === ''
+          ? `${filterName} IN(${filterValue.map((value) => `'${value}'`)})`
+          : `${filterName} AND ${filterName} IN(${filterValue.map(
+              (value) => `'${value}'`,
+            )})`;
     }
 
     return this;
