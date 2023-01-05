@@ -925,6 +925,7 @@ enum OfferStatusEnum {
   Accepted
   Active
   Closed
+  Expired
 }
 
 input OffersFilters {
