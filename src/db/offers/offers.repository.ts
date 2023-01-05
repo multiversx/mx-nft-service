@@ -9,6 +9,7 @@ import {
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class OffersRepository extends Repository<OfferEntity> {
@@ -39,6 +40,17 @@ export class OffersRepository extends Repository<OfferEntity> {
     });
   }
 
+  async getOffersThatReachedDeadline(): Promise<OfferEntity[]> {
+    return await this.offersRepository
+      .createQueryBuilder('a')
+      .where({ status: OfferStatusEnum.Active })
+      .andWhere(
+        `a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`,
+      )
+      .limit(1000)
+      .getMany();
+  }
+
   async getOfferByIdAndMarketplaceKey(
     marketplaceOfferId: number,
     marketplaceKey: string,
@@ -64,6 +76,11 @@ export class OffersRepository extends Repository<OfferEntity> {
 
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
     return await this.offersRepository.save(offer);
+  }
+
+  async updateOffers(offers: OfferEntity[]) {
+    await this.triggerCacheInvalidationForOffers(offers);
+    return await this.offersRepository.save(offers);
   }
 
   async rollbackOffersByHash(blockHash: string) {
@@ -102,6 +119,12 @@ export class OffersRepository extends Repository<OfferEntity> {
         address: ownerAddress,
       }),
     );
+  }
+
+  private async triggerCacheInvalidationForOffers(offers: OfferEntity[]) {
+    for (const offer of offers) {
+      await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
+    }
   }
 
   private getOffersFilter(filters?: OffersFiltersForDb) {
