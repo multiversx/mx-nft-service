@@ -11,15 +11,17 @@ import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { AcceptOfferEvent } from '../../entities/auction/acceptOffer.event';
+import { FeedEventsSenderService } from '../feed-events.service';
 
 @Injectable()
 export class AcceptOfferEventHandler {
   private readonly logger = new Logger(AcceptOfferEventHandler.name);
   constructor(
-    private auctionsGetterService: AuctionsGetterService,
-    private auctionsService: AuctionsSetterService,
-    private offersService: OffersService,
+    private readonly auctionsGetterService: AuctionsGetterService,
+    private readonly auctionsService: AuctionsSetterService,
+    private readonly offersService: OffersService,
     private readonly marketplaceService: MarketplacesService,
+    private readonly feedEventsSenderService: FeedEventsSenderService,
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
@@ -34,7 +36,10 @@ export class AcceptOfferEventHandler {
       `Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
 
-    if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
+    if (
+      marketplace.key !== XOXNO_KEY &&
+      marketplace.type === MarketplaceTypeEnum.External
+    ) {
       return;
     }
 
@@ -48,17 +53,25 @@ export class AcceptOfferEventHandler {
       status: OfferStatusEnum.Accepted,
     });
 
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-      topics.auctionId,
-      marketplace.key,
-    );
-    if (!auction) return;
+    if (topics.auctionId || topics.auctionId !== 0) {
+      let auction =
+        await this.auctionsGetterService.getAuctionByIdAndMarketplace(
+          topics.auctionId,
+          marketplace.key,
+        );
+      if (!auction) return;
 
-    auction.status = AuctionStatusEnum.Closed;
-    auction.modifiedDate = new Date(new Date().toUTCString());
-    this.auctionsService.updateAuction(
-      auction,
-      ExternalAuctionEventEnum.AcceptOffer,
+      auction.status = AuctionStatusEnum.Closed;
+      auction.modifiedDate = new Date(new Date().toUTCString());
+      this.auctionsService.updateAuction(
+        auction,
+        ExternalAuctionEventEnum.AcceptOffer,
+      );
+    }
+
+    await this.feedEventsSenderService.sendAcceptOfferEvent(
+      topics.nftOwner,
+      offer,
     );
   }
 }

@@ -7,11 +7,12 @@ export class AcceptOfferEventsTopics {
   private nonce: string;
   private nrOfferTokens: number;
   private offerOwner: Address;
+  private nftOwner: Address;
   private paymentTokenIdentifier: string;
   private paymentTokenNonce: number;
   private paymentAmount: string;
   private startdate: string;
-  private enddate: string;  
+  private enddate: string;
   private auctionId: number;
 
   constructor(rawTopics: string[]) {
@@ -35,12 +36,13 @@ export class AcceptOfferEventsTopics {
       .toString('hex')
       .hexBigNumberToString();
     this.offerOwner = new Address(Buffer.from(rawTopics[8], 'base64'));
+    this.nftOwner = new Address(Buffer.from(rawTopics[9], 'base64'));
     this.startdate = parseInt(
-      Buffer.from(rawTopics[9], 'base64').toString('hex'),
+      Buffer.from(rawTopics[10], 'base64').toString('hex'),
       16,
     ).toString();
     this.enddate = parseInt(
-      Buffer.from(rawTopics[10], 'base64').toString('hex'),
+      Buffer.from(rawTopics[11], 'base64').toString('hex'),
       16,
     ).toString();
     this.auctionId = parseInt(
@@ -51,6 +53,7 @@ export class AcceptOfferEventsTopics {
   toPlainObject() {
     return {
       offerOwner: this.offerOwner.bech32(),
+      nftOwner: this.nftOwner.bech32(),
       collection: this.collection,
       nonce: this.nonce,
       offerId: this.offerId,
@@ -59,7 +62,7 @@ export class AcceptOfferEventsTopics {
       paymentTokenNonce: this.paymentTokenNonce,
       paymentAmount: this.paymentAmount,
       startdate: this.startdate,
-      enddate: this.enddate,      
+      enddate: this.enddate,
       auctionId: this.auctionId,
     };
   }

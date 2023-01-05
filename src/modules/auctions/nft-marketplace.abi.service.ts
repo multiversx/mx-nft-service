@@ -203,7 +203,7 @@ export class NftMarketplaceAbiService {
     request: AcceptOfferRequest,
   ): Promise<TransactionNode> {
     if (request.auctionId) {
-      return this.acceptAndWithdrawOffer(
+      return this.acceptOfferAndWithdrawAuction(
         ownerAddress,
         request.offerId,
         request.auctionId,
@@ -239,7 +239,7 @@ export class NftMarketplaceAbiService {
       .toPlainObject(new Address(ownerAddress));
   }
 
-  private async acceptAndWithdrawOffer(
+  private async acceptOfferAndWithdrawAuction(
     ownerAddress: string,
     offerId: number,
     auctionId: number,
