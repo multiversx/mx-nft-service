@@ -42,6 +42,9 @@ import { OffersModuleGraph } from 'src/modules/offers/offers.module';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
+import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
+import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 
 @Module({
   imports: [
@@ -52,9 +55,7 @@ import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
-    forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => OffersModuleGraph),
-    forwardRef(() => AssetsModuleGraph),
     forwardRef(() => ElrondCommunicationModule),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
@@ -91,6 +92,9 @@ import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
+    MarketplacesService,
+    MarketplacesCachingService,
+    MarketplaceEventsIndexingService,
   ],
   exports: [NftEventsService],
 })
