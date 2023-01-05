@@ -23,6 +23,7 @@ import {
 } from '@elrondnetwork/erdjs';
 import { cacheConfig, elrondConfig, gas } from '../../config';
 import {
+  ElrondApiService,
   ElrondProxyService,
   getSmartContract,
   RedisCacheService,
@@ -60,12 +61,12 @@ export class NftMarketplaceAbiService {
 
   constructor(
     private elrondProxyService: ElrondProxyService,
+    private apiService: ElrondApiService,
     private auctionsService: AuctionsGetterService,
     private offersService: OffersService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
-    private assetsService: AssetsGetterService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -233,7 +234,7 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const asset = await this.assetsService.getAssetByIdentifierAndAddress(
+    const asset = await this.apiService.getNftByIdentifierAndAddress(
       ownerAddress,
       offer.identifier,
     );
