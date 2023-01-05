@@ -4,6 +4,7 @@ export enum OfferStatusEnum {
   Active = 'Active',
   Closed = 'Closed',
   Accepted = 'Accepted',
+  Expired = 'Expired',
 }
 
 registerEnumType(OfferStatusEnum, {
