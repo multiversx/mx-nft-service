@@ -51,6 +51,7 @@ export class AcceptOfferEventHandler {
     await this.offersService.saveOffer({
       ...offer,
       status: OfferStatusEnum.Accepted,
+      modifiedDate: new Date(new Date().toUTCString()),
     });
 
     if (topics.auctionId || topics.auctionId !== 0) {
