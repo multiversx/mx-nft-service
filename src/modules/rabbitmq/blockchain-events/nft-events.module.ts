@@ -94,9 +94,6 @@ import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplace
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
-    MarketplacesService,
-    MarketplacesCachingService,
-    MarketplaceEventsIndexingService,
   ],
   exports: [NftEventsService],
 })
