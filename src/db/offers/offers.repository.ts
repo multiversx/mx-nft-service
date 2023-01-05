@@ -176,7 +176,7 @@ export class InFilterBuilder {
       this.queryFilter =
         this.queryFilter === ''
           ? `${filterName} IN(${filterValue.map((value) => `'${value}'`)})`
-          : `${filterName} AND ${filterName} IN(${filterValue.map(
+          : `${this.queryFilter} AND ${filterName} IN(${filterValue.map(
               (value) => `'${value}'`,
             )})`;
     }
