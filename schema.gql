@@ -612,6 +612,11 @@ enum FeaturedCollectionTypeEnum {
   Hero
 }
 
+input FeaturedCollectionsArgs {
+  collection: String!
+  type: FeaturedCollectionTypeEnum!
+}
+
 input FeaturedCollectionsFilter {
   type: FeaturedCollectionTypeEnum!
 }
@@ -777,6 +782,7 @@ type MintPrice {
 }
 
 type Mutation {
+  addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -796,6 +802,7 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
+  removeFeaturedCollection(collection: String!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!

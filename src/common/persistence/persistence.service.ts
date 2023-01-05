@@ -43,6 +43,7 @@ import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
@@ -320,6 +321,29 @@ export class PersistenceService {
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
     );
+  }
+
+  async addFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const res = await this.execute(
+      this.addFeaturedCollection.name,
+      this.featuredCollectionsRepository.save(
+        new FeaturedCollectionEntity({ identifier: collection, type }),
+      ),
+    );
+    return !!res.id;
+  }
+
+  async removeFeaturedCollection(collection: string): Promise<boolean> {
+    const res = await this.execute(
+      this.removeFeaturedCollection.name,
+      this.featuredCollectionsRepository.delete({
+        identifier: collection,
+      }),
+    );
+    return res.affected === 1;
   }
 
   async getFeaturedNfts(

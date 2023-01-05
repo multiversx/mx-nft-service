@@ -17,6 +17,7 @@ export enum CacheEventTypeEnum {
   UpdateNotifications,
   UpdateOneNotification,
   AssetLike,
+  FeaturedCollections,
   DeleteCacheKeys,
   SetCacheKey,
 }
