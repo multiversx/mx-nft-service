@@ -16,12 +16,12 @@ export class CacheInfo {
 
   static FeaturedCollections: CacheInfo = {
     key: 'featuredCollections',
-    ttl: TimeConstants.oneDay,
+    ttl: TimeConstants.oneWeek,
   };
 
   static FeaturedNfts: CacheInfo = {
     key: 'featuredNfts',
-    ttl: TimeConstants.oneDay,
+    ttl: TimeConstants.oneWeek,
   };
 
   static NftsCount: CacheInfo = {

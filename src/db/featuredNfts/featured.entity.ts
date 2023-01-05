@@ -1,5 +1,5 @@
 import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity('featured_nfts')
 export class FeaturedNftEntity {
@@ -15,11 +15,12 @@ export class FeaturedNftEntity {
 }
 
 @Entity('featured_collections')
+@Unique('FeaturedCollections_UQ_Entry', ['identifier', 'type'])
 export class FeaturedCollectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
   @Column({ length: 25 })
-  @Index({ unique: true })
+  @Index()
   identifier: string;
   @Column({ length: 25 })
   @Index()
