@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, WhereExpressionBuilder } from 'typeorm';
 import { OfferEntity } from '.';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersFiltersForDb } from './offers.filter';
@@ -28,7 +28,8 @@ export class OffersRepository extends Repository<OfferEntity> {
   ): Promise<[OfferEntity[], number]> {
     return await this.offersRepository
       .createQueryBuilder('offers')
-      .where(this.getOffersFilter(filters))
+      .where(this.getOffersFilterForSingleValues(filters))
+      .andWhere(`${this.getOffersFilterForArrayValues(filters)}`)
       .offset(offset)
       .limit(limit)
       .getManyAndCount();
@@ -127,12 +128,19 @@ export class OffersRepository extends Repository<OfferEntity> {
     }
   }
 
-  private getOffersFilter(filters?: OffersFiltersForDb) {
+  private getOffersFilterForSingleValues(filters?: OffersFiltersForDb) {
     const filterBuilder = new FilterBuilder();
     for (const key of Object.keys(filters)) {
       filterBuilder.addFilter(key, filters[key]);
     }
+    return [filterBuilder.build()];
+  }
 
+  private getOffersFilterForArrayValues(filters?: OffersFiltersForDb) {
+    const filterBuilder = new InFilterBuilder();
+    for (const key of Object.keys(filters)) {
+      filterBuilder.addFilter(key, filters[key]);
+    }
     return [filterBuilder.build()];
   }
 
@@ -148,7 +156,7 @@ export class FilterBuilder {
   private queryFilter = {};
 
   addFilter(filterName: string, filterValue): this {
-    if (filterValue) {
+    if (filterValue && !Array.isArray(filterValue)) {
       this.queryFilter[filterName] = filterValue;
     }
 
@@ -157,5 +165,23 @@ export class FilterBuilder {
 
   build(): {} {
     return this.queryFilter;
+  }
+}
+
+export class InFilterBuilder {
+  private queryFilter = '';
+
+  addFilter(filterName: string, filterValue): this {
+    if (filterValue && Array.isArray(filterValue)) {
+      this.queryFilter =
+        this.queryFilter +
+        `${filterName} IN(${filterValue.map((value) => `'${value}'`)})`;
+    }
+
+    return this;
+  }
+
+  build(): {} {
+    return this.queryFilter === '' ? '1=1' : this.queryFilter;
   }
 }
