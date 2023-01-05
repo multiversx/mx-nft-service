@@ -439,6 +439,7 @@ type CollectionAsset {
 
 type CollectionAssetModel {
   identifier: String!
+  isNsfw: Boolean
   thumbnailUrl: String
 }
 
