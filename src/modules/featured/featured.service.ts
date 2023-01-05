@@ -95,7 +95,7 @@ export class FeaturedService {
       type,
     );
     if (isAdded) {
-      await this.invalidateFeaturedCollectionsCache();
+      await this.triggerFeaturedCollectionsCacheInvalidation();
     }
     return isAdded;
   }
@@ -105,19 +105,16 @@ export class FeaturedService {
       collection,
     );
     if (isRemoved) {
-      await this.invalidateFeaturedCollectionsCache();
+      await this.triggerFeaturedCollectionsCacheInvalidation();
     }
     return isRemoved;
   }
 
-  async invalidateFeaturedCollectionsCache(): Promise<void> {
-    await Promise.all([
-      this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache(),
-      this.cacheEventsPublisherService.publish(
-        new ChangedEvent({
-          type: CacheEventTypeEnum.FeaturedCollections,
-        }),
-      ),
-    ]);
+  async triggerFeaturedCollectionsCacheInvalidation(): Promise<void> {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.FeaturedCollections,
+      }),
+    );
   }
 }
