@@ -7,7 +7,7 @@ export class OffersFiltersForDb {
   collection: string;
   marketplaceKey: string;
   priceToken: string;
-  status: OfferStatusEnum = OfferStatusEnum.Active;
+  status: OfferStatusEnum[] = [OfferStatusEnum.Active];
   constructor(init?: Partial<OffersFiltersForDb>) {
     Object.assign(this, init);
   }

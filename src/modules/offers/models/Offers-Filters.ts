@@ -50,11 +50,11 @@ export class OffersFilters {
   })
   priceToken: string;
 
-  @Field(() => String, {
+  @Field(() => [OfferStatusEnum], {
     nullable: true,
     description: 'The offer status',
   })
-  status: OfferStatusEnum;
+  status: OfferStatusEnum[];
 
   constructor(init?: Partial<OffersFilters>) {
     Object.assign(this, init);
