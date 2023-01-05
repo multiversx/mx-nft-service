@@ -56,9 +56,12 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   @Mutation(() => Boolean)
   async removeFeaturedCollection(
-    @Args('collection')
-    collection: string,
+    @Args('input')
+    input: FeaturedCollectionsArgs,
   ): Promise<boolean> {
-    return await this.featuredService.removeFeaturedCollection(collection);
+    return await this.featuredService.removeFeaturedCollection(
+      input.collection,
+      input.type,
+    );
   }
 }
