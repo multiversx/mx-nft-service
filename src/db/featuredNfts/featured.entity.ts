@@ -19,7 +19,7 @@ export class FeaturedCollectionEntity {
   @PrimaryGeneratedColumn()
   id: number;
   @Column({ length: 25 })
-  @Index()
+  @Index({ unique: true })
   identifier: string;
   @Column({ length: 25 })
   @Index()

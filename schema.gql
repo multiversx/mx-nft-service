@@ -777,6 +777,7 @@ type MintPrice {
 }
 
 type Mutation {
+  addFeaturedCollection(collection: String!, type: FeaturedCollectionTypeEnum!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -796,6 +797,7 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
+  removeFeaturedCollection(collection: String!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!

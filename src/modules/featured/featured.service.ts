@@ -5,10 +5,10 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { cacheConfig } from 'src/config';
 import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
-import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { FeaturedCollectionsFilter } from './Featured-Collections.Filter';
 import { FeaturedCollectionTypeEnum } from './FeatureCollectionType.enum';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class FeaturedService {
@@ -36,7 +36,7 @@ export class FeaturedService {
         this.redisClient,
         cacheKey,
         getAssetLiked,
-        30 * TimeConstants.oneMinute,
+        CacheInfo.FeaturedNfts.ttl,
       );
       const nfts = await this.apiService.getNftsByIdentifiers(
         featuredNfts?.map((x) => x.identifier),
@@ -51,7 +51,11 @@ export class FeaturedService {
   }
 
   private getFeaturedNftsCacheKey(limit, offset) {
-    return generateCacheKeyFromParams('featuredNfts', limit, offset);
+    return generateCacheKeyFromParams(
+      CacheInfo.FeaturedNfts.key,
+      limit,
+      offset,
+    );
   }
 
   async getFeaturedCollections(
@@ -67,7 +71,7 @@ export class FeaturedService {
         this.redisClient,
         cacheKey,
         getFeaturedCollections,
-        30 * TimeConstants.oneMinute,
+        CacheInfo.FeaturedCollections.ttl,
       );
       if (filters && filters.type) {
         featuredCollections = featuredCollections.filter(
@@ -94,7 +98,36 @@ export class FeaturedService {
     }
   }
 
+  async addFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const isAdded = await this.persistenceService.addFeaturedCollection(
+      collection,
+      type,
+    );
+    if (isAdded) {
+      await this.invalidateFeaturedCollectionsCache();
+    }
+    return isAdded;
+  }
+
+  async removeFeaturedCollection(collection: string): Promise<boolean> {
+    const isRemoved = await this.persistenceService.removeFeaturedCollection(
+      collection,
+    );
+    if (isRemoved) {
+      await this.invalidateFeaturedCollectionsCache();
+    }
+    return isRemoved;
+  }
+
+  async invalidateFeaturedCollectionsCache(): Promise<void> {
+    const cacheKey = this.getFeaturedCollectionsCacheKey();
+    await this.redisCacheService.del(this.redisClient, cacheKey);
+  }
+
   private getFeaturedCollectionsCacheKey() {
-    return generateCacheKeyFromParams('featuredCollections');
+    return generateCacheKeyFromParams(CacheInfo.FeaturedCollections.key);
   }
 }
