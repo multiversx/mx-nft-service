@@ -1014,6 +1014,20 @@ export class PersistenceService {
     );
   }
 
+  async getOffersThatReachedDeadline(): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.getOffersThatReachedDeadline.name,
+      this.offersRepository.getOffersThatReachedDeadline(),
+    );
+  }
+
+  async updateOffers(offers: OfferEntity[]): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.updateOffers.name,
+      this.offersRepository.updateOffers(offers),
+    );
+  }
+
   async getMostLikedAssetsIdentifiers(
     offset?: number,
     limit?: number,
