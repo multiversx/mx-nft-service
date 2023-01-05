@@ -41,6 +41,7 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 import { OffersModuleGraph } from 'src/modules/offers/offers.module';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
+import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handle
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => OffersModuleGraph),
+    forwardRef(() => AssetsModuleGraph),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     NftScamModule,
