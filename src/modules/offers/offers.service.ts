@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
-
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { OfferEntity } from 'src/db/offers';
 import { OffersFilters } from './models/Offers-Filters';
-import { Offer } from './models';
+import { Offer, OfferStatusEnum } from './models';
 import { OffersFiltersForDb } from 'src/db/offers/offers.filter';
 import { OffersCachingService } from './caching/offers-caching.service';
 
@@ -36,6 +35,7 @@ export class OffersService {
     offset: number,
     limit: number,
   ): Promise<[Offer[], number]> {
+    console.log({ filters });
     let [offers, count] = await this.offersCachingService.getOrSetOffers(
       filters,
       offset,
@@ -59,7 +59,10 @@ export class OffersService {
       filters.ownerAddress,
       () =>
         this.persistenceService.getOffers(
-          new OffersFiltersForDb({ ownerAddress: filters.ownerAddress }),
+          new OffersFiltersForDb({
+            ownerAddress: filters.ownerAddress,
+            status: [OfferStatusEnum.Active, OfferStatusEnum.Expired],
+          }),
           0,
           1000,
         ),
@@ -139,7 +142,7 @@ export class OffersService {
     }
 
     if (filters.status) {
-      offers = offers.filter((o) => o.status === filters.status);
+      offers = offers.filter((o) => filters.status.includes(o.status));
     }
     return offers;
   }
