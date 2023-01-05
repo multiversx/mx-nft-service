@@ -46,6 +46,7 @@ import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
+import { AssetsGetterService } from '../assets';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -64,6 +65,7 @@ export class NftMarketplaceAbiService {
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
+    private assetsService: AssetsGetterService,
   ) {
     this.redisClient = this.redisCacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -155,7 +157,7 @@ export class NftMarketplaceAbiService {
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(collection);
     if (!marketplace) {
-      return;
+      throw new BadRequestError('No marketplace available for this collection');
     }
 
     const contract = await this.contract.getContract(marketplace.address);
@@ -221,18 +223,38 @@ export class NftMarketplaceAbiService {
     if (!offer) {
       return;
     }
+
     const marketplace =
       await this.marketplaceService.getMarketplaceByCollection(
         offer.collection,
       );
 
     if (!marketplace) {
-      return;
+      throw new BadRequestError('No marketplace available for this collection');
     }
+
+    const asset = await this.assetsService.getAssetByIdentifierAndAddress(
+      ownerAddress,
+      offer.identifier,
+    );
+    if (!asset) {
+      throw new BadRequestError('You do not own this nft!');
+    }
+
     const contract = await this.contract.getContract(marketplace.address);
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
+      asset.identifier,
+    );
     return contract.methodsExplicit
       .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withValue(TokenPayment.egldFromAmount(0))
+      .withSingleESDTNFTTransfer(
+        TokenPayment.metaEsdtFromBigInteger(
+          collection,
+          parseInt(nonce),
+          asset.balance ? new BigNumber(asset.balance) : new BigNumber(1),
+        ),
+        Address.fromString(offer.ownerAddress),
+      )
       .withChainID(elrondConfig.chainID)
       .withGasLimit(gas.withdraw)
       .buildTransaction()
@@ -256,7 +278,7 @@ export class NftMarketplaceAbiService {
       );
 
     if (!marketplace) {
-      return;
+      throw new BadRequestError('No marketplace available for this collection');
     }
 
     const contract = await this.contract.getContract(marketplace.address);
