@@ -336,11 +336,15 @@ export class PersistenceService {
     return !!res.id;
   }
 
-  async removeFeaturedCollection(collection: string): Promise<boolean> {
+  async removeFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
     const res = await this.execute(
       this.removeFeaturedCollection.name,
       this.featuredCollectionsRepository.delete({
         identifier: collection,
+        type: type,
       }),
     );
     return res.affected === 1;

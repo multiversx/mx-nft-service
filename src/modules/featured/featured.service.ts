@@ -100,9 +100,13 @@ export class FeaturedService {
     return isAdded;
   }
 
-  async removeFeaturedCollection(collection: string): Promise<boolean> {
+  async removeFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
     const isRemoved = await this.persistenceService.removeFeaturedCollection(
       collection,
+      type,
     );
     if (isRemoved) {
       await this.triggerFeaturedCollectionsCacheInvalidation();
