@@ -253,7 +253,7 @@ export class NftMarketplaceAbiService {
           parseInt(nonce),
           asset.balance ? new BigNumber(asset.balance) : new BigNumber(1),
         ),
-        Address.fromString(offer.ownerAddress),
+        Address.fromString(ownerAddress),
       )
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
