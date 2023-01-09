@@ -138,6 +138,7 @@ export class NotificationsService {
       );
     }
 
+    this.saveNotifications(notifications);
     this.triggerClearCacheForAccounts(
       offers.map((o) => o.ownerAddress),
       offers[0].marketplaceKey,
