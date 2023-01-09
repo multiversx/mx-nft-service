@@ -1,5 +1,5 @@
-import { ProxyNetworkProvider } from '@elrondnetwork/erdjs-network-providers';
 import { mxConfig } from '../../../config';
+import { ProxyNetworkProvider } from '@multiversx/erdjs-network-providers';
 import * as Agent from 'agentkeepalive';
 import { Injectable } from '@nestjs/common';
 
