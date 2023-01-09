@@ -19,8 +19,9 @@ export class ExpiredOffersService {
       async () => {
         const expiredOffers =
           await this.persistanceService.getOffersThatReachedDeadline();
-        // notifications will be done in further pr
-        // await this.notificationsService.generateNotifications(endedAuctions);
+        await this.notificationsService.generateOffersNotifications(
+          expiredOffers,
+        );
         await this.persistanceService.updateOffers(
           expiredOffers?.map((a) => {
             return {

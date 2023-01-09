@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { SendOfferEvent } from '../../entities/auction/sendOffer.event';
@@ -9,7 +10,8 @@ import { SendOfferEvent } from '../../entities/auction/sendOffer.event';
 export class WithdrawOfferEventHandler {
   private readonly logger = new Logger(WithdrawOfferEventHandler.name);
   constructor(
-    private offersService: OffersService,
+    private readonly offersService: OffersService,
+    private readonly notificationsService: NotificationsService,
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
@@ -35,10 +37,14 @@ export class WithdrawOfferEventHandler {
     );
 
     if (!withdrawOffer) return;
-    await this.offersService.saveOffer({
+    const offer = await this.offersService.saveOffer({
       ...withdrawOffer,
       status: OfferStatusEnum.Closed,
       modifiedDate: new Date(new Date().toUTCString()),
     });
+
+    this.notificationsService.updateNotificationStatusForOffers([
+      offer.identifier,
+    ]);
   }
 }

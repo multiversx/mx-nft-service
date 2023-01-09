@@ -7,6 +7,7 @@ import {
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { XOXNO_KEY } from 'src/utils/constants';
@@ -22,6 +23,7 @@ export class AcceptOfferEventHandler {
     private readonly offersService: OffersService,
     private readonly marketplaceService: MarketplacesService,
     private readonly feedEventsSenderService: FeedEventsSenderService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
@@ -54,6 +56,14 @@ export class AcceptOfferEventHandler {
       modifiedDate: new Date(new Date().toUTCString()),
     });
 
+    await this.feedEventsSenderService.sendAcceptOfferEvent(
+      topics.nftOwner,
+      offer,
+    );
+    this.notificationsService.updateNotificationStatusForOffers([
+      offer.identifier,
+    ]);
+
     if (topics.auctionId || topics.auctionId !== 0) {
       let auction =
         await this.auctionsGetterService.getAuctionByIdAndMarketplace(
@@ -69,10 +79,5 @@ export class AcceptOfferEventHandler {
         ExternalAuctionEventEnum.AcceptOffer,
       );
     }
-
-    await this.feedEventsSenderService.sendAcceptOfferEvent(
-      topics.nftOwner,
-      offer,
-    );
   }
 }
