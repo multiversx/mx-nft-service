@@ -1,11 +1,8 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { OfferStatusEnum } from './Offer-status.enum';
-import { Auction } from '../../auctions/models';
 import { Asset, Price } from '../../assets/models';
-import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 import { Account } from 'src/modules/account-stats/models';
-import { elrondConfig } from 'src/config';
 import { OfferEntity } from 'src/db/offers';
 
 @ObjectType()

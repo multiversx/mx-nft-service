@@ -54,7 +54,6 @@ import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handle
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => OffersModuleGraph),
-    forwardRef(() => AssetsModuleGraph),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     NftScamModule,
