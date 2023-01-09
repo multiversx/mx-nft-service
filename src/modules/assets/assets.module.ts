@@ -11,7 +11,7 @@ import {
 import { IpfsModule } from '../ipfs/ipfs.module';
 import { S3Service } from '../s3/s3.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
@@ -102,7 +102,7 @@ import { AuthModule } from '../auth/auth.module';
     NftTraitsElasticService,
   ],
   imports: [
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CollectionsModuleGraph),

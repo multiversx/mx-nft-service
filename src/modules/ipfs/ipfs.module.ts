@@ -1,10 +1,10 @@
 import { Logger, Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from '../../common/services/elrond-communication/elrond-communication.module';
+import { MxCommunicationModule } from '../../common/services/mx-communication/mx-communication.module';
 import { PinataService } from './pinata.service';
 
 @Module({
   providers: [Logger, PinataService],
-  imports: [ElrondCommunicationModule],
+  imports: [MxCommunicationModule],
   exports: [PinataService],
 })
 export class IpfsModule {}

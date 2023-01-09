@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { MxApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetByIdentifierService } from 'src/modules/assets';
@@ -27,7 +27,7 @@ export class ElasticUpdatesEventsService {
     private readonly nftScamInfoService: NftScamService,
     private readonly documentDbService: DocumentDbService,
     private readonly redisCacheService: RedisCacheService,
-    private readonly elrondApiService: ElrondApiService,
+    private readonly mxApiService: MxApiService,
   ) {
     this.rarityRedisClient = this.redisCacheService.getClient(
       cacheConfig.rarityQueueClientName,
@@ -246,7 +246,7 @@ export class ElasticUpdatesEventsService {
     const cacheKey = this.getCollectionTypeCacheKey(ticker);
     const getCollectionType = async () => {
       const collection =
-        await this.elrondApiService.getCollectionByIdentifierForQuery(
+        await this.mxApiService.getCollectionByIdentifierForQuery(
           ticker,
           'fields=type',
         );

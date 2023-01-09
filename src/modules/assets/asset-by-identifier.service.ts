@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { MxApiService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
@@ -11,7 +11,7 @@ import { TimeConstants } from 'src/utils/time-utils';
 export class AssetByIdentifierService {
   private redisClient: Redis.Redis;
   constructor(
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {

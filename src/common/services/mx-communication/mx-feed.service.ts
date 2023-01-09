@@ -6,7 +6,7 @@ import { Feed } from './models/feed.dto';
 import { SubscriptionFeed } from './models/subscription-feed.dto';
 
 @Injectable()
-export class ElrondFeedService {
+export class MxFeedService {
   constructor(
     private readonly logger: Logger,
     private readonly apiService: ApiService,
@@ -29,11 +29,11 @@ export class ElrondFeedService {
         return response.data;
       } catch (error) {
         this.logger.error(
-          `An error occurred while calling the elrond feed api on url ${removeCredentialsFromUrl(
+          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
             url,
           )}`,
           {
-            path: 'ElrondFeedService.subscribe',
+            path: `${MxFeedService.name}.${this.subscribe.name}`,
             identifier,
             exception: error,
           },
@@ -62,11 +62,11 @@ export class ElrondFeedService {
         return response.data;
       } catch (error) {
         this.logger.error(
-          `An error occurred while calling the elrond feed api on url ${removeCredentialsFromUrl(
+          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
             url,
           )}`,
           {
-            path: 'ElrondFeedService.subscribe',
+            path: `${MxFeedService.name}.${this.unsubscribe.name}`,
             reference,
             exception: error,
           },
@@ -90,11 +90,11 @@ export class ElrondFeedService {
         return response.data;
       } catch (error) {
         this.logger.error(
-          `An error occurred while calling the elrond feed api on url ${removeCredentialsFromUrl(
+          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
             url,
           )}`,
           {
-            path: 'ElrondFeedService.addFeed',
+            path: `${MxFeedService.name}.${this.addFeed.name}`,
             feed: feed,
             exception: error,
           },

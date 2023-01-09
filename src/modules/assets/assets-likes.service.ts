@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { AssetLikeEntity } from 'src/db/assets';
-import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
 import {
   EventEnum,
   Feed,
-} from 'src/common/services/elrond-communication/models/feed.dto';
+} from 'src/common/services/mx-communication/models/feed.dto';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Asset } from './models';
@@ -21,7 +21,7 @@ export class AssetsLikesService {
   constructor(
     private persistenceService: PersistenceService,
     private assetByIdentifierService: AssetByIdentifierService,
-    private accountFeedService: ElrondFeedService,
+    private accountFeedService: MxFeedService,
     private assetsLikesCachingService: AssetsLikesCachingService,
     private cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly logger: Logger,

@@ -3,7 +3,7 @@ import { Nft, NftMetadata, NftTag } from './models/nft.dto';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
-import { constants, elrondConfig } from 'src/config';
+import { constants, mxConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
 import { OwnerApi } from './models/onwer.api';
 import {
@@ -16,27 +16,27 @@ import { Address } from '@elrondnetwork/erdjs/out';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
-import { ElrondStats } from './models/elrond-stats.model';
-import { ElrondApiAbout } from './models/elrond-api-about.model';
+import { MxStats } from './models/mx-stats.model';
+import { MxApiAbout } from './models/mx-api-about.model';
 
 @Injectable()
-export class ElrondApiService {
+export class MxApiService {
   private apiProvider: ApiNetworkProvider;
 
   constructor(private readonly logger: Logger) {
     const keepAliveOptions = {
-      maxSockets: elrondConfig.keepAliveMaxSockets,
-      maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
+      maxSockets: mxConfig.keepAliveMaxSockets,
+      maxFreeSockets: mxConfig.keepAliveMaxFreeSockets,
       timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
-      freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
+      freeSocketTimeout: mxConfig.keepAliveFreeSocketTimeout,
     };
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
 
     this.apiProvider = new ApiNetworkProvider(process.env.ELROND_API, {
-      timeout: elrondConfig.proxyTimeout,
-      httpAgent: elrondConfig.keepAlive ? httpAgent : null,
-      httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
+      timeout: mxConfig.proxyTimeout,
+      httpAgent: mxConfig.keepAlive ? httpAgent : null,
+      httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
       headers: {
         origin: 'NftService',
       },
@@ -54,7 +54,7 @@ export class ElrondApiService {
       profiler.stop();
 
       MetricsCollector.setExternalCall(
-        ElrondApiService.name,
+        MxApiService.name,
         profiler.duration,
         name,
       );
@@ -73,9 +73,9 @@ export class ElrondApiService {
         name: error.name,
       };
       this.logger.error(
-        `An error occurred while calling the elrond api service on url ${resourceUrl}`,
+        `An error occurred while calling the mx api service on url ${resourceUrl}`,
         {
-          path: `ElrondApiService.${name}`,
+          path: `${MxApiService.name}.${name}`,
           error: customError,
         },
       );
@@ -96,7 +96,7 @@ export class ElrondApiService {
       profiler.stop();
 
       MetricsCollector.setExternalCall(
-        ElrondApiService.name,
+        MxApiService.name,
         profiler.duration,
         name,
       );
@@ -115,9 +115,9 @@ export class ElrondApiService {
         name: error.name,
       };
       this.logger.error(
-        `An error occurred while calling the elrond api service on url ${resourceUrl}`,
+        `An error occurred while calling the mx api service on url ${resourceUrl}`,
         {
-          path: `ElrondApiService.${name}`,
+          path: `${MxApiService.name}.${name}`,
           error: customError,
         },
       );
@@ -620,7 +620,7 @@ export class ElrondApiService {
       this.getAllDexTokens.name,
       'mex/tokens?size=10000',
     );
-    return allTokens.map((t) => Token.fromElrondApiDexToken(t));
+    return allTokens.map((t) => Token.fromMxApiDexToken(t));
   }
 
   async getAllTokens(): Promise<Token[]> {
@@ -628,7 +628,7 @@ export class ElrondApiService {
       this.getAllTokens.name,
       'tokens?size=10000&fields=identifier,name,ticker,decimals',
     );
-    return allTokens.map((t) => Token.fromElrondApiToken(t));
+    return allTokens.map((t) => Token.fromMxApiToken(t));
   }
 
   async getEgldPriceFromEconomics(): Promise<string> {
@@ -709,14 +709,14 @@ export class ElrondApiService {
     );
   }
 
-  async getElrondStats(): Promise<ElrondStats> {
-    const stats = await this.doGetGeneric(this.getElrondStats.name, 'stats');
-    return new ElrondStats(stats);
+  async getMxStats(): Promise<MxStats> {
+    const stats = await this.doGetGeneric(this.getMxStats.name, 'stats');
+    return new MxStats(stats);
   }
 
-  async getElrondApiAbout(): Promise<ElrondApiAbout> {
-    const about = await this.doGetGeneric(this.getElrondStats.name, 'about');
-    return new ElrondApiAbout(about);
+  async getMxApiAbout(): Promise<MxApiAbout> {
+    const about = await this.doGetGeneric(this.getMxStats.name, 'about');
+    return new MxApiAbout(about);
   }
 
   async getBulkNftScamInfo(

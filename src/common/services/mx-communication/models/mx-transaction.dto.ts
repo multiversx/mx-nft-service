@@ -1,4 +1,4 @@
-export interface SignedElrondTransactionDTO {
+export interface SignedMxTransactionDTO {
   /**
    * Transactions nonce
    */
@@ -50,9 +50,9 @@ export interface SignedElrondTransactionDTO {
 }
 
 /**
- * Transaction object from Elrond chain.
+ * Transaction object from MultiversX chain.
  */
-export interface ElrondTransactionDTO extends SignedElrondTransactionDTO {
+export interface MxTransactionDTO extends SignedMxTransactionDTO {
   /**
    * Transaction hash
    */

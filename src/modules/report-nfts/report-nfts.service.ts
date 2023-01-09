@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ReportNftEntity } from 'src/db/reportNft';
-import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
+import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()

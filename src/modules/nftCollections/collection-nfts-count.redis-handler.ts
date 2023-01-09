@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { MxApiService, RedisCacheService } from 'src/common';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
 import { RedisValue } from '../common/redis-value.dto';
@@ -12,7 +12,7 @@ export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedis
   protected redisCacheService: RedisCacheService;
   constructor(
     redisCacheService: RedisCacheService,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(redisCacheService, 'collectionAssetsCount');
   }

@@ -1,5 +1,5 @@
 import { U64Value } from '@elrondnetwork/erdjs';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import {
   AuctionTypeEnum,
   AuctionStatusEnum,
@@ -105,7 +105,7 @@ export class AuctionEntity extends BaseEntity {
     tags: string,
     hash: string,
     marketplaceKey: string,
-    decimals: number = elrondConfig.decimals,
+    decimals: number = mxConfig.decimals,
   ) {
     if (!auction) {
       return null;

@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { Price } from 'src/modules/assets/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
@@ -19,8 +19,8 @@ export class PriceRange {
   static fromEntity(
     minBid: string,
     maxBid: string,
-    paymentToken: string = elrondConfig.egld,
-    paymentDecimals: number = elrondConfig.decimals,
+    paymentToken: string = mxConfig.egld,
+    paymentDecimals: number = mxConfig.decimals,
   ) {
     return new PriceRange({
       minBid: new Price({

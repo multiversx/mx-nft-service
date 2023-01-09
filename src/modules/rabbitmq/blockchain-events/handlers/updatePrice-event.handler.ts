@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import {
@@ -81,7 +81,7 @@ export class UpdatePriceEventHandler {
     updatedAuction: AuctionEntity,
     newBid: string,
     hash: string,
-    decimals: number = elrondConfig.decimals,
+    decimals: number = mxConfig.decimals,
   ) {
     updatedAuction.minBid = newBid;
     updatedAuction.minBidDenominated = BigNumberUtils.denominateAmount(

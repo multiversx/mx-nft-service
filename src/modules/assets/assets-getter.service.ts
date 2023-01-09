@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  ElrondApiService,
-  ElrondElasticService,
+  MxApiService,
+  MxElasticService,
   RedisCacheService,
 } from 'src/common';
 import { cacheConfig } from 'src/config';
@@ -29,15 +29,15 @@ import {
   QueryOperator,
   QueryType,
 } from '@elrondnetwork/erdnest';
-import { QueryPagination } from 'src/common/services/elrond-communication/models/query-pagination';
+import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 
 @Injectable()
 export class AssetsGetterService {
   private redisClient: Redis.Redis;
   constructor(
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
     private collectionsService: CollectionsGetterService,
-    private elasticService: ElrondElasticService,
+    private elasticService: MxElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
     private assetRarityLoader: AssetRarityInfoProvider,

@@ -5,7 +5,7 @@ import { Privacy } from './models';
 import { AccountIdentity } from './models/account.identity';
 
 @Injectable()
-export class ElrondIdentityService {
+export class MxIdentityService {
   constructor(
     private readonly logger: Logger,
     private readonly apiService: ApiService,
@@ -27,7 +27,7 @@ export class ElrondIdentityService {
       });
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
@@ -57,7 +57,7 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
@@ -80,7 +80,7 @@ export class ElrondIdentityService {
       return response?.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
@@ -108,7 +108,7 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
@@ -139,7 +139,7 @@ export class ElrondIdentityService {
         });
       }
       this.logger.error(
-        `An error occurred while calling the elrond identity service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import {
   ElasticQuery,
   ElasticSortOrder,
@@ -10,7 +10,7 @@ import { constants } from 'src/config';
 
 @Injectable()
 export class AssetsHistoryElasticService {
-  constructor(private readonly elrondElasticService: ElrondElasticService) {}
+  constructor(private readonly mxElasticService: MxElasticService) {}
 
   async getHistoryLog(
     collection: string,
@@ -40,7 +40,7 @@ export class AssetsHistoryElasticService {
         size: constants.getLogsFromElasticBatchSize,
       });
 
-    await this.elrondElasticService.getScrollableList(
+    await this.mxElasticService.getScrollableList(
       'logs',
       'identifier',
       query,

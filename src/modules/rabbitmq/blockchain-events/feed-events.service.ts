@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CollectionApi } from 'src/common';
-import { ElrondFeedService } from 'src/common/services/elrond-communication/elrond-feed.service';
+import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
 import {
   EventEnum,
   Feed,
-} from 'src/common/services/elrond-communication/models/feed.dto';
+} from 'src/common/services/mx-communication/models/feed.dto';
 import { AuctionEntity } from 'src/db/auctions';
 import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
@@ -12,12 +12,12 @@ import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 
 @Injectable()
 export class FeedEventsSenderService {
   constructor(
-    private accountFeedService: ElrondFeedService,
+    private accountFeedService: MxFeedService,
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly usdPriceService: UsdPriceService,
   ) {}

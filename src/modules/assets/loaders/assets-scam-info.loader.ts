@@ -1,5 +1,5 @@
 import DataLoader = require('dataloader');
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
@@ -10,7 +10,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class AssetScamInfoProvider extends BaseProvider<string> {
   constructor(
     private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(
       assetScamInfoRedisHandler,

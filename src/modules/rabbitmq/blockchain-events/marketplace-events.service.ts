@@ -15,7 +15,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
-import { SlackReportService } from 'src/common/services/elrond-communication/slack-report.service';
+import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
 
 @Injectable()
 export class MarketplaceEventsService {

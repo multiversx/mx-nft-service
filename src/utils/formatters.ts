@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 
 function format(
   big: string,
@@ -117,5 +117,5 @@ export function nominateStringVal(value: string): string {
 
 export const nominateAmount = (tokenAmount: string): string =>
   new BigNumber(tokenAmount)
-    .multipliedBy(`1e+${elrondConfig.decimals}`)
+    .multipliedBy(`1e+${mxConfig.decimals}`)
     .toFixed();

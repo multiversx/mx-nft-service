@@ -1,4 +1,4 @@
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { BrandInfoViewResultType } from 'src/modules/campaigns/models/abi/BrandInfoViewAbi';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
 import { BaseEntity } from '../base-entity';
@@ -58,7 +58,7 @@ export class CampaignEntity extends BaseEntity {
   static fromCampaignAbi(
     campaign: BrandInfoViewResultType,
     address: string,
-    decimals: number = elrondConfig.decimals,
+    decimals: number = mxConfig.decimals,
   ) {
     return campaign
       ? new CampaignEntity({

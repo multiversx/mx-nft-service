@@ -1,5 +1,5 @@
 import { forwardRef, Logger, Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { AccountsStatsResolver } from './accounts-stats.resolver';
 import { AccountsStatsService } from './accounts-stats.service';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
@@ -17,7 +17,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     MarketplacesCachingService,
   ],
   imports: [
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     forwardRef(() => CollectionsModuleGraph),
   ],
   exports: [AccountsStatsService],

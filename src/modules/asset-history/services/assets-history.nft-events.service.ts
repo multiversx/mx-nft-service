@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { NftEventEnum, AssetActionEnum } from 'src/modules/assets/models';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
@@ -45,7 +45,7 @@ export class AssetsHistoryNftEventService {
         if (
           mainEvent.address === mainEvent?.events[0].address &&
           transferEvent.topics[3].base64ToBech32() !==
-            elrondConfig.nftMarketplaceAddress
+            mxConfig.nftMarketplaceAddress
         ) {
           return new AssetHistoryLogInput({
             event: mainEvent,
