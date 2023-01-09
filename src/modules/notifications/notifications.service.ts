@@ -4,7 +4,6 @@ import { Notification, NotificationStatusEnum } from './models';
 import { NotificationEntity } from 'src/db/notifications';
 import { AuctionEntity } from 'src/db/auctions';
 import { NotificationTypeEnum } from './models/Notification-type.enum';
-import { OrderEntity } from 'src/db/orders';
 import { OrdersService } from '../orders/order.service';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NotificationsCachingService } from './notifications-caching.service';
@@ -14,6 +13,11 @@ import {
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { OrderEntity } from 'src/db/orders';
+import { OfferEntity } from 'src/db/offers';
+import { Address } from '@elrondnetwork/erdjs';
+import { NftTypeEnum } from '../assets/models';
+import { AuctionsGetterService } from '../auctions';
 
 @Injectable()
 export class NotificationsService {
@@ -25,6 +29,7 @@ export class NotificationsService {
     private readonly assetByIdentifierService: AssetByIdentifierService,
     private readonly notificationCachingService: NotificationsCachingService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
+    private readonly auctionsGetterService: AuctionsGetterService,
   ) {}
 
   async getNotifications(
@@ -56,7 +61,7 @@ export class NotificationsService {
           await this.persistenceService.getNotificationsByAuctionIds(
             auctionIds,
           );
-        const inactiveNotifications = notifications.map((n) => {
+        const inactiveNotifications = notifications?.map((n) => {
           return {
             ...n,
             status: NotificationStatusEnum.Inactive,
@@ -79,15 +84,72 @@ export class NotificationsService {
     }
   }
 
+  async updateNotificationStatusForOffers(identifiers: string[]) {
+    try {
+      if (identifiers?.length > 0) {
+        const notifications =
+          await this.persistenceService.getNotificationsByIdentifiersAndType(
+            identifiers,
+            [
+              NotificationTypeEnum.OfferReceived,
+              NotificationTypeEnum.OfferExpired,
+            ],
+          );
+        const inactiveNotifications = notifications?.map((n) => {
+          return {
+            ...n,
+            status: NotificationStatusEnum.Inactive,
+            modifiedDate: new Date(new Date().toUTCString()),
+          };
+        });
+        if (inactiveNotifications?.length > 0) {
+          await this.updateInactiveStatus(inactiveNotifications);
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to update notifications status.',
+        {
+          path: this.updateNotificationStatusForOffers.name,
+          exception: error?.toString(),
+        },
+      );
+      return;
+    }
+  }
+
+  async generateOffersNotifications(offers: OfferEntity[]): Promise<void> {
+    let notifications = [];
+    for (const offer of offers) {
+      const asset = await this.assetByIdentifierService.getAsset(
+        offer.identifier,
+      );
+      const assetName = asset ? asset.name : '';
+      notifications.push(
+        new NotificationEntity({
+          auctionId: 0,
+          identifier: offer.identifier,
+          ownerAddress: offer.ownerAddress,
+          status: NotificationStatusEnum.Active,
+          type: NotificationTypeEnum.OfferExpired,
+          name: assetName,
+          marketplaceKey: offer.marketplaceKey,
+        }),
+      );
+    }
+
+    this.triggerClearCacheForAccounts(
+      offers.map((o) => o.ownerAddress),
+      offers[0].marketplaceKey,
+    );
+  }
+
   async saveNotifications(notifications: NotificationEntity[]): Promise<void> {
     try {
       await this.persistenceService.saveNotifications(notifications);
-      await this.cacheEventsPublisher.publish(
-        new ChangedEvent({
-          id: notifications?.map((n) => n.ownerAddress),
-          type: CacheEventTypeEnum.UpdateNotifications,
-          extraInfo: { marketplaceKey: notifications[0].marketplaceKey },
-        }),
+      this.triggerClearCacheForAccounts(
+        notifications?.map((n) => n.ownerAddress),
+        notifications[0].marketplaceKey,
       );
     } catch (error) {
       this.logger.error(
@@ -248,18 +310,92 @@ export class NotificationsService {
     }
   }
 
-  private triggerClearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
+  public async addNotificationForOffer(offer: OfferEntity) {
+    try {
+      const asset = await this.assetByIdentifierService.getAsset(
+        offer.identifier,
+      );
+      if (asset && asset.type !== NftTypeEnum.NonFungibleESDT) {
+        return;
+      }
+      const assetName = asset ? asset.name : '';
+      const address = new Address(asset.ownerAddress);
+      if (!address.isContractAddress()) {
+        this.saveNotifications([
+          this.getOfferNotification(offer, asset.ownerAddress, assetName),
+        ]);
+      } else {
+        const auction =
+          await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(
+            offer.identifier,
+            offer.marketplaceKey,
+          );
+        if (!auction) return;
+        this.saveNotifications([
+          this.getOfferNotification(
+            offer,
+            auction.ownerAddress,
+            assetName,
+            auction.id,
+          ),
+        ]);
+      }
+    } catch (error) {
+      this.logger.error(
+        'An error occurred while trying to save notifications for offers.',
+        {
+          path: this.addNotificationForOffer.name,
+          exception: error?.toString(),
+          order: offer?.ownerAddress,
+        },
+      );
+    }
+  }
+
+  private getOfferNotification(
+    offer: OfferEntity,
+    ownerAddress: string,
+    assetName: string,
+    auctionId: number = 0,
+  ) {
+    return new NotificationEntity({
+      auctionId: auctionId,
+      identifier: offer.identifier,
+      ownerAddress: ownerAddress,
+      status: NotificationStatusEnum.Active,
+      type: NotificationTypeEnum.OfferReceived,
+      name: assetName,
+      marketplaceKey: offer.marketplaceKey,
+    });
+  }
+
+  private triggerClearCache(
+    auctions: AuctionEntity[],
+    orders: OrderEntity[],
+    offerAddresses?: string[],
+  ) {
     if (!auctions?.length && !orders?.length) return;
     let addreses = auctions.map((a) => a.ownerAddress);
     for (const orderGroup in orders) {
       addreses = [...addreses, orders[orderGroup][0].ownerAddress];
     }
+    addreses = [...addreses, ...offerAddresses];
     const uniqueAddresses = [...new Set(addreses)];
+    this.triggerClearCacheForAccounts(
+      uniqueAddresses,
+      auctions[0].marketplaceKey,
+    );
+  }
+
+  private triggerClearCacheForAccounts(
+    accountAddresses: string[],
+    marketplaceKey: string,
+  ) {
     this.cacheEventsPublisher.publish(
       new ChangedEvent({
-        id: uniqueAddresses,
+        id: accountAddresses,
         type: CacheEventTypeEnum.UpdateNotifications,
-        extraInfo: { marketplaceKey: auctions[0].marketplaceKey },
+        extraInfo: { marketplaceKey: marketplaceKey },
       }),
     );
   }

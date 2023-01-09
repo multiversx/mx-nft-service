@@ -6,6 +6,8 @@ export enum NotificationTypeEnum {
   Bought = 'Bought',
   Sold = 'Sold',
   Ended = 'Ended',
+  OfferReceived = 'OfferReceived',
+  OfferExpired = 'OfferExpired',
 }
 
 registerEnumType(NotificationTypeEnum, {

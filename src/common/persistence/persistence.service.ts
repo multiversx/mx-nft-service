@@ -47,6 +47,7 @@ import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enu
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/mx-communication/models/nft.dto';
@@ -568,6 +569,19 @@ export class PersistenceService {
     return await this.execute(
       this.getNotificationsByAuctionIds.name,
       this.notificationRepository.getNotificationsByAuctionIds(auctionIds),
+    );
+  }
+
+  async getNotificationsByIdentifiersAndType(
+    identifiers: string[],
+    type: NotificationTypeEnum[],
+  ): Promise<NotificationEntity[]> {
+    return await this.execute(
+      this.getNotificationsByIdentifiersAndType.name,
+      this.notificationRepository.getNotificationsByIdentifiersAndType(
+        identifiers,
+        type,
+      ),
     );
   }
 
