@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import {
@@ -97,11 +97,11 @@ export class StartAuctionEventHandler {
     hash: string,
     auctionTokenEventMarketplace: Marketplace,
   ) {
-    let decimals = elrondConfig.decimals;
+    let decimals = mxConfig.decimals;
     const asset = await this.assetByIdentifierService.getAsset(
       auctionIdentifier,
     );
-    if (topics.paymentToken !== elrondConfig.egld) {
+    if (topics.paymentToken !== mxConfig.egld) {
       const paymentToken = await this.usdPriceService.getToken(
         topics.paymentToken,
       );

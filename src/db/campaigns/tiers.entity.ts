@@ -1,4 +1,4 @@
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { TierInfoAbi } from 'src/modules/campaigns/models/abi/TierInfoAbi';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
@@ -42,7 +42,7 @@ export class TierEntity extends BaseEntity {
 
   static fromTierAbi(
     tier: TierInfoAbi,
-    decimals: number = elrondConfig.decimals,
+    decimals: number = mxConfig.decimals,
   ) {
     return tier
       ? new TierEntity({

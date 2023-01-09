@@ -23,7 +23,7 @@ import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
 import { Address } from '@elrondnetwork/erdjs/out';
-import { genericDescriptions, elrondConfig } from 'src/config';
+import { genericDescriptions, mxConfig } from 'src/config';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
@@ -263,7 +263,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const address = new Address(ownerAddress);
     if (
       address.isContractAddress() &&
-      !address.equals(new Address(elrondConfig.nftMarketplaceAddress))
+      !address.equals(new Address(mxConfig.nftMarketplaceAddress))
     ) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
 

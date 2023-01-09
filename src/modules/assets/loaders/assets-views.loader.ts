@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AssetsViewsRedisHandler } from './assets-views.redis-handler';
-import { ElrondStatsService } from 'src/common/services/elrond-communication/elrond-stats.service';
+import { MxStatsService } from 'src/common/services/mx-communication/mx-stats.service';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +10,7 @@ import { ElrondStatsService } from 'src/common/services/elrond-communication/elr
 export class AssetsViewsLoader extends BaseProvider<string> {
   constructor(
     assetsViewsRedisHandler: AssetsViewsRedisHandler,
-    private statsService: ElrondStatsService,
+    private statsService: MxStatsService,
   ) {
     super(
       assetsViewsRedisHandler,

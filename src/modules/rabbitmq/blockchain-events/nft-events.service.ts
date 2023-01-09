@@ -1,4 +1,4 @@
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { Injectable } from '@nestjs/common';
 import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
@@ -14,7 +14,7 @@ import { FeedEventsSenderService } from './feed-events.service';
 export class NftEventsService {
   constructor(
     private feedEventsSenderService: FeedEventsSenderService,
-    private elrondApi: ElrondApiService,
+    private mxApiService: MxApiService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
   ) {}
 
@@ -30,7 +30,7 @@ export class NftEventsService {
             CacheEventTypeEnum.Mint,
           );
           const collection =
-            await this.elrondApi.getCollectionByIdentifierForQuery(
+            await this.mxApiService.getCollectionByIdentifierForQuery(
               createTopics.collection,
               'fields=name,type',
             );

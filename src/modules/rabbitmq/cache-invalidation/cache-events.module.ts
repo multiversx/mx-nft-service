@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
@@ -21,7 +21,7 @@ import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module'
         uri: process.env.COMMON_RABBITMQ_URL,
       };
     }),
-    forwardRef(() => ElrondCommunicationModule),
+    forwardRef(() => MxCommunicationModule),
   ],
   providers: [
     CacheEventsConsumer,

@@ -14,7 +14,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
-import { ElrondCommunicationModule } from 'src/common/services/elrond-communication/elrond-communication.module';
+import { MxCommunicationModule } from 'src/common/services/mx-communication/mx-communication.module';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { OnSaleAssetsCountForCollectionRedisHandler } from './loaders/onsale-assets-count.redis-handler';
 import { ArtistAddressProvider } from '../artists/artists.loader';
@@ -57,7 +57,7 @@ import { AuthModule } from '../auth/auth.module';
     SmartContractArtistsService,
   ],
   imports: [
-    forwardRef(() => ElrondCommunicationModule),
+    forwardRef(() => MxCommunicationModule),
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => CommonModule),
     forwardRef(() => AuthModule),

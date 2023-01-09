@@ -1,7 +1,7 @@
 import { Resolver, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { UsdPriceService } from './usd-price.service';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 
 @Resolver(() => Token)
 export class UsdTokenPriceResolver extends BaseResolver(Token) {

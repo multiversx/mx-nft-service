@@ -7,7 +7,6 @@ import { MarketplaceEntity } from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplacesService {

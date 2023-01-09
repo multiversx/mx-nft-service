@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, ElrondStatsService } from 'src/common';
+import { MxApiService, MxStatsService } from 'src/common';
 import { Asset } from '../assets/models';
 
 @Injectable()
 export class TrendingService {
   constructor(
-    private apiService: ElrondApiService,
-    private statsService: ElrondStatsService,
+    private apiService: MxApiService,
+    private statsService: MxStatsService,
     private readonly logger: Logger,
   ) {}
 

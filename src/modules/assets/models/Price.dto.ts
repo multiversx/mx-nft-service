@@ -1,6 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
-import { elrondConfig } from 'src/config';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
+import { mxConfig } from 'src/config';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 
@@ -28,8 +28,8 @@ export class Price {
     return entity
       ? new Price({
           token:
-            entity?.priceToken === elrondConfig.egld
-              ? elrondConfig.egld
+            entity?.priceToken === mxConfig.egld
+              ? mxConfig.egld
               : entity?.priceToken,
           amount: entity?.priceAmount,
           nonce: entity?.priceNonce,

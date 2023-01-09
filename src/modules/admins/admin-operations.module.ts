@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 import { AdminOperationsResolver } from './admin-operations.resolver';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { FlagNftService } from './flag-nft.service';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { CommonModule } from 'src/common.module';
@@ -17,7 +17,7 @@ import { AuthModule } from '../auth/auth.module';
   imports: [
     CommonModule,
     CacheEventsPublisherModule,
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     NftRarityModuleGraph,
     NftTraitsModule,
     MarketplacesModuleGraph,

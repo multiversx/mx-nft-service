@@ -6,7 +6,7 @@ import {
   Int,
   Parent,
 } from '@nestjs/graphql';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { CollectionsStatsService } from './collections-stats.service';
 import { CollectionStats } from './models';
@@ -24,7 +24,7 @@ export class CollectionsStatsResolver {
     @Args({ name: 'filters', type: () => CollectionStatsFilter })
     filters: CollectionStatsFilter,
   ): Promise<CollectionStats> {
-    let decimals = elrondConfig.decimals;
+    let decimals = mxConfig.decimals;
     const collection = await this.collectionsStatsService.getStats(
       filters.identifier,
       filters.marketplaceKey,
@@ -34,7 +34,7 @@ export class CollectionsStatsResolver {
       const paymentToken = await this.usdPriceService.getToken(
         filters.paymentToken,
       );
-      decimals = paymentToken?.decimals ?? elrondConfig.decimals;
+      decimals = paymentToken?.decimals ?? mxConfig.decimals;
     }
     return CollectionStats.fromEntity(
       collection,

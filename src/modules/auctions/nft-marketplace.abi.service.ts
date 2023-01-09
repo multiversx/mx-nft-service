@@ -21,9 +21,9 @@ import {
   ResultsParser,
   SmartContract,
 } from '@elrondnetwork/erdjs';
-import { cacheConfig, elrondConfig, gas } from '../../config';
+import { cacheConfig, mxConfig, gas } from '../../config';
 import {
-  ElrondProxyService,
+  MxProxyService,
   getSmartContract,
   RedisCacheService,
 } from 'src/common';
@@ -55,7 +55,7 @@ export class NftMarketplaceAbiService {
   );
 
   constructor(
-    private elrondProxyService: ElrondProxyService,
+    private mxProxyService: MxProxyService,
     private auctionsService: AuctionsGetterService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
@@ -93,7 +93,7 @@ export class NftMarketplaceAbiService {
       value: TokenPayment.egldFromAmount(0),
       args: this.getCreateAuctionArgs(args, marketplace.address),
       gasLimit: gas.startAuction,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return createAuctionTx.toPlainObject(new Address(ownerAddress));
   }
@@ -108,7 +108,7 @@ export class NftMarketplaceAbiService {
     if (request.paymentTokenIdentifier !== auction.paymentToken)
       throw new BadRequestError('Unaccepted payment token');
 
-    return request.paymentTokenIdentifier !== elrondConfig.egld
+    return request.paymentTokenIdentifier !== mxConfig.egld
       ? await this.bidWithEsdt(
           ownerAddress,
           request,
@@ -136,7 +136,7 @@ export class NftMarketplaceAbiService {
       value: TokenPayment.egldFromAmount(0),
       args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.withdraw,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return withdraw.toPlainObject(new Address(ownerAddress));
   }
@@ -154,7 +154,7 @@ export class NftMarketplaceAbiService {
       value: TokenPayment.egldFromAmount(0),
       args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.endAuction,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
 
     return endAuction.toPlainObject(new Address(ownerAddress));
@@ -170,7 +170,7 @@ export class NftMarketplaceAbiService {
     if (request.paymentTokenIdentifier !== auction.paymentToken)
       throw new BadRequestError('Unaccepted payment token');
 
-    return request.paymentTokenIdentifier !== elrondConfig.egld
+    return request.paymentTokenIdentifier !== mxConfig.egld
       ? await this.buySftWithEsdt(
           ownerAddress,
           request,
@@ -354,7 +354,7 @@ export class NftMarketplaceAbiService {
       new TokenIdentifierValue(args.paymentToken),
       new OptionalValue(
         new BigUIntType(),
-        new BigUIntValue(new BigNumber(elrondConfig.minimumBidDifference)),
+        new BigUIntValue(new BigNumber(mxConfig.minimumBidDifference)),
       ),
     ];
     if (args.startDate) {
@@ -388,7 +388,7 @@ export class NftMarketplaceAbiService {
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.elrondProxyService
+    let queryResponse = await this.mxProxyService
       .getService()
       .queryContract(interaction.buildQuery());
     let result = this.parser.parseQueryResponse(
@@ -418,7 +418,7 @@ export class NftMarketplaceAbiService {
           BytesValue.fromHex(nonce),
         ],
         gasLimit: gas.bid,
-        chainID: elrondConfig.chainID,
+        chainID: mxConfig.chainID,
       })
       .toPlainObject(new Address(ownerAddress));
   }
@@ -445,7 +445,7 @@ export class NftMarketplaceAbiService {
           new BigNumber(request.price),
         ),
       )
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.bid)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
@@ -463,7 +463,7 @@ export class NftMarketplaceAbiService {
         value: TokenPayment.egldFromBigInteger(request.price),
         args: this.getBuySftArguments(request, marketplaceAuctionId),
         gasLimit: gas.buySft,
-        chainID: elrondConfig.chainID,
+        chainID: mxConfig.chainID,
       })
       .toPlainObject(new Address(ownerAddress));
   }
@@ -482,7 +482,7 @@ export class NftMarketplaceAbiService {
           new BigNumber(request.price),
         ),
       )
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buySft)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));

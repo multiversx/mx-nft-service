@@ -1,6 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
-import { constants, elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
@@ -47,7 +47,7 @@ import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollecti
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
-import { NftTag } from '../services/elrond-communication/models/nft.dto';
+import { NftTag } from '../services/mx-communication/models/nft.dto';
 
 @Injectable()
 export class PersistenceService {
@@ -231,7 +231,7 @@ export class PersistenceService {
   async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = elrondConfig.egld,
+    paymentToken: string = mxConfig.egld,
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getCollectionStats.name,

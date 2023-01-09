@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, ElrondToolsService } from 'src/common';
+import { MxApiService, MxToolsService } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
-import { cacheConfig, elrondConfig } from 'src/config';
+import { cacheConfig, mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
@@ -16,8 +16,8 @@ export class UsdPriceService {
 
   constructor(
     private cacheService: CachingService,
-    private readonly elrondApiService: ElrondApiService,
-    private readonly elrondToolsService: ElrondToolsService,
+    private readonly mxApiService: MxApiService,
+    private readonly mxToolsService: MxToolsService,
   ) {
     this.persistentRedisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -33,11 +33,11 @@ export class UsdPriceService {
       return amount;
     }
 
-    if (token === elrondConfig.egld || token === elrondConfig.wegld) {
+    if (token === mxConfig.egld || token === mxConfig.wegld) {
       return computeUsdAmount(
         await this.getEgldPrice(timestamp),
         amount,
-        elrondConfig.decimals,
+        mxConfig.decimals,
       );
     }
 
@@ -59,12 +59,12 @@ export class UsdPriceService {
   }
 
   public async getToken(tokenId: string): Promise<Token | null> {
-    if (tokenId === elrondConfig.egld) {
+    if (tokenId === mxConfig.egld) {
       return new Token({
-        identifier: elrondConfig.egld,
-        symbol: elrondConfig.egld,
-        name: elrondConfig.egld,
-        decimals: elrondConfig.decimals,
+        identifier: mxConfig.egld,
+        symbol: mxConfig.egld,
+        name: mxConfig.egld,
+        decimals: mxConfig.decimals,
         priceUsd: await this.getEgldPrice(),
       });
     }
@@ -78,13 +78,13 @@ export class UsdPriceService {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       `token_${tokenId}`,
-      async () => await this.elrondApiService.getTokenData(tokenId),
+      async () => await this.mxApiService.getTokenData(tokenId),
       CacheInfo.AllTokens.ttl,
     );
   }
 
   async getTokenPriceUsd(token: string): Promise<string | undefined> {
-    if (token === elrondConfig.egld || token === elrondConfig.wegld) {
+    if (token === mxConfig.egld || token === mxConfig.wegld) {
       return await this.getEgldPrice();
     }
     return await this.getEsdtPriceUsd(token);
@@ -114,7 +114,7 @@ export class UsdPriceService {
       this.persistentRedisClient,
       cacheKey,
       async () =>
-        await this.elrondToolsService.getTokenHistoricalPriceByEgld(
+        await this.mxToolsService.getTokenHistoricalPriceByEgld(
           token,
           isoDateOnly,
           egldPriceUsd,
@@ -137,10 +137,10 @@ export class UsdPriceService {
       ).priceUsd = dexToken.priceUsd;
     });
     const egldToken: Token = new Token({
-      identifier: elrondConfig.egld,
-      symbol: elrondConfig.egld,
-      name: elrondConfig.egld,
-      decimals: elrondConfig.decimals,
+      identifier: mxConfig.egld,
+      symbol: mxConfig.egld,
+      name: mxConfig.egld,
+      decimals: mxConfig.decimals,
       priceUsd: egldPriceUSD,
     });
     return apiTokens.concat([egldToken]);
@@ -150,7 +150,7 @@ export class UsdPriceService {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllDexTokens.key,
-      async () => await this.elrondApiService.getAllDexTokens(),
+      async () => await this.mxApiService.getAllDexTokens(),
       CacheInfo.AllDexTokens.ttl,
     );
   }
@@ -159,7 +159,7 @@ export class UsdPriceService {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.AllApiTokens.key,
-      async () => await this.elrondApiService.getAllTokens(),
+      async () => await this.mxApiService.getAllTokens(),
       CacheInfo.AllApiTokens.ttl,
     );
   }
@@ -175,7 +175,7 @@ export class UsdPriceService {
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       CacheInfo.EgldToken.key,
-      async () => await this.elrondApiService.getEgldPriceFromEconomics(),
+      async () => await this.mxApiService.getEgldPriceFromEconomics(),
       CacheInfo.EgldToken.ttl,
     );
   }
@@ -183,14 +183,13 @@ export class UsdPriceService {
   private async getEgldHistoricalPrice(timestamp?: number): Promise<string> {
     const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
     const cacheKey = this.getTokenHistoricalPriceCacheKey(
-      elrondConfig.wegld,
+      mxConfig.wegld,
       isoDateOnly,
     );
     return await this.cacheService.getOrSetCache(
       this.persistentRedisClient,
       cacheKey,
-      async () =>
-        await this.elrondToolsService.getEgldHistoricalPrice(isoDateOnly),
+      async () => await this.mxToolsService.getEgldHistoricalPrice(isoDateOnly),
       DateUtils.isTimestampToday(timestamp)
         ? TimeConstants.oneDay
         : CacheInfo.TokenHistoricalPrice.ttl,

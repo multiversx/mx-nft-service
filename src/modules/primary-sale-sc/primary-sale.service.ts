@@ -12,12 +12,12 @@ import {
   TokenPayment,
   U32Value,
 } from '@elrondnetwork/erdjs';
-import { cacheConfig, elrondConfig, gas } from '../../config';
+import { cacheConfig, mxConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
 import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import {
-  ElrondProxyService,
+  MxProxyService,
   getSmartContract,
   RedisCacheService,
 } from 'src/common';
@@ -43,7 +43,7 @@ export class PrimarySaleService {
   private readonly parser: ResultsParser;
 
   constructor(
-    private elrondProxyService: ElrondProxyService,
+    private mxProxyService: MxProxyService,
     private redisCacheService: RedisCacheService,
     private logger: Logger,
   ) {
@@ -340,7 +340,7 @@ export class PrimarySaleService {
       .withQuerent(new Address(address))
       .buildQuery();
 
-    const queryResponse = await this.elrondProxyService
+    const queryResponse = await this.mxProxyService
       .getService()
       .queryContract(query);
 
@@ -395,7 +395,7 @@ export class PrimarySaleService {
           new BigNumber(request.price),
         ),
       )
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buyTickets)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
@@ -411,14 +411,14 @@ export class PrimarySaleService {
     return contract.methodsExplicit
       .claim([new TokenIdentifierValue(request.collectionIdentifier)])
       .withValue(TokenPayment.egldFromAmount(0))
-      .withChainID(elrondConfig.chainID)
+      .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.elrondProxyService
+    let queryResponse = await this.mxProxyService
       .getService()
       .queryContract(interaction.buildQuery());
     let result = this.parser.parseQueryResponse(

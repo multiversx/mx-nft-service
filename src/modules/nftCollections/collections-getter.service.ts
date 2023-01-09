@@ -6,8 +6,8 @@ import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import {
   CollectionApi,
-  ElrondApiService,
-  ElrondIdentityService,
+  MxApiService,
+  MxIdentityService,
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
@@ -28,8 +28,8 @@ import { DocumentDbService } from 'src/document-db/document-db.service';
 export class CollectionsGetterService {
   private redisClient: Redis.Redis;
   constructor(
-    private apiService: ElrondApiService,
-    private idService: ElrondIdentityService,
+    private apiService: MxApiService,
+    private idService: MxIdentityService,
     private smartContractArtistService: SmartContractArtistsService,
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,

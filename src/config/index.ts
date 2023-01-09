@@ -7,7 +7,7 @@ import { CachingConfig } from '../common/models';
  * Wallet object configuration.
  * Has 3rd party API hosts and other configurations
  */
-export const elrondConfig = config.get('elrond');
+export const mxConfig = config.get('multiversX');
 /**
  * Caching time config.
  * The values are in seconds

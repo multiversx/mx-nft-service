@@ -5,7 +5,7 @@ import { Price } from '../../assets/models';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
 import { Account } from 'src/modules/account-stats/models';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 
 @ObjectType()
 export class Order {
@@ -56,8 +56,8 @@ export class Order {
             amount: order.priceAmount,
             nonce: order.priceNonce,
             token:
-              order?.priceToken === elrondConfig.egld
-                ? elrondConfig.egld
+              order?.priceToken === mxConfig.egld
+                ? mxConfig.egld
                 : order?.priceToken,
             timestamp: DateUtils.getTimestamp(order.creationDate),
           }),

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
-import { ElrondElasticService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { constants } from 'src/config';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
@@ -24,7 +24,7 @@ export class MarketplaceEventsIndexingService {
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,
     private readonly marketplacesCachingService: MarketplacesCachingService,
-    private readonly elrondElasticService: ElrondElasticService,
+    private readonly mxElasticService: MxElasticService,
   ) {}
 
   async reindexAllMarketplaceEvents(
@@ -127,7 +127,7 @@ export class MarketplaceEventsIndexingService {
         size: constants.getLogsFromElasticBatchSize,
       });
 
-    await this.elrondElasticService.getScrollableList(
+    await this.mxElasticService.getScrollableList(
       'logs',
       'identifier',
       query,

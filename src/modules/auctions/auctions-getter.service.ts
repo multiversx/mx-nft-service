@@ -10,10 +10,10 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { Constants } from '@elrondnetwork/erdnest';
-import { cacheConfig, elrondConfig } from 'src/config';
+import { cacheConfig, mxConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import {
   auctionsByNoBidsRequest,
@@ -246,12 +246,12 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     const collectionFilter = queryRequest.getFilterName('collection');
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
-    let paymentDecimals = elrondConfig.decimals;
+    let paymentDecimals = mxConfig.decimals;
     const sort = queryRequest.getSort();
     const allFilters = queryRequest.getAllFilters();
     if (
       collectionFilter &&
-      (!paymentTokenFilter || paymentTokenFilter === elrondConfig.egld)
+      (!paymentTokenFilter || paymentTokenFilter === mxConfig.egld)
     ) {
       return await this.retriveCollectionAuctions(
         collectionFilter,
@@ -339,7 +339,7 @@ export class AuctionsGetterService {
         allAuctions,
       );
     } else {
-      priceRange = await this.computePriceRange(allAuctions, elrondConfig.egld);
+      priceRange = await this.computePriceRange(allAuctions, mxConfig.egld);
     }
 
     if (sort) {

@@ -7,7 +7,7 @@ import {
   TokenPayment,
   TypedValue,
 } from '@elrondnetwork/erdjs';
-import { elrondConfig, gas } from 'src/config';
+import { mxConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { getSmartContract } from 'src/common';
 import { TransactionNode } from '../common/transaction';
@@ -25,10 +25,10 @@ export class CollectionsTransactionsService {
 
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction(request.collectionType),
-      value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
+      value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
       args: transactionArgs,
       gasLimit: gas.issueToken,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
@@ -43,7 +43,7 @@ export class CollectionsTransactionsService {
       value: TokenPayment.egldFromAmount(0),
       args: [BytesValue.fromUTF8(request.collection)],
       gasLimit: gas.stopNFTCreate,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
@@ -59,7 +59,7 @@ export class CollectionsTransactionsService {
       value: TokenPayment.egldFromAmount(0),
       args: transactionArgs,
       gasLimit: gas.transferNFTCreateRole,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
@@ -74,7 +74,7 @@ export class CollectionsTransactionsService {
       value: TokenPayment.egldFromAmount(0),
       args: transactionArgs,
       gasLimit: gas.setRoles,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
@@ -125,6 +125,6 @@ export class CollectionsTransactionsService {
   }
 
   private readonly esdtSmartContract = getSmartContract(
-    elrondConfig.esdtNftAddress,
+    mxConfig.esdtNftAddress,
   );
 }

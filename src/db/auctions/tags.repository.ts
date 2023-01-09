@@ -1,4 +1,4 @@
-import { NftTag } from 'src/common/services/elrond-communication/models';
+import { NftTag } from 'src/common/services/mx-communication/models';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { EntityRepository, Repository } from 'typeorm';

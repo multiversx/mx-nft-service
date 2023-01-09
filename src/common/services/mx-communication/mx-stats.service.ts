@@ -4,7 +4,7 @@ import { ApiService } from './api.service';
 import { NftViewsCount } from './models/nft-views.dto';
 
 @Injectable()
-export class ElrondStatsService {
+export class MxStatsService {
   constructor(
     private readonly logger: Logger,
     private readonly apiService: ApiService,
@@ -18,11 +18,11 @@ export class ElrondStatsService {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond stats service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
-          path: 'ElrondStatsService.getTrending',
+          path: `${MxStatsService.name}.${this.getTrending.name}`,
           dimension,
           exception: error,
         },
@@ -39,11 +39,11 @@ export class ElrondStatsService {
       return response.data;
     } catch (error) {
       this.logger.error(
-        `An error occurred while calling the elrond stats service on url ${removeCredentialsFromUrl(
+        `An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(
           url,
         )}`,
         {
-          path: 'ElrondStatsService.getNftsViewsCount',
+          path: `${MxStatsService.name}.${this.getNftsViewsCount.name}`,
           identifier,
           exception: error,
         },

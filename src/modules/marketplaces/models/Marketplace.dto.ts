@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
-import { elrondConfig } from 'src/config';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
+import { mxConfig } from 'src/config';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import {
@@ -129,7 +129,7 @@ export class Marketplace {
       entity.type === MarketplaceTypeEnum.Internal
         ? 'metaspace.svg'
         : `${entity.key}.svg`;
-    return `${elrondConfig.marketplacesIconsBaseUrl}/${svgName}`;
+    return `${mxConfig.marketplacesIconsBaseUrl}/${svgName}`;
   }
 
   static fromEntityForXoxno(

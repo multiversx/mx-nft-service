@@ -10,7 +10,7 @@ import {
 import { AuctionsQueriesResolver } from './auctions-queries.resolver';
 import { AuctionsMutationsResolver } from './auctions-mutations.resolver';
 import { AssetsModuleGraph } from '../assets/assets.module';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { AuctionsForAssetProvider } from './loaders/asset-auctions.loader';
 import { AuctionOrdersResolver } from './auction-orders.resolver';
 import { AccountsStatsModuleGraph } from '../account-stats/accounts-stats.module';
@@ -62,7 +62,7 @@ import { AuthModule } from '../auth/auth.module';
     UsdPriceService,
   ],
   imports: [
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     MarketplacesModuleGraph,
     CommonModule,
     forwardRef(() => AuctionsCachingModule),

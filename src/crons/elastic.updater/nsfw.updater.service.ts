@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { BatchUtils } from '@elrondnetwork/erdnest';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
@@ -19,7 +19,7 @@ type NsfwType = {
 @Injectable()
 export class NsfwUpdaterService {
   constructor(
-    private elasticService: ElrondElasticService,
+    private elasticService: MxElasticService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
     @Inject(forwardRef(() => FlagNftService))
     private flagsNftService: FlagNftService,

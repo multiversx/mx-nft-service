@@ -5,9 +5,9 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { MxApiService, RedisCacheService } from 'src/common';
 import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
-import { ElrondApiServiceMock } from 'src/common/services/elrond-communication/elrond-api.service.mock';
+import { MxApiServiceMock } from 'src/common/services/mx-communication/mx-api.service.mock';
 import { TagsService } from '../tags.service';
 import { Tag } from '../models';
 import { TagsFilter } from '../models/Tags.Filter';
@@ -18,9 +18,9 @@ import { CachingServiceMock } from 'src/common/services/caching/caching.service.
 
 describe.skip('SearchService', () => {
   let service: TagsService;
-  const ElrondApiServiceProvider = {
-    provide: ElrondApiService,
-    useClass: ElrondApiServiceMock,
+  const MxApiServiceProvider = {
+    provide: MxApiService,
+    useClass: MxApiServiceMock,
   };
 
   const RedisCacheServiceProvider = {
@@ -48,7 +48,7 @@ describe.skip('SearchService', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        ElrondApiServiceProvider,
+        MxApiServiceProvider,
         CachingServiceProvider,
         TagsService,
         RedisCacheServiceProvider,

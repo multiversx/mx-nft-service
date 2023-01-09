@@ -1,4 +1,4 @@
-export class ElrondApiServiceMock {
+export class MxApiServiceMock {
   async getNftsForUserCount(
     _address: string,
     _query: string = '',

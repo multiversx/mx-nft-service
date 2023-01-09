@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { NftRarityComputeService } from './nft-rarity.compute.service';
 import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
@@ -13,7 +13,7 @@ import { constants } from 'src/config';
 export class NftRarityService {
   constructor(
     private readonly logger: Logger,
-    private readonly elrondApiService: ElrondApiService,
+    private readonly mxApiService: MxApiService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly persistenceService: PersistenceService,
     private readonly nftRarityComputeService: NftRarityComputeService,
@@ -35,7 +35,7 @@ export class NftRarityService {
         collectionTicker,
       ),
       this.persistenceService.findNftRarityByCollection(collectionTicker),
-      this.elrondApiService.getCollectionPreferredAlgorithm(collectionTicker),
+      this.mxApiService.getCollectionPreferredAlgorithm(collectionTicker),
     ]);
 
     const areIdenticalRarities = this.areIdenticalRarities(elasticNfts, dbNfts);
@@ -59,7 +59,7 @@ export class NftRarityService {
     if (preferredAlgorithm === 'custom') {
       const [customRanks, customRanksElasticHash]: [CustomRank[], string] =
         await Promise.all([
-          this.elrondApiService.getCollectionCustomRanks(collectionTicker),
+          this.mxApiService.getCollectionCustomRanks(collectionTicker),
           this.nftRarityElasticService.getCollectionCustomRanksHash(
             collectionTicker,
           ),
@@ -349,7 +349,7 @@ export class NftRarityService {
       let allNfts: NftRarityData[] = [];
       let nfts: NftRarityData[];
 
-      await this.elrondApiService.getScrollableNftsByCollectionAfterNonceDesc(
+      await this.mxApiService.getScrollableNftsByCollectionAfterNonceDesc(
         collectionTicker,
         'identifier,nonce,metadata,score,rank,rarities,timestamp',
         async (nftsBatch) => {
@@ -369,12 +369,12 @@ export class NftRarityService {
       allNfts = this.sortDescNftsByNonce(allNfts);
 
       const preferredAlgorithm =
-        await this.elrondApiService.getCollectionPreferredAlgorithm(
+        await this.mxApiService.getCollectionPreferredAlgorithm(
           collectionTicker,
         );
       if (preferredAlgorithm === 'custom') {
         const customRanks =
-          await this.elrondApiService.getCollectionCustomRanks(
+          await this.mxApiService.getCollectionCustomRanks(
             collectionTicker,
           );
         return [
@@ -412,7 +412,7 @@ export class NftRarityService {
     nftsCount?: number,
   ): Promise<[boolean, number]> {
     if (!nftsCount) {
-      nftsCount = await this.elrondApiService.getCollectionNftsCount(
+      nftsCount = await this.mxApiService.getCollectionNftsCount(
         collection,
       );
     }

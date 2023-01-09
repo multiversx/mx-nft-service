@@ -7,7 +7,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { TimeConstants } from 'src/utils/time-utils';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class XoxnoArtistsWarmerService {
   private redisClient: Redis.Redis;
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
-    private elrondApi: ElrondApiService,
+    private mxApiService: MxApiService,
     private cacheService: CachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
@@ -48,7 +48,7 @@ export class XoxnoArtistsWarmerService {
     const cachedScCount = await this.getCachedXoxnoScCount();
     const smartContractsCount = await this.getOrSetXoxnoScCount(address);
     if (cachedScCount || cachedScCount === smartContractsCount) return;
-    const smartContracts = await this.elrondApi.getAccountSmartContracts(
+    const smartContracts = await this.mxApiService.getAccountSmartContracts(
       address,
       smartContractsCount,
     );
@@ -57,7 +57,7 @@ export class XoxnoArtistsWarmerService {
     for (const contract of smartContracts) {
       const cachedArtist = await this.getArtistAddress(contract.address);
       if (cachedArtist) continue;
-      const transaction = await this.elrondApi.getTransactionByHash(
+      const transaction = await this.mxApiService.getTransactionByHash(
         contract.deployTxHash,
       );
       response.push({
@@ -73,7 +73,7 @@ export class XoxnoArtistsWarmerService {
     return this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.XoxnoScCount.key,
-      async () => this.elrondApi.getAccountSmartContractsCount(address),
+      async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,
     );
   }

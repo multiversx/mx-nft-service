@@ -19,7 +19,7 @@ export class Token {
     Object.assign(this, init);
   }
 
-  static fromElrondApiDexToken(token: any): Token {
+  static fromMxApiDexToken(token: any): Token {
     return new Token({
       identifier: token.id,
       symbol: token.symbol,
@@ -28,7 +28,7 @@ export class Token {
     });
   }
 
-  static fromElrondApiToken(token: any): Token {
+  static fromMxApiToken(token: any): Token {
     return new Token({
       identifier: token.identifier,
       symbol: token.ticker,

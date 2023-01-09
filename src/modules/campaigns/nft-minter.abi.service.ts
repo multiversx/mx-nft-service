@@ -19,8 +19,8 @@ import {
   TokenPayment,
   ResultsParser,
 } from '@elrondnetwork/erdjs';
-import { elrondConfig, gas } from '../../config';
-import { ElrondProxyService } from 'src/common';
+import { mxConfig, gas } from '../../config';
+import { MxProxyService } from 'src/common';
 import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
@@ -37,7 +37,7 @@ export class NftMinterAbiService {
     this.abiInterface,
   );
 
-  constructor(private elrondProxyService: ElrondProxyService) {
+  constructor(private mxProxyService: MxProxyService) {
     this.parser = new ResultsParser();
   }
 
@@ -58,10 +58,10 @@ export class NftMinterAbiService {
 
     let issueTokenForBrand = contract.call({
       func: new ContractFunction('issueTokenForBrand'),
-      value: TokenPayment.egldFromBigInteger(elrondConfig.issueNftCost),
+      value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
       args: this.getIssueCampaignArgs(request),
       gasLimit: gas.issueToken,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
   }
@@ -77,7 +77,7 @@ export class NftMinterAbiService {
       value: TokenPayment.egldFromBigInteger(request.price),
       args: this.getBuyNftArguments(request),
       gasLimit: gas.endAuction,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     if (parseInt(request.quantity) > 1) {
       buyRandomNft.setGasLimit(
@@ -89,7 +89,7 @@ export class NftMinterAbiService {
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.elrondProxyService
+    let queryResponse = await this.mxProxyService
       .getService()
       .queryContract(interaction.buildQuery());
     let result = this.parser.parseQueryResponse(

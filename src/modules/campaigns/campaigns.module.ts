@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CampaignsQueriesResolver } from './campaigns-queries.resolver';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { CampaignsMutationsResolver } from './campaigns-mutations.resolver';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsService } from './campaigns.service';
@@ -17,7 +17,7 @@ import { AuthModule } from '../auth/auth.module';
   ],
   imports: [
     PubSubListenerModule,
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuthModule),
   ],

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
-import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
+import { MxElasticService } from 'src/common';
 import {
   ElasticQuery,
   ElasticSortOrder,
@@ -18,7 +17,7 @@ import { Rarity } from '../assets/models/Rarity';
 @Injectable()
 export class NftRarityElasticService {
   constructor(
-    private readonly elasticService: ElrondElasticService,
+    private readonly elasticService: MxElasticService,
     private readonly logger: Logger,
   ) {}
 
