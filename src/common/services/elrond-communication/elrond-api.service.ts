@@ -9,7 +9,7 @@ import { OwnerApi } from './models/onwer.api';
 import {
   ApiNetworkProvider,
   TransactionOnNetwork,
-} from '@elrondnetwork/erdjs-network-providers/out';
+} from '@multiversx/erdjs-network-providers/out';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
 import { Address } from '@elrondnetwork/erdjs/out';
