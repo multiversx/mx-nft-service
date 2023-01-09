@@ -3,7 +3,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
 import { mxConfig } from 'src/config';
-import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
+import { ApiNetworkProvider } from '@multiversx/erdjs-network-providers/out';
 
 @Injectable()
 export class MxPrivateApiService {
