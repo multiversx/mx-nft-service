@@ -47,6 +47,7 @@ import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
+import { NftTypeEnum } from '../assets/models';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -277,6 +278,13 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('You do not own this nft!');
     }
 
+    if (
+      asset.type === NftTypeEnum.SemiFungibleESDT &&
+      asset.balance < offer.boughtTokensNo
+    ) {
+      throw new BadRequestError('Not enough balance to accept this offer!');
+    }
+
     const contract = await this.contract.getContract(marketplace.address);
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(
       asset.identifier,
@@ -287,7 +295,9 @@ export class NftMarketplaceAbiService {
         TokenPayment.metaEsdtFromBigInteger(
           collection,
           parseInt(nonce),
-          asset.balance ? new BigNumber(asset.balance) : new BigNumber(1),
+          asset.type === NftTypeEnum.SemiFungibleESDT
+            ? new BigNumber(offer.boughtTokensNo)
+            : new BigNumber(1),
         ),
         Address.fromString(ownerAddress),
       )
