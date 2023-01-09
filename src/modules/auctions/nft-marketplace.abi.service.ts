@@ -161,7 +161,46 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
+    if (
+      marketplace.acceptedPaymentIdentifiers &&
+      !marketplace.acceptedPaymentIdentifiers.includes(request.paymentToken)
+    ) {
+      throw new BadRequestError('Unaccepted payment token');
+    }
+
     const contract = await this.contract.getContract(marketplace.address);
+    const intermediateInteraction = await this.getGenericOfferInteraction(
+      contract,
+      collection,
+      nonce,
+      request,
+      marketplace,
+    );
+
+    if (request.paymentToken !== elrondConfig.egld) {
+      return intermediateInteraction
+        .withSingleESDTTransfer(
+          TokenPayment.fungibleFromBigInteger(
+            request.paymentToken,
+            new BigNumber(request.paymentAmount),
+          ),
+        )
+        .buildTransaction()
+        .toPlainObject(new Address(ownerAddress));
+    }
+    return intermediateInteraction
+      .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
+  }
+
+  private async getGenericOfferInteraction(
+    contract: SmartContract,
+    collection: string,
+    nonce: string,
+    request: CreateOfferRequest,
+    marketplace: Marketplace,
+  ): Promise<Interaction> {
     return contract.methodsExplicit
       .sendOffer(
         await this.getCreateOfferArgs(
@@ -171,11 +210,8 @@ export class NftMarketplaceAbiService {
           marketplace.key,
         ),
       )
-      .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
       .withChainID(elrondConfig.chainID)
-      .withGasLimit(gas.bid)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .withGasLimit(gas.bid);
   }
 
   async withdrawOffer(
