@@ -33,11 +33,14 @@ import { BidEventHandler } from './handlers/bid-event.handler';
 import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
 import { EndAuctionEventHandler } from './handlers/endAuction-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
-import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { SendOfferEventHandler } from './handlers/sendOffer-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
+import { OffersModuleGraph } from 'src/modules/offers/offers.module';
+import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 
 @Module({
   imports: [
@@ -50,6 +53,7 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => MxCommunicationModule),
+    forwardRef(() => OffersModuleGraph),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     NftScamModule,
@@ -62,7 +66,9 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     EndAuctionEventHandler,
     WithdrawAuctionEventHandler,
     AcceptGlobalOfferEventHandler,
+    SendOfferEventHandler,
     AcceptOfferEventHandler,
+    WithdrawOfferEventHandler,
     UpdatePriceEventHandler,
     SwapUpdateEventHandler,
     NftEventsConsumer,

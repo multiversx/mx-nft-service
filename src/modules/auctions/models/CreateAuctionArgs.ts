@@ -15,7 +15,7 @@ export class CreateAuctionArgs {
   @Field()
   identifier: string;
 
-  @Matches(RegExp(NUMERIC_RGX), { message: `QUantity ${NUMERIC_ERROR}` })
+  @Matches(RegExp(NUMERIC_RGX), { message: `Quantity ${NUMERIC_ERROR}` })
   @Field(() => String)
   quantity: string = '1';
 

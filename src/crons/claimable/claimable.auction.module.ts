@@ -1,10 +1,11 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common.module';
 import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
 import { NotificationsModuleGraph } from 'src/modules/notifications/notifications.module';
+import * as ormconfig from '../../ormconfig';
 import { ClaimableAuctionsService } from './claimable.auction.service';
-import * as ormconfig from './../../ormconfig';
+import { ExpiredOffersService } from './expired.offers.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import * as ormconfig from './../../ormconfig';
     AuctionsModuleGraph,
     NotificationsModuleGraph,
   ],
-  providers: [ClaimableAuctionsService],
-  exports: [ClaimableAuctionsService, CommonModule],
+  providers: [ClaimableAuctionsService, ExpiredOffersService],
+  exports: [ClaimableAuctionsService, ExpiredOffersService, CommonModule],
 })
-export class ClaimableAuctionsModule {}
+export class ClaimableModule {}

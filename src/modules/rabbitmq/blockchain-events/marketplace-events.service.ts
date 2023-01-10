@@ -12,10 +12,12 @@ import { BuyEventHandler } from './handlers/buy-event.handler';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { WithdrawAuctionEventHandler } from './handlers/withdrawAuction-event.handler';
 import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
-import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { SendOfferEventHandler } from './handlers/sendOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
+import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
+import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -32,6 +34,8 @@ export class MarketplaceEventsService {
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private swapUpdateEventHandler: SwapUpdateEventHandler,
     private readonly slackReportService: SlackReportService,
+    private sendOfferEventHandler: SendOfferEventHandler,
+    private withdrawOfferEventHandler: WithdrawOfferEventHandler,
   ) {}
 
   public async handleNftAuctionEvents(
@@ -107,15 +111,43 @@ export class MarketplaceEventsService {
           );
           break;
 
-        case ExternalAuctionEventEnum.AcceptOffer:
+        case AuctionEventEnum.AcceptOffer:
           await this.acceptOfferEventHandler.handle(
             event,
             hash,
             marketplaceType,
           );
           break;
+        case AuctionEventEnum.WithdrawAuctionAndAcceptOffer:
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            AuctionEventEnum.Accept_offer_token_event
+          ) {
+            await this.acceptOfferEventHandler.handle(
+              event,
+              hash,
+              marketplaceType,
+            );
+          } else {
+            await this.withdrawAuctionEventHandler.handle(
+              event,
+              hash,
+              marketplaceType,
+            );
+          }
+          break;
         case ExternalAuctionEventEnum.AcceptGlobalOffer:
           await this.acceptGlobalOfferEventHandler.handle(
+            event,
+            hash,
+            marketplaceType,
+          );
+          break;
+        case AuctionEventEnum.SendOffer:
+          await this.sendOfferEventHandler.handle(event, hash, marketplaceType);
+          break;
+        case AuctionEventEnum.WithdrawOffer:
+          await this.withdrawOfferEventHandler.handle(
             event,
             hash,
             marketplaceType,
