@@ -4,14 +4,14 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 export class Token {
   @Field(() => String)
   identifier: string;
-  @Field(() => String, { nullable: true })
-  symbol?: string;
-  @Field(() => String, { nullable: true })
-  name?: string;
+  @Field(() => String)
+  symbol: string;
+  @Field(() => String)
+  name: string;
   @Field(() => String, { nullable: true })
   priceUsd?: string;
-  @Field(() => Number, { nullable: true })
-  decimals?: number;
+  @Field(() => Number)
+  decimals: number;
   @Field(() => Int, { nullable: true })
   activeAuctions?: number;
 
@@ -19,7 +19,7 @@ export class Token {
     Object.assign(this, init);
   }
 
-  static fromElrondApiDexToken(token: any): Token {
+  static fromMxApiDexToken(token: any): Token {
     return new Token({
       identifier: token.id,
       symbol: token.symbol,
@@ -28,7 +28,7 @@ export class Token {
     });
   }
 
-  static fromElrondApiToken(token: any): Token {
+  static fromMxApiToken(token: any): Token {
     return new Token({
       identifier: token.identifier,
       symbol: token.ticker,

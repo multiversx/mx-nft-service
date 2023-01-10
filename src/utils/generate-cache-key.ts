@@ -1,10 +1,4 @@
-const DEFAULT_REGION = 'defaultregion';
 const SEPARATOR = '_';
-export const generateCacheKey = (key: string,
-  region: string = null): string => {
-  const cacheRegion = region || DEFAULT_REGION;
-  return generateCacheKeyFromParams(cacheRegion, key);
-}
 
 export const generateCacheKeyFromParams = (...args: any[]): string => {
   let cacheKey = '';
@@ -16,7 +10,7 @@ export const generateCacheKeyFromParams = (...args: any[]): string => {
     }
   }
   return cacheKey.slice(0, -1);
-}
+};
 
 const isObject = (input) => {
   return input === Object(input);

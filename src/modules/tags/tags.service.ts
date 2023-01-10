@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService, NftTag } from 'src/common';
+import { MxApiService, NftTag } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { Tag } from './models';
 import { TagTypeEnum } from './models/Tag-type.enum';
@@ -14,7 +14,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 export class TagsService {
   private redisClient: Redis.Redis;
   constructor(
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
     private persistenceService: PersistenceService,
     private cacheService: CachingService,
   ) {

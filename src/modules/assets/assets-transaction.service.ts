@@ -7,12 +7,8 @@ import {
   U64Value,
 } from '@elrondnetwork/erdjs';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import {
-  ElrondApiService,
-  getSmartContract,
-  RedisCacheService,
-} from 'src/common';
-import { cacheConfig, elrondConfig, gas } from 'src/config';
+import { MxApiService, getSmartContract, RedisCacheService } from 'src/common';
+import { cacheConfig, mxConfig, gas } from 'src/config';
 import {
   getCollectionAndNonceFromIdentifier,
   timestampToEpochAndRound,
@@ -32,7 +28,7 @@ import {
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import * as Redis from 'ioredis';
 import { TimeConstants } from 'src/utils/time-utils';
-import { ElrondStats } from 'src/common/services/elrond-communication/models/elrond-stats.model';
+import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -41,7 +37,7 @@ export class AssetsTransactionService {
   constructor(
     private pinataService: PinataService,
     private s3Service: S3Service,
-    private elrondApiService: ElrondApiService,
+    private mxApiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
   ) {
@@ -67,7 +63,7 @@ export class AssetsTransactionService {
         new U64Value(new BigNumber(request.quantity)),
       ],
       gasLimit: gas.addBurnQuantity,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
@@ -76,9 +72,9 @@ export class AssetsTransactionService {
     ownerAddress: string,
     request: UpdateQuantityRequest,
   ): Promise<TransactionNode> {
-    const [nft, elrondStats] = await Promise.all([
-      this.elrondApiService.getNftByIdentifier(request.identifier),
-      this.getOrSetAproximateElrondStats(),
+    const [nft, mxStats] = await Promise.all([
+      this.mxApiService.getNftByIdentifier(request.identifier),
+      this.getOrSetAproximateMxStats(),
     ]);
 
     if (!nft) {
@@ -87,13 +83,13 @@ export class AssetsTransactionService {
 
     const [epoch] = timestampToEpochAndRound(
       nft.timestamp,
-      elrondStats.epoch,
-      elrondStats.roundsPassed,
-      elrondStats.roundsPerEpoch,
-      elrondStats.refreshRate,
+      mxStats.epoch,
+      mxStats.roundsPassed,
+      mxStats.roundsPerEpoch,
+      mxStats.refreshRate,
     );
 
-    if (epoch > elrondConfig.burnNftActivationEpoch) {
+    if (epoch > mxConfig.burnNftActivationEpoch) {
       return await this.updateQuantity(ownerAddress, request);
     }
 
@@ -102,7 +98,7 @@ export class AssetsTransactionService {
       new TransferNftRequest({
         identifier: request.identifier,
         quantity: request.quantity,
-        destinationAddress: elrondConfig.burnAddress,
+        destinationAddress: mxConfig.burnAddress,
       }),
     );
   }
@@ -137,15 +133,14 @@ export class AssetsTransactionService {
         BytesValue.fromUTF8(fileData.url),
       ],
       gasLimit: gas.nftCreate,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
 
     return {
       ...response,
-      gasLimit:
-        gas.nftCreate + response.data.length * elrondConfig.pricePerByte,
-      chainID: elrondConfig.chainID,
+      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
+      chainID: mxConfig.chainID,
     };
   }
 
@@ -167,39 +162,38 @@ export class AssetsTransactionService {
         new AddressValue(new Address(transferRequest.destinationAddress)),
       ],
       gasLimit: gas.nftTransfer,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     });
     let response = transaction.toPlainObject(new Address(ownerAddress));
     response.gasLimit = Math.max(
-      elrondConfig.transferMinCost +
-        response.data.length * elrondConfig.pricePerByte,
+      mxConfig.transferMinCost + response.data.length * mxConfig.pricePerByte,
       gas.nftTransfer,
     );
     return {
       ...response,
-      chainID: elrondConfig.chainID,
+      chainID: mxConfig.chainID,
     };
   }
 
-  private async getOrSetAproximateElrondStats(): Promise<ElrondStats> {
+  private async getOrSetAproximateMxStats(): Promise<MxStats> {
     try {
-      const cacheKey = this.getApproximateElrondStatsCacheKey();
-      const getElrondStats = () => this.elrondApiService.getElrondStats();
+      const cacheKey = this.getApproximateMxStatsCacheKey();
+      const getMxStats = () => this.mxApiService.getMxStats();
       return this.redisCacheService.getOrSet(
         this.redisClient,
         cacheKey,
-        getElrondStats,
+        getMxStats,
         TimeConstants.oneDay,
       );
     } catch (error) {
-      this.logger.error('An error occurred while getting elrond stats', {
-        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateElrondStats.name}`,
+      this.logger.error('An error occurred while getting mx stats', {
+        path: `${AssetsTransactionService.name}.${this.getOrSetAproximateMxStats.name}`,
         exception: error,
       });
     }
   }
 
-  private getApproximateElrondStatsCacheKey() {
-    return generateCacheKeyFromParams('assets', 'approximateElrondStats');
+  private getApproximateMxStatsCacheKey() {
+    return generateCacheKeyFromParams('assets', 'approximateMxStats');
   }
 }

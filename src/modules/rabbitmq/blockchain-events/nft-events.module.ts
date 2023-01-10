@@ -3,7 +3,7 @@ import { NftEventsService } from './nft-events.service';
 import { NftEventsConsumer } from './nft-events.consumer';
 import { RevertEventsConsumer } from './revert-events.consumer';
 import { RevertEventsService } from './revert.events.service';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { MinterEventsService } from './minter-events.service';
 import { CommonModule } from 'src/common.module';
 import { CachingModule } from 'src/common/services/caching/caching.module';
@@ -49,7 +49,7 @@ import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
-    forwardRef(() => ElrondCommunicationModule),
+    forwardRef(() => MxCommunicationModule),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     NftScamModule,

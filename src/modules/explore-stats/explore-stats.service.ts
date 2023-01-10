@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
@@ -23,7 +23,7 @@ export class ExploreStatsService {
     private cachingService: CachingService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     this.redisClient = this.cachingService.getClient(
       cacheConfig.persistentRedisClientName,

@@ -1,4 +1,4 @@
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { IssueCampaignArgs as IssueCampaignArgs } from '../IssueCampaignArgs';
 
 export class IssueCampaignRequest {
@@ -9,7 +9,7 @@ export class IssueCampaignRequest {
   mintStartTime: number;
   mintEndTime: number;
   whitelistEndTime: number;
-  mintPriceToken: string = elrondConfig.egld;
+  mintPriceToken: string = mxConfig.egld;
   collectionName: string;
   collectionTicker: string;
   tags: string[];

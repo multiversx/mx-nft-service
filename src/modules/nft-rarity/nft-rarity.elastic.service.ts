@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
-import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
+import { MxElasticService } from 'src/common';
 import {
   ElasticQuery,
   ElasticSortOrder,
@@ -13,11 +12,12 @@ import { constants } from 'src/config';
 import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
 import { CollectionFromElastic } from './models/collection-from-elastic.model';
+import { Rarity } from '../assets/models/Rarity';
 
 @Injectable()
 export class NftRarityElasticService {
   constructor(
-    private readonly elasticService: ElrondElasticService,
+    private readonly elasticService: MxElasticService,
     private readonly logger: Logger,
   ) {}
 
@@ -51,7 +51,7 @@ export class NftRarityElasticService {
   }
 
   async setNftRaritiesInElastic(
-    nfts: NftRarityEntity[] | NftRarityData[],
+    nfts: NftRarityData[],
     hasRarities: boolean = true,
     nftsFromElastic?: NftRarityData[],
   ): Promise<void> {
@@ -66,7 +66,10 @@ export class NftRarityElasticService {
           (nft) => nft.identifier === nfts[i].identifier,
         );
 
-        if (nftFromElastic.hasRarity !== hasRarities) {
+        if (
+          nftFromElastic.hasRarity !== hasRarities ||
+          Rarity.areDifferentRarities(nftFromElastic.rarities, nfts[i].rarities)
+        ) {
           outdatedNfts.push(nfts[i]);
         }
       }
@@ -371,19 +374,19 @@ export class NftRarityElasticService {
   }
 
   buildNftRaritiesBulkUpdate(
-    nfts: NftRarityEntity[] | NftRarityData[],
+    nfts: NftRarityData[],
     hasRarities: boolean = true,
   ): string[] {
     let updates: string[] = [];
     nfts.forEach((r) => {
       if (hasRarities) {
-        if (r.rank_custom) {
+        if (r.rarities.customRank) {
           updates.push(
             this.elasticService.buildBulkUpdate<number>(
               'tokens',
               r.identifier,
               'nft_rank_custom',
-              r.rank_custom,
+              r.rarities.customRank,
             ),
           );
         }
@@ -392,7 +395,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_score_openRarity',
-            r.score_openRarity,
+            r.rarities.openRarityScore,
           ),
         );
         updates.push(
@@ -400,7 +403,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_rank_openRarity',
-            r.rank_openRarity,
+            r.rarities.openRarityRank,
           ),
         );
         updates.push(
@@ -408,7 +411,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_score_jaccardDistances',
-            r.score_jaccardDistances,
+            r.rarities.jaccardDistancesScore,
           ),
         );
         updates.push(
@@ -416,7 +419,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_rank_jaccardDistances',
-            r.rank_jaccardDistances,
+            r.rarities.jaccardDistancesRank,
           ),
         );
         updates.push(
@@ -424,7 +427,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_score_trait',
-            r.score_trait,
+            r.rarities.traitScore,
           ),
         );
         updates.push(
@@ -432,7 +435,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_rank_trait',
-            r.rank_trait,
+            r.rarities.traitRank,
           ),
         );
         updates.push(
@@ -440,7 +443,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_score_statistical',
-            r.score_statistical,
+            r.rarities.statisticalScore,
           ),
         );
         updates.push(
@@ -448,7 +451,7 @@ export class NftRarityElasticService {
             'tokens',
             r.identifier,
             'nft_rank_statistical',
-            r.rank_statistical,
+            r.rarities.statisticalRank,
           ),
         );
       }

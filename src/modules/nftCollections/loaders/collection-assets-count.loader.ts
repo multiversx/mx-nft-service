@@ -1,7 +1,7 @@
 import DataLoader = require('dataloader');
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { CollectionAssetsCountRedisHandler } from './collection-assets-count.redis-handler';
 
@@ -11,7 +11,7 @@ import { CollectionAssetsCountRedisHandler } from './collection-assets-count.red
 export class CollectionAssetsCountProvider extends BaseProvider<string> {
   constructor(
     collectionAssetsHandler: CollectionAssetsCountRedisHandler,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(
       collectionAssetsHandler,

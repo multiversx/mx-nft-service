@@ -6,7 +6,7 @@ import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 
 @Injectable()
 export class TokensWarmerService {
@@ -14,7 +14,7 @@ export class TokensWarmerService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private cacheService: CachingService,
-    private elrondApiService: ElrondApiService,
+    private mxApiService: MxApiService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -26,7 +26,7 @@ export class TokensWarmerService {
     await Locker.lock(
       'Tokens invalidations',
       async () => {
-        const tokens = await this.elrondApiService.getAllTokens();
+        const tokens = await this.mxApiService.getAllTokens();
         await this.invalidateKey(
           CacheInfo.AllTokens.key,
           tokens,
@@ -42,7 +42,7 @@ export class TokensWarmerService {
     await Locker.lock(
       'DEX Tokens invalidations',
       async () => {
-        const tokens = await this.elrondApiService.getAllDexTokens();
+        const tokens = await this.mxApiService.getAllDexTokens();
         await this.invalidateKey(
           CacheInfo.AllDexTokens.key,
           tokens,
@@ -58,7 +58,7 @@ export class TokensWarmerService {
     await Locker.lock(
       'Egld Token invalidation',
       async () => {
-        const tokens = await this.elrondApiService.getEgldPriceFromEconomics();
+        const tokens = await this.mxApiService.getEgldPriceFromEconomics();
         await this.invalidateKey(
           CacheInfo.EgldToken.key,
           tokens,

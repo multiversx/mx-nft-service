@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
@@ -165,7 +165,7 @@ export class AssetsHistoryService {
         price: totalPrice
           ? new Price({
               nonce: 0,
-              token: elrondConfig.egld,
+              token: mxConfig.egld,
               amount: totalPrice.toFixed(),
               timestamp: input.event.timestamp,
             })

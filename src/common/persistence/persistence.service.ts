@@ -1,6 +1,6 @@
 import { PerformanceProfiler } from '@elrondnetwork/erdnest';
 import { Injectable } from '@nestjs/common';
-import { constants, elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
@@ -43,10 +43,11 @@ import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
+import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
-import { NftTag } from '../services/elrond-communication/models/nft.dto';
+import { NftTag } from '../services/mx-communication/models/nft.dto';
 
 @Injectable()
 export class PersistenceService {
@@ -230,7 +231,7 @@ export class PersistenceService {
   async getCollectionStats(
     identifier: string,
     marketplaceKey: string = undefined,
-    paymentToken: string = elrondConfig.egld,
+    paymentToken: string = mxConfig.egld,
   ): Promise<CollectionStatsEntity> {
     return await this.execute(
       this.getCollectionStats.name,
@@ -320,6 +321,33 @@ export class PersistenceService {
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
     );
+  }
+
+  async addFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const res = await this.execute(
+      this.addFeaturedCollection.name,
+      this.featuredCollectionsRepository.save(
+        new FeaturedCollectionEntity({ identifier: collection, type }),
+      ),
+    );
+    return !!res.id;
+  }
+
+  async removeFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const res = await this.execute(
+      this.removeFeaturedCollection.name,
+      this.featuredCollectionsRepository.delete({
+        identifier: collection,
+        type: type,
+      }),
+    );
+    return res.affected === 1;
   }
 
   async getFeaturedNfts(

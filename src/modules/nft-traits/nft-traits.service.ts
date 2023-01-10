@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, Nft } from 'src/common';
+import { MxApiService, Nft } from 'src/common';
 import { CollectionTraitSummary } from './models/collection-traits.model';
 import {
   NftTrait,
@@ -19,7 +19,7 @@ import { UpdateNftTraitsResponse } from './models/update-nft-traits-response';
 @Injectable()
 export class NftTraitsService {
   constructor(
-    private readonly apiService: ElrondApiService,
+    private readonly apiService: MxApiService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly documentDbService: DocumentDbService,
     private readonly logger: Logger,

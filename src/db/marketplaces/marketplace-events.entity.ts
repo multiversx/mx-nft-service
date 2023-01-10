@@ -1,4 +1,4 @@
-import { EventResponse } from 'src/common/services/elrond-communication/models/elastic-search/event.response';
+import { EventResponse } from 'src/common/services/mx-communication/models/elastic-search/event.response';
 import { BaseEntity } from 'src/db/base-entity';
 import { Column, Entity, Index, Unique } from 'typeorm';
 

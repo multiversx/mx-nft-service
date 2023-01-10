@@ -1,5 +1,5 @@
 {
-  "elrond": {
+  "multiversX": {
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
     "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqemkfxdzk6wj78ymhay6nu0pdc8xsta3fu00syhxuwy",
@@ -18,7 +18,8 @@
     "decimals": 18,
     "egld": "EGLD",
     "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
-    "pemFileName": "wallet.pem"
+    "pemFileName": "wallet.pem",
+    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
   },
   "caching": {
     "ordersRedisClientName": "orders",

@@ -3,6 +3,7 @@ import {
   AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
+  MarketplaceEventEnum,
 } from 'src/modules/assets/models';
 import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
 import { EndAuctionEventHandler } from './handlers/endAuction-event.handler';
@@ -14,7 +15,7 @@ import { UpdatePriceEventHandler } from './handlers/updatePrice-event.handler';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
-import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
+import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -30,6 +31,7 @@ export class MarketplaceEventsService {
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private swapUpdateEventHandler: SwapUpdateEventHandler,
+    private readonly slackReportService: SlackReportService,
   ) {}
 
   public async handleNftAuctionEvents(
@@ -127,6 +129,11 @@ export class MarketplaceEventsService {
             marketplaceType,
           );
           break;
+        case MarketplaceEventEnum.SCUpgrade: {
+          await this.slackReportService.sendScUpgradeNotification(
+            event.address,
+          );
+        }
       }
     }
   }

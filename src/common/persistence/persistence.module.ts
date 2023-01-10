@@ -22,7 +22,7 @@ import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ElrondCommunicationModule } from '../services/elrond-communication';
+import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 
 @Global()
@@ -44,7 +44,7 @@ import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-eve
     TypeOrmModule.forFeature([AuctionEntity]),
     TypeOrmModule.forFeature([MarketplaceEventsRepository]),
     CacheEventsPublisherModule,
-    ElrondCommunicationModule,
+    MxCommunicationModule,
   ],
   providers: [
     UsdPriceService,

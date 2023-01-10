@@ -57,3 +57,7 @@ export enum CollectionEventEnum {
   IssueSemiFungible = 'issueSemiFungible',
   IssueNonFungible = 'issueNonFungible',
 }
+
+export enum MarketplaceEventEnum {
+  SCUpgrade = 'SCUpgrade',
+}

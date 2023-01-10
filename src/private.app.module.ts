@@ -1,9 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common.module';
+import { CachingController } from './common/services/caching/caching.controller';
 import { NsfwUpdaterService } from './crons/elastic.updater/nsfw.updater.service';
 import { RarityUpdaterService } from './crons/elastic.updater/rarity.updater.service';
 import { AdminOperationsModuleGraph } from './modules/admins/admin-operations.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { ReindexController } from './modules/ingress/reindex.controller';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { MetricsController } from './modules/metrics/metrics.controller';
@@ -23,9 +25,10 @@ import * as ormconfig from './ormconfig';
     NftScamModule,
     NftTraitsModule,
     MarketplacesModuleGraph,
+    AuthModule,
   ],
   providers: [Logger, NsfwUpdaterService, RarityUpdaterService],
-  controllers: [MetricsController, ReindexController],
+  controllers: [MetricsController, ReindexController, CachingController],
   exports: [NsfwUpdaterService, RarityUpdaterService],
 })
 export class PrivateAppModule {}

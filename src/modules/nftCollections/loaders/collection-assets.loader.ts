@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from 'src/modules/common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { CollectionAssetsRedisHandler } from './collection-assets.redis-handler';
-import { ElrondApiService } from 'src/common/services/elrond-communication';
+import { MxApiService } from 'src/common/services/mx-communication';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 
 @Injectable({
@@ -11,7 +11,7 @@ import { AssetsQuery } from 'src/modules/assets/assets-query';
 export class CollectionAssetsProvider extends BaseProvider<string> {
   constructor(
     collectionAssetsHandler: CollectionAssetsRedisHandler,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(
       collectionAssetsHandler,
@@ -24,7 +24,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
       const query = new AssetsQuery()
         .addCollection(identifier)
         .addPageSize(0, 10)
-        .addFields(['media', 'identifier', 'collection'])
+        .addFields(['media', 'identifier', 'collection', 'isNsfw'])
         .build();
       return this.apiService.getAllNfts(query);
     });

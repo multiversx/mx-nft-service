@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService, RedisCacheService } from 'src/common';
+import { MxElasticService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -22,7 +22,7 @@ export class TraitsUpdaterService {
   constructor(
     private readonly nftTraitsService: NftTraitsService,
     private readonly redisCacheService: RedisCacheService,
-    private readonly elasticService: ElrondElasticService,
+    private readonly elasticService: MxElasticService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly logger: Logger,
   ) {

@@ -4,7 +4,7 @@ import Redis, { RedisOptions } from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
-import { generateCacheKey } from 'src/utils/generate-cache-key';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { promisify } from 'util';
 
 @Injectable()
@@ -33,12 +33,8 @@ export class RedisCacheService {
     return this.clients[clientName];
   }
 
-  async get(
-    client: Redis.Redis,
-    key: string,
-    region: string = null,
-  ): Promise<any> {
-    const cacheKey = generateCacheKey(key, region);
+  async get(client: Redis.Redis, key: string): Promise<any> {
+    const cacheKey = generateCacheKeyFromParams(key);
     let profiler = new PerformanceProfiler();
     try {
       return JSON.parse(await client.get(cacheKey));
@@ -63,12 +59,11 @@ export class RedisCacheService {
     key: string,
     value: any,
     ttl: number = this.DEFAULT_TTL,
-    region: string = null,
   ): Promise<void> {
     if (isNil(value)) {
       return;
     }
-    const cacheKey = generateCacheKey(key, region);
+    const cacheKey = generateCacheKeyFromParams(key);
 
     let profiler = new PerformanceProfiler();
     try {
@@ -89,14 +84,10 @@ export class RedisCacheService {
     }
   }
 
-  async batchGetCache<T>(
-    client,
-    keys: string[],
-    region: string = null,
-  ): Promise<T[]> {
+  async batchGetCache<T>(client, keys: string[]): Promise<T[]> {
     let profiler = new PerformanceProfiler();
     const chunks = this.getChunks(
-      keys.map((key) => generateCacheKey(key, region)),
+      keys.map((key) => generateCacheKeyFromParams(key)),
       100,
     );
     const asyncMGet = promisify(client.mget).bind(client);
@@ -133,11 +124,10 @@ export class RedisCacheService {
     keys: string[],
     values: any[],
     ttl: number,
-    region: string = null,
   ) {
     let profiler = new PerformanceProfiler();
     try {
-      const mapKeys = keys.map((key) => generateCacheKey(key, region));
+      const mapKeys = keys.map((key) => generateCacheKeyFromParams(key));
       const chunks = this.getChunks(
         mapKeys.map((key, index) => {
           const element: any = {};
@@ -178,12 +168,8 @@ export class RedisCacheService {
     }
   }
 
-  async del(
-    client: Redis.Redis,
-    key: string,
-    region: string = null,
-  ): Promise<void> {
-    const cacheKey = generateCacheKey(key, region);
+  async del(client: Redis.Redis, key: string): Promise<void> {
+    const cacheKey = generateCacheKeyFromParams(key);
     let profiler = new PerformanceProfiler();
     try {
       await client.del(cacheKey);
@@ -202,13 +188,9 @@ export class RedisCacheService {
     }
   }
 
-  async delMultiple(
-    client: Redis.Redis,
-    keys: string[],
-    region: string = null,
-  ): Promise<void> {
+  async delMultiple(client: Redis.Redis, keys: string[]): Promise<void> {
     if (keys?.length > 0) {
-      const redisKeys = keys.map((key) => generateCacheKey(key, region));
+      const redisKeys = keys.map((key) => generateCacheKeyFromParams(key));
       try {
         await client.del(redisKeys);
       } catch (err) {
@@ -224,12 +206,8 @@ export class RedisCacheService {
     }
   }
 
-  async delByPattern(
-    client: Redis.Redis,
-    key: string,
-    region: string = null,
-  ): Promise<void> {
-    const cacheKey = generateCacheKey(key, region);
+  async delByPattern(client: Redis.Redis, key: string): Promise<void> {
+    const cacheKey = generateCacheKeyFromParams(key);
     let profiler = new PerformanceProfiler();
     try {
       const stream = client.scanStream({ match: `${cacheKey}*`, count: 100 });
@@ -278,18 +256,13 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => any,
     ttl: number = this.DEFAULT_TTL,
-    region: string = null,
   ): Promise<any> {
-    const cachedData = await this.get(client, key, region);
+    const cachedData = await this.get(client, key);
     if (!isNil(cachedData)) {
       return cachedData;
     }
-    const value = await this.buildInternalCreateValueFunc(
-      key,
-      region,
-      createValueFunc,
-    );
-    await this.set(client, key, value, ttl, region);
+    const value = await this.buildInternalCreateValueFunc(key, createValueFunc);
+    await this.set(client, key, value, ttl);
 
     return value;
   }
@@ -298,18 +271,13 @@ export class RedisCacheService {
     client: Redis.Redis,
     key: string,
     createValueFunc: () => any,
-    region: string = null,
   ): Promise<any> {
-    const cachedData = await this.get(client, key, region);
+    const cachedData = await this.get(client, key);
     if (!isNil(cachedData)) {
       return cachedData;
     }
-    const value = await this.buildInternalCreateValueFunc(
-      key,
-      region,
-      createValueFunc,
-    );
-    await this.set(client, key, value, value.ttl, region);
+    const value = await this.buildInternalCreateValueFunc(key, createValueFunc);
+    await this.set(client, key, value, value.ttl);
 
     return value;
   }
@@ -319,14 +287,9 @@ export class RedisCacheService {
     key: string,
     createValueFunc: () => any,
     ttl: number = this.DEFAULT_TTL,
-    region: string = null,
   ): Promise<any> {
-    const value = await this.buildInternalCreateValueFunc(
-      key,
-      region,
-      createValueFunc,
-    );
-    await this.set(client, key, value, ttl, region);
+    const value = await this.buildInternalCreateValueFunc(key, createValueFunc);
+    await this.set(client, key, value, ttl);
     return value;
   }
 
@@ -348,9 +311,8 @@ export class RedisCacheService {
     client: Redis.Redis,
     key: string,
     ttl: number = null,
-    region: string = null,
   ): Promise<number> {
-    const cacheKey = generateCacheKey(key, region);
+    const cacheKey = generateCacheKeyFromParams(key);
 
     let profiler = new PerformanceProfiler();
     try {
@@ -373,9 +335,8 @@ export class RedisCacheService {
     client: Redis.Redis,
     key: string,
     ttl: number = null,
-    region: string = null,
   ): Promise<number> {
-    const cacheKey = generateCacheKey(key, region);
+    const cacheKey = generateCacheKeyFromParams(key);
 
     let profiler = new PerformanceProfiler();
     try {
@@ -439,7 +400,6 @@ export class RedisCacheService {
 
   private async buildInternalCreateValueFunc(
     key: string,
-    region: string,
     createValueFunc: () => any,
   ): Promise<any> {
     try {
@@ -453,7 +413,6 @@ export class RedisCacheService {
         path: 'redis-cache.service.createValueFunc',
         exception: err,
         key,
-        region,
       });
       return null;
     }

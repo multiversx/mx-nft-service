@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  ElrondApiService,
-  ElrondIdentityService,
+  MxApiService,
+  MxIdentityService,
   RedisCacheService,
 } from 'src/common';
 import * as Redis from 'ioredis';
@@ -21,8 +21,8 @@ export class SearchService {
   private readonly searchSize: number = 5;
   private fieldsRequested: string = 'identifier,name,assets';
   constructor(
-    private accountsService: ElrondIdentityService,
-    private apiService: ElrondApiService,
+    private accountsService: MxIdentityService,
+    private apiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private collectionsGetterService: CollectionsGetterService,

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { Owner } from './models';
 
 @Injectable()
 export class OwnersService {
-  constructor(private apiService: ElrondApiService) {}
+  constructor(private apiService: MxApiService) {}
 
   async getOwnersForIdentifier(
     identifier: string,

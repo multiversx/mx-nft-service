@@ -1,5 +1,5 @@
 import { isEmpty, map } from 'lodash';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import denominate from 'src/utils/formatters';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
@@ -48,7 +48,7 @@ export default class WhereBuilder<Entity> {
       filterValues = filter.values.map((value) =>
         BigNumberUtils.denominateAmount(
           value,
-          elrondConfig.decimals,
+          mxConfig.decimals,
         ).toString(),
       );
     }

@@ -1,5 +1,5 @@
 import { forwardRef, Logger, Module } from '@nestjs/common';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { MarketplacesService } from './marketplaces.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 import { MarketplacesResolver } from './marketplaces.resolver';
@@ -24,7 +24,7 @@ import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing
   ],
   imports: [
     PubSubListenerModule,
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
   ],

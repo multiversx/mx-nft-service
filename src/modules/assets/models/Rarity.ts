@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Nft } from 'src/common';
+import { NftRarityEntity } from 'src/db/nft-rarity';
 
 @ObjectType()
 export class Rarity {
@@ -66,5 +67,43 @@ export class Rarity {
           statisticalRank: nft.nft_rank_statistical,
         })
       : null;
+  }
+
+  static fromDbRarity(nft: NftRarityEntity): Rarity {
+    return nft
+      ? new Rarity({
+          rank: nft.rank_openRarity,
+          score: nft.score_openRarity,
+          customRank: undefined,
+          openRarityScore: nft.score_openRarity,
+          openRarityRank: nft.rank_openRarity,
+          jaccardDistancesScore: nft.score_jaccardDistances,
+          jaccardDistancesRank: nft.rank_jaccardDistances,
+          traitScore: nft.score_trait,
+          traitRank: nft.rank_trait,
+          statisticalScore: nft.score_statistical,
+          statisticalRank: nft.rank_statistical,
+        })
+      : null;
+  }
+
+  static areDifferentRarities(
+    actualRarity: Rarity,
+    expectedRarity: Rarity,
+  ): boolean {
+    if (
+      actualRarity.openRarityRank !== expectedRarity.openRarityRank ||
+      actualRarity.openRarityScore !== expectedRarity.openRarityScore ||
+      actualRarity.traitRank !== expectedRarity.traitRank ||
+      actualRarity.traitScore !== expectedRarity.traitScore ||
+      actualRarity.statisticalRank !== expectedRarity.statisticalRank ||
+      actualRarity.statisticalScore !== expectedRarity.statisticalScore ||
+      actualRarity.jaccardDistancesRank !==
+        expectedRarity.jaccardDistancesRank ||
+      actualRarity.jaccardDistancesScore !==
+        expectedRarity.jaccardDistancesScore
+    ) {
+      return true;
+    }
   }
 }

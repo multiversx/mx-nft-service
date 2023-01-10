@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
 import BigNumber from 'bignumber.js';
@@ -8,7 +8,7 @@ import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 
 @Injectable()
-export class ElrondToolsService {
+export class MxToolsService {
   private url: string;
   private nativeAuthSigner: NativeAuthSigner;
 
@@ -21,7 +21,7 @@ export class ElrondToolsService {
     this.nativeAuthSigner = new NativeAuthSigner({
       host: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
-      signerPrivateKeyPath: getFilePathFromDist(elrondConfig.pemFileName),
+      signerPrivateKeyPath: getFilePathFromDist(mxConfig.pemFileName),
     });
   }
 
@@ -29,8 +29,8 @@ export class ElrondToolsService {
     isoDateOnly: string,
   ): Promise<string | undefined> {
     return await this.getTokenPriceByTimestamp(
-      elrondConfig.wegld,
-      elrondConfig.usdc,
+      mxConfig.wegld,
+      mxConfig.usdc,
       isoDateOnly,
     );
   }
@@ -42,7 +42,7 @@ export class ElrondToolsService {
   ): Promise<string | undefined> {
     const priceInEgld = await this.getTokenPriceByTimestamp(
       token,
-      elrondConfig.wegld,
+      mxConfig.wegld,
       isoDateOnly,
     );
     if (!priceInEgld) {
@@ -99,7 +99,7 @@ export class ElrondToolsService {
     } catch (error) {
       this.logger.error(`Error when trying to get run ${name}`, {
         error: error.message,
-        path: `${ElrondToolsService.name}.${this.doPost.name}`,
+        path: `${MxToolsService.name}.${this.doPost.name}`,
       });
     }
   }

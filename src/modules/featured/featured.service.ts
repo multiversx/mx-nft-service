@@ -1,43 +1,40 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService, RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { cacheConfig } from 'src/config';
+import { MxApiService } from 'src/common';
 import { Asset } from '../assets/models';
 import { Collection } from '../nftCollections/models';
-import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { FeaturedCollectionsFilter } from './Featured-Collections.Filter';
 import { FeaturedCollectionTypeEnum } from './FeatureCollectionType.enum';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { FeaturedCollectionsCachingService } from './featured-caching.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class FeaturedService {
-  private redisClient: Redis.Redis;
   constructor(
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
     private persistenceService: PersistenceService,
     private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
-    );
-  }
+    private readonly featuredCollectionsCachingService: FeaturedCollectionsCachingService,
+    private cacheEventsPublisherService: CacheEventsPublisherService,
+  ) {}
 
   async getFeaturedNfts(
     limit: number = 10,
     offset: number,
   ): Promise<[Asset[], number]> {
     try {
-      const cacheKey = this.getFeaturedNftsCacheKey(limit, offset);
       const getAssetLiked = () =>
         this.persistenceService.getFeaturedNfts(limit, offset);
-      const [featuredNfts, count] = await this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getAssetLiked,
-        30 * TimeConstants.oneMinute,
-      );
+      const [featuredNfts, count] =
+        await this.featuredCollectionsCachingService.getOrSetFeaturedNfts(
+          getAssetLiked,
+          limit,
+          offset,
+        );
       const nfts = await this.apiService.getNftsByIdentifiers(
         featuredNfts?.map((x) => x.identifier),
       );
@@ -50,25 +47,20 @@ export class FeaturedService {
     }
   }
 
-  private getFeaturedNftsCacheKey(limit, offset) {
-    return generateCacheKeyFromParams('featuredNfts', limit, offset);
-  }
-
   async getFeaturedCollections(
     limit: number = 10,
     offset: number,
     filters: FeaturedCollectionsFilter,
   ): Promise<[Collection[], number]> {
     try {
-      const cacheKey = this.getFeaturedCollectionsCacheKey();
       const getFeaturedCollections = () =>
         this.persistenceService.getFeaturedCollections(limit, offset);
-      let [featuredCollections, count] = await this.redisCacheService.getOrSet(
-        this.redisClient,
-        cacheKey,
-        getFeaturedCollections,
-        30 * TimeConstants.oneMinute,
-      );
+      let [featuredCollections, count] =
+        await this.featuredCollectionsCachingService.getOrSetFeaturedCollections(
+          getFeaturedCollections,
+          limit,
+          offset,
+        );
       if (filters && filters.type) {
         featuredCollections = featuredCollections.filter(
           (x: { type: FeaturedCollectionTypeEnum }) => x.type === filters.type,
@@ -94,7 +86,39 @@ export class FeaturedService {
     }
   }
 
-  private getFeaturedCollectionsCacheKey() {
-    return generateCacheKeyFromParams('featuredCollections');
+  async addFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const isAdded = await this.persistenceService.addFeaturedCollection(
+      collection,
+      type,
+    );
+    if (isAdded) {
+      await this.triggerFeaturedCollectionsCacheInvalidation();
+    }
+    return isAdded;
+  }
+
+  async removeFeaturedCollection(
+    collection: string,
+    type: FeaturedCollectionTypeEnum,
+  ): Promise<boolean> {
+    const isRemoved = await this.persistenceService.removeFeaturedCollection(
+      collection,
+      type,
+    );
+    if (isRemoved) {
+      await this.triggerFeaturedCollectionsCacheInvalidation();
+    }
+    return isRemoved;
+  }
+
+  async triggerFeaturedCollectionsCacheInvalidation(): Promise<void> {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.FeaturedCollections,
+      }),
+    );
   }
 }

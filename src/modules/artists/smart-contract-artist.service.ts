@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { cacheConfig } from 'src/config';
@@ -11,7 +11,7 @@ export class SmartContractArtistsService {
   private redisClient: Redis.Redis;
   constructor(
     private cachingService: CachingService,
-    private elrondApi: ElrondApiService,
+    private mxApiService: MxApiService,
   ) {
     this.redisClient = this.cachingService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -30,7 +30,7 @@ export class SmartContractArtistsService {
   public async getArtistForScAddress(
     scAddress: string,
   ): Promise<{ address: string; owner: string }> {
-    const account = await this.elrondApi.getSmartContractOwner(scAddress);
+    const account = await this.mxApiService.getSmartContractOwner(scAddress);
     if (account.owner === XOXNO_MINTING_MANAGER) {
       return await this.getXoxnoMinterOwner(scAddress);
     }
@@ -41,7 +41,7 @@ export class SmartContractArtistsService {
     scAddress: string,
   ): Promise<{ address: string; owner: string }> {
     const xoxnoScCount = await this.getOrSetXoxnoScCount(XOXNO_MINTING_MANAGER);
-    const smartContracts = await this.elrondApi.getAccountSmartContracts(
+    const smartContracts = await this.mxApiService.getAccountSmartContracts(
       XOXNO_MINTING_MANAGER,
       xoxnoScCount,
     );
@@ -49,7 +49,7 @@ export class SmartContractArtistsService {
     const selectedContract = smartContracts.find(
       (c) => c.address === scAddress,
     );
-    const transaction = await this.elrondApi.getTransactionByHash(
+    const transaction = await this.mxApiService.getTransactionByHash(
       selectedContract.deployTxHash,
     );
     return {
@@ -62,7 +62,7 @@ export class SmartContractArtistsService {
     return this.cachingService.getOrSetCache(
       this.redisClient,
       CacheInfo.XoxnoScCount.key,
-      async () => this.elrondApi.getAccountSmartContractsCount(address),
+      async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,
     );
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
-import { ElrondApiService, RedisCacheService } from 'src/common';
+import { MxApiService, RedisCacheService } from 'src/common';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
 import { NftTypeEnum } from '../assets/models';
@@ -14,7 +14,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   protected redisCacheService: RedisCacheService;
   constructor(
     redisCacheService: RedisCacheService,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(redisCacheService, 'collectionAssets');
   }
@@ -63,7 +63,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
       const query = new AssetsQuery()
         .addCollection(collection)
         .addPageSize(0, 10)
-        .addFields(['media', 'identifier', 'collection'])
+        .addFields(['media', 'identifier', 'collection', 'isNsfw'])
         .build();
       return this.apiService.getAllNfts(query);
     });

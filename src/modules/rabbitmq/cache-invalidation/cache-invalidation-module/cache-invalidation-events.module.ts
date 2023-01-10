@@ -3,6 +3,7 @@ import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-hi
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { IsAssetLikedRedisHandler } from 'src/modules/assets/loaders/asset-is-liked.redis-handler';
 import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
+import { FeaturedCollectionsCachingService } from 'src/modules/featured/featured-caching.service';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
 import { OrdersCachingModule } from 'src/modules/orders/caching/orders-caching.module';
 import { CacheInvalidationEventsService } from './cache-invalidation-events.service';
@@ -15,6 +16,7 @@ import { CacheInvalidationEventsService } from './cache-invalidation-events.serv
     AssetsLikesCachingService,
     IsAssetLikedRedisHandler,
     AssetsHistoryCachingService,
+    FeaturedCollectionsCachingService,
   ],
   exports: [CacheInvalidationEventsService, NotificationsCachingService],
 })

@@ -1,7 +1,7 @@
 import { forwardRef, Logger, Module } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { NotificationsResolver } from './notifications.resolver';
-import { ElrondCommunicationModule } from 'src/common';
+import { MxCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
 import { OrdersModuleGraph } from '../orders/orders.module';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
@@ -18,7 +18,7 @@ import { AuthModule } from '../auth/auth.module';
     AssetByIdentifierService,
   ],
   imports: [
-    ElrondCommunicationModule,
+    MxCommunicationModule,
     CacheEventsPublisherModule,
     CommonModule,
     forwardRef(() => OrdersModuleGraph),

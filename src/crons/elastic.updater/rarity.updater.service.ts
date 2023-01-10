@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService, RedisCacheService } from 'src/common';
+import { MxElasticService, RedisCacheService } from 'src/common';
 import { Locker } from 'src/utils/locker';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import * as Redis from 'ioredis';
@@ -14,7 +14,7 @@ export class RarityUpdaterService {
   private readonly persistentRedisClient: Redis.Redis;
 
   constructor(
-    private readonly elasticService: ElrondElasticService,
+    private readonly elasticService: MxElasticService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftRarityElasticService: NftRarityElasticService,
     private readonly redisCacheService: RedisCacheService,

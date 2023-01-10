@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -134,7 +134,7 @@ export class AuctionsRepository {
   ) {
     const maxBidValue = '1000000000';
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
-    let paymentDecimals = elrondConfig.decimals;
+    let paymentDecimals = mxConfig.decimals;
 
     if (paymentTokenFilter) {
       const paymentToken = await this.usdPriceService.getToken(
@@ -382,7 +382,7 @@ export class AuctionsRepository {
       'a',
     );
     const paymentTokenFilter = queryRequest.getFilterName('paymentToken');
-    const paymentToken = paymentTokenFilter ?? elrondConfig.egld;
+    const paymentToken = paymentTokenFilter ?? mxConfig.egld;
     const queryBuilder: SelectQueryBuilder<AuctionEntity> =
       filterQueryBuilder.build();
     const response = await queryBuilder

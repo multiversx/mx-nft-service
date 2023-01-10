@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondElasticService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { CollectionWithTraitsFlag } from './models/collection-with-traits-flag.model';
 import { EncodedNftValues, NftTraits } from './models/nft-traits.model';
 import {
@@ -13,7 +13,7 @@ import {
 @Injectable()
 export class NftTraitsElasticService {
   constructor(
-    private readonly elasticService: ElrondElasticService,
+    private readonly elasticService: MxElasticService,
     private readonly logger: Logger,
   ) {}
 

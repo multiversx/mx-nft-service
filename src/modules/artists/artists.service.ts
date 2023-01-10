@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ElrondIdentityService } from 'src/common';
+import { MxIdentityService } from 'src/common';
 import * as Redis from 'ioredis';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
@@ -13,7 +13,7 @@ import { CollectionsGetterService } from '../nftCollections/collections-getter.s
 export class ArtistsService {
   private redisClient: Redis.Redis;
   constructor(
-    private idService: ElrondIdentityService,
+    private idService: MxIdentityService,
     private cachingService: CachingService,
     private collectionsGetterService: CollectionsGetterService,
   ) {

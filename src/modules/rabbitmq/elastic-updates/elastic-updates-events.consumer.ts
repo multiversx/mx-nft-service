@@ -17,37 +17,33 @@ export class ElasiticUpdatesConsumer {
   })
   async consumeMintBurnAndUpdateEvents(events: any) {
     if (events.events && process.env.ENABLE_ELASTIC_UPDATES === 'true') {
+      const mintNftEvents = events?.events?.filter(
+        (e: { identifier: NftEventEnum }) =>
+          e.identifier === NftEventEnum.ESDTNFTCreate,
+      );
+      const burnAndUpdateNftAttributesEvents = events?.events?.filter(
+        (e: { identifier: NftEventEnum }) =>
+          e.identifier === NftEventEnum.ESDTNFTBurn ||
+          e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
+      );
+      const mintBurnAndUpdateNftAttributesEvents = [
+        ...mintNftEvents,
+        ...burnAndUpdateNftAttributesEvents,
+      ];
+
       await Promise.all([
         this.elasticUpdateService.handleNftMintEvents(
-          events?.events?.filter(
-            (e: { identifier: NftEventEnum }) =>
-              e.identifier === NftEventEnum.ESDTNFTCreate,
-          ),
+          mintNftEvents,
           events.hash,
         ),
         this.elasticUpdateService.handleTraitsForNftMintBurnAndUpdateEvents(
-          events?.events?.filter(
-            (e: { identifier: NftEventEnum }) =>
-              e.identifier === NftEventEnum.ESDTNFTCreate ||
-              e.identifier === NftEventEnum.ESDTNFTBurn ||
-              e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
-          ),
+          mintBurnAndUpdateNftAttributesEvents,
         ),
         this.elasticUpdateService.handleRaritiesForNftMintBurnAndUpdateEvents(
-          events?.events?.filter(
-            (e: { identifier: NftEventEnum }) =>
-              e.identifier === NftEventEnum.ESDTNFTCreate ||
-              e.identifier === NftEventEnum.ESDTNFTBurn ||
-              e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
-          ),
+          mintBurnAndUpdateNftAttributesEvents,
         ),
         this.elasticUpdateService.handleScamInfoForNftMintBurnAndUpdateEvents(
-          events?.events?.filter(
-            (e: { identifier: NftEventEnum }) =>
-              e.identifier === NftEventEnum.ESDTNFTCreate ||
-              e.identifier === NftEventEnum.ESDTNFTBurn ||
-              e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
-          ),
+          mintBurnAndUpdateNftAttributesEvents,
         ),
       ]);
     }

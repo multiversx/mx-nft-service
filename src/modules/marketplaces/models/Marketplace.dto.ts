@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Token } from 'src/common/services/elrond-communication/models/Token.model';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
+import { mxConfig } from 'src/config';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import {
@@ -23,6 +24,9 @@ export class Marketplace {
 
   @Field(() => String)
   url: string;
+
+  @Field(() => String)
+  iconUrl: string;
 
   @Field(() => MarketplaceTypeEnum)
   type: MarketplaceTypeEnum;
@@ -70,6 +74,7 @@ export class Marketplace {
         marketplaceAuctionId,
         nftType,
       ),
+      iconUrl: Marketplace.getMarketplaceIconPath(entity),
       key: entity.key,
       type: entity.type,
       lastIndexTimestamp: entity.lastIndexTimestamp,
@@ -117,6 +122,14 @@ export class Marketplace {
     }
 
     return entity.url;
+  }
+
+  private static getMarketplaceIconPath(entity: MarketplaceEntity): string {
+    const svgName =
+      entity.type === MarketplaceTypeEnum.Internal
+        ? 'metaspace.svg'
+        : `${entity.key}.svg`;
+    return `${mxConfig.marketplacesIconsBaseUrl}/${svgName}`;
   }
 
   static fromEntityForXoxno(

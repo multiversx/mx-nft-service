@@ -1,5 +1,5 @@
 import { Address } from '@elrondnetwork/erdjs/out';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 
 export class ListNftEventsTopics {
   private collection: string;
@@ -8,7 +8,7 @@ export class ListNftEventsTopics {
   private nrAuctionTokens: string = '1';
   private originalOwner: Address;
   private price: string;
-  private paymentToken: string = elrondConfig.egld;
+  private paymentToken: string = mxConfig.egld;
   private paymentTokenNonce: string = '0';
   private auctionType: string = '';
   private deadline: number = 0;

@@ -2,21 +2,19 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
-import { elrondConfig } from 'src/config';
-import { ApiNetworkProvider } from '@elrondnetwork/erdjs-network-providers/out';
+import { mxConfig } from 'src/config';
+import { ApiNetworkProvider } from '@multiversx/erdjs-network-providers/out';
 
 @Injectable()
-export class ElrondPrivateApiService {
+export class MxPrivateApiService {
   private privateApiProvider: ApiNetworkProvider;
 
-  constructor(
-    private readonly logger: Logger,
-  ) {
+  constructor(private readonly logger: Logger) {
     const keepAliveOptions = {
-      maxSockets: elrondConfig.keepAliveMaxSockets,
-      maxFreeSockets: elrondConfig.keepAliveMaxFreeSockets,
+      maxSockets: mxConfig.keepAliveMaxSockets,
+      maxFreeSockets: mxConfig.keepAliveMaxFreeSockets,
       timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
-      freeSocketTimeout: elrondConfig.keepAliveFreeSocketTimeout,
+      freeSocketTimeout: mxConfig.keepAliveFreeSocketTimeout,
     };
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
@@ -24,9 +22,9 @@ export class ElrondPrivateApiService {
     this.privateApiProvider = new ApiNetworkProvider(
       process.env.ELROND_PRIVATE_API,
       {
-        timeout: elrondConfig.proxyTimeout,
-        httpAgent: elrondConfig.keepAlive ? httpAgent : null,
-        httpsAgent: elrondConfig.keepAlive ? httpsAgent : null,
+        timeout: mxConfig.proxyTimeout,
+        httpAgent: mxConfig.keepAlive ? httpAgent : null,
+        httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
         headers: {
           origin: 'NftService',
         },
@@ -50,7 +48,7 @@ export class ElrondPrivateApiService {
       profiler.stop();
 
       MetricsCollector.setExternalCall(
-        ElrondPrivateApiService.name,
+        MxPrivateApiService.name,
         profiler.duration,
         name,
       );
@@ -69,9 +67,9 @@ export class ElrondPrivateApiService {
         name: error.name,
       };
       this.logger.error(
-        `An error occurred while calling the elrond private-api service on url ${resourceUrl}`,
+        `An error occurred while calling the mx private-api service on url ${resourceUrl}`,
         {
-          path: 'ElrondPrivateApiService.doPostGeneric',
+          path: `${MxPrivateApiService.name}.${this.doPostGeneric.name}`,
           error: customError,
         },
       );

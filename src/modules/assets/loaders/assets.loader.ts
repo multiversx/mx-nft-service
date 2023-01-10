@@ -1,5 +1,5 @@
 import DataLoader = require('dataloader');
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoProvider } from './assets-scam-info.loader';
 import { AssetsRedisHandler } from './assets.redis-handler';
@@ -12,7 +12,7 @@ export class AssetsProvider extends BaseProvider<string> {
   constructor(
     assetstRedisHandler: AssetsRedisHandler,
     private assetScamLoader: AssetScamInfoProvider,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
   ) {
     super(
       assetstRedisHandler,

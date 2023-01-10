@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import {
@@ -7,7 +7,6 @@ import {
   AuctionsSetterService,
 } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
@@ -64,7 +63,7 @@ export class SwapUpdateEventHandler {
     const paymentToken = await this.usdPriceService.getToken(
       auction.paymentToken,
     );
-    const decimals = paymentToken?.decimals ?? elrondConfig.decimals;
+    const decimals = paymentToken?.decimals ?? mxConfig.decimals;
     auction.minBid = topics.price;
     auction.minBidDenominated = BigNumberUtils.denominateAmount(
       topics.price,

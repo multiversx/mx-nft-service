@@ -74,6 +74,8 @@ export class Collection {
   traits: CollectionNftTrait[];
   @Field({ nullable: true })
   preferredRankAlgorithm: string;
+  @Field(() => String)
+  aggregatorUrl: string;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);

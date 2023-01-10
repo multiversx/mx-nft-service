@@ -13,7 +13,7 @@ export interface AddressTransactionCount {
 }
 
 @Injectable()
-export class ElrondElasticService {
+export class MxElasticService {
   private readonly url = process.env.ELROND_ELASTICSEARCH;
   constructor(
     private readonly apiService: ApiService,
@@ -97,7 +97,7 @@ export class ElrondElasticService {
       ];
     } catch (e) {
       this.logger.error('Fail to get logs', {
-        path: 'elrond-elastic.service.getNftHistory',
+        path: `${MxElasticService.name}.${this.getNftHistory.name}`,
         address: nonce,
         exception: e.toString(),
       });

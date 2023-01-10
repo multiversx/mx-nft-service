@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ElrondApiService } from 'src/common';
+import { MxApiService } from 'src/common';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AssetsQuery } from '../assets';
 import { AccountsStatsCachingService } from './accounts-stats.caching.service';
@@ -9,14 +9,14 @@ import { CollectionsGetterService } from '../nftCollections/collections-getter.s
 import { Price } from '../assets/models';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
-import { elrondConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 
 @Injectable()
 export class AccountsStatsService {
   constructor(
     private persistenceService: PersistenceService,
     private collectionsService: CollectionsGetterService,
-    private apiService: ElrondApiService,
+    private apiService: MxApiService,
     private readonly logger: Logger,
     private accountStatsCachingService: AccountsStatsCachingService,
     private marketplacesService: MarketplacesService,
@@ -179,7 +179,7 @@ export class AccountsStatsService {
       new Price({
         amount: BigNumberUtils.nominateAmount(
           price.biddingBalance,
-          paymentToken.decimals ?? elrondConfig.decimals,
+          paymentToken.decimals ?? mxConfig.decimals,
         ),
         token: price.priceToken,
 
