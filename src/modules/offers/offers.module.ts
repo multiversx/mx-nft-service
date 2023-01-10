@@ -12,6 +12,8 @@ import { NotificationsModuleGraph } from '../notifications/notifications.module'
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { OffersCachingModule } from './caching/offers-caching.module';
 import { AuthModule } from '../auth/auth.module';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
+import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
 
 @Module({
   providers: [
@@ -22,6 +24,8 @@ import { AuthModule } from '../auth/auth.module';
     AvailableTokensForAuctionRedisHandler,
     AccountsProvider,
     AccountsRedisHandler,
+    MarketplaceRedisHandler,
+    MarketplaceProvider,
   ],
   imports: [
     MxCommunicationModule,
