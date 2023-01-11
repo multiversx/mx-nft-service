@@ -30,6 +30,9 @@ import { OffersService } from './offers.service';
 import { AuthUser } from '../auth/authUser';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { UserAuthResult } from '../auth/userAuthResult';
+import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
+import { Marketplace } from '../marketplaces/models/Marketplace.dto';
+import { XOXNO_KEY } from 'src/utils/constants';
 
 @Resolver(() => Offer)
 export class OffersResolver extends BaseResolver(Offer) {
@@ -38,6 +41,7 @@ export class OffersResolver extends BaseResolver(Offer) {
     private assetsProvider: AssetsProvider,
     private offersService: OffersService,
     private nftAbiService: NftMarketplaceAbiService,
+    private marketplaceProvider: MarketplaceProvider,
   ) {
     super();
   }
@@ -80,6 +84,30 @@ export class OffersResolver extends BaseResolver(Offer) {
     const { identifier } = order;
     const asset = await this.assetsProvider.load(identifier);
     return asset?.value ?? null;
+  }
+
+  @ResolveField('marketplace', () => Marketplace)
+  async marketplace(@Parent() offer: Offer) {
+    const { marketplaceKey, identifier } = offer;
+    let asset: Asset;
+
+    if (!marketplaceKey) return null;
+    const marketplace = await this.marketplaceProvider.load(marketplaceKey);
+    const marketplaceValue = marketplace?.value;
+    if (marketplaceValue?.length > 0 && marketplaceValue[0].key === XOXNO_KEY) {
+      const assetResponse = await this.assetsProvider.load(identifier);
+      asset = assetResponse?.value;
+    }
+
+    return marketplaceValue?.length > 0
+      ? Marketplace.fromEntity(
+          marketplaceValue[0],
+          identifier,
+          null,
+          null,
+          asset?.type,
+        )
+      : null;
   }
 
   @Mutation(() => TransactionNode)

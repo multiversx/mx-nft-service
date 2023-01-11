@@ -900,6 +900,7 @@ type Offer {
   endDate: Int
   id: ID!
   identifier: String!
+  marketplace: Marketplace!
   marketplaceKey: String!
   owner: Account
   ownerAddress: String!
