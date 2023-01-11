@@ -521,9 +521,9 @@ export class AuctionsGetterService {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
         this.redisClient,
-        CacheInfo.ActiveAuctions.key,
+        CacheInfo.BuyNowAuctions.key,
         async () => await this.getBuyNowAuctions(),
-        CacheInfo.ActiveAuctions.ttl,
+        CacheInfo.BuyNowAuctions.ttl,
         Constants.oneSecond() * 30,
       );
 
