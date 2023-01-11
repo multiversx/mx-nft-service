@@ -50,7 +50,6 @@ export class NotificationsService {
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }
-
     this.triggerClearCache(auctions, orders);
   }
 
@@ -373,14 +372,12 @@ export class NotificationsService {
   private triggerClearCache(
     auctions: AuctionEntity[],
     orders: OrderEntity[],
-    offerAddresses?: string[],
   ) {
     if (!auctions?.length && !orders?.length) return;
     let addreses = auctions.map((a) => a.ownerAddress);
     for (const orderGroup in orders) {
       addreses = [...addreses, orders[orderGroup][0].ownerAddress];
     }
-    addreses = [...addreses, ...offerAddresses];
     const uniqueAddresses = [...new Set(addreses)];
     this.triggerClearCacheForAccounts(
       uniqueAddresses,
