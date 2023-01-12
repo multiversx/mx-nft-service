@@ -498,9 +498,10 @@ export class NftMarketplaceAbiService {
     nonce: string,
     request: CreateOfferRequest,
   ): Promise<TypedValue[]> {
-    const auction = await this.auctionsService.getAuctionById(
-      request.auctionId,
-    );
+    let auction = null;
+    if (request.auctionId) {
+      auction = await this.auctionsService.getAuctionById(request.auctionId);
+    }
     if (!auction) {
       throw new BadRequestError('No auction with the specified id!');
     }
