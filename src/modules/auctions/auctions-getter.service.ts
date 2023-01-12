@@ -388,6 +388,11 @@ export class AuctionsGetterService {
       );
     }
 
+    const maxBidFilter = queryRequest.getFilter('maxBid');
+    if (maxBidFilter && maxBidFilter.values?.every((element) => element !== null)) {
+      allAuctions = allAuctions.filter((x) => x.maxBid.amount > maxBidFilter.values[0]);
+    }
+
     const collectionFilter = queryRequest.getFilterName('collection');
 
     if (collectionFilter) {
