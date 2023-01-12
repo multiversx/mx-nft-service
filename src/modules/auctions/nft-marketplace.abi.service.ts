@@ -174,7 +174,6 @@ export class NftMarketplaceAbiService {
       collection,
       nonce,
       request,
-      marketplace,
     );
 
     if (request.paymentToken !== mxConfig.egld) {
@@ -199,17 +198,9 @@ export class NftMarketplaceAbiService {
     collection: string,
     nonce: string,
     request: CreateOfferRequest,
-    marketplace: Marketplace,
   ): Promise<Interaction> {
     return contract.methodsExplicit
-      .sendOffer(
-        await this.getCreateOfferArgs(
-          collection,
-          nonce,
-          request,
-          marketplace.key,
-        ),
-      )
+      .sendOffer(await this.getCreateOfferArgs(collection, nonce, request))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.bid);
   }
@@ -315,7 +306,7 @@ export class NftMarketplaceAbiService {
     const offer = await this.offersService.getOfferById(offerId);
     const auction = await this.auctionsService.getAuctionById(auctionId);
     if (!offer || !auction || ownerAddress !== auction?.ownerAddress) {
-      return;
+      throw new BadRequestError('No offer/auction available');
     }
 
     const marketplace =
@@ -506,13 +497,13 @@ export class NftMarketplaceAbiService {
     collection: string,
     nonce: string,
     request: CreateOfferRequest,
-    marketplaceKey: string,
   ): Promise<TypedValue[]> {
-    const auction =
-      await this.auctionsService.getAuctionByIdentifierAndMarketplace(
-        request.identifier,
-        marketplaceKey,
-      );
+    const auction = await this.auctionsService.getAuctionById(
+      request.auctionId,
+    );
+    if (!auction) {
+      throw new BadRequestError('No auction with the specified id!');
+    }
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
@@ -521,7 +512,7 @@ export class NftMarketplaceAbiService {
     ];
     if (auction) {
       returnArgs.push(
-        new U64Value(new BigNumber(auction?.marketplaceAuctionId)),
+        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
       );
     }
     return returnArgs;
