@@ -501,10 +501,11 @@ export class NftMarketplaceAbiService {
     let auction = null;
     if (request.auctionId) {
       auction = await this.auctionsService.getAuctionById(request.auctionId);
+      if (!auction) {
+        throw new BadRequestError('No auction with the specified id!');
+      }
     }
-    if (!auction) {
-      throw new BadRequestError('No auction with the specified id!');
-    }
+
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(collection),
       BytesValue.fromHex(nonce),
