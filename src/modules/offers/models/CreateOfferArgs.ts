@@ -32,4 +32,7 @@ export class CreateOfferArgs {
 
   @Field()
   paymentAmount: string;
+
+  @Field(() => Int, { nullable: true })
+  auctionId: number;
 }

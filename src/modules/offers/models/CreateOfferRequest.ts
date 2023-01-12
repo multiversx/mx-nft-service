@@ -9,6 +9,7 @@ export class CreateOfferRequest {
   paymentToken: string;
   paymentTokenNonce: number;
   quantity: string;
+  auctionId: number;
 
   constructor(init?: Partial<CreateOfferRequest>) {
     Object.assign(this, init);
@@ -23,6 +24,7 @@ export class CreateOfferRequest {
       paymentTokenNonce: args.paymentTokenNonce,
       paymentAmount: args.paymentAmount,
       quantity: args.quantity,
+      auctionId: args.auctionId,
     });
   }
 }

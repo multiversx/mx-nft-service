@@ -592,6 +592,7 @@ input CreateNftArgs {
 }
 
 input CreateOfferArgs {
+  auctionId: Int
   deadline: String!
   identifier: String!
   paymentAmount: String!
