@@ -5,6 +5,7 @@ import { NotificationsService } from 'src/modules/notifications/notifications.se
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { SendOfferEvent } from '../../entities/auction/sendOffer.event';
+import { WithdrawOfferEvent } from '../../entities/auction/withdrawOffer.event';
 
 @Injectable()
 export class WithdrawOfferEventHandler {
@@ -16,15 +17,18 @@ export class WithdrawOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const sendOffer = new SendOfferEvent(event);
-    const topics = sendOffer.getTopics();
+    if (marketplaceType === MarketplaceTypeEnum.External) {
+      return;
+    }
+    const withdrawOfferEvent = new WithdrawOfferEvent(event);
+    const topics = withdrawOfferEvent.getTopics();
     const marketplace = await this.marketplaceService.getMarketplaceByType(
-      sendOffer.getAddress(),
+      withdrawOfferEvent.getAddress(),
       marketplaceType,
       topics.collection,
     );
 
-    if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
+    if (!marketplace) {
       return;
     }
     this.logger.log(

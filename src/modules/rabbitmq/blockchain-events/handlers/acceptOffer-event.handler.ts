@@ -28,6 +28,18 @@ export class AcceptOfferEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const acceptOfferEvent = new AcceptOfferEvent(event);
+    const generaMarketplace =
+      await this.marketplaceService.getMarketplaceByType(
+        acceptOfferEvent.getAddress(),
+        marketplaceType,
+      );
+
+    if (
+      generaMarketplace.key !== XOXNO_KEY &&
+      generaMarketplace.type === MarketplaceTypeEnum.External
+    ) {
+      return;
+    }
     const topics = acceptOfferEvent.getTopics();
     const marketplace = await this.marketplaceService.getMarketplaceByType(
       acceptOfferEvent.getAddress(),
