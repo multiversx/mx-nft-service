@@ -28,15 +28,15 @@ export class AcceptOfferEventHandler {
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const acceptOfferEvent = new AcceptOfferEvent(event);
-    const generaMarketplace =
+    const generalMarketplace =
       await this.marketplaceService.getMarketplaceByType(
         acceptOfferEvent.getAddress(),
         marketplaceType,
       );
 
     if (
-      generaMarketplace.key !== XOXNO_KEY &&
-      generaMarketplace.type === MarketplaceTypeEnum.External
+      generalMarketplace.key !== XOXNO_KEY &&
+      generalMarketplace.type === MarketplaceTypeEnum.External
     ) {
       return;
     }
