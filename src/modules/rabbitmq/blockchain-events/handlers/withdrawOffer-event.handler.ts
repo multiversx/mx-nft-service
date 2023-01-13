@@ -4,7 +4,6 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
-import { SendOfferEvent } from '../../entities/auction/sendOffer.event';
 import { WithdrawOfferEvent } from '../../entities/auction/withdrawOffer.event';
 
 @Injectable()
