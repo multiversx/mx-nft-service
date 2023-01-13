@@ -34,7 +34,7 @@ export class AcceptOfferEventHandler {
         marketplaceType,
       );
 
-    if (generalMarketplace.type === MarketplaceTypeEnum.External) {
+    if (generalMarketplace?.type === MarketplaceTypeEnum.External) {
       if (generalMarketplace.key !== XOXNO_KEY) return;
 
       const acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
