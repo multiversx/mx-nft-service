@@ -4,9 +4,7 @@ import { Readable } from 'stream';
 
 @Injectable()
 export class S3Service {
-  constructor(
-    private readonly logger: Logger,
-  ) {}
+  constructor(private readonly logger: Logger) {}
   AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 
   async upload(fileData, filename) {
@@ -29,7 +27,7 @@ export class S3Service {
       readStream,
       bucketS3,
       filename,
-      fileData.mimetype,
+      'application/json',
     );
   }
 
