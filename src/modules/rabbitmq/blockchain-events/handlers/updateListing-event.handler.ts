@@ -13,11 +13,11 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY } from 'src/utils/constants';
-import { UpdateListingEvent } from '../../entities/auction/updateListing.event';
+import { UpdateListingEvent } from '../../entities/auction/updatePrice.event';
 
 @Injectable()
-export class UpdatePriceEventHandler {
-  private readonly logger = new Logger(UpdatePriceEventHandler.name);
+export class UpdateListingEventHandler {
+  private readonly logger = new Logger(UpdateListingEventHandler.name);
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
