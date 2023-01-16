@@ -42,7 +42,7 @@ export class AcceptGlobalOfferEventHandler {
     if (!auction) return;
     auction.status = AuctionStatusEnum.Closed;
     auction.modifiedDate = new Date(new Date().toUTCString());
-    this.auctionsService.updateAuctionPrice(
+    this.auctionsService.updateAuction(
       auction,
       ExternalAuctionEventEnum.AcceptGlobalOffer,
     );

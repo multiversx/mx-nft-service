@@ -40,7 +40,7 @@ export class SwapUpdateEventHandler {
     if (auction) {
       this.updateAuctionPrice(auction, topics, hash);
 
-      this.auctionsService.updateAuctionPrice(
+      this.auctionsService.updateAuction(
         auction,
         ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
       );

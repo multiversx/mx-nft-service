@@ -185,7 +185,7 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuctionPrice(
+  async updateAuction(
     auction: AuctionEntity,
     auctionEvent: string,
   ): Promise<AuctionEntity> {
@@ -197,6 +197,7 @@ export class AuctionsSetterService {
       const decimals = paymentToken?.decimals ?? mxConfig.decimals;
       return await this.persistenceService.updateAuction({
         ...auction,
+        endDate: auction.endDate ?? 0,
         maxBidDenominated: BigNumberUtils.denominateAmount(
           auction.maxBid,
           decimals,
@@ -206,28 +207,6 @@ export class AuctionsSetterService {
           decimals,
         ),
       });
-    } catch (error) {
-      this.logger.error('An error occurred while updating auction price', {
-        path: `${AuctionsSetterService.name}.${this.updateAuctionPrice.name}`,
-        id: auction.id,
-        exception: error,
-      });
-    } finally {
-      profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        auctionEvent,
-        profiler.duration,
-      );
-    }
-  }
-
-  async updateAuction(
-    auction: AuctionEntity,
-    auctionEvent: string,
-  ): Promise<AuctionEntity> {
-    let profiler = new PerformanceProfiler();
-    try {
-      return await this.persistenceService.updateAuction(auction);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: `${AuctionsSetterService.name}.${this.updateAuction.name}`,

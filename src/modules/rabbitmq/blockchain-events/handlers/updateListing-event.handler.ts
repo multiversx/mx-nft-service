@@ -44,7 +44,12 @@ export class UpdateListingEventHandler {
         auction.paymentToken,
       );
 
-      this.updateAuctionListing(auction, updateListingEvent, paymentToken);
+      this.updateAuctionListing(
+        auction,
+        updateListingEvent,
+        paymentToken,
+        hash,
+      );
 
       this.auctionsService.updateAuction(
         auction,
@@ -57,6 +62,7 @@ export class UpdateListingEventHandler {
     auction: AuctionEntity,
     event: UpdateListingEvent,
     paymentToken: Token,
+    hash: string,
   ) {
     const eventTopics = event.getTopics();
 
@@ -78,5 +84,7 @@ export class UpdateListingEventHandler {
         eventTopics.paymentTokenNonce,
       );
     }
+
+    auction.blockHash = hash;
   }
 }
