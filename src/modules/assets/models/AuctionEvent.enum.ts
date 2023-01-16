@@ -20,6 +20,7 @@ export enum ExternalAuctionEventEnum {
   BulkBuy = 'bulkBuy',
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
+  UpdateListing = 'changeListing',
   AcceptOffer = 'acceptOffer',
   UpdateOffer = 'update_offer_event',
   AcceptGlobalOffer = 'acceptGlobalOffer',

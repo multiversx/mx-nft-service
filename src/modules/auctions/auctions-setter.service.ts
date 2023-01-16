@@ -197,6 +197,7 @@ export class AuctionsSetterService {
       const decimals = paymentToken?.decimals ?? mxConfig.decimals;
       return await this.persistenceService.updateAuction({
         ...auction,
+        endDate: auction.endDate ?? 0,
         maxBidDenominated: BigNumberUtils.denominateAmount(
           auction.maxBid,
           decimals,
@@ -208,7 +209,7 @@ export class AuctionsSetterService {
       });
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
-        path: 'AuctionsService.updateAuction',
+        path: `${AuctionsSetterService.name}.${this.updateAuction.name}`,
         id: auction.id,
         exception: error,
       });
