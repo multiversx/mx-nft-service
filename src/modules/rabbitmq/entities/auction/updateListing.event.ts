@@ -1,12 +1,12 @@
 import { GenericEvent } from '../generic.event';
-import { UpdatePriceEventsTopics } from './updatePrice.event.topics';
+import { UpdateListingEventsTopics } from './updateListing.event.topics';
 
 export class UpdateListingEvent extends GenericEvent {
-  private decodedTopics: UpdatePriceEventsTopics;
+  private decodedTopics: UpdateListingEventsTopics;
 
   constructor(init?: Partial<GenericEvent>) {
     super(init);
-    this.decodedTopics = new UpdatePriceEventsTopics(this.topics);
+    this.decodedTopics = new UpdateListingEventsTopics(this.topics);
   }
 
   getTopics() {

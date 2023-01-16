@@ -48,9 +48,9 @@ export class UpdatePriceEventHandler {
       );
       this.updateAuctionPrice(auction, newPrice, hash, paymentToken?.decimals);
 
-      this.auctionsService.updateAuction(
+      this.auctionsService.updateAuctionPrice(
         auction,
-        ExternalAuctionEventEnum.UpdatePrice,
+        ExternalAuctionEventEnum.UpdateListing,
       );
     }
   }

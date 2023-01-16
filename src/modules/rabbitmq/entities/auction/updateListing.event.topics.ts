@@ -24,7 +24,7 @@ export class UpdateListingEventsTopics {
       .hexBigNumberToString();
     this.paymentToken = BinaryUtils.base64Decode(rawTopics[7]);
     this.paymentTokenNonce =
-      BinaryUtils.tryBase64ToBigInt(rawTopics[7])?.toString() ?? '0';
+      BinaryUtils.tryBase64ToBigInt(rawTopics[8])?.toString() ?? '0';
     this.deadline = parseInt(
       Buffer.from(rawTopics[9] ?? '0', 'base64').toString('hex'),
       16,

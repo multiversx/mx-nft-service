@@ -44,7 +44,7 @@ export class AcceptOfferEventHandler {
 
     auction.status = AuctionStatusEnum.Closed;
     auction.modifiedDate = new Date(new Date().toUTCString());
-    this.auctionsService.updateAuction(
+    this.auctionsService.updateAuctionPrice(
       auction,
       ExternalAuctionEventEnum.AcceptOffer,
     );

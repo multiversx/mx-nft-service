@@ -185,7 +185,7 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuction(
+  async updateAuctionPrice(
     auction: AuctionEntity,
     auctionEvent: string,
   ): Promise<AuctionEntity> {
@@ -207,8 +207,30 @@ export class AuctionsSetterService {
         ),
       });
     } catch (error) {
+      this.logger.error('An error occurred while updating auction price', {
+        path: `${AuctionsSetterService.name}.${this.updateAuctionPrice.name}`,
+        id: auction.id,
+        exception: error,
+      });
+    } finally {
+      profiler.stop();
+      MetricsCollector.setAuctionEventsDuration(
+        auctionEvent,
+        profiler.duration,
+      );
+    }
+  }
+
+  async updateAuction(
+    auction: AuctionEntity,
+    auctionEvent: string,
+  ): Promise<AuctionEntity> {
+    let profiler = new PerformanceProfiler();
+    try {
+      return await this.persistenceService.updateAuction(auction);
+    } catch (error) {
       this.logger.error('An error occurred while updating auction', {
-        path: 'AuctionsService.updateAuction',
+        path: `${AuctionsSetterService.name}.${this.updateAuction.name}`,
         id: auction.id,
         exception: error,
       });
