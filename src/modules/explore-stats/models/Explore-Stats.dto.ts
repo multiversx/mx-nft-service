@@ -36,6 +36,8 @@ export class ExploreNftsStats {
   liveAuctionsCount: number;
   @Field(() => Int)
   buyNowCount: number;
+  @Field(() => Int)
+  offersCount: number;
 
   constructor(init?: Partial<ExploreNftsStats>) {
     Object.assign(this, init);
