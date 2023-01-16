@@ -16,6 +16,7 @@ import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { AcceptGlobalOfferEventHandler } from './handlers/acceptGlobalOffer-event.handler';
 import { SwapUpdateEventHandler } from './handlers/swapUpdate-event.handler';
 import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
+import { UpdateListingEventHandler } from './handlers/updateListing-event.handler';
 
 @Injectable()
 export class MarketplaceEventsService {
@@ -31,6 +32,7 @@ export class MarketplaceEventsService {
     private acceptOfferEventHandler: AcceptOfferEventHandler,
     private acceptGlobalOfferEventHandler: AcceptGlobalOfferEventHandler,
     private swapUpdateEventHandler: SwapUpdateEventHandler,
+    private updateListingEventHandler: UpdateListingEventHandler,
     private readonly slackReportService: SlackReportService,
   ) {}
 
@@ -106,7 +108,14 @@ export class MarketplaceEventsService {
             marketplaceType,
           );
           break;
-
+        case ExternalAuctionEventEnum.UpdateListing: {
+          await this.updateListingEventHandler.handle(
+            event,
+            hash,
+            marketplaceType,
+          );
+          break;
+        }
         case ExternalAuctionEventEnum.AcceptOffer:
           await this.acceptOfferEventHandler.handle(
             event,
