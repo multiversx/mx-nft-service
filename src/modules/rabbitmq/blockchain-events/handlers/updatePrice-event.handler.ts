@@ -13,7 +13,7 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY } from 'src/utils/constants';
-import { UpdateListingEvent } from '../../entities/auction/updateListing.event';
+import { UpdatePriceEvent } from '../../entities/auction/updatePrice.event';
 
 @Injectable()
 export class UpdatePriceEventHandler {
@@ -27,7 +27,7 @@ export class UpdatePriceEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const updatePriceEvent = new UpdateListingEvent(event);
+    const updatePriceEvent = new UpdatePriceEvent(event);
     const topics = updatePriceEvent.getTopics();
     const marketplace = await this.marketplaceService.getMarketplaceByType(
       updatePriceEvent.getAddress(),
@@ -50,7 +50,7 @@ export class UpdatePriceEventHandler {
 
       this.auctionsService.updateAuctionPrice(
         auction,
-        ExternalAuctionEventEnum.UpdateListing,
+        ExternalAuctionEventEnum.UpdatePrice,
       );
     }
   }
