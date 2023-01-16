@@ -19,6 +19,9 @@ export class SendOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
+    if (marketplaceType === MarketplaceTypeEnum.External) {
+      return;
+    }
     const sendOffer = new SendOfferEvent(event);
     const topics = sendOffer.getTopics();
     const marketplace = await this.marketplaceService.getMarketplaceByType(
