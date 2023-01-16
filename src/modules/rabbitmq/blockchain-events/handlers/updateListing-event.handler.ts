@@ -72,6 +72,8 @@ export class UpdateListingEventHandler {
         eventTopics.newBid,
         paymentToken.decimals,
       );
+      auction.maxBid = auction.minBid;
+      auction.maxBidDenominated = auction.minBidDenominated;
     }
 
     if (eventTopics.deadline) {
