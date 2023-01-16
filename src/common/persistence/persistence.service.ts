@@ -39,12 +39,15 @@ import {
   NotificationEntity,
   NotificationsRepository,
 } from 'src/db/notifications';
+import { OfferEntity, OffersRepository } from 'src/db/offers';
+import { OffersFiltersForDb } from 'src/db/offers/offers.filter';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/mx-communication/models/nft.dto';
@@ -69,6 +72,7 @@ export class PersistenceService {
     private readonly ordersRepository: OrdersRepository,
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
+    private readonly offersRepository: OffersRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -568,6 +572,19 @@ export class PersistenceService {
     );
   }
 
+  async getNotificationsByIdentifiersAndType(
+    identifiers: string[],
+    type: NotificationTypeEnum[],
+  ): Promise<NotificationEntity[]> {
+    return await this.execute(
+      this.getNotificationsByIdentifiersAndType.name,
+      this.notificationRepository.getNotificationsByIdentifiersAndType(
+        identifiers,
+        type,
+      ),
+    );
+  }
+
   async getNotificationByIdAndOwner(
     auctionId: number,
     ownerAddress: string,
@@ -970,6 +987,58 @@ export class PersistenceService {
         marketplaceKey,
         collectionIdentifier,
       ),
+    );
+  }
+
+  async getOfferById(id: number): Promise<OfferEntity> {
+    return await this.execute(
+      this.getOfferById.name,
+      this.offersRepository.getOfferById(id),
+    );
+  }
+
+  async getOffers(
+    filters?: OffersFiltersForDb,
+    offset: number = 0,
+    limit: number = 10,
+  ): Promise<[OfferEntity[], number]> {
+    return await this.execute(
+      this.getOffers.name,
+      this.offersRepository.getActiveOffers(filters, offset, limit),
+    );
+  }
+
+  async getOfferByIdAndMarketplace(
+    marketplaceOfferId: number,
+    marletplaceKey: string,
+  ): Promise<OfferEntity> {
+    return await this.execute(
+      this.getOfferByIdAndMarketplace.name,
+      this.offersRepository.getOfferByIdAndMarketplaceKey(
+        marketplaceOfferId,
+        marletplaceKey,
+      ),
+    );
+  }
+
+  async saveOffer(offer: OfferEntity): Promise<OfferEntity> {
+    return await this.execute(
+      this.saveOffer.name,
+      this.offersRepository.saveOffer(offer),
+    );
+  }
+
+  async getOffersThatReachedDeadline(): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.getOffersThatReachedDeadline.name,
+      this.offersRepository.getOffersThatReachedDeadline(),
+    );
+  }
+
+  async updateOffers(offers: OfferEntity[]): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.updateOffers.name,
+      this.offersRepository.updateOffers(offers),
     );
   }
 
