@@ -65,14 +65,13 @@ export class OffersCachingService {
   }
 
   public async invalidateCache(
-    identifier?: string,
+    collectionIdentifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
-    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
     await this.cacheService.deleteInCache(
       this.redisClient,
-      this.getOffersForCollectionCacheKey(collection),
+      this.getOffersForCollectionCacheKey(collectionIdentifier),
     );
     await this.cacheService.deleteInCache(
       this.redisClient,

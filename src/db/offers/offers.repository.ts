@@ -67,23 +67,23 @@ export class OffersRepository extends Repository<OfferEntity> {
   }
 
   async saveOffer(offer: OfferEntity) {
-    const res = await this.offersRepository.save(offer);
-    await this.triggerCacheInvalidation(offer.identifier, offer.ownerAddress);
-    return res;
+    const savedOffer = await this.offersRepository.save(offer);
+    await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
+    return savedOffer;
   }
 
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
     offer.status = status;
     offer.modifiedDate = new Date(new Date().toUTCString());
-    const res = await this.offersRepository.save(offer);
-    await this.triggerCacheInvalidation(offer.identifier, offer.ownerAddress);
-    return res;
+    const updatedOffer = await this.offersRepository.save(offer);
+    await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
+    return updatedOffer;
   }
 
   async updateOffers(offers: OfferEntity[]) {
-    const res = await this.offersRepository.save(offers);
+    const updatedOffers = await this.offersRepository.save(offers);
     await this.triggerCacheInvalidationForOffers(offers);
-    return res;
+    return updatedOffers;
   }
 
   async rollbackOffersByHash(blockHash: string) {
@@ -126,7 +126,7 @@ export class OffersRepository extends Repository<OfferEntity> {
 
   private async triggerCacheInvalidationForOffers(offers: OfferEntity[]) {
     for (const offer of offers) {
-      await this.triggerCacheInvalidation(offer.identifier, offer.ownerAddress);
+      await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
     }
   }
 
