@@ -198,6 +198,7 @@ export class CollectionsGetterService {
     let [collections, count] = await this.getOrSetFullCollections();
 
     collections = this.applyFilters(filters, collections);
+    collections = collections.filter((c) => c.nftsCount > 4);
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
       collections = orderBy(
         collections,

@@ -10,8 +10,6 @@ import { Price } from '../assets/models';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { mxConfig } from 'src/config';
-import { OffersService } from '../offers/offers.service';
-import { OffersFilters } from '../offers/models/Offers-Filters';
 
 @Injectable()
 export class AccountsStatsService {
@@ -23,7 +21,6 @@ export class AccountsStatsService {
     private accountStatsCachingService: AccountsStatsCachingService,
     private marketplacesService: MarketplacesService,
     private usdPriceService: UsdPriceService,
-    private offersService: OffersService,
   ) {}
 
   async getStats(
@@ -83,31 +80,6 @@ export class AccountsStatsService {
         'An error occurred while getting claimable count for account',
         {
           path: 'AccountsStatsService.getClaimableCount',
-          address,
-          exception: err?.message,
-        },
-      );
-      return 0;
-    }
-  }
-
-  async getOffersCount(
-    address: string,
-    marketplaceKey: string = null,
-  ): Promise<number> {
-    try {
-      const [, count] = await this.offersService.getOffersForAddress(
-        new OffersFilters({
-          ownerAddress: address,
-          marketplaceKey: marketplaceKey,
-        }),
-      );
-      return count;
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while getting offers count for account',
-        {
-          path: this.getOffersCount.name,
           address,
           exception: err?.message,
         },

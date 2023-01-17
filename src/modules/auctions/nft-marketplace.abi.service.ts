@@ -26,7 +26,6 @@ import {
   MxProxyService,
   getSmartContract,
   RedisCacheService,
-  MxApiService,
 } from 'src/common';
 import * as Redis from 'ioredis';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -44,10 +43,6 @@ import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/c
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
-import { CreateOfferRequest } from '../offers/models';
-import { OffersService } from '../offers/offers.service';
-import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
-import { NftTypeEnum } from '../assets/models';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -61,9 +56,7 @@ export class NftMarketplaceAbiService {
 
   constructor(
     private mxProxyService: MxProxyService,
-    private apiService: MxApiService,
     private auctionsService: AuctionsGetterService,
-    private offersService: OffersService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
@@ -146,189 +139,6 @@ export class NftMarketplaceAbiService {
       chainID: mxConfig.chainID,
     });
     return withdraw.toPlainObject(new Address(ownerAddress));
-  }
-
-  async createOffer(
-    ownerAddress: string,
-    request: CreateOfferRequest,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
-    const marketplace =
-      await this.marketplaceService.getMarketplaceByCollection(collection);
-    if (!marketplace) {
-      throw new BadRequestError('No marketplace available for this collection');
-    }
-
-    if (
-      marketplace.acceptedPaymentIdentifiers &&
-      !marketplace.acceptedPaymentIdentifiers.includes(request.paymentToken)
-    ) {
-      throw new BadRequestError('Unaccepted payment token');
-    }
-
-    const contract = await this.contract.getContract(marketplace.address);
-    const intermediateInteraction = await this.getGenericOfferInteraction(
-      contract,
-      collection,
-      nonce,
-      request,
-    );
-
-    if (request.paymentToken !== mxConfig.egld) {
-      return intermediateInteraction
-        .withSingleESDTTransfer(
-          TokenPayment.fungibleFromBigInteger(
-            request.paymentToken,
-            new BigNumber(request.paymentAmount),
-          ),
-        )
-        .buildTransaction()
-        .toPlainObject(new Address(ownerAddress));
-    }
-    return intermediateInteraction
-      .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
-  }
-
-  private async getGenericOfferInteraction(
-    contract: SmartContract,
-    collection: string,
-    nonce: string,
-    request: CreateOfferRequest,
-  ): Promise<Interaction> {
-    return contract.methodsExplicit
-      .sendOffer(await this.getCreateOfferArgs(collection, nonce, request))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.bid);
-  }
-
-  async withdrawOffer(
-    ownerAddress: string,
-    offerId: number,
-  ): Promise<TransactionNode> {
-    const offer = await this.offersService.getOfferById(offerId);
-    const marketplace =
-      await this.marketplaceService.getMarketplaceByCollection(
-        offer?.collection,
-      );
-
-    if (!marketplace) {
-      return;
-    }
-    const contract = await this.contract.getContract(marketplace.address);
-    return contract.methodsExplicit
-      .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withValue(TokenPayment.egldFromAmount(0))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
-  }
-
-  async acceptOffer(
-    ownerAddress: string,
-    request: AcceptOfferRequest,
-  ): Promise<TransactionNode> {
-    if (request.auctionId) {
-      return this.acceptOfferAndWithdrawAuction(
-        ownerAddress,
-        request.offerId,
-        request.auctionId,
-      );
-    }
-    return this.acceptSingleOffer(ownerAddress, request.offerId);
-  }
-
-  private async acceptSingleOffer(
-    ownerAddress: string,
-    offerId: number,
-  ): Promise<TransactionNode> {
-    const offer = await this.offersService.getOfferById(offerId);
-
-    if (!offer) {
-      return;
-    }
-
-    const marketplace =
-      await this.marketplaceService.getMarketplaceByCollection(
-        offer.collection,
-      );
-
-    if (!marketplace) {
-      throw new BadRequestError('No marketplace available for this collection');
-    }
-
-    const asset = await this.apiService.getNftByIdentifierAndAddress(
-      ownerAddress,
-      offer.identifier,
-    );
-    if (!asset) {
-      throw new BadRequestError('You do not own this nft!');
-    }
-
-    if (
-      asset.type === NftTypeEnum.SemiFungibleESDT &&
-      asset.balance < offer.boughtTokensNo
-    ) {
-      throw new BadRequestError('Not enough balance to accept this offer!');
-    }
-
-    const contract = await this.contract.getContract(marketplace.address);
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      asset.identifier,
-    );
-    return contract.methodsExplicit
-      .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withSingleESDTNFTTransfer(
-        TokenPayment.metaEsdtFromBigInteger(
-          collection,
-          parseInt(nonce),
-          asset.type === NftTypeEnum.SemiFungibleESDT
-            ? new BigNumber(offer.boughtTokensNo)
-            : new BigNumber(1),
-        ),
-        Address.fromString(ownerAddress),
-      )
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
-  }
-
-  private async acceptOfferAndWithdrawAuction(
-    ownerAddress: string,
-    offerId: number,
-    auctionId: number,
-  ): Promise<TransactionNode> {
-    const offer = await this.offersService.getOfferById(offerId);
-    const auction = await this.auctionsService.getAuctionById(auctionId);
-    if (!offer || !auction || ownerAddress !== auction?.ownerAddress) {
-      throw new BadRequestError('No offer/auction available');
-    }
-
-    const marketplace =
-      await this.marketplaceService.getMarketplaceByCollection(
-        offer.collection,
-      );
-
-    if (!marketplace) {
-      throw new BadRequestError('No marketplace available for this collection');
-    }
-
-    const contract = await this.contract.getContract(marketplace.address);
-    return contract.methodsExplicit
-      .withdrawAuctionAndAcceptOffer([
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-        new U64Value(new BigNumber(offer.marketplaceOfferId)),
-      ])
-      .withValue(TokenPayment.egldFromAmount(0))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
   }
 
   async endAuction(
@@ -491,33 +301,6 @@ export class NftMarketplaceAbiService {
     );
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf().toFixed();
-  }
-
-  private async getCreateOfferArgs(
-    collection: string,
-    nonce: string,
-    request: CreateOfferRequest,
-  ): Promise<TypedValue[]> {
-    let auction = null;
-    if (request.auctionId) {
-      auction = await this.auctionsService.getAuctionById(request.auctionId);
-      if (!auction) {
-        throw new BadRequestError('No auction with the specified id!');
-      }
-    }
-
-    let returnArgs: TypedValue[] = [
-      BytesValue.fromUTF8(collection),
-      BytesValue.fromHex(nonce),
-      new BigUIntValue(new BigNumber(request.quantity)),
-      new U64Value(new BigNumber(request.deadline)),
-    ];
-    if (auction) {
-      returnArgs.push(
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-      );
-    }
-    return returnArgs;
   }
 
   private async getIsPausedAbi(contractAddress: string): Promise<boolean> {

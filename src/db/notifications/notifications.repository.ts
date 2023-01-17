@@ -2,7 +2,6 @@ import { EntityRepository, Repository } from 'typeorm';
 import { NotificationEntity } from '.';
 import { NotificationStatusEnum } from 'src/modules/notifications/models';
 import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
-import { NotificationTypeEnum } from 'src/modules/notifications/models/Notification-type.enum';
 
 @EntityRepository(NotificationEntity)
 export class NotificationsRepository extends Repository<NotificationEntity> {
@@ -31,21 +30,6 @@ export class NotificationsRepository extends Repository<NotificationEntity> {
       .where(`n.auctionId in (:...ids) and n.status='active'`, {
         ids: auctionIds,
       })
-      .getMany();
-  }
-
-  async getNotificationsByIdentifiersAndType(
-    auctionIds: string[],
-    type: NotificationTypeEnum[],
-  ): Promise<NotificationEntity[]> {
-    return await this.createQueryBuilder('n')
-      .where(
-        `n.identifier in (:...ids) AND n.type in (:...types) and n.status='active'`,
-        {
-          ids: auctionIds,
-          types: type,
-        },
-      )
       .getMany();
   }
 

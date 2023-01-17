@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
-import { ClaimableModule } from './crons/claimable/claimable.auction.module';
+import { ClaimableAuctionsModule } from './crons/claimable.auctions/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
@@ -47,7 +47,9 @@ async function bootstrap() {
   }
 
   if (process.env.ENABLE_CLAIMABLE_AUCTIONS === 'true') {
-    let processorApp = await NestFactory.createMicroservice(ClaimableModule);
+    let processorApp = await NestFactory.createMicroservice(
+      ClaimableAuctionsModule,
+    );
     await processorApp.listen();
   }
 

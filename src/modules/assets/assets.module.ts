@@ -123,7 +123,6 @@ import { AuthModule } from '../auth/auth.module';
     AssetsSupplyLoader,
     AssetScamInfoProvider,
     AssetsRedisHandler,
-    AssetsProvider,
   ],
 })
 export class AssetsModuleGraph {}

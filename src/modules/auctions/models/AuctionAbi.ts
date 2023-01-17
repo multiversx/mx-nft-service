@@ -42,17 +42,3 @@ export interface EsdtTokenPayment {
   token_nonce: U64Value;
   amount: BigUIntValue;
 }
-
-export interface EgldOrEsdtTokenPayment {
-  token_identifier: TokenIdentifierValue;
-  token_nonce: U64Value;
-  amount: BigUIntValue;
-}
-
-export interface OfferAbi {
-  offer_token: EsdtTokenPayment;
-  payment: EgldOrEsdtTokenPayment;
-  start_time: U64Value;
-  deadline: U64Value;
-  offer_owner: AddressValue;
-}

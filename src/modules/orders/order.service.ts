@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { OrderEntity } from 'src/db/orders';
 import { CreateOrderArgs, Order, OrderStatusEnum } from './models';
@@ -24,7 +24,6 @@ export class OrdersService {
     private persistenceService: PersistenceService,
     private readonly logger: Logger,
     private ordersCachingService: OrdersCachingService,
-    @Inject(forwardRef(() => NotificationsService))
     private notificationsService: NotificationsService,
     private assetByIdentifierService: AssetByIdentifierService,
     private usdPriceService: UsdPriceService,

@@ -17,7 +17,6 @@ import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.reposito
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
-import { OfferEntity, OffersRepository } from 'src/db/offers';
 import { OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
@@ -43,7 +42,6 @@ import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-eve
     TypeOrmModule.forFeature([NotificationsRepository]),
     TypeOrmModule.forFeature([OrdersRepository]),
     TypeOrmModule.forFeature([AuctionEntity]),
-    TypeOrmModule.forFeature([OfferEntity]),
     TypeOrmModule.forFeature([MarketplaceEventsRepository]),
     CacheEventsPublisherModule,
     MxCommunicationModule,
@@ -54,7 +52,6 @@ import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-eve
     AccountStatsRepository,
     CollectionStatsRepository,
     AuctionsRepository,
-    OffersRepository,
   ],
   exports: [PersistenceService, UsdPriceService],
 })

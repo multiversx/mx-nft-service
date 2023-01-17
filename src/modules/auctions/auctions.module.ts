@@ -32,7 +32,6 @@ import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.red
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { AuthModule } from '../auth/auth.module';
-import { OffersModuleGraph } from '../offers/offers.module';
 
 @Module({
   providers: [
@@ -70,7 +69,6 @@ import { OffersModuleGraph } from '../offers/offers.module';
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => AccountsStatsModuleGraph),
     forwardRef(() => AuthModule),
-    forwardRef(() => OffersModuleGraph),
   ],
   exports: [
     AuctionsSetterService,
