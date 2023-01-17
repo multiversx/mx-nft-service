@@ -15,6 +15,7 @@ import {
   buyNowAuctionRequest,
   runningAuctionRequest,
 } from '../auctions/auctionsRequest';
+import { OffersService } from '../offers/offers.service';
 
 @Injectable()
 export class ExploreStatsService {
@@ -24,6 +25,7 @@ export class ExploreStatsService {
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
     private apiService: MxApiService,
+    private offersService: OffersService,
   ) {
     this.redisClient = this.cachingService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -66,11 +68,13 @@ export class ExploreStatsService {
       await this.auctionsService.getAuctionsGroupByIdentifier(
         runningAuctionRequest,
       );
+    const [, offersCount] = await this.offersService.getOffers();
 
     return new ExploreNftsStats({
       allNftsCount,
       buyNowCount,
       liveAuctionsCount,
+      offersCount,
     });
   }
 

@@ -6,7 +6,6 @@ import {
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { AcceptGlobalOfferEvent } from '../../entities/auction/acceptGlobalOffer.event';

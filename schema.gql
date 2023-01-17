@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AcceptOfferArgs {
+  auctionId: Int
+  offerId: Int
+}
+
 type Account {
   address: ID
   cover: String
@@ -35,6 +40,7 @@ type AccountStats {
   creations: String
   likes: String
   marketplaceKey: String
+  offers: String
   orders: String
 }
 
@@ -585,6 +591,16 @@ input CreateNftArgs {
   royalties: String = "0"
 }
 
+input CreateOfferArgs {
+  auctionId: Int
+  deadline: String!
+  identifier: String!
+  paymentAmount: String!
+  paymentToken: String!
+  paymentTokenNonce: Int = 0
+  quantity: String = "1"
+}
+
 input CurrentPaymentTokensFilters {
   collectionIdentifier: String
   marketplaceKey: String
@@ -600,6 +616,7 @@ type ExploreNftsStats {
   allNftsCount: Int!
   buyNowCount: Int!
   liveAuctionsCount: Int!
+  offersCount: Int!
 }
 
 type ExploreStats {
@@ -783,6 +800,7 @@ type MintPrice {
 }
 
 type Mutation {
+  acceptOffer(input: AcceptOfferArgs!): TransactionNode!
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
@@ -805,6 +823,7 @@ type Mutation {
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  sendOffer(input: CreateOfferArgs!): TransactionNode!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
@@ -817,6 +836,7 @@ type Mutation {
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
+  withdrawOffer(offerId: Int!): TransactionNode!
 }
 
 input MyClaimableAuctionsFilters {
@@ -858,6 +878,8 @@ type NotificationPageInfo {
 enum NotificationTypeEnum {
   Bought
   Ended
+  OfferExpired
+  OfferReceived
   Outbidded
   Sold
   Won
@@ -871,6 +893,66 @@ type NotificationsResponse {
   edges: [NotificationEdge!]
   pageData: PageData
   pageInfo: NotificationPageInfo
+}
+
+type Offer {
+  asset: Asset
+  creationDate: Int
+  endDate: Int
+  id: ID!
+  identifier: String!
+  marketplace: Marketplace!
+  marketplaceKey: String!
+  owner: Account
+  ownerAddress: String!
+  price: Price!
+  quantity: String
+  status: OfferStatusEnum!
+}
+
+type OfferEdge {
+  cursor: String
+  node: Offer
+}
+
+type OfferPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+enum OfferStatusEnum {
+  Accepted
+  Active
+  Closed
+  Expired
+}
+
+input OffersFilters {
+  """The collection identifier for the offers"""
+  collectionIdentifier: String
+
+  """The nft identifier for the offers"""
+  identifier: String
+
+  """The marketplace key for the offers"""
+  marketplaceKey: String
+
+  """The owner of the offer"""
+  ownerAddress: String
+
+  """The payment token for the offers"""
+  priceToken: String
+
+  """The offer status"""
+  status: [OfferStatusEnum!]
+}
+
+type OffersResponse {
+  edges: [OfferEdge!]
+  pageData: PageData
+  pageInfo: OfferPageInfo
 }
 
 enum Operation {
@@ -1045,6 +1127,7 @@ type Query {
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
+  offers(filters: OffersFilters, pagination: ConnectionArgs): OffersResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange(filters: TokenFilter): PriceRange!

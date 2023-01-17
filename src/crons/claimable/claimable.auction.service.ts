@@ -23,6 +23,7 @@ export class ClaimableAuctionsService {
       async () => {
         const endedAuctions =
           await this.auctionGetterService.getAuctionsThatReachedDeadline();
+        if (!endedAuctions || endedAuctions?.length === 0) return;
         await this.notificationsService.generateNotifications(endedAuctions);
         await this.auctionSetterService.updateAuctions(
           endedAuctions?.map((a) => {
