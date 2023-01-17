@@ -67,21 +67,23 @@ export class OffersRepository extends Repository<OfferEntity> {
   }
 
   async saveOffer(offer: OfferEntity) {
+    const res = await this.offersRepository.save(offer);
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
-    return await this.offersRepository.save(offer);
+    return res;
   }
 
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
     offer.status = status;
     offer.modifiedDate = new Date(new Date().toUTCString());
-
+    const res = await this.offersRepository.save(offer);
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
-    return await this.offersRepository.save(offer);
+    return res;
   }
 
   async updateOffers(offers: OfferEntity[]) {
+    const res = await this.offersRepository.save(offers);
     await this.triggerCacheInvalidationForOffers(offers);
-    return await this.offersRepository.save(offers);
+    return res;
   }
 
   async rollbackOffersByHash(blockHash: string) {
