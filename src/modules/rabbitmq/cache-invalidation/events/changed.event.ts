@@ -20,4 +20,5 @@ export enum CacheEventTypeEnum {
   FeaturedCollections,
   DeleteCacheKeys,
   SetCacheKey,
+  UpdateOffer,
 }

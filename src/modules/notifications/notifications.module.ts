@@ -8,6 +8,7 @@ import { AssetByIdentifierService } from '../assets/asset-by-identifier.service'
 import { NotificationsCachingService } from './notifications-caching.service';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { AuthModule } from '../auth/auth.module';
+import { AuctionsModuleGraph } from '../auctions/auctions.module';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { AuthModule } from '../auth/auth.module';
     CacheEventsPublisherModule,
     CommonModule,
     forwardRef(() => OrdersModuleGraph),
+    forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => AuthModule),
   ],
   exports: [
