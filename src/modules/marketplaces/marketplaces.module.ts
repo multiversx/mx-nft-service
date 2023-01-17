@@ -11,6 +11,7 @@ import { MarketplaceProvider } from './loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
 import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing.service';
 import { OffersModuleGraph } from '../offers/offers.module';
+import { UpdateListingEventHandler } from '../rabbitmq/blockchain-events/handlers/updateListing-event.handler';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { OffersModuleGraph } from '../offers/offers.module';
     MarketplaceProvider,
     MarketplaceRedisHandler,
     MarketplaceEventsIndexingService,
+    UpdateListingEventHandler
   ],
   imports: [
     PubSubListenerModule,

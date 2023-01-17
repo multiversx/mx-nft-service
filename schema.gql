@@ -810,6 +810,7 @@ type Mutation {
   buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
   buyTickets(input: BuyTicketsArgs!): TransactionNode!
+  changeListings: Boolean!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   clearNftScamInfo(identifier: String!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!

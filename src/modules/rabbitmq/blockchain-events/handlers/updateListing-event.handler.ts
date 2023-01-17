@@ -44,6 +44,10 @@ export class UpdateListingEventHandler {
         auction.paymentToken,
       );
 
+      if (!paymentToken) {
+        console.log('why no token?', auction.paymentToken);
+      }
+
       this.updateAuctionListing(
         auction,
         updateListingEvent,
@@ -55,6 +59,8 @@ export class UpdateListingEventHandler {
         auction,
         ExternalAuctionEventEnum.UpdateListing,
       );
+
+      return auction;
     }
   }
 
@@ -65,6 +71,8 @@ export class UpdateListingEventHandler {
     hash: string,
   ) {
     const eventTopics = event.getTopics();
+
+    console.log(JSON.stringify(eventTopics));
 
     if (eventTopics.newBid) {
       auction.minBid = eventTopics.newBid;
@@ -87,6 +95,9 @@ export class UpdateListingEventHandler {
       );
     }
 
-    auction.blockHash = hash;
+    // not needed when manually parsing events
+    //auction.blockHash = hash;
+
+    console.log(JSON.stringify(auction));
   }
 }

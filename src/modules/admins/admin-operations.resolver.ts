@@ -117,4 +117,15 @@ export class AdminOperationsResolver {
       throw new ApolloError(error);
     }
   }
+
+  @Mutation(() => Boolean)
+  //@UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async changeListings(): Promise<boolean> {
+    try {
+      await this.marketplaceEventsIndexingService.test();
+      return true;
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
 }

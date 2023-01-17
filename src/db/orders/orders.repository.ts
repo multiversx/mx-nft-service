@@ -59,12 +59,12 @@ export class OrdersRepository extends Repository<OrderEntity> {
 
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
     const orders = await this.createQueryBuilder('orders')
-      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+      .where(`auctionId IN(:...auctionIds)`, {
         auctionIds: auctionIds,
       })
       .getMany();
 
-    return orders?.groupBy((asset) => asset.auctionId);
+    return orders?.groupBy((asset) => asset.auctionId) ?? [];
   }
 
   async getOrders(

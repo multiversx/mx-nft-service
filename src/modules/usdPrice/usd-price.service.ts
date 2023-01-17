@@ -131,10 +131,14 @@ export class UsdPriceService {
       this.getCachedDexTokens(),
       this.getEgldPrice(),
     ]);
+    console.log(JSON.stringify(dexTokens));
     dexTokens.map((dexToken) => {
-      apiTokens.find(
+      let apiToken = apiTokens.find(
         (apiToken) => apiToken.identifier === dexToken.identifier,
-      ).priceUsd = dexToken.priceUsd;
+      );
+      if (apiToken) {
+        apiToken.priceUsd = dexToken.priceUsd;
+      }
     });
     const egldToken: Token = new Token({
       identifier: mxConfig.egld,

@@ -10,12 +10,19 @@ import { DateUtils } from 'src/utils/date-utils';
 import {
   ElasticQuery,
   ElasticSortOrder,
+  QueryConditionOptions,
   QueryType,
   RangeGreaterThan,
   RangeLowerThan,
 } from '@elrondnetwork/erdnest';
 import { Locker } from 'src/utils/locker';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
+import { UpdateListingEventHandler } from '../rabbitmq/blockchain-events/handlers/updateListing-event.handler';
+import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { ExternalAuctionEventEnum } from '../assets/models';
+import { OrderEntity } from 'src/db/orders';
+import { OrderStatusEnum } from '../orders/models';
+import { AuctionEntity } from 'src/db/auctions';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -25,6 +32,7 @@ export class MarketplaceEventsIndexingService {
     private readonly marketplaceService: MarketplacesService,
     private readonly marketplacesCachingService: MarketplacesCachingService,
     private readonly mxElasticService: MxElasticService,
+    private readonly updateListingEventHandler: UpdateListingEventHandler, //private readonly
   ) {}
 
   async reindexAllMarketplaceEvents(
@@ -196,5 +204,225 @@ export class MarketplaceEventsIndexingService {
         marketplaceEvents,
       );
     return [savedRecordsCount, marketplaceEvents.length];
+  }
+
+  async test(): Promise<void> {
+    // after this timestamp, the events were live indexed on staging
+    // 1673866608 - staing
+    // 1673875681 - mainnet
+    const lt = 1673866608;
+
+    const saveEvents = false;
+    const processEvents = false;
+    const processOrders = true;
+
+    const fileName = 'allEvents-staging.json';
+    var fs = require('fs');
+
+    let allEventObjects = [];
+
+    if (saveEvents) {
+      const query = ElasticQuery.create()
+        .withCondition(
+          QueryConditionOptions.should,
+          QueryType.Must([
+            QueryType.Nested('events', {
+              'events.address':
+                'erd1qqqqqqqqqqqqqpgq6wegs2xkypfpync8mn2sa5cmpqjlvrhwz5nqgepyg8',
+            }),
+            QueryType.Nested('events', {
+              'events.identifier': 'changeListing',
+            }),
+          ]),
+        )
+        .withRangeFilter('timestamp', new RangeLowerThan(lt))
+        .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
+
+      await this.mxElasticService.getScrollableList(
+        'logs',
+        'identifier',
+        query,
+        async (eventObjects) => {
+          for (const eventObject of eventObjects) {
+            console.log(eventObject.timestamp);
+            allEventObjects.push(eventObject);
+          }
+        },
+      );
+
+      console.log(
+        allEventObjects.length,
+        allEventObjects[0].timestamp,
+        allEventObjects[allEventObjects.length - 1].timestamp,
+      );
+
+      fs.writeFile(fileName, JSON.stringify(allEventObjects), function (err) {
+        if (err) {
+          console.log(err);
+        }
+      });
+    }
+
+    let updatedAuctions: AuctionEntity[] = [];
+    const uppdatedAuctionsFileName = 'output.json';
+    if (processEvents) {
+      try {
+        if (allEventObjects.length === 0) {
+          allEventObjects = JSON.parse(
+            fs.readFileSync(fileName, { encoding: 'utf8', flag: 'r' }),
+          );
+        }
+
+        for (const eventObject of allEventObjects) {
+          for (const event of eventObject.events) {
+            //console.log(JSON.stringify(event));
+            try {
+              if (event.identifier === ExternalAuctionEventEnum.UpdateListing) {
+                const auction = await this.updateListingEventHandler.handle(
+                  event,
+                  '',
+                  MarketplaceTypeEnum.External,
+                );
+
+                if (!auction) {
+                  continue;
+                }
+
+                let a: AuctionEntity = updatedAuctions.find(
+                  (a) => a.id === auction.id,
+                );
+                if (a) {
+                  a = auction;
+                } else {
+                  updatedAuctions.push(auction);
+                }
+              }
+            } catch (error) {
+              console.log(error);
+              throw error;
+            }
+          }
+        }
+
+        fs.writeFile(
+          uppdatedAuctionsFileName,
+          JSON.stringify(updatedAuctions),
+          function (err) {
+            if (err) {
+              console.log(err);
+            }
+          },
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    try {
+      let updatedOrdersCnt = 0;
+      if (processOrders) {
+        if (updatedAuctions.length === 0) {
+          updatedAuctions = JSON.parse(
+            fs.readFileSync(uppdatedAuctionsFileName, {
+              encoding: 'utf8',
+              flag: 'r',
+            }),
+          );
+        }
+        // get all orders where bought
+        const dbBatchSize = 10;
+        for (let i = 0; i < updatedAuctions.length; i += dbBatchSize) {
+          const ids = updatedAuctions
+            .slice(i, i + dbBatchSize)
+            .map((a) => a.id);
+
+          //console.log(ids);
+
+          let ordersRes: any =
+            await this.persistenceService.getOrdersByAuctionIds(ids);
+
+          let orders = [];
+
+          for (const id of ids) {
+            if (ordersRes[id]) {
+              orders.push(ordersRes[id][0]);
+              //console.log(JSON.stringify(ordersRes[id][0]));
+            }
+          }
+
+          if (
+            !orders ||
+            // !orders[0] ||
+            orders.length === 0
+            // orders.entries?.length === 0 ||
+            // orders.keys?.length === 0 ||
+            // orders.toString() === '{}'
+          ) {
+            continue;
+          }
+
+          //console.log(JSON.stringify(orders));
+
+          // for (const [a, b] of orders.entries) {
+          //   console.log('a', a);
+          //   console.log('b', b);
+          // }
+
+          for (let order of orders) {
+            if (order.status === OrderStatusEnum.Bought) {
+              const auction = updatedAuctions.find(
+                (a) => a.id === order.auctionId,
+              );
+
+              if (auction.maxBid && order.priceAmount !== auction.maxBid) {
+                console.log(
+                  `o.id ${order.id} ${order.priceAmount} -> ${auction.maxBid}`,
+                );
+
+                order.priceAmount = auction.maxBid;
+                order.priceAmountDenominated = auction.maxBidDenominated;
+              }
+
+              if (
+                auction.paymentToken &&
+                order.priceToken !== auction.paymentToken
+              ) {
+                console.log(
+                  `o.id ${order.id} ${order.priceToken} -> ${auction.paymentToken}`,
+                );
+
+                order.priceToken = auction.paymentToken;
+              }
+
+              if (auction.paymentNonce && order.priceNonce !== auction.paymentNonce) {
+                console.log(
+                  `o.id ${order.id} ${order.priceNonce} -> ${auction.paymentNonce}`,
+                );
+
+                order.priceNonce = auction.paymentNonce;
+              }
+
+              updatedOrdersCnt++;
+
+              //await this.persistenceService.saveOrder(order);
+            }
+          }
+
+          // fs.writeFile(
+          //   'updatedOrders.json',
+          //   JSON.stringify(updatedOrdersCnt),
+          //   function (err) {
+          //     if (err) {
+          //       console.log(err);
+          //     }
+          //   },
+          // );
+        }
+
+        console.log(updatedOrdersCnt);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
