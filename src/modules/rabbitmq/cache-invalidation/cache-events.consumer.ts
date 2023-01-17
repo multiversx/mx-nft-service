@@ -86,7 +86,10 @@ export class CacheEventsConsumer {
         break;
       }
       case CacheEventTypeEnum.UpdateOffer:
-        await this.cacheInvalidationEventsService.invalidateAuction(event);
+        await Promise.all([
+          this.cacheInvalidationEventsService.invalidateAuction(event),
+          this.cacheInvalidationEventsService.invalidateOffers(event),
+        ]);
         break;
     }
   }
