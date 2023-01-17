@@ -11,6 +11,7 @@ import { OfferEntity } from 'src/db/offers';
 import { OffersFilters } from '../models/Offers-Filters';
 import { RedisCacheService } from 'src/common/services/caching/redis-cache.service';
 import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class OffersCachingService {
@@ -64,15 +65,19 @@ export class OffersCachingService {
   }
 
   public async invalidateCache(
-    collectionIdentifier?: string,
+    identifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
+    const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
     await this.cacheService.deleteInCache(
       this.redisClient,
-      this.getOffersForCollectionCacheKey(collectionIdentifier),
+      this.getOffersForCollectionCacheKey(collection),
     );
-
+    await this.cacheService.deleteInCache(
+      this.redisClient,
+      this.getOffersForOwnerCacheKey(ownerAddress),
+    );
     await this.redisCacheService.delByPattern(
       this.redisClient,
       this.getOffersCacheKey(),
