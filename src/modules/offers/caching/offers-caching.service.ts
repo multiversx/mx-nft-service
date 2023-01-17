@@ -52,7 +52,7 @@ export class OffersCachingService {
   public async getOrSetOffersForCollection(
     address: string,
     getOrSetOffersForCollection: () => any,
-  ): Promise<[Offer[], number]> {
+  ): Promise<[OfferEntity[], number]> {
     return this.cacheService.getOrSetCache(
       this.redisClient,
       this.getOffersForCollectionCacheKey(address),
