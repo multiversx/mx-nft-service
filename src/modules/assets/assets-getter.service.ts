@@ -1,9 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  MxApiService,
-  MxElasticService,
-  RedisCacheService,
-} from 'src/common';
+import { MxApiService, MxElasticService, RedisCacheService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
@@ -337,7 +333,7 @@ export class AssetsGetterService {
     offset: number,
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
-    for (let i = 0; i < traits.length; i++) {
+    for (let i = 0; i < traits?.length; i++) {
       const multipleAttributesPerTraitFilter = traits.find(
         (t) => t.name === traits[i].name && t.value !== traits[i].value,
       );
