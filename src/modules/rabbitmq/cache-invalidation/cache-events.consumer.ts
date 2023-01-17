@@ -28,7 +28,7 @@ export class CacheEventsConsumer {
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
-    this.logger.log(`Consume cache event - ${event.type}`);
+    this.logger.log(`Consume cache event - ${CacheEventTypeEnum[event.type]}`);
 
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
