@@ -65,7 +65,6 @@ export class OffersCachingService {
     collectionIdentifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
-    console.log('Invalidate offers ', { collectionIdentifier, ownerAddress });
     await this.redisCacheService.del(
       this.redisClient,
       this.getOffersForOwnerCacheKey(ownerAddress),
@@ -94,7 +93,6 @@ export class OffersCachingService {
   }
 
   private getOffersForOwnerCacheKey(address: string): string {
-    console.log(generateCacheKeyFromParams('offers_owner', address));
     return generateCacheKeyFromParams('offers_owner', address);
   }
 
