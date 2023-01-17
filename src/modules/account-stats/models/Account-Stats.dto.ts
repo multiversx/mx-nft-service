@@ -24,8 +24,6 @@ export class AccountStats {
   @Field({ nullable: true })
   orders: string;
   @Field({ nullable: true })
-  offers: string;
-  @Field({ nullable: true })
   claimable: string;
   @Field({ nullable: true })
   marketplaceKey: string;

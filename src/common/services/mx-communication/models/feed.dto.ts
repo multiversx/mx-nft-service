@@ -18,8 +18,6 @@ export enum EventEnum {
   bid = 'bid',
   buy = 'buy',
   won = 'won',
-  sendOffer = 'sendOffer',
-  acceptOffer = 'acceptOffer',
 }
 
 export enum TopicEnum {

@@ -8,7 +8,12 @@ import {
   AuctionCustomSort,
 } from 'src/modules/common/filters/AuctionCustomFilters';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
-import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
+import {
+  Sorting,
+  Sort,
+  Operation,
+  Operator,
+} from 'src/modules/common/filters/filtersTypes';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {

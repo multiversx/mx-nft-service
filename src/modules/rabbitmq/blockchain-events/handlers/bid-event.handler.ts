@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -26,7 +25,6 @@ export class BidEventHandler {
     private notificationsService: NotificationsService,
     private feedEventsSenderService: FeedEventsSenderService,
     private readonly marketplaceService: MarketplacesService,
-    private readonly persistenceService: PersistenceService,
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
@@ -85,10 +83,6 @@ export class BidEventHandler {
         AuctionStatusEnum.Ended,
         hash,
         event.identifier,
-      );
-      this.persistenceService.updateOrderWithStatus(
-        order,
-        OrderStatusEnum.Bought,
       );
     }
   }

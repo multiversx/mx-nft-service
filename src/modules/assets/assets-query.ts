@@ -14,8 +14,7 @@ export class AssetsQuery {
     paramName: string,
     paramValue: string | string[] | number | boolean,
   ): this {
-    if (paramValue === undefined || paramValue === null || !paramName)
-      return this;
+    if (!paramValue || !paramName) return this;
     this.query += `${
       this.query.length === 0 ? '?' : '&'
     }${paramName}=${paramValue}`;
@@ -82,9 +81,7 @@ export class AssetsQuery {
   }
 
   withNsfwFlag(): this {
-    // disable temporary
-    // return this.addParamToQuery('isNsfw', false);
-    return this;
+    return this.addParamToQuery('isNsfw', false);
   }
 
   withNftSftType(): this {

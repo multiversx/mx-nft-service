@@ -1,19 +1,20 @@
 {
   "buildInfo": {
     "rustc": {
-      "version": "1.67.0-nightly",
-      "commitHash": "01fbc5ae789fc0c7a2da71d3cd908451f175e4eb",
-      "commitDate": "2022-12-07",
+      "version": "1.66.0-nightly",
+      "commitHash": "a24a020e6d926dffe6b472fc647978f92269504e",
+      "commitDate": "2022-10-18",
       "channel": "Nightly",
-      "short": "rustc 1.67.0-nightly (01fbc5ae7 2022-12-07)"
+      "short": "rustc 1.66.0-nightly (a24a020e6 2022-10-18)"
     },
     "contractCrate": {
       "name": "esdt-nft-marketplace",
-      "version": "0.0.0"
+      "version": "0.0.0",
+      "git_version": "31baa00"
     },
     "framework": {
       "name": "elrond-wasm",
-      "version": "0.38.0"
+      "version": "0.33.1"
     }
   },
   "name": "EsdtNftMarketplace",
@@ -150,102 +151,6 @@
       ]
     },
     {
-      "name": "sendOffer",
-      "mutability": "mutable",
-      "payableInTokens": ["*"],
-      "inputs": [
-        {
-          "name": "desired_nft_id",
-          "type": "TokenIdentifier"
-        },
-        {
-          "name": "desired_nft_nonce",
-          "type": "u64"
-        },
-        {
-          "name": "desired_amount",
-          "type": "BigUint"
-        },
-        {
-          "name": "deadline",
-          "type": "u64"
-        },
-        {
-          "name": "opt_auction_id",
-          "type": "optional<u64>",
-          "multi_arg": true
-        }
-      ],
-      "outputs": [
-        {
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "withdrawOffer",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "acceptOffer",
-      "mutability": "mutable",
-      "payableInTokens": ["*"],
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "withdrawAuctionAndAcceptOffer",
-      "mutability": "mutable",
-      "inputs": [
-        {
-          "name": "auction_id",
-          "type": "u64"
-        },
-        {
-          "name": "offer_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": []
-    },
-    {
-      "name": "getFullOfferData",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "Offer"
-        }
-      ]
-    },
-    {
-      "name": "getLastValidOfferId",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "u64"
-        }
-      ]
-    },
-    {
       "name": "bid",
       "mutability": "mutable",
       "payableInTokens": ["*"],
@@ -374,6 +279,16 @@
       ]
     },
     {
+      "name": "isPaused",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "pause",
       "onlyOwner": true,
       "mutability": "mutable",
@@ -386,394 +301,9 @@
       "mutability": "mutable",
       "inputs": [],
       "outputs": []
-    },
-    {
-      "name": "isPaused",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "bool"
-        }
-      ]
     }
   ],
-  "events": [
-    {
-      "identifier": "auction_token_event",
-      "inputs": [
-        {
-          "name": "auction_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "seller",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "min_bid",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "max_bid",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "start_time",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "deadline",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "accepted_payment_token",
-          "type": "EgldOrEsdtTokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "accepted_payment_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_type",
-          "type": "AuctionType",
-          "indexed": true
-        },
-        {
-          "name": "creator_royalties_percentage",
-          "type": "BigUint"
-        }
-      ]
-    },
-    {
-      "identifier": "bid_event",
-      "inputs": [
-        {
-          "name": "auction_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "nr_auctioned_tokens",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "bidder",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "bid_amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "end_auction_event",
-      "inputs": [
-        {
-          "name": "auction_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "nr_auctioned_tokens",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "auction_winner",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "winning_bid_amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "buy_sft_event",
-      "inputs": [
-        {
-          "name": "auction_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "nr_bought_tokens",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "buyer",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "bid_sft_amount",
-          "type": "BigUint",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "withdraw_event",
-      "inputs": [
-        {
-          "name": "auction_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "auctioned_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "auction_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "nr_auctioned_tokens",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "seller",
-          "type": "Address",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "offer_token_event",
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_type",
-          "type": "EgldOrEsdtTokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "payment_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "buyer",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "start_time",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "deadline",
-          "type": "u64",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "withdraw_offer_token_event",
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_type",
-          "type": "EgldOrEsdtTokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "payment_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "buyer",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "start_time",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "deadline",
-          "type": "u64",
-          "indexed": true
-        }
-      ]
-    },
-    {
-      "identifier": "accept_offer_token_event",
-      "inputs": [
-        {
-          "name": "offer_id",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_id",
-          "type": "TokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "offer_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "offer_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_type",
-          "type": "EgldOrEsdtTokenIdentifier",
-          "indexed": true
-        },
-        {
-          "name": "payment_token_nonce",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "payment_amount",
-          "type": "BigUint",
-          "indexed": true
-        },
-        {
-          "name": "buyer",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "seller",
-          "type": "Address",
-          "indexed": true
-        },
-        {
-          "name": "start_time",
-          "type": "u64",
-          "indexed": true
-        },
-        {
-          "name": "deadline",
-          "type": "u64",
-          "indexed": true
-        }
-      ]
-    }
-  ],
+  "events": [],
   "hasCallback": false,
   "types": {
     "Auction": {
@@ -858,23 +388,6 @@
         }
       ]
     },
-    "EgldOrEsdtTokenPayment": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "token_identifier",
-          "type": "EgldOrEsdtTokenIdentifier"
-        },
-        {
-          "name": "token_nonce",
-          "type": "u64"
-        },
-        {
-          "name": "amount",
-          "type": "BigUint"
-        }
-      ]
-    },
     "EsdtTokenPayment": {
       "type": "struct",
       "fields": [
@@ -889,31 +402,6 @@
         {
           "name": "amount",
           "type": "BigUint"
-        }
-      ]
-    },
-    "Offer": {
-      "type": "struct",
-      "fields": [
-        {
-          "name": "offer_token",
-          "type": "EsdtTokenPayment"
-        },
-        {
-          "name": "payment",
-          "type": "EgldOrEsdtTokenPayment"
-        },
-        {
-          "name": "start_time",
-          "type": "u64"
-        },
-        {
-          "name": "deadline",
-          "type": "u64"
-        },
-        {
-          "name": "offer_owner",
-          "type": "Address"
         }
       ]
     }
