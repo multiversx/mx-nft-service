@@ -233,7 +233,7 @@ export function getCurrentPaymentTokens(
     collectionIdentifier ? `AND a.collection = '${collectionIdentifier}'` : ''
   }`;
   return `SELECT DISTINCT paymentToken, COUNT(a.paymentToken) AS count FROM auctions a 
-  WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken`;
+  WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken ORDER by count DESC`;
 }
 
 export class AuctionFilterBuilder {
