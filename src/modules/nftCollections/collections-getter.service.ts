@@ -4,11 +4,7 @@ import { Address } from '@elrondnetwork/erdjs';
 import { cacheConfig, genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import {
-  CollectionApi,
-  MxApiService,
-  MxIdentityService,
-} from 'src/common';
+import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
@@ -87,9 +83,14 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
+    const blacklistCollections = ['PEPE-293def', 'DEAD-79f8d1'];
     let [trendingCollections] = await this.getOrSetTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
+
     const count = trendingCollections.length;
+    trendingCollections = trendingCollections.filter(
+      (x) => !blacklistCollections.includes(x.collection),
+    );
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
