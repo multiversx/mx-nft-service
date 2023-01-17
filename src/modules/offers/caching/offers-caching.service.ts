@@ -10,8 +10,6 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { OfferEntity } from 'src/db/offers';
 import { OffersFilters } from '../models/Offers-Filters';
 import { RedisCacheService } from 'src/common/services/caching/redis-cache.service';
-import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class OffersCachingService {
@@ -19,7 +17,6 @@ export class OffersCachingService {
   constructor(
     private cacheService: CachingService,
     private redisCacheService: RedisCacheService,
-    private accountStatsCachingService: AccountsStatsCachingService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -68,7 +65,6 @@ export class OffersCachingService {
     collectionIdentifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
-    await this.accountStatsCachingService.invalidateStats(ownerAddress);
     await this.cacheService.deleteInCache(
       this.redisClient,
       this.getOffersForOwnerCacheKey(ownerAddress),
