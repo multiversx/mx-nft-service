@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
@@ -86,7 +86,7 @@ export class CacheEventsConsumer {
         break;
       }
       case CacheEventTypeEnum.UpdateOffer:
-        await this.cacheInvalidationEventsService.invalidateAuction(event);
+        await this.cacheInvalidationEventsService.invalidateOffers(event);
         break;
     }
   }

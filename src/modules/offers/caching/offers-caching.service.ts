@@ -41,7 +41,7 @@ export class OffersCachingService {
     address: string,
     getOrSetOffersForAddress: () => any,
   ): Promise<[OfferEntity[], number]> {
-    return this.cacheService.getOrSetCache(
+    return this.redisCacheService.getOrSet(
       this.redisClient,
       this.getOffersForOwnerCacheKey(address),
       () => getOrSetOffersForAddress(),
@@ -52,8 +52,8 @@ export class OffersCachingService {
   public async getOrSetOffersForCollection(
     address: string,
     getOrSetOffersForCollection: () => any,
-  ): Promise<[Offer[], number]> {
-    return this.cacheService.getOrSetCache(
+  ): Promise<[OfferEntity[], number]> {
+    return this.redisCacheService.getOrSet(
       this.redisClient,
       this.getOffersForCollectionCacheKey(address),
       () => getOrSetOffersForCollection(),
@@ -65,15 +65,14 @@ export class OffersCachingService {
     collectionIdentifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
-    await this.cacheService.deleteInCache(
+    await this.redisCacheService.del(
       this.redisClient,
       this.getOffersForOwnerCacheKey(ownerAddress),
     );
-    await this.cacheService.deleteInCache(
+    await this.redisCacheService.del(
       this.redisClient,
       this.getOffersForCollectionCacheKey(collectionIdentifier),
     );
-
     await this.redisCacheService.delByPattern(
       this.redisClient,
       this.getOffersCacheKey(),

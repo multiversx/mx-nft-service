@@ -84,7 +84,7 @@ export class OffersService {
     offset: number,
     limit: number,
   ): Promise<[Offer[], number]> {
-    let [offers] = await this.offersCachingService.getOrSetOffersForAddress(
+    let [offers] = await this.offersCachingService.getOrSetOffersForCollection(
       filters.ownerAddress,
       () =>
         this.persistenceService.getOffers(
