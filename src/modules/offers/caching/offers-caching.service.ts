@@ -71,11 +71,11 @@ export class OffersCachingService {
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
     await this.cacheService.deleteInCache(
       this.redisClient,
-      this.getOffersForCollectionCacheKey(collectionIdentifier),
+      this.getOffersForOwnerCacheKey(ownerAddress),
     );
     await this.cacheService.deleteInCache(
       this.redisClient,
-      this.getOffersForOwnerCacheKey(ownerAddress),
+      this.getOffersForCollectionCacheKey(collectionIdentifier),
     );
     await this.redisCacheService.delByPattern(
       this.redisClient,
