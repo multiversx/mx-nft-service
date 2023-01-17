@@ -12,7 +12,6 @@ import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 @Injectable()
 export class CacheEventsConsumer {
   constructor(
-    private readonly logger: Logger,
     private cacheSetterAdminService: CacheSetterAdminService,
     private cacheInvalidationAdminService: CacheInvalidationAdminService,
     private assetsRedisHandler: AssetsRedisHandler,
@@ -28,8 +27,6 @@ export class CacheEventsConsumer {
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
-    this.logger.log(`Consume cache event ${JSON.stringify(event)}`);
-
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
         await Promise.all([
