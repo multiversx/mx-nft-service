@@ -19,7 +19,8 @@
     "egld": "EGLD",
     "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
     "pemFileName": "wallet.pem",
-    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
+    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets",
+    "blacklistCollections": "PIXELSAPES-6f39b8,DEAD-79f8d1,PEPE-293def,FLIPPEDEP-f9395f,TRIPZ-825db8,CLC-fbd165,CLC-1ec837,ALIEN-a499ab,MADZALP-c9275e,BZK-e82bce,MINOTAUR-ee193a,FLUFF-288a44,REAPERS-53ec55,CIPIRAW-477259,JOINT-665de4,FAT-b83d85,XPLANTCREW-3d80a9,KILLERS-a268fe,MOONROCKYS-e03123,BDGA-a05446,PARTY-705dcb,KOALA-4f171c,BMA-2ac2b7,EALIENPUNK-578305,PIXELCLC-e835c9,CHAOSCROCS-bd2e85,WEED-41a93c,EGLDKONGZ-acc056,JUNKY-0c90e0,ROPUNK-a3be3d,GRIZZLY-2bdd4d,ED6957-b3a408,EGLDSOCCER-ee5ca9,IPR-77a747,EGHOSTNFT1-87b6c9,ALIEN-b4956a,HAZE-9f06bc,TRIPPYT-52a2e3,COWS-519b6e,BABEEZ-13d2f5"
   },
   "caching": {
     "ordersRedisClientName": "orders",

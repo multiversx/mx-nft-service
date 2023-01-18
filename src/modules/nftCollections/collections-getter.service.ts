@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
 import { Address } from '@elrondnetwork/erdjs';
-import { cacheConfig, genericDescriptions } from 'src/config';
+import { cacheConfig, genericDescriptions, mxConfig } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
@@ -83,7 +83,7 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    const blacklistCollections = ['PEPE-293def', 'DEAD-79f8d1'];
+    const blacklistCollections = mxConfig.blacklistCollections.split(',');
     let [trendingCollections] = await this.getOrSetTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
 
