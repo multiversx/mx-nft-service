@@ -76,7 +76,6 @@ export class CacheInvalidationEventsService {
   }
 
   async invalidateTrendingAuctions(payload: ChangedEvent) {
-    if (process.env.ENABLE_CACHE_WARMER === 'true')
-      await this.analyticsService.handleTrendingCollections(payload.id);
+    await this.analyticsService.handleTrendingCollections(payload.id);
   }
 }
