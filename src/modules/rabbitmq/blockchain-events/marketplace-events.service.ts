@@ -55,6 +55,7 @@ export class MarketplaceEventsService {
         case AuctionEventEnum.BuySftEvent:
         case ExternalAuctionEventEnum.Buy:
         case ExternalAuctionEventEnum.BulkBuy:
+        case ExternalAuctionEventEnum.BuyFor:
         case ExternalAuctionEventEnum.BuyNft:
         case ElrondNftsSwapAuctionEventEnum.Purchase:
           const eventName = Buffer.from(event.topics[0], 'base64').toString();

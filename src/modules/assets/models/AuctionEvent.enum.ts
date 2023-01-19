@@ -17,6 +17,7 @@ export enum ExternalAuctionEventEnum {
   ListNftOnMarketplace = 'listNftOnMarketplace',
   Buy = 'buy',
   BuyNft = 'buyNft',
+  BuyFor = 'buyFor',
   BulkBuy = 'bulkBuy',
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
