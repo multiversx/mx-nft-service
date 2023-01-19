@@ -28,6 +28,7 @@ import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-
 import { DocumentDbModule } from 'src/document-db/document-db.module';
 import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
+import { BlacklistedCollectionsModule } from '../blacklist/blacklisted-collections.module';
 
 @Module({
   providers: [
@@ -62,6 +63,7 @@ import { AuthModule } from '../auth/auth.module';
     forwardRef(() => CommonModule),
     forwardRef(() => AuthModule),
     DocumentDbModule,
+    BlacklistedCollectionsModule,
   ],
   exports: [
     CollectionsTransactionsService,

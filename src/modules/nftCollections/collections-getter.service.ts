@@ -23,6 +23,7 @@ import {
 import { randomBetween } from 'src/utils/helpers';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
+import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -36,6 +37,7 @@ export class CollectionsGetterService {
     private collectionNftsRedis: CollectionsNftsRedisHandler,
     private cacheService: CachingService,
     private documentDbService: DocumentDbService,
+    private blacklistedCollectionsService: BlacklistedCollectionsService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.collectionsRedisClientName,
@@ -90,6 +92,12 @@ export class CollectionsGetterService {
     let [trendingCollections] = await this.getOrSetTrendingCollections();
     trendingCollections = this.applyFilters(filters, trendingCollections);
     const count = trendingCollections.length;
+    trendingCollections = trendingCollections.filter(
+      async (x) =>
+        !(await this.blacklistedCollectionsService.isBlacklistedCollection(
+          x.collection,
+        )),
+    );
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }

@@ -25,6 +25,7 @@ import { PersistenceService } from './persistence.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
+import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections';
 
 @Global()
 @Module({
@@ -32,6 +33,7 @@ import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-eve
     TypeOrmModule.forFeature([AssetsLikesRepository]),
     TypeOrmModule.forFeature([FeaturedCollectionsRepository]),
     TypeOrmModule.forFeature([FeaturedNftsRepository]),
+    TypeOrmModule.forFeature([BlacklistedCollectionsRepository]),
     TypeOrmModule.forFeature([TagsRepository]),
     TypeOrmModule.forFeature([CampaignsRepository]),
     TypeOrmModule.forFeature([TiersRepository]),

@@ -801,6 +801,7 @@ type MintPrice {
 
 type Mutation {
   acceptOffer(input: AcceptOfferArgs!): TransactionNode!
+  addBlacklistedCollection(collection: String!): Boolean!
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
   addReport(input: ReportNftInput!): Boolean!
@@ -821,6 +822,7 @@ type Mutation {
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
+  removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
