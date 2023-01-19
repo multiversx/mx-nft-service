@@ -42,7 +42,10 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
 
     response = [
       ...response,
-      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
+      new RedisValue({
+        values: finalNfts,
+        ttl: CacheInfo.CollectionAssets.ttl,
+      }),
       new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];
     return response;
