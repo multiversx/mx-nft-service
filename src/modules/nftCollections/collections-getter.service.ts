@@ -19,6 +19,7 @@ import {
 import { randomBetween } from 'src/utils/helpers';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
+import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
 import { AnalyticsService } from '../analytics/analytics.service';
 
 @Injectable()
@@ -34,6 +35,7 @@ export class CollectionsGetterService {
     private cacheService: CachingService,
     private analyticsService: AnalyticsService,
     private documentDbService: DocumentDbService,
+    private blacklistedCollectionsService: BlacklistedCollectionsService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.collectionsRedisClientName,
@@ -85,7 +87,6 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    const blacklistCollections = ['PEPE-293def', 'DEAD-79f8d1'];
     let trendingCollections = [];
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
       const collections = await this.analyticsService.getTrendingByVolume();
@@ -95,11 +96,11 @@ export class CollectionsGetterService {
         await this.getOrSetTrendingByAuctionsCollections();
     }
     trendingCollections = this.applyFilters(filters, trendingCollections);
-
+    const blacklistedCollections =
+      await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
     trendingCollections = trendingCollections.filter(
-      (x) => !blacklistCollections.includes(x.collection),
+      (x) => !blacklistedCollections.includes(x.collection),
     );
-
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];

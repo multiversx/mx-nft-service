@@ -93,6 +93,11 @@ export class CacheEventsConsumer {
         break;
       }
 
+      case CacheEventTypeEnum.BlacklistedCollections: {
+        await this.cacheInvalidationEventsService.invalidateBlacklistedCollectionsCache();
+        break;
+      }
+
       case CacheEventTypeEnum.DeleteCacheKeys: {
         await this.cacheInvalidationAdminService.deleteCacheKeys(event);
         break;
