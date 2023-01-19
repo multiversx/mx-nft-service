@@ -45,7 +45,6 @@ export class CacheEventsConsumer {
         await Promise.all([
           this.assetsRedisHandler.clearMultipleKeys(event.id),
           this.collectionAssets.clearMultipleKeys(collections),
-          this.collectionAssetsCount.clearMultipleKeys(event.id),
         ]);
         break;
 
@@ -54,7 +53,6 @@ export class CacheEventsConsumer {
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
-          this.collectionAssetsCount.clearKey(collection),
         ]);
         break;
 
