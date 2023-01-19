@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { MxApiService, RedisCacheService } from 'src/common';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
 import { NftTypeEnum } from '../assets/models';
@@ -16,7 +17,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     redisCacheService: RedisCacheService,
     private apiService: MxApiService,
   ) {
-    super(redisCacheService, 'collectionAssets');
+    super(redisCacheService, CacheInfo.CollectionAssets.key);
   }
   mapValues(
     returnValues: { key: string; value: any }[],

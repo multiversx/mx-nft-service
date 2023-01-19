@@ -91,6 +91,7 @@ export class FlagNftService {
           }));
 
           await this.updateCollectionNfts(nsfwItems, value);
+          // todo: update collection elastic flag
         },
       );
       return true;
@@ -220,7 +221,7 @@ export class FlagNftService {
     await this.cacheEventPublisherService.publish(
       new ChangedEvent({
         id: identifier,
-        type: CacheEventTypeEnum.OwnerChanged,
+        type: CacheEventTypeEnum.AssetRefresh,
       }),
     );
   }

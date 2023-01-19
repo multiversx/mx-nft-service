@@ -21,4 +21,5 @@ export enum CacheEventTypeEnum {
   DeleteCacheKeys,
   SetCacheKey,
   UpdateOffer,
+  AssetRefresh,
 }
