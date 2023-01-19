@@ -76,6 +76,11 @@ export class CacheEventsConsumer {
         break;
       }
 
+      case CacheEventTypeEnum.BlacklistedCollections: {
+        await this.cacheInvalidationEventsService.invalidateBlacklistedCollectionsCache();
+        break;
+      }
+
       case CacheEventTypeEnum.DeleteCacheKeys: {
         await this.cacheInvalidationAdminService.deleteCacheKeys(event);
         break;
@@ -87,6 +92,12 @@ export class CacheEventsConsumer {
       }
       case CacheEventTypeEnum.UpdateOffer:
         await this.cacheInvalidationEventsService.invalidateOffers(event);
+        break;
+
+      case CacheEventTypeEnum.RefreshTrending:
+        await this.cacheInvalidationEventsService.invalidateTrendingAuctions(
+          event,
+        );
         break;
     }
   }

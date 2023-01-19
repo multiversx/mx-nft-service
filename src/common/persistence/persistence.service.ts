@@ -10,6 +10,10 @@ import { AuctionWithStartBid } from 'src/db/auctions/auctionWithBidCount.dto';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
+import {
+  BlacklistedCollectionEntity,
+  BlacklistedCollectionsRepository,
+} from 'src/db/blacklistedCollections';
 import { CampaignEntity } from 'src/db/campaigns/campaign.entity';
 import { CampaignsRepository } from 'src/db/campaigns/campaigns.repository';
 import { TierEntity } from 'src/db/campaigns/tiers.entity';
@@ -63,6 +67,7 @@ export class PersistenceService {
     private readonly tiersRepository: TiersRepository,
     private readonly featuredCollectionsRepository: FeaturedCollectionsRepository,
     private readonly featuredNftsRepository: FeaturedNftsRepository,
+    private readonly blacklistedCollectionsRepository: BlacklistedCollectionsRepository,
     private readonly marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private readonly marketplaceRepository: MarketplaceRepository,
     private readonly reportNftsRepository: ReportNftsRepository,
@@ -1068,5 +1073,34 @@ export class PersistenceService {
       beforeTimestamp,
       afterTimestamp,
     );
+  }
+
+  async getBlacklistedCollections(): Promise<
+    [BlacklistedCollectionEntity[], number]
+  > {
+    return await this.execute(
+      this.getBlacklistedCollections.name,
+      this.blacklistedCollectionsRepository.getBlacklistedCollections(),
+    );
+  }
+
+  async addBlacklistedCollection(collection: string): Promise<boolean> {
+    const res = await this.execute(
+      this.addBlacklistedCollection.name,
+      this.blacklistedCollectionsRepository.save(
+        new FeaturedCollectionEntity({ identifier: collection }),
+      ),
+    );
+    return !!res.id;
+  }
+
+  async removeBlacklistedCollection(collection: string): Promise<boolean> {
+    const res = await this.execute(
+      this.removeBlacklistedCollection.name,
+      this.blacklistedCollectionsRepository.delete({
+        identifier: collection,
+      }),
+    );
+    return res.affected === 1;
   }
 }

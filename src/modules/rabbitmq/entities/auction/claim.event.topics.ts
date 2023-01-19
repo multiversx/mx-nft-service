@@ -4,6 +4,7 @@ export class ClaimEventsTopics {
   private currentWinner: Address;
   private collection: string;
   private nonce: string;
+  private bid: string = '0';
   private auctionId: string;
   private boughtTokens: string = '1';
 
@@ -20,6 +21,7 @@ export class ClaimEventsTopics {
       nonce: this.nonce,
       auctionId: this.auctionId,
       boughtTokens: this.boughtTokens,
+      bid: this.bid,
     };
   }
 }

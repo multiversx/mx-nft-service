@@ -4,11 +4,7 @@ import { Address } from '@elrondnetwork/erdjs';
 import { cacheConfig, genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import {
-  CollectionApi,
-  MxApiService,
-  MxIdentityService,
-} from 'src/common';
+import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
@@ -23,6 +19,8 @@ import {
 import { randomBetween } from 'src/utils/helpers';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
+import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -35,7 +33,9 @@ export class CollectionsGetterService {
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
     private cacheService: CachingService,
+    private analyticsService: AnalyticsService,
     private documentDbService: DocumentDbService,
+    private blacklistedCollectionsService: BlacklistedCollectionsService,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.collectionsRedisClientName,
@@ -87,14 +87,28 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    let [trendingCollections] = await this.getOrSetTrendingCollections();
+    let trendingCollections = [];
+    if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
+      const collections = await this.analyticsService.getTrendingByVolume();
+      [trendingCollections] = await this.addCollectionsDetails(collections);
+    } else {
+      [trendingCollections] =
+        await this.getOrSetTrendingByAuctionsCollections();
+    }
     trendingCollections = this.applyFilters(filters, trendingCollections);
+    const blacklistedCollections =
+      await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
+    trendingCollections = trendingCollections.filter(
+      (x) => !blacklistedCollections.includes(x.collection),
+    );
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
 
-  async getOrSetTrendingCollections(): Promise<[Collection[], number]> {
+  async getOrSetTrendingByAuctionsCollections(): Promise<
+    [Collection[], number]
+  > {
     return await this.cacheService.getOrSetCache(
       this.redisClient,
       CacheInfo.TrendingCollections.key,
@@ -104,6 +118,28 @@ export class CollectionsGetterService {
   }
 
   async getAllTrendingCollections(): Promise<[Collection[], number]> {
+    const [trendingCollections] = await Promise.all([
+      this.persistenceService.getTrendingCollections(),
+      this.persistenceService.getTrendingCollectionsCount(),
+    ]);
+    return await this.addCollectionsDetails(trendingCollections);
+  }
+
+  private async addCollectionsDetails(
+    trendingCollections: any[],
+  ): Promise<[Collection[], number]> {
+    const mappedCollections = [];
+    const [collections] = await this.getOrSetFullCollections();
+    for (const trendingCollection of trendingCollections) {
+      const mappedCollection = collections.find(
+        (c) => c.collection === trendingCollection.collection,
+      );
+      if (mappedCollection) mappedCollections.push(mappedCollection);
+    }
+    return [mappedCollections, mappedCollections.length];
+  }
+
+  async getAllTrendingByVolumeCollections(): Promise<[Collection[], number]> {
     const [trendingCollections] = await Promise.all([
       this.persistenceService.getTrendingCollections(),
       this.persistenceService.getTrendingCollectionsCount(),

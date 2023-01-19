@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { CacheWarmerModule } from 'src/crons/cache.warmer/cache.warmer.module';
 import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-history-caching.service';
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { IsAssetLikedRedisHandler } from 'src/modules/assets/loaders/asset-is-liked.redis-handler';
 import { AuctionsCachingModule } from 'src/modules/auctions/caching/auctions-caching.module';
+import { BlacklistedCollectionsCachingService } from 'src/modules/blacklist/blacklisted-collections.caching.service';
 import { FeaturedCollectionsCachingService } from 'src/modules/featured/featured-caching.service';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
 import { OffersCachingModule } from 'src/modules/offers/caching/offers-caching.module';
@@ -10,7 +12,12 @@ import { OrdersCachingModule } from 'src/modules/orders/caching/orders-caching.m
 import { CacheInvalidationEventsService } from './cache-invalidation-events.service';
 
 @Module({
-  imports: [AuctionsCachingModule, OrdersCachingModule, OffersCachingModule],
+  imports: [
+    AuctionsCachingModule,
+    OrdersCachingModule,
+    OffersCachingModule,
+    CacheWarmerModule,
+  ],
   providers: [
     CacheInvalidationEventsService,
     NotificationsCachingService,
@@ -18,6 +25,7 @@ import { CacheInvalidationEventsService } from './cache-invalidation-events.serv
     IsAssetLikedRedisHandler,
     AssetsHistoryCachingService,
     FeaturedCollectionsCachingService,
+    BlacklistedCollectionsCachingService,
   ],
   exports: [CacheInvalidationEventsService, NotificationsCachingService],
 })

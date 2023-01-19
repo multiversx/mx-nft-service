@@ -9,6 +9,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneDay,
   };
 
+  static TrendingByVolume: CacheInfo = {
+    key: 'trendingByVolume',
+    ttl: TimeConstants.oneWeek,
+  };
+
   static CollectionsMostActive: CacheInfo = {
     key: 'collectionsMostActive',
     ttl: TimeConstants.oneDay,
@@ -21,6 +26,11 @@ export class CacheInfo {
 
   static FeaturedNfts: CacheInfo = {
     key: 'featuredNfts',
+    ttl: TimeConstants.oneWeek,
+  };
+
+  static BlacklistedCollections: CacheInfo = {
+    key: 'blacklistedCollections',
     ttl: TimeConstants.oneWeek,
   };
 
