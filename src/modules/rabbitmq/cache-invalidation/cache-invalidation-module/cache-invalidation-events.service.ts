@@ -4,6 +4,7 @@ import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-hi
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
+import { BlacklistedCollectionsCachingService } from 'src/modules/blacklist/blacklisted-collections.caching.service';
 import { FeaturedCollectionsCachingService } from 'src/modules/featured/featured-caching.service';
 import { NotificationsCachingService } from 'src/modules/notifications/notifications-caching.service';
 import { OffersCachingService } from 'src/modules/offers/caching/offers-caching.service';
@@ -20,6 +21,7 @@ export class CacheInvalidationEventsService {
     private assetsLikesCachingService: AssetsLikesCachingService,
     private assetsHistoryCachingService: AssetsHistoryCachingService,
     private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
+    private blacklistedCollectionsCachingService: BlacklistedCollectionsCachingService,
     private analyticsService: TrendingCollectionsWarmerService,
     private offersCachingService: OffersCachingService,
   ) {}
@@ -68,6 +70,11 @@ export class CacheInvalidationEventsService {
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
+    await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
+  }
+
+  async invalidateBlacklistedCollectionsCache(): Promise<void> {
+    await this.blacklistedCollectionsCachingService.invalidateBlacklistedCollectionsCache();
     await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 

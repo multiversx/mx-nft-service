@@ -29,6 +29,11 @@ export class CacheInfo {
     ttl: TimeConstants.oneWeek,
   };
 
+  static BlacklistedCollections: CacheInfo = {
+    key: 'blacklistedCollections',
+    ttl: TimeConstants.oneWeek,
+  };
+
   static NftsCount: CacheInfo = {
     key: 'nftsCount',
     ttl: TimeConstants.oneDay,

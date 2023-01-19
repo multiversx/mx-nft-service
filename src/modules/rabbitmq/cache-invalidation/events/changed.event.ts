@@ -21,5 +21,6 @@ export enum CacheEventTypeEnum {
   DeleteCacheKeys,
   SetCacheKey,
   UpdateOffer,
+  BlacklistedCollections,
   RefreshTrending,
 }
