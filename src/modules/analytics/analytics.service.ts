@@ -99,7 +99,11 @@ export class AnalyticsService {
 
       for (const token of collection.tokens) {
         const tokenDetails = tokensWithPrice[token.paymentToken];
-        if (tokenDetails && tokenDetails.length > 0) {
+        if (
+          tokenDetails &&
+          tokenDetails.length > 0 &&
+          tokenDetails[0].usdPrice
+        ) {
           priceUsd = priceUsd.plus(
             computeUsd(
               tokenDetails[0].usdPrice,
@@ -115,7 +119,7 @@ export class AnalyticsService {
         tokens: collection.tokens,
       });
     }
-    return trending.sortedDescending((x) => x.volume);
+    return trending.sortedDescending((x) => parseFloat(x.volume));
   }
 
   private async getParsedEvents(
