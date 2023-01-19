@@ -15,6 +15,7 @@ import { SmartContractArtistsService } from 'src/modules/artists/smart-contract-
 import { LikesWarmerService } from './likes.warmer.service';
 import { AssetsModuleGraph } from 'src/modules/assets/assets.module';
 import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
+import { BlacklistedCollectionsModule } from 'src/modules/blacklist/blacklisted-collections.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CollectionsGetterService } from 'src/modules/nftCollections/collections
     PubSubListenerModule,
     MarketplacesModuleGraph,
     AssetsModuleGraph,
+    BlacklistedCollectionsModule,
   ],
   providers: [
     CollectionsGetterService,

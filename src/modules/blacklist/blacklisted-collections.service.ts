@@ -19,7 +19,6 @@ export class BlacklistedCollectionsService {
 
   async isBlacklistedCollection(collection: string): Promise<boolean> {
     const blacklistedCollectionsIds = await this.getBlacklistedCollectionIds();
-    console.log(`is ${collection} part of ${blacklistedCollectionsIds}?`);
     return blacklistedCollectionsIds.includes(collection);
   }
 
