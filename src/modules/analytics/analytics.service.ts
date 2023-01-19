@@ -115,7 +115,7 @@ export class AnalyticsService {
         tokens: collection.tokens,
       });
     }
-    return trending.sortedDescending((x) => x.volume);
+    return trending.sortedDescending((x) => parseFloat(x.volume));
   }
 
   private async getParsedEvents(
