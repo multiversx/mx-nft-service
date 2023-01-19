@@ -101,14 +101,13 @@ export class CollectionsGetterService {
     trendingCollections = trendingCollections.filter(
       (x) => !blacklistCollections.includes(x.collection),
     );
-
-    const count = trendingCollections.length;
     trendingCollections = trendingCollections.filter(
       async (x) =>
         !(await this.blacklistedCollectionsService.isBlacklistedCollection(
           x.collection,
         )),
     );
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }

@@ -29,7 +29,7 @@ export class BlacklistedCollectionsCachingService {
   }
 
   async invalidateBlacklistedCollectionsCache(): Promise<void> {
-    await this.redisCacheService.delByPattern(
+    await this.redisCacheService.del(
       this.redisClient,
       CacheInfo.BlacklistedCollections.key,
     );

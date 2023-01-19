@@ -35,4 +35,10 @@ export class BlacklistedCollectionsResolver extends BaseResolver(Collection) {
       collection,
     );
   }
+
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @Mutation(() => [String])
+  async blacklistedCollection(): Promise<string[]> {
+    return await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
+  }
 }
