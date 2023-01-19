@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation, Query } from '@nestjs/graphql';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { BaseResolver } from '../common/base.resolver';
@@ -37,8 +37,8 @@ export class BlacklistedCollectionsResolver extends BaseResolver(Collection) {
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  @Mutation(() => [String])
-  async blacklistedCollection(): Promise<string[]> {
+  @Query(() => [String])
+  async blacklistedCollections(): Promise<string[]> {
     return await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
   }
 }

@@ -1115,6 +1115,7 @@ type Query {
     sorting: [Sorting!]
   ): AuctionResponse!
   auctionsSortByBids(filters: FiltersExpression, grouping: Grouping, pagination: ConnectionArgs): AuctionResponse!
+  blacklistedCollection: [String!]!
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
