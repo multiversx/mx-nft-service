@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 declare global {
   interface Array<T> {
     groupBy(predicate: (item: T) => any, asArray?: boolean): any;
@@ -5,6 +7,7 @@ declare global {
     sorted(predicate?: (element: T) => number, ignoreZeros?: boolean): T[];
     sortedDescending(predicate?: (element: T) => number): T[];
     sum(predicate?: (item: T) => number): number;
+    sumBigNumber(predicate?: (item: T) => BigNumber): BigNumber;
     toRecord<TOUT>(
       keyPredicate: (item: T) => string,
       valuePredicate?: (item: T) => TOUT,
@@ -108,6 +111,18 @@ Array.prototype.sum = function <T>(predicate?: (item: T) => number): number {
   }
 
   return this.reduce((a, b) => a + b);
+};
+
+Array.prototype.sumBigNumber = function <T>(
+  predicate?: (item: T) => BigNumber,
+): BigNumber {
+  if (predicate) {
+    return this.map(predicate).reduce((a: BigNumber, b: BigNumber) =>
+      a.plus(b),
+    );
+  }
+
+  return this.reduce((a: BigNumber, b: BigNumber) => a.plus(b));
 };
 
 Array.prototype.toRecord = function <TIN, TOUT>(

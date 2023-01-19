@@ -28,6 +28,7 @@ import { AssetsCollectionsForOwnerRedisHandler } from '../assets/loaders/assets-
 import { DocumentDbModule } from 'src/document-db/document-db.module';
 import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
   providers: [
@@ -61,6 +62,7 @@ import { AuthModule } from '../auth/auth.module';
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => CommonModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => AnalyticsModule),
     DocumentDbModule,
   ],
   exports: [

@@ -71,6 +71,7 @@
     "helmet": "4.4.1",
     "ioredis": "4.28.5",
     "jwks-rsa": "2.0.3",
+    "moment": "^2.29.4",
     "mongoose": "5.13.15",
     "mysql2": "2.2.5",
     "nest-winston": "1.6.2",
