@@ -22,4 +22,5 @@ export enum CacheEventTypeEnum {
   SetCacheKey,
   UpdateOffer,
   AssetRefresh,
+  RefreshTrending,
 }
