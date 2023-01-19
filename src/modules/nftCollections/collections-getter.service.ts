@@ -87,7 +87,6 @@ export class CollectionsGetterService {
     limit: number = 10,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    const blacklistCollections = ['PEPE-293def', 'DEAD-79f8d1'];
     let trendingCollections = [];
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
       const collections = await this.analyticsService.getTrendingByVolume();
@@ -97,14 +96,10 @@ export class CollectionsGetterService {
         await this.getOrSetTrendingByAuctionsCollections();
     }
     trendingCollections = this.applyFilters(filters, trendingCollections);
-
-    trendingCollections = trendingCollections.filter(
-      (x) => !blacklistCollections.includes(x.collection),
-    );
-    const blacklistedCollection =
+    const blacklistedCollections =
       await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
     trendingCollections = trendingCollections.filter(
-      (x) => !blacklistedCollection.includes(x.collection),
+      (x) => !blacklistedCollections.includes(x.collection),
     );
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
