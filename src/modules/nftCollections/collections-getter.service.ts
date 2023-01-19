@@ -96,10 +96,11 @@ export class CollectionsGetterService {
     }
     trendingCollections = this.applyFilters(filters, trendingCollections);
 
-    const count = trendingCollections.length;
     trendingCollections = trendingCollections.filter(
       (x) => !blacklistCollections.includes(x.collection),
     );
+
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
