@@ -40,6 +40,6 @@ import { TrendingCollectionsWarmerService } from './trendingCollections.warmer.s
     LikesWarmerService,
     TrendingCollectionsWarmerService,
   ],
-  exports: [CommonModule],
+  exports: [CommonModule, TrendingCollectionsWarmerService],
 })
 export class CacheWarmerModule {}

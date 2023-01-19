@@ -1,4 +1,4 @@
-import { ProxyNetworkProvider } from '@multiversx/erdjs-network-providers';
+import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
 import { mxConfig } from '../../../config';
 import * as Agent from 'agentkeepalive';
 import { Injectable } from '@nestjs/common';
