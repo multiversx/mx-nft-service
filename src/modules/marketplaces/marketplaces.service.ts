@@ -83,6 +83,12 @@ export class MarketplacesService {
     return externalMarketplaces.map((m) => m.address);
   }
 
+  async getMarketplacesAddreses(): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    return allMarketplaces.items.map((m) => m.address);
+  }
+
   async getMarketplaceByKey(marketplaceKey: string): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 

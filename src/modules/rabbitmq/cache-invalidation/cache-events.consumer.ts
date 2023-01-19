@@ -88,6 +88,12 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.UpdateOffer:
         await this.cacheInvalidationEventsService.invalidateOffers(event);
         break;
+
+      case CacheEventTypeEnum.RefreshTrending:
+        await this.cacheInvalidationEventsService.invalidateTrendingAuctions(
+          event,
+        );
+        break;
     }
   }
 }

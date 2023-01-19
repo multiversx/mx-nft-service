@@ -11,6 +11,11 @@ import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-e
 import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/MarketplaceEventsIndexingArgs';
 import { MarketplaceEventsIndexingRequest } from '../marketplaces/models/MarketplaceEventsIndexingRequest';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -18,6 +23,7 @@ export class AdminOperationsResolver {
     private readonly flagService: FlagNftService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
+    private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
   ) {}
 
@@ -82,6 +88,25 @@ export class AdminOperationsResolver {
       return await this.nftTraitService.updateCollectionTraits(
         collectionTicker,
       );
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async indexTrandingCollections(
+    @Args('forTheLastHours')
+    forTheLastHours: number = 24,
+  ): Promise<boolean> {
+    try {
+      await this.cacheEventsPublisherService.publish(
+        new ChangedEvent({
+          id: forTheLastHours,
+          type: CacheEventTypeEnum.RefreshTrending,
+        }),
+      );
+      return true;
     } catch (error) {
       throw new ApolloError(error);
     }
