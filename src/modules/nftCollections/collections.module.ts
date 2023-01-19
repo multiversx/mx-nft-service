@@ -29,6 +29,7 @@ import { DocumentDbModule } from 'src/document-db/document-db.module';
 import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
 import { BlacklistedCollectionsModule } from '../blacklist/blacklisted-collections.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
   providers: [
@@ -62,6 +63,7 @@ import { BlacklistedCollectionsModule } from '../blacklist/blacklisted-collectio
     forwardRef(() => AssetsModuleGraph),
     forwardRef(() => CommonModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => AnalyticsModule),
     DocumentDbModule,
     BlacklistedCollectionsModule,
   ],

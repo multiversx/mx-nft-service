@@ -67,6 +67,17 @@ export const computeUsdAmount = (
   return amountUsd.toString();
 };
 
+export const computeUsd = (
+  tokenPriceUsd: string,
+  tokenAmount: string,
+  tokenDecimals: number,
+): BigNumber => {
+  const amountUsd = new BigNumber(tokenAmount)
+    .multipliedBy(tokenPriceUsd)
+    .dividedBy(Math.pow(10, tokenDecimals));
+  return amountUsd;
+};
+
 export const randomBetween = (min: number, max: number): number => {
   min = Math.ceil(min);
   max = Math.floor(max);
