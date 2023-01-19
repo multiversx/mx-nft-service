@@ -32,26 +32,23 @@ export class AnalyticsService {
     );
   }
 
-  public async getOrSetTrendingByVolume(): Promise<any> {
-    return await this.cacheService.getOrSetCache(
+  public async getTrendingByVolume(): Promise<any> {
+    return await this.cacheService.getCache(
       this.redisClient,
       CacheInfo.TrendingByVolume.key,
-      async () => await this.reindexTrendingCollections(),
-      CacheInfo.TrendingByVolume.ttl,
     );
   }
 
   public async reindexTrendingCollections(
-    startDateParam?: string,
-    endDateParam?: string,
+    forTheLastHours: number = 5,
   ): Promise<any> {
     try {
       const performanceProfiler = new PerformanceProfiler();
 
-      const startDateUtc =
-        startDateParam ??
-        moment().add(-5, 'hours').format('YYYY-MM-DD HH:mm:ss');
-      const endDateUtc = endDateParam ?? moment().format('YYYY-MM-DD HH:mm:ss');
+      const startDateUtc = moment()
+        .add(-forTheLastHours, 'hours')
+        .format('YYYY-MM-DD HH:mm:ss');
+      const endDateUtc = moment().format('YYYY-MM-DD HH:mm:ss');
 
       await this.getFilterAddresses();
 

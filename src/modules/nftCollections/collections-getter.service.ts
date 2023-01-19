@@ -88,8 +88,7 @@ export class CollectionsGetterService {
     const blacklistCollections = ['PEPE-293def', 'DEAD-79f8d1'];
     let trendingCollections = [];
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
-      const collections =
-        await this.analyticsService.getOrSetTrendingByVolume();
+      const collections = await this.analyticsService.getTrendingByVolume();
       [trendingCollections] = await this.addCollectionsDetails(collections);
     } else {
       [trendingCollections] =

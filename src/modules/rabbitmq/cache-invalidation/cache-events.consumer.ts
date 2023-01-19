@@ -90,7 +90,9 @@ export class CacheEventsConsumer {
         break;
 
       case CacheEventTypeEnum.RefreshTrending:
-        await this.cacheInvalidationEventsService.invalidateOffers(event);
+        await this.cacheInvalidationEventsService.invalidateTrendingAuctions(
+          event,
+        );
         break;
     }
   }

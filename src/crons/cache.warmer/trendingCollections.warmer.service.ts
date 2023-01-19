@@ -24,11 +24,13 @@ export class TrendingCollectionsWarmerService {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async handleTrendingCollections() {
+  async handleTrendingCollections(forTheLastHours: number = 5) {
     await Locker.lock(
       'Trending Collections invalidations',
       async () => {
-        const tokens = await this.analytics.reindexTrendingCollections();
+        const tokens = await this.analytics.reindexTrendingCollections(
+          forTheLastHours,
+        );
 
         await this.invalidateKey(
           CacheInfo.TrendingByVolume.key,

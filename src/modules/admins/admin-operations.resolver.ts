@@ -95,10 +95,14 @@ export class AdminOperationsResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async indexTrandingCollections(): Promise<boolean> {
+  async indexTrandingCollections(
+    @Args('forTheLastHours')
+    forTheLastHours: number = 5,
+  ): Promise<boolean> {
     try {
       await this.cacheEventsPublisherService.publish(
         new ChangedEvent({
+          id: forTheLastHours,
           type: CacheEventTypeEnum.RefreshTrending,
         }),
       );

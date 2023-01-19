@@ -36,7 +36,7 @@ import { TrendingCollectionsWarmerService } from './trendingCollections.warmer.s
     SmartContractArtistsService,
     AuctionsWarmerService,
     TokensWarmerService,
-    XoxnoArtistsWarmerService,
+    // XoxnoArtistsWarmerService,
     LikesWarmerService,
     TrendingCollectionsWarmerService,
   ],
