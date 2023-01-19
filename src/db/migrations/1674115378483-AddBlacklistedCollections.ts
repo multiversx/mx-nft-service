@@ -12,4 +12,5 @@ export class AddBlacklistedCollections1674115378483 implements MigrationInterfac
         await queryRunner.query(`DROP INDEX \`IDX_0073176ad04a85f121aa5b87ac\` ON \`blacklisted_collections\``);
         await queryRunner.query(`DROP TABLE \`blacklisted_collections\``);
     }
+
 }
