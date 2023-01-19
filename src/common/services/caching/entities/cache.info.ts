@@ -11,7 +11,7 @@ export class CacheInfo {
 
   static TrendingByVolume: CacheInfo = {
     key: 'trendingByVolume',
-    ttl: 2 * TimeConstants.oneDay,
+    ttl: TimeConstants.oneWeek,
   };
 
   static CollectionsMostActive: CacheInfo = {

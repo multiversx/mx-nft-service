@@ -40,7 +40,7 @@ export class AnalyticsService {
   }
 
   public async reindexTrendingCollections(
-    forTheLastHours: number = 5,
+    forTheLastHours: number = 24,
   ): Promise<any> {
     try {
       const performanceProfiler = new PerformanceProfiler();

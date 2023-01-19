@@ -97,7 +97,7 @@ export class AdminOperationsResolver {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async indexTrandingCollections(
     @Args('forTheLastHours')
-    forTheLastHours: number = 5,
+    forTheLastHours: number = 24,
   ): Promise<boolean> {
     try {
       await this.cacheEventsPublisherService.publish(

@@ -23,8 +23,8 @@ export class TrendingCollectionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
-  async handleTrendingCollections(forTheLastHours: number = 5) {
+  @Cron(CronExpression.EVERY_DAY_AT_5AM)
+  async handleTrendingCollections(forTheLastHours: number = 24) {
     await Locker.lock(
       'Trending Collections invalidations',
       async () => {
@@ -35,7 +35,7 @@ export class TrendingCollectionsWarmerService {
         await this.invalidateKey(
           CacheInfo.TrendingByVolume.key,
           tokens,
-          TimeConstants.oneDay,
+          CacheInfo.TrendingByVolume.ttl,
         );
       },
       true,
