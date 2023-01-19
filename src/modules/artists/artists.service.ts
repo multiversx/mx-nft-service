@@ -74,12 +74,27 @@ export class ArtistsService {
     page: number = 0,
     size: number = 25,
   ): Promise<[Account[], number]> {
-    const [trendingCollections, count] =
+    const [trendingCollections] =
       await this.collectionsGetterService.getTrendingCollections();
+    const [mostActive] =
+      await this.collectionsGetterService.getOrSetMostActiveCollections();
 
-    const trendingCreators = trendingCollections?.slice(page, page + size);
+    const addressCreators = trendingCollections.map(
+      (x: { artistAddress: any }) => x.artistAddress,
+    );
+
+    const trendingCreators = mostActive.filter((x) =>
+      addressCreators.includes(x.artist),
+    );
+
+    const activeWithoutTrending = mostActive.filter(
+      (x) => !addressCreators.includes(x.artist),
+    );
+    const response = [...trendingCreators, ...activeWithoutTrending];
+    const count = response.length;
+    const selectedCollections = response?.slice(page, page + size);
     const mappedAccounts = await this.getAccountsInfo(
-      trendingCreators.map((x: { artistAddress: any }) => x.artistAddress),
+      selectedCollections.map((x: { artist: any }) => x.artist),
     );
     return [
       mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
