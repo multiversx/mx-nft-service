@@ -90,7 +90,9 @@ export class CollectionsGetterService {
     let trendingCollections = [];
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
       const collections = await this.analyticsService.getTrendingByVolume();
-      [trendingCollections] = await this.addCollectionsDetails(collections);
+      if (collections) {
+        [trendingCollections] = await this.addCollectionsDetails(collections);
+      }
     } else {
       [trendingCollections] =
         await this.getOrSetTrendingByAuctionsCollections();
