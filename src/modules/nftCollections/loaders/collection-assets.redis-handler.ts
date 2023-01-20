@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from 'src/common';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { cacheConfig } from 'src/config';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
@@ -12,7 +13,7 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
   constructor(redisCacheService: RedisCacheService) {
     super(
       redisCacheService,
-      'collectionAssets',
+      CacheInfo.CollectionAssets.key,
       cacheConfig.collectionsRedisClientName,
     );
   }
@@ -41,7 +42,10 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
 
     response = [
       ...response,
-      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
+      new RedisValue({
+        values: finalNfts,
+        ttl: CacheInfo.CollectionAssets.ttl,
+      }),
       new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];
     return response;

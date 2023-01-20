@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { rabbitExchanges, rabbitQueues } from './../rabbit-config';
 import { PublicRabbitConsumer } from './../rabbitmq.consumers';
 import { CacheInvalidationAdminService } from './cache-admin-module/cache-admin-invalidation.service';
@@ -36,7 +37,23 @@ export class CacheEventsConsumer {
         break;
 
       case CacheEventTypeEnum.AssetsRefresh:
-        await this.assetsRedisHandler.clearMultipleKeys(event.id);
+        const collections = event.id.map((identifier) => {
+          const { collection } =
+            getCollectionAndNonceFromIdentifier(identifier);
+          return collection;
+        });
+        await Promise.all([
+          this.assetsRedisHandler.clearMultipleKeys(event.id),
+          this.collectionAssets.clearMultipleKeys(collections),
+        ]);
+        break;
+
+      case CacheEventTypeEnum.AssetRefresh:
+        const { collection } = getCollectionAndNonceFromIdentifier(event.id);
+        await Promise.all([
+          this.assetsRedisHandler.clearKey(event.id),
+          this.collectionAssets.clearKey(collection),
+        ]);
         break;
 
       case CacheEventTypeEnum.Mint:
