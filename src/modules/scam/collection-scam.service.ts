@@ -1,23 +1,19 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { MxExtrasApiService } from 'src/common/services/mx-communication/mx-extras-api.service';
 
 @Injectable()
 export class CollectionScamService {
-  constructor(
-    private mxExtrasApiService: MxExtrasApiService,
-    private readonly logger: Logger,
-  ) {}
+  constructor(private mxExtrasApiService: MxExtrasApiService) {}
 
   async manuallySetCollectionScamInfo(collection: string): Promise<boolean> {
-    // post
     await this.mxExtrasApiService.setCollectionScam(collection);
     // invalidate cache
     return true;
   }
 
   async manuallyClearCollectionScamInfo(collection: string): Promise<boolean> {
-    // post
+    await this.mxExtrasApiService.clearCollectionScam(collection);
     // invalidate cache
     return true;
   }

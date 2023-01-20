@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { ApiConfigService } from 'src/utils/api.config.service';
 import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
-import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
@@ -17,7 +16,6 @@ export class MxExtrasApiService {
     private readonly apiConfigService: ApiConfigService,
     private readonly apiService: ApiService,
   ) {
-    //'https://testnet-extras-api.multiversx.com'; //
     this.url = this.apiConfigService.getExtrasApiUrl();
     this.nativeAuthSigner = new NativeAuthSigner({
       host: 'NftService',
@@ -38,7 +36,7 @@ export class MxExtrasApiService {
     console.log(body, res);
   }
 
-  async removeCollectionScam(collection: string): Promise<void> {}
+  async clearCollectionScam(collection: string): Promise<void> {}
 
   private async getConfig(): Promise<ApiSettings> {
     const accessTokenInfo = await this.nativeAuthSigner.getToken();
