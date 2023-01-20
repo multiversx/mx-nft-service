@@ -17,7 +17,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     redisCacheService: RedisCacheService,
     private apiService: MxApiService,
   ) {
-    super(redisCacheService, CacheInfo.CollectionNfts.key);
+    super(redisCacheService, CacheInfo.CollectionAssets.key);
   }
   mapValues(
     returnValues: { key: string; value: any }[],
@@ -44,7 +44,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
       ...response,
       new RedisValue({
         values: finalNfts,
-        ttl: CacheInfo.CollectionNfts.ttl,
+        ttl: CacheInfo.CollectionAssets.ttl,
       }),
       new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
     ];

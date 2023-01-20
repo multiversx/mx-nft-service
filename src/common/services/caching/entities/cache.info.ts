@@ -168,9 +168,4 @@ export class CacheInfo {
     key: 'collectionAssets',
     ttl: TimeConstants.oneDay,
   };
-
-  static CollectionNfts: CacheInfo = {
-    key: 'collectionNfts',
-    ttl: TimeConstants.oneDay,
-  };
 }
