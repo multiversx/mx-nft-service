@@ -1,6 +1,5 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { ApolloError } from 'apollo-server-express';
-import { ScamInfoTypeEnum } from '../assets/models';
 import { CollectionScamService } from './collection-scam.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
@@ -11,12 +10,11 @@ export class CollectionScamResolver {
   constructor(private readonly collectionScamService: CollectionScamService) {}
 
   @Mutation(() => Boolean)
-  //@UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async setCollectionScamInfo(
     @Args('collection') collection: string,
   ): Promise<boolean> {
     try {
-      return true;
       return await this.collectionScamService.manuallySetCollectionScamInfo(
         collection,
       );
@@ -26,12 +24,11 @@ export class CollectionScamResolver {
   }
 
   @Mutation(() => Boolean)
-  //@UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async clearCollectionScamInfo(
     @Args('collection') collection: string,
   ): Promise<boolean> {
     try {
-      return true;
       return await this.collectionScamService.manuallyClearCollectionScamInfo(
         collection,
       );

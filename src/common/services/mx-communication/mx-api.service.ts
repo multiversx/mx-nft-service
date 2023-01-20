@@ -89,7 +89,6 @@ export class MxApiService {
   ): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
-      console.log(resourceUrl, payload);
       const response = await this.getService().doPostGeneric(
         resourceUrl,
         payload,
@@ -104,7 +103,6 @@ export class MxApiService {
 
       return response;
     } catch (error) {
-      console.log(error);
       if (error.inner?.response?.status === HttpStatus.NOT_FOUND) {
         return;
       }

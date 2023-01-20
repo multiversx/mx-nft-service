@@ -25,22 +25,25 @@ export class MxExtrasApiService {
   }
 
   async setCollectionScam(collection: string): Promise<void> {
-    const body = {
-      [`${collection}`]: 'Scam report',
-    };
-    const res = await this.doPost(
+    await this.doPost(
       this.setCollectionScam.name,
       'permissions/deny/collections',
-      body,
+      {
+        name: collection,
+        description: 'Scam report',
+      },
     );
-    console.log(body, res);
   }
 
-  async clearCollectionScam(collection: string): Promise<void> {}
+  async clearCollectionScam(collection: string): Promise<void> {
+    await this.doDelete(
+      this.setCollectionScam.name,
+      `permissions/deny/collections/${collection}`,
+    );
+  }
 
   private async getConfig(): Promise<ApiSettings> {
     const accessTokenInfo = await this.nativeAuthSigner.getToken();
-    console.log(accessTokenInfo);
     return {
       authorization: `Bearer ${accessTokenInfo.token}`,
       timeout: 500,
@@ -58,6 +61,23 @@ export class MxExtrasApiService {
         `${this.url}/${resourceUrl}`,
         body,
         config,
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Error when trying to get run ${name}`, {
+        error: error.message,
+        path: `${MxExtrasApiService.name}.${this.doPost.name}`,
+      });
+    }
+  }
+
+  private async doDelete(name: string, resourceUrl: string): Promise<any> {
+    try {
+      const config = await this.getConfig();
+      const response = await this.apiService.delete(
+        `${this.url}/${resourceUrl}`,
+        config,
+        {},
       );
       return response.data;
     } catch (error) {
