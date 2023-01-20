@@ -11,7 +11,7 @@ import { ApiConfigService } from 'src/utils/api.config.service';
 import {
   NftScamInfoModel,
   NftScamInfoSchema,
-} from 'src/modules/nft-scam/models/nft-scam-info.model';
+} from 'src/modules/scam/models/nft-scam-info.model';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { DocumentDbService } from './document-db.service';
 

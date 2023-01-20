@@ -56,4 +56,8 @@ export class ApiConfigService {
   getJwtSecret(): string {
     return this.getGenericConfig<string>('JWT_SECRET_KEY');
   }
+
+  getExtrasApiUrl(): string {
+    return this.getGenericConfig<string>('MX_EXTRAS_API');
+  }
 }

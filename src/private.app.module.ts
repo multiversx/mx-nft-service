@@ -10,7 +10,7 @@ import { ReindexController } from './modules/ingress/reindex.controller';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { MetricsController } from './modules/metrics/metrics.controller';
 import { NftRarityModuleGraph } from './modules/nft-rarity/nft-rarity.module';
-import { NftScamModule } from './modules/nft-scam/nft-scam.module';
+import { ScamModule } from './modules/scam/scam.module';
 import { NftTraitsModule } from './modules/nft-traits/nft-traits.module';
 import { CacheEventsPublisherModule } from './modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import * as ormconfig from './ormconfig';
@@ -22,7 +22,7 @@ import * as ormconfig from './ormconfig';
     AdminOperationsModuleGraph,
     NftRarityModuleGraph,
     CacheEventsPublisherModule,
-    NftScamModule,
+    ScamModule,
     NftTraitsModule,
     MarketplacesModuleGraph,
     AuthModule,

@@ -5,7 +5,7 @@ import { EntityRepository } from './entity.repository';
 import {
   NftScamInfoModel,
   NftScamInfoDocument,
-} from 'src/modules/nft-scam/models/nft-scam-info.model';
+} from 'src/modules/scam/models/nft-scam-info.model';
 import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 

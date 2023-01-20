@@ -812,6 +812,7 @@ type Mutation {
   buySft(input: BuySftActionArgs!): TransactionNode!
   buyTickets(input: BuyTicketsArgs!): TransactionNode!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
+  clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -827,6 +828,7 @@ type Mutation {
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
+  setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
