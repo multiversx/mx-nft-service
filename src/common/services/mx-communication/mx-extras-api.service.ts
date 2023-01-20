@@ -37,7 +37,7 @@ export class MxExtrasApiService {
 
   async clearCollectionScam(collection: string): Promise<void> {
     await this.doDelete(
-      this.setCollectionScam.name,
+      this.clearCollectionScam.name,
       `permissions/deny/collections/${collection}`,
     );
   }
@@ -83,7 +83,7 @@ export class MxExtrasApiService {
     } catch (error) {
       this.logger.error(`Error when trying to get run ${name}`, {
         error: error.message,
-        path: `${MxExtrasApiService.name}.${this.doPost.name}`,
+        path: `${MxExtrasApiService.name}.${this.doDelete.name}`,
       });
     }
   }
