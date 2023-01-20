@@ -3,27 +3,27 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EntityRepository } from './entity.repository';
 import {
-  NftScamInfoModel,
-  NftScamInfoDocument,
-} from 'src/modules/nft-scam/models/nft-scam-info.model';
+  ScamInfoModel,
+  ScamInfoDocument as ScamInfoDocument,
+} from 'src/modules/scam/models/scam-info.model';
 import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 
 @Injectable()
-export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDocument> {
+export class ScamInfoRepositoryService extends EntityRepository<ScamInfoDocument> {
   constructor(
-    @InjectModel(NftScamInfoModel.name)
-    private readonly nftScamInfoModel: Model<NftScamInfoDocument>,
+    @InjectModel(ScamInfoModel.name)
+    private readonly scamInfoModel: Model<ScamInfoDocument>,
   ) {
-    super(nftScamInfoModel);
+    super(scamInfoModel);
   }
 
-  async saveOrUpdateNftScamInfo(
+  async saveOrUpdateScamInfo(
     identifier: string,
     version: string,
     scamInfo?: ScamInfo,
   ): Promise<void> {
-    let doc: NftScamInfoModel = {
+    let doc: ScamInfoModel = {
       identifier: identifier,
       version: version,
     };
@@ -48,28 +48,26 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
     if (!nfts || nfts.length === 0) {
       return;
     }
-    await this.saveOrUpdateBulk(nfts, version);
+    await this.saveOrUpdateBulkNftScams(nfts, version);
   }
 
-  async deleteNftScamInfo(identifier: string): Promise<void> {
+  async deleteScamInfo(identifier: string): Promise<void> {
     await this.findOneAndDelete({
       identifier: identifier,
     });
   }
 
-  async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamInfoModel[]> {
+  async getBulkScamInfo(identifiers: string[]): Promise<ScamInfoModel[]> {
     return await this.getManyByIdentifiers(identifiers);
   }
 
-  async getNftScamInfo(
-    identifier: string,
-  ): Promise<NftScamInfoModel | undefined> {
+  async getNftScamInfo(identifier: string): Promise<ScamInfoModel | undefined> {
     return await this.findOne({
       identifier: identifier,
     });
   }
 
-  private async saveOrUpdateBulk(
+  private async saveOrUpdateBulkNftScams(
     nfts: Nft[],
     scamEngineVersion: string,
   ): Promise<void> {
@@ -100,7 +98,7 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
 
   private async getManyByIdentifiers(
     identifiers: string[],
-  ): Promise<NftScamInfoModel[]> {
+  ): Promise<ScamInfoModel[]> {
     return await this.entityModel.find({ identifier: { $in: identifiers } });
   }
 }

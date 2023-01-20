@@ -21,6 +21,7 @@ import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { ScamInfoModel } from '../scam/models/scam-info.model';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -522,5 +523,9 @@ export class CollectionsGetterService {
       return undefined;
     }
     return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
+  }
+
+  async getScamInfo(collection: string): Promise<ScamInfoModel | undefined> {
+    return await this.documentDbService.getScamInfo(collection);
   }
 }

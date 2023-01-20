@@ -28,6 +28,7 @@ import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
+import { ScamInfoModel } from '../scam/models/scam-info.model';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -193,6 +194,18 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     return (
       collectionNode.traits ??
       (await this.collectionsGetterService.getCollectionTraits(
+        collectionNode.collection,
+      ))
+    );
+  }
+
+  @ResolveField('scamInfo')
+  async scamInfo(
+    @Parent() collectionNode: Collection,
+  ): Promise<ScamInfoModel | undefined> {
+    return (
+      collectionNode.scamInfo ??
+      (await this.collectionsGetterService.getScamInfo(
         collectionNode.collection,
       ))
     );

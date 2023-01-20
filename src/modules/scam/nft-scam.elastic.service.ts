@@ -3,7 +3,7 @@ import { MxElasticService, Nft } from 'src/common';
 import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
 import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum, ScamInfoTypeEnum } from '../assets/models';
-import { NftScamInfoModel } from './models/nft-scam-info.model';
+import { ScamInfoModel } from './models/scam-info.model';
 
 @Injectable()
 export class NftScamElasticService {
@@ -159,7 +159,7 @@ export class NftScamElasticService {
   }
 
   buildNftScamInfoDbToElasticMigrationBulkUpdate(
-    nftsFromDb: NftScamInfoModel[],
+    nftsFromDb: ScamInfoModel[],
     nftsFromElastic: any,
   ): string[] {
     let updates: string[] = [];

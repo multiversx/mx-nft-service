@@ -4,6 +4,7 @@ import { Account } from 'src/modules/account-stats/models';
 import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-traits.model';
+import { ScamInfoModel } from 'src/modules/scam/models/scam-info.model';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
 
@@ -76,6 +77,8 @@ export class Collection {
   preferredRankAlgorithm: string;
   @Field(() => String)
   aggregatorUrl: string;
+  @Field(() => ScamInfoModel, { nullable: true })
+  scamInfo?: ScamInfoModel;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
@@ -118,6 +121,7 @@ export class Collection {
       nftsCount: collectionApi.count,
       traits: CollectionNftTrait.fromCollectionTraits(collectionApi.traits),
       preferredRankAlgorithm: collectionApi.assets?.preferredRankAlgorithm,
+      scamInfo: ScamInfoModel.fromCollectionApi(collectionApi),
     });
   }
 }

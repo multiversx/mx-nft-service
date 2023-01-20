@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Nft, NftScamInfo } from 'src/common';
 import { elasticDictionary } from 'src/config';
-import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { ScamInfoModel } from 'src/modules/scam/models/scam-info.model';
 import { ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {
@@ -37,7 +37,7 @@ export class ScamInfo {
 
   static areApiAndDbScamInfoDifferent(
     nftFromApi: Nft,
-    nftFromDb: NftScamInfoModel,
+    nftFromDb: ScamInfoModel,
     version: string,
   ): boolean {
     return (
@@ -50,7 +50,7 @@ export class ScamInfo {
 
   static areElasticAndDbScamInfoDifferent(
     nftFromElastic: any,
-    nftFromDb: NftScamInfoModel,
+    nftFromDb: ScamInfoModel,
   ): boolean {
     return (
       nftFromDb?.type !==

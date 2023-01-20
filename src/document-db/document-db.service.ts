@@ -3,16 +3,16 @@ import { Injectable } from '@nestjs/common';
 import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { ScamInfoModel } from 'src/modules/scam/models/scam-info.model';
 import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
-import { NftScamInfoRepositoryService } from './repositories/nft-scam.repository';
+import { ScamInfoRepositoryService } from './repositories/scam.repository';
 import { TraitRepositoryService } from './repositories/traits.repository';
 
 @Injectable()
 export class DocumentDbService {
   constructor(
     private readonly traitRepositoryService: TraitRepositoryService,
-    private readonly nftScamInfoRepositoryService: NftScamInfoRepositoryService,
+    private readonly scamInfoRepositoryService: ScamInfoRepositoryService,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -57,14 +57,14 @@ export class DocumentDbService {
     );
   }
 
-  async saveOrUpdateNftScamInfo(
+  async saveOrUpdateScamInfo(
     identifier: string,
     version: string,
     scamInfo?: ScamInfo,
   ): Promise<void> {
     return await this.execute(
-      this.saveOrUpdateBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.saveOrUpdateNftScamInfo(
+      this.saveOrUpdateScamInfo.name,
+      this.scamInfoRepositoryService.saveOrUpdateScamInfo(
         identifier,
         version,
         scamInfo,
@@ -78,33 +78,28 @@ export class DocumentDbService {
   ): Promise<void> {
     return await this.execute(
       this.saveOrUpdateBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.saveOrUpdateBulkNftScamInfo(
-        nfts,
-        version,
-      ),
+      this.scamInfoRepositoryService.saveOrUpdateBulkNftScamInfo(nfts, version),
     );
   }
 
-  async deleteNftScamInfo(identifier: string): Promise<void> {
+  async deleteScamInfo(identifier: string): Promise<void> {
     return await this.execute(
-      this.deleteNftScamInfo.name,
-      this.nftScamInfoRepositoryService.deleteNftScamInfo(identifier),
+      this.deleteScamInfo.name,
+      this.scamInfoRepositoryService.deleteScamInfo(identifier),
     );
   }
 
-  async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamInfoModel[]> {
+  async getBulkScamInfo(identifiers: string[]): Promise<ScamInfoModel[]> {
     return await this.execute(
-      this.getBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.getBulkNftScamInfo(identifiers),
+      this.getBulkScamInfo.name,
+      this.scamInfoRepositoryService.getBulkScamInfo(identifiers),
     );
   }
 
-  async getNftScamInfo(
-    identifier: string,
-  ): Promise<NftScamInfoModel | undefined> {
+  async getScamInfo(identifier: string): Promise<ScamInfoModel | undefined> {
     return await this.execute(
-      this.getNftScamInfo.name,
-      this.nftScamInfoRepositoryService.getNftScamInfo(identifier),
+      this.getScamInfo.name,
+      this.scamInfoRepositoryService.getNftScamInfo(identifier),
     );
   }
 }

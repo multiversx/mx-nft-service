@@ -1,3 +1,5 @@
+import { ScamInfoModel } from 'src/modules/scam/models/scam-info.model';
+
 export interface CollectionApi {
   collection: string;
   name: string;
@@ -16,6 +18,7 @@ export interface CollectionApi {
   assets: CollectionAssetApi;
   count: number;
   traits: { [key: string]: { [key: string]: number } };
+  scamInfo: ScamInfoModel;
 }
 
 export interface RolesApi {

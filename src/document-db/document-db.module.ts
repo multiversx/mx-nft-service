@@ -9,9 +9,9 @@ import { CommonModule } from 'src/common.module';
 import { ApiConfigService } from 'src/utils/api.config.service';
 
 import {
-  NftScamInfoModel,
-  NftScamInfoSchema,
-} from 'src/modules/nft-scam/models/nft-scam-info.model';
+  ScamInfoModel,
+  ScamInfoSchema,
+} from 'src/modules/scam/models/scam-info.model';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { DocumentDbService } from './document-db.service';
 
@@ -37,8 +37,8 @@ import { DocumentDbService } from './document-db.service';
     ]),
     MongooseModule.forFeature([
       {
-        name: NftScamInfoModel.name,
-        schema: NftScamInfoSchema,
+        name: ScamInfoModel.name,
+        schema: ScamInfoSchema,
       },
     ]),
   ],

@@ -31,7 +31,7 @@ import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.mod
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
-import { NftScamModule } from './modules/nft-scam/nft-scam.module';
+import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
 import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
@@ -73,7 +73,7 @@ import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
     AccountsStatsModuleGraph,
     CollectionsStatsModuleGraph,
     ReportNftsModuleGraph,
-    NftScamModule,
+    ScamModule,
     FeaturedModuleGraph,
     BlacklistedCollectionsModule,
     UsdPriceModuleGraph,
