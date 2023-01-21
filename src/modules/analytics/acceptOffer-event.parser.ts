@@ -17,7 +17,6 @@ export class AcceptOfferEventParser {
     );
     let acceptOfferEvent = undefined;
     let topics = undefined;
-    console.log(marketplace.key, event);
     if (marketplace.key === XOXNO_KEY) {
       acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       topics = acceptOfferEvent.getTopics();
