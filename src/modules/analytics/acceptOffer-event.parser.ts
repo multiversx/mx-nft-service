@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { MarketplaceTypeEnum } from '../marketplaces/models/MarketplaceType.enum';
 import { AcceptOfferEvent } from '../rabbitmq/entities/auction/acceptOffer.event';
 import { AcceptOfferDeadrareEvent } from '../rabbitmq/entities/auction/acceptOfferDeadrare.event';
 import { AcceptOfferFrameitEvent } from '../rabbitmq/entities/auction/acceptOfferFrameit.event';
@@ -16,7 +17,7 @@ export class AcceptOfferEventParser {
     );
     let acceptOfferEvent = undefined;
     let topics = undefined;
-
+    console.log(marketplace.key, event);
     if (marketplace.key === XOXNO_KEY) {
       acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       topics = acceptOfferEvent.getTopics();
@@ -31,15 +32,16 @@ export class AcceptOfferEventParser {
       acceptOfferEvent = new AcceptOfferFrameitEvent(event);
       topics = acceptOfferEvent.getTopics();
     }
-
-    acceptOfferEvent = new AcceptOfferEvent(event);
-    topics = acceptOfferEvent.getTopics();
-
-    return {
-      paymentToken: topics.paymentTokenIdentifier,
-      paymentNonce: topics.paymentTokenNonce,
-      collection: topics.collection,
-      value: topics.paymentAmount,
-    };
+    if (marketplace.type === MarketplaceTypeEnum.Internal) {
+      acceptOfferEvent = new AcceptOfferEvent(event);
+      topics = acceptOfferEvent.getTopics();
+    }
+    if (acceptOfferEvent && topics)
+      return {
+        paymentToken: topics.paymentTokenIdentifier,
+        paymentNonce: topics.paymentTokenNonce,
+        collection: topics.collection,
+        value: topics.paymentAmount,
+      };
   }
 }
