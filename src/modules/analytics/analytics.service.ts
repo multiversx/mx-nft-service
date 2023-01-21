@@ -12,6 +12,7 @@ import * as Redis from 'ioredis';
 import { CachingService } from 'src/common/services/caching/caching.service';
 import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 
 @Injectable()
 export class AnalyticsService {
@@ -26,6 +27,7 @@ export class AnalyticsService {
     private readonly cacheService: CachingService,
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
+    private readonly acceptEventParser: AcceptOfferEventParser,
   ) {
     this.redisClient = this.cacheService.getClient(
       cacheConfig.collectionsRedisClientName,
@@ -222,8 +224,14 @@ export class AnalyticsService {
 
     for (const rawEvent of events) {
       try {
-        const eve = await this.buyEventHandler.handle(rawEvent, 'hash');
-        if (eve) this.data.push(eve);
+        let parsedEvent = undefined;
+        if (rawEvent.identifier === 'acceptOffer') {
+          parsedEvent = await this.acceptEventParser.handle(rawEvent);
+        } else {
+          parsedEvent = await this.buyEventHandler.handle(rawEvent, 'hash');
+        }
+
+        if (parsedEvent) this.data.push(parsedEvent);
       } catch (error) {
         if (error?.message?.includes('Cannot create address from')) {
           this.logger.log('Invalid event');
