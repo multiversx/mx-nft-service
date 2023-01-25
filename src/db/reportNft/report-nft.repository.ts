@@ -27,6 +27,14 @@ export class ReportNftsRepository extends Repository<ReportNftEntity> {
     }
   }
 
+  async clearReport(identifier: string): Promise<boolean> {
+    const response = await this.delete({ identifier: identifier });
+    if (response?.affected > 0) {
+      return true;
+    }
+    return false;
+  }
+
   async getReportCount(identifier: string): Promise<number> {
     try {
       return await this.count({

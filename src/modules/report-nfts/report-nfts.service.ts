@@ -27,13 +27,29 @@ export class ReportNftsService {
       await this.sendReportMessage(identifier);
       return true;
     } catch (err) {
-      this.logger.error('An error occurred while adding Asset Like.', {
-        path: 'ReportNftsService.addReport',
+      this.logger.error('An error occurred while adding a report.', {
+        path: `${ReportNftsService.name}.${this.addReport.name}`,
         identifier,
         address,
         exception: err,
       });
       return await this.persistenceService.isReportedBy(identifier, address);
+    }
+  }
+
+  async clearReport(identifier: string): Promise<boolean> {
+    try {
+      return await this.persistenceService.clearReport(identifier);
+    } catch (err) {
+      this.logger.error(
+        'An error occurred while deleting reports for identifier.',
+        {
+          path: `${ReportNftsService.name}.${this.clearReport.name}`,
+          identifier,
+          exception: err,
+        },
+      );
+      return false;
     }
   }
 
