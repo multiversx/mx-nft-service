@@ -125,6 +125,9 @@ async function bootstrap() {
   logger.log(
     `Marketplace events indexing is active: ${process.env.ENABLE_MARKETPLACE_EVENTS}`,
   );
+  logger.log(
+    `Trending by volume is active: ${process.env.ENABLE_TRENDING_BY_VOLUME}`,
+  );
 }
 
 bootstrap();
