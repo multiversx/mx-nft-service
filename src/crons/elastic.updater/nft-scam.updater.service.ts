@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
+import { NftScamService } from 'src/modules/scam/nft-scam.service';
 
 @Injectable()
 export class NftScamUpdaterService {

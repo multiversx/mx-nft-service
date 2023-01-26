@@ -450,6 +450,7 @@ type CollectionAsset {
 type CollectionAssetModel {
   identifier: String!
   isNsfw: Boolean
+  scamInfo: ScamInfo
   thumbnailUrl: String
 }
 
@@ -816,6 +817,7 @@ type Mutation {
   buySft(input: BuySftActionArgs!): TransactionNode!
   buyTickets(input: BuyTicketsArgs!): TransactionNode!
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
+  clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
@@ -832,6 +834,7 @@ type Mutation {
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
+  setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!

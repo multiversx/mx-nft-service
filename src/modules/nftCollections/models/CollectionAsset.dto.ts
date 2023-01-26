@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Nft } from 'src/common/services/mx-communication/models/nft.dto';
+import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 
 @ObjectType()
 export class CollectionAsset {
@@ -25,6 +26,8 @@ export class CollectionAssetModel {
   }
   @Field(() => Boolean, { nullable: true })
   isNsfw?: boolean;
+  @Field(() => ScamInfo, { nullable: true })
+  scamInfo?: ScamInfo;
 
   static fromNft(nft: Nft) {
     return nft
