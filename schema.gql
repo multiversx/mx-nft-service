@@ -432,6 +432,7 @@ type Collection {
   pngUrl: String
   preferredRankAlgorithm: String
   roles: [CollectionRole!]
+  scamInfo: ScamInfo
   social: CollectionSocial
   status: String
   svgUrl: String

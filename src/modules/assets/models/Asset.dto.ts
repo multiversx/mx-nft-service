@@ -124,7 +124,7 @@ export class Asset {
           tags: nft.tags,
           isWhitelistedStorage: nft.isWhitelistedStorage,
           isNsfw: nft.isNsfw,
-          scamInfo: ScamInfo.fromNftScamInfo(nft.scamInfo),
+          scamInfo: ScamInfo.fromScamInfoApi(nft.scamInfo),
           media: nft.media?.map((m) => Media.fromNftMedia(m)),
           verified: !!nft.assets ?? false,
           branding: CollectionBranding.fromNftAssets(nft.assets),
