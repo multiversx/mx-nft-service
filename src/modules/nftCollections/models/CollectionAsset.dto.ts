@@ -36,6 +36,7 @@ export class CollectionAssetModel {
             nft.media?.length > 0 ? nft.media[0].thumbnailUrl : null,
           identifier: nft.identifier,
           isNsfw: nft.isNsfw,
+          scamInfo: ScamInfo.fromScamInfoApi(nft.scamInfo),
         })
       : null;
   }
