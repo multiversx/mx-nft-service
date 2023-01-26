@@ -1,4 +1,5 @@
 import { CollectionAssetApi } from './collection.dto';
+import { ScamInfoApi } from './scam-info.dto';
 
 export interface Nft {
   collection: string;
@@ -34,7 +35,7 @@ export interface Nft {
   tags: string[];
   metadata: NftMetadata;
   media: NftMedia[];
-  scamInfo: NftScamInfo;
+  scamInfo: ScamInfoApi;
   assets: CollectionAssetApi;
   score: number;
   rank: number;
@@ -69,11 +70,6 @@ export interface NftMedia {
   thumbnailUrl: string;
   fileType: string;
   fileSize;
-}
-
-export interface NftScamInfo {
-  type: string;
-  info: string;
 }
 
 export interface NftTag {

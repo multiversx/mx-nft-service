@@ -1,3 +1,5 @@
+import { ScamInfoApi } from './scam-info.dto';
+
 export interface CollectionApi {
   collection: string;
   name: string;
@@ -16,6 +18,7 @@ export interface CollectionApi {
   assets: CollectionAssetApi;
   count: number;
   traits: { [key: string]: { [key: string]: number } };
+  scamInfo: ScamInfoApi;
 }
 
 export interface RolesApi {
