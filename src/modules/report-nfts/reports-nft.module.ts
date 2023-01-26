@@ -8,12 +8,13 @@ import { ReportNftsResolver } from './report-nfts.resolver';
 import { ReportNftsService } from './report-nfts.service';
 
 @Module({
-  providers: [Logger, ReportNftsService, ReportNftsResolver],
+  providers: [ReportNftsService, ReportNftsResolver],
   imports: [
     CommonModule,
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => AuthModule),
     TypeOrmModule.forFeature([ReportNftsRepository]),
   ],
+  exports: [ReportNftsService],
 })
 export class ReportNftsModuleGraph {}

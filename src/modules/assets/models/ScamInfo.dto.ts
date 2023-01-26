@@ -1,7 +1,7 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Nft, NftScamInfo } from 'src/common';
 import { elasticDictionary } from 'src/config';
-import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { NftScamInfoModel } from 'src/modules/scam/models/nft-scam-info.model';
 import { ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {

@@ -10,6 +10,11 @@ import { elasticDictionary } from 'src/config';
 import { NftScamInfoModel } from './models/nft-scam-info.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { MxApiAbout } from 'src/common/services/mx-communication/models/mx-api-about.model';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventTypeEnum,
+  ChangedEvent,
+} from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class NftScamService {
@@ -18,6 +23,7 @@ export class NftScamService {
     private nftScamElasticService: NftScamElasticService,
     private mxElasticService: MxElasticService,
     private mxApiService: MxApiService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -155,11 +161,27 @@ export class NftScamService {
         info,
       ),
     ]);
+    this.triggerCacheInvalidation(identifier);
     return true;
   }
 
   async manuallyClearNftScamInfo(identifier: string): Promise<boolean> {
-    return await this.validateOrUpdateNftScamInfo(identifier, {}, true);
+    const cleared = await this.validateOrUpdateNftScamInfo(
+      identifier,
+      {},
+      true,
+    );
+    this.triggerCacheInvalidation(identifier);
+    return cleared;
+  }
+
+  private async triggerCacheInvalidation(identifier: string): Promise<void> {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        id: identifier,
+        type: CacheEventTypeEnum.AssetRefresh,
+      }),
+    );
   }
 
   private async validateOrUpdateScamInfoDataForNoScamNft(

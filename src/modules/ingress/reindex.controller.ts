@@ -2,7 +2,7 @@ import { Controller, Post } from '@nestjs/common';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { MarketplaceEventsIndexingService } from '../marketplaces/marketplaces-events-indexing.service';
-import { NftScamService } from '../nft-scam/nft-scam.service';
+import { NftScamService } from '../scam/nft-scam.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 
 @Controller()

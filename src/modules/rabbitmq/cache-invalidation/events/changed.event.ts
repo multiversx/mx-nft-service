@@ -24,4 +24,5 @@ export enum CacheEventTypeEnum {
   AssetRefresh,
   BlacklistedCollections,
   RefreshTrending,
+  MarkCollection,
 }

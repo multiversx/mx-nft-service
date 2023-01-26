@@ -56,6 +56,13 @@ export class CacheEventsConsumer {
         ]);
         break;
 
+      case CacheEventTypeEnum.MarkCollection:
+        await Promise.all([
+          this.assetsRedisHandler.clearKeyByPattern(`${event.id}-`),
+          this.collectionAssets.clearKey(event.id),
+        ]);
+        break;
+
       case CacheEventTypeEnum.Mint:
         await this.collectionAssets.clearKey(event.id);
         await this.collectionAssetsCount.clearKey(event.id);

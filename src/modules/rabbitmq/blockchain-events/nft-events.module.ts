@@ -27,7 +27,7 @@ import { FeedEventsSenderService } from './feed-events.service';
 import { UsdPriceModuleGraph } from 'src/modules/usdPrice/usd-price.module';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
-import { NftScamModule } from 'src/modules/nft-scam/nft-scam.module';
+import { ScamModule } from 'src/modules/scam/scam.module';
 import { BuyEventHandler } from './handlers/buy-event.handler';
 import { BidEventHandler } from './handlers/bid-event.handler';
 import { StartAuctionEventHandler } from './handlers/startAuction-event.handler';
@@ -57,7 +57,7 @@ import { UpdateListingEventHandler } from './handlers/updateListing-event.handle
     forwardRef(() => OffersModuleGraph),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
-    NftScamModule,
+    ScamModule,
   ],
   providers: [
     Logger,

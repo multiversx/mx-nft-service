@@ -16,11 +16,14 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { ReportNftsService } from '../report-nfts/report-nfts.service';
+import { ClearReportInput } from './models/clear-report.input';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
   constructor(
     private readonly flagService: FlagNftService,
+    private reportNfts: ReportNftsService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
@@ -36,6 +39,14 @@ export class AdminOperationsResolver {
       input.identifier,
       input.nsfwFlag,
     );
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  clearReportNft(
+    @Args('input', { type: () => ClearReportInput }) input: ClearReportInput,
+  ): Promise<boolean> {
+    return this.reportNfts.clearReport(input.identifier);
   }
 
   @Mutation(() => Boolean)

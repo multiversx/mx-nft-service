@@ -7,6 +7,7 @@ import { CommonModule } from 'src/common.module';
 import { AnalyticsService } from './analytics.service';
 import { BuyEventParser } from './buy-event.parser';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
+import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 
 @Module({
   providers: [
@@ -15,6 +16,7 @@ import { ElasticAnalyticsService } from './elastic.indexer.service';
     AnalyticsService,
     ElasticAnalyticsService,
     BuyEventParser,
+    AcceptOfferEventParser,
   ],
   imports: [
     MxCommunicationModule,
