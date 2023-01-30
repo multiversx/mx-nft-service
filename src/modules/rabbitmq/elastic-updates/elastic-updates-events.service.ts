@@ -10,7 +10,7 @@ import { MintEvent } from '../entities/auction/mint.event';
 import * as Redis from 'ioredis';
 import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
-import { NftScamService } from 'src/modules/nft-scam/nft-scam.service';
+import { NftScamService } from 'src/modules/scam/nft-scam.service';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 

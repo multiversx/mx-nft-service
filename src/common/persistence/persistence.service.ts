@@ -481,6 +481,13 @@ export class PersistenceService {
     );
   }
 
+  async clearReport(identifier: string): Promise<boolean> {
+    return await this.execute(
+      this.clearReport.name,
+      this.reportNftsRepository.clearReport(identifier),
+    );
+  }
+
   async getReportCount(identifier: string): Promise<number> {
     return await this.execute(
       this.getReportCount.name,

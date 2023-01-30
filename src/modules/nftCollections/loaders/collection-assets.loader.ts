@@ -24,7 +24,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
       const query = new AssetsQuery()
         .addCollection(identifier)
         .addPageSize(0, 10)
-        .addFields(['media', 'identifier', 'collection', 'isNsfw'])
+        .addFields(['media', 'identifier', 'collection', 'isNsfw', 'scamInfo'])
         .build();
       return this.apiService.getAllNfts(query);
     });

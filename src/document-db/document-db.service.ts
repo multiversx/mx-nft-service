@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { NftScamInfoModel } from 'src/modules/nft-scam/models/nft-scam-info.model';
+import { NftScamInfoModel } from 'src/modules/scam/models/nft-scam-info.model';
 import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { NftScamInfoRepositoryService } from './repositories/nft-scam.repository';
 import { TraitRepositoryService } from './repositories/traits.repository';
