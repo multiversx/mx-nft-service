@@ -1,15 +1,12 @@
-import { EventResponse } from 'src/common/services/mx-communication/models/elastic-search/event.response';
 import { BaseEntity } from 'src/db/base-entity';
+import { MarketplaceEventAndTransactionData } from 'src/modules/marketplaces/models/marketplaceEventAndTxData.dto';
 import { Column, Entity, Index, Unique } from 'typeorm';
 
 @Entity('marketplace_events')
-@Unique('MarketplaceEventsEntity_UQ_EVENT', ['txHash', 'order'])
+@Unique('MarketplaceEventsEntity_UQ_EVENT', ['txHash', 'eventOrder', 'isTx'])
 export class MarketplaceEventsEntity extends BaseEntity {
   @Column({ length: 64 })
   txHash: string;
-
-  @Column()
-  order: number;
 
   @Column({ length: 64, nullable: true })
   originalTxHash?: string;
@@ -21,10 +18,16 @@ export class MarketplaceEventsEntity extends BaseEntity {
   @Column()
   timestamp: number;
 
+  @Column()
+  eventOrder: number = -1;
+
+  @Column()
+  isTx: boolean = false;
+
   @Column({
     type: 'json',
   })
-  data: EventResponse;
+  data: MarketplaceEventAndTransactionData;
 
   constructor(init?: Partial<MarketplaceEventsEntity>) {
     super();

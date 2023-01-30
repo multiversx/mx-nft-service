@@ -32,16 +32,27 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
     return savedRecords;
   }
 
-  async getByMarketplaceAndTimestamps(
-    marketplaceKey: string,
-    beforeTimestamp: number,
-    afterTimestamp: number,
+  async getByMarketplaceAndTimestampsAsc(
+    marketplaceAddress: string,
+    afterTimestamp?: number,
+    beforeTimestamp?: number,
   ): Promise<MarketplaceEventsEntity[]> {
+    let whereFilter = {
+      marketplaceAddress,
+    };
+    if (afterTimestamp && beforeTimestamp) {
+      whereFilter['timestamp'] =
+        MoreThan(afterTimestamp) && LessThan(beforeTimestamp);
+    } else if (afterTimestamp) {
+      whereFilter['timestamp'] = MoreThan(afterTimestamp);
+    }
+
     return await this.find({
-      where: {
-        marketplaceAddress: marketplaceKey,
-        timestamp: MoreThan(afterTimestamp) && LessThan(beforeTimestamp),
+      where: whereFilter,
+      order: {
+        timestamp: 'ASC',
       },
+      take: constants.dbBatch,
     });
   }
 }
