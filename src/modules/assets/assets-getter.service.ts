@@ -277,6 +277,7 @@ export class AssetsGetterService {
     if (artistCollections) {
       const batch = artistCollections?.collections?.slice(0, 100);
       let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
+      console.log(JSON.stringify(elasticQuery));
       let elasticNfts = await this.elasticService.getList(
         'tokens',
         'identifier',
