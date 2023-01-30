@@ -57,12 +57,19 @@ export class SmartContractArtistsService {
     const selectedContract = smartContracts.find(
       (c) => c.address === scAddress,
     );
-    const transaction = await this.mxApiService.getTransactionByHash(
-      selectedContract.deployTxHash,
-    );
+    if (selectedContract) {
+      const transaction = await this.mxApiService.getTransactionByHash(
+        selectedContract.deployTxHash,
+      );
+      return {
+        address: scAddress,
+        owner: transaction.sender.bech32(),
+      };
+    }
+    console.log('Contract not found for ', scAddress);
     return {
       address: scAddress,
-      owner: transaction.sender.bech32(),
+      owner: scAddress,
     };
   }
 
