@@ -1,9 +1,7 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-
-export class AddTxDataToMarketplaceEvents1671700107422 implements MigrationInterface {
-    name = 'AddTxDataToMarketplaceEvents1671700107422'
-
+export class AddTxDataToMarketplaceEvents1675097317500 implements MigrationInterface {
+    name = 'AddTxDataToMarketplaceEvents1675097317500'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`DROP INDEX \`MarketplaceEventsEntity_UQ_EVENT\` ON \`marketplace_events\``);
@@ -13,7 +11,6 @@ export class AddTxDataToMarketplaceEvents1671700107422 implements MigrationInter
         await queryRunner.query(`CREATE UNIQUE INDEX \`MarketplaceEventsEntity_UQ_EVENT\` ON \`marketplace_events\` (\`txHash\`, \`eventOrder\`, \`isTx\`)`);
     }
 
-
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`DROP INDEX \`MarketplaceEventsEntity_UQ_EVENT\` ON \`marketplace_events\``);
         await queryRunner.query(`ALTER TABLE \`marketplace_events\` DROP COLUMN \`isTx\``);
@@ -21,6 +18,5 @@ export class AddTxDataToMarketplaceEvents1671700107422 implements MigrationInter
         await queryRunner.query(`ALTER TABLE \`marketplace_events\` ADD \`order\` int NOT NULL`);
         await queryRunner.query(`CREATE UNIQUE INDEX \`MarketplaceEventsEntity_UQ_EVENT\` ON \`marketplace_events\` (\`txHash\`, \`order\`)`);
     }
-
 
 }
