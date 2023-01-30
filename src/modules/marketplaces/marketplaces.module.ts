@@ -11,7 +11,6 @@ import { MarketplaceProvider } from './loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
 import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing.service';
 import { OffersModuleGraph } from '../offers/offers.module';
-import { MarkeplacesElasticService } from './marketplaces.elastic.service';
 
 @Module({
   providers: [
@@ -23,7 +22,6 @@ import { MarkeplacesElasticService } from './marketplaces.elastic.service';
     MarketplaceProvider,
     MarketplaceRedisHandler,
     MarketplaceEventsIndexingService,
-    MarkeplacesElasticService,
   ],
   imports: [
     PubSubListenerModule,

@@ -8,7 +8,10 @@ import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { Locker } from 'src/utils/locker';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 import { BinaryUtils } from '@elrondnetwork/erdnest';
-import { MarkeplacesElasticService } from './marketplaces.elastic.service';
+import {
+  getMarketplaceEventsElasticQuery,
+  getMarketplaceTransactionsElasticQuery,
+} from './marketplaces.elastic.queries';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -17,7 +20,6 @@ export class MarketplaceEventsIndexingService {
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,
     private readonly marketplacesCachingService: MarketplacesCachingService,
-    private readonly markeplacesElasticService: MarkeplacesElasticService,
     private readonly mxElasticService: MxElasticService,
   ) {}
 
@@ -110,10 +112,7 @@ export class MarketplaceEventsIndexingService {
     let oldestTimestamp: number;
     let newestTimestamp: number;
 
-    const txQuery =
-      this.markeplacesElasticService.getMarketplaceTransactionsElasticQuery(
-        input,
-      );
+    const txQuery = getMarketplaceTransactionsElasticQuery(input);
 
     await this.mxElasticService.getScrollableList(
       'transactions',
@@ -150,8 +149,7 @@ export class MarketplaceEventsIndexingService {
     let oldestTimestamp: number;
     let newestTimestamp: number;
 
-    const eventsQuery =
-      this.markeplacesElasticService.getMarketplaceEventsElasticQuery(input);
+    const eventsQuery = getMarketplaceEventsElasticQuery(input);
 
     await this.mxElasticService.getScrollableList(
       'logs',

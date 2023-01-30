@@ -1075,7 +1075,7 @@ export class PersistenceService {
     afterTimestamp?: number,
     beforeTimestamp?: number,
   ): Promise<MarketplaceEventsEntity[]> {
-    return await this.marketplaceEventsRepository.getByMarketplaceAndTimestampsAsc(
+    return await this.marketplaceEventsRepository.getEventsByMarketplaceAndTimestampsAsc(
       marketplaceKey,
       afterTimestamp,
       beforeTimestamp,

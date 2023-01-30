@@ -7,7 +7,7 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
   async saveOrIgnoreBulk(
     marketplaceEvents: MarketplaceEventsEntity[],
   ): Promise<number> {
-    let savedRecords = 0;
+    let savedRecordsCount = 0;
 
     const totalBatches = Math.max(
       marketplaceEvents.length / constants.dbBatch,
@@ -24,15 +24,15 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
         .values(batch)
         .orIgnore()
         .execute();
-      savedRecords += res?.identifiers.filter(
+      savedRecordsCount += res?.identifiers.filter(
         (identifier) => identifier,
       ).length;
     }
 
-    return savedRecords;
+    return savedRecordsCount;
   }
 
-  async getByMarketplaceAndTimestampsAsc(
+  async getEventsByMarketplaceAndTimestampsAsc(
     marketplaceAddress: string,
     afterTimestamp?: number,
     beforeTimestamp?: number,
