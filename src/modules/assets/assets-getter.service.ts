@@ -281,6 +281,7 @@ export class AssetsGetterService {
         'identifier',
         elasticQuery,
       );
+
       const returnAssets = await this.mapElasticNfts(elasticNfts);
       return new CollectionType({
         items: returnAssets,
@@ -297,11 +298,11 @@ export class AssetsGetterService {
     const assets = await this.getAssetsForIdentifiers(
       elasticNfts?.map((e) => e.identifier),
     );
-
     const returnAssets = [];
     for (const asset of elasticNfts) {
       returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
     }
+
     return returnAssets;
   }
 

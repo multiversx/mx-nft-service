@@ -21,10 +21,18 @@ export class SmartContractArtistsService {
   async getOrSetArtistForScAddress(address: string) {
     return this.cachingService.getOrSetCache(
       this.redisClient,
-      CacheInfo.Artist.key,
-      async () => this.getArtistForScAddress(address),
+      `${CacheInfo.Artist.key}_${address}`,
+      async () => this.getMappedArtistForScAddress(address),
       CacheInfo.Artist.ttl,
     );
+  }
+
+  public async getMappedArtistForScAddress(
+    scAddress: string,
+  ): Promise<{ key: string; value: { address: string; owner: string } }> {
+    const account = await this.getArtistForScAddress(scAddress);
+
+    return { key: account.address, value: account };
   }
 
   public async getArtistForScAddress(

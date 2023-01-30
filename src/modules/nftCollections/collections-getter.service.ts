@@ -370,11 +370,11 @@ export class CollectionsGetterService {
           collection.owner,
         );
       const followersCount = await this.idService.getFollowersCount(
-        artist.owner,
+        artist?.value?.owner,
       );
       return Collection.fromCollectionApi(
         collection,
-        artist?.owner,
+        artist?.value?.owner,
         followersCount?.count,
       );
     }
