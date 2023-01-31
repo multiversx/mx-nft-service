@@ -122,11 +122,23 @@ export class MarketplaceEventsService {
           break;
         }
         case ExternalAuctionEventEnum.AcceptOffer:
-          await this.acceptOfferEventHandler.handle(
-            event,
-            hash,
-            marketplaceType,
-          );
+          if (
+            Buffer.from(event.topics[0], 'base64').toString() ===
+            ExternalAuctionEventEnum.EndTokenEvent
+          ) {
+            await this.withdrawAuctionEventHandler.handle(
+              event,
+              hash,
+              marketplaceType,
+            );
+          } else {
+            await this.acceptOfferEventHandler.handle(
+              event,
+              hash,
+              marketplaceType,
+            );
+          }
+
           break;
         case AuctionEventEnum.WithdrawAuctionAndAcceptOffer:
           if (
