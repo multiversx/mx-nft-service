@@ -6,6 +6,7 @@ export class MarketplaceEventsIndexingRequest {
   afterTimestamp?: number;
   stopIfDuplicates?: boolean;
   marketplaceLastIndexTimestamp?: number;
+  txTimestampDelimiter?: number;
 
   static fromMarketplaceEventsIndexingArgs(
     input: MarketplaceEventsIndexingArgs,

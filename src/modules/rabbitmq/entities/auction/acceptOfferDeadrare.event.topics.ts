@@ -48,7 +48,7 @@ export class AcceptOfferDeadrareEventsTopics {
       Buffer.from(rawTopics[8], 'base64').toString('hex'),
       16,
     ).toString();
-    this.offerOwner = new Address(Buffer.from(rawTopics[10], 'base64'));
+    this.offerOwner = new Address(Buffer.from(rawTopics[12], 'base64'));
 
     this.nftOwner = new Address(Buffer.from(rawTopics[13], 'base64'));
   }

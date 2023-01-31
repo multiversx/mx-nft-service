@@ -7,7 +7,7 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
   async saveOrIgnoreBulk(
     marketplaceEvents: MarketplaceEventsEntity[],
   ): Promise<number> {
-    let savedRecords = 0;
+    let savedRecordsCount = 0;
 
     const totalBatches = Math.max(
       marketplaceEvents.length / constants.dbBatch,
@@ -24,24 +24,35 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
         .values(batch)
         .orIgnore()
         .execute();
-      savedRecords += res?.identifiers.filter(
+      savedRecordsCount += res?.identifiers.filter(
         (identifier) => identifier,
       ).length;
     }
 
-    return savedRecords;
+    return savedRecordsCount;
   }
 
-  async getByMarketplaceAndTimestamps(
-    marketplaceKey: string,
-    beforeTimestamp: number,
-    afterTimestamp: number,
+  async getEventsByMarketplaceAndTimestampsAsc(
+    marketplaceAddress: string,
+    afterTimestamp?: number,
+    beforeTimestamp?: number,
   ): Promise<MarketplaceEventsEntity[]> {
+    let whereFilter = {
+      marketplaceAddress,
+    };
+    if (afterTimestamp && beforeTimestamp) {
+      whereFilter['timestamp'] =
+        MoreThan(afterTimestamp) && LessThan(beforeTimestamp);
+    } else if (afterTimestamp) {
+      whereFilter['timestamp'] = MoreThan(afterTimestamp);
+    }
+
     return await this.find({
-      where: {
-        marketplaceAddress: marketplaceKey,
-        timestamp: MoreThan(afterTimestamp) && LessThan(beforeTimestamp),
+      where: whereFilter,
+      order: {
+        timestamp: 'ASC',
       },
+      take: constants.dbBatch,
     });
   }
 }

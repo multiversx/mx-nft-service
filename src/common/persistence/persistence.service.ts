@@ -1070,15 +1070,15 @@ export class PersistenceService {
     return await this.marketplaceEventsRepository.saveOrIgnoreBulk(events);
   }
 
-  async getMarketplaceEvents(
+  async getMarketplaceEventsAsc(
     marketplaceKey: string,
-    beforeTimestamp: number,
-    afterTimestamp: number,
+    afterTimestamp?: number,
+    beforeTimestamp?: number,
   ): Promise<MarketplaceEventsEntity[]> {
-    return await this.marketplaceEventsRepository.getByMarketplaceAndTimestamps(
+    return await this.marketplaceEventsRepository.getEventsByMarketplaceAndTimestampsAsc(
       marketplaceKey,
-      beforeTimestamp,
       afterTimestamp,
+      beforeTimestamp,
     );
   }
 
