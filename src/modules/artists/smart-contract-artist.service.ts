@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as Redis from 'ioredis';
 import { MxApiService } from 'src/common';
 import { CachingService } from 'src/common/services/caching/caching.service';
@@ -12,6 +12,7 @@ export class SmartContractArtistsService {
   constructor(
     private cachingService: CachingService,
     private mxApiService: MxApiService,
+    private logger: Logger,
   ) {
     this.redisClient = this.cachingService.getClient(
       cacheConfig.persistentRedisClientName,
@@ -66,7 +67,7 @@ export class SmartContractArtistsService {
         owner: transaction.sender.bech32(),
       };
     }
-    console.log('Contract not found for ', scAddress);
+    this.logger.log(`Contract not found for ${scAddress}`);
     return {
       address: scAddress,
       owner: scAddress,
