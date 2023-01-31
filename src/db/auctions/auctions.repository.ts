@@ -602,6 +602,8 @@ export class AuctionsRepository {
       auction.identifier,
       auction.ownerAddress,
     );
+
+    auction.modifiedDate = new Date(new Date().toUTCString());
     return await this.auctionsRepository.save(auction);
   }
 
@@ -619,6 +621,7 @@ export class AuctionsRepository {
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
+      auction.modifiedDate = new Date(new Date().toUTCString());
       return await this.auctionsRepository.save(auction);
     }
     return null;
@@ -639,6 +642,7 @@ export class AuctionsRepository {
     if (auction) {
       auction.status = status;
       auction.blockHash = hash;
+      auction.modifiedDate = new Date(new Date().toUTCString());
       return await this.auctionsRepository.save(auction);
     }
     return null;
