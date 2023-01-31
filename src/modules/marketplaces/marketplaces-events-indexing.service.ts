@@ -7,7 +7,7 @@ import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { Locker } from 'src/utils/locker';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { BinaryUtils, ElasticQuery } from '@elrondnetwork/erdnest';
 import {
   getMarketplaceEventsElasticQuery,
   getMarketplaceTransactionsElasticQuery,
@@ -81,10 +81,12 @@ export class MarketplaceEventsIndexingService {
         throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
       }
 
-      let newestTimestamp: number;
+      const newestTxTimestamp =
+        await this.addElasticTxToDbAndReturnNewestTimestamp(input);
+      const newestEventTimestamp =
+        await this.addElasticEventsToDbAndReturnNewestTimestamp(input);
 
-      [newestTimestamp] = await this.getTxAndSaveToDb(input);
-      [newestTimestamp] = await this.getEventsAndSaveToDb(input);
+      const newestTimestamp = Math.max(newestTxTimestamp, newestEventTimestamp);
 
       if (
         newestTimestamp &&
@@ -106,78 +108,67 @@ export class MarketplaceEventsIndexingService {
     }
   }
 
-  private async getTxAndSaveToDb(
+  private async addElasticTxToDbAndReturnNewestTimestamp(
     input: MarketplaceEventsIndexingRequest,
-  ): Promise<[number, number]> {
-    let oldestTimestamp: number;
-    let newestTimestamp: number;
-
-    const txQuery = getMarketplaceTransactionsElasticQuery(input);
-
-    await this.mxElasticService.getScrollableList(
+  ): Promise<number> {
+    return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
+      getMarketplaceTransactionsElasticQuery(input),
       'transactions',
-      'identifier',
-      txQuery,
-      async (transactions) => {
-        if (!transactions || transactions.length === 0) {
-          return false;
-        }
-
-        if (!newestTimestamp) {
-          newestTimestamp = transactions[0].timestamp;
-        }
-
-        oldestTimestamp = transactions[transactions.length - 1].timestamp;
-
-        const [savedItemsCount, totalEventsCount] = await this.saveTxToDb(
-          transactions,
-          input.marketplaceAddress,
-        );
-
-        if (input.stopIfDuplicates && savedItemsCount !== totalEventsCount) {
-          return false;
-        }
-      },
+      input.marketplaceAddress,
+      this.saveTxToDb.bind(this),
+      input.stopIfDuplicates,
     );
-
-    return [newestTimestamp, oldestTimestamp];
   }
 
-  private async getEventsAndSaveToDb(
+  private async addElasticEventsToDbAndReturnNewestTimestamp(
     input: MarketplaceEventsIndexingRequest,
-  ): Promise<[number, number]> {
-    let oldestTimestamp: number;
+  ): Promise<number> {
+    return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
+      getMarketplaceEventsElasticQuery(input),
+      'logs',
+      input.marketplaceAddress,
+      this.saveEventsToDb.bind(this),
+      input.stopIfDuplicates,
+    );
+  }
+
+  private async addGenericElasticDataToDbAndReturnNewestTimestamp(
+    elasticQuery: ElasticQuery,
+    elasticCollection: string,
+    marketplaceAddress: string,
+    saveToDbFunction: (
+      items: any[],
+      marketplaceAddress: string,
+    ) => Promise<[number, number]>,
+    stopIfDuplicates?: boolean,
+  ): Promise<number> {
     let newestTimestamp: number;
 
-    const eventsQuery = getMarketplaceEventsElasticQuery(input);
-
     await this.mxElasticService.getScrollableList(
-      'logs',
+      elasticCollection,
       'identifier',
-      eventsQuery,
-      async (events) => {
-        if (!events || events.length === 0) {
+      elasticQuery,
+      async (items) => {
+        if (!items || items.length === 0) {
           return false;
         }
 
         if (!newestTimestamp) {
-          newestTimestamp = events[0].timestamp;
+          newestTimestamp = items[0].timestamp;
         }
 
-        oldestTimestamp = events[events.length - 1].timestamp;
-
-        const [savedItemsCount, totalEventsCount] = await this.saveEventsToDb(
-          events,
-          input.marketplaceAddress,
+        const [savedItemsCount, totalEventsCount] = await saveToDbFunction(
+          items,
+          marketplaceAddress,
         );
 
-        if (input.stopIfDuplicates && savedItemsCount !== totalEventsCount) {
+        if (stopIfDuplicates && savedItemsCount !== totalEventsCount) {
           return false;
         }
       },
     );
 
-    return [newestTimestamp, oldestTimestamp];
+    return newestTimestamp;
   }
 
   private async getMarketplaceLastIndexTimestamp(
