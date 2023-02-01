@@ -11,6 +11,8 @@ import { MarketplaceProvider } from './loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from './loaders/marketplace.redis-handler';
 import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing.service';
 import { OffersModuleGraph } from '../offers/offers.module';
+import { AssetByIdentifierService } from '../assets';
+import { MarketplacesReindexService } from './marketplaces-reindex.service';
 
 @Module({
   providers: [
@@ -22,6 +24,8 @@ import { OffersModuleGraph } from '../offers/offers.module';
     MarketplaceProvider,
     MarketplaceRedisHandler,
     MarketplaceEventsIndexingService,
+    AssetByIdentifierService,
+    MarketplacesReindexService,
   ],
   imports: [
     PubSubListenerModule,
@@ -30,6 +34,10 @@ import { OffersModuleGraph } from '../offers/offers.module';
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => OffersModuleGraph),
   ],
-  exports: [MarketplacesService, MarketplaceEventsIndexingService],
+  exports: [
+    MarketplacesService,
+    MarketplaceEventsIndexingService,
+    MarketplacesReindexService,
+  ],
 })
 export class MarketplacesModuleGraph {}

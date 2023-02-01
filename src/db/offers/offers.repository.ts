@@ -10,6 +10,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtils } from 'src/utils/date-utils';
+import { constants } from 'src/config';
 
 @Injectable()
 export class OffersRepository extends Repository<OfferEntity> {
@@ -70,6 +71,12 @@ export class OffersRepository extends Repository<OfferEntity> {
     const savedOffer = await this.offersRepository.save(offer);
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
     return savedOffer;
+  }
+  
+  async saveBulkOffers(orders: OfferEntity[]): Promise<void> {
+    await this.offersRepository.save(orders, {
+      chunk: constants.dbBatch,
+    });
   }
 
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {

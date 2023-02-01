@@ -35,6 +35,10 @@ export class DateUtils {
     return new Date(timestamp * 1000).toJSON().slice(0, 10);
   }
 
+  static getUtcDateFromTimestamp(timestamp: number): Date {
+    return new Date(new Date(timestamp * 1000).toUTCString());
+  }
+
   static timestampToIsoStringWithoutTime(timestamp: number): string {
     let date = new Date(timestamp * 1000);
     date.setUTCHours(0, 0, 0, 0);

@@ -18,6 +18,7 @@ import {
 } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { ReportNftsService } from '../report-nfts/report-nfts.service';
 import { ClearReportInput } from './models/clear-report.input';
+import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -28,6 +29,7 @@ export class AdminOperationsResolver {
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
+    private readonly marketplacesReindexService: MarketplacesReindexService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -147,6 +149,22 @@ export class AdminOperationsResolver {
         MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
           input,
         ),
+      );
+      return true;
+    } catch (error) {
+      throw new ApolloError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async reindexMarketplaceData(
+    @Args('marketplaceAddress')
+    marketplaceAddress: string,
+  ): Promise<boolean> {
+    try {
+      await this.marketplacesReindexService.reindexMarketplaceData(
+        marketplaceAddress,
       );
       return true;
     } catch (error) {

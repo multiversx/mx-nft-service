@@ -691,6 +691,13 @@ export class PersistenceService {
     );
   }
 
+  async saveBulkOrders(orders: OrderEntity[]) {
+    return await this.execute(
+      this.saveBulkOrders.name,
+      this.ordersRepository.saveBulkOrders(orders),
+    );
+  }
+
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
     return await this.execute(
       this.updateOrderWithStatus.name,
@@ -940,6 +947,13 @@ export class PersistenceService {
     );
   }
 
+  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
+    return await this.execute(
+      this.saveBulkAuctions.name,
+      this.auctionsRepository.saveBulkAuctions(auctions),
+    );
+  }
+
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {
     return await this.execute(
       this.rollbackAuctionAndOrdersByHash.name,
@@ -1037,6 +1051,13 @@ export class PersistenceService {
     return await this.execute(
       this.saveOffer.name,
       this.offersRepository.saveOffer(offer),
+    );
+  }
+
+  async saveBulkOffers(offers: OfferEntity[]): Promise<void> {
+    return await this.execute(
+      this.saveBulkOffers.name,
+      this.offersRepository.saveBulkOffers(offers),
     );
   }
 

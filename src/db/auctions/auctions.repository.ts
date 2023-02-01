@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { mxConfig } from 'src/config';
+import { constants, mxConfig } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import {
   AuctionCustomEnum,
@@ -538,6 +538,12 @@ export class AuctionsRepository {
       auction.ownerAddress,
     );
     return await this.auctionsRepository.save(auction);
+  }
+
+  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
+    await this.auctionsRepository.save(auctions, {
+      chunk: constants.dbBatch,
+    });
   }
 
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {

@@ -830,6 +830,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+  reindexMarketplaceData(marketplaceAddress: String!): Boolean!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!

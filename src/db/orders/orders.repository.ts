@@ -5,6 +5,7 @@ import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { getOrdersForAuctions } from '../auctions/sql.queries';
+import { constants } from 'src/config';
 
 @EntityRepository(OrderEntity)
 export class OrdersRepository extends Repository<OrderEntity> {
@@ -85,6 +86,12 @@ export class OrdersRepository extends Repository<OrderEntity> {
 
   async saveOrder(order: OrderEntity) {
     return await this.save(order);
+  }
+
+  async saveBulkOrders(orders: OrderEntity[]): Promise<void> {
+    await this.save(orders, {
+      chunk: constants.dbBatch,
+    });
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
