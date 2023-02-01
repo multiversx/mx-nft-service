@@ -15,6 +15,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { getAllCollectionNftsFromElasticQuery } from './nft-scam.queries';
 
 @Injectable()
 export class NftScamService {
@@ -124,10 +125,7 @@ export class NftScamService {
     scamEngineVersion: string,
   ): Promise<void> {
     this.logger.log(`Processing scamInfo for ${collection}...`);
-    const nftsQuery =
-      this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
-        collection,
-      );
+    const nftsQuery = getAllCollectionNftsFromElasticQuery(collection);
     await this.mxElasticService.getScrollableList(
       'tokens',
       'identifier',

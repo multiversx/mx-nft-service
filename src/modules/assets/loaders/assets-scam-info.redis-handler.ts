@@ -3,11 +3,12 @@ import { RedisCacheService } from 'src/common';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'asset_scam_info');
+    super(redisCacheService, CacheInfo.NftScamInfo.key);
   }
 
   mapValues(
@@ -28,7 +29,7 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
     return [
       new RedisValue({
         values: redisValues,
-        ttl: 30 * TimeConstants.oneMinute,
+        ttl: CacheInfo.NftScamInfo.ttl,
       }),
     ];
   }

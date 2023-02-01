@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
+import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-scam-info.redis-handler';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -18,6 +19,7 @@ export class CacheEventsConsumer {
     private assetsRedisHandler: AssetsRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
     private collectionAssets: CollectionAssetsRedisHandler,
+    private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
     private cacheInvalidationEventsService: CacheInvalidationEventsService,
   ) {}
 
@@ -44,6 +46,7 @@ export class CacheEventsConsumer {
         });
         await Promise.all([
           this.assetsRedisHandler.clearMultipleKeys(event.id),
+          this.assetScamInfoRedisHandler.clearMultipleKeys(event.id),
           this.collectionAssets.clearMultipleKeys(collections),
         ]);
         break;
@@ -52,6 +55,7 @@ export class CacheEventsConsumer {
         const { collection } = getCollectionAndNonceFromIdentifier(event.id);
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
+          this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
         ]);
         break;
@@ -59,6 +63,7 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.MarkCollection:
         await Promise.all([
           this.assetsRedisHandler.clearKeyByPattern(`${event.id}-`),
+          this.assetScamInfoRedisHandler.clearKeyByPattern(`${event.id}-`),
           this.collectionAssets.clearKey(event.id),
         ]);
         break;
