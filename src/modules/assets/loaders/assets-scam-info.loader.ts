@@ -1,8 +1,10 @@
 import DataLoader = require('dataloader');
-import { MxApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
+import { Asset } from '../models';
+import { DocumentDbService } from 'src/document-db/document-db.service';
+import { ScamInfo } from '../models/ScamInfo.dto';
 
 @Injectable({
   scope: Scope.REQUEST,
@@ -10,7 +12,7 @@ import { Injectable, Scope } from '@nestjs/common';
 export class AssetScamInfoProvider extends BaseProvider<string> {
   constructor(
     private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
-    private apiService: MxApiService,
+    private documentDbService: DocumentDbService,
   ) {
     super(
       assetScamInfoRedisHandler,
@@ -19,10 +21,18 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const nfts = await this.apiService.getNftsByIdentifiers(
+    const bulkNftScamInfo = await this.documentDbService.getBulkNftScamInfo(
       identifiers,
-      0,
-      'fields=identifier,scamInfo',
+    );
+    const nfts: Asset[] = bulkNftScamInfo.map(
+      (nft) =>
+        new Asset({
+          identifier: nft.identifier,
+          scamInfo: new ScamInfo({
+            type: nft.type,
+            info: nft.info,
+          }),
+        }),
     );
     return nfts?.groupBy((asset) => asset.identifier);
   }

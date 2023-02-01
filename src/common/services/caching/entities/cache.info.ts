@@ -173,4 +173,9 @@ export class CacheInfo {
     key: 'collectionNfts',
     ttl: TimeConstants.oneDay,
   };
+
+  static NftScamInfo: CacheInfo = {
+    key: 'nftScamInfo',
+    ttl: TimeConstants.oneDay,
+  };
 }

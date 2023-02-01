@@ -30,6 +30,7 @@ import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
 import { BlacklistedCollectionsModule } from '../blacklist/blacklisted-collections.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { CollectionAssetsModelResolver } from './collection-assets-model.resolver';
 
 @Module({
   providers: [
@@ -42,6 +43,7 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     CollectionAssetsCountRedisHandler,
     CollectionsQueriesResolver,
     CollectionsMutationsResolver,
+    CollectionAssetsModelResolver,
     AccountsRedisHandler,
     AccountsProvider,
     OnSaleAssetsCountForCollectionProvider,
