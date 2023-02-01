@@ -48,37 +48,29 @@ export class MarketplacesReindexService {
           break;
         }
 
-        const oldestTimestamp = batch[0].timestamp;
-        let newestTimestamp = batch[batch.length - 1].timestamp;
+        afterTimestamp =
+          this.sliceBatchIfPartialEventsSetAndGetNewestTimestamp(batch);
 
-        if (newestTimestamp !== oldestTimestamp) {
-          batch = batch.slice(
-            0,
-            batch.findIndex((event) => event.timestamp === newestTimestamp),
+        processInNextBatch =
+          await this.processAuctionEventsBatchAndReturnUnprocessedEvents(
+            marketplace,
+            processInNextBatch.concat(batch),
+            auctionsState,
+            ordersState,
+            offersState,
           );
-          newestTimestamp = batch[batch.length - 1].timestamp;
-        }
-
-        afterTimestamp = newestTimestamp;
-
-        processInNextBatch = await this.processAuctionEventsBatch(
-          marketplace,
-          processInNextBatch.concat(batch),
-          auctionsState,
-          ordersState,
-          offersState,
-        );
       } while (true);
 
       if (processInNextBatch.length > 0) {
-        const unprocessedEvents = await this.processAuctionEventsBatch(
-          marketplace,
-          processInNextBatch,
-          auctionsState,
-          ordersState,
-          offersState,
-          true,
-        );
+        const unprocessedEvents =
+          await this.processAuctionEventsBatchAndReturnUnprocessedEvents(
+            marketplace,
+            processInNextBatch,
+            auctionsState,
+            ordersState,
+            offersState,
+            true,
+          );
 
         if (unprocessedEvents.length > 0) {
           throw new Error(
@@ -108,7 +100,23 @@ export class MarketplacesReindexService {
     }
   }
 
-  private async processAuctionEventsBatch(
+  private sliceBatchIfPartialEventsSetAndGetNewestTimestamp(
+    eventsBatch: MarketplaceEventsEntity[],
+  ): number {
+    const oldestTimestamp = eventsBatch[0].timestamp;
+    let newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
+
+    if (newestTimestamp !== oldestTimestamp) {
+      eventsBatch = eventsBatch.slice(
+        0,
+        eventsBatch.findIndex((event) => event.timestamp === newestTimestamp),
+      );
+      newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
+    }
+    return newestTimestamp;
+  }
+
+  private async processAuctionEventsBatchAndReturnUnprocessedEvents(
     marketplace: Marketplace,
     batch: MarketplaceEventsEntity[],
     auctionsState: AuctionEntity[],
@@ -253,7 +261,7 @@ export class MarketplacesReindexService {
 
     for (let i = 0; i < ordersState.length; i++) {
       ordersState[i].auction = auctionsState[ordersState[i].auctionId];
-      ordersState[i].auctionId = auctionsState[ordersState[i].auctionId].id; //newAuctionIds[ordersState[i].auctionId];
+      ordersState[i].auctionId = auctionsState[ordersState[i].auctionId].id;
       console.log(ordersState[i].auctionId);
     }
 
