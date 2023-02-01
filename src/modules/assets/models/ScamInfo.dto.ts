@@ -16,7 +16,7 @@ export class ScamInfo {
   }
 
   static fromScamInfoApi(scamInfo: ScamInfoApi): ScamInfo | undefined {
-    return scamInfo
+    return scamInfo?.type
       ? new ScamInfo({
           type: ScamInfoTypeEnum[scamInfo.type],
           info: scamInfo.info,
