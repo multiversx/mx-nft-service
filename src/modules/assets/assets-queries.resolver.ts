@@ -35,6 +35,7 @@ import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { randomBetween } from 'src/utils/helpers';
+import { ScamInfo } from './models/ScamInfo.dto';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -140,8 +141,11 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return availableTokens?.value ?? 0;
   }
 
-  @ResolveField('scamInfo', () => String)
+  @ResolveField('scamInfo', () => ScamInfo)
   async scamInfo(@Parent() asset: Asset) {
+    if (asset.scamInfo) {
+      return asset.scamInfo;
+    }
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;

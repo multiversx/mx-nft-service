@@ -67,7 +67,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
       const query = new AssetsQuery()
         .addCollection(collection)
         .addPageSize(0, 10)
-        .addFields(['media', 'identifier', 'collection', 'isNsfw'])
+        .addFields(['media', 'identifier', 'collection', 'isNsfw', 'scamInfo'])
         .build();
       return this.apiService.getAllNfts(query);
     });

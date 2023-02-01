@@ -31,9 +31,9 @@ export class AssetsHistoryExternalAuctionService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: event.address,
+          address: transferEvent.address,
           itemsCount: transferEvent.topics[2],
-          sender: transferEvent.topics[3].base64ToBech32(),
+          sender: event.address,
         });
       }
       case ExternalAuctionEventEnum.Buy: {

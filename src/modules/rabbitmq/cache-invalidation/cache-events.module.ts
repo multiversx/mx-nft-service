@@ -9,6 +9,7 @@ import { CacheInvalidationEventsModule } from './cache-invalidation-module/cache
 import { CacheEventsConsumer } from './cache-events.consumer';
 import { CommonRabbitModule } from './common-rabbitmq.module';
 import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module';
+import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-scam-info.redis-handler';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module'
     AssetsRedisHandler,
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
+    AssetScamInfoRedisHandler,
   ],
   exports: [],
 })
