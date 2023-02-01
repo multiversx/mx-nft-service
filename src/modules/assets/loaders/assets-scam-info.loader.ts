@@ -28,10 +28,12 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
       (nft) =>
         new Asset({
           identifier: nft.identifier,
-          scamInfo: new ScamInfo({
-            type: nft.type,
-            info: nft.info,
-          }),
+          scamInfo: nft.type
+            ? new ScamInfo({
+                type: nft.type,
+                info: nft.info,
+              })
+            : null,
         }),
     );
     return nfts?.groupBy((asset) => asset.identifier);
