@@ -221,8 +221,9 @@ export class AuctionEntity extends BaseEntity {
       nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
       status: AuctionStatusEnum.Running,
       type:
+        topicsAuctionToken.auctionType === '' ||
         parseInt(topicsAuctionToken.auctionType) ===
-        ElrondSwapAuctionTypeEnum.Auction
+          ElrondSwapAuctionTypeEnum.Auction
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
