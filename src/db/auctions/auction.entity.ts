@@ -8,6 +8,7 @@ import {
   ElrondSwapAuctionTypeEnum,
 } from 'src/modules/auctions/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import { ENEFTOR_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { nominateVal } from 'src/utils/formatters';
 import { Column, Entity, Index, OneToMany, Unique } from 'typeorm';
@@ -220,9 +221,8 @@ export class AuctionEntity extends BaseEntity {
       nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
       status: AuctionStatusEnum.Running,
       type:
-        topicsAuctionToken.auctionType === '' ||
         parseInt(topicsAuctionToken.auctionType) ===
-          ElrondSwapAuctionTypeEnum.Auction
+        ElrondSwapAuctionTypeEnum.Auction
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
@@ -235,12 +235,12 @@ export class AuctionEntity extends BaseEntity {
       ),
       maxBid:
         parseInt(topicsAuctionToken.auctionType) ===
-        ElrondSwapAuctionTypeEnum.Buy
+          ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
           ? topicsAuctionToken.price
           : '0',
       maxBidDenominated: BigNumberUtils.denominateAmount(
         parseInt(topicsAuctionToken.auctionType) ===
-          ElrondSwapAuctionTypeEnum.Buy
+          ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
           ? topicsAuctionToken.price
           : '0',
         decimals,

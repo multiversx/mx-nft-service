@@ -73,7 +73,9 @@ export class StartAuctionEventHandler {
           await this.auctionsGetterService.getLastAuctionIdForMarketplace(
             marketplace.key,
           );
-        topics.auctionId = auctionId && auctionId > 0 ? auctionId++ : 1;
+        topics.auctionId = (
+          auctionId && auctionId > 0 ? auctionId + 1 : 1
+        ).toString(16);
       }
       return await this.handleSaveAuctionFromTopics(
         auctionIdentifier,
