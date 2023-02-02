@@ -147,6 +147,7 @@ export class OrdersService {
       const activeOrder =
         await this.persistenceService.getActiveOrderForAuction(auctionId);
 
+      if (!activeOrder) return;
       await this.triggerCacheInvalidation(auctionId, activeOrder.ownerAddress);
       const orderEntity = await this.persistenceService.updateOrderWithStatus(
         activeOrder,
