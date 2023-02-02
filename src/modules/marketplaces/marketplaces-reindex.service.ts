@@ -98,8 +98,8 @@ export class MarketplacesReindexService {
         break;
       }
 
-      afterTimestamp =
-        this.sliceBatchIfPartialEventsSetAndGetNewestTimestamp(batch);
+      [batch, afterTimestamp] =
+        this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch);
 
       processInNextBatch =
         await this.processEventsBatchAndReturnUnprocessedEvents(
@@ -127,9 +127,9 @@ export class MarketplacesReindexService {
     }
   }
 
-  private sliceBatchIfPartialEventsSetAndGetNewestTimestamp(
+  private getSlicedBatchAndNewestTimestampIfPartialEventsSet(
     eventsBatch: MarketplaceEventsEntity[],
-  ): number {
+  ): [MarketplaceEventsEntity[], number] {
     const oldestTimestamp = eventsBatch[0].timestamp;
     let newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
 
@@ -141,7 +141,7 @@ export class MarketplacesReindexService {
       newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
     }
 
-    return newestTimestamp;
+    return [eventsBatch, newestTimestamp];
   }
 
   private async processEventsBatchAndReturnUnprocessedEvents(
@@ -468,7 +468,7 @@ export class MarketplacesReindexService {
       case AssetOfferEnum.AuctionClosedAndOfferAccepted: {
         offersState[offerIndex].status = OfferStatusEnum.Accepted;
         offersState[offerIndex].modifiedDate = modifiedDate;
-        
+
         auctionsState[auctionIndex].status = AuctionStatusEnum.Closed;
         auctionsState[auctionIndex].blockHash =
           auctionsState[auctionIndex].blockHash ?? input.blockHash;
@@ -583,14 +583,11 @@ export class MarketplacesReindexService {
       return NftEventTypeEnum.NftEventEnum;
     }
 
-    if (Object.values(AuctionEventEnum).includes(eventIdentifier)) {
-      if (eventIdentifier !== AuctionEventEnum.BidEvent) {
-        return NftEventTypeEnum.AuctionEventEnum;
-      } else {
-        if (marketplace.type === MarketplaceTypeEnum.Internal) {
-          return NftEventTypeEnum.AuctionEventEnum;
-        }
-      }
+    if (
+      marketplace.type === MarketplaceTypeEnum.Internal &&
+      Object.values(AuctionEventEnum).includes(eventIdentifier)
+    ) {
+      return NftEventTypeEnum.AuctionEventEnum;
     }
 
     if (Object.values(ExternalAuctionEventEnum).includes(eventIdentifier)) {
@@ -600,13 +597,7 @@ export class MarketplacesReindexService {
     if (
       Object.values(ElrondNftsSwapAuctionEventEnum).includes(eventIdentifier)
     ) {
-      if (eventIdentifier !== ElrondNftsSwapAuctionEventEnum.Bid) {
-        return NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum;
-      } else {
-        if (marketplace.type === MarketplaceTypeEnum.External) {
-          return NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum;
-        }
-      }
+      return NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum;
     }
   }
 
