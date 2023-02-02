@@ -366,18 +366,10 @@ export class MarketplacesReindexService {
         });
         ordersState.push(order);
 
-        let totalBought = 0;
-        ordersState
-          .filter(
-            (o) =>
-              o.auctionId === auctionsState[auctionIndex].id &&
-              o.status === OrderStatusEnum.Bought,
-          )
-          .forEach((o) => {
-            totalBought += Number.isInteger(o.boughtTokensNo)
-              ? parseInt(o.boughtTokensNo)
-              : 1;
-          });
+        const totalBought = this.getTotalBoughtTokensForAuction(
+          auctionsState[auctionIndex].id,
+          ordersState,
+        );
 
         if (auctionsState[auctionIndex].nrAuctionedTokens === totalBought) {
           auctionsState[auctionIndex].status = AuctionStatusEnum.Ended;
@@ -693,6 +685,23 @@ export class MarketplacesReindexService {
         offersState[i].status = OfferStatusEnum.Expired;
       }
     }
+  }
+
+  private getTotalBoughtTokensForAuction(
+    auctionId: number,
+    orders: OrderEntity[],
+  ): number {
+    let totalBought = 0;
+    orders
+      .filter(
+        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought,
+      )
+      .forEach((o) => {
+        totalBought += Number.isInteger(o.boughtTokensNo)
+          ? parseInt(o.boughtTokensNo)
+          : 1;
+      });
+    return totalBought;
   }
 
   private async addMarketplaceStatesToDb(
