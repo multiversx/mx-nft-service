@@ -2,15 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AuctionEntity } from 'src/db/auctions';
-import { AuctionStatusEnum } from '../auctions/models/AuctionStatus.enum';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplacesService } from './marketplaces.service';
 import { OrderEntity } from 'src/db/orders';
-import { OrderStatusEnum } from '../orders/models';
 import { Marketplace } from './models';
 import { OfferEntity } from 'src/db/offers';
-import { OfferStatusEnum } from '../offers/models';
-import BigNumber from 'bignumber.js';
 import { AuctionsSetterService } from '../auctions';
 import {
   AssetActionEnum,
@@ -22,13 +18,25 @@ import {
 } from '../assets/models';
 import { MarketplaceEventLogInput } from './models/MarketplaceEventLogInput';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
-import { BinaryUtils } from '@elrondnetwork/erdnest';
 import { AssetOfferEnum } from '../assets/models/AssetOfferEnum';
 import { AssetByIdentifierService } from '../assets';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
-import { mxConfig } from 'src/config';
-import { BigNumberUtils } from 'src/utils/bigNumber-utils';
-import { AuctionTypeEnum } from '../auctions/models';
+import {
+  getAuctionIndex,
+  handleMarketplaceExpiredAuctionsAndOrders,
+  handleMarketplaceReindexAuctionBidEvent,
+  handleMarketplaceReindexBoughtAuctionEvent,
+  handleMarketplaceReindexClosedAuctionEvent,
+  handleMarketplaceReindexEndedAuctionEvent,
+  handleMarketplaceReindexStartedAuctionEvent,
+} from './marketplaces-reindex-handlers/marketplace-reindex-auctions.handlers';
+import {
+  handleMarketplaceExpiredOffers,
+  handleMarketplaceReindexAcceptedOfferEvent,
+  handleMarketplaceReindexClosedOfferEvent,
+  handleMarketplaceReindexCreatedOfferEvent,
+} from './marketplaces-reindex-handlers/marketplace-reindex-offers.handlers';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -263,209 +271,83 @@ export class MarketplacesReindexService {
       return;
     }
 
-    const auctionId = BinaryUtils.hexToNumber(input.auctionId);
-    const offerId = parseInt(input.offerId);
-    const nonce = BinaryUtils.hexToNumber(input.nonce);
-    const itemsCount = parseInt(input.itemsCount);
-    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-
-    let auctionIndex: number;
-    if (input.identifier !== AssetActionEnum.StartedAuction) {
-      auctionIndex = auctionsState.findIndex(
-        (a) => a.marketplaceAuctionId === auctionId,
-      );
-    }
-    let offerIndex: number;
-    if (input.identifier !== AssetOfferEnum.Created) {
-      offerIndex = offersState.findIndex(
-        (o) => o.marketplaceOfferId === offerId,
-      );
-    }
-
-    const paymentNonce = !Number.isNaN(
-      input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce,
-    )
-      ? input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce
-      : 0;
-    const paymentTokenIdentifier =
-      input.paymentToken ?? auctionsState[auctionIndex]?.paymentToken;
-
     switch (input.action) {
       case AssetActionEnum.StartedAuction: {
-        const [asset, paymentToken] = await Promise.all([
+        const [asset, [paymentToken, paymentNonce]] = await Promise.all([
           this.assetByIdentifierService.getAsset(input.identifier),
-          this.usdPriceService.getToken(input.paymentToken),
+          this.getPaymentTokenAndNonce(auctionsState, input),
         ]);
-
-        const decimals = paymentToken?.decimals ?? mxConfig.decimals;
-        const auction = new AuctionEntity({
-          creationDate: modifiedDate,
-          modifiedDate,
-          id: auctionsState.length,
-          marketplaceAuctionId: auctionId,
-          identifier: input.identifier,
-          collection: input.collection,
-          nonce: nonce,
-          nrAuctionedTokens: itemsCount,
-          status: AuctionStatusEnum.Running,
-          type: input.auctionType,
-          paymentToken: paymentTokenIdentifier,
+        handleMarketplaceReindexStartedAuctionEvent(
+          input,
+          marketplace,
+          auctionsState,
+          paymentToken.identifier,
           paymentNonce,
-          ownerAddress: input.sender,
-          minBid: input.minBid,
-          maxBid: input.maxBid !== 'NaN' ? input.maxBid : '0',
-          minBidDenominated: BigNumberUtils.denominateAmount(
-            input.minBid,
-            decimals,
-          ),
-          maxBidDenominated: BigNumberUtils.denominateAmount(
-            input.maxBid !== 'NaN' ? input.maxBid : '0',
-            decimals,
-          ),
-          minBidDiff: input.minBidDiff ?? '0',
-          startDate: input.startTime,
-          endDate: input.endTime,
-          tags: asset.tags?.join(',') ?? '',
-          blockHash: input.blockHash ?? '',
-          marketplaceKey: marketplace.key,
-        });
-        auctionsState.push(auction);
+          paymentToken.decimals,
+          asset,
+        );
         break;
       }
       case AssetActionEnum.Bought: {
-        const paymentToken = await this.usdPriceService.getToken(
-          auctionsState[auctionIndex].paymentToken,
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
+          auctionsState,
+          input,
         );
-
-        this.setInactiveOrdersForAuction(
+        handleMarketplaceReindexBoughtAuctionEvent(
+          input,
+          marketplace,
+          auctionsState,
           ordersState,
-          auctionsState[auctionIndex].id,
-          modifiedDate,
+          paymentToken.identifier,
+          paymentNonce,
+          paymentToken.decimals,
         );
-
-        const order = new OrderEntity({
-          id: ordersState.length,
-          creationDate: modifiedDate,
-          modifiedDate,
-          auctionId: auctionsState[auctionIndex].id,
-          ownerAddress: input.address,
-          priceToken: paymentTokenIdentifier,
-          priceNonce: paymentNonce,
-          priceAmount: input.price,
-          priceAmountDenominated: BigNumberUtils.denominateAmount(
-            input.price,
-            paymentToken.decimals,
-          ),
-          blockHash: input.blockHash ?? '',
-          marketplaceKey: marketplace.key,
-          boughtTokensNo:
-            auctionsState[auctionIndex].type === AuctionTypeEnum.Nft
-              ? null
-              : itemsCount.toString(),
-          status: OrderStatusEnum.Bought,
-        });
-        ordersState.push(order);
-
-        const totalBought = this.getTotalBoughtTokensForAuction(
-          auctionsState[auctionIndex].id,
-          ordersState,
-        );
-
-        if (auctionsState[auctionIndex].nrAuctionedTokens === totalBought) {
-          auctionsState[auctionIndex].status = AuctionStatusEnum.Ended;
-          auctionsState[auctionIndex].modifiedDate = modifiedDate;
-          auctionsState[auctionIndex].blockHash =
-            auctionsState[auctionIndex].blockHash ?? input.blockHash;
-        }
         break;
       }
       case AssetActionEnum.EndedAuction: {
-        auctionsState[auctionIndex].status = AuctionStatusEnum.Ended;
-        auctionsState[auctionIndex].blockHash =
-          auctionsState[auctionIndex].blockHash ?? input.blockHash;
-        auctionsState[auctionIndex].modifiedDate = modifiedDate;
-
-        const winnerOrderId = this.handleChooseWinnerOrderAndReturnId(
+        handleMarketplaceReindexEndedAuctionEvent(
+          input,
+          auctionsState,
           ordersState,
-          auctionsState[auctionIndex],
-          OrderStatusEnum.Bought,
         );
-
-        this.setInactiveOrdersForAuction(
-          ordersState,
-          auctionsState[auctionIndex].id,
-          modifiedDate,
-          winnerOrderId,
-        );
-
         break;
       }
       case AssetActionEnum.ClosedAuction: {
-        auctionsState[auctionIndex].status = AuctionStatusEnum.Closed;
-        auctionsState[auctionIndex].blockHash =
-          auctionsState[auctionIndex].blockHash ?? input.blockHash;
-        auctionsState[auctionIndex].modifiedDate = modifiedDate;
-
-        this.setInactiveOrdersForAuction(
+        handleMarketplaceReindexClosedAuctionEvent(
+          input,
+          auctionsState,
           ordersState,
-          auctionsState[auctionIndex].id,
-          modifiedDate,
         );
-
         break;
       }
       case AssetOfferEnum.Created: {
-        const paymentToken = await this.usdPriceService.getToken(
-          input.paymentToken,
+        const [paymentToken] = await this.getPaymentTokenAndNonce(
+          auctionsState,
+          input,
         );
-        const offer = new OfferEntity({
-          id: offersState.length,
-          creationDate: modifiedDate,
-          modifiedDate,
-          marketplaceOfferId: offerId,
-          blockHash: input.blockHash,
-          collection: input.collection,
-          identifier: input.identifier,
-          priceToken: input.paymentToken,
-          priceNonce: input.paymentNonce,
-          priceAmount: input.price,
-          priceAmountDenominated: BigNumberUtils.denominateAmount(
-            input.price,
-            paymentToken.decimals,
-          ),
-          ownerAddress: input.address,
-          endDate: input.endTime,
-          boughtTokensNo: input.itemsCount,
-          marketplaceKey: marketplace.key,
-          status: OfferStatusEnum.Active,
-        });
-        offersState.push(offer);
+        handleMarketplaceReindexCreatedOfferEvent(
+          input,
+          marketplace,
+          offersState,
+          paymentToken.decimals,
+        );
         break;
       }
       case AssetOfferEnum.Accepted: {
-        offersState[offerIndex].status = OfferStatusEnum.Accepted;
-        offersState[offerIndex].modifiedDate = modifiedDate;
+        handleMarketplaceReindexAcceptedOfferEvent(input, offersState);
         break;
       }
       case AssetOfferEnum.Closed: {
-        offersState[offerIndex].status = OfferStatusEnum.Closed;
-        offersState[offerIndex].modifiedDate = modifiedDate;
+        handleMarketplaceReindexClosedOfferEvent(input, offersState);
         break;
       }
       case AssetOfferEnum.AuctionClosedAndOfferAccepted: {
-        offersState[offerIndex].status = OfferStatusEnum.Accepted;
-        offersState[offerIndex].modifiedDate = modifiedDate;
-
-        auctionsState[auctionIndex].status = AuctionStatusEnum.Closed;
-        auctionsState[auctionIndex].blockHash =
-          auctionsState[auctionIndex].blockHash ?? input.blockHash;
-        auctionsState[auctionIndex].modifiedDate = modifiedDate;
-
-        this.setInactiveOrdersForAuction(
+        handleMarketplaceReindexClosedAuctionEvent(
+          input,
+          auctionsState,
           ordersState,
-          auctionsState[auctionIndex].id,
-          modifiedDate,
         );
+        handleMarketplaceReindexAcceptedOfferEvent(input, offersState);
         break;
       }
       default: {
@@ -473,46 +355,40 @@ export class MarketplacesReindexService {
           throw new Error(`Case not handled ${input.auctionType}`);
         }
 
-        const paymentToken = await this.usdPriceService.getToken(
-          auctionsState[auctionIndex].paymentToken,
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
+          auctionsState,
+          input,
         );
 
-        this.setInactiveOrdersForAuction(
+        handleMarketplaceReindexAuctionBidEvent(
+          input,
+          marketplace,
+          auctionsState,
           ordersState,
-          auctionsState[auctionIndex].id,
-          modifiedDate,
+          paymentToken.identifier,
+          paymentNonce,
+          paymentToken.decimals,
         );
-
-        let order = new OrderEntity({
-          id: ordersState.length,
-          creationDate: modifiedDate,
-          modifiedDate,
-          auctionId: auctionsState[auctionIndex].id,
-          status: OrderStatusEnum.Active,
-          ownerAddress: input.address,
-          priceToken: paymentTokenIdentifier,
-          priceNonce: paymentNonce,
-          priceAmount: input.price,
-          priceAmountDenominated: BigNumberUtils.denominateAmount(
-            input.price,
-            paymentToken.decimals,
-          ),
-          blockHash: input.blockHash ?? '',
-          marketplaceKey: marketplace.key,
-          boughtTokensNo:
-            auctionsState[auctionIndex].type === AuctionTypeEnum.Nft
-              ? null
-              : itemsCount.toString(),
-        });
-
-        if (order.priceAmount === auctionsState[auctionIndex].maxBid) {
-          order.status = OrderStatusEnum.Bought;
-          auctionsState[auctionIndex].status = AuctionStatusEnum.Ended;
-        }
-
-        ordersState.push(order);
       }
     }
+  }
+
+  private async getPaymentTokenAndNonce(
+    auctionsState: AuctionEntity[],
+    input: MarketplaceEventLogInput,
+  ): Promise<[Token, number]> {
+    const auctionIndex = getAuctionIndex(auctionsState, input);
+    const paymentNonce = !Number.isNaN(
+      input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce,
+    )
+      ? input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce
+      : 0;
+    const paymentTokenIdentifier =
+      input.paymentToken ?? auctionsState[auctionIndex]?.paymentToken;
+    const paymentToken = await this.usdPriceService.getToken(
+      paymentTokenIdentifier,
+    );
+    return [paymentToken, paymentNonce];
   }
 
   private async getEventCategoryTypeAndMainEventIndex(
@@ -588,120 +464,18 @@ export class MarketplacesReindexService {
     }
   }
 
-  private setInactiveOrdersForAuction(
-    ordersState: OrderEntity[],
-    auctionId: number,
-    modifiedDate: Date,
-    exceptWinnerId?: number,
-  ): void {
-    ordersState
-      .filter(
-        (o) =>
-          o.auctionId === auctionId &&
-          o.status === OrderStatusEnum.Active &&
-          o.id !== exceptWinnerId,
-      )
-      .map((o) => {
-        o.status = OrderStatusEnum.Inactive;
-        o.modifiedDate = modifiedDate;
-      });
-  }
-
-  private handleChooseWinnerOrderAndReturnId(
-    ordersState: OrderEntity[],
-    auction: AuctionEntity,
-    status: OrderStatusEnum,
-  ): number {
-    const bids = ordersState
-      .filter(
-        (o) =>
-          o.auctionId === auction.id && o.status === OrderStatusEnum.Active,
-      )
-      .map((o) => new BigNumber(o.priceAmount));
-
-    if (bids.length) {
-      const maxBid = BigNumber.max(...bids);
-      const winnerOrderIndex = ordersState.findIndex(
-        (o) =>
-          o.auctionId === auction.id &&
-          o.status === OrderStatusEnum.Active &&
-          o.priceAmount === maxBid.toString(),
-      );
-      ordersState[winnerOrderIndex].status = status;
-      return ordersState[winnerOrderIndex].id;
-    }
-    return -1;
-  }
-
   private processMarketplaceExpiredStates(
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
     currentTimestamp: number,
   ): void {
-    this.processMarketplaceExpiredAuctionsAndOrders(
+    handleMarketplaceExpiredAuctionsAndOrders(
       auctionsState,
       ordersState,
       currentTimestamp,
     );
-    this.processMarketplaceExpiredOffers(offersState, currentTimestamp);
-  }
-
-  private processMarketplaceExpiredAuctionsAndOrders(
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    currentTimestamp: number,
-  ): void {
-    const runningAuctions = auctionsState.filter(
-      (a) => a.status === AuctionStatusEnum.Running,
-    );
-    for (let i = 0; i < runningAuctions.length; i++) {
-      if (runningAuctions[i].endDate < currentTimestamp) {
-        runningAuctions[i].status = AuctionStatusEnum.Claimable;
-        const winnerOrderId = this.handleChooseWinnerOrderAndReturnId(
-          ordersState,
-          runningAuctions[i],
-          OrderStatusEnum.Active,
-        );
-        this.setInactiveOrdersForAuction(
-          ordersState,
-          runningAuctions[i].id,
-          DateUtils.getUtcDateFromTimestamp(runningAuctions[i].endDate),
-          winnerOrderId,
-        );
-      }
-    }
-  }
-
-  private processMarketplaceExpiredOffers(
-    offersState: OfferEntity[],
-    currentTimestamp: number,
-  ): void {
-    for (let i = 0; i < offersState.length; i++) {
-      if (
-        offersState[i].status === OfferStatusEnum.Active &&
-        offersState[i].endDate < currentTimestamp
-      ) {
-        offersState[i].status = OfferStatusEnum.Expired;
-      }
-    }
-  }
-
-  private getTotalBoughtTokensForAuction(
-    auctionId: number,
-    orders: OrderEntity[],
-  ): number {
-    let totalBought = 0;
-    orders
-      .filter(
-        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought,
-      )
-      .forEach((o) => {
-        totalBought += Number.isInteger(o.boughtTokensNo)
-          ? parseInt(o.boughtTokensNo)
-          : 1;
-      });
-    return totalBought;
+    handleMarketplaceExpiredOffers(offersState, currentTimestamp);
   }
 
   private async addMarketplaceStatesToDb(
