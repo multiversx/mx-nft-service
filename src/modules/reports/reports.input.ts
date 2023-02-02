@@ -8,14 +8,14 @@ import {
 } from 'src/utils/constants';
 
 @InputType()
-export class ClearReportInput {
+export class ReportNftInput {
   @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
   @Field(() => String)
   identifier: string;
 }
 
 @InputType()
-export class ClearReportCollectionInput {
+export class ReportCollectionInput {
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
     message: COLLECTION_IDENTIFIER_ERROR,
   })

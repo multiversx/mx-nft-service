@@ -2,19 +2,18 @@ import { forwardRef, Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MxCommunicationModule } from 'src/common';
 import { CommonModule } from 'src/common.module';
-import { ReportNftsRepository } from 'src/db/reportNft';
+import { ReportNftsRepository } from 'src/db/reports';
 import { AuthModule } from '../auth/auth.module';
-import { ReportNftsResolver } from './report-nfts.resolver';
-import { ReportNftsService } from './report-nfts.service';
+import { ReportsResolver } from './reports.resolver';
+import { ReportsService } from './reports.service';
 
 @Module({
-  providers: [ReportNftsService, ReportNftsResolver],
+  providers: [ReportsService, ReportsResolver],
   imports: [
     CommonModule,
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([ReportNftsRepository]),
   ],
-  exports: [ReportNftsService],
+  exports: [ReportsService],
 })
-export class ReportNftsModuleGraph {}
+export class ReportsModuleGraph {}
