@@ -401,6 +401,10 @@ input ClaimTicketsArgs {
   collectionIdentifier: String!
 }
 
+input ClearReportCollectionInput {
+  collectionIdentifier: String!
+}
+
 input ClearReportInput {
   identifier: String!
 }
@@ -823,6 +827,7 @@ type Mutation {
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
+  clearReportCollection(input: ClearReportCollectionInput!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!

@@ -70,14 +70,14 @@ export class ReportNftsService {
     }
   }
 
-  async clearReport(identifier: string): Promise<boolean> {
+  async clearNftReport(identifier: string): Promise<boolean> {
     try {
       return await this.persistenceService.clearNftReport(identifier);
     } catch (err) {
       this.logger.error(
-        'An error occurred while deleting reports for identifier.',
+        'An error occurred while deleting nft reports for identifier.',
         {
-          path: `${ReportNftsService.name}.${this.clearReport.name}`,
+          path: `${ReportNftsService.name}.${this.clearNftReport.name}`,
           identifier,
           exception: err,
         },
@@ -91,7 +91,7 @@ export class ReportNftsService {
       return await this.persistenceService.clearCollectionReport(identifier);
     } catch (err) {
       this.logger.error(
-        'An error occurred while deleting reports for identifier.',
+        'An error occurred while deleting collection reports for identifier.',
         {
           path: `${ReportNftsService.name}.${this.clearCollectionReport.name}`,
           identifier,
