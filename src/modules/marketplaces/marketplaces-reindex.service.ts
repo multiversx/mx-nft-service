@@ -229,26 +229,26 @@ export class MarketplacesReindexService {
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
-    timestamp: number,
+    currentTimestamp: number,
   ): void {
     this.processMarketplaceExpiredAuctionsAndOrders(
       auctionsState,
       ordersState,
-      timestamp,
+      currentTimestamp,
     );
-    this.processMarketplaceExpiredOffers(offersState, timestamp);
+    this.processMarketplaceExpiredOffers(offersState, currentTimestamp);
   }
 
   private processMarketplaceExpiredAuctionsAndOrders(
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
-    timestamp: number,
+    currentTimestamp: number,
   ): void {
     const runningAuctions = auctionsState.filter(
       (a) => a.status === AuctionStatusEnum.Running,
     );
     for (let i = 0; i < runningAuctions.length; i++) {
-      if (runningAuctions[i].endDate < timestamp) {
+      if (runningAuctions[i].endDate < currentTimestamp) {
         runningAuctions[i].status = AuctionStatusEnum.Claimable;
         const winnerOrderId = this.handleChooseWinnerOrderAndReturnId(
           ordersState,
@@ -267,12 +267,12 @@ export class MarketplacesReindexService {
 
   private processMarketplaceExpiredOffers(
     offersState: OfferEntity[],
-    timestamp: number,
+    currentTimestamp: number,
   ): void {
     for (let i = 0; i < offersState.length; i++) {
       if (
         offersState[i].status === OfferStatusEnum.Active &&
-        offersState[i].endDate < timestamp
+        offersState[i].endDate < currentTimestamp
       ) {
         offersState[i].status = OfferStatusEnum.Expired;
       }
