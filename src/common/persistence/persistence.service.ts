@@ -46,7 +46,12 @@ import {
 import { OfferEntity, OffersRepository } from 'src/db/offers';
 import { OffersFiltersForDb } from 'src/db/offers/offers.filter';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
-import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
+import {
+  ReportCollectionEntity,
+  ReportCollectionsRepository,
+  ReportNftEntity,
+  ReportNftsRepository,
+} from 'src/db/reports';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';
@@ -71,6 +76,7 @@ export class PersistenceService {
     private readonly marketplaceCollectionsRepository: MarketplaceCollectionsRepository,
     private readonly marketplaceRepository: MarketplaceRepository,
     private readonly reportNftsRepository: ReportNftsRepository,
+    private readonly reportCollectionsRepository: ReportCollectionsRepository,
     private readonly nftsFlagsRepository: NftsFlagsRepository,
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
@@ -467,31 +473,64 @@ export class PersistenceService {
     );
   }
 
-  async isReportedBy(identifier: string, address: string): Promise<boolean> {
+  async isNftReportedBy(identifier: string, address: string): Promise<boolean> {
     return await this.execute(
-      this.isReportedBy.name,
+      this.isNftReportedBy.name,
       this.reportNftsRepository.isReportedBy(identifier, address),
     );
   }
 
-  async addReport(reportEntity: ReportNftEntity): Promise<ReportNftEntity> {
+  async addNftReport(reportEntity: ReportNftEntity): Promise<ReportNftEntity> {
     return await this.execute(
-      this.addReport.name,
+      this.addNftReport.name,
       this.reportNftsRepository.addReport(reportEntity),
     );
   }
 
-  async clearReport(identifier: string): Promise<boolean> {
+  async clearNftReport(identifier: string): Promise<boolean> {
     return await this.execute(
-      this.clearReport.name,
+      this.clearNftReport.name,
       this.reportNftsRepository.clearReport(identifier),
     );
   }
 
-  async getReportCount(identifier: string): Promise<number> {
+  async getNftReportCount(identifier: string): Promise<number> {
     return await this.execute(
-      this.getReportCount.name,
+      this.getNftReportCount.name,
       this.reportNftsRepository.getReportCount(identifier),
+    );
+  }
+
+  async isCollectionReportedBy(
+    identifier: string,
+    address: string,
+  ): Promise<boolean> {
+    return await this.execute(
+      this.isCollectionReportedBy.name,
+      this.reportCollectionsRepository.isReportedBy(identifier, address),
+    );
+  }
+
+  async addCollectionReport(
+    reportEntity: ReportCollectionEntity,
+  ): Promise<ReportCollectionEntity> {
+    return await this.execute(
+      this.addCollectionReport.name,
+      this.reportCollectionsRepository.addReport(reportEntity),
+    );
+  }
+
+  async clearCollectionReport(identifier: string): Promise<boolean> {
+    return await this.execute(
+      this.clearCollectionReport.name,
+      this.reportCollectionsRepository.clearReport(identifier),
+    );
+  }
+
+  async getCollectionReportCount(identifier: string): Promise<number> {
+    return await this.execute(
+      this.getCollectionReportCount.name,
+      this.reportCollectionsRepository.getReportCount(identifier),
     );
   }
 

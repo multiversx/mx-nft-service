@@ -401,6 +401,10 @@ input ClaimTicketsArgs {
   collectionIdentifier: String!
 }
 
+input ClearReportCollectionInput {
+  collectionIdentifier: String!
+}
+
 input ClearReportInput {
   identifier: String!
 }
@@ -810,7 +814,10 @@ type Mutation {
   addBlacklistedCollection(collection: String!): Boolean!
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
-  addReport(input: ReportNftInput!): Boolean!
+  addReport(
+    """This endpoint can be used to report a NFT"""
+    input: ReportNftInput!
+  ): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -820,6 +827,7 @@ type Mutation {
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
+  clearReportCollection(input: ClearReportCollectionInput!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -834,6 +842,10 @@ type Mutation {
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  reportCollection(
+    """This endpoint can be used to report a Collection"""
+    input: ReportCollectionInput!
+  ): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
   setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
@@ -1166,6 +1178,10 @@ type Rarity {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+input ReportCollectionInput {
+  collectionIdentifier: String!
 }
 
 input ReportNftInput {

@@ -17,7 +17,7 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 import { UsdPriceModuleGraph } from './modules/usdPrice/usd-price.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
-import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
+import { ReportsModuleGraph } from './modules/reports/reports.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 import { SearchModuleGraph } from './modules/search/search.module';
@@ -72,7 +72,7 @@ import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
     OwnersModuleGraph,
     AccountsStatsModuleGraph,
     CollectionsStatsModuleGraph,
-    ReportNftsModuleGraph,
+    ReportsModuleGraph,
     ScamModule,
     FeaturedModuleGraph,
     BlacklistedCollectionsModule,
