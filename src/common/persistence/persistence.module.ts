@@ -19,14 +19,14 @@ import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
 import { NotificationsRepository } from 'src/db/notifications';
 import { OfferEntity, OffersRepository } from 'src/db/offers';
 import { OrdersRepository } from 'src/db/orders';
-import { ReportNftsRepository } from 'src/db/reportNft/report-nft.repository';
+import { ReportNftsRepository } from 'src/db/reports/report-nft.repository';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections/blacklisted.repository';
-import { ReportCollectionsRepository } from 'src/db/reportNft/report-collection.repository';
+import { ReportCollectionsRepository } from 'src/db/reports';
 
 @Global()
 @Module({

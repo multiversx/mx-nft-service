@@ -16,7 +16,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
-import { ReportNftsService } from '../report-nfts/report-nfts.service';
+import { ReportsService } from '../reports/reports.service';
 import {
   ClearReportCollectionInput,
   ClearReportInput,
@@ -26,7 +26,7 @@ import {
 export class AdminOperationsResolver {
   constructor(
     private readonly flagService: FlagNftService,
-    private reportNfts: ReportNftsService,
+    private reportNfts: ReportsService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,

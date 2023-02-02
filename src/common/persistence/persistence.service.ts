@@ -46,9 +46,12 @@ import {
 import { OfferEntity, OffersRepository } from 'src/db/offers';
 import { OffersFiltersForDb } from 'src/db/offers/offers.filter';
 import { OrderEntity, OrdersRepository } from 'src/db/orders';
-import { ReportNftEntity, ReportNftsRepository } from 'src/db/reportNft';
-import { ReportCollectionEntity } from 'src/db/reportNft/report-collection.entity';
-import { ReportCollectionsRepository } from 'src/db/reportNft/report-collection.repository';
+import {
+  ReportCollectionEntity,
+  ReportCollectionsRepository,
+  ReportNftEntity,
+  ReportNftsRepository,
+} from 'src/db/reports';
 import { AuctionStatusEnum } from 'src/modules/auctions/models/AuctionStatus.enum';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import { FeaturedCollectionTypeEnum } from 'src/modules/featured/FeatureCollectionType.enum';

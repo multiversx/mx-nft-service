@@ -5,12 +5,12 @@ import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/userAuthResult';
 import { BaseResolver } from '../common/base.resolver';
 import { ReportNft } from './report-nft.dto';
-import { ReportCollectionInput, ReportNftInput } from './report-nft.input';
-import { ReportNftsService } from './report-nfts.service';
+import { ReportCollectionInput, ReportNftInput } from './reports.input';
+import { ReportsService } from './reports.service';
 
 @Resolver(() => ReportNft)
-export class ReportNftsResolver extends BaseResolver(ReportNft) {
-  constructor(private reportNfts: ReportNftsService) {
+export class ReportsResolver extends BaseResolver(ReportNft) {
+  constructor(private reportNfts: ReportsService) {
     super();
   }
 

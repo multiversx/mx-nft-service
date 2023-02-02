@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ReportNftEntity } from 'src/db/reportNft';
+import { ReportNftEntity } from 'src/db/reports';
 import { SlackReportService } from 'src/common/services/mx-communication/slack-report.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { ReportCollectionEntity } from 'src/db/reportNft/report-collection.entity';
+import { ReportCollectionEntity } from 'src/db/reports/report-collection.entity';
 
 @Injectable()
-export class ReportNftsService {
+export class ReportsService {
   constructor(
     private persistenceService: PersistenceService,
     private slackReport: SlackReportService,
@@ -29,7 +29,7 @@ export class ReportNftsService {
       return true;
     } catch (err) {
       this.logger.error('An error occurred while adding a report.', {
-        path: `${ReportNftsService.name}.${this.addNftReport.name}`,
+        path: `${ReportsService.name}.${this.addNftReport.name}`,
         identifier,
         address,
         exception: err,
@@ -58,7 +58,7 @@ export class ReportNftsService {
       return true;
     } catch (err) {
       this.logger.error('An error occurred while adding a report.', {
-        path: `${ReportNftsService.name}.${this.addCollectionReport.name}`,
+        path: `${ReportsService.name}.${this.addCollectionReport.name}`,
         identifier: collectionIdentifier,
         address,
         exception: err,
@@ -77,7 +77,7 @@ export class ReportNftsService {
       this.logger.error(
         'An error occurred while deleting nft reports for identifier.',
         {
-          path: `${ReportNftsService.name}.${this.clearNftReport.name}`,
+          path: `${ReportsService.name}.${this.clearNftReport.name}`,
           identifier,
           exception: err,
         },
@@ -93,7 +93,7 @@ export class ReportNftsService {
       this.logger.error(
         'An error occurred while deleting collection reports for identifier.',
         {
-          path: `${ReportNftsService.name}.${this.clearCollectionReport.name}`,
+          path: `${ReportsService.name}.${this.clearCollectionReport.name}`,
           identifier,
           exception: err,
         },
