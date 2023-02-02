@@ -13,6 +13,7 @@ import { CachingService } from 'src/common/services/caching/caching.service';
 import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
+import { CollectionVolumeLast24 } from './collection-volume';
 
 @Injectable()
 export class AnalyticsService {
@@ -34,7 +35,7 @@ export class AnalyticsService {
     );
   }
 
-  public async getTrendingByVolume(): Promise<any> {
+  public async getTrendingByVolume(): Promise<CollectionVolumeLast24[]> {
     return await this.cacheService.getCache(
       this.redisClient,
       CacheInfo.TrendingByVolume.key,
@@ -43,7 +44,7 @@ export class AnalyticsService {
 
   public async reindexTrendingCollections(
     forTheLastHours: number = 24,
-  ): Promise<any> {
+  ): Promise<CollectionVolumeLast24[]> {
     try {
       const performanceProfiler = new PerformanceProfiler();
 
@@ -75,7 +76,7 @@ export class AnalyticsService {
   private async fetchLogsUsingScrollApi(
     startDateUtc: string,
     endDateUtc: string,
-  ): Promise<void> {
+  ): Promise<CollectionVolumeLast24[]> {
     this.logger.log(
       `Scroll logs between '${startDateUtc}' and '${endDateUtc}'`,
     );
@@ -92,7 +93,7 @@ export class AnalyticsService {
     return await this.getTrendingCollections();
   }
 
-  private async getTrendingCollections(): Promise<any> {
+  private async getTrendingCollections(): Promise<CollectionVolumeLast24[]> {
     const tokensWithPrice = await this.getTokensWithDetails();
     const collections = this.getDataGroupedByCollectionAndToke();
     let trending = [];
