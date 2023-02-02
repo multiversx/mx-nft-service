@@ -6,7 +6,6 @@ import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { CachingService } from 'src/common/services/caching/caching.service';
-import { TimeConstants } from 'src/utils/time-utils';
 import { AnalyticsService } from 'src/modules/analytics/analytics.service';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class TrendingCollectionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_5AM)
+  @Cron(CronExpression.EVERY_HOUR)
   async handleTrendingCollections(forTheLastHours: number = 24) {
     await Locker.lock(
       'Trending Collections invalidations',

@@ -104,6 +104,11 @@ export class CollectionsGetterService {
       (x) => !blacklistedCollections.includes(x.collection),
     );
     const count = trendingCollections.length;
+    trendingCollections = orderBy(
+      trendingCollections,
+      ['verified', 'last24Volume'],
+      ['desc', 'desc'],
+    );
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
@@ -130,13 +135,18 @@ export class CollectionsGetterService {
   private async addCollectionsDetails(
     trendingCollections: any[],
   ): Promise<[Collection[], number]> {
-    const mappedCollections = [];
+    const mappedCollections: Collection[] = [];
     const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of trendingCollections) {
       const mappedCollection = collections.find(
         (c) => c.collection === trendingCollection.collection,
       );
-      if (mappedCollection) mappedCollections.push(mappedCollection);
+      if (mappedCollection)
+        mappedCollections.push({
+          ...mappedCollection,
+          last24USDVolume: parseInt(trendingCollection?.volume ?? '0'),
+          last24Trading: trendingCollection,
+        });
     }
     return [mappedCollections, mappedCollections.length];
   }

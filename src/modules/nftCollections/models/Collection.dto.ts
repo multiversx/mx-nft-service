@@ -1,6 +1,7 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
+import { CollectionVolumeLast24 } from 'src/modules/analytics/collection-volume';
 import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
@@ -79,6 +80,8 @@ export class Collection {
   aggregatorUrl: string;
   @Field(() => ScamInfo, { nullable: true })
   scamInfo: ScamInfo;
+  last24Trading: CollectionVolumeLast24;
+  last24USDVolume: number;
 
   constructor(init?: Partial<Collection>) {
     Object.assign(this, init);
