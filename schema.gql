@@ -810,7 +810,10 @@ type Mutation {
   addBlacklistedCollection(collection: String!): Boolean!
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
-  addReport(input: ReportNftInput!): Boolean!
+  addReport(
+    """This endpoint can be used to report a NFT"""
+    input: ReportNftInput!
+  ): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -834,6 +837,10 @@ type Mutation {
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  reportCollection(
+    """This endpoint can be used to report a Collection"""
+    input: ReportCollectionInput!
+  ): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
   setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
@@ -1166,6 +1173,10 @@ type Rarity {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+input ReportCollectionInput {
+  collectionIdentifier: String!
 }
 
 input ReportNftInput {

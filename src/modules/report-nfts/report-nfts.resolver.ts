@@ -5,7 +5,7 @@ import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/userAuthResult';
 import { BaseResolver } from '../common/base.resolver';
 import { ReportNft } from './report-nft.dto';
-import { ReportNftInput } from './report-nft.input';
+import { ReportCollectionInput, ReportNftInput } from './report-nft.input';
 import { ReportNftsService } from './report-nfts.service';
 
 @Resolver(() => ReportNft)
@@ -17,9 +17,29 @@ export class ReportNftsResolver extends BaseResolver(ReportNft) {
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard)
   addReport(
-    @Args('input', { type: () => ReportNftInput }) input: ReportNftInput,
+    @Args('input', {
+      type: () => ReportNftInput,
+      description: 'This endpoint can be used to report a NFT',
+    })
+    input: ReportNftInput,
     @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
-    return this.reportNfts.addReport(input.identifier, user.address);
+    return this.reportNfts.addNftReport(input.identifier, user.address);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard)
+  reportCollection(
+    @Args('input', {
+      type: () => ReportCollectionInput,
+      description: 'This endpoint can be used to report a Collection',
+    })
+    input: ReportCollectionInput,
+    @AuthUser() user: UserAuthResult,
+  ): Promise<boolean> {
+    return this.reportNfts.addCollectionReport(
+      input.collectionIdentifier,
+      user.address,
+    );
   }
 }

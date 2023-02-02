@@ -10,10 +10,14 @@ export class SlackReportService {
     private readonly apiService: ApiService,
   ) {}
 
-  async sendReport(identifier: string, count: number): Promise<boolean> {
+  async sendReport(
+    identifier: string,
+    count: number,
+    type: 'nfts' | 'collections' = 'nfts',
+  ): Promise<boolean> {
     const url = process.env.SLACK_API;
     const marketplaceUrl = new URL(
-      `${process.env.ELROND_MARKETPLACE}\\nfts\\${identifier}`,
+      `${process.env.ELROND_MARKETPLACE}\\${type}\\${identifier}`,
     );
     try {
       const response = await this.apiService.post(

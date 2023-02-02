@@ -26,6 +26,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections/blacklisted.repository';
+import { ReportCollectionsRepository } from 'src/db/reportNft/report-collection.repository';
 
 @Global()
 @Module({
@@ -40,6 +41,7 @@ import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections/
     TypeOrmModule.forFeature([MarketplaceRepository]),
     TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
     TypeOrmModule.forFeature([ReportNftsRepository]),
+    TypeOrmModule.forFeature([ReportCollectionsRepository]),
     TypeOrmModule.forFeature([NftsFlagsRepository]),
     TypeOrmModule.forFeature([NftRarityRepository]),
     TypeOrmModule.forFeature([NotificationsRepository]),
