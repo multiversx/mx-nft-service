@@ -11,7 +11,6 @@ import { Marketplace } from './models';
 import { OfferEntity } from 'src/db/offers';
 import { OfferStatusEnum } from '../offers/models';
 import BigNumber from 'bignumber.js';
-
 import { AuctionsSetterService } from '../auctions';
 
 @Injectable()
@@ -25,68 +24,25 @@ export class MarketplacesReindexService {
 
   async reindexMarketplaceData(marketplaceAddress: string): Promise<void> {
     try {
-      let processInNextBatch: MarketplaceEventsEntity[] = [];
-
-      let afterTimestamp: number;
-
       let auctionsState: AuctionEntity[] = [];
       let ordersState: OrderEntity[] = [];
       let offersState: OfferEntity[] = [];
 
-      const marketplace =
-        await this.marketplacesService.getMarketplaceByAddress(
-          marketplaceAddress,
-        );
+      await this.processMarketplaceEventsInBatches(
+        marketplaceAddress,
+        auctionsState,
+        ordersState,
+        offersState,
+      );
 
-      do {
-        let batch = await this.persistenceService.getMarketplaceEventsAsc(
-          marketplaceAddress,
-          afterTimestamp,
-        );
-
-        if (!batch || batch.length === 0) {
-          break;
-        }
-
-        afterTimestamp =
-          this.sliceBatchIfPartialEventsSetAndGetNewestTimestamp(batch);
-
-        processInNextBatch =
-          await this.processAuctionEventsBatchAndReturnUnprocessedEvents(
-            marketplace,
-            processInNextBatch.concat(batch),
-            auctionsState,
-            ordersState,
-            offersState,
-          );
-      } while (true);
-
-      if (processInNextBatch.length > 0) {
-        const unprocessedEvents =
-          await this.processAuctionEventsBatchAndReturnUnprocessedEvents(
-            marketplace,
-            processInNextBatch,
-            auctionsState,
-            ordersState,
-            offersState,
-            true,
-          );
-
-        if (unprocessedEvents.length > 0) {
-          throw new Error(
-            `Could not handle ${unprocessedEvents.length} events`,
-          );
-        }
-      }
-
-      this.updateStatesIfDeadline(
+      this.processMarketplaceExpiredStates(
         auctionsState,
         ordersState,
         offersState,
         DateUtils.getCurrentTimestamp(),
       );
 
-      await this.addMarketplaceStateToDb(
+      await this.addMarketplaceStatesToDb(
         auctionsState,
         ordersState,
         offersState,
@@ -97,6 +53,58 @@ export class MarketplacesReindexService {
         marketplaceAddress,
         exception: error,
       });
+    }
+  }
+
+  private async processMarketplaceEventsInBatches(
+    marketplaceAddress: string,
+    auctionsState: AuctionEntity[],
+    ordersState: OrderEntity[],
+    offersState: OfferEntity[],
+  ): Promise<void> {
+    const marketplace = await this.marketplacesService.getMarketplaceByAddress(
+      marketplaceAddress,
+    );
+
+    let afterTimestamp: number;
+    let processInNextBatch: MarketplaceEventsEntity[] = [];
+
+    do {
+      let batch = await this.persistenceService.getMarketplaceEventsAsc(
+        marketplaceAddress,
+        afterTimestamp,
+      );
+
+      if (!batch || batch.length === 0) {
+        break;
+      }
+
+      afterTimestamp =
+        this.sliceBatchIfPartialEventsSetAndGetNewestTimestamp(batch);
+
+      processInNextBatch =
+        await this.processEventsBatchAndReturnUnprocessedEvents(
+          marketplace,
+          processInNextBatch.concat(batch),
+          auctionsState,
+          ordersState,
+          offersState,
+        );
+    } while (true);
+
+    const isFinalBatch = true;
+    processInNextBatch =
+      await this.processEventsBatchAndReturnUnprocessedEvents(
+        marketplace,
+        processInNextBatch,
+        auctionsState,
+        ordersState,
+        offersState,
+        isFinalBatch,
+      );
+
+    if (processInNextBatch.length > 0) {
+      throw new Error(`Could not handle ${processInNextBatch.length} events`);
     }
   }
 
@@ -113,16 +121,17 @@ export class MarketplacesReindexService {
       );
       newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
     }
+
     return newestTimestamp;
   }
 
-  private async processAuctionEventsBatchAndReturnUnprocessedEvents(
+  private async processEventsBatchAndReturnUnprocessedEvents(
     marketplace: Marketplace,
     batch: MarketplaceEventsEntity[],
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
-    finalBatch?: boolean,
+    isFinalBatch?: boolean,
   ): Promise<MarketplaceEventsEntity[]> {
     let unprocessedEvents: MarketplaceEventsEntity[] = [...batch];
 
@@ -133,14 +142,14 @@ export class MarketplacesReindexService {
         (event) => event.txHash === txHash || event.originalTxHash === txHash,
       );
 
-      const biggerTimestampInBatch = unprocessedEvents.find(
+      const isAnotherEventsSetInBatch = unprocessedEvents.find(
         (e) => e.timestamp > unprocessedEvents[0].timestamp,
       );
 
       if (
-        !finalBatch &&
-        (eventOrdersAndTx.length >= unprocessedEvents.length ||
-          !biggerTimestampInBatch)
+        !isFinalBatch &&
+        (eventOrdersAndTx.length === unprocessedEvents.length ||
+          !isAnotherEventsSetInBatch)
       ) {
         return unprocessedEvents;
       }
@@ -149,7 +158,7 @@ export class MarketplacesReindexService {
         (event) => event.txHash !== txHash && event.originalTxHash !== txHash,
       );
 
-      await this.processAuctionEvent(
+      await this.processEventsSet(
         marketplace,
         eventOrdersAndTx,
         auctionsState,
@@ -161,7 +170,7 @@ export class MarketplacesReindexService {
     return [];
   }
 
-  private async processAuctionEvent(
+  private async processEventsSet(
     marketplace: Marketplace,
     eventOrdersAndTx: MarketplaceEventsEntity[],
     auctionsState: AuctionEntity[],
@@ -216,10 +225,23 @@ export class MarketplacesReindexService {
     return -1;
   }
 
-  private updateStatesIfDeadline(
+  private processMarketplaceExpiredStates(
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
+    timestamp: number,
+  ): void {
+    this.processMarketplaceExpiredAuctionsAndOrders(
+      auctionsState,
+      ordersState,
+      timestamp,
+    );
+    this.processMarketplaceExpiredOffers(offersState, timestamp);
+  }
+
+  private processMarketplaceExpiredAuctionsAndOrders(
+    auctionsState: AuctionEntity[],
+    ordersState: OrderEntity[],
     timestamp: number,
   ): void {
     const runningAuctions = auctionsState.filter(
@@ -241,7 +263,12 @@ export class MarketplacesReindexService {
         );
       }
     }
+  }
 
+  private processMarketplaceExpiredOffers(
+    offersState: OfferEntity[],
+    timestamp: number,
+  ): void {
     for (let i = 0; i < offersState.length; i++) {
       if (
         offersState[i].status === OfferStatusEnum.Active &&
@@ -252,7 +279,7 @@ export class MarketplacesReindexService {
     }
   }
 
-  private async addMarketplaceStateToDb(
+  private async addMarketplaceStatesToDb(
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
@@ -262,7 +289,6 @@ export class MarketplacesReindexService {
     for (let i = 0; i < ordersState.length; i++) {
       ordersState[i].auction = auctionsState[ordersState[i].auctionId];
       ordersState[i].auctionId = auctionsState[ordersState[i].auctionId].id;
-      console.log(ordersState[i].auctionId);
     }
 
     await this.persistenceService.saveBulkOrders(ordersState);
