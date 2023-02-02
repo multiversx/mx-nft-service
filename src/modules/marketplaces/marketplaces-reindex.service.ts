@@ -269,11 +269,6 @@ export class MarketplacesReindexService {
     const itemsCount = parseInt(input.itemsCount);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
-    if (!auctionId && !offerId) {
-      console.log(JSON.stringify(input));
-      throw new Error('?');
-    }
-
     let auctionIndex: number;
     if (input.identifier !== AssetActionEnum.StartedAuction) {
       auctionIndex = auctionsState.findIndex(
