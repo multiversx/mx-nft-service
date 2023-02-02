@@ -38,8 +38,7 @@ export class SwapUpdateEventHandler {
     );
 
     if (auction) {
-      this.updateAuctionPrice(auction, topics, hash);
-
+      await this.updateAuctionPrice(auction, topics, hash);
       this.auctionsService.updateAuction(
         auction,
         ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
@@ -69,6 +68,8 @@ export class SwapUpdateEventHandler {
       topics.price,
       decimals,
     );
+    auction.maxBid = auction.minBid;
+    auction.maxBidDenominated = auction.minBidDenominated;
     auction.endDate = topics.deadline;
     auction.nrAuctionedTokens = topics.nrAuctionTokens;
     auction.blockHash = hash;

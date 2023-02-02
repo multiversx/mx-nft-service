@@ -1,4 +1,5 @@
 import { Address } from '@elrondnetwork/erdjs';
+import { NumberUtils } from '@elrondnetwork/erdnest';
 
 export class ElrondSwapUpdateTopics {
   private auctionId: string;
@@ -21,10 +22,7 @@ export class ElrondSwapUpdateTopics {
     this.price = Buffer.from(rawTopics[6], 'base64')
       .toString('hex')
       .hexBigNumberToString();
-    this.deadline = parseInt(
-      Buffer.from(rawTopics[9], 'base64').toString('hex'),
-      16,
-    );
+    this.deadline = parseInt(NumberUtils.numberDecode(rawTopics[9] ?? '00'));
   }
 
   toPlainObject() {
