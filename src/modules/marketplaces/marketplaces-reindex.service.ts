@@ -2,41 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AuctionEntity } from 'src/db/auctions';
-import { DateUtils } from 'src/utils/date-utils';
 import { MarketplacesService } from './marketplaces.service';
 import { OrderEntity } from 'src/db/orders';
 import { Marketplace } from './models';
 import { OfferEntity } from 'src/db/offers';
 import { AuctionsSetterService } from '../auctions';
-import {
-  AssetActionEnum,
-  AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-  NftEventEnum,
-  NftEventTypeEnum,
-} from '../assets/models';
-import { MarketplaceEventLogInput } from './models/MarketplaceEventLogInput';
-import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
-import { AssetOfferEnum } from '../assets/models/AssetOfferEnum';
-import { AssetByIdentifierService } from '../assets';
-import { UsdPriceService } from '../usdPrice/usd-price.service';
-import {
-  getAuctionIndex,
-  handleMarketplaceExpiredAuctionsAndOrders,
-  handleMarketplaceReindexAuctionBidEvent,
-  handleMarketplaceReindexBoughtAuctionEvent,
-  handleMarketplaceReindexClosedAuctionEvent,
-  handleMarketplaceReindexEndedAuctionEvent,
-  handleMarketplaceReindexStartedAuctionEvent,
-} from './marketplaces-reindex-handlers/marketplace-reindex-auctions.handlers';
-import {
-  handleMarketplaceExpiredOffers,
-  handleMarketplaceReindexAcceptedOfferEvent,
-  handleMarketplaceReindexClosedOfferEvent,
-  handleMarketplaceReindexCreatedOfferEvent,
-} from './marketplaces-reindex-handlers/marketplace-reindex-offers.handlers';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
+import { DateUtils } from 'src/utils/date-utils';
+import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -44,8 +16,7 @@ export class MarketplacesReindexService {
     private readonly persistenceService: PersistenceService,
     private readonly marketplacesService: MarketplacesService,
     private readonly auctionSetterService: AuctionsSetterService,
-    private readonly assetByIdentifierService: AssetByIdentifierService,
-    private readonly usdPriceService: UsdPriceService,
+    private readonly marketplacesReindexEventsSummaryService: MarketplacesReindexEventsSummaryService,
     private readonly logger: Logger,
   ) {}
 
@@ -204,60 +175,19 @@ export class MarketplacesReindexService {
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
   ): Promise<void> {
-    const [eventCategory, eventType, index] =
-      await this.getEventCategoryTypeAndMainEventIndex(
-        eventOrdersAndTx,
+    const eventsSetSummary =
+      this.marketplacesReindexEventsSummaryService.getEventsSetSummary(
         marketplace,
+        eventOrdersAndTx,
       );
 
-    if (!eventCategory) {
-      return;
-    }
-
-    switch (eventCategory) {
-      case NftEventTypeEnum.AuctionEventEnum: {
-        await this.processEvent(
-          marketplace,
-          auctionsState,
-          ordersState,
-          offersState,
-          MarketplaceEventLogInput.fromInternalMarketplaceEventAndTx(
-            eventOrdersAndTx,
-            eventType,
-            index,
-          ),
-        );
-        break;
-      }
-      case NftEventTypeEnum.ExternalAuctionEventEnum: {
-        await this.processEvent(
-          marketplace,
-          auctionsState,
-          ordersState,
-          offersState,
-          MarketplaceEventLogInput.fromExternalMarketplaceEventAndTx(
-            eventOrdersAndTx,
-            eventType,
-            index,
-          ),
-        );
-        break;
-      }
-      case NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum: {
-        await this.processEvent(
-          marketplace,
-          auctionsState,
-          ordersState,
-          offersState,
-          MarketplaceEventLogInput.fromElrondNftSwapMarketplaceEventAndTx(
-            eventOrdersAndTx,
-            eventType,
-            index,
-          ),
-        );
-        break;
-      }
-    }
+    await this.processEvent(
+      marketplace,
+      auctionsState,
+      ordersState,
+      offersState,
+      eventsSetSummary,
+    );
   }
 
   private async processEvent(
@@ -265,203 +195,9 @@ export class MarketplacesReindexService {
     auctionsState: AuctionEntity[],
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
-    input: MarketplaceEventLogInput,
+    eventsSetSummary: any,
   ): Promise<void> {
-    if (!input) {
-      return;
-    }
-
-    switch (input.action) {
-      case AssetActionEnum.StartedAuction: {
-        const [asset, [paymentToken, paymentNonce]] = await Promise.all([
-          this.assetByIdentifierService.getAsset(input.identifier),
-          this.getPaymentTokenAndNonce(auctionsState, input),
-        ]);
-        handleMarketplaceReindexStartedAuctionEvent(
-          input,
-          marketplace,
-          auctionsState,
-          paymentToken.identifier,
-          paymentNonce,
-          paymentToken.decimals,
-          asset,
-        );
-        break;
-      }
-      case AssetActionEnum.Bought: {
-        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
-          auctionsState,
-          input,
-        );
-        handleMarketplaceReindexBoughtAuctionEvent(
-          input,
-          marketplace,
-          auctionsState,
-          ordersState,
-          paymentToken.identifier,
-          paymentNonce,
-          paymentToken.decimals,
-        );
-        break;
-      }
-      case AssetActionEnum.EndedAuction: {
-        handleMarketplaceReindexEndedAuctionEvent(
-          input,
-          auctionsState,
-          ordersState,
-        );
-        break;
-      }
-      case AssetActionEnum.ClosedAuction: {
-        handleMarketplaceReindexClosedAuctionEvent(
-          input,
-          auctionsState,
-          ordersState,
-        );
-        break;
-      }
-      case AssetOfferEnum.Created: {
-        const [paymentToken] = await this.getPaymentTokenAndNonce(
-          auctionsState,
-          input,
-        );
-        handleMarketplaceReindexCreatedOfferEvent(
-          input,
-          marketplace,
-          offersState,
-          paymentToken.decimals,
-        );
-        break;
-      }
-      case AssetOfferEnum.Accepted: {
-        handleMarketplaceReindexAcceptedOfferEvent(input, offersState);
-        break;
-      }
-      case AssetOfferEnum.Closed: {
-        handleMarketplaceReindexClosedOfferEvent(input, offersState);
-        break;
-      }
-      case AssetOfferEnum.AuctionClosedAndOfferAccepted: {
-        handleMarketplaceReindexClosedAuctionEvent(
-          input,
-          auctionsState,
-          ordersState,
-        );
-        handleMarketplaceReindexAcceptedOfferEvent(input, offersState);
-        break;
-      }
-      default: {
-        if (input.auctionType) {
-          throw new Error(`Case not handled ${input.auctionType}`);
-        }
-
-        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
-          auctionsState,
-          input,
-        );
-
-        handleMarketplaceReindexAuctionBidEvent(
-          input,
-          marketplace,
-          auctionsState,
-          ordersState,
-          paymentToken.identifier,
-          paymentNonce,
-          paymentToken.decimals,
-        );
-      }
-    }
-  }
-
-  private async getPaymentTokenAndNonce(
-    auctionsState: AuctionEntity[],
-    input: MarketplaceEventLogInput,
-  ): Promise<[Token, number]> {
-    const auctionIndex = getAuctionIndex(auctionsState, input);
-    const paymentNonce = !Number.isNaN(
-      input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce,
-    )
-      ? input.paymentNonce ?? auctionsState[auctionIndex]?.paymentNonce
-      : 0;
-    const paymentTokenIdentifier =
-      input.paymentToken ?? auctionsState[auctionIndex]?.paymentToken;
-    const paymentToken = await this.usdPriceService.getToken(
-      paymentTokenIdentifier,
-    );
-    return [paymentToken, paymentNonce];
-  }
-
-  private async getEventCategoryTypeAndMainEventIndex(
-    eventsAndTx: MarketplaceEventsEntity[],
-    marketplace: Marketplace,
-  ): Promise<[string, string, number]> {
-    const eventsSortedByOrderAsc = eventsAndTx.sort((a, b) => {
-      return a.eventOrder - b.eventOrder;
-    });
-
-    const txData = eventsAndTx[0].isTx ? eventsAndTx[0] : undefined;
-
-    const eventsStartIdx = txData ? 1 : 0;
-
-    if (eventsSortedByOrderAsc.length === 1 && txData) {
-      const topics = txData.data.txData.data.split('@');
-      const eventIdentifier = topics[0];
-      const eventCategory = await this.getEventCategory(
-        eventIdentifier,
-        marketplace,
-      );
-      this.logger.warn(`No events found for ${txData.data.txData.blockHash}`);
-      return [eventCategory, eventIdentifier, 0];
-    }
-
-    const events = eventsSortedByOrderAsc.map((event) => event.data.eventData);
-
-    for (let i = eventsStartIdx; i < events.length; i++) {
-      const eventIdentifier: any = events[i].identifier;
-      const eventCategory = await this.getEventCategory(
-        eventIdentifier,
-        marketplace,
-      );
-      if (eventCategory) {
-        return [eventCategory, eventIdentifier, i];
-      }
-    }
-
-    return [
-      NftEventTypeEnum.NftEventEnum,
-      eventsSortedByOrderAsc[eventsStartIdx].data.eventData.identifier,
-      eventsStartIdx,
-    ];
-  }
-
-  private async getEventCategory(
-    eventIdentifier: any,
-    marketplace: Marketplace,
-  ): Promise<string> {
-    if (
-      eventIdentifier !== NftEventEnum.ESDTNFTTransfer &&
-      eventIdentifier !== NftEventEnum.MultiESDTNFTTransfer &&
-      Object.values(NftEventEnum).includes(eventIdentifier)
-    ) {
-      return NftEventTypeEnum.NftEventEnum;
-    }
-
-    if (
-      marketplace.type === MarketplaceTypeEnum.Internal &&
-      Object.values(AuctionEventEnum).includes(eventIdentifier)
-    ) {
-      return NftEventTypeEnum.AuctionEventEnum;
-    }
-
-    if (Object.values(ExternalAuctionEventEnum).includes(eventIdentifier)) {
-      return NftEventTypeEnum.ExternalAuctionEventEnum;
-    }
-
-    if (
-      Object.values(ElrondNftsSwapAuctionEventEnum).includes(eventIdentifier)
-    ) {
-      return NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum;
-    }
+    throw new Error('Not implemented yet');
   }
 
   private processMarketplaceExpiredStates(
@@ -470,12 +206,7 @@ export class MarketplacesReindexService {
     offersState: OfferEntity[],
     currentTimestamp: number,
   ): void {
-    handleMarketplaceExpiredAuctionsAndOrders(
-      auctionsState,
-      ordersState,
-      currentTimestamp,
-    );
-    handleMarketplaceExpiredOffers(offersState, currentTimestamp);
+    throw new Error('Not implemented yet');
   }
 
   private async addMarketplaceStatesToDb(

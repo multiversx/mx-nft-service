@@ -115,6 +115,7 @@ type Asset {
 
 enum AssetActionEnum {
   Added
+  Bid
   Bought
   ClosedAuction
   Created
