@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import '../../../../utils/extensions';
 
 export class IssueCollectionTopics {

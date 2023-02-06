@@ -2,7 +2,7 @@ import {
   ElasticQuery,
   ElasticSortOrder,
   QueryType,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 

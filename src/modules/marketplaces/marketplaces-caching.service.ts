@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';

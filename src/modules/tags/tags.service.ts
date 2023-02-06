@@ -6,7 +6,7 @@ import { TagsFilter } from './models/Tags.Filter';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class TagsService {

@@ -12,8 +12,7 @@ import { UpdateAttributesEvent } from '../entities/auction/update-attributes.eve
 import { NftScamService } from 'src/modules/scam/nft-scam.service';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class ElasticUpdatesEventsService {
@@ -25,7 +24,6 @@ export class ElasticUpdatesEventsService {
     private readonly documentDbService: DocumentDbService,
     private readonly redisCacheService: RedisCacheService,
     private readonly mxApiService: MxApiService,
-    private readonly localRedisCacheService: LocalRedisCacheService,
   ) {}
 
   public async handleNftMintEvents(
@@ -198,7 +196,7 @@ export class ElasticUpdatesEventsService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.localRedisCacheService.addItemsToList(
+      await this.redisCacheService.rpush(
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -211,7 +209,7 @@ export class ElasticUpdatesEventsService {
 
   async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.localRedisCacheService.addItemsToList(
+      await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
       );

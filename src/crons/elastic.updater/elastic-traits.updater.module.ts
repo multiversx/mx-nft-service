@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
-import { CachingModule } from 'src/common/services/caching/caching.module';
+import { CacheModule } from 'src/common/services/caching/caching.module';
 import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NftTraitsModule } from 'src/modules/nft-traits/nft-traits.module';
@@ -12,7 +12,7 @@ import { ElasticTraitsUpdaterService } from './elastic-traits.updater.service';
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     CommonModule,
     NftTraitsModule,
-    CachingModule,
+    CacheModule,
   ],
   providers: [Logger, ElasticTraitsUpdaterService, TraitsUpdaterService],
   exports: [ElasticTraitsUpdaterService, TraitsUpdaterService],

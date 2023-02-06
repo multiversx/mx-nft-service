@@ -1,4 +1,4 @@
-import { PerformanceProfiler } from '@elrondnetwork/erdnest';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';

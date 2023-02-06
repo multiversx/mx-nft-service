@@ -11,10 +11,10 @@ import {
   TokenIdentifierValue,
   TokenPayment,
   U32Value,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
-import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { MxProxyService, getSmartContract } from 'src/common';
 import {
@@ -27,7 +27,7 @@ import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class PrimarySaleService {

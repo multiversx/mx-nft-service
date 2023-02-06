@@ -1,6 +1,5 @@
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { LocalRedisCacheService } from 'src/common';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisValue } from './redis-value.dto';
@@ -8,17 +7,11 @@ import { RedisValue } from './redis-value.dto';
 @Injectable()
 export abstract class RedisKeyValueDataloaderHandler<T> {
   protected redisCacheService: RedisCacheService;
-  protected localRedisCacheService: LocalRedisCacheService;
   private readonly logger: Logger;
   private cacheKeyName: string;
-  constructor(
-    redisCacheService: RedisCacheService,
-    cacheKeyName: string,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
+  constructor(redisCacheService: RedisCacheService, cacheKeyName: string) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.localRedisCacheService = localRedisCacheService;
     this.logger = new Logger(RedisKeyValueDataloaderHandler.name);
   }
   abstract mapValues(keys: { key: T; value: any }[], dataKeys): RedisValue[];
@@ -34,7 +27,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
-    await this.localRedisCacheService.delByPattern(this.getCacheKey(key));
+    await this.redisCacheService.deleteByPattern(this.getCacheKey(key));
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {

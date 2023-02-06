@@ -9,9 +9,9 @@ import { MxPrivateApiService } from './mx-private-api.service';
 import { MxProxyService } from './mx-proxy.service';
 import { MxStatsService } from './mx-stats.service';
 import { SlackReportService } from './slack-report.service';
-import { ApiConfigService } from 'src/utils/api.config.service';
 import { ConfigService } from '@nestjs/config';
 import { MxExtrasApiService } from './mx-extras-api.service';
+import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 
 @Module({
   providers: [

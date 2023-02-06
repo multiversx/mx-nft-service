@@ -1,8 +1,7 @@
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 import { TimeConstants } from 'src/utils/time-utils';
 import { AssetsQuery } from '../assets/assets-query';
 import { NftTypeEnum } from '../assets/models';
@@ -16,9 +15,8 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
   constructor(
     redisCacheService: RedisCacheService,
     private apiService: MxApiService,
-    localRedisCacheService: LocalRedisCacheService,
   ) {
-    super(redisCacheService, 'collectionAssets', localRedisCacheService);
+    super(redisCacheService, 'collectionAssets');
   }
   mapValues(
     returnValues: { key: string; value: any }[],

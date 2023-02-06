@@ -43,9 +43,9 @@ export class JwtAuthenticateGuard implements CanActivate {
           }
           request.auth = {
             address: decoded.sub,
-            expires: decoded.exp,
-            issued: decoded.iat,
-            host: decoded.iss,
+            // expires: decoded.exp,
+            // issued: decoded.iat,
+            // host: decoded.iss,
           };
           resolve(request.auth);
         });

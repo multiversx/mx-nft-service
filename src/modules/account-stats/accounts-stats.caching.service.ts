@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { TimeConstants } from 'src/utils/time-utils';

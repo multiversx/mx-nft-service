@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 

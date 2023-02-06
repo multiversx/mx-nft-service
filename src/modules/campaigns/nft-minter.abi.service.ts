@@ -18,14 +18,14 @@ import {
   CompositeValue,
   TokenPayment,
   ResultsParser,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { MxProxyService } from 'src/common';
 import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 
 @Injectable()
 export class NftMinterAbiService {

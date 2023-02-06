@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
-import { Address } from '@elrondnetwork/erdjs';
+import { Address } from '@multiversx/sdk-core';
 import { genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
@@ -8,7 +8,7 @@ import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import {

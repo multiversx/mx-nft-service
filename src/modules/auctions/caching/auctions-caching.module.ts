@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
 import { AuctionsCachingService } from './auctions-caching.service';
-import { CachingModule } from 'src/common/services/caching/caching.module';
+import { CacheModule } from 'src/common/services/caching/caching.module';
 import { AuctionsForAssetRedisHandler } from '../loaders/asset-auctions.redis-handler';
 import { LowestAuctionRedisHandler } from '../loaders/lowest-auctions.redis-handler';
 import { AccountsStatsCachingService } from '../../account-stats/accounts-stats.caching.service';
@@ -23,7 +23,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
     InternalMarketplaceRedisHandler,
     UsdPriceService,
   ],
-  imports: [CachingModule, CommonModule],
+  imports: [CacheModule, CommonModule],
   exports: [
     AuctionsCachingService,
     AuctionsForAssetRedisHandler,

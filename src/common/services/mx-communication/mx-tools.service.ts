@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
-import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
+import { NativeAuthSigner } from '@multiversx/sdk-nestjs/lib/src/utils/native.auth.signer';
 import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';

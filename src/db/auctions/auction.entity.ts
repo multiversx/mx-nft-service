@@ -1,4 +1,4 @@
-import { U64Value } from '@elrondnetwork/erdjs';
+import { U64Value } from '@multiversx/sdk-core';
 import { mxConfig } from 'src/config';
 import {
   AuctionTypeEnum,

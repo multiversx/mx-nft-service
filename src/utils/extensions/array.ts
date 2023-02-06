@@ -65,29 +65,26 @@ Array.prototype.remove = function <T>(element: T): number {
   return index;
 };
 
-Array.prototype.sorted = function <T>(
-  predicate?: (item: T) => number,
-  ignoreZeros: boolean = false,
-): T[] {
+Array.prototype.sorted = function <T>(predicate?: (item: T) => number): T[] {
   const cloned = [...this];
 
   if (predicate) {
     cloned.sort((a, b) => {
-      if (ignoreZeros) {
-        const x = predicate(a) === 0 ? Infinity : predicate(a);
-        const y = predicate(b) === 0 ? Infinity : predicate(b);
+      // if (ignoreZeros) {
+      //   const x = predicate(a) === 0 ? Infinity : predicate(a);
+      //   const y = predicate(b) === 0 ? Infinity : predicate(b);
 
-        return x - y;
-      }
+      //   return x - y;
+      // }
       return predicate(a) - predicate(b);
     });
   } else {
     cloned.sort((a, b) => {
-      if (ignoreZeros) {
-        const x = a === 0 ? Infinity : a;
-        const y = b === 0 ? Infinity : b;
-        return x - y;
-      }
+      // if (ignoreZeros) {
+      //   const x = a === 0 ? Infinity : a;
+      //   const y = b === 0 ? Infinity : b;
+      //   return x - y;
+      // }
       return a - b;
     });
   }

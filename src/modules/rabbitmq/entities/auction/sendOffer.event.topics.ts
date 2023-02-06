@@ -1,5 +1,5 @@
-import { Address } from '@elrondnetwork/erdjs/out';
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { Address } from '@multiversx/sdk-core/out';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 
 export class SendOfferEventsTopics {
   private offerId: number;

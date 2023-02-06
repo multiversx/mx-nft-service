@@ -1,22 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisValue } from '../common/redis-value.dto';
-import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export abstract class BaseCollectionsAssetsRedisHandler {
   protected redisCacheService: RedisCacheService;
-  protected localRedisCacheService: LocalRedisCacheService;
   private cacheKeyName: string;
-  constructor(
-    redisCacheService: RedisCacheService,
-    cacheKeyName: string,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
+  constructor(redisCacheService: RedisCacheService, cacheKeyName: string) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.localRedisCacheService = localRedisCacheService;
   }
   protected abstract mapValues(
     returnValues: { key: string; value: any }[],
@@ -75,7 +68,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
   }
 
   async clearKeyByPattern(key: string): Promise<any> {
-    await this.localRedisCacheService.delByPattern(this.getCacheKey(key));
+    await this.redisCacheService.deleteByPattern(this.getCacheKey(key));
   }
 
   private getCacheKeys(key: string[]) {

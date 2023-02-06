@@ -7,18 +7,15 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class RarityUpdaterService {
-  private readonly rarityQueueRedisClient: Redis.Redis;
-  private readonly persistentRedisClient: Redis.Redis;
-
   constructor(
     private readonly elasticService: MxElasticService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftRarityElasticService: NftRarityElasticService,
-    private readonly localRedisCacheService: LocalRedisCacheService,
+    private readonly redisCacheService: RedisCacheService,
     private readonly logger: Logger,
   ) {}
 
@@ -121,11 +118,9 @@ export class RarityUpdaterService {
     await Locker.lock(
       'processTokenRarityQueue: Update rarities for all collections in the rarities queue',
       async () => {
-        const collectionsToUpdate: string[] =
-          await this.localRedisCacheService.popAllItemsFromList(
-            this.getRarityQueueCacheKey(),
-            true,
-          );
+        const collectionsToUpdate: string[] = await this.redisCacheService.lpop(
+          this.getRarityQueueCacheKey(),
+        );
 
         const notUpdatedCollections: string[] = await this.updateTokenRarities(
           collectionsToUpdate,
@@ -141,7 +136,7 @@ export class RarityUpdaterService {
     collectionTickers: string[],
   ): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.localRedisCacheService.addItemsToList(
+      await this.redisCacheService.rpush(
         this.getRarityQueueCacheKey(),
         collectionTickers,
       );
@@ -150,28 +145,5 @@ export class RarityUpdaterService {
 
   private getRarityQueueCacheKey() {
     return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
-  }
-
-  private async getLastValidatedCollectionIndex(): Promise<number> {
-    return (
-      Number.parseInt(
-        await this.persistentRedisClient.get(
-          this.getRarityValidatorCounterCacheKey(),
-        ),
-      ) || 0
-    );
-  }
-
-  private async setLastValidatedCollectionIndex(index: number): Promise<void> {
-    await this.persistentRedisClient.set(
-      this.getRarityValidatorCounterCacheKey(),
-      index.toString(),
-      'EX',
-      90 * TimeConstants.oneMinute,
-    );
-  }
-
-  private getRarityValidatorCounterCacheKey() {
-    return generateCacheKeyFromParams('rarityValidatorCounter');
   }
 }

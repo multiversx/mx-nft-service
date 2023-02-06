@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<string> {
-  constructor(
-    redisCacheService: RedisCacheService,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
-    super(redisCacheService, 'asset_scam_info', localRedisCacheService);
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, 'asset_scam_info');
   }
 
   mapValues(

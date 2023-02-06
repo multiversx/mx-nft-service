@@ -12,14 +12,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
-export class OffersRepository extends Repository<OfferEntity> {
+export class OffersRepository {
   constructor(
     private cacheEventsPublisherService: CacheEventsPublisherService,
     @InjectRepository(OfferEntity)
     private offersRepository: Repository<OfferEntity>,
-  ) {
-    super();
-  }
+  ) {}
 
   async getActiveOffers(
     filters?: OffersFiltersForDb,

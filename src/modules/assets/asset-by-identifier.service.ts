@@ -4,23 +4,25 @@ import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class AssetByIdentifierService {
   constructor(
     private apiService: MxApiService,
     private readonly logger: Logger,
-    private localRedisCacheService: LocalRedisCacheService,
+    // private localRedisCacheService: LocalRedisCacheService,
+    private localRedisCacheService: RedisCacheService,
   ) {}
 
   public async getAsset(identifier: string): Promise<Asset> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.localRedisCacheService.getOrSetWithDifferentTtl(
+      const asset = await this.localRedisCacheService.getOrSet(
         cacheKey,
         getAsset,
+        Constants.oneDay(),
       );
       return asset?.value ? asset?.value : null;
     } catch (error) {

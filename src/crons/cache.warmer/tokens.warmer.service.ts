@@ -5,7 +5,7 @@ import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
 import { MxApiService } from 'src/common';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class TokensWarmerService {

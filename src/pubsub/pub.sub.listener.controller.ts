@@ -1,5 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
 @Controller()

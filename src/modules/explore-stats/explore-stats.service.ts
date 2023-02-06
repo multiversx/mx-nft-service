@@ -14,7 +14,7 @@ import {
   runningAuctionRequest,
 } from '../auctions/auctionsRequest';
 import { OffersService } from '../offers/offers.service';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class ExploreStatsService {

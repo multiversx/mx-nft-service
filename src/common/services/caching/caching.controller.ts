@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { CachingService } from './caching.service';
 import { DeleteCacheKeysInput } from './entities/deleteCacheInput';
 import { SetCacheKeyInput } from './entities/setCacheInput';
 import { GetCacheKeysInput } from './entities/getCacheInput';
@@ -20,6 +19,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Controller()
 export class CachingController {
@@ -36,11 +36,9 @@ export class CachingController {
   ): Promise<any> {
     try {
       let values: any[] = [];
-      const redisClient = this.cachingService.getClient(input.redisClientName);
+
       for (let i = 0; i < input.keys.length; i++) {
-        values.push(
-          await this.cachingService.getCache<any>(redisClient, input.keys[i]),
-        );
+        values.push(await this.cachingService.getCache<any>(input.keys[i]));
       }
       return res.status(200).send(values);
     } catch (error) {

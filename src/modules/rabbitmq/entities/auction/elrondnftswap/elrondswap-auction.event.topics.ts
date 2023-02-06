@@ -5,8 +5,8 @@ import {
   StructType,
   TokenIdentifierType,
   U64Type,
-} from '@elrondnetwork/erdjs';
-import { NumberUtils } from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-core';
+import { NumberUtils } from '@multiversx/sdk-nestjs';
 
 export class ElrondSwapAuctionTopics {
   private auctionId: string;

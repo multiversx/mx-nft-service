@@ -4,6 +4,11 @@ import { UsdPriceService } from './usd-price.service';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { UsdPriceResolver } from './usd-price.resolver';
 import { UsdTokenPriceResolver } from './usd-token-price.resolver';
+import { DynamicModuleUtils } from 'src/utils/dynamic.module.utils';
+import {
+  RedisCacheModule,
+  RedisCacheModuleOptions,
+} from '@multiversx/sdk-nestjs';
 
 @Module({
   providers: [
@@ -12,7 +17,15 @@ import { UsdTokenPriceResolver } from './usd-token-price.resolver';
     UsdPriceRedisHandler,
     UsdPriceService,
   ],
-  imports: [MxCommunicationModule],
+  imports: [
+    MxCommunicationModule,
+    RedisCacheModule.forRoot(
+      new RedisCacheModuleOptions({
+        host: process.env.REDIS_URL,
+        port: parseInt(process.env.REDIS_PORT),
+      }),
+    ),
+  ],
   exports: [UsdPriceService],
 })
 export class UsdPriceModuleGraph {}

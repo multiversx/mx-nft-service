@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { TagsService } from 'src/modules/tags/tags.service';
 
 @Injectable()

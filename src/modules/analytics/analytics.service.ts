@@ -9,11 +9,11 @@ import { BuyEventParser } from './buy-event.parser';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { computeUsd } from 'src/utils/helpers';
 import * as Redis from 'ioredis';
-import { CachingService } from 'src/common/services/caching/caching.service';
 import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 import { CollectionVolumeLast24 } from './collection-volume';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class AnalyticsService {
@@ -29,17 +29,10 @@ export class AnalyticsService {
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
     private readonly acceptEventParser: AcceptOfferEventParser,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
-    );
-  }
+  ) {}
 
   public async getTrendingByVolume(): Promise<CollectionVolumeLast24[]> {
-    return await this.cacheService.getCache(
-      this.redisClient,
-      CacheInfo.TrendingByVolume.key,
-    );
+    return await this.cacheService.getCache(CacheInfo.TrendingByVolume.key);
   }
 
   public async reindexTrendingCollections(

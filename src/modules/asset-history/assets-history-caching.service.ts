@@ -1,17 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { AssetHistoryLog } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export class AssetsHistoryCachingService {
-  constructor(
-    private readonly redisCacheService: RedisCacheService,
-    private readonly localRedisCacheService: LocalRedisCacheService,
-  ) {}
+  constructor(private readonly redisCacheService: RedisCacheService) {}
 
   async getOrSetHistoryLog(
     collection: string,
@@ -41,7 +37,7 @@ export class AssetsHistoryCachingService {
       collection,
       nonce,
     );
-    await this.localRedisCacheService.delByPattern(cacheKeyPattern);
+    await this.redisCacheService.deleteByPattern(cacheKeyPattern);
   }
 
   getAssetHistoryCacheKey(

@@ -1,23 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import {
   FeaturedCollectionEntity,
   FeaturedNftEntity,
 } from 'src/db/featuredNfts';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class FeaturedCollectionsCachingService {
-  private redisClient: Redis.Redis;
-
-  constructor(private readonly redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
-    );
-  }
+  constructor(private readonly redisCacheService: RedisCacheService) {}
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
@@ -26,7 +18,6 @@ export class FeaturedCollectionsCachingService {
   ): Promise<[FeaturedCollectionEntity[], number]> {
     const cacheKey = this.getFeaturedCollectionsCacheKey();
     return await this.redisCacheService.getOrSet(
-      this.redisClient,
       cacheKey,
       getFeaturedCollections,
       CacheInfo.FeaturedCollections.ttl,
@@ -40,7 +31,6 @@ export class FeaturedCollectionsCachingService {
   ): Promise<[FeaturedNftEntity[], number]> {
     const cacheKey = this.getFeaturedNftsCacheKey(limit, offset);
     return await this.redisCacheService.getOrSet(
-      this.redisClient,
       cacheKey,
       getFeaturedNfts,
       CacheInfo.FeaturedNfts.ttl,
@@ -48,8 +38,7 @@ export class FeaturedCollectionsCachingService {
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
+    await this.redisCacheService.deleteByPattern(
       CacheInfo.FeaturedCollections.key,
     );
   }

@@ -1,17 +1,13 @@
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { LocalRedisCacheService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 
 @Injectable()
 export class AccountsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
-  constructor(
-    redisCacheService: RedisCacheService,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
-    super(redisCacheService, CacheInfo.Account.key, localRedisCacheService);
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, CacheInfo.Account.key);
   }
 
   mapValues(

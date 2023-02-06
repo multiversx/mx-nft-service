@@ -7,7 +7,6 @@ import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableModule } from './crons/claimable/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
-import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
@@ -17,6 +16,7 @@ import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-sca
 import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
 import { graphqlUploadExpress } from 'graphql-upload';
+import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });

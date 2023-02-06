@@ -1,4 +1,4 @@
-import { ElasticQuery, QueryOperator, QueryType } from '@elrondnetwork/erdnest';
+import { ElasticQuery, QueryOperator, QueryType } from '@multiversx/sdk-nestjs';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { MxElasticService, NftMedia } from 'src/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';

@@ -1,17 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { TimeConstants } from 'src/utils/time-utils';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
-import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<string> {
-  constructor(
-    redisCacheService: RedisCacheService,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
-    super(redisCacheService, 'asset_rarity', localRedisCacheService);
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, 'asset_rarity');
   }
 
   mapValues(

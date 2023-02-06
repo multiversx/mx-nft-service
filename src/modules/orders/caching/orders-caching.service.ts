@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
 import { Order } from '../models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { QueryRequest } from '../../common/filters/QueryRequest';
 import { AvailableTokensForAuctionRedisHandler } from '../../auctions/loaders/available-tokens-auctions.redis-handler';
 import { LastOrderRedisHandler } from '../loaders/last-order.redis-handler';

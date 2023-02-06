@@ -2,13 +2,9 @@ import { Logger, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import {
-  CachingService,
-  CachingModuleOptions,
-  LocalCacheService,
-  MetricsService,
   ElrondCachingModule,
   RedisCacheModuleOptions,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { ConfigService } from '@nestjs/config';
 import { ApiConfigService } from '../common/api-config/api.config.service';
 

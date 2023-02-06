@@ -7,7 +7,7 @@ import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { Locker } from 'src/utils/locker';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
-import { BinaryUtils, ElasticQuery } from '@elrondnetwork/erdnest';
+import { BinaryUtils, ElasticQuery } from '@multiversx/sdk-nestjs';
 import {
   getMarketplaceEventsElasticQuery,
   getMarketplaceTransactionsElasticQuery,

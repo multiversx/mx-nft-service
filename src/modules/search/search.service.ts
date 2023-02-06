@@ -8,7 +8,7 @@ import {
   SearchItemResponse,
 } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { NftTypeEnum } from '../assets/models';
 
 @Injectable()

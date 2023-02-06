@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
 import { OrderEntity } from '.';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
@@ -6,7 +6,6 @@ import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { getOrdersForAuctions } from '../auctions/sql.queries';
 
-@EntityRepository(OrderEntity)
 export class OrdersRepository extends Repository<OrderEntity> {
   async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
     return await this.createQueryBuilder('order')

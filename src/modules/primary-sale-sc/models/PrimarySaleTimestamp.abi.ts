@@ -3,7 +3,7 @@ import {
   BigUIntValue,
   U32Type,
   U64Type,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 
 export interface PrimarySaleTimeAbi {
   start_sale: U64Type;

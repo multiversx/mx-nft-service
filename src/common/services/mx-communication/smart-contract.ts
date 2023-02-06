@@ -1,4 +1,4 @@
-import { Address, SmartContract } from '@elrondnetwork/erdjs';
+import { Address, SmartContract } from '@multiversx/sdk-core';
 import { SmartContractProfiler } from 'src/modules/metrics/smartcontract-profiler';
 
 export function getSmartContract(address: string): SmartContract {

@@ -5,7 +5,7 @@ import {
   ElasticSortOrder,
   QueryOperator,
   QueryType,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { NftTypeEnum } from '../assets/models';
 import { NftRarityData } from './models/nft-rarity-data.model';
 import { constants } from 'src/config';

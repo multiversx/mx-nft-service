@@ -20,7 +20,7 @@ import {
   TokenPayment,
   ResultsParser,
   SmartContract,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -34,7 +34,7 @@ import {
 } from './models/requests';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
-import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
@@ -42,7 +42,7 @@ import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftMarketplaceAbiService {

@@ -13,7 +13,7 @@ import { Tag } from '../models';
 import { TagsFilter } from '../models/Tags.Filter';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { TagsRepositoryMock } from 'src/db/auctions/tags.repository.mock';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { CachingServiceMock } from 'src/common/services/caching/caching.service.mock';
 
 describe.skip('SearchService', () => {

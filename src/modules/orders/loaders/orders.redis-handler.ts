@@ -1,6 +1,5 @@
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { LocalRedisCacheService } from 'src/common';
 import { OrderEntity } from 'src/db/orders/order.entity';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
@@ -8,11 +7,8 @@ import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class OrdersRedisHandler extends RedisKeyValueDataloaderHandler<number> {
-  constructor(
-    redisCacheService: RedisCacheService,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
-    super(redisCacheService, 'auction_orders', localRedisCacheService);
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, 'auction_orders');
   }
 
   mapValues(

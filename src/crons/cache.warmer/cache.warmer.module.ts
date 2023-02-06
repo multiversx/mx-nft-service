@@ -18,7 +18,6 @@ import { CollectionsGetterService } from 'src/modules/nftCollections/collections
 import { BlacklistedCollectionsModule } from 'src/modules/blacklist/blacklisted-collections.module';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { TrendingCollectionsWarmerService } from './trendingCollections.warmer.service';
-import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
 
 @Module({
   imports: [
@@ -30,7 +29,6 @@ import { DynamicModuleUtils } from 'src/utils/dynamicModule-utils';
     AssetsModuleGraph,
     BlacklistedCollectionsModule,
     AnalyticsModule,
-    DynamicModuleUtils.getCachingModule(),
   ],
   providers: [
     CollectionsGetterService,

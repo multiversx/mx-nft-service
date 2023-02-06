@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
-import { CachingModule } from 'src/common/services/caching/caching.module';
+import { CacheModule } from 'src/common/services/caching/caching.module';
 import { OrdersCachingService } from './orders-caching.service';
 import { OrdersService } from '../order.service';
 import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
@@ -16,7 +16,7 @@ import { AvailableTokensForAuctionRedisHandler } from 'src/modules/auctions/load
     OrdersRedisHandler,
     AvailableTokensForAuctionRedisHandler,
   ],
-  imports: [CachingModule, CommonModule],
+  imports: [CacheModule, CommonModule],
   exports: [OrdersCachingService],
 })
 export class OrdersCachingModule {}

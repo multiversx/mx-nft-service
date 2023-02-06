@@ -6,10 +6,9 @@ import { cacheConfig } from 'src/config';
 import { TimeConstants } from 'src/utils/time-utils';
 import * as hash from 'object-hash';
 import { Offer } from '../models';
-import { CachingService } from 'src/common/services/caching/caching.service';
 import { OfferEntity } from 'src/db/offers';
 import { OffersFilters } from '../models/Offers-Filters';
-import { RedisCacheService } from 'src/common/services/caching/redis-cache.service';
+import { CachingService, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class OffersCachingService {
@@ -17,11 +16,7 @@ export class OffersCachingService {
   constructor(
     private cacheService: CachingService,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   public async getOrSetOffers(
     filters: OffersFilters,
@@ -30,7 +25,6 @@ export class OffersCachingService {
     getOffers: () => any,
   ): Promise<[OfferEntity[], number]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getOffersCacheKey(filters, offset, limit),
       () => getOffers(),
       30 * TimeConstants.oneSecond,
@@ -42,7 +36,6 @@ export class OffersCachingService {
     getOrSetOffersForAddress: () => any,
   ): Promise<[OfferEntity[], number]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getOffersForOwnerCacheKey(address),
       () => getOrSetOffersForAddress(),
       30 * TimeConstants.oneMinute,
@@ -54,7 +47,6 @@ export class OffersCachingService {
     getOrSetOffersForCollection: () => any,
   ): Promise<[OfferEntity[], number]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getOffersForCollectionCacheKey(address),
       () => getOrSetOffersForCollection(),
       30 * TimeConstants.oneSecond,
@@ -65,18 +57,13 @@ export class OffersCachingService {
     collectionIdentifier?: string,
     ownerAddress?: string,
   ): Promise<void> {
-    await this.redisCacheService.del(
-      this.redisClient,
+    await this.redisCacheService.delete(
       this.getOffersForOwnerCacheKey(ownerAddress),
     );
-    await this.redisCacheService.del(
-      this.redisClient,
+    await this.redisCacheService.delete(
       this.getOffersForCollectionCacheKey(collectionIdentifier),
     );
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      this.getOffersCacheKey(),
-    );
+    await this.redisCacheService.deleteByPattern(this.getOffersCacheKey());
   }
 
   private getOffersCacheKey(

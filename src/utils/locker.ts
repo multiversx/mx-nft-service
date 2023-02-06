@@ -1,4 +1,4 @@
-import { CpuProfiler } from '@elrondnetwork/erdnest';
+import { CpuProfiler } from '@multiversx/sdk-nestjs';
 import { Logger } from '@nestjs/common';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';

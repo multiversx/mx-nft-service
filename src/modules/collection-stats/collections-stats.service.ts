@@ -6,7 +6,7 @@ import { AssetsQuery } from '../assets';
 import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class CollectionsStatsService {

@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { RedisValueDataloaderHandler } from 'src/modules/common/redis-value-dataloader.handler';
-import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export class AssetLikesProviderRedisHandler extends RedisValueDataloaderHandler<string> {
-  constructor(
-    redisCacheService: RedisCacheService,
-    localRedisCacheService: LocalRedisCacheService,
-  ) {
-    super(redisCacheService, 'assetLikesCount', localRedisCacheService);
+  constructor(redisCacheService: RedisCacheService) {
+    super(redisCacheService, 'assetLikesCount');
   }
 
   mapValues(

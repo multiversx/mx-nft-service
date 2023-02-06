@@ -5,7 +5,7 @@ import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { AssetsLikesService } from 'src/modules/assets';
 
 @Injectable()

@@ -29,7 +29,7 @@ import { AuctionsCachingService } from './caching/auctions-caching.service';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader';
 import { MarketplaceRedisHandler } from '../marketplaces/loaders/marketplace.redis-handler';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { AuthModule } from '../auth/auth.module';
 import { OffersModuleGraph } from '../offers/offers.module';

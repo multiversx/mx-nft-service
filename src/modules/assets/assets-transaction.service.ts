@@ -5,7 +5,7 @@ import {
   ContractFunction,
   TokenPayment,
   U64Value,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MxApiService, getSmartContract } from 'src/common';
 import { cacheConfig, mxConfig, gas } from 'src/config';
@@ -28,7 +28,7 @@ import {
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class AssetsTransactionService {

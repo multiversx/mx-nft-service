@@ -23,7 +23,7 @@ import {
   QueryOperator,
   QueryType,
   RedisCacheService,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 
 @Injectable()

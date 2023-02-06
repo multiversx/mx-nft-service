@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxIdentityService } from 'src/common';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';

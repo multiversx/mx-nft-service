@@ -4,21 +4,19 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, RedisCacheService } from '@elrondnetwork/erdnest';
+import { ElasticQuery, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Locker } from 'src/utils/locker';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
   getCollectionsWithTraitSummaryFromElasticQuery,
 } from 'src/modules/nft-traits/nft-traits.elastic.queries';
-import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
 
 @Injectable()
 export class TraitsUpdaterService {
   constructor(
     private readonly nftTraitsService: NftTraitsService,
-    private readonly localRedisCacheService: LocalRedisCacheService,
     private readonly redisCacheService: RedisCacheService,
     private readonly elasticService: MxElasticService,
     private readonly nftTraitsElasticService: NftTraitsElasticService,
@@ -170,11 +168,9 @@ export class TraitsUpdaterService {
     await Locker.lock(
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
-        const tokensToUpdate: string[] =
-          await this.localRedisCacheService.popAllItemsFromList(
-            this.getTraitsQueueCacheKey(),
-            true,
-          );
+        const tokensToUpdate: string[] = await this.redisCacheService.lpop(
+          this.getTraitsQueueCacheKey(),
+        );
 
         const notUpdatedNfts: string[] = await this.updateTokenTraits(
           tokensToUpdate,
@@ -188,7 +184,7 @@ export class TraitsUpdaterService {
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.localRedisCacheService.addItemsToList(
+      await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
       );

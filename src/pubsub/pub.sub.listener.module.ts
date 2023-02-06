@@ -4,11 +4,11 @@ import {
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
-import { CachingModule } from 'src/common/services/caching/caching.module';
+import { CacheModule } from 'src/common/services/caching/caching.module';
 import { PubSubListenerController } from './pub.sub.listener.controller';
 
 @Module({
-  imports: [forwardRef(() => CachingModule)],
+  imports: [forwardRef(() => CacheModule)],
   controllers: [PubSubListenerController],
   providers: [
     {
@@ -20,9 +20,6 @@ import { PubSubListenerController } from './pub.sub.listener.controller';
             url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
             retryDelay: 1000,
             retryAttempts: 10,
-            retry_strategy: function (_: any) {
-              return 1000;
-            },
           },
         };
 

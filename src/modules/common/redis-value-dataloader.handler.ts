@@ -1,23 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@elrondnetwork/erdnest';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
-import { LocalRedisCacheService } from 'src/common';
 
 @Injectable()
 export abstract class RedisValueDataloaderHandler<T> {
   protected redisCacheService: RedisCacheService;
-  protected localRedisCacheService: LocalRedisCacheService;
   private cacheKeyName: string;
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
-    localRedisCacheService: LocalRedisCacheService,
     private ttl: number = TimeConstants.oneWeek,
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
-    this.localRedisCacheService = localRedisCacheService;
   }
   abstract mapValues(keys: T[], dataKeys): any;
 
@@ -26,7 +22,7 @@ export abstract class RedisValueDataloaderHandler<T> {
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
-    await this.localRedisCacheService.delByPattern(this.getCacheKey(key));
+    this.redisCacheService.deleteByPattern(this.getCacheKey(key));
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {

@@ -7,7 +7,7 @@ import { cacheConfig, mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
-import { CachingService } from '@elrondnetwork/erdnest';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class UsdPriceService {
