@@ -50,6 +50,7 @@ export class NftEventsConsumer {
           (e: { identifier: NftEventEnum }) =>
             e.identifier === NftEventEnum.ESDTNFTCreate ||
             e.identifier === NftEventEnum.ESDTNFTTransfer ||
+            e.identifier === NftEventEnum.ESDTNFTBurn ||
             e.identifier === NftEventEnum.MultiESDTNFTTransfer,
         ),
         nftAuctionEvents.hash,
