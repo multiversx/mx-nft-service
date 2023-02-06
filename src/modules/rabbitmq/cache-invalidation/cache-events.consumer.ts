@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
+import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
+import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets-collection.redis-handler';
 import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-scam-info.redis-handler';
 import { CollectionAssetsCountRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsRedisHandler } from 'src/modules/nftCollections/loaders/collection-assets.redis-handler';
@@ -21,6 +23,8 @@ export class CacheEventsConsumer {
     private collectionAssets: CollectionAssetsRedisHandler,
     private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
     private cacheInvalidationEventsService: CacheInvalidationEventsService,
+    private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
+    private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
   ) {}
 
   @PublicRabbitConsumer({
@@ -32,9 +36,16 @@ export class CacheEventsConsumer {
   async consume(event: ChangedEvent): Promise<void> {
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
+        const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
+          this.collectionAssetsRedisHandler.clearKeyByPattern(
+            collectionIdentifier,
+          ),
+          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+            collectionIdentifier,
+          ),
         ]);
         break;
 
@@ -57,6 +68,10 @@ export class CacheEventsConsumer {
           this.assetsRedisHandler.clearKey(event.id),
           this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
+          this.collectionAssetsRedisHandler.clearKeyByPattern(collection),
+          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+            collection,
+          ),
         ]);
         break;
 

@@ -7,11 +7,9 @@ import {
   ChangedEvent,
 } from '../cache-invalidation/events/changed.event';
 import { MintEvent } from '../entities/auction/mint.event';
-import { SendOfferEvent } from '../entities/auction/sendOffer.event';
 import { TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
-import { AcceptOfferEvent } from '../entities/auction/acceptOffer.event';
-import { WithdrawOfferEvent } from '../entities/auction/withdrawOffer.event';
+import { BurnEvent } from '../entities/auction/burn.event';
 
 @Injectable()
 export class NftEventsService {
@@ -57,6 +55,16 @@ export class NftEventsService {
           await this.triggerCacheInvalidation(
             `${transferTopics.collection}-${transferTopics.nonce}`,
             CacheEventTypeEnum.OwnerChanged,
+          );
+          break;
+
+        case NftEventEnum.ESDTNFTBurn:
+          const burnEvent = new BurnEvent(event);
+          const burnTopics = transferEvent.getTopics();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          await this.triggerCacheInvalidation(
+            `${transferTopics.collection}-${transferTopics.nonce}`,
+            CacheEventTypeEnum.AssetRefresh,
           );
           break;
 

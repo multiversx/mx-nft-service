@@ -3,14 +3,14 @@ import { MxApiService } from 'src/common';
 import { BaseProvider } from '../../common/base.loader';
 import { Injectable, Scope } from '@nestjs/common';
 import { AssetsQuery } from '../assets-query';
-import { AssetsCollectionsRedisHandler } from './assets-collection.redis-handler';
+import { AssetsCollectionsForOwnerRedisHandler } from './assets-collection-for-owner.redis-handler';
 
 @Injectable({
   scope: Scope.REQUEST,
 })
 export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
   constructor(
-    assetsRedisHandler: AssetsCollectionsRedisHandler,
+    assetsRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private apiService: MxApiService,
   ) {
     super(
