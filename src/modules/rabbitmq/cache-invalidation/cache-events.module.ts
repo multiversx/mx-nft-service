@@ -10,6 +10,8 @@ import { CacheEventsConsumer } from './cache-events.consumer';
 import { CommonRabbitModule } from './common-rabbitmq.module';
 import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module';
 import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-scam-info.redis-handler';
+import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets-collection.redis-handler';
+import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-sca
     CollectionAssetsCountRedisHandler,
     CollectionAssetsRedisHandler,
     AssetScamInfoRedisHandler,
+    AssetsCollectionsRedisHandler,
+    AssetsCollectionsForOwnerRedisHandler,
   ],
   exports: [],
 })
