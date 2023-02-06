@@ -31,7 +31,7 @@ export class AccountStatsRepository {
     );
   }
 
-  async getOnwerAccountStats(
+  async getOwnerAccountStats(
     address: string,
     marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {

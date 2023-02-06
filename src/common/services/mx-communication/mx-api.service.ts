@@ -5,7 +5,7 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
 import { constants, mxConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
-import { OwnerApi } from './models/onwer.api';
+import { OwnerApi } from './models/owner.api';
 import {
   ApiNetworkProvider,
   TransactionOnNetwork,

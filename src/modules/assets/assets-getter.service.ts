@@ -160,14 +160,14 @@ export class AssetsGetterService {
   }
 
   async getAssetByIdentifierAndAddress(
-    onwerAddress: string,
+    ownerAddress: string,
     identifier: string,
   ): Promise<Asset> {
     const nft = await this.apiService.getNftByIdentifierAndAddress(
-      onwerAddress,
+      ownerAddress,
       identifier,
     );
-    return Asset.fromNft(nft, onwerAddress);
+    return Asset.fromNft(nft, ownerAddress);
   }
 
   async getAssetsForIdentifiers(identifiers: string[]): Promise<Asset[]> {

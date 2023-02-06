@@ -13,7 +13,7 @@ export class AccountStatsRepositoryMock extends Repository<AuctionEntity> {
     });
   }
 
-  async getOnwerAccountStats(address: string): Promise<AccountStatsEntity> {
+  async getOwnerAccountStats(address: string): Promise<AccountStatsEntity> {
     return new AccountStatsEntity({
       auctions: '3',
       orders: '0',
