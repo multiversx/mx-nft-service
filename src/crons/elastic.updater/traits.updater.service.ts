@@ -4,8 +4,11 @@ import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TimeConstants } from 'src/utils/time-utils';
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { ElasticQuery, RedisCacheService } from '@multiversx/sdk-nestjs';
-import { Locker } from 'src/utils/locker';
+import {
+  ElasticQuery,
+  Locker,
+  RedisCacheService,
+} from '@multiversx/sdk-nestjs';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,

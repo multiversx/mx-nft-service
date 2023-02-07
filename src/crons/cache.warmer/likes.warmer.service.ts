@@ -2,10 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CachingService, Locker } from '@multiversx/sdk-nestjs';
 import { AssetsLikesService } from 'src/modules/assets';
 
 @Injectable()

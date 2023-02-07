@@ -22,7 +22,7 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
-import { Address } from '@multiversx/sdk-core/out';
+import { Address } from '@multiversx/sdk-core';
 import { genericDescriptions, mxConfig } from 'src/config';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';

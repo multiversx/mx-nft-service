@@ -5,10 +5,10 @@ import { NftRarityEntity } from '../../db/nft-rarity/nft-rarity.entity';
 import { AssetRarityInfoRedisHandler } from '../assets/loaders/assets-rarity-info.redis-handler';
 import { NftRarityData } from './models/nft-rarity-data.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
 import { NftRarityElasticService } from './nft-rarity.elastic.service';
 import { constants } from 'src/config';
+import { Locker } from '@multiversx/sdk-nestjs';
 @Injectable()
 export class NftRarityService {
   constructor(
@@ -373,10 +373,9 @@ export class NftRarityService {
           collectionTicker,
         );
       if (preferredAlgorithm === 'custom') {
-        const customRanks =
-          await this.mxApiService.getCollectionCustomRanks(
-            collectionTicker,
-          );
+        const customRanks = await this.mxApiService.getCollectionCustomRanks(
+          collectionTicker,
+        );
         return [
           NftRarityData.setCustomRanks(allNfts, customRanks),
           customRanks,
@@ -412,9 +411,7 @@ export class NftRarityService {
     nftsCount?: number,
   ): Promise<[boolean, number]> {
     if (!nftsCount) {
-      nftsCount = await this.mxApiService.getCollectionNftsCount(
-        collection,
-      );
+      nftsCount = await this.mxApiService.getCollectionNftsCount(collection);
     }
     if (nftsCount > constants.nftsCountThresholdForTraitAndRarityIndexing) {
       this.logger.log(

@@ -14,7 +14,7 @@ import { Account } from '../account-stats/models';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
-import { Address } from '@multiversx/sdk-core/out';
+import { Address } from '@multiversx/sdk-core';
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { Asset, AssetsResponse } from '../assets/models';

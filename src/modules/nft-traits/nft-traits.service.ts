@@ -9,12 +9,12 @@ import {
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetsQuery } from '../assets';
 import { constants } from 'src/config';
-import { Locker } from 'src/utils/locker';
 import { Sort } from '../common/filters/filtersTypes';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { NftTraitsElasticService } from './nft-traits.elastic.service';
 import { CollectionWithTraitsFlag } from './models/collection-with-traits-flag.model';
 import { UpdateNftTraitsResponse } from './models/update-nft-traits-response';
+import { Locker } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftTraitsService {

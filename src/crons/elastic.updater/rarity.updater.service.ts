@@ -1,13 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { Locker } from 'src/utils/locker';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
-import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Locker, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class RarityUpdaterService {

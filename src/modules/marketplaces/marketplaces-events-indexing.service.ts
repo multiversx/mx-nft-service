@@ -5,9 +5,8 @@ import { MarketplacesService } from './marketplaces.service';
 import { MxElasticService } from 'src/common';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
-import { Locker } from 'src/utils/locker';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
-import { BinaryUtils, ElasticQuery } from '@multiversx/sdk-nestjs';
+import { BinaryUtils, ElasticQuery, Locker } from '@multiversx/sdk-nestjs';
 import {
   getMarketplaceEventsElasticQuery,
   getMarketplaceTransactionsElasticQuery,
