@@ -8,7 +8,7 @@ import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 @Injectable()
 export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'asset_scam_info');
+    super(redisCacheService, CacheInfo.NftScamInfo.key);
   }
 
   mapValues(
