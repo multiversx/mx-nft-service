@@ -8,6 +8,7 @@ import {
 } from '@multiversx/sdk-nestjs';
 import { forwardRef, Global, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
+import { LocalRedisCacheService } from './local-redis-cache.service';
 
 @Global()
 @Module({
@@ -35,14 +36,10 @@ import { CommonModule } from 'src/common.module';
       }),
     ),
   ],
-  providers: [
-    // LocalRedisCacheService,
-    LocalCacheService,
-    CachingModuleOptions,
-  ],
+  providers: [LocalRedisCacheService, LocalCacheService, CachingModuleOptions],
   exports: [
     LocalCacheService,
-    // LocalRedisCacheService,
+    LocalRedisCacheService,
     ElrondCachingModule.forRoot(
       new RedisCacheModuleOptions({
         host: process.env.REDIS_URL,

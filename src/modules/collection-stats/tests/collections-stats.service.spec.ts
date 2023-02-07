@@ -6,8 +6,7 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
-import { MxApiService, RedisCacheService } from 'src/common';
-import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
+import { MxApiService } from 'src/common';
 import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
 import { CollectionStatsRepositoryMock } from 'src/db/collection-stats/collection-stats.repository-mock';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
@@ -25,11 +24,6 @@ describe.skip('CollectionsStatsService', () => {
     useClass: CollectionStatsRepositoryMock,
   };
 
-  const RedisCacheServiceProvider = {
-    provide: RedisCacheService,
-    useClass: RedisCacheServiceMock,
-  };
-
   const logTransports: Transport[] = [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -44,7 +38,6 @@ describe.skip('CollectionsStatsService', () => {
         MxApiServiceProvider,
         CollectionStatsRepositoryProvider,
         CollectionsStatsService,
-        RedisCacheServiceProvider,
       ],
       imports: [
         WinstonModule.forRoot({

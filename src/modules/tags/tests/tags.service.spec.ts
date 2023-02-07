@@ -5,8 +5,7 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
-import { MxApiService, RedisCacheService } from 'src/common';
-import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
+import { MxApiService } from 'src/common';
 import { MxApiServiceMock } from 'src/common/services/mx-communication/mx-api.service.mock';
 import { TagsService } from '../tags.service';
 import { Tag } from '../models';
@@ -14,22 +13,12 @@ import { TagsFilter } from '../models/Tags.Filter';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
 import { TagsRepositoryMock } from 'src/db/auctions/tags.repository.mock';
 import { CachingService } from '@multiversx/sdk-nestjs';
-import { CachingServiceMock } from 'src/common/services/caching/caching.service.mock';
 
 describe.skip('SearchService', () => {
   let service: TagsService;
   const MxApiServiceProvider = {
     provide: MxApiService,
     useClass: MxApiServiceMock,
-  };
-
-  const RedisCacheServiceProvider = {
-    provide: RedisCacheService,
-    useClass: RedisCacheServiceMock,
-  };
-  const CachingServiceProvider = {
-    provide: CachingService,
-    useClass: CachingServiceMock,
   };
 
   const TagsRepositoryProvider = {
@@ -47,13 +36,7 @@ describe.skip('SearchService', () => {
   ];
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [
-        MxApiServiceProvider,
-        CachingServiceProvider,
-        TagsService,
-        RedisCacheServiceProvider,
-        TagsRepositoryProvider,
-      ],
+      providers: [MxApiServiceProvider, TagsService, TagsRepositoryProvider],
       imports: [
         WinstonModule.forRoot({
           transports: logTransports,

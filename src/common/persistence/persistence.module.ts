@@ -1,7 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
-import { AssetsLikesRepository } from 'src/db/assets/assets-likes.repository';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AuctionsRepository } from 'src/db/auctions/auctions.repository';
 import { TagsRepository } from 'src/db/auctions/tags.repository';
@@ -27,11 +26,12 @@ import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections/blacklisted.repository';
 import { ReportCollectionsRepository } from 'src/db/reports';
+import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
 
 @Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AssetsLikesRepository]),
+    TypeOrmModule.forFeature([AssetLikeEntity]),
     TypeOrmModule.forFeature([FeaturedCollectionsRepository]),
     TypeOrmModule.forFeature([FeaturedNftsRepository]),
     TypeOrmModule.forFeature([BlacklistedCollectionsRepository]),
@@ -59,6 +59,7 @@ import { ReportCollectionsRepository } from 'src/db/reports';
     CollectionStatsRepository,
     AuctionsRepository,
     OffersRepository,
+    AssetsLikesRepository
   ],
   exports: [PersistenceService, UsdPriceService],
 })

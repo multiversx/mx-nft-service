@@ -47,10 +47,16 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
         const redisValues = this.mapValues(returnValues, data);
 
         for (const val of redisValues) {
-          const cacheKeys = this.getCacheKeys(
-            val.values.map((value) => value.key),
-          );
-          await this.redisCacheService.setMany(cacheKeys, val.values, val.ttl);
+          if (val.values?.length > 0) {
+            const cacheKeys = this.getCacheKeys(
+              val.values.map((value) => value.key),
+            );
+            await this.redisCacheService.setMany(
+              cacheKeys,
+              val.values,
+              val.ttl,
+            );
+          }
         }
         return returnValues;
       }

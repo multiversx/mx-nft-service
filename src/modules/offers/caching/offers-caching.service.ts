@@ -1,35 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
 import { TimeConstants } from 'src/utils/time-utils';
-import * as hash from 'object-hash';
-import { Offer } from '../models';
 import { OfferEntity } from 'src/db/offers';
-import { OffersFilters } from '../models/Offers-Filters';
-import { CachingService, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class OffersCachingService {
-  private redisClient: Redis.Redis;
-  constructor(
-    private cacheService: CachingService,
-    private redisCacheService: RedisCacheService,
-  ) {}
-
-  public async getOrSetOffers(
-    filters: OffersFilters,
-    offset: number = 0,
-    limit: number = 10,
-    getOffers: () => any,
-  ): Promise<[OfferEntity[], number]> {
-    return this.redisCacheService.getOrSet(
-      this.getOffersCacheKey(filters, offset, limit),
-      () => getOffers(),
-      30 * TimeConstants.oneSecond,
-    );
-  }
+  constructor(private redisCacheService: RedisCacheService) {}
 
   public async getOrSetOffersForAddress(
     address: string,
@@ -62,20 +40,6 @@ export class OffersCachingService {
     );
     await this.redisCacheService.delete(
       this.getOffersForCollectionCacheKey(collectionIdentifier),
-    );
-    await this.redisCacheService.deleteByPattern(this.getOffersCacheKey());
-  }
-
-  private getOffersCacheKey(
-    request?: OffersFilters,
-    offset: number = 0,
-    limit: number = 10,
-  ) {
-    return generateCacheKeyFromParams(
-      'offersHash',
-      request ? hash(request) : '',
-      offset,
-      limit,
     );
   }
 

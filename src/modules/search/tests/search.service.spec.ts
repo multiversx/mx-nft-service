@@ -5,8 +5,7 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
-import { MxApiService, MxIdentityService, RedisCacheService } from 'src/common';
-import { RedisCacheServiceMock } from 'src/common/services/caching/redis-cache.service.mock';
+import { MxApiService, MxIdentityService } from 'src/common';
 import { MxApiServiceMock } from 'src/common/services/mx-communication/mx-api.service.mock';
 import { SearchService } from '../search.service';
 import { MxIdentityServiceMock } from 'src/common/services/mx-communication/mx-identity.service.mock';
@@ -28,11 +27,6 @@ describe.skip('SearchService', () => {
     useClass: MxIdentityServiceMock,
   };
 
-  const RedisCacheServiceProvider = {
-    provide: RedisCacheService,
-    useClass: RedisCacheServiceMock,
-  };
-
   const logTransports: Transport[] = [
     new winston.transports.Console({
       format: winston.format.combine(
@@ -47,7 +41,6 @@ describe.skip('SearchService', () => {
         MxApiServiceProvider,
         MxIdentityServiceProvider,
         SearchService,
-        RedisCacheServiceProvider,
       ],
       imports: [
         WinstonModule.forRoot({
