@@ -15,9 +15,12 @@ import { MarketplaceCollectionsRepository } from 'src/db/marketplaces/marketplac
 import { MarketplaceRepository } from 'src/db/marketplaces/marketplaces.repository';
 import { NftRarityRepository } from 'src/db/nft-rarity/nft-rarity.repository';
 import { NftsFlagsRepository } from 'src/db/nftFlags/nft-flags.repository';
-import { NotificationsRepository } from 'src/db/notifications';
+import {
+  NotificationEntity,
+  NotificationsRepository,
+} from 'src/db/notifications';
 import { OfferEntity, OffersRepository } from 'src/db/offers';
-import { OrdersRepository } from 'src/db/orders';
+import { OrderEntity, OrdersRepository } from 'src/db/orders';
 import { ReportNftsRepository } from 'src/db/reports/report-nft.repository';
 import { CacheEventsPublisherModule } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { PersistenceService } from './persistence.service';
@@ -25,30 +28,49 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MxCommunicationModule } from '../services/mx-communication';
 import { MarketplaceEventsRepository } from 'src/db/marketplaces/marketplace-events.repository';
 import { BlacklistedCollectionsRepository } from 'src/db/blacklistedCollections/blacklisted.repository';
-import { ReportCollectionsRepository } from 'src/db/reports';
+import {
+  ReportCollectionEntity,
+  ReportCollectionsRepository,
+  ReportNftEntity,
+} from 'src/db/reports';
 import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
+import { BlacklistedCollectionEntity } from 'src/db/blacklistedCollections';
+import { TierEntity } from 'src/db/campaigns/tiers.entity';
+import { CampaignEntity } from 'src/db/campaigns';
+import { TagEntity } from 'src/db/auctions/tags.entity';
+import {
+  FeaturedCollectionEntity,
+  FeaturedNftEntity,
+} from 'src/db/featuredNfts';
+import {
+  MarketplaceCollectionEntity,
+  MarketplaceEntity,
+} from 'src/db/marketplaces';
+import { NftFlagsEntity } from 'src/db/nftFlags';
+import { NftRarityEntity } from 'src/db/nft-rarity';
+import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 
 @Global()
 @Module({
   imports: [
     TypeOrmModule.forFeature([AssetLikeEntity]),
-    TypeOrmModule.forFeature([FeaturedCollectionsRepository]),
-    TypeOrmModule.forFeature([FeaturedNftsRepository]),
-    TypeOrmModule.forFeature([BlacklistedCollectionsRepository]),
-    TypeOrmModule.forFeature([TagsRepository]),
-    TypeOrmModule.forFeature([CampaignsRepository]),
-    TypeOrmModule.forFeature([TiersRepository]),
-    TypeOrmModule.forFeature([MarketplaceRepository]),
-    TypeOrmModule.forFeature([MarketplaceCollectionsRepository]),
-    TypeOrmModule.forFeature([ReportNftsRepository]),
-    TypeOrmModule.forFeature([ReportCollectionsRepository]),
-    TypeOrmModule.forFeature([NftsFlagsRepository]),
-    TypeOrmModule.forFeature([NftRarityRepository]),
-    TypeOrmModule.forFeature([NotificationsRepository]),
-    TypeOrmModule.forFeature([OrdersRepository]),
+    TypeOrmModule.forFeature([FeaturedCollectionEntity]),
+    TypeOrmModule.forFeature([FeaturedNftEntity]),
+    TypeOrmModule.forFeature([BlacklistedCollectionEntity]),
+    TypeOrmModule.forFeature([TagEntity]),
+    TypeOrmModule.forFeature([CampaignEntity]),
+    TypeOrmModule.forFeature([TierEntity]),
+    TypeOrmModule.forFeature([MarketplaceEntity]),
+    TypeOrmModule.forFeature([MarketplaceCollectionEntity]),
+    TypeOrmModule.forFeature([ReportNftEntity]),
+    TypeOrmModule.forFeature([ReportCollectionEntity]),
+    TypeOrmModule.forFeature([NftFlagsEntity]),
+    TypeOrmModule.forFeature([NftRarityEntity]),
+    TypeOrmModule.forFeature([NotificationEntity]),
+    TypeOrmModule.forFeature([OrderEntity]),
     TypeOrmModule.forFeature([AuctionEntity]),
     TypeOrmModule.forFeature([OfferEntity]),
-    TypeOrmModule.forFeature([MarketplaceEventsRepository]),
+    TypeOrmModule.forFeature([MarketplaceEventsEntity]),
     CacheEventsPublisherModule,
     MxCommunicationModule,
   ],
@@ -59,7 +81,22 @@ import { AssetLikeEntity, AssetsLikesRepository } from 'src/db/assets';
     CollectionStatsRepository,
     AuctionsRepository,
     OffersRepository,
-    AssetsLikesRepository
+    AssetsLikesRepository,
+    BlacklistedCollectionsRepository,
+    TiersRepository,
+    CampaignsRepository,
+    TagsRepository,
+    FeaturedCollectionsRepository,
+    FeaturedNftsRepository,
+    MarketplaceRepository,
+    MarketplaceCollectionsRepository,
+    ReportNftsRepository,
+    ReportCollectionsRepository,
+    NftsFlagsRepository,
+    NftRarityRepository,
+    NotificationsRepository,
+    OrdersRepository,
+    MarketplaceEventsRepository,
   ],
   exports: [PersistenceService, UsdPriceService],
 })

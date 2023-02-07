@@ -1,11 +1,17 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ReportNftEntity } from './report-nft.entity';
 
-@EntityRepository(ReportNftEntity)
-export class ReportNftsRepository extends Repository<ReportNftEntity> {
+@Injectable()
+export class ReportNftsRepository {
+  constructor(
+    @InjectRepository(ReportNftEntity)
+    private reportNftRepository: Repository<ReportNftEntity>,
+  ) {}
   async isReportedBy(identifier: string, address: string): Promise<boolean> {
-    const count = await this.count({
+    const count = await this.reportNftRepository.count({
       where: {
         identifier,
         address,
@@ -17,7 +23,7 @@ export class ReportNftsRepository extends Repository<ReportNftEntity> {
 
   async addReport(reportEntity: ReportNftEntity): Promise<ReportNftEntity> {
     try {
-      return await this.save(reportEntity);
+      return await this.reportNftRepository.save(reportEntity);
     } catch (err) {
       // If like already exists, we ignore the error.
       if (err.errno === MYSQL_ALREADY_EXISTS) {
@@ -28,7 +34,9 @@ export class ReportNftsRepository extends Repository<ReportNftEntity> {
   }
 
   async clearReport(identifier: string): Promise<boolean> {
-    const response = await this.delete({ identifier: identifier });
+    const response = await this.reportNftRepository.delete({
+      identifier: identifier,
+    });
     if (response?.affected > 0) {
       return true;
     }
@@ -37,7 +45,7 @@ export class ReportNftsRepository extends Repository<ReportNftEntity> {
 
   async getReportCount(identifier: string): Promise<number> {
     try {
-      return await this.count({
+      return await this.reportNftRepository.count({
         where: {
           identifier,
         },

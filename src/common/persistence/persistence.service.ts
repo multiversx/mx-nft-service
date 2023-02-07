@@ -342,27 +342,26 @@ export class PersistenceService {
     collection: string,
     type: FeaturedCollectionTypeEnum,
   ): Promise<boolean> {
-    const res = await this.execute(
+    return await this.execute(
       this.addFeaturedCollection.name,
-      this.featuredCollectionsRepository.save(
-        new FeaturedCollectionEntity({ identifier: collection, type }),
+      this.featuredCollectionsRepository.addFeaturedCollection(
+        collection,
+        type,
       ),
     );
-    return !!res.id;
   }
 
   async removeFeaturedCollection(
     collection: string,
     type: FeaturedCollectionTypeEnum,
   ): Promise<boolean> {
-    const res = await this.execute(
+    return await this.execute(
       this.removeFeaturedCollection.name,
-      this.featuredCollectionsRepository.delete({
-        identifier: collection,
-        type: type,
-      }),
+      this.featuredCollectionsRepository.removeFeaturedCollection(
+        collection,
+        type,
+      ),
     );
-    return res.affected === 1;
   }
 
   async getFeaturedNfts(
@@ -1131,22 +1130,20 @@ export class PersistenceService {
   }
 
   async addBlacklistedCollection(collection: string): Promise<boolean> {
-    const res = await this.execute(
+    return await this.execute(
       this.addBlacklistedCollection.name,
-      this.blacklistedCollectionsRepository.save(
-        new FeaturedCollectionEntity({ identifier: collection }),
+      this.blacklistedCollectionsRepository.addBlacklistedCollection(
+        collection,
       ),
     );
-    return !!res.id;
   }
 
   async removeBlacklistedCollection(collection: string): Promise<boolean> {
-    const res = await this.execute(
+    return await this.execute(
       this.removeBlacklistedCollection.name,
-      this.blacklistedCollectionsRepository.delete({
-        identifier: collection,
-      }),
+      this.blacklistedCollectionsRepository.removeBlacklistedCollection(
+        collection,
+      ),
     );
-    return res.affected === 1;
   }
 }

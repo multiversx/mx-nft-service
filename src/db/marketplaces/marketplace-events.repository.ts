@@ -1,9 +1,15 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { constants } from 'src/config';
 import { EntityRepository, LessThan, MoreThan, Repository } from 'typeorm';
 import { MarketplaceEventsEntity } from './marketplace-events.entity';
 
-@EntityRepository(MarketplaceEventsEntity)
-export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEntity> {
+@Injectable()
+export class MarketplaceEventsRepository {
+  constructor(
+    @InjectRepository(MarketplaceEventsEntity)
+    private marketplaceCollectionRepository: Repository<MarketplaceEventsEntity>,
+  ) {}
   async saveOrIgnoreBulk(
     marketplaceEvents: MarketplaceEventsEntity[],
   ): Promise<number> {
@@ -18,7 +24,8 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
         i * constants.dbBatch,
         (i + 1) * constants.dbBatch,
       );
-      const res = await this.createQueryBuilder()
+      const res = await this.marketplaceCollectionRepository
+        .createQueryBuilder()
         .insert()
         .into('marketplace_events')
         .values(batch)
@@ -47,7 +54,7 @@ export class MarketplaceEventsRepository extends Repository<MarketplaceEventsEnt
       whereFilter['timestamp'] = MoreThan(afterTimestamp);
     }
 
-    return await this.find({
+    return await this.marketplaceCollectionRepository.find({
       where: whereFilter,
       order: {
         timestamp: 'ASC',

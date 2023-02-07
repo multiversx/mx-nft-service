@@ -1,14 +1,20 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ReportCollectionEntity } from './report-collection.entity';
 
-@EntityRepository(ReportCollectionEntity)
-export class ReportCollectionsRepository extends Repository<ReportCollectionEntity> {
+@Injectable()
+export class ReportCollectionsRepository {
+  constructor(
+    @InjectRepository(ReportCollectionEntity)
+    private reportCollectionRepository: Repository<ReportCollectionEntity>,
+  ) {}
   async isReportedBy(
     collectionIdentifier: string,
     address: string,
   ): Promise<boolean> {
-    const count = await this.count({
+    const count = await this.reportCollectionRepository.count({
       where: {
         collectionIdentifier,
         address,
@@ -22,7 +28,7 @@ export class ReportCollectionsRepository extends Repository<ReportCollectionEnti
     reportEntity: ReportCollectionEntity,
   ): Promise<ReportCollectionEntity> {
     try {
-      return await this.save(reportEntity);
+      return await this.reportCollectionRepository.save(reportEntity);
     } catch (err) {
       // If like already exists, we ignore the error.
       if (err.errno === MYSQL_ALREADY_EXISTS) {
@@ -33,7 +39,7 @@ export class ReportCollectionsRepository extends Repository<ReportCollectionEnti
   }
 
   async clearReport(collectionIdentifier: string): Promise<boolean> {
-    const response = await this.delete({
+    const response = await this.reportCollectionRepository.delete({
       collectionIdentifier: collectionIdentifier,
     });
     if (response?.affected > 0) {
@@ -44,7 +50,7 @@ export class ReportCollectionsRepository extends Repository<ReportCollectionEnti
 
   async getReportCount(collectionIdentifier: string): Promise<number> {
     try {
-      return await this.count({
+      return await this.reportCollectionRepository.count({
         where: {
           collectionIdentifier,
         },

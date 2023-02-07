@@ -1,8 +1,7 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AuctionEntity } from '../auctions';
 import { AccountStatsEntity } from './account-stats';
 
-@EntityRepository(AuctionEntity)
 export class AccountStatsRepositoryMock extends Repository<AuctionEntity> {
   async getPublicAccountStats(address: string): Promise<AccountStatsEntity> {
     return new AccountStatsEntity({

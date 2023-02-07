@@ -10,20 +10,12 @@ import { MxApiServiceMock } from 'src/common/services/mx-communication/mx-api.se
 import { TagsService } from '../tags.service';
 import { Tag } from '../models';
 import { TagsFilter } from '../models/Tags.Filter';
-import { TagsRepository } from 'src/db/auctions/tags.repository';
-import { TagsRepositoryMock } from 'src/db/auctions/tags.repository.mock';
-import { CachingService } from '@multiversx/sdk-nestjs';
 
 describe.skip('SearchService', () => {
   let service: TagsService;
   const MxApiServiceProvider = {
     provide: MxApiService,
     useClass: MxApiServiceMock,
-  };
-
-  const TagsRepositoryProvider = {
-    provide: TagsRepository,
-    useClass: TagsRepositoryMock,
   };
 
   const logTransports: Transport[] = [
@@ -36,7 +28,7 @@ describe.skip('SearchService', () => {
   ];
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [MxApiServiceProvider, TagsService, TagsRepositoryProvider],
+      providers: [MxApiServiceProvider, TagsService],
       imports: [
         WinstonModule.forRoot({
           transports: logTransports,
