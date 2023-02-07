@@ -419,16 +419,19 @@ export class AssetsGetterService {
         assetsRarity?.groupBy((asset) => asset.identifier),
       );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
-      await this.assetScamLoader.batchScamInfo(
-        assetsWithScamInfo?.map((a) => a.identifier),
-        assetsWithScamInfo?.groupBy((asset) => asset.identifier),
-      );
+
+      if (assetsWithScamInfo?.length > 0)
+        await this.assetScamLoader.batchScamInfo(
+          assetsWithScamInfo?.map((a) => a.identifier),
+          assetsWithScamInfo?.groupBy((asset) => asset.identifier),
+        );
 
       let assetsWithSupply = response.items?.filter((x) => x?.supply);
-      await this.assetSupplyLoader.batchSupplyInfo(
-        assetsWithSupply?.map((a) => a.identifier),
-        assetsWithSupply?.groupBy((asset) => asset.identifier),
-      );
+      if (assetsWithSupply?.length > 0)
+        await this.assetSupplyLoader.batchSupplyInfo(
+          assetsWithSupply?.map((a) => a.identifier),
+          assetsWithSupply?.groupBy((asset) => asset.identifier),
+        );
     }
   }
 
