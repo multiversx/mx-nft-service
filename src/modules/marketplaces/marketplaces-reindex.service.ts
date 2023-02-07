@@ -2,16 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AuctionEntity } from 'src/db/auctions';
-import { AuctionStatusEnum } from '../auctions/models/AuctionStatus.enum';
-import { DateUtils } from 'src/utils/date-utils';
 import { MarketplacesService } from './marketplaces.service';
 import { OrderEntity } from 'src/db/orders';
-import { OrderStatusEnum } from '../orders/models';
 import { Marketplace } from './models';
 import { OfferEntity } from 'src/db/offers';
-import { OfferStatusEnum } from '../offers/models';
-import BigNumber from 'bignumber.js';
 import { AuctionsSetterService } from '../auctions';
+import { DateUtils } from 'src/utils/date-utils';
+import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -19,6 +16,7 @@ export class MarketplacesReindexService {
     private readonly persistenceService: PersistenceService,
     private readonly marketplacesService: MarketplacesService,
     private readonly auctionSetterService: AuctionsSetterService,
+    private readonly marketplacesReindexEventsSummaryService: MarketplacesReindexEventsSummaryService,
     private readonly logger: Logger,
   ) {}
 
@@ -79,8 +77,8 @@ export class MarketplacesReindexService {
         break;
       }
 
-      afterTimestamp =
-        this.sliceBatchIfPartialEventsSetAndGetNewestTimestamp(batch);
+      [batch, afterTimestamp] =
+        this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch);
 
       processInNextBatch =
         await this.processEventsBatchAndReturnUnprocessedEvents(
@@ -108,9 +106,9 @@ export class MarketplacesReindexService {
     }
   }
 
-  private sliceBatchIfPartialEventsSetAndGetNewestTimestamp(
+  private getSlicedBatchAndNewestTimestampIfPartialEventsSet(
     eventsBatch: MarketplaceEventsEntity[],
-  ): number {
+  ): [MarketplaceEventsEntity[], number] {
     const oldestTimestamp = eventsBatch[0].timestamp;
     let newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
 
@@ -122,7 +120,7 @@ export class MarketplacesReindexService {
       newestTimestamp = eventsBatch[eventsBatch.length - 1].timestamp;
     }
 
-    return newestTimestamp;
+    return [eventsBatch, newestTimestamp];
   }
 
   private async processEventsBatchAndReturnUnprocessedEvents(
@@ -177,52 +175,29 @@ export class MarketplacesReindexService {
     ordersState: OrderEntity[],
     offersState: OfferEntity[],
   ): Promise<void> {
-    throw new Error('Not implemented yet');
-  }
-
-  private setInactiveOrdersForAuction(
-    ordersState: OrderEntity[],
-    auctionId: number,
-    modifiedDate: Date,
-    exceptWinnerId?: number,
-  ): void {
-    ordersState
-      .filter(
-        (o) =>
-          o.auctionId === auctionId &&
-          o.status === OrderStatusEnum.Active &&
-          o.id !== exceptWinnerId,
-      )
-      .map((o) => {
-        o.status = OrderStatusEnum.Inactive;
-        o.modifiedDate = modifiedDate;
-      });
-  }
-
-  private handleChooseWinnerOrderAndReturnId(
-    ordersState: OrderEntity[],
-    auction: AuctionEntity,
-    status: OrderStatusEnum,
-  ): number {
-    const bids = ordersState
-      .filter(
-        (o) =>
-          o.auctionId === auction.id && o.status === OrderStatusEnum.Active,
-      )
-      .map((o) => new BigNumber(o.priceAmount));
-
-    if (bids.length) {
-      const maxBid = BigNumber.max(...bids);
-      const winnerOrderIndex = ordersState.findIndex(
-        (o) =>
-          o.auctionId === auction.id &&
-          o.status === OrderStatusEnum.Active &&
-          o.priceAmount === maxBid.toString(),
+    const eventsSetSummary =
+      this.marketplacesReindexEventsSummaryService.getEventsSetSummary(
+        marketplace,
+        eventOrdersAndTx,
       );
-      ordersState[winnerOrderIndex].status = status;
-      return ordersState[winnerOrderIndex].id;
-    }
-    return -1;
+
+    await this.processEvent(
+      marketplace,
+      auctionsState,
+      ordersState,
+      offersState,
+      eventsSetSummary,
+    );
+  }
+
+  private async processEvent(
+    marketplace: Marketplace,
+    auctionsState: AuctionEntity[],
+    ordersState: OrderEntity[],
+    offersState: OfferEntity[],
+    eventsSetSummary: any,
+  ): Promise<void> {
+    throw new Error('Not implemented yet');
   }
 
   private processMarketplaceExpiredStates(
@@ -231,52 +206,7 @@ export class MarketplacesReindexService {
     offersState: OfferEntity[],
     currentTimestamp: number,
   ): void {
-    this.processMarketplaceExpiredAuctionsAndOrders(
-      auctionsState,
-      ordersState,
-      currentTimestamp,
-    );
-    this.processMarketplaceExpiredOffers(offersState, currentTimestamp);
-  }
-
-  private processMarketplaceExpiredAuctionsAndOrders(
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    currentTimestamp: number,
-  ): void {
-    const runningAuctions = auctionsState.filter(
-      (a) => a.status === AuctionStatusEnum.Running,
-    );
-    for (let i = 0; i < runningAuctions.length; i++) {
-      if (runningAuctions[i].endDate < currentTimestamp) {
-        runningAuctions[i].status = AuctionStatusEnum.Claimable;
-        const winnerOrderId = this.handleChooseWinnerOrderAndReturnId(
-          ordersState,
-          runningAuctions[i],
-          OrderStatusEnum.Active,
-        );
-        this.setInactiveOrdersForAuction(
-          ordersState,
-          runningAuctions[i].id,
-          DateUtils.getUtcDateFromTimestamp(runningAuctions[i].endDate),
-          winnerOrderId,
-        );
-      }
-    }
-  }
-
-  private processMarketplaceExpiredOffers(
-    offersState: OfferEntity[],
-    currentTimestamp: number,
-  ): void {
-    for (let i = 0; i < offersState.length; i++) {
-      if (
-        offersState[i].status === OfferStatusEnum.Active &&
-        offersState[i].endDate < currentTimestamp
-      ) {
-        offersState[i].status = OfferStatusEnum.Expired;
-      }
-    }
+    throw new Error('Not implemented yet');
   }
 
   private async addMarketplaceStatesToDb(

@@ -1,3 +1,5 @@
+import { EventResponse } from 'src/common/services/mx-communication/models/elastic-search/event.response';
+
 export class GenericEvent {
   private address = '';
   private identifier = '';
@@ -23,5 +25,14 @@ export class GenericEvent {
       data: this.data,
       topics: this.topics,
     };
+  }
+
+  static fromEventResponse(eventResponse: EventResponse): GenericEvent {
+    let event = new GenericEvent();
+    event.address = eventResponse.address;
+    event.identifier = eventResponse.identifier;
+    event.topics = eventResponse.topics;
+    event.data = eventResponse.data;
+    return event;
   }
 }

@@ -13,6 +13,7 @@ import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing
 import { OffersModuleGraph } from '../offers/offers.module';
 import { AssetByIdentifierService } from '../assets';
 import { MarketplacesReindexService } from './marketplaces-reindex.service';
+import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
 
 @Module({
   providers: [
@@ -26,6 +27,7 @@ import { MarketplacesReindexService } from './marketplaces-reindex.service';
     MarketplaceEventsIndexingService,
     AssetByIdentifierService,
     MarketplacesReindexService,
+    MarketplacesReindexEventsSummaryService,
   ],
   imports: [
     PubSubListenerModule,
