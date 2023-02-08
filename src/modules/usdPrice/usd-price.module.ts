@@ -4,7 +4,6 @@ import { UsdPriceService } from './usd-price.service';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { UsdPriceResolver } from './usd-price.resolver';
 import { UsdTokenPriceResolver } from './usd-token-price.resolver';
-import { DynamicModuleUtils } from 'src/utils/dynamic.module.utils';
 import {
   RedisCacheModule,
   RedisCacheModuleOptions,
