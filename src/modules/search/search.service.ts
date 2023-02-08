@@ -1,15 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService, MxIdentityService } from 'src/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 import {
   SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
-import { NftTypeEnum } from '../assets/models';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class SearchService {
@@ -29,7 +27,7 @@ export class SearchService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getAddressHerotag(address),
-        5 * TimeConstants.oneMinute,
+        5 * Constants.oneMinute(),
       );
     } catch (err) {
       this.logger.error(
@@ -50,7 +48,7 @@ export class SearchService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMappedHerotags(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -110,7 +108,7 @@ export class SearchService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMappedCollections(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -173,7 +171,7 @@ export class SearchService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMappedNfts(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -232,7 +230,7 @@ export class SearchService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMappedTags(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(

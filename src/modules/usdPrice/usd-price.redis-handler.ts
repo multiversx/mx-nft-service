@@ -1,10 +1,9 @@
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { DateUtils } from 'src/utils/date-utils';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class UsdPriceRedisHandler extends RedisKeyValueDataloaderHandler<number> {
@@ -27,9 +26,7 @@ export class UsdPriceRedisHandler extends RedisKeyValueDataloaderHandler<number>
       }
     }
 
-    return [
-      new RedisValue({ values: redisValues, ttl: TimeConstants.oneWeek }),
-    ];
+    return [new RedisValue({ values: redisValues, ttl: Constants.oneWeek() })];
   }
 
   getCacheKey(key: number) {

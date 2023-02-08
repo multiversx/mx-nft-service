@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService, Locker } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+
 import { MxApiService } from 'src/common';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
@@ -28,7 +28,7 @@ export class XoxnoArtistsWarmerService {
             await this.invalidateKey(
               `${CacheInfo.Artist.key}_${scOwner.address}`,
               { key: scOwner.address, value: scOwner },
-              5 * TimeConstants.oneHour,
+              5 * Constants.oneHour(),
             ),
         );
       },

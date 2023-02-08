@@ -3,7 +3,7 @@ import { MxApiService } from 'src/common';
 import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
@@ -41,17 +41,17 @@ export class AssetByIdentifierService {
       return {
         key: identifier,
         value: undefined,
-        ttl: TimeConstants.oneDay,
+        ttl: Constants.oneDay(),
       };
-    let ttl = TimeConstants.oneDay;
+    let ttl = Constants.oneDay();
     if (!nft) {
-      ttl = 3 * TimeConstants.oneSecond;
+      ttl = 3 * Constants.oneSecond();
     }
     if (
       (nft?.media && nft?.media[0].thumbnailUrl.includes('default')) ||
       (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner)
     )
-      ttl = TimeConstants.oneMinute;
+      ttl = Constants.oneMinute();
     return {
       key: identifier,
       value: Asset.fromNft(nft),

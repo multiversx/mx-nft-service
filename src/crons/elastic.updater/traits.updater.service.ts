@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
 import {
+  Constants,
   ElasticQuery,
   Locker,
   RedisCacheService,
@@ -208,7 +209,7 @@ export class TraitsUpdaterService {
     await this.redisCacheService.set(
       this.getTraitsValidatorCounterCacheKey(),
       index.toString(),
-      90 * TimeConstants.oneMinute,
+      90 * Constants.oneMinute(),
     );
   }
 

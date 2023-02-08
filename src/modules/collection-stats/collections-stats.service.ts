@@ -3,10 +3,9 @@ import { MxApiService } from 'src/common';
 import { mxConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetsQuery } from '../assets';
-import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class CollectionsStatsService {
@@ -37,7 +36,7 @@ export class CollectionsStatsService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         getCollectionStats,
-        5 * TimeConstants.oneMinute,
+        5 * Constants.oneMinute(),
       );
     } catch (err) {
       this.logger.error(
@@ -79,7 +78,7 @@ export class CollectionsStatsService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         getAccountStats,
-        TimeConstants.oneDay,
+        Constants.oneDay(),
       );
     } catch (err) {
       this.logger.error(

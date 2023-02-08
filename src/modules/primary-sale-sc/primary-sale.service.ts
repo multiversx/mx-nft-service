@@ -22,12 +22,11 @@ import {
   TicketInfoAbi,
 } from './models/PrimarySaleTimestamp.abi';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class PrimarySaleService {
@@ -117,7 +116,7 @@ export class PrimarySaleService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getPricePerTicketMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting price per ticket.', {
@@ -151,7 +150,7 @@ export class PrimarySaleService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMaxNftPerWalletMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -188,7 +187,7 @@ export class PrimarySaleService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getTimestampsMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -212,7 +211,7 @@ export class PrimarySaleService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -240,9 +239,9 @@ export class PrimarySaleService {
     const addresses: Address[] = response?.firstValue?.valueOf();
     const claimmers = addresses.map((x) => x.bech32());
     if (claimmers.includes(address)) {
-      return [true, TimeConstants.oneHour];
+      return [true, Constants.oneHour()];
     }
-    return [false, TimeConstants.oneSecond];
+    return [false, Constants.oneSecond()];
   }
 
   async getMyTicketsMap(
@@ -272,7 +271,7 @@ export class PrimarySaleService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.isWhitelistedMap(address),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {

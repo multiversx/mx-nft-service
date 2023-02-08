@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
 import { Notification } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NotificationsCachingService {
@@ -16,7 +15,7 @@ export class NotificationsCachingService {
     return this.redisCacheService.getOrSet(
       this.getNotificationsCacheKey(address),
       () => getNotifications(),
-      TimeConstants.oneDay,
+      Constants.oneDay(),
     );
   }
 

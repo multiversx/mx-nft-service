@@ -26,9 +26,9 @@ import {
   TransferNftRequest,
 } from './models/requests';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -176,7 +176,7 @@ export class AssetsTransactionService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         getMxStats,
-        TimeConstants.oneDay,
+        Constants.oneDay(),
       );
     } catch (error) {
       this.logger.error('An error occurred while getting mx stats', {

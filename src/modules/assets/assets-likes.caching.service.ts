@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
 import { AssetLikeEntity } from 'src/db/assets';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Asset } from './models';
 import { IsAssetLikedRedisHandler } from './loaders/asset-is-liked.redis-handler';
 
 @Injectable()
 export class AssetsLikesCachingService {
-  private readonly ttl = 6 * TimeConstants.oneHour;
+  private readonly ttl = 6 * Constants.oneHour();
 
   constructor(
     private isAssetLikedRedisHandler: IsAssetLikedRedisHandler,

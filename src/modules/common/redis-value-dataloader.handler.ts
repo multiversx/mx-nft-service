@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export abstract class RedisValueDataloaderHandler<T> {
@@ -10,7 +9,7 @@ export abstract class RedisValueDataloaderHandler<T> {
   constructor(
     redisCacheService: RedisCacheService,
     cacheKeyName: string,
-    private ttl: number = TimeConstants.oneWeek,
+    private ttl: number = Constants.oneWeek(),
   ) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;

@@ -4,9 +4,8 @@ import { Tag } from './models';
 import { TagTypeEnum } from './models/Tag-type.enum';
 import { TagsFilter } from './models/Tags.Filter';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { TimeConstants } from 'src/utils/time-utils';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class TagsService {
@@ -61,7 +60,7 @@ export class TagsService {
           this.apiService.getTags(offset, limit, filters.searchTerm),
           this.apiService.getTagsCount(filters.searchTerm),
         ]),
-      5 * TimeConstants.oneMinute,
+      5 * Constants.oneMinute(),
     );
   }
 

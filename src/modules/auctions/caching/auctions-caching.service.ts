@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { PriceRange } from 'src/db/auctions/price-range';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -64,7 +64,7 @@ export class AuctionsCachingService {
     return this.redisCacheService.getOrSet(
       this.getAuctionsCacheKey(queryRequest),
       () => getAuctions(),
-      30 * TimeConstants.oneSecond,
+      30 * Constants.oneSecond(),
     );
   }
 
@@ -75,7 +75,7 @@ export class AuctionsCachingService {
     return this.redisCacheService.getOrSet(
       generateCacheKeyFromParams('minMaxPrice', token),
       () => getData(),
-      5 * TimeConstants.oneMinute,
+      5 * Constants.oneMinute(),
     );
   }
 
@@ -88,7 +88,7 @@ export class AuctionsCachingService {
     return this.redisCacheService.getOrSet(
       this.getClaimableAuctionsCacheKey(key, limit, offset),
       () => getData(),
-      30 * TimeConstants.oneSecond,
+      30 * Constants.oneSecond(),
     );
   }
 

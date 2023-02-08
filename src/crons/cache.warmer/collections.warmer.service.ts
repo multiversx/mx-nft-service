@@ -4,8 +4,8 @@ import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
 import { cacheConfig } from 'src/config';
-import { CachingService, Locker } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+
 import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 
 const EVERY_15_MINUTES = '0 */15 * * * *';
@@ -28,7 +28,7 @@ export class CollectionsWarmerService {
         await this.invalidateKey(
           CacheInfo.AllCollections.key,
           tokens,
-          TimeConstants.oneHour,
+          CacheInfo.AllCollections.ttl,
         );
       },
       true,

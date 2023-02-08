@@ -3,8 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { cacheConfig } from 'src/config';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService, Locker } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 
@@ -34,7 +34,7 @@ export class AuctionsWarmerService {
           await this.invalidateKey(
             `collectionAuctions:${collection}`,
             auctionResult,
-            10 * TimeConstants.oneMinute,
+            10 * Constants.oneMinute(),
           );
         }
       },
@@ -59,7 +59,7 @@ export class AuctionsWarmerService {
           await this.invalidateKey(
             `paymentTokenAuctions:${paymentToken.identifier}`,
             auctionResult,
-            10 * TimeConstants.oneMinute,
+            10 * Constants.oneMinute(),
           );
         }
       },

@@ -8,7 +8,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
@@ -17,6 +17,7 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
+  Constants,
   ElasticQuery,
   ElasticSortOrder,
   QueryConditionOptions,
@@ -224,7 +225,7 @@ export class AssetsGetterService {
       return this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getAllAssets(query, countQuery),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {

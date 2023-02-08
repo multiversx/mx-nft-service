@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
-import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class AccountsStatsCachingService {
@@ -15,7 +14,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getStatsCacheKey(address),
       () => getAccountStats(),
-      5 * TimeConstants.oneMinute,
+      5 * Constants.oneMinute(),
     );
   }
 
@@ -26,7 +25,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getBiddingBalanceCacheKey(key),
       () => getBiddingBalanceStats(),
-      5 * TimeConstants.oneMinute,
+      5 * Constants.oneMinute(),
     );
   }
 
@@ -37,7 +36,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getStatsCacheKey(`owner_${address}`),
       () => getAccountStats(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
   }
 
@@ -48,7 +47,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getClaimableCacheKey(address),
       () => getClaimableCount(),
-      5 * TimeConstants.oneSecond,
+      5 * Constants.oneSecond(),
     );
   }
 
@@ -59,7 +58,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getLikesCacheKey(address),
       () => getLikesCount(),
-      5 * TimeConstants.oneSecond,
+      5 * Constants.oneSecond(),
     );
   }
 
@@ -70,7 +69,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       this.getCollectedCacheKey(address),
       () => getCollectedCount(),
-      5 * TimeConstants.oneSecond,
+      5 * Constants.oneSecond(),
     );
   }
 
@@ -81,7 +80,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       generateCacheKeyFromParams('account_collections', address),
       () => getCollectionsCount(),
-      5 * TimeConstants.oneSecond,
+      5 * Constants.oneSecond(),
     );
   }
 
@@ -92,7 +91,7 @@ export class AccountsStatsCachingService {
     return this.redisCacheService.getOrSet(
       generateCacheKeyFromParams('account_creations', address),
       () => getCreationsCount(),
-      5 * TimeConstants.oneSecond,
+      5 * Constants.oneSecond(),
     );
   }
 

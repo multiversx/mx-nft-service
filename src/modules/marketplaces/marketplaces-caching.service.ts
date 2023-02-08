@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { TimeConstants } from 'src/utils/time-utils';
 import { Marketplace } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
@@ -17,7 +16,7 @@ export class MarketplacesCachingService {
     return await this.cacheService.getOrSetCache(
       CacheInfo.AllMarketplaces.key,
       () => getMarketplaces(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
   }
 
@@ -28,7 +27,7 @@ export class MarketplacesCachingService {
     return await this.cacheService.getOrSetCache(
       generateCacheKeyFromParams('marketplace_address_collection', key),
       () => getMarketplaceByAddress(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
   }
 
@@ -39,7 +38,7 @@ export class MarketplacesCachingService {
     return await this.cacheService.getOrSetCache(
       generateCacheKeyFromParams('marketplace_collection', key),
       () => getMarketplaceByCollection(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
   }
 
@@ -50,7 +49,7 @@ export class MarketplacesCachingService {
     return await this.cacheService.getOrSetCache(
       generateCacheKeyFromParams('collections_by_marketplace', key),
       () => getCollectionsByMarketplace(),
-      30 * TimeConstants.oneMinute,
+      30 * Constants.oneMinute(),
     );
   }
 

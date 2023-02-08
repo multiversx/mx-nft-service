@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
@@ -53,7 +53,7 @@ export class AssetScamInfoRedisHandler extends RedisKeyValueDataloaderHandler<st
         await this.redisCacheService.setMany(
           cacheKeys,
           val.values,
-          5 * TimeConstants.oneMinute,
+          5 * Constants.oneMinute(),
         );
       }
       return returnValues;

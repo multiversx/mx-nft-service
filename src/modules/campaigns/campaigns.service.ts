@@ -6,8 +6,7 @@ import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
 import { cacheConfig } from 'src/config';
-import { CachingService } from '@multiversx/sdk-nestjs';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -68,7 +67,7 @@ export class CampaignsService {
     const campaigns = await this.cacheService.getOrSetCache(
       CacheInfo.Campaigns.key,
       () => this.getCampaignsFromDb(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
     return campaigns;
   }
@@ -124,9 +123,9 @@ export class CampaignsService {
     await this.cacheService.setCache(
       CacheInfo.Campaigns.key,
       campaigns,
-      TimeConstants.oneDay,
+      Constants.oneDay(),
     );
-    await this.refreshCacheKey(CacheInfo.Campaigns.key, TimeConstants.oneDay);
+    await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
   }
 
   private async refreshCacheKey(key: string, ttl: number) {

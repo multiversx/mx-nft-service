@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { MxApiService, MxToolsService } from 'src/common';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { TimeConstants } from 'src/utils/time-utils';
-import { cacheConfig, mxConfig } from 'src/config';
+import { mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { DateUtils } from 'src/utils/date-utils';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class UsdPriceService {
@@ -110,7 +109,7 @@ export class UsdPriceService {
           egldPriceUsd,
         ),
       DateUtils.isTimestampToday(timestamp)
-        ? TimeConstants.oneDay
+        ? Constants.oneDay()
         : CacheInfo.TokenHistoricalPrice.ttl,
     );
   }
@@ -177,7 +176,7 @@ export class UsdPriceService {
       cacheKey,
       async () => await this.mxToolsService.getEgldHistoricalPrice(isoDateOnly),
       DateUtils.isTimestampToday(timestamp)
-        ? TimeConstants.oneDay
+        ? Constants.oneDay()
         : CacheInfo.TokenHistoricalPrice.ttl,
     );
   }

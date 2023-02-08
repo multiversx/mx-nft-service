@@ -1,181 +1,181 @@
-import { TimeConstants } from 'src/utils/time-utils';
+import { Constants } from '@multiversx/sdk-nestjs';
 
 export class CacheInfo {
   key: string = '';
-  ttl: number = TimeConstants.oneSecond * 6;
+  ttl: number = Constants.oneSecond() * 6;
 
   static AllCollections: CacheInfo = {
     key: 'allCollections',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static TrendingByVolume: CacheInfo = {
     key: 'trendingByVolume',
-    ttl: TimeConstants.oneWeek,
+    ttl: Constants.oneWeek(),
   };
 
   static CollectionsMostActive: CacheInfo = {
     key: 'collectionsMostActive',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static FeaturedCollections: CacheInfo = {
     key: 'featuredCollections',
-    ttl: TimeConstants.oneWeek,
+    ttl: Constants.oneWeek(),
   };
 
   static FeaturedNfts: CacheInfo = {
     key: 'featuredNfts',
-    ttl: TimeConstants.oneWeek,
+    ttl: Constants.oneWeek(),
   };
 
   static BlacklistedCollections: CacheInfo = {
     key: 'blacklistedCollections',
-    ttl: TimeConstants.oneWeek,
+    ttl: Constants.oneWeek(),
   };
 
   static NftsCount: CacheInfo = {
     key: 'nftsCount',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static CollectionsMostFollowed: CacheInfo = {
     key: 'collectionsMostFollowed',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static AllMarketplaces: CacheInfo = {
     key: 'allMarketplaces',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static AuctionsEndingToday: CacheInfo = {
     key: 'auctionsEndingToday',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static ActiveAuctions: CacheInfo = {
     key: 'activeAuctions',
-    ttl: TimeConstants.oneMinute * 10,
+    ttl: Constants.oneMinute() * 10,
   };
 
   static BuyNowAuctions: CacheInfo = {
     key: 'buyNowAuctions',
-    ttl: TimeConstants.oneMinute * 10,
+    ttl: Constants.oneMinute() * 10,
   };
 
   static TopAuctionsOrderByNoBids: CacheInfo = {
     key: 'auctionsOrderByNoBids',
-    ttl: TimeConstants.oneMinute * 10,
+    ttl: Constants.oneMinute() * 10,
   };
 
   static TrendingCollections: CacheInfo = {
     key: 'trendingCollections',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static ActiveCollectionLast30Days: CacheInfo = {
     key: 'activeCollectionLast30Days',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static AuctionsEndingInAMonth: CacheInfo = {
     key: 'auctionsEndingInAMonth',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static MarketplaceAuctions: CacheInfo = {
     key: 'marketplaceAuctions',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static Campaigns: CacheInfo = {
     key: 'allCampaigns',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static AuctionTags: CacheInfo = {
     key: 'auctionTags',
-    ttl: 5 * TimeConstants.oneHour,
+    ttl: 5 * Constants.oneHour(),
   };
 
   static Artist: CacheInfo = {
     key: 'artist',
-    ttl: 12 * TimeConstants.oneHour,
+    ttl: 12 * Constants.oneHour(),
   };
 
   static Account: CacheInfo = {
     key: 'account',
-    ttl: TimeConstants.oneMinute,
+    ttl: Constants.oneMinute(),
   };
 
   static XoxnoScCount: CacheInfo = {
     key: 'xoxno_sc_count',
-    ttl: 12 * TimeConstants.oneHour,
+    ttl: 12 * Constants.oneHour(),
   };
 
   static NftTags: CacheInfo = {
     key: 'nftTags',
-    ttl: 5 * TimeConstants.oneMinute,
+    ttl: 5 * Constants.oneMinute(),
   };
 
   static AllDexTokens: CacheInfo = {
     key: 'allDexTokens',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: 10 * Constants.oneMinute(),
   };
 
   static AllApiTokens: CacheInfo = {
     key: 'allApiTokens',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: 10 * Constants.oneMinute(),
   };
 
   static AllTokens: CacheInfo = {
     key: 'allTokens',
-    ttl: TimeConstants.oneMinute,
+    ttl: Constants.oneMinute(),
   };
 
   static EgldToken: CacheInfo = {
     key: 'egldToken',
-    ttl: 10 * TimeConstants.oneMinute,
+    ttl: 10 * Constants.oneMinute(),
   };
 
   static TokenHistoricalPrice: CacheInfo = {
     key: 'tokenHistoricalPrice',
-    ttl: 30 * TimeConstants.oneDay,
+    ttl: 30 * Constants.oneDay(),
   };
 
   static CurrentPaymentTokens: CacheInfo = {
     key: 'currentPaymentTokens',
-    ttl: 30 * TimeConstants.oneMinute,
+    ttl: 30 * Constants.oneMinute(),
   };
 
   static MostLikedAssets: CacheInfo = {
     key: 'mostLikedAssets',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static AssetHistory: CacheInfo = {
     key: 'assetHistory',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static CollectionTypes: CacheInfo = {
     key: 'collectionType',
-    ttl: TimeConstants.oneHour,
+    ttl: Constants.oneHour(),
   };
 
   static CollectionAssets: CacheInfo = {
     key: 'collectionAssets',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static CollectionNfts: CacheInfo = {
     key: 'collectionNfts',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 
   static NftScamInfo: CacheInfo = {
     key: 'nftScamInfo',
-    ttl: TimeConstants.oneDay,
+    ttl: Constants.oneDay(),
   };
 }

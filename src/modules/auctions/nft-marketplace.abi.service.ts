@@ -26,7 +26,6 @@ import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
-import { TimeConstants } from 'src/utils/time-utils';
 import {
   BidRequest,
   BuySftRequest,
@@ -42,7 +41,7 @@ import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftMarketplaceAbiService {
@@ -430,7 +429,7 @@ export class NftMarketplaceAbiService {
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getCutPercentageMap(contractAddress),
-        TimeConstants.oneWeek,
+        Constants.oneWeek(),
       );
     } catch (err) {
       this.logger.error(
@@ -448,7 +447,7 @@ export class NftMarketplaceAbiService {
       return await this.redisCacheService.getOrSet(
         generateCacheKeyFromParams('isPaused', contractAddress),
         () => this.getIsPausedAbi(contractAddress),
-        TimeConstants.oneWeek,
+        Constants.oneWeek(),
       );
     } catch (err) {
       this.logger.error(
