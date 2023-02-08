@@ -26,6 +26,7 @@ export abstract class RedisValueDataloaderHandler<T> {
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {
+    if (!keys || keys.length === 0) return;
     const cacheKeys = this.getCacheKeys(keys);
     let [redisKeys, values] = [cacheKeys, []];
     const getDataFromRedis = await this.redisCacheService.getMany(cacheKeys);

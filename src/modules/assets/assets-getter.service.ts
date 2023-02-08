@@ -414,10 +414,11 @@ export class AssetsGetterService {
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
       const assetsRarity = this.getAssetsWithRarity(response);
-      await this.assetRarityLoader.batchRarity(
-        assetsRarity?.map((a) => a.identifier),
-        assetsRarity?.groupBy((asset) => asset.identifier),
-      );
+      if (assetsRarity?.length > 0)
+        await this.assetRarityLoader.batchRarity(
+          assetsRarity?.map((a) => a.identifier),
+          assetsRarity?.groupBy((asset) => asset.identifier),
+        );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
 
       if (assetsWithScamInfo?.length > 0)

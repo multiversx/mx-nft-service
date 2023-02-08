@@ -18,6 +18,8 @@ export abstract class BaseCollectionsAssetsRedisHandler {
   protected abstract getData(keys: string[]): any;
 
   async batchLoad(keys: string[]) {
+
+    if(!keys || keys.length===0) return
     const cacheKeys = this.getCacheKeys(keys);
     const getDataFromRedis: { key: string; value: any }[] =
       await this.redisCacheService.getMany(cacheKeys);
