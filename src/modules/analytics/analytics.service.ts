@@ -115,7 +115,7 @@ export class AnalyticsService {
         tokens: collection.tokens,
       });
     }
-    return trending.sortedDescending((x) => parseFloat(x.volume));
+    return trending.sortedDescending([(x) => parseFloat(x.volume)]);
   }
 
   private async getParsedEvents(
@@ -175,8 +175,8 @@ export class AnalyticsService {
           .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
           .map((group: { key: any; values: any[] }) => ({
             paymentToken: group.key,
-            sum: group.values.sumBigNumber(
-              (x: { value: BigNumber.Value }) => new BigNumber(x.value),
+            sum: group.values.sumBigInt(
+              (x: { value:BigInt }) => BigInt(x.value.toString()),
             ),
           })),
       }));

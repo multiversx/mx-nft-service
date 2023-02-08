@@ -335,12 +335,12 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]], true);
         } else {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]]);
         }
       } else {
-        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+        allAuctions = allAuctions.sortedDescending([(x) => x[sort.field]]);
       }
     }
 
@@ -419,12 +419,12 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]], true);
         } else {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]]);
         }
       } else {
-        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+        allAuctions = allAuctions.sortedDescending([(x) => x[sort.field]]);
       }
     }
 
@@ -470,9 +470,9 @@ export class AuctionsGetterService {
       }
       if (currentPriceSort) {
         if (currentPriceSort.direction === Sort.ASC) {
-          allAuctions = allAuctions.sorted((x) => x['startBid']);
+          allAuctions = allAuctions.sorted([(x) => x['startBid']]);
         } else {
-          allAuctions = allAuctions.sortedDescending((x) => x['startBid']);
+          allAuctions = allAuctions.sortedDescending([(x) => x['startBid']]);
         }
       }
     }
@@ -494,12 +494,12 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]]);
         } else {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]]);
         }
       } else {
-        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+        allAuctions = allAuctions.sortedDescending([(x) => x[sort.field]]);
       }
     }
 
@@ -527,12 +527,12 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]], true);
         } else {
-          allAuctions = allAuctions.sorted((x) => x[sort.field]);
+          allAuctions = allAuctions.sorted([(x) => x[sort.field]]);
         }
       } else {
-        allAuctions = allAuctions.sortedDescending((x) => x[sort.field]);
+        allAuctions = allAuctions.sortedDescending([(x) => x[sort.field]]);
       }
     }
 
