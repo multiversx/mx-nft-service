@@ -13,7 +13,7 @@ import {
   SearchItemResponse,
   SearchNftCollectionResponse,
 } from '../models/SearchItemResponse';
-import { CollectionsModuleGraph } from 'src/modules/nftCollections/collections.module';
+import { SearchModuleGraph } from '../search.module';
 
 describe.skip('SearchService', () => {
   let service: SearchService;
@@ -46,7 +46,7 @@ describe.skip('SearchService', () => {
         WinstonModule.forRoot({
           transports: logTransports,
         }),
-        CollectionsModuleGraph,
+        SearchModuleGraph,
       ],
     }).compile();
 
