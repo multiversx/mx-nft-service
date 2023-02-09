@@ -60,10 +60,10 @@ export class NftEventsService {
 
         case NftEventEnum.ESDTNFTBurn:
           const burnEvent = new BurnEvent(event);
-          const burnTopics = transferEvent.getTopics();
+          const burnTopics = burnEvent.getTopics();
           await new Promise((resolve) => setTimeout(resolve, 500));
           await this.triggerCacheInvalidation(
-            `${transferTopics.collection}-${transferTopics.nonce}`,
+            `${burnTopics.collection}-${burnTopics.nonce}`,
             CacheEventTypeEnum.AssetRefresh,
           );
           break;
