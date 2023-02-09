@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
 import { CachingService, Locker } from '@multiversx/sdk-nestjs';
@@ -37,7 +36,6 @@ export class LikesWarmerService {
 
   private async refreshCacheKey(key: string, ttl: number) {
     await this.clientProxy.emit<{
-      redisClient: Redis.Redis;
       key: string;
       ttl: number;
     }>('refreshCacheKey', {

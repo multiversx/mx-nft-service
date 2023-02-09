@@ -81,9 +81,6 @@ export class CachingController {
       new ChangedEvent({
         id: input.keys,
         type: CacheEventTypeEnum.DeleteCacheKeys,
-        extraInfo: {
-          redisClientName: input.redisClientName,
-        },
       }),
     );
   }
@@ -94,7 +91,6 @@ export class CachingController {
         id: input.key,
         type: CacheEventTypeEnum.SetCacheKey,
         extraInfo: {
-          redisClientName: input.redisClientName,
           value: input.value,
           ttl: input.ttl.toString(),
         },

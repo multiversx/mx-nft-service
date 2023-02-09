@@ -1,6 +1,5 @@
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import * as Redis from 'ioredis';
 import { MxApiService } from 'src/common';
 import { AssetsQuery } from '../assets/assets-query';
 import { RedisValue } from '../common/redis-value.dto';
@@ -8,7 +7,6 @@ import { BaseCollectionsAssetsRedisHandler } from './base-collection-assets.redi
 
 @Injectable()
 export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedisHandler {
-  protected redisClient: Redis.Redis;
   protected redisCacheService: RedisCacheService;
   constructor(
     redisCacheService: RedisCacheService,

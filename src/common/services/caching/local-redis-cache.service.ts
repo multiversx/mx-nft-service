@@ -1,7 +1,6 @@
 import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-export const REDIS_CLIENT_TOKEN = 'REDIS_CLIENT_TOKEN';
 @Injectable()
 export class LocalRedisCacheService {
   constructor(
