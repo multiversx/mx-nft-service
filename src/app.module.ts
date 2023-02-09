@@ -52,10 +52,10 @@ import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
       sortSchema: true,
       plugins: [new ComplexityPlugin()],
       formatError: (error: GraphQLError) => {
+        console.log(error);
         const graphQLFormattedError: GraphQLFormattedError = {
           ...error,
-          message:
-            error.extensions?.exception?.response?.message || error.message,
+          message: error.message,
         };
         console.error(graphQLFormattedError);
 
