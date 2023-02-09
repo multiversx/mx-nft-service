@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { cacheConfig } from 'src/config';
 import { ClientProxy } from '@nestjs/microservices';
 import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
 
@@ -130,7 +129,6 @@ export class AuctionsWarmerService {
     await this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
-      redisClientName: cacheConfig.auctionsRedisClientName,
     });
   }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import { Asset, NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
@@ -204,7 +203,7 @@ export class ElasticUpdatesEventsService {
   }
 
   private getRarityQueueCacheKey() {
-    return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+    return generateCacheKeyFromParams('rarityQueue');
   }
 
   async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
@@ -217,7 +216,7 @@ export class ElasticUpdatesEventsService {
   }
 
   private getTraitsQueueCacheKey() {
-    return generateCacheKeyFromParams(cacheConfig.traitsQueueClientName);
+    return generateCacheKeyFromParams('traitsQueue');
   }
 
   private convertToMatchingEventType(

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
@@ -15,7 +14,6 @@ import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
   getCollectionsWithTraitSummaryFromElasticQuery,
 } from 'src/modules/nft-traits/nft-traits.elastic.queries';
-import { NftTraitsElasticService } from 'src/modules/nft-traits/nft-traits.elastic.service';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -23,7 +21,6 @@ export class TraitsUpdaterService {
     private readonly nftTraitsService: NftTraitsService,
     private readonly redisCacheService: RedisCacheService,
     private readonly elasticService: MxElasticService,
-    private readonly nftTraitsElasticService: NftTraitsElasticService,
     private readonly logger: Logger,
   ) {}
 
@@ -214,7 +211,7 @@ export class TraitsUpdaterService {
   }
 
   private getTraitsQueueCacheKey() {
-    return generateCacheKeyFromParams(cacheConfig.traitsQueueClientName);
+    return generateCacheKeyFromParams('traitsQueue');
   }
 
   private getTraitsValidatorCounterCacheKey() {

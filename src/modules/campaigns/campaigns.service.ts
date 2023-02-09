@@ -5,7 +5,6 @@ import { CampaignEntity } from 'src/db/campaigns';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
-import { cacheConfig } from 'src/config';
 import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
@@ -132,7 +131,6 @@ export class CampaignsService {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
-      redisClientName: cacheConfig.persistentRedisClientName,
     });
   }
 

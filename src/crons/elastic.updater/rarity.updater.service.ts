@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
-import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
 import { Locker, RedisCacheService } from '@multiversx/sdk-nestjs';
@@ -141,6 +140,6 @@ export class RarityUpdaterService {
   }
 
   private getRarityQueueCacheKey() {
-    return generateCacheKeyFromParams(cacheConfig.rarityQueueClientName);
+    return generateCacheKeyFromParams('rarityQueue');
   }
 }

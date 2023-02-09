@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { cacheConfig } from 'src/config';
 import { AnalyticsService } from 'src/modules/analytics/analytics.service';
 import { CachingService, Locker } from '@multiversx/sdk-nestjs';
 
@@ -43,7 +42,6 @@ export class TrendingCollectionsWarmerService {
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.collectionsRedisClientName,
       key,
       ttl,
     });

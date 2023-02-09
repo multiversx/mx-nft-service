@@ -8,8 +8,6 @@ import BigNumber from 'bignumber.js';
 import { BuyEventParser } from './buy-event.parser';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { computeUsd } from 'src/utils/helpers';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 import { CollectionVolumeLast24 } from './collection-volume';
@@ -19,7 +17,6 @@ import { CachingService } from '@multiversx/sdk-nestjs';
 export class AnalyticsService {
   private filterAddresses: string[];
   private data: any[] = [];
-  private redisClient: Redis.Redis;
 
   constructor(
     private readonly indexerService: ElasticAnalyticsService,
@@ -115,7 +112,7 @@ export class AnalyticsService {
         tokens: collection.tokens,
       });
     }
-    return trending.sortedDescending([(x) => parseFloat(x.volume)]);
+    return trending.sortedDescending((x) => parseFloat(x.volume));
   }
 
   private async getParsedEvents(
@@ -175,8 +172,8 @@ export class AnalyticsService {
           .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
           .map((group: { key: any; values: any[] }) => ({
             paymentToken: group.key,
-            sum: group.values.sumBigInt(
-              (x: { value:BigInt }) => BigInt(x.value.toString()),
+            sum: group.values.sumBigInt((x: { value: BigInt }) =>
+              BigInt(x.value.toString()),
             ),
           })),
       }));

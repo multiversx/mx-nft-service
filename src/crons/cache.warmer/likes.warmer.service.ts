@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { cacheConfig } from 'src/config';
 import { CachingService, Locker } from '@multiversx/sdk-nestjs';
 import { AssetsLikesService } from 'src/modules/assets';
 
@@ -42,7 +41,6 @@ export class LikesWarmerService {
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.persistentRedisClientName,
       key,
       ttl,
     });

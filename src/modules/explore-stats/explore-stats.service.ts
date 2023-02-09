@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { cacheConfig } from 'src/config';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
   ExploreCollectionsStats,

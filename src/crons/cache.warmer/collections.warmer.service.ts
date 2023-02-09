@@ -3,8 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { cacheConfig } from 'src/config';
-import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+import { CachingService, Locker } from '@multiversx/sdk-nestjs';
 
 import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 
@@ -114,7 +113,6 @@ export class CollectionsWarmerService {
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.collectionsRedisClientName,
       key,
       ttl,
     });

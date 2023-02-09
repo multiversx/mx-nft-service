@@ -8,7 +8,7 @@ import {
 } from '@multiversx/sdk-core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MxApiService, getSmartContract } from 'src/common';
-import { cacheConfig, mxConfig, gas } from 'src/config';
+import { mxConfig, gas } from 'src/config';
 import {
   getCollectionAndNonceFromIdentifier,
   timestampToEpochAndRound,
