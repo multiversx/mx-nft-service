@@ -18,9 +18,7 @@ export class PubSubListenerController {
   }
 
   @EventPattern('refreshCacheKey')
-  async refreshCacheKey(
-    @Payload() event: { redisClientName: string; key: string; ttl: number },
-  ) {
+  async refreshCacheKey(@Payload() event: { key: string; ttl: number }) {
     this.logger.log(
       `Refreshing local cache key ${event.key} with ttl ${event.ttl}`,
     );
