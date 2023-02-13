@@ -1,5 +1,9 @@
-import { ConnectionOptions } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { MysqlConnectionCredentialsOptions } from 'typeorm/driver/mysql/MysqlConnectionCredentialsOptions';
+import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
+
+dotenvExpand.expand(dotenv.config());
 
 const db: MysqlConnectionCredentialsOptions = {
   host: process.env.DB_HOST,
@@ -12,11 +16,16 @@ const db: MysqlConnectionCredentialsOptions = {
 const dbSlaves = process.env.DB_SLAVES
   ? JSON.parse(process.env.DB_SLAVES)
   : [db];
-
-const config: ConnectionOptions = {
+const connectionSource = new DataSource({
+  migrationsTableName: 'migrations',
   type: 'mysql',
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  logging: process.env.DB_LOGGING,
   synchronize: false,
-  dropSchema: false,
   replication: {
     master: db,
     slaves: dbSlaves,
@@ -32,6 +41,6 @@ const config: ConnectionOptions = {
       rejectUnauthorized: false,
     },
   },
-};
+} as DataSourceOptions);
 
-export = config;
+export default connectionSource;
