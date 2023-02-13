@@ -19,6 +19,11 @@ export class DynamicModuleUtils {
   }
 
   static getRedisModule(): DynamicModule {
+    console.log(
+      1111111111,
+      process.env.REDIS_URL,
+      parseInt(process.env.REDIS_PORT),
+    );
     return RedisCacheModule.forRoot(
       new RedisCacheModuleOptions({
         host: process.env.REDIS_URL,
