@@ -4,7 +4,7 @@ import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs';
 import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class AssetByIdentifierService {
   constructor(
     private apiService: MxApiService,
     private readonly logger: Logger,
-    private localRedisCacheService: LocalRedisCacheService, // private localRedisCacheService: RedisCacheService,
+    private localRedisCacheService: LocalRedisCacheService,
   ) {}
 
   public async getAsset(identifier: string): Promise<Asset> {
