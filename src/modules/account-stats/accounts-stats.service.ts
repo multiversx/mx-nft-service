@@ -245,7 +245,7 @@ export class AccountsStatsService {
     try {
       const key = marketplaceKey ? `${address}_${marketplaceKey}` : address;
       return this.accountStatsCachingService.getStatsForOwner(key, () =>
-        this.persistenceService.getOnwerAccountStats(address, marketplaceKey),
+        this.persistenceService.getOwnerAccountStats(address, marketplaceKey),
       );
     } catch (err) {
       this.logger.error(

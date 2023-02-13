@@ -143,9 +143,6 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
   @ResolveField('scamInfo', () => ScamInfo)
   async scamInfo(@Parent() asset: Asset) {
-    if (asset.scamInfo) {
-      return asset.scamInfo;
-    }
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;

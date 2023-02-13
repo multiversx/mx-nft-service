@@ -52,7 +52,7 @@ export class JwtAuthenticateGuard implements CanActivate {
         });
       });
     } catch (error) {
-      this.logger.error(error);
+      this.logger.warn(error);
       return false;
     }
 

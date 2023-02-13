@@ -181,13 +181,13 @@ export class PersistenceService {
     );
   }
 
-  async getOnwerAccountStats(
+  async getOwnerAccountStats(
     address: string,
     marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {
     return await this.execute(
-      this.getOnwerAccountStats.name,
-      this.accountStatsRepository.getOnwerAccountStats(address, marketplaceKey),
+      this.getOwnerAccountStats.name,
+      this.accountStatsRepository.getOwnerAccountStats(address, marketplaceKey),
     );
   }
 
