@@ -147,6 +147,7 @@ async function startPublicApp() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      forbidUnknownValues: false,
     }),
   );
 

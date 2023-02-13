@@ -139,6 +139,11 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   identifier: string;
 
+  @IsOptional()
+  @Matches(RegExp(NFT_IDENTIFIER_RGX), {
+    message: NFT_IDENTIFIER_ERROR,
+    each: true,
+  })
   @Field(() => [String], { nullable: true })
   identifiers: string[];
 
@@ -149,12 +154,18 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   collection: string;
 
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+    each: true,
+  })
   @Field(() => [String], {
     nullable: true,
     description: 'This will work only with an owner address',
   })
   collections: string[];
 
+  @IsOptional()
   @Field(() => [String], { nullable: true })
   tags: [string];
 
@@ -163,6 +174,7 @@ export class AssetsFilter {
   @Field(() => String, { nullable: true })
   likedByAddress: string;
 
+  @IsOptional()
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
   constructor(init?: Partial<AssetsFilter>) {
