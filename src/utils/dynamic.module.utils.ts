@@ -4,32 +4,54 @@ import {
   RedisCacheModule,
   RedisCacheModuleOptions,
 } from '@multiversx/sdk-nestjs';
-import { DynamicModule } from '@nestjs/common';
+import { DynamicModule, Provider } from '@nestjs/common';
+import {
+  ClientOptions,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
+import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 
 export class DynamicModuleUtils {
   static getCachingModule(): DynamicModule {
     return CachingModule.forRootAsync({
-      useFactory: () =>
+      useFactory: (apiConfigService: ApiConfigService) =>
         new CachingModuleOptions({
-          url: process.env.REDIS_URL,
-          port: parseInt(process.env.REDIS_PORT),
-          password: process.env.REDIS_PASSWORD,
+          url: apiConfigService.getRedisUrl(),
+          port: apiConfigService.getRedisPort(),
         }),
+      inject: [ApiConfigService],
+    });
+  }
+  static getRedisModule(): DynamicModule {
+    return RedisCacheModule.forRootAsync({
+      useFactory: (apiConfigService: ApiConfigService) =>
+        new RedisCacheModuleOptions({
+          host: apiConfigService.getRedisUrl(),
+          port: apiConfigService.getRedisPort(),
+        }),
+      inject: [ApiConfigService],
     });
   }
 
-  static getRedisModule(): DynamicModule {
-    console.log(
-      1111111111,
-      process.env.REDIS_URL,
-      parseInt(process.env.REDIS_PORT),
-    );
-    return RedisCacheModule.forRoot(
-      new RedisCacheModuleOptions({
-        host: process.env.REDIS_URL,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-      }),
-    );
+  static getPubSubService(): Provider {
+    return {
+      provide: 'PUBSUB_SERVICE',
+      useFactory: (apiConfigService: ApiConfigService) => {
+        const clientOptions: ClientOptions = {
+          transport: Transport.REDIS,
+          options: {
+            host: apiConfigService.getRedisUrl(),
+            port: apiConfigService.getRedisPort(),
+            retryDelay: 1000,
+            retryAttempts: 10,
+            retryStrategy: () => 1000,
+          },
+        };
+
+        return ClientProxyFactory.create(clientOptions);
+      },
+      inject: [ApiConfigService],
+    };
   }
 }

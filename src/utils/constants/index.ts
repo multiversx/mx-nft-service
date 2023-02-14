@@ -1,4 +1,3 @@
-export const REDIS_URL = `redis://root:${process.env.REDIS_PASSWORD}@${process.env.REDIS_URL}:${process.env.REDIS_PORT}`;
 export const NFT_IDENTIFIER_RGX = '^[A-Z0-9]{3,10}-[a-f0-9]{6}-[a-f0-9]{2,}$';
 export const NFT_IDENTIFIER_ERROR = 'You should provide a valid nft identifier';
 export const COLLECTION_IDENTIFIER_RGX = '^[A-Z0-9]{3,10}-[a-f0-9]{6}$';

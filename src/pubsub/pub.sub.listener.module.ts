@@ -1,32 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
-import {
-  ClientOptions,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
 import { CacheModule } from 'src/common/services/caching/caching.module';
+import { ApiConfigModule } from 'src/modules/common/api-config/api.config.module';
+import { DynamicModuleUtils } from 'src/utils/dynamic.module.utils';
 import { PubSubListenerController } from './pub.sub.listener.controller';
 
 @Module({
-  imports: [forwardRef(() => CacheModule)],
+  imports: [forwardRef(() => CacheModule), ApiConfigModule],
   controllers: [PubSubListenerController],
-  providers: [
-    {
-      provide: 'PUBSUB_SERVICE',
-      useFactory: () => {
-        const clientOptions: ClientOptions = {
-          transport: Transport.REDIS,
-          options: {
-            url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
-            retryDelay: 1000,
-            retryAttempts: 10,
-          },
-        };
-
-        return ClientProxyFactory.create(clientOptions);
-      },
-    },
-  ],
+  providers: [DynamicModuleUtils.getPubSubService()],
   exports: ['PUBSUB_SERVICE'],
 })
 export class PubSubListenerModule {}

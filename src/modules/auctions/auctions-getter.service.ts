@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Auction } from './models';
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
-import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
@@ -27,7 +26,6 @@ import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 
 @Injectable()
 export class AuctionsGetterService {
-  private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,

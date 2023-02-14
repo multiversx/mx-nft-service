@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { BlacklistedCollectionEntity } from 'src/db/blacklistedCollections';
@@ -7,8 +6,6 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class BlacklistedCollectionsCachingService {
-  private redisClient: Redis.Redis;
-
   constructor(private readonly redisCacheService: RedisCacheService) {}
 
   async getOrSetBlacklistedCollections(

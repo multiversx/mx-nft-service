@@ -17,9 +17,15 @@ import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
+import { ApiConfigModule } from './modules/common/api-config/api.config.module';
+import { ApiConfigService } from './modules/common/api-config/api.config.service';
+import { RedisClient } from 'redis';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
+
+  const apiConfigApp = await NestFactory.create(ApiConfigModule);
+  const apiConfigService = apiConfigApp.get<ApiConfigService>(ApiConfigService);
   if (process.env.ENABLE_PUBLIC_API === 'true') {
     await startPublicApp();
   }
@@ -79,20 +85,17 @@ async function bootstrap() {
     processorApp.useLogger(logger);
     await processorApp.listen(ports.scamInfo);
   }
-
   if (process.env.ENABLE_CACHE_INVALIDATION !== 'true') {
-    const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
-      PubSubListenerModule,
-      {
-        transport: Transport.REDIS,
-        options: {
-          url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
-          retryAttempts: 100,
-          retryDelay: 1000,
-          retry_strategy: function (_: any) {
-            return 1000;
-          },
-        },
+  const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+    PubSubListenerModule,
+    {
+      transport: Transport.REDIS,
+      options: {
+        host: apiConfigService.getRedisUrl(),
+        port: apiConfigService.getRedisPort(),
+        retryAttempts: 100,
+        retryDelay: 1000,
+        retryStrategy: () => 1000,
       },
     );
     pubSubApp.listen();
@@ -133,6 +136,27 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+RedisClient.prototype.on_error = function (err: any) {
+  if (this.closing) {
+    return;
+  }
+
+  err.message =
+    'Redis connection to ' + this.address + ' failed - ' + err.message;
+  // debug(err.message);
+  this.connected = false;
+  this.ready = false;
+
+  // Only emit the error if the retry_strategy option is not set
+  if (!this.options.retry_strategy) {
+    // this.emit('error', err);
+  }
+  // 'error' events get turned into exceptions if they aren't listened for. If the user handled this error
+  // then we should try to reconnect.
+  this.connection_gone('error', err);
+};
+
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
