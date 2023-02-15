@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
 import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets-collection.redis-handler';
@@ -25,6 +25,7 @@ export class CacheEventsConsumer {
     private cacheInvalidationEventsService: CacheInvalidationEventsService,
     private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
+    private logger: Logger,
   ) {}
 
   @PublicRabbitConsumer({
@@ -34,6 +35,7 @@ export class CacheEventsConsumer {
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
+    this.logger.log({ event });
     switch (event.type) {
       case CacheEventTypeEnum.OwnerChanged:
         const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
