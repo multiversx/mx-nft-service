@@ -210,13 +210,9 @@ export class RedisCacheService {
     const cacheKey = generateCacheKeyFromParams(key);
     let profiler = new PerformanceProfiler();
     try {
-      const stream = client.scanStream({ match: `${cacheKey}*`, count: 100 });
-      let keys = [];
+      const stream = client.scanStream({ match: `${cacheKey}*`, count: 10 });
       stream.on('data', async function (resultKeys) {
-        for (var i = 0; i < resultKeys.length; i++) {
-          keys.push(resultKeys[i]);
-        }
-        const dels = keys.map((key) => ['del', key]);
+        const dels = resultKeys.map((key) => ['del', key]);
 
         const multi = client.multi(dels);
         await promisify(multi.exec).call(multi);
