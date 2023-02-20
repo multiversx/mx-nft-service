@@ -49,7 +49,7 @@ export class OrdersCachingService {
     await this.ordersRedisHandler.clearKeyByPattern(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
-    return this.redisCacheService.flushDb(this.redisClient);
+    // return this.redisCacheService.flushDb(this.redisClient);
   }
 
   private getOrdersCacheKey(request: QueryRequest) {
