@@ -68,20 +68,20 @@ export class CacheEventsConsumer {
         profilerAssets.stop('AssetsRefresh');
         break;
 
-      case CacheEventTypeEnum.AssetRefresh:
-        const profilerAssetRefresh = new CpuProfiler();
-        const { collection } = getCollectionAndNonceFromIdentifier(event.id);
-        await Promise.all([
-          this.assetsRedisHandler.clearKey(event.id),
-          this.assetScamInfoRedisHandler.clearKey(event.id),
-          this.collectionAssets.clearKey(collection),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(collection),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collection,
-          ),
-        ]);
-        profilerAssetRefresh.stop('AssetRefresh');
-        break;
+      // case CacheEventTypeEnum.AssetRefresh:
+      //   const profilerAssetRefresh = new CpuProfiler();
+      //   const { collection } = getCollectionAndNonceFromIdentifier(event.id);
+      //   await Promise.all([
+      //     this.assetsRedisHandler.clearKey(event.id),
+      //     this.assetScamInfoRedisHandler.clearKey(event.id),
+      //     this.collectionAssets.clearKey(collection),
+      //     this.collectionAssetsRedisHandler.clearKeyByPattern(collection),
+      //     this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+      //       collection,
+      //     ),
+      //   ]);
+      //   profilerAssetRefresh.stop('AssetRefresh');
+      //   break;
 
       case CacheEventTypeEnum.MarkCollection:
         const profilerMarkCollection = new CpuProfiler();
@@ -93,21 +93,21 @@ export class CacheEventsConsumer {
         profilerMarkCollection.stop('MarkCollection');
         break;
 
-      case CacheEventTypeEnum.Mint:
-        const profilerMint = new CpuProfiler();
-        await this.collectionAssets.clearKey(event.id);
-        await this.collectionAssetsCount.clearKey(event.id);
-        profilerMint.stop('Mint');
-        break;
+      // case CacheEventTypeEnum.Mint:
+      //   const profilerMint = new CpuProfiler();
+      //   await this.collectionAssets.clearKey(event.id);
+      //   await this.collectionAssetsCount.clearKey(event.id);
+      //   profilerMint.stop('Mint');
+      //   break;
 
-      case CacheEventTypeEnum.UpdateAuction:
-        const profilerUpdateAuction = new CpuProfiler();
-        await Promise.all([
-          this.cacheInvalidationEventsService.invalidateAuction(event),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
-        ]);
-        profilerUpdateAuction.stop('UpdateAuction');
-        break;
+      // case CacheEventTypeEnum.UpdateAuction:
+      //   const profilerUpdateAuction = new CpuProfiler();
+      //   await Promise.all([
+      //     this.cacheInvalidationEventsService.invalidateAuction(event),
+      //     this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
+      //   ]);
+      //   profilerUpdateAuction.stop('UpdateAuction');
+      //   break;
 
       case CacheEventTypeEnum.UpdateOrder:
         const profilerUpdateOrder = new CpuProfiler();
