@@ -22,7 +22,7 @@ export class CacheInvalidationEventsService {
     private assetsHistoryCachingService: AssetsHistoryCachingService,
     private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
     private blacklistedCollectionsCachingService: BlacklistedCollectionsCachingService,
-    private analyticsService: TrendingCollectionsWarmerService,
+    // private analyticsService: TrendingCollectionsWarmerService,
     private offersCachingService: OffersCachingService,
   ) {}
 
@@ -82,7 +82,7 @@ export class CacheInvalidationEventsService {
     this.offersCachingService.invalidateCache(payload.id, payload.address);
   }
 
-  async invalidateTrendingAuctions(payload: ChangedEvent) {
-    await this.analyticsService.handleTrendingCollections(payload.id);
-  }
+  // async invalidateTrendingAuctions(payload: ChangedEvent) {
+  //   await this.analyticsService.handleTrendingCollections(payload.id);
+  // }
 }

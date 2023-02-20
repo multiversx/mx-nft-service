@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { CacheWarmerModule } from 'src/crons/cache.warmer/cache.warmer.module';
 import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-history-caching.service';
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { IsAssetLikedRedisHandler } from 'src/modules/assets/loaders/asset-is-liked.redis-handler';
@@ -12,12 +11,7 @@ import { OrdersCachingModule } from 'src/modules/orders/caching/orders-caching.m
 import { CacheInvalidationEventsService } from './cache-invalidation-events.service';
 
 @Module({
-  imports: [
-    AuctionsCachingModule,
-    OrdersCachingModule,
-    OffersCachingModule,
-    CacheWarmerModule,
-  ],
+  imports: [AuctionsCachingModule, OrdersCachingModule, OffersCachingModule],
   providers: [
     CacheInvalidationEventsService,
     NotificationsCachingService,

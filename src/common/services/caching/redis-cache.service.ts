@@ -210,16 +210,21 @@ export class RedisCacheService {
     const cacheKey = generateCacheKeyFromParams(key);
     let profiler = new PerformanceProfiler();
     try {
-      const stream = client.scanStream({ match: `${cacheKey}*`, count: 100 });
-      let keys = [];
-      stream.on('data', async function (resultKeys) {
-        for (var i = 0; i < resultKeys.length; i++) {
-          keys.push(resultKeys[i]);
-        }
-        const dels = keys.map((key) => ['del', key]);
+      const stream = client.scanStream({ match: `${cacheKey}*`, count: 10 });
 
-        const multi = client.multi(dels);
-        await promisify(multi.exec).call(multi);
+      const dels = await new Promise((resolve, reject) => {
+        let delKeys = [];
+        stream.on('data', function (resultKeys) {
+          if (resultKeys.length) {
+            client.unlink(resultKeys);
+          }
+        });
+        stream.on('end', () => {
+          resolve(delKeys);
+        });
+        stream.on('error', (err) => {
+          reject(err);
+        });
       });
     } catch (err) {
       this.logger.error(
@@ -232,6 +237,9 @@ export class RedisCacheService {
       );
     } finally {
       profiler.stop();
+      this.logger.log(
+        `Profiler duration for delByPattern for key ${key} - ${profiler.duration}`,
+      );
       MetricsCollector.setRedisDuration('MDEL', profiler.duration);
     }
   }
