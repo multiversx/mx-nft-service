@@ -52,10 +52,12 @@ export class NftEventsService {
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
           await new Promise((resolve) => setTimeout(resolve, 500));
-          await this.triggerCacheInvalidation(
-            `${transferTopics.collection}-${transferTopics.nonce}`,
-            CacheEventTypeEnum.OwnerChanged,
-          );
+          if (transferTopics.nonce) {
+            await this.triggerCacheInvalidation(
+              `${transferTopics.collection}-${transferTopics.nonce}`,
+              CacheEventTypeEnum.OwnerChanged,
+            );
+          }
           break;
 
         case NftEventEnum.ESDTNFTBurn:
@@ -71,11 +73,12 @@ export class NftEventsService {
         case NftEventEnum.MultiESDTNFTTransfer:
           const multiTransferEvent = new TransferEvent(event);
           const multiTransferTopics = multiTransferEvent.getTopics();
-          this.triggerCacheInvalidation(
-            `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
-            CacheEventTypeEnum.OwnerChanged,
-          );
-
+          if (multiTransferTopics.nonce) {
+            this.triggerCacheInvalidation(
+              `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
+              CacheEventTypeEnum.OwnerChanged,
+            );
+          }
           break;
       }
     }
