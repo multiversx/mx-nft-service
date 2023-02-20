@@ -211,12 +211,23 @@ export class RedisCacheService {
     let profiler = new PerformanceProfiler();
     try {
       const stream = client.scanStream({ match: `${cacheKey}*`, count: 10 });
-      stream.on('data', async function (resultKeys) {
-        const dels = resultKeys.map((key) => ['del', key]);
 
-        const multi = client.multi(dels);
-        await promisify(multi.exec).call(multi);
-      });
+      const dels = await new Promise((resolve, reject) => {
+        let delKeys = [];
+        stream.on('data', function (resultKeys) {
+          delKeys.push(resultKeys.map((key) => ['del', key]));
+        });
+        stream.on('end', () => {
+          resolve(dels);
+        });
+        stream.on('error', (err) => {
+          reject(err);
+        })
+      })
+
+      const multi = client.multi(dels);
+      await promisify(multi.exec).call(multi);
+
     } catch (err) {
       this.logger.error(
         'An error occurred while trying to delete from redis cache by pattern.',
