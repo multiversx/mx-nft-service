@@ -73,7 +73,7 @@ export class NftEventsService {
         case NftEventEnum.MultiESDTNFTTransfer:
           const multiTransferEvent = new TransferEvent(event);
           const multiTransferTopics = multiTransferEvent.getTopics();
-          if (transferTopics.nonce) {
+          if (multiTransferTopics.nonce) {
             this.triggerCacheInvalidation(
               `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
