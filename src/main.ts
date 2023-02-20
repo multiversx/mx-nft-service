@@ -80,21 +80,23 @@ async function bootstrap() {
     await processorApp.listen(ports.scamInfo);
   }
 
-  const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
-    PubSubListenerModule,
-    {
-      transport: Transport.REDIS,
-      options: {
-        url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
-        retryAttempts: 100,
-        retryDelay: 1000,
-        retry_strategy: function (_: any) {
-          return 1000;
+  if (process.env.ENABLE_CACHE_INVALIDATION !== 'true') {
+    const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+      PubSubListenerModule,
+      {
+        transport: Transport.REDIS,
+        options: {
+          url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
+          retryAttempts: 100,
+          retryDelay: 1000,
+          retry_strategy: function (_: any) {
+            return 1000;
+          },
         },
       },
-    },
-  );
-  pubSubApp.listen();
+    );
+    pubSubApp.listen();
+  }
 
   logger.log(`Public API active: ${process.env.ENABLE_PUBLIC_API}`);
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
