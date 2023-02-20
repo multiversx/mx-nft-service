@@ -215,9 +215,7 @@ export class RedisCacheService {
       const dels = await new Promise((resolve, reject) => {
         let delKeys = [];
         stream.on('data', function (resultKeys) {
-          if (resultKeys.length) {
-            client.unlink(resultKeys);
-          }
+          delKeys = [...delKeys, ...resultKeys.map((key) => ['del', key])];
         });
         stream.on('end', () => {
           resolve(delKeys);
@@ -226,6 +224,9 @@ export class RedisCacheService {
           reject(err);
         });
       });
+
+      const multi = client.multi(dels);
+      await promisify(multi.exec).call(multi);
     } catch (err) {
       this.logger.error(
         'An error occurred while trying to delete from redis cache by pattern.',
