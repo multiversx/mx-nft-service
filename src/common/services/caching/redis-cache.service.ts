@@ -17,7 +17,7 @@ export class RedisCacheService {
     password: process.env.REDIS_PASSWORD,
   };
 
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
 
   getClient(clientName: string): Redis.Redis {
     if (this.clients[clientName]) {
@@ -228,6 +228,7 @@ export class RedisCacheService {
       );
     } finally {
       profiler.stop();
+      this.logger.log(`Profiler duration for delByPattern for key ${key} - ${profiler.duration}`);
       MetricsCollector.setRedisDuration('MDEL', profiler.duration);
     }
   }
