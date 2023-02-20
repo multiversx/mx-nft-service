@@ -17,7 +17,7 @@ import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loader
   imports: [
     CommonModule,
     CacheInvalidationEventsModule,
-    // CacheAdminEventsModule,
+    CacheAdminEventsModule,
     CommonRabbitModule.register(() => {
       return {
         exchange: rabbitExchanges.CACHE_INVALIDATION,
@@ -37,4 +37,4 @@ import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loader
   ],
   exports: [],
 })
-export class CacheEventsModule {}
+export class CacheEventsModule { }
