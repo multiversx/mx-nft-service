@@ -216,13 +216,10 @@ export class RedisCacheService {
         let delKeys = [];
         stream.on('data', function (resultKeys) {
           if (resultKeys.length) {
-            delKeys = [...delKeys, ...resultKeys];
+            client.unlink(resultKeys);
           }
         });
         stream.on('end', () => {
-          if (delKeys.length) {
-            client.unlink(delKeys);
-          }
           resolve(delKeys);
         });
         stream.on('error', (err) => {
