@@ -27,7 +27,7 @@ export class CacheEventsConsumer {
     private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private logger: Logger,
-  ) { }
+  ) {}
 
   @PublicRabbitConsumer({
     connection: 'common',

@@ -28,7 +28,7 @@ export class CacheInvalidationEventsService {
 
   async invalidateAuction(payload: ChangedEvent) {
     await Promise.all([
-      // await this.auctionsCachingService.invalidateCache(),
+      await this.auctionsCachingService.invalidateCache(),
       await this.auctionsCachingService.invalidatePersistentCaching(
         payload.id,
         payload.address,

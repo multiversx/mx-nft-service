@@ -226,11 +226,7 @@ export class RedisCacheService {
           reject(err);
         });
       });
-
-      // const multi = client.unlink(dels);
-      // await promisify(multi.exec).call(multi);
     } catch (err) {
-      console.log(err);
       this.logger.error(
         'An error occurred while trying to delete from redis cache by pattern.',
         {
