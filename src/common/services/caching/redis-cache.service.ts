@@ -17,7 +17,7 @@ export class RedisCacheService {
     password: process.env.REDIS_PASSWORD,
   };
 
-  constructor(private readonly logger: Logger) { }
+  constructor(private readonly logger: Logger) {}
 
   getClient(clientName: string): Redis.Redis {
     if (this.clients[clientName]) {
@@ -215,21 +215,25 @@ export class RedisCacheService {
       const dels = await new Promise((resolve, reject) => {
         let delKeys = [];
         stream.on('data', function (resultKeys) {
-          delKeys = [...delKeys, ...resultKeys.map((key) => ['del', key])]
+          if (resultKeys.length) {
+            delKeys = [...delKeys, ...resultKeys];
+          }
         });
         stream.on('end', () => {
+          if (delKeys.length) {
+            client.unlink(delKeys);
+          }
           resolve(delKeys);
         });
         stream.on('error', (err) => {
           reject(err);
-        })
-      })
+        });
+      });
 
-      const multi = client.multi(dels);
-      await promisify(multi.exec).call(multi);
-
+      // const multi = client.unlink(dels);
+      // await promisify(multi.exec).call(multi);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       this.logger.error(
         'An error occurred while trying to delete from redis cache by pattern.',
         {
@@ -240,7 +244,9 @@ export class RedisCacheService {
       );
     } finally {
       profiler.stop();
-      this.logger.log(`Profiler duration for delByPattern for key ${key} - ${profiler.duration}`);
+      this.logger.log(
+        `Profiler duration for delByPattern for key ${key} - ${profiler.duration}`,
+      );
       MetricsCollector.setRedisDuration('MDEL', profiler.duration);
     }
   }
