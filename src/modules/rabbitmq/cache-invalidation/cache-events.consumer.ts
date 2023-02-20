@@ -36,22 +36,22 @@ export class CacheEventsConsumer {
   async consume(event: ChangedEvent): Promise<void> {
     this.logger.log({ event });
     switch (event.type) {
-      case CacheEventTypeEnum.OwnerChanged:
-        const profiler = new CpuProfiler();
-        const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
-        await Promise.all([
-          this.assetsRedisHandler.clearKey(event.id),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
-          ),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
-          ),
-        ]);
-        profiler.stop('OwnerChanged');
+      // case CacheEventTypeEnum.OwnerChanged:
+      //   const profiler = new CpuProfiler();
+      //   const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
+      //   await Promise.all([
+      //     this.assetsRedisHandler.clearKey(event.id),
+      //     this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
+      //     this.collectionAssetsRedisHandler.clearKeyByPattern(
+      //       collectionIdentifier,
+      //     ),
+      //     this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+      //       collectionIdentifier,
+      //     ),
+      //   ]);
+      //   profiler.stop('OwnerChanged');
 
-        break;
+      //   break;
 
       case CacheEventTypeEnum.AssetsRefresh:
         const profilerAssets = new CpuProfiler();
