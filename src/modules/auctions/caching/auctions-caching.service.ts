@@ -53,7 +53,7 @@ export class AuctionsCachingService {
 
   public async invalidateCacheByPattern(address: string) {
     await this.redisCacheService.deleteByPattern(
-      generateCacheKeyFromParams('claimable_auctions', address),
+      `${generateCacheKeyFromParams('claimable_auctions', address)}*`,
     );
   }
 

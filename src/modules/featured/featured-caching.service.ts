@@ -39,7 +39,7 @@ export class FeaturedCollectionsCachingService {
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
     await this.redisCacheService.deleteByPattern(
-      CacheInfo.FeaturedCollections.key,
+      `${CacheInfo.FeaturedCollections.key}*`,
     );
   }
 

@@ -21,7 +21,7 @@ export class BlacklistedCollectionsCachingService {
 
   async invalidateBlacklistedCollectionsCache(): Promise<void> {
     await this.redisCacheService.deleteByPattern(
-      CacheInfo.BlacklistedCollections.key,
+      `${CacheInfo.BlacklistedCollections.key}*`,
     );
   }
 

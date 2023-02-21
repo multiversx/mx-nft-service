@@ -21,7 +21,7 @@ export abstract class RedisValueDataloaderHandler<T> {
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
-    this.redisCacheService.deleteByPattern(this.getCacheKey(key));
+    this.redisCacheService.deleteByPattern(`${this.getCacheKey(key)}*`);
   }
 
   batchLoad = async (keys: T[], createValueFunc: () => any) => {

@@ -37,7 +37,7 @@ export class AssetsHistoryCachingService {
       collection,
       nonce,
     );
-    await this.redisCacheService.deleteByPattern(cacheKeyPattern);
+    await this.redisCacheService.deleteByPattern(`${cacheKeyPattern}*`);
   }
 
   getAssetHistoryCacheKey(
