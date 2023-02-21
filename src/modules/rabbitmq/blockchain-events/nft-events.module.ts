@@ -47,7 +47,6 @@ import { UpdateListingEventHandler } from './handlers/updateListing-event.handle
   imports: [
     CommonModule,
     CacheEventsPublisherModule,
-    forwardRef(() => CacheModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
     forwardRef(() => OrdersModuleGraph),

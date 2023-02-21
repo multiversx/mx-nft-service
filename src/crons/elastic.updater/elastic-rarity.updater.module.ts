@@ -12,7 +12,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     CommonModule,
     NftRarityModuleGraph,
-    CacheModule,
   ],
   providers: [Logger, ElasticRarityUpdaterService, RarityUpdaterService],
   exports: [ElasticRarityUpdaterService, RarityUpdaterService],
