@@ -275,7 +275,9 @@ export class CollectionsGetterService {
     const size = 25;
     let from = 0;
 
-    const totalCount = await this.apiService.getCollectionsCount();
+    const totalCount = await this.apiService.getCollectionsCount(
+      '?type=NonFungibleESDT,SemiFungibleESDT',
+    );
     let collectionsResponse: Collection[] = [];
     do {
       let mappedCollections = await this.getMappedCollections(from, size);
