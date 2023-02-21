@@ -86,16 +86,17 @@ async function bootstrap() {
     await processorApp.listen(ports.scamInfo);
   }
   if (process.env.ENABLE_CACHE_INVALIDATION !== 'true') {
-  const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
-    PubSubListenerModule,
-    {
-      transport: Transport.REDIS,
-      options: {
-        host: apiConfigService.getRedisUrl(),
-        port: apiConfigService.getRedisPort(),
-        retryAttempts: 100,
-        retryDelay: 1000,
-        retryStrategy: () => 1000,
+    const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
+      PubSubListenerModule,
+      {
+        transport: Transport.REDIS,
+        options: {
+          host: apiConfigService.getRedisUrl(),
+          port: apiConfigService.getRedisPort(),
+          retryAttempts: 100,
+          retryDelay: 1000,
+          retryStrategy: () => 1000,
+        },
       },
     );
     pubSubApp.listen();
