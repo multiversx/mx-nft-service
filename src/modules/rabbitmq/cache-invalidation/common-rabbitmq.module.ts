@@ -31,7 +31,7 @@ export class CommonRabbitModule {
           },
         }),
       ],
-      providers: [Logger, RabbitPublisherService],
+      providers: [RabbitPublisherService],
       exports: [RabbitPublisherService],
     };
   }

@@ -18,7 +18,7 @@ export class MxExtrasApiService {
   ) {
     this.url = this.apiConfigService.getExtrasApiUrl();
     this.nativeAuthSigner = new NativeAuthSigner({
-      host: 'NftService',
+      origin: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
       signerPrivateKeyPath: getFilePathFromDist(mxConfig.pemFileName),
     });
