@@ -13,6 +13,7 @@ export class FeaturedNftsRepository extends Repository<FeaturedNftEntity> {
       .where(`a.status= :status`, {
         status: AuctionStatusEnum.Running,
       })
+      .orderBy('featuredCollections.id', 'DESC')
       .skip(offset)
       .take(limit)
       .getManyAndCount();
@@ -29,6 +30,7 @@ export class FeaturedCollectionsRepository extends Repository<FeaturedCollection
     const featuredCollections = await this.createQueryBuilder(
       'featuredCollections',
     )
+      .orderBy('featuredCollections.id', 'DESC')
       .skip(0)
       .take(100)
       .getManyAndCount();
