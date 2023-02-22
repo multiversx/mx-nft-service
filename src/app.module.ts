@@ -1,4 +1,3 @@
-import '../node_modules/@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config/dist';
@@ -36,6 +35,8 @@ import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
+import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
 
 @Module({
   imports: [
