@@ -10,11 +10,15 @@ import { AssetByIdentifierService } from './asset-by-identifier.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Asset } from './models';
 import { AssetsLikesCachingService } from './assets-likes.caching.service';
-import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import {
+  CacheEventsPublisherService,
+  NftLikePublisherService,
+} from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { UserNftLikeEvent } from '../rabbitmq/cache-invalidation/events/userNftLike.event';
 
 @Injectable()
 export class AssetsLikesService {
@@ -24,6 +28,7 @@ export class AssetsLikesService {
     private accountFeedService: MxFeedService,
     private assetsLikesCachingService: AssetsLikesCachingService,
     private cacheEventsPublisherService: CacheEventsPublisherService,
+    private nftLikePublisherService: NftLikePublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -67,6 +72,9 @@ export class AssetsLikesService {
         await this.accountFeedService.subscribe(identifier, authorization);
         const nftData = await this.assetByIdentifierService.getAsset(
           identifier,
+        );
+        await this.nftLikePublisherService.publish(
+          new UserNftLikeEvent({ address, nftIdentifier: identifier }),
         );
         await this.accountFeedService.addFeed(
           new Feed({
