@@ -32,6 +32,7 @@ export class CacheInvalidationEventsService {
       await this.auctionsCachingService.invalidatePersistentCaching(
         payload.id,
         payload.address,
+        payload.extraInfo?.marketplaceKey,
       ),
       await this.auctionsCachingService.invalidateCacheByPattern(
         payload.address,
@@ -44,6 +45,7 @@ export class CacheInvalidationEventsService {
     await this.ordersCachingService.invalidateCache(
       parseInt(payload.id),
       payload.address,
+      payload.extraInfo?.marketplaceKey,
     );
   }
 

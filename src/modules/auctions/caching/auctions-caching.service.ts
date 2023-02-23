@@ -46,10 +46,14 @@ export class AuctionsCachingService {
   public async invalidatePersistentCaching(
     identifier: string,
     address: string,
+    marketplaceKey: string,
   ) {
     const { collection } = getCollectionAndNonceFromIdentifier(identifier);
     return await Promise.all([
       this.accountStatsCachingService.invalidateStats(address),
+      this.accountStatsCachingService.invalidateStats(
+        `${address}_${marketplaceKey}`,
+      ),
       this.auctionsLoader.clearKey(identifier),
       this.lowestAuctionLoader.clearKey(identifier),
       this.assetsAuctionsCountLoader.clearKey(identifier),
