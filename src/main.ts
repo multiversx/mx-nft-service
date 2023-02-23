@@ -19,7 +19,6 @@ import { graphqlUploadExpress } from 'graphql-upload';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { ApiConfigModule } from './modules/common/api-config/api.config.module';
 import { ApiConfigService } from './modules/common/api-config/api.config.service';
-import { RedisClient } from 'redis';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
@@ -137,26 +136,6 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-RedisClient.prototype.on_error = function (err: any) {
-  if (this.closing) {
-    return;
-  }
-
-  err.message =
-    'Redis connection to ' + this.address + ' failed - ' + err.message;
-  // debug(err.message);
-  this.connected = false;
-  this.ready = false;
-
-  // Only emit the error if the retry_strategy option is not set
-  if (!this.options.retry_strategy) {
-    // this.emit('error', err);
-  }
-  // 'error' events get turned into exceptions if they aren't listened for. If the user handled this error
-  // then we should try to reconnect.
-  this.connection_gone('error', err);
-};
 
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
