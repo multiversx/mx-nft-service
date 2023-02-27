@@ -64,7 +64,7 @@ export class NftEventsService {
               `${transferTopics.collection}-${transferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
               transferEvent.getAddress(),
-              transferTopics.receiverAddress.hex(),
+              transferTopics.receiverAddress.toString(),
             );
           }
           break;
@@ -106,7 +106,7 @@ export class NftEventsService {
               `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
               multiTransferEvent.getAddress(),
-              multiTransferTopics.receiverAddress.hex(),
+              multiTransferTopics.receiverAddress.toString(),
             );
           }
           break;
