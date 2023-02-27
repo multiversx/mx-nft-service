@@ -51,8 +51,15 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTTransfer:
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          if (transferTopics.nonce) {
+          const collectionInfo =
+            await this.mxApiService.getCollectionByIdentifierForQuery(
+              createTopics.collection,
+              'fields=name,type',
+            );
+          if (
+            collectionInfo?.type === NftTypeEnum.NonFungibleESDT ||
+            collectionInfo?.type === NftTypeEnum.SemiFungibleESDT
+          ) {
             await this.triggerCacheInvalidation(
               `${transferTopics.collection}-${transferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
@@ -73,7 +80,15 @@ export class NftEventsService {
         case NftEventEnum.MultiESDTNFTTransfer:
           const multiTransferEvent = new TransferEvent(event);
           const multiTransferTopics = multiTransferEvent.getTopics();
-          if (multiTransferTopics.nonce) {
+          const collectionDetails =
+            await this.mxApiService.getCollectionByIdentifierForQuery(
+              createTopics.collection,
+              'fields=name,type',
+            );
+          if (
+            collectionDetails?.type === NftTypeEnum.NonFungibleESDT ||
+            collectionDetails?.type === NftTypeEnum.SemiFungibleESDT
+          ) {
             this.triggerCacheInvalidation(
               `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
