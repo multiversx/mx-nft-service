@@ -41,7 +41,7 @@ export class JwtAuthenticateGuard implements CanActivate {
           if (err) {
             reject(err);
           }
-
+          console.log('Service Host jwt', decoded.iss);
           request.auth = {
             address: decoded.sub,
             expires: decoded.exp,
