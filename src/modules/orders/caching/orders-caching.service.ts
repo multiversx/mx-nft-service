@@ -43,12 +43,16 @@ export class OrdersCachingService {
   public async invalidateCache(
     auctionId: number = 0,
     ownerAddress: string = '',
+    marketplaceKey: string = '',
   ): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKeyByPattern(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
+    await this.accountStatsCachingService.invalidateStats(
+      `${ownerAddress}_${marketplaceKey}`,
+    );
     return this.redisCacheService.flushDb(this.redisClient);
   }
 

@@ -32,7 +32,9 @@ export class CacheEventsConsumer {
   @PublicRabbitConsumer({
     connection: 'common',
     exchange: rabbitExchanges.CACHE_INVALIDATION,
-    queueName: rabbitQueues.CACHE_INVALIDATION,
+    queueName: `${rabbitQueues.CACHE_INVALIDATION}-${
+      process.env.CLUSTER ?? 'development'
+    }`,
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
