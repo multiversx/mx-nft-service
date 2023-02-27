@@ -60,9 +60,11 @@ export class NftEventsService {
             collectionInfo?.type === NftTypeEnum.NonFungibleESDT ||
             collectionInfo?.type === NftTypeEnum.SemiFungibleESDT
           ) {
-            await this.triggerCacheInvalidation(
+            await this.triggerCacheInvalidationWithOwner(
               `${transferTopics.collection}-${transferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
+              transferEvent.getAddress(),
+              transferTopics.receiverAddress.hex(),
             );
           }
           break;
@@ -89,6 +91,7 @@ export class NftEventsService {
 
         case NftEventEnum.MultiESDTNFTTransfer:
           const multiTransferEvent = new TransferEvent(event);
+          multiTransferEvent.getAddress();
           const multiTransferTopics = multiTransferEvent.getTopics();
           const collectionDetails =
             await this.mxApiService.getCollectionByIdentifierForQuery(
@@ -99,9 +102,11 @@ export class NftEventsService {
             collectionDetails?.type === NftTypeEnum.NonFungibleESDT ||
             collectionDetails?.type === NftTypeEnum.SemiFungibleESDT
           ) {
-            this.triggerCacheInvalidation(
+            this.triggerCacheInvalidationWithOwner(
               `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
+              multiTransferEvent.getAddress(),
+              multiTransferTopics.receiverAddress.hex(),
             );
           }
           break;
@@ -117,6 +122,22 @@ export class NftEventsService {
       new ChangedEvent({
         id: id,
         type: eventType,
+      }),
+    );
+  }
+
+  private async triggerCacheInvalidationWithOwner(
+    id: string,
+    eventType: CacheEventTypeEnum,
+    address: string,
+    receiverAddress: string,
+  ) {
+    await this.cacheEventsPublisherService.publish(
+      new ChangedEvent({
+        id: id,
+        type: eventType,
+        address: address,
+        extraInfo: { receiverAddress: receiverAddress },
       }),
     );
   }

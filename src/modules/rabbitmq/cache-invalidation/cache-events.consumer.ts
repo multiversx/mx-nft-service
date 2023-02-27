@@ -46,11 +46,9 @@ export class CacheEventsConsumer {
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
-          ),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
+          this.collectionAssetsRedisHandler.clearKey(collectionIdentifier),
+          this.collectionAssetsForOwnerRedisHandler.clearKey(
+            `${collectionIdentifier}_${event.address}`,
           ),
         ]);
         profiler.stop('OwnerChanged');
