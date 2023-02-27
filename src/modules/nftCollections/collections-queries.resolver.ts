@@ -170,7 +170,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     );
     const assetsValue = assets?.value;
     return PageResponse.mapResponse<Asset>(
-      assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)),
+      assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
       pagination,
       assetsValue?.count ?? 0,
       offset,
