@@ -41,7 +41,7 @@ export class NativeAuthGuard implements CanActivate {
 
     try {
       const userInfo = await this.authServer.validate(jwt);
-
+      console.log('Service Host', userInfo?.host);
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
