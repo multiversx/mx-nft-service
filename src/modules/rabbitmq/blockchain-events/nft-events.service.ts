@@ -53,7 +53,7 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           const collectionInfo =
             await this.mxApiService.getCollectionByIdentifierForQuery(
-              createTopics.collection,
+              transferTopics.collection,
               'fields=name,type',
             );
           if (
@@ -82,7 +82,7 @@ export class NftEventsService {
           const multiTransferTopics = multiTransferEvent.getTopics();
           const collectionDetails =
             await this.mxApiService.getCollectionByIdentifierForQuery(
-              createTopics.collection,
+              multiTransferTopics.collection,
               'fields=name,type',
             );
           if (
