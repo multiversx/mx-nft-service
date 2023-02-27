@@ -49,8 +49,18 @@ export class ElasticUpdatesEventsService {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
-          const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          await this.nftFlagsService.updateNftFlag(identifier);
+          const collection =
+            await this.mxApiService.getCollectionByIdentifierForQuery(
+              createTopics.collection,
+              'fields=name,type',
+            );
+          if (
+            collection?.type === NftTypeEnum.NonFungibleESDT ||
+            collection?.type === NftTypeEnum.SemiFungibleESDT
+          ) {
+            const identifier = `${createTopics.collection}-${createTopics.nonce}`;
+            await this.nftFlagsService.updateNftFlag(identifier);
+          }
           break;
       }
     }

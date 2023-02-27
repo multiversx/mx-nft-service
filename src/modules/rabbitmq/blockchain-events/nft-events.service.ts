@@ -26,10 +26,6 @@ export class NftEventsService {
           const mintEvent = new MintEvent(event);
           const createTopics = mintEvent.getTopics();
           const identifier = `${createTopics.collection}-${createTopics.nonce}`;
-          this.triggerCacheInvalidation(
-            createTopics.collection,
-            CacheEventTypeEnum.Mint,
-          );
           const collection =
             await this.mxApiService.getCollectionByIdentifierForQuery(
               createTopics.collection,
@@ -44,6 +40,10 @@ export class NftEventsService {
               mintEvent,
               createTopics,
               collection,
+            );
+            this.triggerCacheInvalidation(
+              createTopics.collection,
+              CacheEventTypeEnum.Mint,
             );
           }
           break;
@@ -71,10 +71,20 @@ export class NftEventsService {
           const burnEvent = new BurnEvent(event);
           const burnTopics = burnEvent.getTopics();
           await new Promise((resolve) => setTimeout(resolve, 500));
-          await this.triggerCacheInvalidation(
-            `${burnTopics.collection}-${burnTopics.nonce}`,
-            CacheEventTypeEnum.AssetRefresh,
-          );
+          const burnCollection =
+            await this.mxApiService.getCollectionByIdentifierForQuery(
+              burnTopics.collection,
+              'fields=name,type',
+            );
+          if (
+            burnCollection?.type === NftTypeEnum.NonFungibleESDT ||
+            burnCollection?.type === NftTypeEnum.SemiFungibleESDT
+          ) {
+            await this.triggerCacheInvalidation(
+              `${burnTopics.collection}-${burnTopics.nonce}`,
+              CacheEventTypeEnum.AssetRefresh,
+            );
+          }
           break;
 
         case NftEventEnum.MultiESDTNFTTransfer:
