@@ -57,6 +57,27 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('JWT_SECRET_KEY');
   }
 
+  getNativeAuthMaxExpirySeconds(): number {
+    const maxExpiry = this.configService.get<string>(
+      'NATIVE_AUTH_MAX_EXPIRY_SECONDS',
+    );
+    if (!maxExpiry) {
+      throw new Error('No native auth max expiry in seconds present');
+    }
+    return parseInt(maxExpiry);
+  }
+
+  getNativeAuthAcceptedOrigins(): string[] {
+    const origins = this.configService.get<string>(
+      'NATIVE_AUTH_ACCEPTED_ORIGINS',
+    );
+    if (!origins) {
+      throw new Error('No accepted origins present');
+    }
+
+    return origins.split(',');
+  }
+
   getExtrasApiUrl(): string {
     return this.getGenericConfig<string>('MX_EXTRAS_API');
   }
