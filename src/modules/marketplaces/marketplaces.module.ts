@@ -13,7 +13,18 @@ import { MarketplaceEventsIndexingService } from './marketplaces-events-indexing
 import { OffersModuleGraph } from '../offers/offers.module';
 import { AssetByIdentifierService } from '../assets';
 import { MarketplacesReindexService } from './marketplaces-reindex.service';
+import { ReindexAuctionStartedHandler } from './marketplaces-reindex-handlers/reindex-auction-started.handler';
+import { ReindexAuctionBidHandler } from './marketplaces-reindex-handlers/reindex-auction-bid.handler';
+import { ReindexAuctionBoughtHandler } from './marketplaces-reindex-handlers/reindex-auction-bought.handler';
+import { ReindexAuctionEndedHandler } from './marketplaces-reindex-handlers/reindex-auction-ended.handler';
+import { ReindexAuctionClosedHandler } from './marketplaces-reindex-handlers/reindex-auction-closed.handler';
+import { ReindexOfferCreatedHandler } from './marketplaces-reindex-handlers/reindex-offer-created.hander';
+import { ReindexOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-offer-accepted.handler';
+import { ReindexOfferClosedHandler } from './marketplaces-reindex-handlers/reindex-offer-closed.handler';
 import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
+import { ReindexAuctionPriceUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-price-updated.handler';
+import { ReindexGlobalOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-global-offer-accepted.handler';
+import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-updated.handler';
 
 @Module({
   providers: [
@@ -28,6 +39,17 @@ import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-
     AssetByIdentifierService,
     MarketplacesReindexService,
     MarketplacesReindexEventsSummaryService,
+    ReindexAuctionStartedHandler,
+    ReindexAuctionBidHandler,
+    ReindexAuctionBoughtHandler,
+    ReindexAuctionEndedHandler,
+    ReindexAuctionClosedHandler,
+    ReindexAuctionPriceUpdatedHandler,
+    ReindexAuctionUpdatedHandler,
+    ReindexOfferCreatedHandler,
+    ReindexOfferAcceptedHandler,
+    ReindexOfferClosedHandler,
+    ReindexGlobalOfferAcceptedHandler,
   ],
   imports: [
     PubSubListenerModule,

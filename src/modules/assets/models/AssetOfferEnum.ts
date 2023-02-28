@@ -5,6 +5,7 @@ export enum AssetOfferEnum {
   Accepted = 'OfferAccepted',
   Closed = 'OfferClosed',
   AuctionClosedAndOfferAccepted = 'AuctionClosedAndOfferAccepted',
+  GloballyAccepted = 'GloballyAccepted',
 }
 
 registerEnumType(AssetOfferEnum, {
