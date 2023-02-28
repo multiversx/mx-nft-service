@@ -37,7 +37,7 @@ export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
     const nftsPromisesResponse = await Promise.all(nftsPromises);
     let response: any = {};
     for (const [nfts, count] of nftsPromisesResponse) {
-      const key = `${nfts[0].collection}_${page}_${size}_${ownerAddress}`;
+      const key = `${nfts[0]?.collection}_${page}_${size}_${ownerAddress}`;
       response[key] = { nfts: nfts, count: count };
     }
     return response;
