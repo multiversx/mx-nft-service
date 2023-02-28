@@ -97,9 +97,6 @@ export class AuctionEntity extends BaseEntity {
   constructor(init?: Partial<AuctionEntity>) {
     super();
     Object.assign(this, init);
-    if (!this.paymentNonce) {
-      this.paymentNonce = 0;
-    }
   }
 
   static fromAuctionAbi(
