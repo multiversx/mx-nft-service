@@ -43,11 +43,14 @@ export class FlagNftService {
         return false;
       }
 
-      const value = await this.getNsfwValue(nftMedia, identifier);
-      if (value) {
-        await this.addNsfwFlag(identifier, value);
-        this.triggerCacheInvalidation(identifier);
+      let value = 0;
+      if (nftMedia.fileType.includes('image')) {
+        value = await this.getNsfwValue(nftMedia, identifier);
       }
+
+      await this.addNsfwFlag(identifier, value);
+      this.triggerCacheInvalidation(identifier);
+
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW for nft', {
