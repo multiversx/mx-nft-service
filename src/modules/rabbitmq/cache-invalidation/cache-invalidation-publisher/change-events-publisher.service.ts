@@ -25,7 +25,6 @@ export class NftLikePublisherService {
   ) {}
 
   async publish(payload: UserNftLikeEvent) {
-    console.log('Publish like event', { payload });
     await this.rabbitPublisherService.publish(
       rabbitExchanges.NFT_LIKE,
       payload,

@@ -57,7 +57,6 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
     const { limit, offset } = pagination.pagingParams();
-    console.log({ filters, sorting });
     const [collections, count] =
       await this.collectionsGetterService.getCollections(
         offset,
