@@ -80,7 +80,7 @@ export class CacheEventsConsumer {
           this.assetsRedisHandler.clearKey(event.id),
           this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(collection),
+          this.collectionAssetsRedisHandler.clearKey(collection),
           this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
             collection,
           ),
