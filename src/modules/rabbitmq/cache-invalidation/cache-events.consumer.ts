@@ -51,7 +51,7 @@ export class CacheEventsConsumer {
             `${collectionIdentifier}_${event.address}`,
           ),
           this.collectionAssetsForOwnerRedisHandler.clearKey(
-            `${collectionIdentifier}_${event.extraInfo?.marketplaceKey}`,
+            `${collectionIdentifier}_${event.extraInfo?.receiverAddress}`,
           ),
         ]);
         profiler.stop('OwnerChanged');
