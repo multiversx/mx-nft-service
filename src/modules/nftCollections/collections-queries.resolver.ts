@@ -139,7 +139,13 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   @ResolveField('assets', () => AssetsResponse)
   async assets(
     @Parent() collectionResponse: Collection,
-    @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
+    @Args({
+      name: 'pagination',
+      type: () => ConnectionArgs,
+      nullable: true,
+      description:
+        'This filter will be removed in the next version, we return the latest 10 assets for this collection',
+    })
     pagination: ConnectionArgs,
     @Args({
       name: 'filters',
@@ -149,32 +155,30 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     filters: AssetsCollectionFilter,
   ): Promise<AssetsResponse> {
     const { collection } = collectionResponse;
-    const { limit, offset } = pagination.pagingParams();
 
     if (!collection) return null;
     if (filters?.ownerAddress) {
       const assets = await this.assetByOwnerProvider.load(
-        `${collection}_${offset}_${limit}_${filters.ownerAddress}`,
+        `${collection}_${filters.ownerAddress}`,
       );
       const assetsValue = assets?.value;
       return PageResponse.mapResponse<Asset>(
         assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
         pagination,
         assetsValue?.count ?? 0,
-        offset,
-        limit,
+        0,
+        10,
       );
     }
-    const assets = await this.assetProvider.load(
-      `${collection}_${offset}_${limit}`,
-    );
+    const assets = await this.assetProvider.load(collection);
     const assetsValue = assets?.value;
+
     return PageResponse.mapResponse<Asset>(
       assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
       pagination,
       assetsValue?.count ?? 0,
-      offset,
-      limit,
+      0,
+      10,
     );
   }
 

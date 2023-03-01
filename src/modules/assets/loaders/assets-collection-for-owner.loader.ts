@@ -20,15 +20,13 @@ export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const page = parseInt(identifiers[0].split('_')[1]);
-    const size = parseInt(identifiers[0].split('_')[2]);
-    const ownerAddress = identifiers[0].split('_')[3];
+    const ownerAddress = identifiers[0].split('_')[1];
     const nftsPromises = identifiers.map((identifier) =>
       this.apiService.getNftsAndCountForAccount(
         ownerAddress,
         new AssetsQuery()
           .addCollection(identifier.split('_')[0])
-          .addPageSize(page, size)
+          .addPageSize(0, 10)
           .build(),
         new AssetsQuery().addCollection(identifier.split('_')[0]).build(),
       ),
@@ -37,7 +35,7 @@ export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
     const nftsPromisesResponse = await Promise.all(nftsPromises);
     let response: any = {};
     for (const [nfts, count] of nftsPromisesResponse) {
-      const key = `${nfts[0]?.collection}_${page}_${size}_${ownerAddress}`;
+      const key = `${nfts[0]?.collection}_${ownerAddress}`;
       response[key] = { nfts: nfts, count: count };
     }
     return response;

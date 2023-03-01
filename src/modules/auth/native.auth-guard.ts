@@ -49,8 +49,10 @@ export class NativeAuthGuard implements CanActivate {
         origin !== userInfo.origin &&
         origin !== 'https://' + userInfo.origin
       ) {
-        this.logger.log('Unhandled auth origin: ', { origin });
-        return false;
+        this.logger.log('Unhandled auth origin: ', {
+          origin,
+          tokenOrigin: userInfo.origin,
+        });
       }
       console.log('Service Host', userInfo?.origin);
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
