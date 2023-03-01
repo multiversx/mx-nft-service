@@ -22,7 +22,7 @@ export class TrendingCollectionsWarmerService {
     );
   }
 
-  @Cron(CronExpression.EVERY_2_HOURS)
+  @Cron(CronExpression.EVERY_HOUR)
   async handleTrendingCollections(forTheLastHours: number = 24) {
     await Locker.lock(
       'Trending Collections invalidations',
