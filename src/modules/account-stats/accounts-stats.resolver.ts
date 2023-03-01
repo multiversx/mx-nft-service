@@ -45,11 +45,11 @@ export class AccountsStatsResolver {
   @ResolveField(() => [Price])
   async biddings(@Parent() stats: AccountStats) {
     const { address, marketplaceKey } = stats;
-    const claimableCount = await this.accountsStatsService.getBiddingBalance(
+    const biddings = await this.accountsStatsService.getBiddingBalance(
       address,
       marketplaceKey,
     );
-    return claimableCount || 0;
+    return biddings;
   }
 
   @ResolveField(() => Int)
