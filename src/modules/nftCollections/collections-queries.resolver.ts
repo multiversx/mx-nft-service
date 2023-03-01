@@ -162,6 +162,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
         `${collection}_${filters.ownerAddress}`,
       );
       const assetsValue = assets?.value;
+      console.log({ assetsOwner: assetsValue?.nfts });
       return PageResponse.mapResponse<Asset>(
         assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
         pagination,
@@ -172,6 +173,8 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     }
     const assets = await this.assetProvider.load(collection);
     const assetsValue = assets?.value;
+
+    console.log({ assetsOwner: assetsValue?.nfts });
     return PageResponse.mapResponse<Asset>(
       assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
       pagination,
