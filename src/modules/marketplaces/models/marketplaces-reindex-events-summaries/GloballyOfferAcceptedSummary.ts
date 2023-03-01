@@ -1,42 +1,35 @@
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetOfferEnum } from 'src/modules/assets/models/AssetOfferEnum';
-import { WithdrawOfferEvent } from 'src/modules/rabbitmq/entities/auction/withdrawOffer.event';
+import { AcceptGlobalOfferEvent } from 'src/modules/rabbitmq/entities/auction/acceptGlobalOffer.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
 
 @ObjectType()
-export class OfferClosedSummary extends ReindexGenericSummary {
-  offerId: number;
+export class GlobalOfferAcceptedSummary extends ReindexGenericSummary {
+  auctionId: number;
   auctionType: AssetOfferEnum;
 
-  identifier: string;
-  collection: string;
-  nonce: string;
-
-  constructor(init?: Partial<OfferClosedSummary>) {
+  constructor(init?: Partial<GlobalOfferAcceptedSummary>) {
     super(init);
     Object.assign(this, init);
   }
 
-  static fromWithdrawOfferEventAndTx(
+  static fromAcceptGlobalOfferEventAndTx(
     event: MarketplaceEventsEntity,
     tx: MarketplaceTransactionData,
-  ): OfferClosedSummary {
+  ): GlobalOfferAcceptedSummary {
     const genericEvent = event.data
       ? GenericEvent.fromEventResponse(event.data.eventData)
       : undefined;
-    const topics = new WithdrawOfferEvent(genericEvent).getTopics();
+    const topics = new AcceptGlobalOfferEvent(genericEvent).getTopics();
 
-    return new OfferClosedSummary({
+    return new GlobalOfferAcceptedSummary({
       timestamp: event.timestamp,
       blockHash: tx?.blockHash,
-      collection: topics.collection,
-      nonce: topics.nonce,
-      identifier: `${topics.collection}-${topics.nonce}`,
-      offerId: topics.offerId,
-      action: AssetOfferEnum.Closed,
+      auctionId: topics.auctionId,
+      action: AssetOfferEnum.GloballyAccepted,
     });
   }
 }
