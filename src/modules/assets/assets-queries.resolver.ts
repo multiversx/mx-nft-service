@@ -75,7 +75,10 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
       filters,
       sorting,
     );
-
+    const nullType = response?.items?.filter(
+      (x) => x.type === null || x.type === undefined,
+    );
+    console.log({ nullType });
     return PageResponse.mapResponse<Asset>(
       response?.items || [],
       pagination,

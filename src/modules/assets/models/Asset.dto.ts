@@ -103,8 +103,6 @@ export class Asset {
   }
 
   static fromNft(nft: Nft, address: string = null) {
-    console.log('null nft type for ', nft?.identifier, nft?.type);
-
     return nft
       ? new Asset({
           collection: nft.collection,
