@@ -36,13 +36,24 @@ export class NativeAuthGuard implements CanActivate {
     }
 
     const authorization: string = request.headers['authorization'];
+    const origin = request.headers['origin'];
     if (!authorization) {
       throw new UnauthorizedException();
     }
     const jwt = authorization.replace('Bearer ', '');
+
     try {
       const userInfo = await this.authServer.validate(jwt);
 
+      if (
+        origin !== userInfo.origin &&
+        origin !== 'https://' + userInfo.origin
+      ) {
+        this.logger.log('Unhandled auth origin: ', {
+          origin,
+          tokenOrigin: userInfo.origin,
+        });
+      }
       console.log('Service Host', userInfo?.origin);
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
