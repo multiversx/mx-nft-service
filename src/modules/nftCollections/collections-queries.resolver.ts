@@ -169,6 +169,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
       `${collection}_${offset}_${limit}`,
     );
     const assetsValue = assets?.value;
+    console.log({ assets: assets?.value });
     return PageResponse.mapResponse<Asset>(
       assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
       pagination,
