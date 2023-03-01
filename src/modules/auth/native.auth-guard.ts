@@ -42,6 +42,7 @@ export class NativeAuthGuard implements CanActivate {
     }
     const jwt = authorization.replace('Bearer ', '');
 
+    console.log('request service', origin);
     try {
       const userInfo = await this.authServer.validate(jwt);
 
