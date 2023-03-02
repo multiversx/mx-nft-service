@@ -43,6 +43,12 @@ export class AssetByIdentifierService {
     identifier: string,
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifierForQuery(identifier);
+    if (!NftTypeEnum[nft.type])
+      return {
+        key: identifier,
+        value: undefined,
+        ttl: TimeConstants.oneDay,
+      };
     let ttl = TimeConstants.oneDay;
     if (!nft) {
       ttl = 3 * TimeConstants.oneSecond;
