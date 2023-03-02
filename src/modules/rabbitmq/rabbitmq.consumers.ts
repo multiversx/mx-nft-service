@@ -48,7 +48,7 @@ export const PublicRabbitConsumer = (config: RabbitConsumerConfig) => {
       exchange,
       routingKey: '',
       queueOptions: {
-        autoDelete: true,
+        autoDelete: false,
       },
     }),
   );
