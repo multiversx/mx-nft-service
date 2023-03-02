@@ -76,14 +76,19 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.AssetRefresh:
         const profilerAssetRefresh = new CpuProfiler();
         const { collection } = getCollectionAndNonceFromIdentifier(event.id);
+        const collectionsAssetForOnwerPromise = event.address
+          ? this.collectionAssetsForOwnerRedisHandler.clearKey(
+              `${collection}_${event.address}`,
+            )
+          : this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+              collection,
+            );
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
           this.collectionAssetsRedisHandler.clearKey(collection),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collection,
-          ),
+          collectionsAssetForOnwerPromise,
         ]);
         profilerAssetRefresh.stop('AssetRefresh');
         break;
