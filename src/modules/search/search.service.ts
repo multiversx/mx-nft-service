@@ -206,7 +206,9 @@ export class SearchService {
         searchTerm,
         `fields=${this.fieldsRequested}`,
       );
-      if (!NftTypeEnum[response.type]) return [];
+      if (!NftTypeEnum[response?.type]) {
+        return [];
+      }
       return [
         new SearchNftCollectionResponse({
           identifier: response?.identifier,
