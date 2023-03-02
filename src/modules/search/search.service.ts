@@ -1,9 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  MxApiService,
-  MxIdentityService,
-  RedisCacheService,
-} from 'src/common';
+import { MxApiService, MxIdentityService, RedisCacheService } from 'src/common';
 import * as Redis from 'ioredis';
 import { cacheConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -14,12 +10,13 @@ import {
   SearchItemResponse,
 } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import { NftTypeEnum } from '../assets/models';
 
 @Injectable()
 export class SearchService {
   private redisClient: Redis.Redis;
   private readonly searchSize: number = 5;
-  private fieldsRequested: string = 'identifier,name,assets';
+  private fieldsRequested: string = 'identifier,name,assets,type';
   constructor(
     private accountsService: MxIdentityService,
     private apiService: MxApiService,
@@ -209,6 +206,7 @@ export class SearchService {
         searchTerm,
         `fields=${this.fieldsRequested}`,
       );
+      if (!NftTypeEnum[response.type]) return [];
       return [
         new SearchNftCollectionResponse({
           identifier: response?.identifier,

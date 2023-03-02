@@ -54,7 +54,6 @@ export class NativeAuthGuard implements CanActivate {
           tokenOrigin: userInfo.origin,
         });
       }
-      console.log('Service Host', userInfo?.origin);
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
