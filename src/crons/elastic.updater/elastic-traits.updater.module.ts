@@ -8,12 +8,7 @@ import { TraitsUpdaterService } from './traits.updater.service';
 import { ElasticTraitsUpdaterService } from './elastic-traits.updater.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-    CommonModule,
-    NftTraitsModule,
-    CacheModule,
-  ],
+  imports: [CommonModule, NftTraitsModule, CacheModule],
   providers: [Logger, ElasticTraitsUpdaterService, TraitsUpdaterService],
   exports: [ElasticTraitsUpdaterService, TraitsUpdaterService],
 })
