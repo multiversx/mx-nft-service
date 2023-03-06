@@ -32,7 +32,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
     ];
   }
 
-  private _batchRarity = async (keys: string[], data: any) => {
+  batchRarity = async (keys: string[], data: any) => {
     const cacheKeys = this.getCacheKeys(keys);
     const getDataFromRedis: { key: string; value: any }[] =
       await this.redisCacheService.getMany(cacheKeys);
@@ -58,10 +58,4 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
     }
     return getDataFromRedis;
   };
-  public get batchRarity() {
-    return this._batchRarity;
-  }
-  public set batchRarity(value) {
-    this._batchRarity = value;
-  }
 }
