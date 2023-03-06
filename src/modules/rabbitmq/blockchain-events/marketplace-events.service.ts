@@ -73,6 +73,7 @@ export class MarketplaceEventsService {
         case AuctionEventEnum.WithdrawEvent:
         case ElrondNftsSwapAuctionEventEnum.WithdrawSwap:
         case ExternalAuctionEventEnum.ClaimBackNft:
+        case ExternalAuctionEventEnum.ReturnListing:
           if (
             Buffer.from(event.topics[0], 'base64').toString() ===
             ExternalAuctionEventEnum.UpdateOffer
