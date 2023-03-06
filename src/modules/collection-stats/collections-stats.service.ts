@@ -6,6 +6,7 @@ import { AssetsQuery } from '../assets';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class CollectionsStatsService {
@@ -98,7 +99,7 @@ export class CollectionsStatsService {
     marketplaceKey: string = undefined,
   ) {
     return generateCacheKeyFromParams(
-      'collectionAssetsCount',
+      CacheInfo.CollectionAssetsCount,
       key,
       marketplaceKey,
     );

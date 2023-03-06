@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class CollectionAssetsCountRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'collectionAssetsCount');
+    super(redisCacheService, CacheInfo.CollectionAssetsCount.key);
   }
 
   mapValues(

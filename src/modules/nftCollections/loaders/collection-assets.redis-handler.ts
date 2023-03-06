@@ -9,7 +9,7 @@ import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 @Injectable()
 export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(redisCacheService, 'collectionAssets');
+    super(redisCacheService, CacheInfo.CollectionAssets.key);
   }
 
   mapValues(

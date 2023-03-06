@@ -169,6 +169,11 @@ export class CacheInfo {
     ttl: Constants.oneDay(),
   };
 
+  static CollectionAssetsCount: CacheInfo = {
+    key: 'collectionAssetsCount',
+    ttl: Constants.oneDay(),
+  };
+
   static CollectionNfts: CacheInfo = {
     key: 'collectionNfts',
     ttl: Constants.oneDay(),
