@@ -15,7 +15,7 @@ export class CollectionsNftsRedisHandler extends BaseCollectionsAssetsRedisHandl
     redisCacheService: RedisCacheService,
     private apiService: MxApiService,
   ) {
-    super(redisCacheService, 'collectionAssets');
+    super(redisCacheService, CacheInfo.CollectionNfts.key);
   }
   mapValues(
     returnValues: { key: string; value: any }[],
