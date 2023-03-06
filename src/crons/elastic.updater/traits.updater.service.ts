@@ -172,7 +172,7 @@ export class TraitsUpdaterService {
         const tokensToUpdate: string[] = await this.redisCacheService.lpop(
           this.getTraitsQueueCacheKey(),
         );
-
+        console.log(' processTokenTraitsQueue', JSON.stringify(tokensToUpdate));
         const notUpdatedNfts: string[] = await this.updateTokenTraits(
           tokensToUpdate,
         );
