@@ -40,6 +40,7 @@ export class OrdersCachingService {
     await this.ordersRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKeyByPattern(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
+    await this.accountStatsCachingService.invalidateStats(ownerAddress);
     await this.accountStatsCachingService.invalidateStats(
       `${ownerAddress}_${marketplaceKey}`,
     );
