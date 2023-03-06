@@ -416,7 +416,14 @@ type Collection {
   artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
-  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
+  assets(
+    filters: AssetsCollectionFilter
+
+    """
+    This filter will be removed in the next version, we return the latest 10 assets for this collection
+    """
+    pagination: ConnectionArgs
+  ): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean

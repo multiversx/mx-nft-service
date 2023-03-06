@@ -43,11 +43,14 @@ export class FlagNftService {
         return false;
       }
 
-      const value = await this.getNsfwValue(nftMedia, identifier);
-      if (value) {
-        await this.addNsfwFlag(identifier, value);
-        this.triggerCacheInvalidation(identifier);
+      let value = 0;
+      if (nftMedia.fileType.includes('image')) {
+        value = await this.getNsfwValue(nftMedia, identifier);
       }
+
+      await this.addNsfwFlag(identifier, value);
+      this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
+
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW for nft', {
@@ -186,6 +189,7 @@ export class FlagNftService {
   public async updateNftNSFWByAdmin(identifier: string, value) {
     try {
       this.logger.log(`Setting nsfw for '${identifier}' with value ${value}`);
+      const nft = await this.assetByIdentifierService.getAsset(identifier);
       await this.persistenceService.updateFlag(
         new NftFlagsEntity({
           identifier: identifier,
@@ -202,7 +206,7 @@ export class FlagNftService {
         '?retry_on_conflict=2',
       );
 
-      await this.triggerCacheInvalidation(identifier);
+      await this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
       return true;
     } catch (error) {
       this.logger.error('An error occurred while updating NSFW', {
@@ -216,11 +220,15 @@ export class FlagNftService {
     }
   }
 
-  private async triggerCacheInvalidation(identifier: string) {
+  private async triggerCacheInvalidation(
+    identifier: string,
+    ownerAddress: string,
+  ) {
     await this.cacheEventPublisherService.publish(
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.AssetRefresh,
+        address: ownerAddress,
       }),
     );
   }

@@ -32,7 +32,9 @@ export class CacheEventsConsumer {
   @PublicRabbitConsumer({
     connection: 'common',
     exchange: rabbitExchanges.CACHE_INVALIDATION,
-    queueName: rabbitQueues.CACHE_INVALIDATION,
+    queueName: `${rabbitQueues.CACHE_INVALIDATION}-${
+      process.env.CLUSTER ?? 'development'
+    }`,
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
@@ -44,11 +46,12 @@ export class CacheEventsConsumer {
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
+          this.collectionAssetsRedisHandler.clearKey(collectionIdentifier),
+          this.collectionAssetsForOwnerRedisHandler.clearKey(
+            `${collectionIdentifier}_${event.address}`,
           ),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collectionIdentifier,
+          this.collectionAssetsForOwnerRedisHandler.clearKey(
+            `${collectionIdentifier}_${event.extraInfo?.receiverAddress}`,
           ),
         ]);
         profiler.stop('OwnerChanged');
@@ -73,14 +76,19 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.AssetRefresh:
         const profilerAssetRefresh = new CpuProfiler();
         const { collection } = getCollectionAndNonceFromIdentifier(event.id);
+        const collectionsAssetForOnwerPromise = event.address
+          ? this.collectionAssetsForOwnerRedisHandler.clearKey(
+              `${collection}_${event.address}`,
+            )
+          : this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
+              collection,
+            );
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
-          this.collectionAssetsRedisHandler.clearKeyByPattern(collection),
-          this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-            collection,
-          ),
+          this.collectionAssetsRedisHandler.clearKey(collection),
+          collectionsAssetForOnwerPromise,
         ]);
         profilerAssetRefresh.stop('AssetRefresh');
         break;

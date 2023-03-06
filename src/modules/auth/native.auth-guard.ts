@@ -1,4 +1,4 @@
-import { NativeAuthServer } from '@elrondnetwork/native-auth-server';
+import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import {
   Injectable,
   CanActivate,
@@ -19,6 +19,8 @@ export class NativeAuthGuard implements CanActivate {
     this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       apiUrl: apiConfigService.getApiUrl(),
+      maxExpirySeconds: apiConfigService.getNativeAuthMaxExpirySeconds(),
+      acceptedOrigins: apiConfigService.getNativeAuthAcceptedOrigins(),
     });
   }
 
@@ -34,6 +36,7 @@ export class NativeAuthGuard implements CanActivate {
     }
 
     const authorization: string = request.headers['authorization'];
+    const origin = request.headers['origin'];
     if (!authorization) {
       throw new UnauthorizedException();
     }
@@ -42,6 +45,15 @@ export class NativeAuthGuard implements CanActivate {
     try {
       const userInfo = await this.authServer.validate(jwt);
 
+      if (
+        origin !== userInfo.origin &&
+        origin !== 'https://' + userInfo.origin
+      ) {
+        this.logger.log('Unhandled auth origin: ', {
+          origin,
+          tokenOrigin: userInfo.origin,
+        });
+      }
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);

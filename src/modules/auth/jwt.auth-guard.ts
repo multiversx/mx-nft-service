@@ -41,7 +41,6 @@ export class JwtAuthenticateGuard implements CanActivate {
           if (err) {
             reject(err);
           }
-
           request.auth = {
             address: decoded.sub,
             expires: decoded.exp,
