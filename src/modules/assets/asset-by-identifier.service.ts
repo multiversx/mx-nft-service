@@ -37,7 +37,7 @@ export class AssetByIdentifierService {
     identifier: string,
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifierForQuery(identifier);
-    if (!NftTypeEnum[nft?.type])
+    if (nft && !NftTypeEnum[nft?.type])
       return {
         key: identifier,
         value: undefined,
