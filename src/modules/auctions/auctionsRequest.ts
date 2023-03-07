@@ -58,7 +58,7 @@ export function getAuctionsForCollectionRequest(collection: string) {
         }),
         new Filter({
           field: 'startDate',
-          values: [Math.round(new Date().getTime() / 1000).toString()],
+          values: [DateUtils.getCurrentTimestamp().toString()],
           op: Operation.LE,
         }),
         new Filter({
@@ -95,7 +95,7 @@ export function getAuctionsForPaymentTokenRequest(paymentToken: string) {
         }),
         new Filter({
           field: 'startDate',
-          values: [Math.round(new Date().getTime() / 1000).toString()],
+          values: [DateUtils.getCurrentTimestamp().toString()],
           op: Operation.LE,
         }),
         new Filter({
@@ -126,7 +126,7 @@ export const runningAuctionRequest = new QueryRequest({
       }),
       new Filter({
         field: 'startDate',
-        values: [Math.round(new Date().getTime() / 1000).toString()],
+        values: [DateUtils.getCurrentTimestamp().toString()],
         op: Operation.LE,
       }),
     ],
