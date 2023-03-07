@@ -208,6 +208,7 @@ export class ElasticUpdatesEventsService {
 
   async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
+      console.log('addNftsToTraitsQueue', { collectionTickers });
       await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
