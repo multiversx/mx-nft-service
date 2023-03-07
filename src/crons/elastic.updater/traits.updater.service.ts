@@ -42,9 +42,12 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              collections = collections.concat([
-                ...new Set(items.map((i) => i.token)),
-              ]);
+              items = [{ token: 'test-idr' }];
+              const itemsToCheck =
+                items?.length === 1
+                  ? [items[0].token]
+                  : new Set(items.map((i) => i.token));
+              collections = collections.concat([...itemsToCheck]);
               if (collections.length > lastIndex + maxCollectionsToValidate) {
                 return undefined;
               }
@@ -91,7 +94,12 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
+              items = [{ token: 'test-idr' }];
+              const itemsToCheck =
+                items?.length === 1
+                  ? [items[0].token]
+                  : new Set(items.map((i) => i.token));
+              const collections = [...itemsToCheck];
               collectionsToUpdate = collectionsToUpdate.concat(
                 collections.filter(
                   (c) => collectionsToUpdate.indexOf(c) === -1,
