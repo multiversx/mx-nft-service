@@ -50,6 +50,7 @@ export class TraitsUpdaterService {
               if (collections.length > lastIndex + maxCollectionsToValidate) {
                 return undefined;
               }
+              console.log('handleValidateTokenTraits', { collections });
             },
           );
 
@@ -106,6 +107,10 @@ export class TraitsUpdaterService {
               if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
                 return undefined;
               }
+
+              console.log('handleSetTraitsWhereNotSet', {
+                collectionsToUpdate,
+              });
             },
           );
 
