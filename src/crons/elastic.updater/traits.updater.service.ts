@@ -180,6 +180,7 @@ export class TraitsUpdaterService {
     await Locker.lock(
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
+        console.log('redis queue', this.getTraitsQueueCacheKey());
         const tokensToUpdate: string[] = await this.redisCacheService.lpop(
           this.getTraitsQueueCacheKey(),
         );
