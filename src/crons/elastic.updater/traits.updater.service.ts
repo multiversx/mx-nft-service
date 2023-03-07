@@ -42,7 +42,6 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              items = [{ token: 'test-idr' }];
               const itemsToCheck =
                 items?.length === 1
                   ? [items[0].token]
@@ -94,7 +93,6 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              items = [{ token: 'test-idr' }];
               const itemsToCheck =
                 items?.length === 1
                   ? [items[0].token]
