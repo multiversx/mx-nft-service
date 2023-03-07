@@ -190,6 +190,7 @@ export class TraitsUpdaterService {
   }
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
+    console.log('addNftsToTraitQueue', { collectionTickers });
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
