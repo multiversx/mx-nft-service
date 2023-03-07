@@ -7,7 +7,11 @@ import {
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { BuySftEvent } from 'src/modules/rabbitmq/entities/auction';
+import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
+import { ElrondSwapBuyEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
+import { DEADRARE_KEY } from 'src/utils/constants';
+import { Marketplace } from '../Marketplace.dto';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
 
@@ -30,23 +34,23 @@ export class AuctionBuySummary extends ReindexGenericSummary {
   static fromBuySftEventAndTx(
     event: MarketplaceEventsEntity,
     tx: MarketplaceTransactionData,
+    marketplace: Marketplace,
   ): AuctionBuySummary {
-    const eventName = Buffer.from(
-      event.data.eventData?.topics?.[0],
-      'base64',
-    ).toString();
     if (
-      eventName === ExternalAuctionEventEnum.UpdateOffer ||
-      eventName === ElrondNftsSwapAuctionEventEnum.UpdateListing
+      event.hasOneOfEventTopicIdentifiers([
+        ExternalAuctionEventEnum.UpdateOffer,
+        ElrondNftsSwapAuctionEventEnum.UpdateListing,
+      ])
     ) {
       return;
     }
 
     const address = event.data.eventData?.address ?? tx.receiver;
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
-    const topics = new BuySftEvent(genericEvent).getTopics();
+    const topics = this.getTopics(event, marketplace);
+
+    if (!topics) {
+      return;
+    }
 
     return new AuctionBuySummary({
       timestamp: event.timestamp,
@@ -63,13 +67,28 @@ export class AuctionBuySummary extends ReindexGenericSummary {
     });
   }
 
-  static fromBulkBuyEventAndTx(
-    events: MarketplaceEventsEntity[],
-    tx: MarketplaceTransactionData,
-  ): AuctionBuySummary[] {
-    const buyEvents = events.filter(
-      (e) => e.data?.eventData?.identifier === ExternalAuctionEventEnum.BulkBuy,
-    );
-    return buyEvents.map((e) => this.fromBuySftEventAndTx(e, tx));
+  private static getTopics(
+    event: MarketplaceEventsEntity,
+    marketplace: Marketplace,
+  ): any {
+    const genericEvent = event.data
+      ? GenericEvent.fromEventResponse(event.data.eventData)
+      : undefined;
+    try {
+      if (
+        event.hasEventIdentifier(ExternalAuctionEventEnum.BuyNft) &&
+        marketplace.key !== DEADRARE_KEY
+      ) {
+        return new ClaimEvent(genericEvent).getTopics();
+      }
+
+      if (event.hasEventIdentifier(ElrondNftsSwapAuctionEventEnum.Purchase)) {
+        return new ElrondSwapBuyEvent(genericEvent).getTopics();
+      }
+
+      return new BuySftEvent(genericEvent).getTopics();
+    } catch (error) {
+      return;
+    }
   }
 }

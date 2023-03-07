@@ -4,7 +4,6 @@ export enum AssetOfferEnum {
   Created = 'OfferCreated',
   Accepted = 'OfferAccepted',
   Closed = 'OfferClosed',
-  AuctionClosedAndOfferAccepted = 'AuctionClosedAndOfferAccepted',
   GloballyAccepted = 'GloballyAccepted',
 }
 

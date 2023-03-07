@@ -3,11 +3,13 @@ import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import {
   AssetActionEnum,
-  AuctionEventEnum,
+  ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { AuctionTypeEnum } from 'src/modules/auctions/models';
 import { WithdrawEvent } from 'src/modules/rabbitmq/entities/auction';
+import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
+import { ElrondSwapWithdrawEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-withdraw.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
@@ -28,39 +30,43 @@ export class ReindexAuctionClosedSummary extends ReindexGenericSummary {
   }
 
   static fromWithdrawAuctionEventAndTx(
-    events: MarketplaceEventsEntity[],
+    event: MarketplaceEventsEntity,
     tx: MarketplaceTransactionData,
-  ): ReindexAuctionClosedSummary[] {
-    const withdrawEvents = events.filter(
-      (e) => e.data?.eventData?.identifier === AuctionEventEnum.WithdrawEvent,
-    );
+  ): ReindexAuctionClosedSummary {
+    if (event.hasEventTopicIdentifier(ExternalAuctionEventEnum.UpdateOffer)) {
+      return;
+    }
 
-    return withdrawEvents.map((event) => {
-      if (
-        Buffer.from(event.data.eventData?.topics?.[0], 'base64').toString() ===
-        ExternalAuctionEventEnum.UpdateOffer
-      ) {
-        return;
-      }
+    const address = event.data.eventData?.address ?? tx.receiver;
+    const topics = this.getTopics(event);
 
-      const address = event.data.eventData?.address ?? tx.receiver;
-      const genericEvent = event.data
-        ? GenericEvent.fromEventResponse(event.data.eventData)
-        : undefined;
-      const topics = new WithdrawEvent(genericEvent).getTopics();
-
-      return new ReindexAuctionClosedSummary({
-        timestamp: event.timestamp,
-        blockHash: tx?.blockHash,
-        collection: topics.collection,
-        nonce: topics.nonce,
-        identifier: `${topics.collection}-${topics.nonce}`,
-        auctionId: BinaryUtils.hexToNumber(topics.auctionId),
-        itemsCount: topics.nrAuctionTokens,
-        address,
-        sender: topics.originalOwner,
-        action: AssetActionEnum.ClosedAuction,
-      });
+    return new ReindexAuctionClosedSummary({
+      timestamp: event.timestamp,
+      blockHash: tx?.blockHash,
+      collection: topics.collection,
+      nonce: topics.nonce,
+      identifier: `${topics.collection}-${topics.nonce}`,
+      auctionId: BinaryUtils.hexToNumber(topics.auctionId),
+      itemsCount: topics.nrAuctionTokens ?? topics.boughtTokensNo,
+      address,
+      sender: topics.originalOwner,
+      action: AssetActionEnum.ClosedAuction,
     });
+  }
+
+  private static getTopics(event: MarketplaceEventsEntity): any {
+    const genericEvent = event.data
+      ? GenericEvent.fromEventResponse(event.data.eventData)
+      : undefined;
+
+    if (event.hasEventIdentifier(ExternalAuctionEventEnum.ClaimBackNft)) {
+      return new ClaimEvent(genericEvent).getTopics();
+    }
+
+    if (event.hasEventIdentifier(ElrondNftsSwapAuctionEventEnum.WithdrawSwap)) {
+      return new ElrondSwapWithdrawEvent(genericEvent).getTopics();
+    }
+
+    return new WithdrawEvent(genericEvent).getTopics();
   }
 }
