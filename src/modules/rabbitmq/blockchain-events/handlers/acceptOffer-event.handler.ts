@@ -40,7 +40,9 @@ export class AcceptOfferEventHandler {
       const acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       const topics = acceptOfferEvent.getTopics();
       this.logger.log(
-        `Accept Offer event detected for hash '${hash}' and marketplace '${generalMarketplace?.name}'`,
+        `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
+          generalMarketplace?.name
+        }'`,
       );
 
       if (topics.auctionId || topics.auctionId !== 0) {

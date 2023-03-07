@@ -32,7 +32,9 @@ export class UpdateListingEventHandler {
       topics.collection,
     );
     this.logger.log(
-      `Update listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${updateListingEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       parseInt(topics.auctionId, 16),

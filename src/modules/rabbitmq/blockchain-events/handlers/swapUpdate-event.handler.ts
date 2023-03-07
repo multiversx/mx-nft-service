@@ -30,7 +30,9 @@ export class SwapUpdateEventHandler {
       marketplaceType,
     );
     this.logger.log(
-      `Udpdate auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${updateEvent.getIdentifier()}  auction event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       parseInt(topics.auctionId, 16),
