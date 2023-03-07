@@ -208,7 +208,6 @@ export class ElasticUpdatesEventsService {
 
   async addNftsToTraitsQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      console.log('addNftsToTraitsQueue', { collectionTickers });
       await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
         collectionTickers,
@@ -239,15 +238,6 @@ export class ElasticUpdatesEventsService {
 
   private async getCollectionType(ticker: string): Promise<string> {
     const cacheKey = this.getCollectionTypeCacheKey(ticker);
-    const getCollectionType = async () => {
-      const collection =
-        await this.mxApiService.getCollectionByIdentifierForQuery(
-          ticker,
-          'fields=type',
-        );
-      return collection.type;
-    };
-
     const collectionType = await this.redisCacheService.getOrSet<string>(
       cacheKey,
       () => this.getCollectionTypeFromApi(ticker),

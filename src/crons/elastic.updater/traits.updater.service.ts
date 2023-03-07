@@ -50,7 +50,6 @@ export class TraitsUpdaterService {
               if (collections.length > lastIndex + maxCollectionsToValidate) {
                 return undefined;
               }
-              console.log('handleValidateTokenTraits', { collections });
             },
           );
 
@@ -107,10 +106,6 @@ export class TraitsUpdaterService {
               if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
                 return undefined;
               }
-
-              console.log('handleSetTraitsWhereNotSet', {
-                collectionsToUpdate,
-              });
             },
           );
 
@@ -180,11 +175,9 @@ export class TraitsUpdaterService {
     await Locker.lock(
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
-        console.log('redis queue', this.getTraitsQueueCacheKey());
         const tokensToUpdate: string[] = await this.redisCacheService.lpop(
           this.getTraitsQueueCacheKey(),
         );
-        console.log(' processTokenTraitsQueue', JSON.stringify(tokensToUpdate));
         const notUpdatedNfts: string[] = await this.updateTokenTraits(
           tokensToUpdate,
         );
@@ -196,7 +189,6 @@ export class TraitsUpdaterService {
   }
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
-    console.log('addNftsToTraitQueue', { collectionTickers });
     if (collectionTickers?.length > 0) {
       await this.redisCacheService.rpush(
         this.getTraitsQueueCacheKey(),
