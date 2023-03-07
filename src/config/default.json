@@ -21,22 +21,6 @@
     "pemFileName": "wallet.pem",
     "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
   },
-  "caching": {
-    "ordersRedisClientName": "orders",
-    "ordersDbName": 2,
-    "assetsRedisClientName": "assets",
-    "assetsDbName": 3,
-    "auctionsRedisClientName": "auctions",
-    "auctionsDbName": 4,
-    "persistentRedisClientName": "persistent",
-    "persistentDbName": 5,
-    "collectionsRedisClientName": "collections",
-    "collectionsDbName": 6,
-    "rarityQueueClientName": "rarityQueue",
-    "rarityQueueDbName": 7,
-    "traitsQueueClientName": "traitsQueue",
-    "traitsQueueDbName": 8
-  },
   "fileStorage": {
     "host": "ipfs.infura.io",
     "port": "5001",

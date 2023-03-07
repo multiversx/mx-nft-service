@@ -1,4 +1,4 @@
-import { Address } from '@elrondnetwork/erdjs';
+import { Address } from '@multiversx/sdk-core';
 import BigNumber from 'bignumber.js';
 
 export function oneSecond(): number {

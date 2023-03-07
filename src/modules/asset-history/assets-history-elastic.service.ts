@@ -5,7 +5,7 @@ import {
   ElasticSortOrder,
   QueryType,
   RangeLowerThan,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { constants } from 'src/config';
 
 @Injectable()

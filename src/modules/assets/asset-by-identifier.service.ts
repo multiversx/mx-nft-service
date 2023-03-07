@@ -1,31 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxApiService, RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { MxApiService } from 'src/common';
 import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
+import { Constants } from '@multiversx/sdk-nestjs';
+import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()
 export class AssetByIdentifierService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+    private localRedisCacheService: LocalRedisCacheService,
+  ) {}
 
   public async getAsset(identifier: string): Promise<Asset> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.redisCacheService.getOrSetWithDifferentTtl(
-        this.redisClient,
+      const asset = await this.localRedisCacheService.getOrSetWithDifferentTtl(
         cacheKey,
         getAsset,
       );
@@ -43,21 +37,21 @@ export class AssetByIdentifierService {
     identifier: string,
   ): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifierForQuery(identifier);
-    if (!NftTypeEnum[nft?.type])
+    if (nft && !NftTypeEnum[nft?.type])
       return {
         key: identifier,
         value: undefined,
-        ttl: TimeConstants.oneDay,
+        ttl: Constants.oneDay(),
       };
-    let ttl = TimeConstants.oneDay;
+    let ttl = Constants.oneDay();
     if (!nft) {
-      ttl = 3 * TimeConstants.oneSecond;
+      ttl = 3 * Constants.oneSecond();
     }
     if (
       (nft?.media && nft?.media[0].thumbnailUrl.includes('default')) ||
       (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner)
     )
-      ttl = TimeConstants.oneMinute;
+      ttl = Constants.oneMinute();
     return {
       key: identifier,
       value: Asset.fromNft(nft),

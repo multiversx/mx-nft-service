@@ -1,10 +1,17 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { NftRarityEntity } from './nft-rarity.entity';
 
-@EntityRepository(NftRarityEntity)
-export class NftRarityRepository extends Repository<NftRarityEntity> {
+@Injectable()
+export class NftRarityRepository {
+  constructor(
+    @InjectRepository(NftRarityEntity)
+    private nftRarityRepository: Repository<NftRarityEntity>,
+  ) {}
   async saveOrUpdateBulk(nftRarities: NftRarityEntity[]): Promise<void> {
-    await this.createQueryBuilder()
+    await this.nftRarityRepository
+      .createQueryBuilder()
       .insert()
       .into('nft_rarities')
       .values(nftRarities)
@@ -36,7 +43,8 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
   }
 
   async getCollectionIds(): Promise<string[]> {
-    const res = await this.createQueryBuilder()
+    const res = await this.nftRarityRepository
+      .createQueryBuilder()
       .select('collection')
       .distinct(true)
       .execute();
@@ -44,7 +52,8 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
   }
 
   async getBulkRarities(identifiers: string[]): Promise<NftRarityEntity[]> {
-    return await this.createQueryBuilder()
+    return await this.nftRarityRepository
+      .createQueryBuilder()
       .where(`identifier IN(:identifiers)`, {
         identifiers: identifiers,
       })
@@ -54,12 +63,14 @@ export class NftRarityRepository extends Repository<NftRarityEntity> {
   async findNftRarityByCollection(
     collectionTicker: string,
   ): Promise<NftRarityEntity[]> {
-    return (await this.find({ collection: collectionTicker })).sort(
-      (a, b) => b.nonce - a.nonce,
-    );
+    return (
+      await this.nftRarityRepository.find({
+        where: { collection: collectionTicker },
+      })
+    ).sort((a, b) => b.nonce - a.nonce);
   }
 
   async deleteNftRarity(identifier: string): Promise<any> {
-    return await this.delete({ identifier: identifier });
+    return await this.nftRarityRepository.delete({ identifier: identifier });
   }
 }

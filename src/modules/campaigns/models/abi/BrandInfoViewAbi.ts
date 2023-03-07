@@ -1,4 +1,4 @@
-import { BytesValue, TokenIdentifierValue } from '@elrondnetwork/erdjs';
+import { BytesValue, TokenIdentifierValue } from '@multiversx/sdk-core';
 
 import { BrandInfo } from './BrandInfoAbi';
 import { TierInfoAbi } from './TierInfoAbi';

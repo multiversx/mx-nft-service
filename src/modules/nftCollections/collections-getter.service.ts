@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
-import { Address } from '@elrondnetwork/erdjs';
-import { cacheConfig, genericDescriptions } from 'src/config';
+import { Address } from '@multiversx/sdk-core';
+import { genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
 import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import {
@@ -24,7 +23,6 @@ import { AnalyticsService } from '../analytics/analytics.service';
 
 @Injectable()
 export class CollectionsGetterService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private idService: MxIdentityService,
@@ -36,11 +34,7 @@ export class CollectionsGetterService {
     private analyticsService: AnalyticsService,
     private documentDbService: DocumentDbService,
     private blacklistedCollectionsService: BlacklistedCollectionsService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
-    );
-  }
+  ) {}
 
   async getCollections(
     offset: number = 0,
@@ -117,7 +111,6 @@ export class CollectionsGetterService {
     [Collection[], number]
   > {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.TrendingCollections.key,
       async () => await this.getAllTrendingCollections(),
       CacheInfo.TrendingCollections.ttl,
@@ -171,7 +164,6 @@ export class CollectionsGetterService {
     [Collection[], number]
   > {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.ActiveCollectionLast30Days.key,
       async () => await this.getActiveCollectionsFromLast30Days(),
       CacheInfo.ActiveCollectionLast30Days.ttl,
@@ -264,7 +256,6 @@ export class CollectionsGetterService {
 
   async getOrSetFullCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
       CacheInfo.AllCollections.ttl,
@@ -308,7 +299,6 @@ export class CollectionsGetterService {
     [{ artist: string; nfts: number; collections: string[] }[], number]
   > {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.CollectionsMostActive.key,
       async () => await this.getMostActiveCollections(),
       CacheInfo.CollectionsMostActive.ttl,
@@ -341,7 +331,6 @@ export class CollectionsGetterService {
 
   async getOrSetMostFollowedCollections(): Promise<[Collection[], number]> {
     return await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.CollectionsMostFollowed.key,
       async () => await this.getMostFollowedCollections(),
       CacheInfo.CollectionsMostFollowed.ttl,

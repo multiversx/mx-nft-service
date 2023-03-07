@@ -10,8 +10,6 @@ import { CollectionAssetsCountProvider } from './loaders/collection-assets-count
 import { CollectionAssetsCountRedisHandler } from './loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsResolver } from './collection-assets.resolver';
 import { CollectionsMutationsResolver } from './collections-mutations.resolver';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { MxCommunicationModule } from 'src/common/services/mx-communication/mx-communication.module';
@@ -48,8 +46,6 @@ import { CollectionAssetsModelResolver } from './collection-assets-model.resolve
     AccountsProvider,
     OnSaleAssetsCountForCollectionProvider,
     OnSaleAssetsCountForCollectionRedisHandler,
-    CachingService,
-    LocalCacheService,
     CollectionsNftsRedisHandler,
     CollectionsNftsCountRedisHandler,
     ArtistAddressProvider,
@@ -69,10 +65,6 @@ import { CollectionAssetsModelResolver } from './collection-assets-model.resolve
     DocumentDbModule,
     BlacklistedCollectionsModule,
   ],
-  exports: [
-    CollectionsTransactionsService,
-    CollectionsGetterService,
-    LocalCacheService,
-  ],
+  exports: [CollectionsTransactionsService, CollectionsGetterService],
 })
 export class CollectionsModuleGraph {}

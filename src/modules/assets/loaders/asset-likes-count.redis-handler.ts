@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { RedisValueDataloaderHandler } from 'src/modules/common/redis-value-dataloader.handler';
 
 @Injectable()

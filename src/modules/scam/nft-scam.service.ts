@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService, MxElasticService, Nft } from 'src/common';
-
-import { Locker } from 'src/utils/locker';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamElasticService } from './nft-scam.elastic.service';
@@ -17,6 +15,7 @@ import {
 } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { getAllCollectionNftsFromElasticQuery } from './nft-scam.queries';
 import { AssetByIdentifierService } from '../assets';
+import { Locker } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftScamService {

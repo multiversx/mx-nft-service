@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';

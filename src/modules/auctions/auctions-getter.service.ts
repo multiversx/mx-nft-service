@@ -2,15 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Auction } from './models';
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
-import * as Redis from 'ioredis';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CachingService } from 'src/common/services/caching/caching.service';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
-import { Constants } from '@elrondnetwork/erdnest';
-import { cacheConfig, mxConfig } from 'src/config';
+import { Constants } from '@multiversx/sdk-nestjs';
+import { mxConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
@@ -24,25 +23,17 @@ import {
 } from './auctionsRequest';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AuctionsGetterService {
-  private redisClient: Redis.Redis;
-  private auctionsRedisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
     private cacheService: CachingService,
     private readonly usdPriceService: UsdPriceService,
     private readonly logger: Logger,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-    this.auctionsRedisClient = this.cacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
+  ) {}
 
   async getAuctions(
     queryRequest: QueryRequest,
@@ -72,7 +63,6 @@ export class AuctionsGetterService {
 
       const [allAuctions, count, priceRange] =
         await this.cacheService.getOrSetCache(
-          this.redisClient,
           CacheInfo.TopAuctionsOrderByNoBids.key,
           async () => this.getTopAuctionsOrderByNoBids(),
           CacheInfo.TopAuctionsOrderByNoBids.ttl,
@@ -299,7 +289,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.auctionsRedisClient,
         `collectionAuctions:${collectionFilter}`,
         async () => await this.getAuctionsByCollection(collectionFilter),
         Constants.oneMinute() * 10,
@@ -345,7 +334,9 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted((x) =>
+            x[sort.field] === 0 ? Number.MAX_SAFE_INTEGER : x[sort.field],
+          );
         } else {
           allAuctions = allAuctions.sorted((x) => x[sort.field]);
         }
@@ -370,7 +361,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.auctionsRedisClient,
         `paymentTokenAuctions:${paymentTokenFilter}`,
         async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
         Constants.oneMinute() * 10,
@@ -389,8 +379,13 @@ export class AuctionsGetterService {
     }
 
     const maxBidFilter = queryRequest.getFilter('maxBid');
-    if (maxBidFilter && maxBidFilter.values?.every((element) => element !== null)) {
-      allAuctions = allAuctions.filter((x) => x.maxBid.amount > maxBidFilter.values[0]);
+    if (
+      maxBidFilter &&
+      maxBidFilter.values?.every((element) => element !== null)
+    ) {
+      allAuctions = allAuctions.filter(
+        (x) => x.maxBid.amount > maxBidFilter.values[0],
+      );
     }
 
     const collectionFilter = queryRequest.getFilterName('collection');
@@ -425,7 +420,9 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted((x) =>
+            x[sort.field] === 0 ? Number.MAX_SAFE_INTEGER : x[sort.field],
+          );
         } else {
           allAuctions = allAuctions.sorted((x) => x[sort.field]);
         }
@@ -491,7 +488,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
         CacheInfo.ActiveAuctions.key,
         async () => await this.getActiveAuctions(),
         CacheInfo.ActiveAuctions.ttl,
@@ -501,7 +497,7 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted((x) => x[sort.field]);
         } else {
           allAuctions = allAuctions.sorted((x) => x[sort.field]);
         }
@@ -525,7 +521,6 @@ export class AuctionsGetterService {
   ): Promise<[Auction[], number, PriceRange]> {
     let [allAuctions, _totalCount, priceRange] =
       await this.cacheService.getOrSetCache(
-        this.redisClient,
         CacheInfo.BuyNowAuctions.key,
         async () => await this.getBuyNowAuctions(),
         CacheInfo.BuyNowAuctions.ttl,
@@ -535,7 +530,9 @@ export class AuctionsGetterService {
     if (sort) {
       if (sort.direction === Sort.ASC) {
         if (sort.field === 'endDate') {
-          allAuctions = allAuctions.sorted((x) => x[sort.field], true);
+          allAuctions = allAuctions.sorted((x) =>
+            x[sort.field] === 0 ? Number.MAX_SAFE_INTEGER : x[sort.field],
+          );
         } else {
           allAuctions = allAuctions.sorted((x) => x[sort.field]);
         }
@@ -610,24 +607,33 @@ export class AuctionsGetterService {
   async getTopAuctionsOrderByNoBids(): Promise<
     [Auction[], number, PriceRange]
   > {
-    return this.getMappedAuctionsOrderBids(auctionsByNoBidsRequest);
+    return this.getMappedAuctionsOrderBids(
+      auctionsByNoBidsRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getBuyNowAuctions(): Promise<[Auction[], number, PriceRange]> {
-    return await this.getAuctionsGroupByIdentifierRaw(buyNowAuctionRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(
+      buyNowAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
-    return await this.getAuctionsGroupByIdentifierRaw(runningAuctionRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(
+      runningAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getAuctionsByCollection(
     collection: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = getAuctionsForCollectionRequest(collection);
+    const queryRequest = getAuctionsForCollectionRequest(
+      collection,
+      DateUtils.getCurrentTimestamp().toString(),
+    );
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
@@ -636,7 +642,10 @@ export class AuctionsGetterService {
   async getAuctionsByPaymentToken(
     paymentToken: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = getAuctionsForPaymentTokenRequest(paymentToken);
+    const queryRequest = getAuctionsForPaymentTokenRequest(
+      paymentToken,
+      DateUtils.getCurrentTimestamp().toString(),
+    );
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }

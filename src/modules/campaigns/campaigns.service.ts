@@ -1,31 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Campaign } from './models';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import * as Redis from 'ioredis';
 import { CampaignEntity } from 'src/db/campaigns';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
-import { cacheConfig } from 'src/config';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 
 @Injectable()
 export class CampaignsService {
-  private redisClient: Redis.Redis;
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
     private persistenceService: PersistenceService,
     private cacheService: CachingService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getCampaigns(
     limit: number = 10,
@@ -72,10 +64,9 @@ export class CampaignsService {
 
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
     const campaigns = await this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.Campaigns.key,
       () => this.getCampaignsFromDb(),
-      TimeConstants.oneHour,
+      Constants.oneHour(),
     );
     return campaigns;
   }
@@ -129,26 +120,21 @@ export class CampaignsService {
   public async invalidateKey() {
     const campaigns = await this.getCampaignsFromDb();
     await this.cacheService.setCache(
-      this.redisClient,
       CacheInfo.Campaigns.key,
       campaigns,
-      TimeConstants.oneDay,
+      Constants.oneDay(),
     );
-    await this.refreshCacheKey(CacheInfo.Campaigns.key, TimeConstants.oneDay);
+    await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
   }
 
   private async refreshCacheKey(key: string, ttl: number) {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
-      redisClientName: cacheConfig.persistentRedisClientName,
     });
   }
 
   public async invalidateCache() {
-    await this.cacheService.deleteInCache(
-      this.redisClient,
-      CacheInfo.Campaigns.key,
-    );
+    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
   }
 }

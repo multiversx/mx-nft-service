@@ -64,7 +64,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   @UseGuards(JwtOrNativeAuthGuard)
   async isWhitelisted(
     @AuthUser() user: UserAuthResult,
-  ): Promise<{ isWhitelisted: boolean; message: string }> {
+  ): Promise<{ isWhitelisted: boolean; message?: string }> {
     return await this.primarySaleService.isWhitelisted(user.address);
   }
 

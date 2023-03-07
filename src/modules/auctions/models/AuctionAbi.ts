@@ -4,7 +4,7 @@ import {
   OptionValue,
   TokenIdentifierValue,
   U64Value,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { AuctionStatusEnum } from '.';
 
 export interface GeneralAuctionAbi {

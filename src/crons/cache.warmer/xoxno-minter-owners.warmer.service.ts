@@ -1,27 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
-import { cacheConfig } from 'src/config';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+
 import { MxApiService } from 'src/common';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
 export class XoxnoArtistsWarmerService {
-  private redisClient: Redis.Redis;
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private mxApiService: MxApiService,
     private cacheService: CachingService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleArtistMappingForXoxno() {
@@ -36,7 +28,7 @@ export class XoxnoArtistsWarmerService {
             await this.invalidateKey(
               `${CacheInfo.Artist.key}_${scOwner.address}`,
               { key: scOwner.address, value: scOwner },
-              5 * TimeConstants.oneHour,
+              5 * Constants.oneHour(),
             ),
         );
       },
@@ -71,7 +63,6 @@ export class XoxnoArtistsWarmerService {
 
   private async getOrSetXoxnoScCount(address: string) {
     return this.cacheService.getOrSetCache(
-      this.redisClient,
       CacheInfo.XoxnoScCount.key,
       async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,
@@ -79,31 +70,23 @@ export class XoxnoArtistsWarmerService {
   }
 
   private async getArtistAddress(address: string) {
-    return this.cacheService.getCache(
-      this.redisClient,
-      `${CacheInfo.Artist.key}_${address}`,
-    );
+    return this.cacheService.getCache(`${CacheInfo.Artist.key}_${address}`);
   }
 
   private async getCachedXoxnoScCount() {
-    return this.cacheService.getCache(
-      this.redisClient,
-      CacheInfo.XoxnoScCount.key,
-    );
+    return this.cacheService.getCache(CacheInfo.XoxnoScCount.key);
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(this.redisClient, key, data, ttl);
+    await this.cacheService.setCache(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 
   private async refreshCacheKey(key: string, ttl: number) {
     await this.clientProxy.emit<{
-      redisClient: Redis.Redis;
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.persistentRedisClientName,
       key,
       ttl,
     });

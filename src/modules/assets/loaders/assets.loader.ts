@@ -24,7 +24,8 @@ export class AssetsProvider extends BaseProvider<string> {
     const nfts = await this.apiService.getNftsByIdentifiers(identifiers, 0);
     const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
 
-    this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
+    if (identifiers && identifiers.length > 0)
+      this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
 
     return nftsGrouped;
   }

@@ -1,29 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import * as Redis from 'ioredis';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { Locker } from 'src/utils/locker';
 import { ClientProxy } from '@nestjs/microservices';
-import { cacheConfig } from 'src/config';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CachingService, Locker } from '@multiversx/sdk-nestjs';
+
 import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 
 const EVERY_15_MINUTES = '0 */15 * * * *';
 
 @Injectable()
 export class CollectionsWarmerService {
-  private redisClient: Redis.Redis;
-
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private collectionsGetterService: CollectionsGetterService,
     private cacheService: CachingService,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
-    );
-  }
+  ) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async handleCollectionsInvalidations() {
@@ -35,7 +26,7 @@ export class CollectionsWarmerService {
         await this.invalidateKey(
           CacheInfo.AllCollections.key,
           tokens,
-          TimeConstants.oneHour,
+          CacheInfo.AllCollections.ttl,
         );
       },
       true,
@@ -111,17 +102,15 @@ export class CollectionsWarmerService {
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(this.redisClient, key, data, ttl);
+    await this.cacheService.setCache(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 
   private async refreshCacheKey(key: string, ttl: number) {
     this.clientProxy.emit<{
-      redisClient: Redis.Redis;
       key: string;
       ttl: number;
     }>('refreshCacheKey', {
-      redisClientName: cacheConfig.collectionsRedisClientName,
       key,
       ttl,
     });

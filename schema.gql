@@ -292,7 +292,7 @@ enum AuctionTypeEnum {
 input BidActionArgs {
   auctionId: Int!
   identifier: String!
-  paymentTokenIdentifier: String = "EGLD"
+  paymentTokenIdentifier: String! = "EGLD"
   price: String!
 }
 
@@ -318,7 +318,7 @@ input BuyRandomNftActionArgs {
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
-  paymentTokenIdentifier: String = "EGLD"
+  paymentTokenIdentifier: String! = "EGLD"
   price: String!
   quantity: String
 }
@@ -467,7 +467,7 @@ type CollectionAssetModel {
 }
 
 input CollectionAssetsRetriveCount {
-  size: Int = 4
+  size: Int! = 4
 }
 
 type CollectionBranding {
@@ -596,7 +596,7 @@ input CreateAuctionArgs {
   minBid: String!
   paymentToken: String!
   paymentTokenNonce: Int
-  quantity: String = "1"
+  quantity: String! = "1"
   startDate: String
 }
 
@@ -604,8 +604,8 @@ input CreateNftArgs {
   attributes: AttributeInput!
   collection: String!
   name: String!
-  quantity: String = "1"
-  royalties: String = "0"
+  quantity: String! = "1"
+  royalties: String! = "0"
 }
 
 input CreateOfferArgs {
@@ -614,8 +614,8 @@ input CreateOfferArgs {
   identifier: String!
   paymentAmount: String!
   paymentToken: String!
-  paymentTokenNonce: Int = 0
-  quantity: String = "1"
+  paymentTokenNonce: Int! = 0
+  quantity: String! = "1"
 }
 
 input CurrentPaymentTokensFilters {
@@ -707,7 +707,7 @@ input IssueCampaignArgs {
   collectionTicker: String!
   mediaTypes: MediaTypeEnum!
   mintEndTime: Int!
-  mintPriceToken: String = "EGLD"
+  mintPriceToken: String! = "EGLD"
   mintStartTime: Int!
   minterAddress: String!
   royalties: String!
@@ -717,10 +717,10 @@ input IssueCampaignArgs {
 }
 
 input IssueCollectionArgs {
-  canFreeze: Boolean = false
-  canPause: Boolean = false
-  canTransferNFTCreateRole: Boolean = false
-  canWipe: Boolean = false
+  canFreeze: Boolean! = false
+  canPause: Boolean! = false
+  canTransferNFTCreateRole: Boolean! = false
+  canWipe: Boolean! = false
   tokenName: String!
   tokenTicker: String!
 }
@@ -1278,7 +1278,7 @@ enum TagTypeEnum {
 
 input TagsFilter {
   searchTerm: String
-  tagType: TagTypeEnum = Nft
+  tagType: TagTypeEnum! = Nft
 }
 
 type TagsResponse {
@@ -1324,7 +1324,7 @@ type Token {
 }
 
 input TokenFilter {
-  token: String = "EGLD"
+  token: String! = "EGLD"
 }
 
 type TransactionNode {
@@ -1343,7 +1343,7 @@ type TransactionNode {
 input TransferNftArgs {
   destinationAddress: String!
   identifier: String!
-  quantity: String = "1"
+  quantity: String! = "1"
 }
 
 input TransferNftCreateRoleArgs {

@@ -20,19 +20,12 @@ import {
   TokenPayment,
   ResultsParser,
   SmartContract,
-} from '@elrondnetwork/erdjs';
-import { cacheConfig, mxConfig, gas } from '../../config';
-import {
-  MxProxyService,
-  getSmartContract,
-  RedisCacheService,
-  MxApiService,
-} from 'src/common';
-import * as Redis from 'ioredis';
+} from '@multiversx/sdk-core';
+import { mxConfig, gas } from '../../config';
+import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { TransactionNode } from '../common/transaction';
-import { TimeConstants } from 'src/utils/time-utils';
 import {
   BidRequest,
   BuySftRequest,
@@ -40,7 +33,7 @@ import {
 } from './models/requests';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
-import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
@@ -48,10 +41,10 @@ import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftMarketplaceAbiService {
-  private redisClient: Redis.Redis;
   private readonly parser: ResultsParser;
 
   private contract = new ContractLoader(
@@ -68,10 +61,6 @@ export class NftMarketplaceAbiService {
     private redisCacheService: RedisCacheService,
     private marketplaceService: MarketplacesService,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-
     this.parser = new ResultsParser();
   }
 
@@ -438,10 +427,9 @@ export class NftMarketplaceAbiService {
         contractAddress,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getCutPercentageMap(contractAddress),
-        TimeConstants.oneWeek,
+        Constants.oneWeek(),
       );
     } catch (err) {
       this.logger.error(
@@ -457,10 +445,9 @@ export class NftMarketplaceAbiService {
   async getIsPaused(contractAddress: string): Promise<boolean> {
     try {
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         generateCacheKeyFromParams('isPaused', contractAddress),
         () => this.getIsPausedAbi(contractAddress),
-        TimeConstants.oneWeek,
+        Constants.oneWeek(),
       );
     } catch (err) {
       this.logger.error(

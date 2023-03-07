@@ -7,7 +7,6 @@ import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableModule } from './crons/claimable/claimable.auction.module';
 import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
 import { PrivateAppModule } from './private.app.module';
-import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
@@ -17,9 +16,15 @@ import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-sca
 import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
 import { graphqlUploadExpress } from 'graphql-upload';
+import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
+import { ApiConfigModule } from './modules/common/api-config/api.config.module';
+import { ApiConfigService } from './modules/common/api-config/api.config.service';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
+
+  const apiConfigApp = await NestFactory.create(ApiConfigModule);
+  const apiConfigService = apiConfigApp.get<ApiConfigService>(ApiConfigService);
   if (process.env.ENABLE_PUBLIC_API === 'true') {
     await startPublicApp();
   }
@@ -79,19 +84,17 @@ async function bootstrap() {
     processorApp.useLogger(logger);
     await processorApp.listen(ports.scamInfo);
   }
-
   if (process.env.ENABLE_CACHE_INVALIDATION !== 'true') {
     const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
       PubSubListenerModule,
       {
         transport: Transport.REDIS,
         options: {
-          url: `redis://${process.env.REDIS_URL}:${process.env.REDIS_PORT}`,
+          host: apiConfigService.getRedisUrl(),
+          port: apiConfigService.getRedisPort(),
           retryAttempts: 100,
           retryDelay: 1000,
-          retry_strategy: function (_: any) {
-            return 1000;
-          },
+          retryStrategy: () => 1000,
         },
       },
     );
@@ -133,6 +136,7 @@ async function bootstrap() {
 }
 
 bootstrap();
+
 async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
@@ -147,6 +151,7 @@ async function startPublicApp() {
       transformOptions: {
         enableImplicitConversion: true,
       },
+      forbidUnknownValues: false,
     }),
   );
 

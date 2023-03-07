@@ -3,7 +3,7 @@ import {
   BigUIntValue,
   BytesValue,
   U64Value,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { TimePeriod } from './MintPeriodAbi';
 
 export interface BrandInfo {
