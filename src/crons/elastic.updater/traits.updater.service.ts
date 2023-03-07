@@ -42,11 +42,9 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const itemsToCheck =
-                items?.length === 1
-                  ? [items[0].token]
-                  : new Set(items.map((i) => i.token));
-              collections = collections.concat([...itemsToCheck]);
+              collections = collections.concat([
+                ...new Set(items.map((i) => i.token)),
+              ]);
               if (collections.length > lastIndex + maxCollectionsToValidate) {
                 return undefined;
               }
@@ -93,11 +91,7 @@ export class TraitsUpdaterService {
             'token',
             query,
             async (items) => {
-              const itemsToCheck =
-                items?.length === 1
-                  ? [items[0].token]
-                  : new Set(items.map((i) => i.token));
-              const collections = [...itemsToCheck];
+              const collections = [...new Set(items.map((i) => i.token))];
               collectionsToUpdate = collectionsToUpdate.concat(
                 collections.filter(
                   (c) => collectionsToUpdate.indexOf(c) === -1,
