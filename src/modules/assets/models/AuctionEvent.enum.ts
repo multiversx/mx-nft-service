@@ -22,6 +22,7 @@ export enum ExternalAuctionEventEnum {
   ChangePrice = 'changePrice',
   UpdatePrice = 'updatePrice',
   UpdateListing = 'changeListing',
+  ReturnListing = 'returnListing',
   AcceptOffer = 'acceptOffer',
   UpdateOffer = 'update_offer_event',
   AcceptGlobalOffer = 'acceptGlobalOffer',

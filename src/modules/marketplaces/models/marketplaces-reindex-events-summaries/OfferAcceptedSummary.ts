@@ -2,12 +2,13 @@ import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetOfferEnum } from 'src/modules/assets/models/AssetOfferEnum';
 import { AcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/acceptOffer.event';
+import { AcceptOfferDeadrareEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferDeadrare.event';
+import { AcceptOfferFrameitEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferFrameit.event';
 import { AcceptOfferXoxnoEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferXoxno.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
-import { XOXNO_KEY } from 'src/utils/constants';
+import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { Marketplace } from '../Marketplace.dto';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
-import { MarketplaceTypeEnum } from '../MarketplaceType.enum';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
 
 @ObjectType()
@@ -26,7 +27,6 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
 
   paymentToken: string;
   paymentNonce: number;
-
   price: string;
 
   constructor(init?: Partial<OfferAcceptedSummary>) {
@@ -39,17 +39,7 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
     tx: MarketplaceTransactionData,
     marketplace: Marketplace,
   ): OfferAcceptedSummary {
-    let topics;
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
-
-    if (marketplace?.type === MarketplaceTypeEnum.External) {
-      if (marketplace.key !== XOXNO_KEY) return;
-      topics = new AcceptOfferXoxnoEvent(genericEvent).getTopics();
-    } else {
-      topics = new AcceptOfferEvent(genericEvent).getTopics();
-    }
+    const topics = this.getTopics(event, marketplace);
 
     return new OfferAcceptedSummary({
       timestamp: event.timestamp,
@@ -69,5 +59,28 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
       endTime: parseInt(topics.enddate),
       action: AssetOfferEnum.Accepted,
     });
+  }
+
+  private static getTopics(
+    event: MarketplaceEventsEntity,
+    marketplace: Marketplace,
+  ): any {
+    const genericEvent = event.data
+      ? GenericEvent.fromEventResponse(event.data.eventData)
+      : undefined;
+
+    if (marketplace.key === XOXNO_KEY) {
+      return new AcceptOfferXoxnoEvent(genericEvent).getTopics();
+    }
+
+    if (marketplace.key === DEADRARE_KEY) {
+      return new AcceptOfferDeadrareEvent(genericEvent).getTopics();
+    }
+
+    if (marketplace.key === FRAMEIT_KEY) {
+      return new AcceptOfferFrameitEvent(genericEvent).getTopics();
+    }
+
+    return new AcceptOfferEvent(genericEvent).getTopics();
   }
 }

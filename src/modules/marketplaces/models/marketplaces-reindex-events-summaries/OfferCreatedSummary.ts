@@ -23,7 +23,6 @@ export class OfferCreatedSummary extends ReindexGenericSummary {
 
   paymentToken: string;
   paymentNonce: number;
-
   price: string;
 
   constructor(init?: Partial<OfferCreatedSummary>) {
