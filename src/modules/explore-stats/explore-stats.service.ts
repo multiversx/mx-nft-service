@@ -14,6 +14,7 @@ import {
 } from '../auctions/auctionsRequest';
 import { OffersService } from '../offers/offers.service';
 import { CachingService } from '@multiversx/sdk-nestjs';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class ExploreStatsService {
@@ -54,12 +55,12 @@ export class ExploreStatsService {
 
     const [, buyNowCount] =
       await this.auctionsService.getAuctionsGroupByIdentifier(
-        buyNowAuctionRequest,
+        buyNowAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
       );
 
     const [, liveAuctionsCount] =
       await this.auctionsService.getAuctionsGroupByIdentifier(
-        runningAuctionRequest,
+        runningAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
       );
     const [, offersCount] = await this.offersService.getOffers();
 

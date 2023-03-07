@@ -23,6 +23,7 @@ import {
 } from './auctionsRequest';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AuctionsGetterService {
@@ -606,24 +607,33 @@ export class AuctionsGetterService {
   async getTopAuctionsOrderByNoBids(): Promise<
     [Auction[], number, PriceRange]
   > {
-    return this.getMappedAuctionsOrderBids(auctionsByNoBidsRequest);
+    return this.getMappedAuctionsOrderBids(
+      auctionsByNoBidsRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getBuyNowAuctions(): Promise<[Auction[], number, PriceRange]> {
-    return await this.getAuctionsGroupByIdentifierRaw(buyNowAuctionRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(
+      buyNowAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getActiveAuctions(): Promise<[Auction[], number, PriceRange]> {
-    return await this.getAuctionsGroupByIdentifierRaw(runningAuctionRequest);
+    return await this.getAuctionsGroupByIdentifierRaw(
+      runningAuctionRequest(DateUtils.getCurrentTimestamp().toString()),
+    );
   }
 
   // TODO: use db access directly without intermediate caching layers once we optimize the model
   async getAuctionsByCollection(
     collection: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = getAuctionsForCollectionRequest(collection);
+    const queryRequest = getAuctionsForCollectionRequest(
+      collection,
+      DateUtils.getCurrentTimestamp().toString(),
+    );
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
@@ -632,7 +642,10 @@ export class AuctionsGetterService {
   async getAuctionsByPaymentToken(
     paymentToken: string,
   ): Promise<[Auction[], number, PriceRange]> {
-    const queryRequest = getAuctionsForPaymentTokenRequest(paymentToken);
+    const queryRequest = getAuctionsForPaymentTokenRequest(
+      paymentToken,
+      DateUtils.getCurrentTimestamp().toString(),
+    );
 
     return await this.getAuctionsGroupByIdentifierRaw(queryRequest);
   }
