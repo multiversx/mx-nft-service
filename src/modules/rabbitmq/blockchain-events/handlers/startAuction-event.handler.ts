@@ -45,7 +45,9 @@ export class StartAuctionEventHandler {
 
     if (!marketplace) return;
     this.logger.log(
-      `Auction listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     const auction = await this.saveAuction(topics, marketplace, hash);
 
