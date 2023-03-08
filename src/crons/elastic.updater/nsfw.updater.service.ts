@@ -234,11 +234,13 @@ export class NsfwUpdaterService {
     );
   }
   private async triggerMultipleInvalidation(identifiers: string[]) {
-    await this.cacheEventsPublisher.publish(
-      new ChangedEvent({
-        id: identifiers,
-        type: CacheEventTypeEnum.AssetsRefresh,
-      }),
-    );
+    if (identifiers?.length) {
+      await this.cacheEventsPublisher.publish(
+        new ChangedEvent({
+          id: identifiers,
+          type: CacheEventTypeEnum.AssetsRefresh,
+        }),
+      );
+    }
   }
 }
