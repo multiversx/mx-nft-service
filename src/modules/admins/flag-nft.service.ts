@@ -238,12 +238,14 @@ export class FlagNftService {
   }
 
   private async triggerMultipleInvalidation(identifiers: string[]) {
-    await this.cacheEventPublisherService.publish(
-      new ChangedEvent({
-        id: identifiers,
-        type: CacheEventTypeEnum.AssetsRefresh,
-      }),
-    );
+    if (identifiers?.length) {
+      await this.cacheEventPublisherService.publish(
+        new ChangedEvent({
+          id: identifiers,
+          type: CacheEventTypeEnum.AssetsRefresh,
+        }),
+      );
+    }
   }
 
   private getNftMedia(nft: Asset): NftMedia | undefined {
