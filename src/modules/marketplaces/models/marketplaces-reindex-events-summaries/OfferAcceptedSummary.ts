@@ -1,12 +1,19 @@
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
+import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
 import { AssetOfferEnum } from 'src/modules/assets/models/AssetOfferEnum';
 import { AcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/acceptOffer.event';
 import { AcceptOfferDeadrareEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferDeadrare.event';
 import { AcceptOfferFrameitEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferFrameit.event';
 import { AcceptOfferXoxnoEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferXoxno.event';
+import { ElrondSwapAcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-acceptOffer.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
-import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
+import {
+  DEADRARE_KEY,
+  ELRONDNFTSWAP_KEY,
+  FRAMEIT_KEY,
+  XOXNO_KEY,
+} from 'src/utils/constants';
 import { Marketplace } from '../Marketplace.dto';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
@@ -27,6 +34,7 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
 
   paymentToken: string;
   paymentNonce: number;
+
   price: string;
 
   constructor(init?: Partial<OfferAcceptedSummary>) {
@@ -41,6 +49,10 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
   ): OfferAcceptedSummary {
     const topics = this.getTopics(event, marketplace);
 
+    if (!topics) {
+      return;
+    }
+
     return new OfferAcceptedSummary({
       timestamp: event.timestamp,
       blockHash: tx?.blockHash,
@@ -49,7 +61,7 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
       identifier: `${topics.collection}-${topics.nonce}`,
       itemsCount: topics.nrOfferTokens.toString(),
       offerId: topics.offerId.toString(),
-      auctionId: topics?.auctionId,
+      auctionId: topics.auctionId,
       address: topics.offerOwner,
       sender: topics.nftOwner,
       price: topics.paymentAmount,
@@ -79,6 +91,10 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
 
     if (marketplace.key === FRAMEIT_KEY) {
       return new AcceptOfferFrameitEvent(genericEvent).getTopics();
+    }
+
+    if (marketplace.key === ELRONDNFTSWAP_KEY) {
+      return new ElrondSwapAcceptOfferEvent(genericEvent).getTopics();
     }
 
     return new AcceptOfferEvent(genericEvent).getTopics();
