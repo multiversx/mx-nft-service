@@ -85,7 +85,7 @@ export class AnalyticsService {
 
   private async getTrendingCollections(): Promise<CollectionVolumeLast24[]> {
     const tokensWithPrice = await this.getTokensWithDetails();
-    const collections = this.getDataGroupedByCollectionAndToke();
+    const collections = this.getDataGroupedByCollectionAndToken();
     let trending = [];
     for (const collection of collections) {
       let priceUsd: BigNumber = new BigNumber(0);
@@ -100,7 +100,7 @@ export class AnalyticsService {
           priceUsd = priceUsd.plus(
             computeUsd(
               tokenDetails[0].usdPrice,
-              token.sum.toString(),
+              token.sum,
               tokenDetails[0].decimals,
             ),
           );
@@ -163,7 +163,7 @@ export class AnalyticsService {
     return { scrollPage, lastBlockLogs };
   }
 
-  private getDataGroupedByCollectionAndToke() {
+  private getDataGroupedByCollectionAndToken() {
     return this.data
       .groupBy((x) => x.collection, true)
       .map((group: { key: any; values: any[] }) => ({
@@ -172,9 +172,9 @@ export class AnalyticsService {
           .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
           .map((group: { key: any; values: any[] }) => ({
             paymentToken: group.key,
-            sum: group.values.sumBigInt((x: { value: BigInt }) =>
-              BigInt(x.value.toString()),
-            ),
+            sum: group.values
+              .sumBigInt((x: { value: BigInt }) => BigInt(x.value.toString()))
+              .toString(),
           })),
       }));
   }
