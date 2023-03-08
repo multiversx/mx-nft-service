@@ -1,3 +1,4 @@
+import { Locker } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import {
@@ -6,7 +7,6 @@ import {
 } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
-import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class ClaimableAuctionsService {

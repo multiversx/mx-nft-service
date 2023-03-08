@@ -35,7 +35,9 @@ export class UpdatePriceEventHandler {
       topics.collection,
     );
     this.logger.log(
-      `Update price event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${updatePriceEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       parseInt(topics.auctionId, 16),

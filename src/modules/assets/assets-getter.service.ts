@@ -1,16 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxApiService, MxElasticService, RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { MxApiService, MxElasticService } from 'src/common';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
 import { AssetsQuery } from '.';
 import { Asset, CollectionType } from './models';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
@@ -19,17 +17,18 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import {
+  Constants,
   ElasticQuery,
   ElasticSortOrder,
   QueryConditionOptions,
   QueryOperator,
   QueryType,
-} from '@elrondnetwork/erdnest';
+  RedisCacheService,
+} from '@multiversx/sdk-nestjs';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 
 @Injectable()
 export class AssetsGetterService {
-  private redisClient: Redis.Redis;
   constructor(
     private apiService: MxApiService,
     private collectionsService: CollectionsGetterService,
@@ -42,11 +41,7 @@ export class AssetsGetterService {
     private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getAssetsForUser(
     address: string,
@@ -227,12 +222,10 @@ export class AssetsGetterService {
   ): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      const getAssets = () => this.getAllAssets(query, countQuery);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
-        getAssets,
-        5 * TimeConstants.oneSecond,
+        () => this.getAllAssets(query, countQuery),
+        5 * Constants.oneSecond(),
       );
     } catch (error) {
       this.logger.error('An error occurred while get assets', {
@@ -422,21 +415,25 @@ export class AssetsGetterService {
   private async addToCache(response: CollectionType<Asset>) {
     if (response?.count && response?.items) {
       const assetsRarity = this.getAssetsWithRarity(response);
-      await this.assetRarityLoader.batchRarity(
-        assetsRarity?.map((a) => a.identifier),
-        assetsRarity?.groupBy((asset) => asset.identifier),
-      );
+      if (assetsRarity?.length > 0)
+        await this.assetRarityLoader.batchRarity(
+          assetsRarity?.map((a) => a.identifier),
+          assetsRarity?.groupBy((asset) => asset.identifier),
+        );
       let assetsWithScamInfo = response.items?.filter((x) => x?.scamInfo);
-      await this.assetScamLoader.batchScamInfo(
-        assetsWithScamInfo?.map((a) => a.identifier),
-        assetsWithScamInfo?.groupBy((asset) => asset.identifier),
-      );
+
+      if (assetsWithScamInfo?.length > 0)
+        await this.assetScamLoader.batchScamInfo(
+          assetsWithScamInfo?.map((a) => a.identifier),
+          assetsWithScamInfo?.groupBy((asset) => asset.identifier),
+        );
 
       let assetsWithSupply = response.items?.filter((x) => x?.supply);
-      await this.assetSupplyLoader.batchSupplyInfo(
-        assetsWithSupply?.map((a) => a.identifier),
-        assetsWithSupply?.groupBy((asset) => asset.identifier),
-      );
+      if (assetsWithSupply?.length > 0)
+        await this.assetSupplyLoader.batchSupplyInfo(
+          assetsWithSupply?.map((a) => a.identifier),
+          assetsWithSupply?.groupBy((asset) => asset.identifier),
+        );
     }
   }
 

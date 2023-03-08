@@ -1,15 +1,22 @@
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { OrderStatusEnum } from '../../modules/orders/models';
 import { OrderEntity } from '.';
 import { QueryRequest } from 'src/modules/common/filters/QueryRequest';
 import FilterQueryBuilder from 'src/modules/common/filters/FilterQueryBuilder';
 import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { getOrdersForAuctions } from '../auctions/sql.queries';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
-@EntityRepository(OrderEntity)
-export class OrdersRepository extends Repository<OrderEntity> {
+@Injectable()
+export class OrdersRepository {
+  constructor(
+    @InjectRepository(OrderEntity)
+    private ordersRepository: Repository<OrderEntity>,
+  ) {}
   async getActiveOrderForAuction(auctionId: number): Promise<OrderEntity> {
-    return await this.createQueryBuilder('order')
+    return await this.ordersRepository
+      .createQueryBuilder('order')
       .where(`order.auctionId = :id and order.status='active'`, {
         id: auctionId,
       })
@@ -17,7 +24,8 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async getActiveOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
-    return await this.createQueryBuilder('order')
+    return await this.ordersRepository
+      .createQueryBuilder('order')
       .where(`order.auctionId = :id and order.status='active'`, {
         id: auctionId,
       })
@@ -27,7 +35,8 @@ export class OrdersRepository extends Repository<OrderEntity> {
   async getOrdersByAuctionIdsOrderByPrice(
     auctionIds: number[],
   ): Promise<OrderEntity[]> {
-    return await this.createQueryBuilder('orders')
+    return await this.ordersRepository
+      .createQueryBuilder('orders')
       .orderBy('priceAmountDenominated', 'DESC')
       .where(`auctionId IN(:...auctionIds)`, {
         auctionIds: auctionIds,
@@ -36,7 +45,7 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async getOrdersByComposedKeys(auctionIds: string[]): Promise<any[]> {
-    return await this.query(
+    return await this.ordersRepository.query(
       getOrdersForAuctions(
         auctionIds.map((value) => value.split('_')[0]),
         parseInt(auctionIds[0].split('_')[1]),
@@ -46,7 +55,8 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async getLastOrdersByAuctionIds(auctionIds: number[]): Promise<any[]> {
-    return await this.createQueryBuilder('orders')
+    return await this.ordersRepository
+      .createQueryBuilder('orders')
       .orderBy('priceAmountDenominated', 'DESC')
       .where(
         `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
@@ -58,7 +68,8 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
-    const orders = await this.createQueryBuilder('orders')
+    const orders = await this.ordersRepository
+      .createQueryBuilder('orders')
       .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
         auctionIds: auctionIds,
       })
@@ -71,7 +82,7 @@ export class OrdersRepository extends Repository<OrderEntity> {
     queryRequest: QueryRequest,
   ): Promise<[OrderEntity[], number]> {
     const filterQueryBuilder = new FilterQueryBuilder<OrderEntity>(
-      this,
+      this.ordersRepository,
       queryRequest.filters,
     );
     const queryBuilder: SelectQueryBuilder<OrderEntity> =
@@ -84,13 +95,13 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   async saveOrder(order: OrderEntity) {
-    return await this.save(order);
+    return await this.ordersRepository.save(order);
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
     order.status = status;
     order.modifiedDate = new Date(new Date().toUTCString());
-    return await this.save(order);
+    return await this.ordersRepository.save(order);
   }
 
   async rollbackOrdersByHash(blockHash: string) {
@@ -101,23 +112,24 @@ export class OrdersRepository extends Repository<OrderEntity> {
     for (let order of ordersByHash) {
       const orders = await this.getOrdersForAuction(order.auctionId);
       if (orders.length === 1) {
-        return this.delete(orders[0].id);
+        return this.ordersRepository.delete(orders[0].id);
       }
       const indexOf = orders.findIndex((o) => o.id === order.id);
       if (indexOf === orders.length - 1) {
-        await this.delete(orders[indexOf].id);
+        await this.ordersRepository.delete(orders[indexOf].id);
         await this.updateOrderWithStatus(
           orders[indexOf - 1],
           OrderStatusEnum.Active,
         );
       } else {
-        await this.delete(orders[indexOf].id);
+        await this.ordersRepository.delete(orders[indexOf].id);
       }
     }
   }
 
   async deleteOrdersByAuctionId(auctionIds: number[]) {
-    return await this.createQueryBuilder()
+    return await this.ordersRepository
+      .createQueryBuilder()
       .delete()
       .from(OrderEntity)
       .where('auctionId in (:ids)', { ids: auctionIds })
@@ -125,11 +137,15 @@ export class OrdersRepository extends Repository<OrderEntity> {
   }
 
   private getOrdersByBlockHash(blockHash: string): Promise<OrderEntity[]> {
-    return this.createQueryBuilder().where({ blockHash: blockHash }).getMany();
+    return this.ordersRepository
+      .createQueryBuilder()
+      .where({ blockHash: blockHash })
+      .getMany();
   }
 
   private getOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
-    return this.createQueryBuilder('order')
+    return this.ordersRepository
+      .createQueryBuilder('order')
       .where(`order.auctionId = :id`, {
         id: auctionId,
       })

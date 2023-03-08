@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { ExternalAuctionEventEnum } from '../assets/models';
 import { MarketplaceTypeEnum } from '../marketplaces/models/MarketplaceType.enum';
 import { AcceptOfferEvent } from '../rabbitmq/entities/auction/acceptOffer.event';
 import { AcceptOfferDeadrareEvent } from '../rabbitmq/entities/auction/acceptOfferDeadrare.event';
@@ -17,7 +18,13 @@ export class AcceptOfferEventParser {
     );
     let acceptOfferEvent = undefined;
     let topics = undefined;
-    if (marketplace.key === XOXNO_KEY) {
+    if (
+      marketplace.key === XOXNO_KEY &&
+      !(
+        Buffer.from(event.topics[0], 'base64').toString() ===
+        ExternalAuctionEventEnum.UserDeposit
+      )
+    ) {
       acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       topics = acceptOfferEvent.getTopics();
     }

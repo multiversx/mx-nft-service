@@ -1,5 +1,5 @@
-import { Address } from '@elrondnetwork/erdjs';
-import { NumberUtils } from '@elrondnetwork/erdnest';
+import { Address } from '@multiversx/sdk-core';
+import { NumberUtils } from '@multiversx/sdk-nestjs';
 
 export class ElrondSwapUpdateTopics {
   private auctionId: string;

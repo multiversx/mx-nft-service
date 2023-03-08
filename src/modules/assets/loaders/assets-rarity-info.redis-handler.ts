@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
-import { TimeConstants } from 'src/utils/time-utils';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 
@@ -27,7 +27,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
     return [
       new RedisValue({
         values: redisValues,
-        ttl: TimeConstants.oneDay,
+        ttl: Constants.oneDay(),
       }),
     ];
   }
@@ -35,7 +35,7 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
   batchRarity = async (keys: string[], data: any) => {
     const cacheKeys = this.getCacheKeys(keys);
     const getDataFromRedis: { key: string; value: any }[] =
-      await this.redisCacheService.batchGetCache(this.redisClient, cacheKeys);
+      await this.redisCacheService.getMany(cacheKeys);
     const returnValues: { key: string; value: any }[] =
       this.mapReturnValues<string>(keys, getDataFromRedis);
     const getNotCachedKeys = returnValues
@@ -48,11 +48,10 @@ export class AssetRarityInfoRedisHandler extends RedisKeyValueDataloaderHandler<
         const cacheKeys = this.getCacheKeys(
           val.values.map((value) => value.key),
         );
-        await this.redisCacheService.batchSetCache(
-          this.redisClient,
+        await this.redisCacheService.setMany(
           cacheKeys,
           val.values,
-          30 * TimeConstants.oneMinute,
+          30 * Constants.oneMinute(),
         );
       }
       return returnValues;

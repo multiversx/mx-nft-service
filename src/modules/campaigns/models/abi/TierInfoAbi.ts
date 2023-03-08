@@ -1,4 +1,4 @@
-import { BytesValue, U32Value } from '@elrondnetwork/erdjs';
+import { BytesValue, U32Value } from '@multiversx/sdk-core';
 import { MintPrice } from './MintPriceAbi';
 
 export interface TierInfoAbi {

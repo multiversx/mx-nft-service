@@ -1,4 +1,4 @@
-import { PerformanceProfiler } from '@elrondnetwork/erdnest';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';

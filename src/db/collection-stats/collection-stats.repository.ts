@@ -1,9 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
-import { EntityManager, EntityRepository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { CollectionStatsEntity } from './collection-stats';
 import { getCollectionStats } from './collection-stats.querries';
 
-@EntityRepository()
+@Injectable()
 export class CollectionStatsRepository {
   constructor(public readonly manager: EntityManager) {}
   async getStats(

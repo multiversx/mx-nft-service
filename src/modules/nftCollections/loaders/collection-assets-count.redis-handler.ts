@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
-import { TimeConstants } from 'src/utils/time-utils';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class CollectionAssetsCountRedisHandler extends RedisKeyValueDataloaderHandler<string> {
   constructor(redisCacheService: RedisCacheService) {
-    super(
-      redisCacheService,
-      'collectionAssetsCount',
-      cacheConfig.collectionsRedisClientName,
-    );
+    super(redisCacheService, CacheInfo.CollectionAssetsCount.key);
   }
 
   mapValues(
@@ -29,6 +24,6 @@ export class CollectionAssetsCountRedisHandler extends RedisKeyValueDataloaderHa
       }
     }
 
-    return [new RedisValue({ values: redisValues, ttl: TimeConstants.oneDay })];
+    return [new RedisValue({ values: redisValues, ttl: Constants.oneDay() })];
   }
 }

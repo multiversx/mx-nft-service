@@ -1,7 +1,6 @@
 import { envload } from './env_load';
 envload();
 import * as config from 'config';
-import { CachingConfig } from '../common/models';
 
 /**
  * Wallet object configuration.
@@ -12,7 +11,6 @@ export const mxConfig = config.get('multiversX');
  * Caching time config.
  * The values are in seconds
  */
-export const cacheConfig: CachingConfig = config.get('caching');
 
 export const fileStorage = config.get('fileStorage');
 export const gas = config.get('gas');

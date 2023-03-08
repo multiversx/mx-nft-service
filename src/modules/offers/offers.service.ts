@@ -27,24 +27,18 @@ export class OffersService {
       return await this.getOffersForCollection(filters, offset, limit);
     }
 
-    return await this.getOrSetOffers(filters, offset, limit);
+    return await this.getOffersFromDb(filters, offset, limit);
   }
 
-  private async getOrSetOffers(
+  private async getOffersFromDb(
     filters: OffersFilters,
     offset: number,
     limit: number,
   ): Promise<[Offer[], number]> {
-    let [offers, count] = await this.offersCachingService.getOrSetOffers(
-      filters,
+    let [offers, count] = await this.persistenceService.getOffers(
+      OffersFiltersForDb.formInputFilters(filters),
       offset,
       limit,
-      () =>
-        this.persistenceService.getOffers(
-          OffersFiltersForDb.formInputFilters(filters),
-          offset,
-          limit,
-        ),
     );
     return [offers.map((o) => Offer.fromEntity(o)), count];
   }

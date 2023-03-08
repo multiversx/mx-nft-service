@@ -11,31 +11,25 @@ import {
   TokenIdentifierValue,
   TokenPayment,
   U32Value,
-} from '@elrondnetwork/erdjs';
-import { cacheConfig, mxConfig, gas } from '../../config';
+} from '@multiversx/sdk-core';
+import { mxConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
-import { ContractLoader } from '@elrondnetwork/erdnest/lib/src/sc.interactions/contract.loader';
+import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
-import {
-  MxProxyService,
-  getSmartContract,
-  RedisCacheService,
-} from 'src/common';
+import { MxProxyService, getSmartContract } from 'src/common';
 import {
   PrimarySaleTimeAbi,
   TicketInfoAbi,
 } from './models/PrimarySaleTimestamp.abi';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class PrimarySaleService {
-  private redisClient: Redis.Redis;
   private contract = new ContractLoader(
     './src/abis/primary-sales-sc.abi.json',
     'Sales',
@@ -47,9 +41,6 @@ export class PrimarySaleService {
     private redisCacheService: RedisCacheService,
     private logger: Logger,
   ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
     this.parser = new ResultsParser();
   }
 
@@ -123,10 +114,9 @@ export class PrimarySaleService {
         collectionIdentifier,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getPricePerTicketMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting price per ticket.', {
@@ -137,9 +127,7 @@ export class PrimarySaleService {
     }
   }
 
-  async getPricePerTicketMap(
-    collectionIdentifier: string,
-  ): Promise<TransactionNode> {
+  async getPricePerTicketMap(collectionIdentifier: string): Promise<string> {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
@@ -160,10 +148,9 @@ export class PrimarySaleService {
         collectionIdentifier,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMaxNftPerWalletMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -177,9 +164,7 @@ export class PrimarySaleService {
     }
   }
 
-  async getMaxNftPerWalletMap(
-    collectionIdentifier: string,
-  ): Promise<TransactionNode> {
+  async getMaxNftPerWalletMap(collectionIdentifier: string): Promise<string> {
     const contract = await this.contract.getContract(
       process.env.HOLORIDE_PRIMARY_SC,
     );
@@ -200,10 +185,9 @@ export class PrimarySaleService {
         collectionIdentifier,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getTimestampsMap(collectionIdentifier),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -225,10 +209,9 @@ export class PrimarySaleService {
         collectionIdentifier,
       );
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
@@ -256,9 +239,9 @@ export class PrimarySaleService {
     const addresses: Address[] = response?.firstValue?.valueOf();
     const claimmers = addresses.map((x) => x.bech32());
     if (claimmers.includes(address)) {
-      return [true, TimeConstants.oneHour];
+      return [true, Constants.oneHour()];
     }
-    return [false, TimeConstants.oneSecond];
+    return [false, Constants.oneSecond()];
   }
 
   async getMyTicketsMap(
@@ -282,14 +265,13 @@ export class PrimarySaleService {
 
   async isWhitelisted(
     address: string,
-  ): Promise<{ isWhitelisted: boolean; message: string }> {
+  ): Promise<{ isWhitelisted: boolean; message?: string }> {
     try {
       const cacheKey = generateCacheKeyFromParams('isWhitelisted', address);
       return await this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.isWhitelistedMap(address),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {
@@ -309,10 +291,7 @@ export class PrimarySaleService {
         address,
         collectionIdentifier,
       );
-      const cachedValue = await this.redisCacheService.get(
-        this.redisClient,
-        cacheKey,
-      );
+      const cachedValue = await this.redisCacheService.get<boolean>(cacheKey);
       if (cachedValue) {
         return cachedValue;
       }
@@ -320,7 +299,7 @@ export class PrimarySaleService {
         collectionIdentifier,
         address,
       );
-      await this.redisCacheService.set(this.redisClient, cacheKey, value, ttl);
+      await this.redisCacheService.set(cacheKey, value, ttl);
       return value;
     } catch (err) {
       this.logger.error('An error occurred while getting has claimed status.', {

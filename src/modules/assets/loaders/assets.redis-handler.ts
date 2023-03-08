@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { Asset, NftTypeEnum } from '../models';
 
 @Injectable()
@@ -33,8 +33,8 @@ export class AssetsRedisHandler extends RedisKeyValueDataloaderHandler<string> {
 
     response = [
       ...response,
-      new RedisValue({ values: finalNfts, ttl: TimeConstants.oneDay }),
-      new RedisValue({ values: defaultNfts, ttl: TimeConstants.oneMinute }),
+      new RedisValue({ values: finalNfts, ttl: Constants.oneDay() }),
+      new RedisValue({ values: defaultNfts, ttl: Constants.oneMinute() }),
     ];
     return response;
   }

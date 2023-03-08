@@ -2,7 +2,7 @@ import DataLoader = require('dataloader');
 import { BaseProvider } from '../../common/base.loader';
 import { AssetScamInfoRedisHandler } from './assets-scam-info.redis-handler';
 import { Injectable, Scope } from '@nestjs/common';
-import { Asset } from '../models';
+import { Asset, ScamInfoTypeEnum } from '../models';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { ScamInfo } from '../models/ScamInfo.dto';
 
@@ -30,7 +30,7 @@ export class AssetScamInfoProvider extends BaseProvider<string> {
           identifier: nft.identifier,
           scamInfo: nft.type
             ? new ScamInfo({
-                type: nft.type,
+                type: ScamInfoTypeEnum[nft.type],
                 info: nft.info,
               })
             : null,

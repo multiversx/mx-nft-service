@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
-import { RedisCacheService } from 'src/common';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
+
 import { PriceRange } from 'src/db/auctions/price-range';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { AuctionWithBidsCount } from 'src/db/auctions/auctionWithBidCount.dto';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AccountsStatsCachingService } from 'src/modules/account-stats/accounts-stats.caching.service';
 import { AssetAuctionsCountRedisHandler } from 'src/modules/assets/loaders/asset-auctions-count.redis-handler';
@@ -23,7 +20,6 @@ import { Token } from 'src/common/services/mx-communication/models/Token.model';
 
 @Injectable()
 export class AuctionsCachingService {
-  private redisClient: Redis.Redis;
   constructor(
     private auctionsLoader: AuctionsForAssetRedisHandler,
     private lowestAuctionLoader: LowestAuctionRedisHandler,
@@ -33,15 +29,7 @@ export class AuctionsCachingService {
     private accountStatsCachingService: AccountsStatsCachingService,
     private internalMarketplaceRedisHandler: InternalMarketplaceRedisHandler,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.auctionsRedisClientName,
-    );
-  }
-
-  public async invalidateCache(): Promise<void> {
-    return await this.redisCacheService.flushDb(this.redisClient);
-  }
+  ) {}
 
   public async invalidatePersistentCaching(
     identifier: string,
@@ -64,9 +52,8 @@ export class AuctionsCachingService {
   }
 
   public async invalidateCacheByPattern(address: string) {
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      generateCacheKeyFromParams('claimable_auctions', address),
+    await this.redisCacheService.deleteByPattern(
+      `${generateCacheKeyFromParams('claimable_auctions', address)}*`,
     );
   }
 
@@ -75,10 +62,9 @@ export class AuctionsCachingService {
     getAuctions: () => any,
   ): Promise<[Auction[], number, PriceRange]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getAuctionsCacheKey(queryRequest),
       () => getAuctions(),
-      30 * TimeConstants.oneSecond,
+      30 * Constants.oneSecond(),
     );
   }
 
@@ -87,10 +73,9 @@ export class AuctionsCachingService {
     getData: () => any,
   ): Promise<{ minBid: string; maxBid: string }> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       generateCacheKeyFromParams('minMaxPrice', token),
       () => getData(),
-      5 * TimeConstants.oneMinute,
+      5 * Constants.oneMinute(),
     );
   }
 
@@ -101,10 +86,9 @@ export class AuctionsCachingService {
     getData: () => any,
   ): Promise<[Auction[], number]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getClaimableAuctionsCacheKey(key, limit, offset),
       () => getData(),
-      30 * TimeConstants.oneSecond,
+      30 * Constants.oneSecond(),
     );
   }
 
@@ -114,7 +98,6 @@ export class AuctionsCachingService {
     collectionIdentifier?: string,
   ): Promise<Token[]> {
     return this.redisCacheService.getOrSet(
-      this.redisClient,
       this.getCurrentPaymentTokensCacheKey(
         marketplaceKey,
         collectionIdentifier,

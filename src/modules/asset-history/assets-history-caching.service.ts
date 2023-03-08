@@ -1,21 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
-import { cacheConfig } from 'src/config';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { AssetHistoryLog } from './models';
-import * as Redis from 'ioredis';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class AssetsHistoryCachingService {
-  private redisClient: Redis.Redis;
-
-  constructor(private readonly redisCacheService: RedisCacheService) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.assetsRedisClientName,
-    );
-  }
+  constructor(private readonly redisCacheService: RedisCacheService) {}
 
   async getOrSetHistoryLog(
     collection: string,
@@ -31,7 +23,6 @@ export class AssetsHistoryCachingService {
       timestamp,
     );
     return await this.redisCacheService.getOrSet(
-      this.redisClient,
       cacheKey,
       getOrSetHistoryLog,
       CacheInfo.AssetHistory.ttl,
@@ -46,10 +37,7 @@ export class AssetsHistoryCachingService {
       collection,
       nonce,
     );
-    await this.redisCacheService.delByPattern(
-      this.redisClient,
-      cacheKeyPattern,
-    );
+    await this.redisCacheService.deleteByPattern(`${cacheKeyPattern}*`);
   }
 
   getAssetHistoryCacheKey(

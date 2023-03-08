@@ -6,7 +6,7 @@ import {
   ContractFunction,
   TokenPayment,
   TypedValue,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core';
 import { mxConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { getSmartContract } from 'src/common';

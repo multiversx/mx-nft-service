@@ -1,4 +1,4 @@
-import { BigUIntValue, TokenIdentifierValue } from '@elrondnetwork/erdjs';
+import { BigUIntValue, TokenIdentifierValue } from '@multiversx/sdk-core';
 
 export interface MintPrice {
   token_id: TokenIdentifierValue;

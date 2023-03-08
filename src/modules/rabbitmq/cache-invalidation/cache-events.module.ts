@@ -37,4 +37,4 @@ import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loader
   ],
   exports: [],
 })
-export class CacheEventsModule { }
+export class CacheEventsModule {}

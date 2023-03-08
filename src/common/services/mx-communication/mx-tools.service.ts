@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
-import { ApiConfigService } from 'src/utils/api.config.service';
-import { NativeAuthSigner } from '@elrondnetwork/erdnest/lib/src/utils/native.auth.signer';
+import { NativeAuthSigner } from '@multiversx/sdk-nestjs/lib/src/utils/native.auth.signer';
 import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
+import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 
 @Injectable()
 export class MxToolsService {
@@ -19,7 +19,7 @@ export class MxToolsService {
   ) {
     this.url = this.apiConfigService.getToolsUrl();
     this.nativeAuthSigner = new NativeAuthSigner({
-      host: 'NftService',
+      origin: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
       signerPrivateKeyPath: getFilePathFromDist(mxConfig.pemFileName),
     });

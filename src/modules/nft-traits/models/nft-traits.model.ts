@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { Field, InputType } from '@nestjs/graphql';
 import { Nft } from 'src/common';
 

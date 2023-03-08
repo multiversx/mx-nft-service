@@ -1,4 +1,4 @@
-import { Account, Address } from '@elrondnetwork/erdjs';
+import { Account, Address } from '@multiversx/sdk-core';
 import BigNumber from 'bignumber.js';
 
 declare global {

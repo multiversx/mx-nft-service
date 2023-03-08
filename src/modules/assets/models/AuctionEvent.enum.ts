@@ -28,6 +28,7 @@ export enum ExternalAuctionEventEnum {
   AcceptGlobalOffer = 'acceptGlobalOffer',
   ClaimBackNft = 'claimBackNft',
   EndTokenEvent = 'end_auction_event',
+  UserDeposit = 'user_deposit',
 }
 
 export enum ElrondNftsSwapAuctionEventEnum {

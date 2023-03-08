@@ -1,5 +1,5 @@
-import { BinaryUtils } from '@elrondnetwork/erdnest';
-import { Address } from '@elrondnetwork/erdjs/out';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { Address } from '@multiversx/sdk-core';
 import '../../../../utils/extensions';
 
 export class TransferEventsTopics {

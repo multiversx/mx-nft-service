@@ -1,9 +1,9 @@
+import { Locker } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { OfferStatusEnum } from 'src/modules/offers/models';
-import { Locker } from 'src/utils/locker';
 
 @Injectable()
 export class ExpiredOffersService {
