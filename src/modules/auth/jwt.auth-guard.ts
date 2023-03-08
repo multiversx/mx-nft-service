@@ -51,7 +51,6 @@ export class JwtAuthenticateGuard implements CanActivate {
         });
       });
     } catch (error) {
-      this.logger.warn(error);
       return false;
     }
 
