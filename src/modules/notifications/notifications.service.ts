@@ -15,7 +15,7 @@ import {
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { OrderEntity } from 'src/db/orders';
 import { OfferEntity } from 'src/db/offers';
-import { Address } from '@elrondnetwork/erdjs';
+import { Address } from '@multiversx/sdk-core';
 import { NftTypeEnum } from '../assets/models';
 import { AuctionsGetterService } from '../auctions';
 
@@ -369,10 +369,7 @@ export class NotificationsService {
     });
   }
 
-  private triggerClearCache(
-    auctions: AuctionEntity[],
-    orders: OrderEntity[],
-  ) {
+  private triggerClearCache(auctions: AuctionEntity[], orders: OrderEntity[]) {
     if (!auctions?.length && !orders?.length) return;
     let addreses = auctions.map((a) => a.ownerAddress);
     for (const orderGroup in orders) {

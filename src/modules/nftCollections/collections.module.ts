@@ -10,8 +10,6 @@ import { CollectionAssetsCountProvider } from './loaders/collection-assets-count
 import { CollectionAssetsCountRedisHandler } from './loaders/collection-assets-count.redis-handler';
 import { CollectionAssetsResolver } from './collection-assets.resolver';
 import { CollectionsMutationsResolver } from './collections-mutations.resolver';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { LocalCacheService } from 'src/common/services/caching/local.cache.service';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { MxCommunicationModule } from 'src/common/services/mx-communication/mx-communication.module';
@@ -30,6 +28,7 @@ import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
 import { BlacklistedCollectionsModule } from '../blacklist/blacklisted-collections.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
+import { CollectionAssetsModelResolver } from './collection-assets-model.resolver';
 
 @Module({
   providers: [
@@ -42,12 +41,11 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     CollectionAssetsCountRedisHandler,
     CollectionsQueriesResolver,
     CollectionsMutationsResolver,
+    CollectionAssetsModelResolver,
     AccountsRedisHandler,
     AccountsProvider,
     OnSaleAssetsCountForCollectionProvider,
     OnSaleAssetsCountForCollectionRedisHandler,
-    CachingService,
-    LocalCacheService,
     CollectionsNftsRedisHandler,
     CollectionsNftsCountRedisHandler,
     ArtistAddressProvider,
@@ -67,10 +65,6 @@ import { AnalyticsModule } from '../analytics/analytics.module';
     DocumentDbModule,
     BlacklistedCollectionsModule,
   ],
-  exports: [
-    CollectionsTransactionsService,
-    CollectionsGetterService,
-    LocalCacheService,
-  ],
+  exports: [CollectionsTransactionsService, CollectionsGetterService],
 })
 export class CollectionsModuleGraph {}

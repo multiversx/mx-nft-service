@@ -47,7 +47,9 @@ export class BidEventHandler {
     }
     if (!marketplace) return;
     this.logger.log(
-      `Bid event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     const auction =
       await this.auctionsGetterService.getAuctionByIdAndMarketplace(

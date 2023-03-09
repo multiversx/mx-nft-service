@@ -4,7 +4,6 @@ import {
 } from '@golevelup/nestjs-rabbitmq';
 import { applyDecorators } from '@nestjs/common';
 import { RabbitConsumerConfig } from './rabbit-config';
-import * as uuid from 'uuid';
 
 /** Competing Consumer which will be handled by only one instance of the microservice.
  * Make sure the exchange exists.
@@ -45,11 +44,11 @@ export const PublicRabbitConsumer = (config: RabbitConsumerConfig) => {
   return applyDecorators(
     RabbitSubscribe({
       connection: connection ?? 'default',
-      queue: `${queueName}_${uuid.v4()}`,
+      queue: queueName,
       exchange,
       routingKey: '',
       queueOptions: {
-        autoDelete: true,
+        autoDelete: false,
       },
     }),
   );

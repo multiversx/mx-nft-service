@@ -12,7 +12,7 @@ import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache
 import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { AuthModule } from '../auth/auth.module';
-import { ReportNftsModuleGraph } from '../report-nfts/reports-nft.module';
+import { ReportsModuleGraph } from '../reports/reports.module';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { ReportNftsModuleGraph } from '../report-nfts/reports-nft.module';
     NftTraitsModule,
     MarketplacesModuleGraph,
     AuthModule,
-    ReportNftsModuleGraph,
+    ReportsModuleGraph,
   ],
   providers: [
     Logger,

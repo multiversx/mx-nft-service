@@ -1,14 +1,20 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { MarketplaceEntity } from './marketplace.entity';
 
-@EntityRepository(MarketplaceEntity)
-export class MarketplaceRepository extends Repository<MarketplaceEntity> {
+@Injectable()
+export class MarketplaceRepository {
+  constructor(
+    @InjectRepository(MarketplaceEntity)
+    private marketplaceRepository: Repository<MarketplaceEntity>,
+  ) {}
   async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
-    return await this.findAndCount();
+    return await this.marketplaceRepository.findAndCount();
   }
 
   async getMarketplaceByAddress(address: string): Promise<MarketplaceEntity> {
-    return await this.findOne({
+    return await this.marketplaceRepository.findOne({
       where: {
         address,
       },
@@ -18,7 +24,8 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
   async getMarketplacesByKeys(
     marketplaceKeys: string[],
   ): Promise<MarketplaceEntity[]> {
-    return await this.createQueryBuilder('marketplaces')
+    return await this.marketplaceRepository
+      .createQueryBuilder('marketplaces')
       .where('`key` IN(:...marketplaceKeys)', {
         marketplaceKeys: marketplaceKeys,
       })
@@ -28,7 +35,8 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
   async getMarketplacesByAddresses(
     addresses: string[],
   ): Promise<MarketplaceEntity[]> {
-    return await this.createQueryBuilder('fm')
+    return await this.marketplaceRepository
+      .createQueryBuilder('fm')
       .select('fm.address as address')
       .addSelect('fm.url as url')
       .addSelect('fm.name as name')
@@ -43,7 +51,7 @@ export class MarketplaceRepository extends Repository<MarketplaceEntity> {
     address: string,
     lastIndexTimestamp: number,
   ): Promise<void> {
-    await this.update(
+    await this.marketplaceRepository.update(
       { address: address },
       { lastIndexTimestamp: lastIndexTimestamp },
     );

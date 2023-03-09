@@ -6,7 +6,6 @@ import {
 } from 'src/modules/nft-traits/models/collection-traits.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModule } from 'src/common.module';
-import { ApiConfigService } from 'src/utils/api.config.service';
 
 import {
   NftScamInfoModel,
@@ -14,6 +13,7 @@ import {
 } from 'src/modules/scam/models/nft-scam-info.model';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { DocumentDbService } from './document-db.service';
+import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 
 @Global()
 @Module({

@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@elrondnetwork/erdnest';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';
@@ -32,7 +32,9 @@ export class UpdateListingEventHandler {
       topics.collection,
     );
     this.logger.log(
-      `Update listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${updateListingEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       parseInt(topics.auctionId, 16),

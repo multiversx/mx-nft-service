@@ -73,6 +73,7 @@ export class MarketplaceEventsService {
         case AuctionEventEnum.WithdrawEvent:
         case ElrondNftsSwapAuctionEventEnum.WithdrawSwap:
         case ExternalAuctionEventEnum.ClaimBackNft:
+        case ExternalAuctionEventEnum.ReturnListing:
           if (
             Buffer.from(event.topics[0], 'base64').toString() ===
             ExternalAuctionEventEnum.UpdateOffer
@@ -122,10 +123,14 @@ export class MarketplaceEventsService {
           break;
         }
         case ExternalAuctionEventEnum.AcceptOffer:
-          if (
-            Buffer.from(event.topics[0], 'base64').toString() ===
-            ExternalAuctionEventEnum.EndTokenEvent
-          ) {
+          const acceptOfferEventName = Buffer.from(
+            event.topics[0],
+            'base64',
+          ).toString();
+          if (acceptOfferEventName === ExternalAuctionEventEnum.UserDeposit) {
+            return;
+          }
+          if (acceptOfferEventName === ExternalAuctionEventEnum.EndTokenEvent) {
             await this.withdrawAuctionEventHandler.handle(
               event,
               hash,

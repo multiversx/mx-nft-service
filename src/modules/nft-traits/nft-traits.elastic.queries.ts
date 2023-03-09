@@ -5,7 +5,7 @@ import {
   RangeGreaterThan,
   RangeLowerThanOrEqual,
   ElasticSortOrder,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { constants } from 'src/config';
 import { NftTypeEnum } from '../assets/models';
 

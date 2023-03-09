@@ -10,7 +10,6 @@ import { ExpiredOffersService } from './expired.offers.service';
 @Module({
   imports: [
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-
     CommonModule,
     AuctionsModuleGraph,
     NotificationsModuleGraph,

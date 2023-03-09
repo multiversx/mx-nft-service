@@ -1,4 +1,4 @@
-import { Address } from '@elrondnetwork/erdjs/out';
+import { Address } from '@multiversx/sdk-core';
 import '../../../../utils/extensions';
 
 export class BuySftEventsTopics {

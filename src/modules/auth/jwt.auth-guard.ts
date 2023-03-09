@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verify } from 'jsonwebtoken';
-import { ApiConfigService } from 'src/utils/api.config.service';
+import { ApiConfigService } from '../common/api-config/api.config.service';
 import { AuthUtils } from './auth.utils';
 
 @Injectable()
@@ -37,22 +37,20 @@ export class JwtAuthenticateGuard implements CanActivate {
       const jwtSecret = this.apiConfigService.getJwtSecret();
 
       request.jwt = await new Promise((resolve, reject) => {
-        verify(jwt, jwtSecret, (err, decoded) => {
+        verify(jwt, jwtSecret, (err, decoded: any) => {
           if (err) {
             reject(err);
           }
-
           request.auth = {
             address: decoded.sub,
-            expires: decoded.exp,
-            issued: decoded.iat,
-            host: decoded.iss,
+            expires: decoded?.exp,
+            issued: decoded?.iat,
+            host: decoded?.iss,
           };
           resolve(request.auth);
         });
       });
     } catch (error) {
-      this.logger.error(error);
       return false;
     }
 

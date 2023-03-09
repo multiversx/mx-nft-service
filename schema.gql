@@ -293,7 +293,7 @@ enum AuctionTypeEnum {
 input BidActionArgs {
   auctionId: Int!
   identifier: String!
-  paymentTokenIdentifier: String = "EGLD"
+  paymentTokenIdentifier: String! = "EGLD"
   price: String!
 }
 
@@ -319,7 +319,7 @@ input BuyRandomNftActionArgs {
 input BuySftActionArgs {
   auctionId: Int!
   identifier: String!
-  paymentTokenIdentifier: String = "EGLD"
+  paymentTokenIdentifier: String! = "EGLD"
   price: String!
   quantity: String
 }
@@ -402,6 +402,10 @@ input ClaimTicketsArgs {
   collectionIdentifier: String!
 }
 
+input ClearReportCollectionInput {
+  collectionIdentifier: String!
+}
+
 input ClearReportInput {
   identifier: String!
 }
@@ -413,7 +417,14 @@ type Collection {
   artistFollowersCount: Int!
 
   """This will return only the first 10 assets"""
-  assets(filters: AssetsCollectionFilter, pagination: ConnectionArgs): AssetsResponse
+  assets(
+    filters: AssetsCollectionFilter
+
+    """
+    This filter will be removed in the next version, we return the latest 10 assets for this collection
+    """
+    pagination: ConnectionArgs
+  ): AssetsResponse
   canAddQuantity: Boolean
   canBurn: Boolean
   canCreate: Boolean
@@ -457,7 +468,7 @@ type CollectionAssetModel {
 }
 
 input CollectionAssetsRetriveCount {
-  size: Int = 4
+  size: Int! = 4
 }
 
 type CollectionBranding {
@@ -586,7 +597,7 @@ input CreateAuctionArgs {
   minBid: String!
   paymentToken: String!
   paymentTokenNonce: Int
-  quantity: String = "1"
+  quantity: String! = "1"
   startDate: String
 }
 
@@ -594,8 +605,8 @@ input CreateNftArgs {
   attributes: AttributeInput!
   collection: String!
   name: String!
-  quantity: String = "1"
-  royalties: String = "0"
+  quantity: String! = "1"
+  royalties: String! = "0"
 }
 
 input CreateOfferArgs {
@@ -604,8 +615,8 @@ input CreateOfferArgs {
   identifier: String!
   paymentAmount: String!
   paymentToken: String!
-  paymentTokenNonce: Int = 0
-  quantity: String = "1"
+  paymentTokenNonce: Int! = 0
+  quantity: String! = "1"
 }
 
 input CurrentPaymentTokensFilters {
@@ -697,7 +708,7 @@ input IssueCampaignArgs {
   collectionTicker: String!
   mediaTypes: MediaTypeEnum!
   mintEndTime: Int!
-  mintPriceToken: String = "EGLD"
+  mintPriceToken: String! = "EGLD"
   mintStartTime: Int!
   minterAddress: String!
   royalties: String!
@@ -707,10 +718,10 @@ input IssueCampaignArgs {
 }
 
 input IssueCollectionArgs {
-  canFreeze: Boolean = false
-  canPause: Boolean = false
-  canTransferNFTCreateRole: Boolean = false
-  canWipe: Boolean = false
+  canFreeze: Boolean! = false
+  canPause: Boolean! = false
+  canTransferNFTCreateRole: Boolean! = false
+  canWipe: Boolean! = false
   tokenName: String!
   tokenTicker: String!
 }
@@ -811,7 +822,10 @@ type Mutation {
   addBlacklistedCollection(collection: String!): Boolean!
   addFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   addLike(input: AddLikeArgs!): Boolean!
-  addReport(input: ReportNftInput!): Boolean!
+  addReport(
+    """This endpoint can be used to report a NFT"""
+    input: ReportNftInput!
+  ): Boolean!
   addSftQuantity(input: HandleQuantityArgs!): TransactionNode!
   bid(input: BidActionArgs!): TransactionNode!
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
@@ -821,6 +835,7 @@ type Mutation {
   claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
+  clearReportCollection(input: ClearReportCollectionInput!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
@@ -836,6 +851,10 @@ type Mutation {
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  reportCollection(
+    """This endpoint can be used to report a Collection"""
+    input: ReportCollectionInput!
+  ): Boolean!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
   setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
@@ -1170,6 +1189,10 @@ input RemoveLikeArgs {
   identifier: String!
 }
 
+input ReportCollectionInput {
+  collectionIdentifier: String!
+}
+
 input ReportNftInput {
   identifier: String!
 }
@@ -1257,7 +1280,7 @@ enum TagTypeEnum {
 
 input TagsFilter {
   searchTerm: String
-  tagType: TagTypeEnum = Nft
+  tagType: TagTypeEnum! = Nft
 }
 
 type TagsResponse {
@@ -1303,7 +1326,7 @@ type Token {
 }
 
 input TokenFilter {
-  token: String = "EGLD"
+  token: String! = "EGLD"
 }
 
 type TransactionNode {
@@ -1322,7 +1345,7 @@ type TransactionNode {
 input TransferNftArgs {
   destinationAddress: String!
   identifier: String!
-  quantity: String = "1"
+  quantity: String! = "1"
 }
 
 input TransferNftCreateRoleArgs {

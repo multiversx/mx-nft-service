@@ -1,26 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxApiService, RedisCacheService } from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig, mxConfig } from 'src/config';
+import { MxApiService } from 'src/common';
+import { mxConfig } from 'src/config';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetsQuery } from '../assets';
-import { TimeConstants } from 'src/utils/time-utils';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class CollectionsStatsService {
-  private redisClient: Redis.Redis;
   constructor(
     private persistenceService: PersistenceService,
     private apiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
-    );
-  }
+  ) {}
 
   async getStats(
     identifier: string,
@@ -40,10 +35,9 @@ export class CollectionsStatsService {
           paymentToken,
         );
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         getCollectionStats,
-        5 * TimeConstants.oneMinute,
+        5 * Constants.oneMinute(),
       );
     } catch (err) {
       this.logger.error(
@@ -74,7 +68,7 @@ export class CollectionsStatsService {
 
   async getItemsCount(
     identifier: string,
-  ): Promise<{ key: string; value: number }> {
+  ): Promise<{ key: string; value: string }> {
     try {
       const cacheKey = this.getCollectionNftsCacheKey(identifier);
       const getAccountStats = () =>
@@ -83,10 +77,9 @@ export class CollectionsStatsService {
           identifier,
         );
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         getAccountStats,
-        TimeConstants.oneDay,
+        Constants.oneDay(),
       );
     } catch (err) {
       this.logger.error(
@@ -97,7 +90,7 @@ export class CollectionsStatsService {
           exception: err?.message,
         },
       );
-      return { key: identifier, value: 0 };
+      return { key: identifier, value: '0' };
     }
   }
 
@@ -106,7 +99,7 @@ export class CollectionsStatsService {
     marketplaceKey: string = undefined,
   ) {
     return generateCacheKeyFromParams(
-      'collectionAssetsCount',
+      CacheInfo.CollectionAssetsCount,
       key,
       marketplaceKey,
     );
@@ -117,12 +110,8 @@ export class CollectionsStatsService {
   }
 
   public async invalidateStats(identifier: string) {
-    await this.redisCacheService.del(
-      this.redisClient,
-      this.getStatsCacheKey(identifier),
-    );
-    await this.redisCacheService.del(
-      this.redisClient,
+    await this.redisCacheService.delete(this.getStatsCacheKey(identifier));
+    await this.redisCacheService.delete(
       this.getCollectionNftsCacheKey(identifier),
     );
   }

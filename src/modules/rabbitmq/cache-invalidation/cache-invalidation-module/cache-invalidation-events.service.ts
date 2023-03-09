@@ -22,16 +22,16 @@ export class CacheInvalidationEventsService {
     private assetsHistoryCachingService: AssetsHistoryCachingService,
     private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
     private blacklistedCollectionsCachingService: BlacklistedCollectionsCachingService,
-    private analyticsService: TrendingCollectionsWarmerService,
+    // private analyticsService: TrendingCollectionsWarmerService,
     private offersCachingService: OffersCachingService,
   ) {}
 
   async invalidateAuction(payload: ChangedEvent) {
     await Promise.all([
-      await this.auctionsCachingService.invalidateCache(),
       await this.auctionsCachingService.invalidatePersistentCaching(
         payload.id,
         payload.address,
+        payload.extraInfo?.marketplaceKey,
       ),
       await this.auctionsCachingService.invalidateCacheByPattern(
         payload.address,
@@ -44,6 +44,7 @@ export class CacheInvalidationEventsService {
     await this.ordersCachingService.invalidateCache(
       parseInt(payload.id),
       payload.address,
+      payload.extraInfo?.marketplaceKey,
     );
   }
 
@@ -82,7 +83,7 @@ export class CacheInvalidationEventsService {
     this.offersCachingService.invalidateCache(payload.id, payload.address);
   }
 
-  async invalidateTrendingAuctions(payload: ChangedEvent) {
-    await this.analyticsService.handleTrendingCollections(payload.id);
-  }
+  // async invalidateTrendingAuctions(payload: ChangedEvent) {
+  //   await this.analyticsService.handleTrendingCollections(payload.id);
+  // }
 }

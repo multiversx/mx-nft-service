@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { BatchUtils } from '@elrondnetwork/erdnest';
+import { BatchUtils } from '@multiversx/sdk-nestjs';
 import asyncPool from 'tiny-async-pool';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
@@ -234,11 +234,13 @@ export class NsfwUpdaterService {
     );
   }
   private async triggerMultipleInvalidation(identifiers: string[]) {
-    await this.cacheEventsPublisher.publish(
-      new ChangedEvent({
-        id: identifiers,
-        type: CacheEventTypeEnum.AssetsRefresh,
-      }),
-    );
+    if (identifiers?.length) {
+      await this.cacheEventsPublisher.publish(
+        new ChangedEvent({
+          id: identifiers,
+          type: CacheEventTypeEnum.AssetsRefresh,
+        }),
+      );
+    }
   }
 }

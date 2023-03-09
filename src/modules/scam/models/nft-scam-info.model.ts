@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ScamInfoTypeEnum } from 'src/modules/assets/models';
 
 export type NftScamInfoDocument = NftScamInfoModel & Document;
 
@@ -10,8 +9,8 @@ export class NftScamInfoModel {
   identifier: string;
   @Prop({ type: String })
   version: string;
-  @Prop({ type: ScamInfoTypeEnum, nullable: true })
-  type?: ScamInfoTypeEnum;
+  @Prop({ type: String, nullable: true })
+  type?: string;
   @Prop({ type: String, nullable: true })
   info?: string;
 

@@ -1,4 +1,4 @@
-import { Address } from '@elrondnetwork/erdjs/out';
+import { Address } from '@multiversx/sdk-core';
 import { mxConfig } from 'src/config';
 
 export class ListNftEventsTopics {

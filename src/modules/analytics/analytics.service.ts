@@ -8,17 +8,15 @@ import BigNumber from 'bignumber.js';
 import { BuyEventParser } from './buy-event.parser';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { computeUsd } from 'src/utils/helpers';
-import * as Redis from 'ioredis';
-import { CachingService } from 'src/common/services/caching/caching.service';
-import { cacheConfig } from 'src/config';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
+import { CollectionVolumeLast24 } from './collection-volume';
+import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class AnalyticsService {
   private filterAddresses: string[];
   private data: any[] = [];
-  private redisClient: Redis.Redis;
 
   constructor(
     private readonly indexerService: ElasticAnalyticsService,
@@ -28,22 +26,15 @@ export class AnalyticsService {
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
     private readonly acceptEventParser: AcceptOfferEventParser,
-  ) {
-    this.redisClient = this.cacheService.getClient(
-      cacheConfig.collectionsRedisClientName,
-    );
-  }
+  ) {}
 
-  public async getTrendingByVolume(): Promise<any> {
-    return await this.cacheService.getCache(
-      this.redisClient,
-      CacheInfo.TrendingByVolume.key,
-    );
+  public async getTrendingByVolume(): Promise<CollectionVolumeLast24[]> {
+    return await this.cacheService.getCache(CacheInfo.TrendingByVolume.key);
   }
 
   public async reindexTrendingCollections(
     forTheLastHours: number = 24,
-  ): Promise<any> {
+  ): Promise<CollectionVolumeLast24[]> {
     try {
       const performanceProfiler = new PerformanceProfiler();
 
@@ -75,7 +66,7 @@ export class AnalyticsService {
   private async fetchLogsUsingScrollApi(
     startDateUtc: string,
     endDateUtc: string,
-  ): Promise<void> {
+  ): Promise<CollectionVolumeLast24[]> {
     this.logger.log(
       `Scroll logs between '${startDateUtc}' and '${endDateUtc}'`,
     );
@@ -92,9 +83,9 @@ export class AnalyticsService {
     return await this.getTrendingCollections();
   }
 
-  private async getTrendingCollections(): Promise<any> {
+  private async getTrendingCollections(): Promise<CollectionVolumeLast24[]> {
     const tokensWithPrice = await this.getTokensWithDetails();
-    const collections = this.getDataGroupedByCollectionAndToke();
+    const collections = this.getDataGroupedByCollectionAndToken();
     let trending = [];
     for (const collection of collections) {
       let priceUsd: BigNumber = new BigNumber(0);
@@ -109,7 +100,7 @@ export class AnalyticsService {
           priceUsd = priceUsd.plus(
             computeUsd(
               tokenDetails[0].usdPrice,
-              token.sum.toString(),
+              token.sum,
               tokenDetails[0].decimals,
             ),
           );
@@ -172,7 +163,7 @@ export class AnalyticsService {
     return { scrollPage, lastBlockLogs };
   }
 
-  private getDataGroupedByCollectionAndToke() {
+  private getDataGroupedByCollectionAndToken() {
     return this.data
       .groupBy((x) => x.collection, true)
       .map((group: { key: any; values: any[] }) => ({
@@ -181,9 +172,9 @@ export class AnalyticsService {
           .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
           .map((group: { key: any; values: any[] }) => ({
             paymentToken: group.key,
-            sum: group.values.sumBigNumber(
-              (x: { value: BigNumber.Value }) => new BigNumber(x.value),
-            ),
+            sum: group.values
+              .sumBigInt((x: { value: BigInt }) => BigInt(x.value.toString()))
+              .toString(),
           })),
       }));
   }

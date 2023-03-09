@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { MxCommunicationModule } from 'src/common/services/mx-communication';
 import { UsdPriceService } from './usd-price.service';
 import { UsdPriceRedisHandler } from './usd-price.redis-handler';
 import { UsdPriceResolver } from './usd-price.resolver';
 import { UsdTokenPriceResolver } from './usd-token-price.resolver';
+import { CommonModule } from 'src/common.module';
 
 @Module({
   providers: [
@@ -12,7 +12,7 @@ import { UsdTokenPriceResolver } from './usd-token-price.resolver';
     UsdPriceRedisHandler,
     UsdPriceService,
   ],
-  imports: [MxCommunicationModule],
+  imports: [CommonModule],
   exports: [UsdPriceService],
 })
 export class UsdPriceModuleGraph {}

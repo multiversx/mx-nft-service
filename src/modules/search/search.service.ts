@@ -1,45 +1,34 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  MxApiService,
-  MxIdentityService,
-  RedisCacheService,
-} from 'src/common';
-import * as Redis from 'ioredis';
-import { cacheConfig } from 'src/config';
+import { MxApiService, MxIdentityService } from 'src/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TimeConstants } from 'src/utils/time-utils';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 import {
   SearchNftCollectionResponse,
   SearchItemResponse,
 } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { NftTypeEnum } from '../assets/models';
 
 @Injectable()
 export class SearchService {
-  private redisClient: Redis.Redis;
   private readonly searchSize: number = 5;
-  private fieldsRequested: string = 'identifier,name,assets';
+  private fieldsRequested: string = 'identifier,name,assets,type';
   constructor(
     private accountsService: MxIdentityService,
     private apiService: MxApiService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
     private collectionsGetterService: CollectionsGetterService,
-  ) {
-    this.redisClient = this.redisCacheService.getClient(
-      cacheConfig.persistentRedisClientName,
-    );
-  }
+  ) {}
 
   async getHerotagForAddress(address: string): Promise<any> {
     try {
       const cacheKey = this.getAddressHerotagCacheKey(address);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getAddressHerotag(address),
-        5 * TimeConstants.oneMinute,
+        5 * Constants.oneMinute(),
       );
     } catch (err) {
       this.logger.error(
@@ -58,10 +47,9 @@ export class SearchService {
     try {
       const cacheKey = this.getAccountsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMappedHerotags(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -115,14 +103,13 @@ export class SearchService {
     return generateCacheKeyFromParams('address_herotag', address);
   }
 
-  async getCollections(searchTerm: string): Promise<string[]> {
+  async getCollections(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getCollectionCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMappedCollections(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -140,7 +127,7 @@ export class SearchService {
   private async getMappedCollections(
     searchTerm: string,
   ): Promise<SearchItemResponse[]> {
-    const [collections, count] =
+    const [collections] =
       await this.collectionsGetterService.getOrSetFullCollections();
     let allResults = collections
       .filter(
@@ -179,14 +166,13 @@ export class SearchService {
     return generateCacheKeyFromParams('search_collection', searchTerm);
   }
 
-  async getNfts(searchTerm: string): Promise<SearchNftCollectionResponse[]> {
+  async getNfts(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMappedNfts(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(
@@ -209,6 +195,9 @@ export class SearchService {
         searchTerm,
         `fields=${this.fieldsRequested}`,
       );
+      if (!NftTypeEnum[response?.type]) {
+        return [];
+      }
       return [
         new SearchNftCollectionResponse({
           identifier: response?.identifier,
@@ -240,10 +229,9 @@ export class SearchService {
     try {
       const cacheKey = this.getTagsCacheKey(searchTerm);
       return this.redisCacheService.getOrSet(
-        this.redisClient,
         cacheKey,
         () => this.getMappedTags(searchTerm),
-        5 * TimeConstants.oneSecond,
+        5 * Constants.oneSecond(),
       );
     } catch (err) {
       this.logger.error(

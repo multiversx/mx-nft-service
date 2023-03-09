@@ -536,6 +536,7 @@ export class AuctionsRepository {
     await this.triggerCacheInvalidation(
       auction.identifier,
       auction.ownerAddress,
+      auction.marketplaceKey,
     );
     return await this.auctionsRepository.save(auction);
   }
@@ -607,6 +608,7 @@ export class AuctionsRepository {
     await this.triggerCacheInvalidation(
       auction.identifier,
       auction.ownerAddress,
+      auction.marketplaceKey,
     );
 
     auction.modifiedDate = new Date(new Date().toUTCString());
@@ -623,6 +625,7 @@ export class AuctionsRepository {
     await this.triggerCacheInvalidation(
       auction.identifier,
       auction.ownerAddress,
+      auction.marketplaceKey,
     );
     if (auction) {
       auction.status = status;
@@ -644,6 +647,7 @@ export class AuctionsRepository {
     await this.triggerCacheInvalidation(
       auction.identifier,
       auction.ownerAddress,
+      auction.marketplaceKey,
     );
     if (auction) {
       auction.status = status;
@@ -659,6 +663,7 @@ export class AuctionsRepository {
       await this.triggerCacheInvalidation(
         auction.identifier,
         auction.ownerAddress,
+        auction.marketplaceKey,
       );
     }
     return await this.auctionsRepository.save(auctions);
@@ -667,12 +672,14 @@ export class AuctionsRepository {
   private async triggerCacheInvalidation(
     identifier: string,
     ownerAddress: string,
+    marketplaceKey: string,
   ) {
     await this.cacheEventsPublisherService.publish(
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.UpdateAuction,
         address: ownerAddress,
+        extraInfo: { marketplaceKey: marketplaceKey },
       }),
     );
   }

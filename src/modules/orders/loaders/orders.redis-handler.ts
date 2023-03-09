@@ -1,9 +1,8 @@
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from 'src/common';
 import { OrderEntity } from 'src/db/orders/order.entity';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
-import { TimeConstants } from 'src/utils/time-utils';
 
 @Injectable()
 export class OrdersRedisHandler extends RedisKeyValueDataloaderHandler<number> {
@@ -22,8 +21,6 @@ export class OrdersRedisHandler extends RedisKeyValueDataloaderHandler<number> {
         redisValues.push(item);
       }
     }
-    return [
-      new RedisValue({ values: redisValues, ttl: TimeConstants.oneWeek }),
-    ];
+    return [new RedisValue({ values: redisValues, ttl: Constants.oneWeek() })];
   }
 }

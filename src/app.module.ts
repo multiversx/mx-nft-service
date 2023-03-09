@@ -1,5 +1,5 @@
-import '../node_modules/@elrondnetwork/erdnest/lib/src/utils/extensions/number.extensions';
 import { Module } from '@nestjs/common';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
@@ -17,7 +17,7 @@ import { OwnersModuleGraph } from './modules/owners/owners.module';
 import { AccountsStatsModuleGraph } from './modules/account-stats/accounts-stats.module';
 import { UsdPriceModuleGraph } from './modules/usdPrice/usd-price.module';
 import { TrendingModuleGraph } from './modules/trending/trending.module';
-import { ReportNftsModuleGraph } from './modules/report-nfts/reports-nft.module';
+import { ReportsModuleGraph } from './modules/reports/reports.module';
 import { CampaignsModuleGraph } from './modules/campaigns/campaigns.module';
 import { CollectionsStatsModuleGraph } from './modules/collection-stats/collections-stats.module';
 import { SearchModuleGraph } from './modules/search/search.module';
@@ -34,7 +34,9 @@ import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.m
 import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
-import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
+import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
+import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
 
 @Module({
   imports: [
@@ -43,7 +45,8 @@ import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
       introspection: process.env.NODE_ENV !== 'production',
       playground: true,
@@ -52,8 +55,7 @@ import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
       formatError: (error: GraphQLError) => {
         const graphQLFormattedError: GraphQLFormattedError = {
           ...error,
-          message:
-            error.extensions?.exception?.response?.message || error.message,
+          message: error.message,
         };
         console.error(graphQLFormattedError);
 
@@ -72,7 +74,7 @@ import '@elrondnetwork/erdnest/lib/src/utils/extensions/date.extensions';
     OwnersModuleGraph,
     AccountsStatsModuleGraph,
     CollectionsStatsModuleGraph,
-    ReportNftsModuleGraph,
+    ReportsModuleGraph,
     ScamModule,
     FeaturedModuleGraph,
     BlacklistedCollectionsModule,

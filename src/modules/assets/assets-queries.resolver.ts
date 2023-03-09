@@ -22,7 +22,7 @@ import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
-import { Address } from '@elrondnetwork/erdjs/out';
+import { Address } from '@multiversx/sdk-core';
 import { genericDescriptions, mxConfig } from 'src/config';
 import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
 import { Rarity } from './models/Rarity';
@@ -35,6 +35,7 @@ import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { randomBetween } from 'src/utils/helpers';
+import { ScamInfo } from './models/ScamInfo.dto';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -140,7 +141,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return availableTokens?.value ?? 0;
   }
 
-  @ResolveField('scamInfo', () => String)
+  @ResolveField('scamInfo', () => ScamInfo)
   async scamInfo(@Parent() asset: Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);

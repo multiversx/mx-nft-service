@@ -1,7 +1,10 @@
 import { Global, Module } from '@nestjs/common';
 import { rabbitExchanges } from '../../rabbit-config';
 import { CommonRabbitModule } from '../common-rabbitmq.module';
-import { CacheEventsPublisherService } from './change-events-publisher.service';
+import {
+  CacheEventsPublisherService,
+  NftLikePublisherService,
+} from './change-events-publisher.service';
 
 @Global()
 @Module({
@@ -13,7 +16,7 @@ import { CacheEventsPublisherService } from './change-events-publisher.service';
       };
     }),
   ],
-  providers: [CacheEventsPublisherService],
-  exports: [CacheEventsPublisherService],
+  providers: [CacheEventsPublisherService, NftLikePublisherService],
+  exports: [CacheEventsPublisherService, NftLikePublisherService],
 })
 export class CacheEventsPublisherModule {}

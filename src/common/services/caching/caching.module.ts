@@ -1,19 +1,16 @@
-import {
-  forwardRef,
-  Global,
-  Logger,
-  Module,
-  CacheModule,
-} from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
-import { CachingService } from './caching.service';
-import { LocalCacheService } from './local.cache.service';
-import { RedisCacheService } from './redis-cache.service';
+import { DynamicModuleUtils } from 'src/utils/dynamic.module.utils';
+import { LocalRedisCacheService } from './local-redis-cache.service';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => CommonModule), CacheModule.register()],
-  providers: [Logger, CachingService, LocalCacheService, RedisCacheService],
-  exports: [CachingService, LocalCacheService, RedisCacheService],
+  imports: [
+    forwardRef(() => CommonModule),
+    DynamicModuleUtils.getRedisModule(),
+    DynamicModuleUtils.getCachingModule(),
+  ],
+  providers: [LocalRedisCacheService],
+  exports: [LocalRedisCacheService, DynamicModuleUtils.getRedisModule()],
 })
-export class CachingModule {}
+export class CacheModule {}

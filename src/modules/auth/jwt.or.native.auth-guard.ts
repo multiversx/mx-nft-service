@@ -1,11 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { ApiConfigService } from 'src/utils/api.config.service';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Logger,
+} from '@nestjs/common';
+import { ApiConfigService } from '../common/api-config/api.config.service';
 import { JwtAuthenticateGuard } from './jwt.auth-guard';
 import { NativeAuthGuard } from './native.auth-guard';
 
 @Injectable()
 export class JwtOrNativeAuthGuard implements CanActivate {
-  constructor(private readonly apiConfigService: ApiConfigService) {}
+  constructor(
+    private readonly apiConfigService: ApiConfigService,
+    private readonly logger: Logger,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.apiConfigService);
@@ -17,7 +25,8 @@ export class JwtOrNativeAuthGuard implements CanActivate {
       guards.map((guard) => {
         try {
           return guard.canActivate(context);
-        } catch {
+        } catch (error) {
+          this.logger.error(`${JwtOrNativeAuthGuard.name}: `, error);
           return false;
         }
       }),

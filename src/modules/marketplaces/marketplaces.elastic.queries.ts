@@ -5,7 +5,7 @@ import {
   RangeGreaterThan,
   ElasticSortOrder,
   QueryConditionOptions,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { constants } from 'src/config';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 

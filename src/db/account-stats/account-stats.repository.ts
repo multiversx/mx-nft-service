@@ -1,5 +1,5 @@
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
-import { EntityManager, EntityRepository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
 import { AccountStatsEntity } from './account-stats';
 import {
@@ -8,8 +8,9 @@ import {
   getPublicAccountStatsQuery,
 } from './stats.querries';
 import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
+import { Injectable } from '@nestjs/common';
 
-@EntityRepository()
+@Injectable()
 export class AccountStatsRepository {
   constructor(public readonly manager: EntityManager) {}
   async getPublicAccountStats(
@@ -31,7 +32,7 @@ export class AccountStatsRepository {
     );
   }
 
-  async getOnwerAccountStats(
+  async getOwnerAccountStats(
     address: string,
     marketplaceKey: string = null,
   ): Promise<AccountStatsEntity> {

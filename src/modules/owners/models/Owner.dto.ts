@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { OwnerApi } from 'src/common/services/mx-communication/models/onwer.api';
+import { OwnerApi } from 'src/common/services/mx-communication/models/owner.api';
 import { Account } from 'src/modules/account-stats/models';
 
 @ObjectType()

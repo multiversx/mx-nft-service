@@ -41,7 +41,9 @@ export class BuyEventHandler {
 
     if (!marketplace) return;
     this.logger.log(
-      `Buy event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
 
     if (topics.auctionId) {

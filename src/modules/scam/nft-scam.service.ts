@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService, MxElasticService, Nft } from 'src/common';
-
-import { Locker } from 'src/utils/locker';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { NftScamElasticService } from './nft-scam.elastic.service';
@@ -15,11 +13,15 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { getAllCollectionNftsFromElasticQuery } from './nft-scam.queries';
+import { AssetByIdentifierService } from '../assets';
+import { Locker } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class NftScamService {
   constructor(
     private documentDbService: DocumentDbService,
+    private assetByIdentifierService: AssetByIdentifierService,
     private nftScamElasticService: NftScamElasticService,
     private mxElasticService: MxElasticService,
     private mxApiService: MxApiService,
@@ -124,10 +126,7 @@ export class NftScamService {
     scamEngineVersion: string,
   ): Promise<void> {
     this.logger.log(`Processing scamInfo for ${collection}...`);
-    const nftsQuery =
-      this.nftScamElasticService.getAllCollectionNftsFromElasticQuery(
-        collection,
-      );
+    const nftsQuery = getAllCollectionNftsFromElasticQuery(collection);
     await this.mxElasticService.getScrollableList(
       'tokens',
       'identifier',
@@ -146,6 +145,7 @@ export class NftScamService {
     type: ScamInfoTypeEnum,
     info: string,
   ): Promise<boolean> {
+    const nft = await this.assetByIdentifierService.getAsset(identifier);
     await Promise.all([
       this.documentDbService.saveOrUpdateNftScamInfo(
         identifier,
@@ -161,25 +161,30 @@ export class NftScamService {
         info,
       ),
     ]);
-    this.triggerCacheInvalidation(identifier);
+    this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
     return true;
   }
 
   async manuallyClearNftScamInfo(identifier: string): Promise<boolean> {
+    const nft = await this.assetByIdentifierService.getAsset(identifier);
     const cleared = await this.validateOrUpdateNftScamInfo(
       identifier,
       {},
       true,
     );
-    this.triggerCacheInvalidation(identifier);
+    this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
     return cleared;
   }
 
-  private async triggerCacheInvalidation(identifier: string): Promise<void> {
+  private async triggerCacheInvalidation(
+    identifier: string,
+    ownerAddress: string,
+  ): Promise<void> {
     await this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: identifier,
         type: CacheEventTypeEnum.AssetRefresh,
+        address: ownerAddress,
       }),
     );
   }

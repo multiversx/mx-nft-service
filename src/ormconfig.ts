@@ -26,9 +26,6 @@ const config: ConnectionOptions = {
       ? ['src/db/**/*.entity.js']
       : ['dist/db/**/*.entity.js'],
   migrations: ['dist/db/migrations/*.js'],
-  cli: {
-    migrationsDir: 'src/db/migrations',
-  },
   extra: {
     connectionLimit: process.env.DB_CONNECTION_LIMIT,
     ssl: {

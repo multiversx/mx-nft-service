@@ -1,6 +1,6 @@
+import { Locker } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Locker } from 'src/utils/locker';
 import { NsfwUpdaterService } from './nsfw.updater.service';
 
 @Injectable()

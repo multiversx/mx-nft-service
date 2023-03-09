@@ -16,15 +16,18 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
-import { ReportNftsService } from '../report-nfts/report-nfts.service';
-import { ClearReportInput } from './models/clear-report.input';
 import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex.service';
+import { ReportsService } from '../reports/reports.service';
+import {
+  ClearReportCollectionInput,
+  ClearReportInput,
+} from './models/clear-report.input';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
   constructor(
     private readonly flagService: FlagNftService,
-    private reportNfts: ReportNftsService,
+    private reportNfts: ReportsService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
@@ -48,7 +51,16 @@ export class AdminOperationsResolver {
   clearReportNft(
     @Args('input', { type: () => ClearReportInput }) input: ClearReportInput,
   ): Promise<boolean> {
-    return this.reportNfts.clearReport(input.identifier);
+    return this.reportNfts.clearNftReport(input.identifier);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  clearReportCollection(
+    @Args('input', { type: () => ClearReportCollectionInput })
+    input: ClearReportCollectionInput,
+  ): Promise<boolean> {
+    return this.reportNfts.clearCollectionReport(input.collectionIdentifier);
   }
 
   @Mutation(() => Boolean)

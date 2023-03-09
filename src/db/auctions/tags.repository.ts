@@ -1,13 +1,20 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { NftTag } from 'src/common/services/mx-communication/models';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
-import { EntityRepository, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { TagEntity } from './tags.entity';
 
-@EntityRepository(TagEntity)
-export class TagsRepository extends Repository<TagEntity> {
+@Injectable()
+export class TagsRepository {
+  constructor(
+    @InjectRepository(TagEntity)
+    private tagsRepository: Repository<TagEntity>,
+  ) {}
   async getTags(size: number): Promise<NftTag[]> {
-    const tags: NftTag[] = await this.createQueryBuilder('t')
+    const tags: NftTag[] = await this.tagsRepository
+      .createQueryBuilder('t')
       .select('count(a.id) as count, t.tag')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
       .where(`a.status= :status`, {
@@ -25,7 +32,8 @@ export class TagsRepository extends Repository<TagEntity> {
     page: number = 0,
     size: number = 10,
   ): Promise<NftTag[]> {
-    const tags: NftTag[] = await this.createQueryBuilder('t')
+    const tags: NftTag[] = await this.tagsRepository
+      .createQueryBuilder('t')
       .select('count(a.id) as count, t.tag')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
       .where(`a.status= :status`, {
@@ -41,7 +49,8 @@ export class TagsRepository extends Repository<TagEntity> {
   }
 
   async getTagsCount(): Promise<number> {
-    const { count } = await this.createQueryBuilder('t')
+    const { count } = await this.tagsRepository
+      .createQueryBuilder('t')
       .select('COUNT (DISTINCT(tag))', 'count')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
       .where(`a.status= :status`, {
@@ -52,7 +61,8 @@ export class TagsRepository extends Repository<TagEntity> {
   }
 
   async getTagsBySearchTermCount(searchTerm: string): Promise<number> {
-    const { count } = await this.createQueryBuilder('t')
+    const { count } = await this.tagsRepository
+      .createQueryBuilder('t')
       .select('COUNT(DISTINCT(tag))', 'count')
       .innerJoin('auctions', 'a', 't.auctionId=a.id')
       .where(`a.status= :status`, {
@@ -65,7 +75,7 @@ export class TagsRepository extends Repository<TagEntity> {
 
   async saveTags(tags: TagEntity[]): Promise<TagEntity[]> {
     try {
-      return await this.save(tags);
+      return await this.tagsRepository.save(tags);
     } catch (err) {
       // If like already exists, we ignore the error.
       if (err.errno === MYSQL_ALREADY_EXISTS) {

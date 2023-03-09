@@ -44,6 +44,7 @@ export class OrdersService {
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
+        createOrderArgs.marketplaceKey,
       );
 
       const paymentToken = await this.usdPriceService.getToken(
@@ -77,6 +78,7 @@ export class OrdersService {
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
+        createOrderArgs.marketplaceKey,
       );
       const paymentToken = await this.usdPriceService.getToken(
         createOrderArgs.priceToken,
@@ -147,7 +149,12 @@ export class OrdersService {
       const activeOrder =
         await this.persistenceService.getActiveOrderForAuction(auctionId);
 
-      await this.triggerCacheInvalidation(auctionId, activeOrder.ownerAddress);
+      if (!activeOrder) return;
+      await this.triggerCacheInvalidation(
+        auctionId,
+        activeOrder.ownerAddress,
+        activeOrder.marketplaceKey,
+      );
       const orderEntity = await this.persistenceService.updateOrderWithStatus(
         activeOrder,
         status,
@@ -168,6 +175,7 @@ export class OrdersService {
       await this.triggerCacheInvalidation(
         createOrderArgs.auctionId,
         createOrderArgs.ownerAddress,
+        createOrderArgs.marketplaceKey,
       );
 
       const paymentToken = await this.usdPriceService.getToken(
@@ -224,12 +232,14 @@ export class OrdersService {
   private async triggerCacheInvalidation(
     auctionId: number,
     ownerAddress: string,
+    marketplaceKey: string,
   ) {
     await this.rabbitPublisherService.publish(
       new ChangedEvent({
         id: auctionId.toString(),
         type: CacheEventTypeEnum.UpdateOrder,
         address: ownerAddress,
+        extraInfo: { marketplaceKey: marketplaceKey },
       }),
     );
   }

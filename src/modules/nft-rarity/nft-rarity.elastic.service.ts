@@ -3,13 +3,13 @@ import { MxElasticService } from 'src/common';
 import {
   ElasticQuery,
   ElasticSortOrder,
+  Locker,
   QueryOperator,
   QueryType,
-} from '@elrondnetwork/erdnest';
+} from '@multiversx/sdk-nestjs';
 import { NftTypeEnum } from '../assets/models';
 import { NftRarityData } from './models/nft-rarity-data.model';
 import { constants } from 'src/config';
-import { Locker } from 'src/utils/locker';
 import { CustomRank } from './models/custom-rank.model';
 import { CollectionFromElastic } from './models/collection-from-elastic.model';
 import { Rarity } from '../assets/models/Rarity';

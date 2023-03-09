@@ -5,14 +5,14 @@ import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
 import { constants, mxConfig } from 'src/config';
 import { CollectionApi } from './models/collection.dto';
-import { OwnerApi } from './models/onwer.api';
+import { OwnerApi } from './models/owner.api';
 import {
   ApiNetworkProvider,
   TransactionOnNetwork,
 } from '@multiversx/sdk-network-providers';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
 import { Token } from './models/Token.model';
-import { Address } from '@elrondnetwork/erdjs/out';
+import { Address } from '@multiversx/sdk-core';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';

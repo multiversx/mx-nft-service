@@ -30,7 +30,9 @@ export class SwapUpdateEventHandler {
       marketplaceType,
     );
     this.logger.log(
-      `Udpdate auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      `${updateEvent.getIdentifier()}  auction event detected for hash '${hash}' and marketplace '${
+        marketplace?.name
+      }'`,
     );
     let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
       parseInt(topics.auctionId, 16),
@@ -38,8 +40,7 @@ export class SwapUpdateEventHandler {
     );
 
     if (auction) {
-      this.updateAuctionPrice(auction, topics, hash);
-
+      await this.updateAuctionPrice(auction, topics, hash);
       this.auctionsService.updateAuction(
         auction,
         ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
@@ -69,6 +70,8 @@ export class SwapUpdateEventHandler {
       topics.price,
       decimals,
     );
+    auction.maxBid = auction.minBid;
+    auction.maxBidDenominated = auction.minBidDenominated;
     auction.endDate = topics.deadline;
     auction.nrAuctionedTokens = topics.nrAuctionTokens;
     auction.blockHash = hash;

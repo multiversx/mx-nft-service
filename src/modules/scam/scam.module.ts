@@ -1,6 +1,7 @@
 import { Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
 import { DocumentDbModule } from 'src/document-db/document-db.module';
+import { AssetByIdentifierService } from '../assets';
 import { AuthModule } from '../auth/auth.module';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { CollectionScamResolver } from './collection-scam.resolver';
@@ -23,7 +24,8 @@ import { NftScamService } from './nft-scam.service';
     NftScamResolver,
     CollectionScamService,
     CollectionScamResolver,
+    AssetByIdentifierService,
   ],
-  exports: [NftScamService, NftScamElasticService],
+  exports: [NftScamService, NftScamElasticService, AssetByIdentifierService],
 })
 export class ScamModule {}
