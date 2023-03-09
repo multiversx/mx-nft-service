@@ -33,15 +33,16 @@ export class MarketplaceReindexState {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
   }
 
-  createBoughtOrderFromEventSummaryAndToken(
+  createOrder(
     auctionIndex: number,
     input: any,
+    status: OrderStatusEnum,
     paymentToken: Token,
     paymentNonce?: number,
-  ): void {
+  ): OrderEntity {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const price = input.price ?? input.currentBid;
-    const order = new OrderEntity({
+    return new OrderEntity({
       id: this.orders.length,
       creationDate: modifiedDate,
       modifiedDate,
@@ -60,9 +61,8 @@ export class MarketplaceReindexState {
         this.auctions[auctionIndex].type === AuctionTypeEnum.Nft
           ? null
           : input.itemsCount,
-      status: OrderStatusEnum.Bought,
+      status: status,
     });
-    this.orders.push(order);
   }
 
   setAuctionOrderWinnerStatusAndReturnId(

@@ -34,12 +34,14 @@ export class ReindexAuctionBoughtHandler {
       modifiedDate,
     );
 
-    marketplaceReindexState.createBoughtOrderFromEventSummaryAndToken(
+    const order = marketplaceReindexState.createOrder(
       auctionIndex,
       input,
+      OrderStatusEnum.Bought,
       paymentToken,
       paymentNonce,
     );
+    marketplaceReindexState.orders.push(order);
 
     const totalBought = this.getTotalBoughtTokensForAuction(
       marketplaceReindexState.auctions[auctionIndex].id,

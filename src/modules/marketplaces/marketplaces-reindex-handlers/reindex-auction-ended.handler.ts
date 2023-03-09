@@ -45,11 +45,13 @@ export class ReindexAuctionEndedHandler {
         winnerOrderId,
       );
     } else {
-      marketplaceReindexState.createBoughtOrderFromEventSummaryAndToken(
+      const order = marketplaceReindexState.createOrder(
         auctionIndex,
         input,
+        OrderStatusEnum.Bought,
         paymentToken,
       );
+      marketplaceReindexState.orders.push(order);
     }
   }
 }
