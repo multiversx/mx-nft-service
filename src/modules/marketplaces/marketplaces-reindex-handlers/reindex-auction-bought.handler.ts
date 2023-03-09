@@ -1,12 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { OrderEntity } from 'src/db/orders';
-import {
-  AuctionStatusEnum,
-  AuctionTypeEnum,
-} from 'src/modules/auctions/models';
+import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
-import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
@@ -31,7 +27,6 @@ export class ReindexAuctionBoughtHandler {
       return;
     }
 
-    const itemsCount = parseInt(input.itemsCount);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
     marketplaceReindexState.setInactiveOrdersForAuction(
@@ -39,32 +34,12 @@ export class ReindexAuctionBoughtHandler {
       modifiedDate,
     );
 
-    const order = new OrderEntity({
-      id: marketplaceReindexState.orders.length,
-      creationDate: modifiedDate,
-      modifiedDate,
-      auctionId: marketplaceReindexState.auctions[auctionIndex].id,
-      ownerAddress: input.address,
-      priceToken: paymentToken.identifier,
-      priceNonce: paymentNonce,
-      priceAmount:
-        input.price !== '0'
-          ? input.price
-          : marketplaceReindexState.auctions[auctionIndex].maxBid,
-      priceAmountDenominated:
-        input.price !== '0'
-          ? BigNumberUtils.denominateAmount(input.price, paymentToken.decimals)
-          : marketplaceReindexState.auctions[auctionIndex].maxBidDenominated,
-      blockHash: input.blockHash ?? '',
-      marketplaceKey: marketplaceReindexState.marketplace.key,
-      boughtTokensNo:
-        marketplaceReindexState.auctions[auctionIndex].type ===
-        AuctionTypeEnum.Nft
-          ? null
-          : itemsCount.toString(),
-      status: OrderStatusEnum.Bought,
-    });
-    marketplaceReindexState.orders.push(order);
+    marketplaceReindexState.createBoughtOrderFromEventSummaryAndToken(
+      auctionIndex,
+      input,
+      paymentToken,
+      paymentNonce,
+    );
 
     const totalBought = this.getTotalBoughtTokensForAuction(
       marketplaceReindexState.auctions[auctionIndex].id,
