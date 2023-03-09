@@ -3,47 +3,78 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AuctionEntity } from 'src/db/auctions';
 import { MarketplacesService } from './marketplaces.service';
-import { OrderEntity } from 'src/db/orders';
-import { Marketplace } from './models';
-import { OfferEntity } from 'src/db/offers';
 import { AuctionsSetterService } from '../auctions';
-import { DateUtils } from 'src/utils/date-utils';
+import { AssetActionEnum } from '../assets/models';
+import { AssetOfferEnum } from '../assets/models/AssetOfferEnum';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
+import { ReindexAuctionStartedHandler } from './marketplaces-reindex-handlers/reindex-auction-started.handler';
+import { ReindexAuctionBidHandler } from './marketplaces-reindex-handlers/reindex-auction-bid.handler';
+import { ReindexAuctionBoughtHandler } from './marketplaces-reindex-handlers/reindex-auction-bought.handler';
+import { ReindexAuctionEndedHandler } from './marketplaces-reindex-handlers/reindex-auction-ended.handler';
+import { ReindexAuctionClosedHandler } from './marketplaces-reindex-handlers/reindex-auction-closed.handler';
+import { ReindexOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-offer-accepted.handler';
+import { ReindexOfferClosedHandler } from './marketplaces-reindex-handlers/reindex-offer-closed.handler';
+import { ReindexOfferCreatedHandler } from './marketplaces-reindex-handlers/reindex-offer-created.hander';
+import { ReindexAuctionPriceUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-price-updated.handler';
+import { ReindexGlobalOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-global-offer-accepted.handler';
+import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-updated.handler';
+import { constants, mxConfig } from 'src/config';
+import { MarketplaceReindexState } from './models/MarketplaceReindexState';
+import { MxApiService } from 'src/common';
+import { DateUtils } from 'src/utils/date-utils';
+import { Locker } from 'src/utils/locker';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplacesReindexService {
   constructor(
     private readonly persistenceService: PersistenceService,
     private readonly marketplacesService: MarketplacesService,
+    private readonly usdPriceService: UsdPriceService,
     private readonly auctionSetterService: AuctionsSetterService,
     private readonly marketplacesReindexEventsSummaryService: MarketplacesReindexEventsSummaryService,
+    private readonly reindexAuctionStartedHandler: ReindexAuctionStartedHandler,
+    private readonly reindexAuctionBidHandler: ReindexAuctionBidHandler,
+    private readonly reindexAuctionBoughtHandler: ReindexAuctionBoughtHandler,
+    private readonly reindexAuctionEndedHandler: ReindexAuctionEndedHandler,
+    private readonly reindexAuctionClosedHandler: ReindexAuctionClosedHandler,
+    private readonly reindexAuctionPriceUpdatedHandler: ReindexAuctionPriceUpdatedHandler,
+    private readonly reindexAuctionUpdatedHandler: ReindexAuctionUpdatedHandler,
+    private readonly reindexOfferCreatedHandler: ReindexOfferCreatedHandler,
+    private readonly reindexOfferAcceptedHandler: ReindexOfferAcceptedHandler,
+    private readonly reindexOfferClosedHandler: ReindexOfferClosedHandler,
+    private readonly reindexGlobalOfferAcceptedHandler: ReindexGlobalOfferAcceptedHandler,
+    private readonly mxApiService: MxApiService,
     private readonly logger: Logger,
   ) {}
 
   async reindexMarketplaceData(marketplaceAddress: string): Promise<void> {
     try {
-      let auctionsState: AuctionEntity[] = [];
-      let ordersState: OrderEntity[] = [];
-      let offersState: OfferEntity[] = [];
+      await Locker.lock(
+        'Reindex marketplace data',
+        async () => {
+          const marketplace =
+            await this.marketplacesService.getMarketplaceByAddress(
+              marketplaceAddress,
+            );
 
-      await this.processMarketplaceEventsInBatches(
-        marketplaceAddress,
-        auctionsState,
-        ordersState,
-        offersState,
-      );
+          let marketplaceReindexState = new MarketplaceReindexState({
+            marketplace,
+          });
 
-      this.processMarketplaceExpiredStates(
-        auctionsState,
-        ordersState,
-        offersState,
-        DateUtils.getCurrentTimestamp(),
-      );
+          await this.processMarketplaceEventsInBatches(marketplaceReindexState);
 
-      await this.addMarketplaceStatesToDb(
-        auctionsState,
-        ordersState,
-        offersState,
+          marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(
+            DateUtils.getCurrentTimestamp(),
+          );
+
+          await this.populateAuctionAssetTags(marketplaceReindexState.auctions);
+
+          await this.addMarketplaceStateToDb(marketplaceReindexState);
+        },
+        true,
       );
     } catch (error) {
       this.logger.error('An error occurred while reindexing marketplace data', {
@@ -55,23 +86,19 @@ export class MarketplacesReindexService {
   }
 
   private async processMarketplaceEventsInBatches(
-    marketplaceAddress: string,
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
+    marketplaceReindexState: MarketplaceReindexState,
   ): Promise<void> {
-    const marketplace = await this.marketplacesService.getMarketplaceByAddress(
-      marketplaceAddress,
-    );
-
     let afterTimestamp: number;
     let processInNextBatch: MarketplaceEventsEntity[] = [];
+    let nextBatchPromise: Promise<MarketplaceEventsEntity[]>;
+
+    nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
+      marketplaceReindexState.marketplace.address,
+      afterTimestamp,
+    );
 
     do {
-      let batch = await this.persistenceService.getMarketplaceEventsAsc(
-        marketplaceAddress,
-        afterTimestamp,
-      );
+      let batch = await nextBatchPromise;
 
       if (!batch || batch.length === 0) {
         break;
@@ -80,29 +107,28 @@ export class MarketplacesReindexService {
       [batch, afterTimestamp] =
         this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch);
 
+      nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
+        marketplaceReindexState.marketplace.address,
+        afterTimestamp,
+      );
+
       processInNextBatch =
         await this.processEventsBatchAndReturnUnprocessedEvents(
-          marketplace,
+          marketplaceReindexState,
           processInNextBatch.concat(batch),
-          auctionsState,
-          ordersState,
-          offersState,
         );
     } while (true);
 
     const isFinalBatch = true;
     processInNextBatch =
       await this.processEventsBatchAndReturnUnprocessedEvents(
-        marketplace,
+        marketplaceReindexState,
         processInNextBatch,
-        auctionsState,
-        ordersState,
-        offersState,
         isFinalBatch,
       );
 
     if (processInNextBatch.length > 0) {
-      throw new Error(`Could not handle ${processInNextBatch.length} events`);
+      this.logger.warn(`Could not handle ${processInNextBatch.length} events`);
     }
   }
 
@@ -124,11 +150,8 @@ export class MarketplacesReindexService {
   }
 
   private async processEventsBatchAndReturnUnprocessedEvents(
-    marketplace: Marketplace,
+    marketplaceReindexState: MarketplaceReindexState,
     batch: MarketplaceEventsEntity[],
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
     isFinalBatch?: boolean,
   ): Promise<MarketplaceEventsEntity[]> {
     let unprocessedEvents: MarketplaceEventsEntity[] = [...batch];
@@ -156,72 +179,254 @@ export class MarketplacesReindexService {
         (event) => event.txHash !== txHash && event.originalTxHash !== txHash,
       );
 
-      await this.processEventsSet(
-        marketplace,
-        eventOrdersAndTx,
-        auctionsState,
-        ordersState,
-        offersState,
-      );
+      await this.processEventsSet(marketplaceReindexState, eventOrdersAndTx);
     }
 
     return [];
   }
 
   private async processEventsSet(
-    marketplace: Marketplace,
+    marketplaceReindexState: MarketplaceReindexState,
     eventOrdersAndTx: MarketplaceEventsEntity[],
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
   ): Promise<void> {
-    const eventsSetSummary =
-      this.marketplacesReindexEventsSummaryService.getEventsSetSummary(
-        marketplace,
+    const eventsSetSummaries =
+      this.marketplacesReindexEventsSummaryService.getEventsSetSummaries(
+        marketplaceReindexState.marketplace,
         eventOrdersAndTx,
       );
 
-    await this.processEvent(
-      marketplace,
-      auctionsState,
-      ordersState,
-      offersState,
-      eventsSetSummary,
-    );
+    for (let i = 0; i < eventsSetSummaries?.length; i++) {
+      await this.processEvent(marketplaceReindexState, eventsSetSummaries[i]);
+    }
   }
 
   private async processEvent(
-    marketplace: Marketplace,
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
+    marketplaceReindexState: MarketplaceReindexState,
     eventsSetSummary: any,
   ): Promise<void> {
-    throw new Error('Not implemented yet');
+    if (!eventsSetSummary) {
+      return;
+    }
+    switch (eventsSetSummary.action) {
+      case AssetActionEnum.StartedAuction: {
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexAuctionStartedHandler.handle(
+          eventsSetSummary,
+          marketplaceReindexState,
+          paymentToken,
+          paymentNonce,
+        );
+        break;
+      }
+      case AssetActionEnum.Bid: {
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexAuctionBidHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken,
+          paymentNonce,
+        );
+        break;
+      }
+      case AssetActionEnum.Bought: {
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexAuctionBoughtHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken,
+          paymentNonce,
+        );
+        break;
+      }
+      case AssetActionEnum.EndedAuction: {
+        const [paymentToken] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexAuctionEndedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken,
+        );
+        break;
+      }
+      case AssetActionEnum.ClosedAuction: {
+        this.reindexAuctionClosedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        break;
+      }
+      case AssetActionEnum.PriceUpdated: {
+        const [paymentToken] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexAuctionPriceUpdatedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken.decimals,
+        );
+        break;
+      }
+      case AssetActionEnum.Updated: {
+        const paymentToken = await this.usdPriceService.getToken(
+          eventsSetSummary.paymentToken,
+        );
+        this.reindexAuctionUpdatedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken.decimals,
+        );
+        break;
+      }
+      case AssetOfferEnum.Created: {
+        const [paymentToken] = await this.getPaymentTokenAndNonce(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        this.reindexOfferCreatedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+          paymentToken.decimals,
+        );
+        break;
+      }
+      case AssetOfferEnum.Accepted: {
+        this.reindexOfferAcceptedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        break;
+      }
+      case AssetOfferEnum.GloballyAccepted: {
+        this.reindexGlobalOfferAcceptedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        break;
+      }
+      case AssetOfferEnum.Closed: {
+        this.reindexOfferClosedHandler.handle(
+          marketplaceReindexState,
+          eventsSetSummary,
+        );
+        break;
+      }
+      default: {
+        if (eventsSetSummary.auctionType) {
+          throw new Error(`EVent not handled ${eventsSetSummary.auctionType}`);
+        }
+      }
+    }
   }
 
-  private processMarketplaceExpiredStates(
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
-    currentTimestamp: number,
-  ): void {
-    throw new Error('Not implemented yet');
+  private async getPaymentTokenAndNonce(
+    marketplaceReindexState: MarketplaceReindexState,
+    input: any,
+  ): Promise<[Token, number]> {
+    try {
+      const auctionIndex =
+        marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
+          ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
+          : marketplaceReindexState.getAuctionIndexByIdentifier(
+              input.identifier,
+            );
+      const paymentNonceValue =
+        input.paymentNonce ??
+        marketplaceReindexState.auctions[auctionIndex]?.paymentNonce;
+      const paymentNonce = !Number.isNaN(paymentNonceValue)
+        ? paymentNonceValue
+        : 0;
+      const paymentTokenIdentifier =
+        input.paymentToken ??
+        marketplaceReindexState.auctions[auctionIndex]?.paymentToken;
+      if (paymentTokenIdentifier === mxConfig.egld) {
+        return [
+          new Token({
+            identifier: mxConfig.egld,
+            decimals: mxConfig.decimals,
+          }),
+          0,
+        ];
+      }
+      const paymentToken = await this.usdPriceService.getToken(
+        paymentTokenIdentifier,
+      );
+      if (!paymentToken) {
+        return [
+          new Token({
+            identifier: paymentTokenIdentifier ?? mxConfig.egld,
+            decimals: mxConfig.decimals,
+          }),
+          paymentNonce,
+        ];
+      }
+      return [paymentToken, paymentNonce];
+    } catch {
+      return [undefined, undefined];
+    }
   }
 
-  private async addMarketplaceStatesToDb(
-    auctionsState: AuctionEntity[],
-    ordersState: OrderEntity[],
-    offersState: OfferEntity[],
+  private async addMarketplaceStateToDb(
+    marketplaceReindexState: MarketplaceReindexState,
   ): Promise<void> {
-    await this.auctionSetterService.saveBulkAuctions(auctionsState);
+    await this.auctionSetterService.saveBulkAuctions(
+      marketplaceReindexState.auctions,
+    );
 
-    for (let i = 0; i < ordersState.length; i++) {
-      ordersState[i].auction = auctionsState[ordersState[i].auctionId];
-      ordersState[i].auctionId = auctionsState[ordersState[i].auctionId].id;
+    for (let i = 0; i < marketplaceReindexState.orders.length; i++) {
+      marketplaceReindexState.orders[i].auction =
+        marketplaceReindexState.auctions[
+          marketplaceReindexState.orders[i].auctionId
+        ];
+      marketplaceReindexState.orders[i].auctionId =
+        marketplaceReindexState.auctions[
+          marketplaceReindexState.orders[i].auctionId
+        ].id;
     }
 
-    await this.persistenceService.saveBulkOrders(ordersState);
-    await this.persistenceService.saveBulkOffers(offersState);
+    await this.persistenceService.saveBulkOrders(
+      marketplaceReindexState.orders,
+    );
+    await this.persistenceService.saveBulkOffers(
+      marketplaceReindexState.offers,
+    );
+  }
+
+  private async populateAuctionAssetTags(
+    auctions: AuctionEntity[],
+  ): Promise<void> {
+    const batchSize = constants.getNftsFromApiBatchSize;
+    for (let i = 0; i < auctions.length; i += batchSize) {
+      const assetsWithNoTagsIdentifiers = [
+        ...new Set(
+          auctions
+            .slice(i, i + batchSize)
+            .filter((a) => a.tags === '')
+            .map((a) => a.identifier),
+        ),
+      ];
+      const assets = await this.mxApiService.getNftsByIdentifiers(
+        assetsWithNoTagsIdentifiers,
+        0,
+        'fields=identifier,tags',
+      );
+      const tags = assets.filter((a) => a.tags);
+      for (let j = 0; j < assets?.length; j++) {
+        auctions
+          .filter((a) => a.identifier === assets[j].identifier)
+          .map((a) => (a.tags = assets[j]?.tags?.join(',') ?? ''));
+      }
+    }
   }
 }
