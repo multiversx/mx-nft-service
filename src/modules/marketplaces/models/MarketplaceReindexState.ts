@@ -20,7 +20,7 @@ export class MarketplaceReindexState {
     Object.assign(this, init);
   }
 
-  getAuctionIndexByNonce(auctionId: number): number {
+  getAuctionIndexByAuctionId(auctionId: number): number {
     return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
   }
 
@@ -31,7 +31,7 @@ export class MarketplaceReindexState {
     );
   }
 
-  getOfferIndexByNonce(offerId: number): number {
+  getOfferIndexByOfferId(offerId: number): number {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
   }
 
