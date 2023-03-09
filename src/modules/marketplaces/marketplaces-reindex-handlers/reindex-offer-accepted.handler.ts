@@ -15,12 +15,12 @@ export class ReindexOfferAcceptedHandler {
     input: OfferAcceptedSummary,
   ): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const offerIndex = marketplaceReindexState.getOfferIndexByNonce(
+    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(
       input.offerId,
     );
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-        ? marketplaceReindexState.getAuctionIndexByNonce(input.auctionId)
+        ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
         : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
 
     if (offerIndex !== -1) {

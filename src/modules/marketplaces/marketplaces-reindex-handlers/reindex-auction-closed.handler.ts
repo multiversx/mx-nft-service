@@ -15,7 +15,7 @@ export class ReindexAuctionClosedHandler {
   ): void {
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-        ? marketplaceReindexState.getAuctionIndexByNonce(input.auctionId)
+        ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
         : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 

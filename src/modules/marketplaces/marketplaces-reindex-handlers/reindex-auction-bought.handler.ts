@@ -20,7 +20,7 @@ export class ReindexAuctionBoughtHandler {
   ): void {
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-        ? marketplaceReindexState.getAuctionIndexByNonce(input.auctionId)
+        ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
         : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
 
     if (auctionIndex === -1) {

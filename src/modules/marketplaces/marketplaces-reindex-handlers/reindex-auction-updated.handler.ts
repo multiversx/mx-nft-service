@@ -14,7 +14,7 @@ export class ReindexAuctionUpdatedHandler {
     input: AuctionUpdatedSummary,
     decimals: number,
   ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByNonce(
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
       input.auctionId,
     );
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);

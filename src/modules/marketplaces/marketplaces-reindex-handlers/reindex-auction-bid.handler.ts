@@ -16,7 +16,7 @@ export class ReindexAuctionBidHandler {
     paymentToken: Token,
     paymentNonce: number,
   ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByNonce(
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
       input.auctionId,
     );
 

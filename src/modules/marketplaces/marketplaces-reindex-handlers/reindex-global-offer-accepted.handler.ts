@@ -13,7 +13,7 @@ export class ReindexGlobalOfferAcceptedHandler {
     input: GlobalOfferAcceptedSummary,
   ): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByNonce(
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
       input.auctionId,
     );
 

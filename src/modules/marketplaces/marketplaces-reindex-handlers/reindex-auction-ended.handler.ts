@@ -15,7 +15,7 @@ export class ReindexAuctionEndedHandler {
     input: AuctionEndedSummary,
     paymentToken: Token,
   ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByNonce(
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
       input.auctionId,
     );
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);

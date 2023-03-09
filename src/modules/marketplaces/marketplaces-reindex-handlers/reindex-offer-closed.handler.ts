@@ -13,7 +13,7 @@ export class ReindexOfferClosedHandler {
     input: OfferClosedSummary,
   ): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const offerIndex = marketplaceReindexState.getOfferIndexByNonce(
+    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(
       input.offerId,
     );
     if (offerIndex === -1) {
