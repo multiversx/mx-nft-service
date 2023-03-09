@@ -31,13 +31,6 @@ export class MarketplaceReindexState {
     );
   }
 
-  getAuctionIndex(auctionId: number, identifier: string): number {
-    if (auctionId) {
-      return this.getAuctionIndexByNonce(auctionId);
-    }
-    return this.getAuctionIndexByIdentifier(identifier);
-  }
-
   getOfferIndexByNonce(offerId: number): number {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
   }
