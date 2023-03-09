@@ -213,9 +213,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionStartedHandler.handle(
           eventsSetSummary,
           marketplaceReindexState,
@@ -229,9 +226,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionBidHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -245,9 +239,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionBoughtHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -261,9 +252,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionEndedHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -283,9 +271,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionPriceUpdatedHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -297,9 +282,6 @@ export class MarketplacesReindexService {
         const paymentToken = await this.usdPriceService.getToken(
           eventsSetSummary.paymentToken,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexAuctionUpdatedHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -312,9 +294,6 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           eventsSetSummary,
         );
-        if (!paymentToken) {
-          break;
-        }
         this.reindexOfferCreatedHandler.handle(
           marketplaceReindexState,
           eventsSetSummary,
@@ -371,13 +350,11 @@ export class MarketplacesReindexService {
       const paymentTokenIdentifier =
         input.paymentToken ??
         marketplaceReindexState.auctions[auctionIndex]?.paymentToken;
-      if (!paymentTokenIdentifier || paymentTokenIdentifier === mxConfig.egld) {
+      if (paymentTokenIdentifier === mxConfig.egld) {
         return [
           new Token({
             identifier: mxConfig.egld,
-            symbol: mxConfig.egld,
             decimals: mxConfig.decimals,
-            name: mxConfig.egld,
           }),
           0,
         ];
@@ -385,6 +362,15 @@ export class MarketplacesReindexService {
       const paymentToken = await this.usdPriceService.getToken(
         paymentTokenIdentifier,
       );
+      if (!paymentToken) {
+        return [
+          new Token({
+            identifier: paymentTokenIdentifier ?? mxConfig.egld,
+            decimals: mxConfig.decimals,
+          }),
+          paymentNonce,
+        ];
+      }
       return [paymentToken, paymentNonce];
     } catch {
       return [undefined, undefined];
