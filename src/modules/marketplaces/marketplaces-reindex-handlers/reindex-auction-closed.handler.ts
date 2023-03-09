@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
 import { ReindexAuctionClosedSummary } from '../models/marketplaces-reindex-events-summaries/AuctionClosedSummary';
@@ -12,7 +13,10 @@ export class ReindexAuctionClosedHandler {
     marketplaceReindexState: MarketplaceReindexState,
     input: ReindexAuctionClosedSummary,
   ): void {
-    const auctionIndex = this.getAuctionIndex(marketplaceReindexState, input);
+    const auctionIndex =
+      marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
+        ? marketplaceReindexState.getAuctionIndexByNonce(input.auctionId)
+        : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
     if (auctionIndex === -1) {
@@ -29,18 +33,6 @@ export class ReindexAuctionClosedHandler {
     marketplaceReindexState.setInactiveOrdersForAuction(
       marketplaceReindexState.auctions[auctionIndex].id,
       modifiedDate,
-    );
-  }
-
-  private getAuctionIndex(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: ReindexAuctionClosedSummary,
-  ): number {
-    if (input.auctionId) {
-      return marketplaceReindexState.getAuctionIndexByNonce(input.auctionId);
-    }
-    return marketplaceReindexState.getAuctionIndexByIdentifier(
-      input.identifier,
     );
   }
 }

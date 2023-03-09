@@ -7,6 +7,7 @@ import {
 } from 'src/modules/auctions/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
 import { AuctionBuySummary } from '../models/marketplaces-reindex-events-summaries/AuctionBuySummary';
@@ -21,10 +22,10 @@ export class ReindexAuctionBoughtHandler {
     paymentToken: Token,
     paymentNonce: number,
   ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndex(
-      input.auctionId,
-      input.identifier,
-    );
+    const auctionIndex =
+      marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
+        ? marketplaceReindexState.getAuctionIndexByNonce(input.auctionId)
+        : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
 
     if (auctionIndex === -1) {
       return;
