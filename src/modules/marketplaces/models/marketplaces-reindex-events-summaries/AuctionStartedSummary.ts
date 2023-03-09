@@ -54,7 +54,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
     const address = event.data.eventData?.address ?? tx.receiver;
     const topics = this.getTopics(event);
 
-    if (!topics || (!topics.price && !topics.newBid)) {
+    if (!topics || (!topics.price && !topics.minBid)) {
       return;
     }
 
@@ -95,7 +95,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
           return;
         }
         return topics;
-      } catch (error) {
+      } catch {
         return;
       }
     }

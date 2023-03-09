@@ -87,7 +87,7 @@ export class AuctionBuySummary extends ReindexGenericSummary {
       }
 
       return new BuySftEvent(genericEvent).getTopics();
-    } catch (error) {
+    } catch {
       return;
     }
   }

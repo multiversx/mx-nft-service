@@ -29,6 +29,13 @@ export class MarketplaceReindexState {
     return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
   }
 
+  getAuctionIndexByIdentifier(identifier: string): number {
+    return this.auctions.findIndex(
+      (a) =>
+        a.identifier === identifier && a.status === AuctionStatusEnum.Running,
+    );
+  }
+
   getOfferIndexByOfferId(offerId: number): number {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
   }
@@ -68,6 +75,7 @@ export class MarketplaceReindexState {
   setAuctionOrderWinnerStatusAndReturnId(
     auctionId: number,
     status: OrderStatusEnum,
+    modifiedDate?: Date,
   ): number {
     const bids = this.orders
       .filter(
@@ -84,6 +92,9 @@ export class MarketplaceReindexState {
           o.priceAmount === maxBid.toString(),
       );
       this.orders[winnerOrderIndex].status = status;
+      if (modifiedDate) {
+        this.orders[winnerOrderIndex].modifiedDate = modifiedDate;
+      }
       return this.orders[winnerOrderIndex].id;
     }
     return -1;
