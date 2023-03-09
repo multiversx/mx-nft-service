@@ -1,11 +1,16 @@
 import { ObjectType } from '@nestjs/graphql';
 import BigNumber from 'bignumber.js';
+import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';
 import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
-import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import {
+  AuctionStatusEnum,
+  AuctionTypeEnum,
+} from 'src/modules/auctions/models';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Marketplace } from './Marketplace.dto';
 
@@ -20,12 +25,44 @@ export class MarketplaceReindexState {
     Object.assign(this, init);
   }
 
-  getAuctionIndexByNonce(auctionId: number): number {
+  getAuctionIndexByAuctionId(auctionId: number): number {
     return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
   }
 
-  getOfferIndexByNonce(offerId: number): number {
+  getOfferIndexByOfferId(offerId: number): number {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
+  }
+
+  createOrder(
+    auctionIndex: number,
+    input: any,
+    status: OrderStatusEnum,
+    paymentToken: Token,
+    paymentNonce?: number,
+  ): OrderEntity {
+    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+    const price = input.price ?? input.currentBid;
+    return new OrderEntity({
+      id: this.orders.length,
+      creationDate: modifiedDate,
+      modifiedDate,
+      auctionId: this.auctions[auctionIndex].id,
+      ownerAddress: input.address,
+      priceToken: paymentToken.identifier,
+      priceNonce: paymentNonce ?? 0,
+      priceAmount: price !== '0' ? price : this.auctions[auctionIndex].maxBid,
+      priceAmountDenominated:
+        price !== '0'
+          ? BigNumberUtils.denominateAmount(price, paymentToken.decimals)
+          : this.auctions[auctionIndex].maxBidDenominated,
+      blockHash: input.blockHash ?? '',
+      marketplaceKey: this.marketplace.key,
+      boughtTokensNo:
+        this.auctions[auctionIndex].type === AuctionTypeEnum.Nft
+          ? null
+          : input.itemsCount,
+      status: status,
+    });
   }
 
   setAuctionOrderWinnerStatusAndReturnId(

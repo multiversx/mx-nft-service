@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
 import { GlobalOfferAcceptedSummary } from '../models/marketplaces-reindex-events-summaries/GloballyOfferAcceptedSummary';
 
@@ -10,6 +12,17 @@ export class ReindexGlobalOfferAcceptedHandler {
     marketplaceReindexState: MarketplaceReindexState,
     input: GlobalOfferAcceptedSummary,
   ): void {
-    throw new Error('Not implemented yet');
+    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
+      input.auctionId,
+    );
+
+    if (auctionIndex === -1) {
+      return;
+    }
+
+    marketplaceReindexState.auctions[auctionIndex].status =
+      AuctionStatusEnum.Closed;
+    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
   }
 }
