@@ -65,7 +65,7 @@ export class MarketplacesReindexService {
 
           let marketplaceReindexState = new MarketplaceReindexState({
             marketplace,
-            fromTheBeginning: input.afterTimestamp ? false : true,
+            isReindexFromTheBeginning: input.afterTimestamp ? false : true,
           });
 
           await this.processMarketplaceEventsInBatches(
@@ -219,7 +219,7 @@ export class MarketplacesReindexService {
         eventOrdersAndTx,
       );
 
-    if (!marketplaceReindexState.fromTheBeginning) {
+    if (!marketplaceReindexState.isReindexFromTheBeginning) {
       await this.getStateFromDbIfMissing(
         marketplaceReindexState,
         eventsSetSummaries,

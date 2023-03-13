@@ -17,7 +17,7 @@ import { Marketplace } from './Marketplace.dto';
 @ObjectType()
 export class MarketplaceReindexState {
   marketplace: Marketplace;
-  fromTheBeginning: boolean;
+  isReindexFromTheBeginning: boolean;
   auctions: AuctionEntity[] = [];
   orders: OrderEntity[] = [];
   offers: OfferEntity[] = [];
