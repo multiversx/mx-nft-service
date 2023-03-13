@@ -23,9 +23,9 @@ import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/re
 import { constants, mxConfig } from 'src/config';
 import { MarketplaceReindexState } from './models/MarketplaceReindexState';
 import { MxApiService } from 'src/common';
-import { DateUtils } from 'src/utils/date-utils';
-import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { MarketplaceReindexDataArgs } from './models/MarketplaceReindexDataArgs';
+import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
+import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs';
 
 @Injectable()
@@ -73,6 +73,7 @@ export class MarketplacesReindexService {
             input.afterTimestamp,
             input.beforeTimestamp,
           );
+
           marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(
             input.beforeTimestamp ?? DateUtils.getCurrentTimestamp(),
           );
@@ -80,6 +81,10 @@ export class MarketplacesReindexService {
           await this.populateAuctionAssetTags(marketplaceReindexState.auctions);
 
           await this.addMarketplaceStateToDb(marketplaceReindexState);
+
+          this.logger.log(
+            `Reindexing marketplace ${input.marketplaceAddress} ended`,
+          );
         },
         true,
       );
@@ -222,7 +227,11 @@ export class MarketplacesReindexService {
     }
 
     for (let i = 0; i < eventsSetSummaries?.length; i++) {
-      await this.processEvent(marketplaceReindexState, eventsSetSummaries[i]);
+      try {
+        await this.processEvent(marketplaceReindexState, eventsSetSummaries[i]);
+      } catch (error) {
+        this.logger.error(error);
+      }
     }
   }
 
@@ -250,10 +259,10 @@ export class MarketplacesReindexService {
 
     const auctionIds = auctions?.map((a) => a.id);
     const [orders, offers] = await Promise.all([
-      auctionIds.length > 0
+      auctionIds?.length > 0
         ? this.persistenceService.getOrdersByAuctionIds(auctionIds)
         : [],
-      missingOfferIds.length > 0
+      missingOfferIds?.length > 0
         ? this.persistenceService.getBulkOffersByOfferIdsAndMarketplace(
             missingOfferIds,
             marketplaceReindexState.marketplace.key,
@@ -447,7 +456,7 @@ export class MarketplacesReindexService {
       }
       default: {
         if (eventsSetSummary.auctionType) {
-          throw new Error(`EVent not handled ${eventsSetSummary.auctionType}`);
+          throw new Error(`Case not handled ${eventsSetSummary.auctionType}`);
         }
       }
     }
