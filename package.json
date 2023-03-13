@@ -71,6 +71,7 @@
     "graphql-upload": "13.0.0",
     "helmet": "4.4.1",
     "jwks-rsa": "2.0.3",
+    "moment": "^2.29.4",
     "mongoose": "6.9.0",
     "mysql2": "2.2.5",
     "nest-winston": "1.8.0",
@@ -86,7 +87,7 @@
     "save": "2.5.0",
     "swagger-ui-express": "4.3.0",
     "tiny-async-pool": "1.2.0",
-    "typeorm": "0.3.11",
+    "typeorm": "0.3.12",
     "winston": "3.7.2"
   },
   "devDependencies": {
