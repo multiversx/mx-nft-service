@@ -17,6 +17,7 @@ import { Marketplace } from './Marketplace.dto';
 @ObjectType()
 export class MarketplaceReindexState {
   marketplace: Marketplace;
+  fromTheBeginning: boolean;
   auctions: AuctionEntity[] = [];
   orders: OrderEntity[] = [];
   offers: OfferEntity[] = [];
@@ -106,13 +107,13 @@ export class MarketplaceReindexState {
     exceptWinnerId?: number,
   ): void {
     this.orders
-      .filter(
+      ?.filter(
         (o) =>
           o.auctionId === auctionId &&
           o.status === OrderStatusEnum.Active &&
           o.id !== exceptWinnerId,
       )
-      .map((o) => {
+      ?.map((o) => {
         o.status = OrderStatusEnum.Inactive;
         o.modifiedDate = modifiedDate;
       });
@@ -126,7 +127,7 @@ export class MarketplaceReindexState {
   private setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(
     timestamp: number,
   ): void {
-    const runningAuctions = this.auctions.filter(
+    const runningAuctions = this.auctions?.filter(
       (a) => a.status === AuctionStatusEnum.Running,
     );
     for (let i = 0; i < runningAuctions.length; i++) {
