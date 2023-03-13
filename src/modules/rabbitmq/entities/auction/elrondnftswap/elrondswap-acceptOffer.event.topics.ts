@@ -5,10 +5,10 @@ import {
   StructType,
   TokenIdentifierType,
   U64Type,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core/out';
 
 export class ElrondSwapAcceptOfferTopics {
-  private offerId: string;
+  private offerId: number;
   private collection: string;
   private nonce: string;
   private nrOfferTokens: string;
@@ -18,7 +18,10 @@ export class ElrondSwapAcceptOfferTopics {
   private paymentTokenNonce: string;
 
   constructor(rawTopics: string[]) {
-    this.offerId = Buffer.from(rawTopics[1], 'base64').toString('hex');
+    this.offerId = parseInt(
+      Buffer.from(rawTopics[1], 'base64').toString('hex'),
+      16,
+    );
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
     this.nrOfferTokens = parseInt(
