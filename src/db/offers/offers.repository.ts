@@ -70,7 +70,7 @@ export class OffersRepository {
     await this.triggerCacheInvalidation(offer.collection, offer.ownerAddress);
     return savedOffer;
   }
-  
+
   async saveBulkOffers(orders: OfferEntity[]): Promise<void> {
     await this.offersRepository.save(orders, {
       chunk: constants.dbBatch,
@@ -89,6 +89,21 @@ export class OffersRepository {
     const updatedOffers = await this.offersRepository.save(offers);
     await this.triggerCacheInvalidationForOffers(offers);
     return updatedOffers;
+  }
+
+  async getBulkOffersByOfferIdsAndMarketplace(
+    offerIds: number[],
+    marketplaceKey: string,
+  ): Promise<OfferEntity[]> {
+    return await this.offersRepository
+      .createQueryBuilder('offers')
+      .where(
+        `marketplaceOfferId IN(:...offerIds) and marketplaceKey='${marketplaceKey}'`,
+        {
+          offerIds: offerIds,
+        },
+      )
+      .getMany();
   }
 
   async rollbackOffersByHash(blockHash: string) {

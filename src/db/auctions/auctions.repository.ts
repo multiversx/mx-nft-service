@@ -424,6 +424,24 @@ export class AuctionsRepository {
       .getMany();
   }
 
+  async getBulkAuctionsByAuctionIdsAndMarketplace(
+    auctionsIds: number[],
+    marketplaceKey: string,
+  ): Promise<AuctionEntity[]> {
+    if (!auctionsIds || auctionsIds.length === 0) {
+      return;
+    }
+    return await this.auctionsRepository
+      .createQueryBuilder('auctions')
+      .where(
+        `marketplaceAuctionId IN(:...auctionsIds) and marketplaceKey='${marketplaceKey}'`,
+        {
+          auctionsIds: auctionsIds,
+        },
+      )
+      .getMany();
+  }
+
   async getAuctionByMarketplace(
     id: number,
     marketplaceKey: string,
@@ -478,6 +496,21 @@ export class AuctionsRepository {
         parseInt(identifiers[0].split('_')[2]),
       ),
     );
+  }
+
+  async getBulkAuctionsByIdentifiersAndMarketplace(
+    identifiers: string[],
+    marketplaceKey: string,
+  ): Promise<any[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('auctions')
+      .where(
+        `identifier IN(:...identifiers) and marketplaceKey='${marketplaceKey}'`,
+        {
+          identifiers: identifiers,
+        },
+      )
+      .getMany();
   }
 
   async getAvailableTokensByAuctionId(id: number): Promise<any> {

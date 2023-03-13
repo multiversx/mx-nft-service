@@ -5,7 +5,7 @@ import {
   StructType,
   TokenIdentifierType,
   U64Type,
-} from '@elrondnetwork/erdjs';
+} from '@multiversx/sdk-core/out';
 export class ElrondSwapUpdateTopics {
   private auctionId: string;
   private collection: string;

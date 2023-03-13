@@ -885,6 +885,18 @@ export class PersistenceService {
       this.auctionsRepository.getBulkAuctions(auctionsIds),
     );
   }
+  async getBulkAuctionsByAuctionIdsAndMarketplace(
+    auctionsIds: number[],
+    marketplaceKey: string,
+  ): Promise<AuctionEntity[]> {
+    return await this.execute(
+      this.getBulkAuctionsByAuctionIdsAndMarketplace.name,
+      this.auctionsRepository.getBulkAuctionsByAuctionIdsAndMarketplace(
+        auctionsIds,
+        marketplaceKey,
+      ),
+    );
+  }
 
   async getAuctionByMarketplace(
     id: number,
@@ -922,6 +934,19 @@ export class PersistenceService {
     return await this.execute(
       this.getAuctionsForIdentifiers.name,
       this.auctionsRepository.getAuctionsForIdentifiers(identifiers),
+    );
+  }
+
+  async getBulkAuctionsByIdentifierAndMarketplace(
+    identifiers: string[],
+    marletplaceKey: string,
+  ): Promise<any[]> {
+    return await this.execute(
+      this.getBulkAuctionsByIdentifierAndMarketplace.name,
+      this.auctionsRepository.getBulkAuctionsByIdentifiersAndMarketplace(
+        identifiers,
+        marletplaceKey,
+      ),
     );
   }
 
@@ -1110,6 +1135,19 @@ export class PersistenceService {
     return await this.execute(
       this.updateOffers.name,
       this.offersRepository.updateOffers(offers),
+    );
+  }
+
+  async getBulkOffersByOfferIdsAndMarketplace(
+    offerIds: number[],
+    marketplaceKey: string,
+  ): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.getBulkOffersByOfferIdsAndMarketplace.name,
+      this.offersRepository.getBulkOffersByOfferIdsAndMarketplace(
+        offerIds,
+        marketplaceKey,
+      ),
     );
   }
 

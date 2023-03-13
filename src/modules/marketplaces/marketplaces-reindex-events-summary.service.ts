@@ -115,6 +115,11 @@ export class MarketplacesReindexEventsSummaryService {
             txData,
           );
         }
+        if (
+          event.hasEventTopicIdentifier(ExternalAuctionEventEnum.UserDeposit)
+        ) {
+          return;
+        }
         return OfferAcceptedSummary.fromAcceptOfferEventAndTx(
           event,
           txData,

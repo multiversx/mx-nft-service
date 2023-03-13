@@ -22,6 +22,7 @@ import {
   ClearReportCollectionInput,
   ClearReportInput,
 } from './models/clear-report.input';
+import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -171,13 +172,11 @@ export class AdminOperationsResolver {
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async reindexMarketplaceData(
-    @Args('marketplaceAddress')
-    marketplaceAddress: string,
+    @Args('input')
+    input: MarketplaceReindexDataArgs,
   ): Promise<boolean> {
     try {
-      await this.marketplacesReindexService.reindexMarketplaceData(
-        marketplaceAddress,
-      );
+      await this.marketplacesReindexService.reindexMarketplaceData(input);
       return true;
     } catch (error) {
       throw new ApolloError(error);
