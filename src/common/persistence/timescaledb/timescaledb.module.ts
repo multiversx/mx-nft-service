@@ -3,15 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common.module';
 import { CacheModule } from 'src/common/services/caching/caching.module';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
-import { AnalyticsDataGetterService } from './analytics-data.getter.service';
-import { AnalyticsDataSetterService } from './analytics-data.setter.service';
 import {
-  CloseDaily,
-  CloseHourly,
+  XNftsAnalyticsEntity,
   SumDaily,
   SumHourly,
-  XNftsAnalyticsEntity,
-} from './entities/analytics.entities';
+  CloseDaily,
+  CloseHourly,
+} from 'src/timescaledb/entities/analytics.entities';
+import { AnalyticsDataGetterService } from './analytics-data.getter.service';
+import { AnalyticsDataSetterService } from './analytics-data.setter.service';
 
 @Module({
   imports: [
@@ -47,4 +47,4 @@ import {
   providers: [AnalyticsDataGetterService, AnalyticsDataSetterService],
   exports: [AnalyticsDataGetterService, AnalyticsDataSetterService],
 })
-export class AnalyticsDataModule {}
+export class TimescaleDbModule {}
