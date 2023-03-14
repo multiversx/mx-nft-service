@@ -49,7 +49,7 @@ export class ReindexAuctionStartedHandler {
         paymentToken.decimals,
       ),
       minBidDiff: input.minBidDiff ?? '0',
-      startDate: input.startTime,
+      startDate: input.startTime ?? input.timestamp,
       endDate: input.endTime > 0 ? input.endTime : 0,
       tags: '',
       blockHash: input.blockHash ?? '',
