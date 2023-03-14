@@ -1,10 +1,12 @@
 import { EventResponse } from 'src/common/services/mx-communication/models/elastic-search/event.response';
+import BigNumber from 'bignumber.js';
 
 export class GenericEvent {
   private address = '';
   private identifier = '';
   protected topics = [];
   protected data = '';
+  protected timestamp: BigNumber | undefined;
 
   constructor(init?: Partial<GenericEvent>) {
     Object.assign(this, init);
@@ -18,12 +20,17 @@ export class GenericEvent {
     return this.identifier;
   }
 
+  getTimestamp(): BigNumber | undefined {
+    return this.timestamp;
+  }
+
   toJSON(): any {
     return {
       address: this.address,
       identifier: this.identifier,
       data: this.data,
       topics: this.topics,
+      timestamp: this.timestamp?.toNumber(),
     };
   }
 
