@@ -54,10 +54,10 @@ export class MarketplacesReindexService {
   async reindexMarketplaceData(
     input: MarketplaceReindexDataArgs,
   ): Promise<void> {
-    try {
-      await Locker.lock(
-        'Reindex marketplace data',
-        async () => {
+    await Locker.lock(
+      'Reindex marketplace data',
+      async () => {
+        try {
           const marketplace =
             await this.marketplacesService.getMarketplaceByAddress(
               input.marketplaceAddress,
@@ -85,16 +85,19 @@ export class MarketplacesReindexService {
           this.logger.log(
             `Reindexing marketplace ${input.marketplaceAddress} ended`,
           );
-        },
-        true,
-      );
-    } catch (error) {
-      this.logger.error('An error occurred while reindexing marketplace data', {
-        path: `${MarketplacesReindexService.name}.${this.reindexMarketplaceData.name}`,
-        marketplaceAddress: input.marketplaceAddress,
-        exception: error,
-      });
-    }
+        } catch (error) {
+          this.logger.error(
+            'An error occurred while reindexing marketplace data',
+            {
+              path: `${MarketplacesReindexService.name}.${this.reindexMarketplaceData.name}`,
+              marketplaceAddress: input.marketplaceAddress,
+              exception: error,
+            },
+          );
+        }
+      },
+      true,
+    );
   }
 
   private async processMarketplaceEventsInBatches(

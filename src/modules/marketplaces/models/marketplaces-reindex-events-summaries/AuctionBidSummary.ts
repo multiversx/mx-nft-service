@@ -30,7 +30,7 @@ export class AuctionBidSummary extends ReindexGenericSummary {
     tx: MarketplaceTransactionData,
     marketplaceKey: string,
   ): AuctionBidSummary {
-    if (!event) {
+    if (!event || event.hasEventTopicIdentifier('end_auction_event')) {
       return;
     }
 
