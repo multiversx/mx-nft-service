@@ -265,26 +265,28 @@ export class FlagNftService {
   }
 
   private async setElasticNftFlagMapping(): Promise<void> {
-    await Locker.lock(
-      'setElasticNftFlagMapping',
-      async () => {
-        try {
-          await this.elasticUpdater.putMappings(
-            'tokens',
-            this.elasticUpdater.buildPutMultipleMappingsBody([
-              {
-                key: 'nft_nsfw_mark',
-                value: 'float',
-              },
-            ]),
-          );
-        } catch (error) {
-          this.logger.error('Error when trying to map nsfw Elastic types', {
-            path: `$${FlagNftService.name}.${this.setElasticNftFlagMapping.name}`,
-          });
-        }
-      },
-      false,
-    );
+    if (process.env.ENABLE_ELASTIC_UPDATES === 'true') {
+      await Locker.lock(
+        'setElasticNftFlagMapping',
+        async () => {
+          try {
+            await this.elasticUpdater.putMappings(
+              'tokens',
+              this.elasticUpdater.buildPutMultipleMappingsBody([
+                {
+                  key: 'nft_nsfw_mark',
+                  value: 'float',
+                },
+              ]),
+            );
+          } catch (error) {
+            this.logger.error('Error when trying to map nsfw Elastic types', {
+              path: `$${FlagNftService.name}.${this.setElasticNftFlagMapping.name}`,
+            });
+          }
+        },
+        false,
+      );
+    }
   }
 }
