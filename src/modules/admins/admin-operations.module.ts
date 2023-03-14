@@ -13,6 +13,7 @@ import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { AuthModule } from '../auth/auth.module';
 import { ReportsModuleGraph } from '../reports/reports.module';
+import { AnalyticsModule } from 'src/crons/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ReportsModuleGraph } from '../reports/reports.module';
     MarketplacesModuleGraph,
     AuthModule,
     ReportsModuleGraph,
+    AnalyticsModule,
   ],
   providers: [
     Logger,

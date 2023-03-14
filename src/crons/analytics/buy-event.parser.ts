@@ -9,12 +9,15 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { BuySftEvent } from 'src/modules/rabbitmq/entities/auction';
 import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
 import { ElrondSwapBuyEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
 export class BuyEventParser {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private readonly marketplaceService: MarketplacesService,
+    private readonly usdPriceService: UsdPriceService,
   ) {}
 
   async handle(event: any) {
@@ -42,14 +45,25 @@ export class BuyEventParser {
     }
     if (!auction) return;
 
+    const tokenData = await this.usdPriceService.getToken(auction.paymentToken);
+    const volume = topics.bid === '0' ? auction.minBid : topics.bid;
     return [
       {
         collection: topics.collection,
         paymentToken: auction.paymentToken,
         paymentNonce: auction.paymentNonce,
-        value: topics.bid === '0' && auction ? auction.minBid : topics.bid,
+        usdPrice: tokenData.priceUsd,
+        decimals: tokenData.decimals,
+        volume: volume,
+        volumeUSD:
+          volume === '0'
+            ? '0'
+            : computeUsd(
+                tokenData.priceUsd,
+                volume,
+                tokenData.decimals,
+              ).toFixed(),
       },
-      event.getTimestamp(),
     ];
   }
 

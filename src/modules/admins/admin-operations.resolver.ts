@@ -23,6 +23,7 @@ import {
   ClearReportInput,
 } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
+import { AnalyticsService } from 'src/crons/analytics/analytics.service';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -32,6 +33,7 @@ export class AdminOperationsResolver {
     private reportNfts: ReportsService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
+    private readonly analyticsService: AnalyticsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
     private readonly marketplacesReindexService: MarketplacesReindexService,
@@ -121,18 +123,22 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async indexTrandingCollections(
     @Args('forTheLastHours')
     forTheLastHours: number = 24,
   ): Promise<boolean> {
     try {
-      await this.cacheEventsPublisherService.publish(
-        new ChangedEvent({
-          id: forTheLastHours,
-          type: CacheEventTypeEnum.RefreshTrending,
-        }),
+      await this.analyticsService.reindexTrendingCollections(
+        1678617432,
+        1678703832,
       );
+      // await this.cacheEventsPublisherService.publish(
+      //   new ChangedEvent({
+      //     id: forTheLastHours,
+      //     type: CacheEventTypeEnum.RefreshTrending,
+      //   }),
+      // );
       return true;
     } catch (error) {
       throw new ApolloError(error);
