@@ -10,15 +10,14 @@ import {
 } from './entities/analytics.entities';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AnalyticsGetterInterface } from './interfaces/analytics.getter.interface';
-import { AnalyticsArgs } from './interfaces/analytics.query';
 import {
   computeTimeInterval,
   convertBinToTimeResolution,
 } from 'src/utils/analytics.utils';
+import { AnalyticsArgs } from './entities/analytics.query';
 
 @Injectable()
-export class AnalyticsDataGetterService implements AnalyticsGetterInterface {
+export class AnalyticsDataGetterService {
   constructor(
     @InjectRepository(XNftsAnalyticsEntity)
     private readonly nftsAnalytics: Repository<XNftsAnalyticsEntity>,

@@ -26,7 +26,10 @@
     "typeorm": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/datasource.ts",
     "generate-migration": "npm run typeorm -- migration:generate src/db/migrations/$npm_config_name",
     "run-migrations": "npm run typeorm migration:run",
-    "revert-migrations": "npm run typeorm migration:revert"
+    "revert-migrations": "npm run typeorm migration:revert",
+    "typeormTimescale": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/common/persistence/timescaledb/typeorm.config.ts",
+    "generate-migration-timescale": "npm run typeormTimescale -- migration:generate src/common/persistence/timescaledb/migrations/$npm_config_name",
+    "run-migrations-timescale": "npm run typeormTimescale migration:run"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
