@@ -233,7 +233,11 @@ export class MarketplacesReindexService {
       try {
         await this.processEvent(marketplaceReindexState, eventsSetSummaries[i]);
       } catch (error) {
-        this.logger.error(error);
+        this.logger.warn(
+          `Error reprocessing marketplace event ${JSON.stringify(
+            eventsSetSummaries[i],
+          )} - ${JSON.stringify(error)}`,
+        );
       }
     }
   }

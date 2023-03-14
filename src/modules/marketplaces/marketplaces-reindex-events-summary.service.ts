@@ -32,9 +32,15 @@ export class MarketplacesReindexEventsSummaryService {
       return;
     }
 
-    return events.map((event) =>
-      this.getEventSummary(event, txData, marketplace),
-    );
+    return events.map((event) => {
+      try {
+        return this.getEventSummary(event, txData, marketplace);
+      } catch (error) {
+        this.logger.warn(
+          `Error when getting event summary for ${txData.blockHash} ${event.timestamp}`,
+        );
+      }
+    });
   }
 
   private getEventsAndTxData(
