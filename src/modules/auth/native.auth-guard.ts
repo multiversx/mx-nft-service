@@ -1,4 +1,5 @@
 import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
+import { CachingService } from '@multiversx/sdk-nestjs';
 import {
   Injectable,
   CanActivate,
@@ -15,12 +16,32 @@ export class NativeAuthGuard implements CanActivate {
   private readonly logger: Logger;
   private readonly authServer: NativeAuthServer;
 
-  constructor(apiConfigService: ApiConfigService) {
+  constructor(
+    apiConfigService: ApiConfigService,
+    private readonly cachingService: CachingService,
+  ) {
     this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       apiUrl: apiConfigService.getApiUrl(),
       maxExpirySeconds: apiConfigService.getNativeAuthMaxExpirySeconds(),
       acceptedOrigins: apiConfigService.getNativeAuthAcceptedOrigins(),
+      cache: {
+        getValue: async <T>(key: string): Promise<T | undefined> => {
+          if (key === 'block:timestamp:latest') {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            return new Date().getTime() / 1000;
+          }
+          return await this.cachingService.getCache<T>(key);
+        },
+        setValue: async <T>(
+          key: string,
+          value: T,
+          ttl: number,
+        ): Promise<void> => {
+          await this.cachingService.setCache(key, value, ttl);
+        },
+      },
     });
   }
 
