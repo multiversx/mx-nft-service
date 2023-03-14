@@ -21,6 +21,9 @@ export class ReindexAuctionStartedHandler {
     const nonce = BinaryUtils.hexToNumber(input.nonce);
     const itemsCount = parseInt(input.itemsCount);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+    const startTime = Number.isNaN(input.startTime)
+      ? input.timestamp
+      : input.startTime;
     const auction = new AuctionEntity({
       creationDate: modifiedDate,
       modifiedDate,
@@ -49,7 +52,7 @@ export class ReindexAuctionStartedHandler {
         paymentToken.decimals,
       ),
       minBidDiff: input.minBidDiff ?? '0',
-      startDate: input.startTime ?? input.timestamp,
+      startDate: startTime,
       endDate: input.endTime > 0 ? input.endTime : 0,
       tags: '',
       blockHash: input.blockHash ?? '',
