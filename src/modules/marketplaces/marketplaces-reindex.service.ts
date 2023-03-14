@@ -136,7 +136,7 @@ export class MarketplacesReindexService {
           marketplaceReindexState,
           processInNextBatch.concat(batch),
         );
-    } while (afterTimestamp < beforeTimestamp);
+    } while (beforeTimestamp ? afterTimestamp < beforeTimestamp : true);
 
     const isFinalBatch = true;
     processInNextBatch =
