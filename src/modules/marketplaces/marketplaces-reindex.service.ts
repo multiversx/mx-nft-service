@@ -27,6 +27,7 @@ import { MarketplaceReindexDataArgs } from './models/MarketplaceReindexDataArgs'
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs';
+import { TagEntity } from 'src/db/auctions/tags.entity';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -534,6 +535,23 @@ export class MarketplacesReindexService {
         ].id;
     }
 
+    let tags: TagEntity[] = [];
+    marketplaceReindexState.auctions.map((auction) => {
+      const assetTags = auction.tags.split(',');
+      assetTags.map((assetTag) => {
+        if (assetTag !== '') {
+          tags.push(
+            new TagEntity({
+              auctionId: auction.id,
+              tag: assetTag.trim().slice(0, 20),
+              auction: auction,
+            }),
+          );
+        }
+      });
+    });
+
+    await this.persistenceService.saveTags(tags);
     await this.persistenceService.saveBulkOrders(
       marketplaceReindexState.orders,
     );

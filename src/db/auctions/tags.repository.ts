@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NftTag } from 'src/common/services/mx-communication/models';
+import { constants } from 'src/config';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MYSQL_ALREADY_EXISTS } from 'src/utils/constants';
 import { Repository } from 'typeorm';
@@ -75,7 +76,7 @@ export class TagsRepository {
 
   async saveTags(tags: TagEntity[]): Promise<TagEntity[]> {
     try {
-      return await this.tagsRepository.save(tags);
+      return await this.tagsRepository.save(tags, { chunk: constants.dbBatch });
     } catch (err) {
       // If like already exists, we ignore the error.
       if (err.errno === MYSQL_ALREADY_EXISTS) {
