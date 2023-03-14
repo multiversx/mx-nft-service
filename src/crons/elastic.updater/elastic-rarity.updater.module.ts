@@ -1,6 +1,5 @@
 import { Logger, Module } from '@nestjs/common';
 import { CommonModule } from 'src/common.module';
-import { CacheModule } from 'src/common/services/caching/caching.module';
 import { NftRarityModuleGraph } from 'src/modules/nft-rarity/nft-rarity.module';
 import { ElasticRarityUpdaterService } from './elastic-rarity.updater.service';
 import { RarityUpdaterService } from './rarity.updater.service';
