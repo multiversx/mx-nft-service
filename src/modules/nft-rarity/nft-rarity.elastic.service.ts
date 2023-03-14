@@ -274,66 +274,68 @@ export class NftRarityElasticService {
   }
 
   async setElasticRarityMappings(): Promise<void> {
-    await Locker.lock(
-      'setElasticRarityMappings',
-      async () => {
-        try {
-          await this.elasticService.putMappings(
-            'tokens',
-            this.elasticService.buildPutMultipleMappingsBody([
+    if (process.env.ENABLE_ELASTIC_UPDATES === 'true') {
+      await Locker.lock(
+        'setElasticRarityMappings',
+        async () => {
+          try {
+            await this.elasticService.putMappings(
+              'tokens',
+              this.elasticService.buildPutMultipleMappingsBody([
+                {
+                  key: 'nft_rank_custom',
+                  value: 'long',
+                },
+                {
+                  key: 'nft_custom_ranks_hash',
+                  value: 'text',
+                },
+                {
+                  key: 'nft_score_openRarity',
+                  value: 'float',
+                },
+                {
+                  key: 'nft_rank_openRarity',
+                  value: 'long',
+                },
+                {
+                  key: 'nft_score_jaccardDistances',
+                  value: 'float',
+                },
+                {
+                  key: 'nft_rank_jaccardDistances',
+                  value: 'long',
+                },
+                {
+                  key: 'nft_score_trait',
+                  value: 'float',
+                },
+                {
+                  key: 'nft_rank_trait',
+                  value: 'long',
+                },
+                {
+                  key: 'nft_score_statistical',
+                  value: 'float',
+                },
+                {
+                  key: 'nft_rank_statistical',
+                  value: 'long',
+                },
+              ]),
+            );
+          } catch (error) {
+            this.logger.error(
+              'Error when trying to map Elastic types for rarity variables',
               {
-                key: 'nft_rank_custom',
-                value: 'long',
+                path: `${NftRarityElasticService.name}.${this.setElasticRarityMappings.name}`,
               },
-              {
-                key: 'nft_custom_ranks_hash',
-                value: 'text',
-              },
-              {
-                key: 'nft_score_openRarity',
-                value: 'float',
-              },
-              {
-                key: 'nft_rank_openRarity',
-                value: 'long',
-              },
-              {
-                key: 'nft_score_jaccardDistances',
-                value: 'float',
-              },
-              {
-                key: 'nft_rank_jaccardDistances',
-                value: 'long',
-              },
-              {
-                key: 'nft_score_trait',
-                value: 'float',
-              },
-              {
-                key: 'nft_rank_trait',
-                value: 'long',
-              },
-              {
-                key: 'nft_score_statistical',
-                value: 'float',
-              },
-              {
-                key: 'nft_rank_statistical',
-                value: 'long',
-              },
-            ]),
-          );
-        } catch (error) {
-          this.logger.error(
-            'Error when trying to map Elastic types for rarity variables',
-            {
-              path: `${NftRarityElasticService.name}.${this.setElasticRarityMappings.name}`,
-            },
-          );
-        }
-      },
-      false,
-    );
+            );
+          }
+        },
+        false,
+      );
+    }
   }
 
   async getAllCollectionsFromElastic(): Promise<string[]> {
