@@ -44,7 +44,7 @@ export class ReindexAuctionEndedHandler {
         modifiedDate,
         winnerOrderId,
       );
-    } else {
+    } else if (input.currentBid !== '0') {
       const order = marketplaceReindexState.createOrder(
         auctionIndex,
         input,
