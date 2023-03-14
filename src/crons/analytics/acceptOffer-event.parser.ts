@@ -6,11 +6,16 @@ import { AcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/acceptOf
 import { AcceptOfferDeadrareEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferDeadrare.event';
 import { AcceptOfferFrameitEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferFrameit.event';
 import { AcceptOfferXoxnoEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferXoxno.event';
+import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
 export class AcceptOfferEventParser {
-  constructor(private readonly marketplaceService: MarketplacesService) {}
+  constructor(
+    private readonly marketplaceService: MarketplacesService,
+    private readonly usdPriceService: UsdPriceService,
+  ) {}
 
   async handle(event: any) {
     const marketplace = await this.marketplaceService.getMarketplaceByAddress(
@@ -42,15 +47,26 @@ export class AcceptOfferEventParser {
       acceptOfferEvent = new AcceptOfferEvent(event);
       topics = acceptOfferEvent.getTopics();
     }
-    if (acceptOfferEvent && topics)
+    if (acceptOfferEvent && topics) {
+      const tokenData = await this.usdPriceService.getToken(
+        topics.paymentTokenIdentifier,
+      );
+
       return [
         {
           collection: topics.collection,
           paymentToken: topics.paymentTokenIdentifier,
           paymentNonce: topics.paymentTokenNonce,
-          value: topics.paymentAmount,
+          usdPrice: tokenData.priceUsd,
+          decimals: tokenData.decimals,
+          volume: topics.paymentAmount,
+          volumeUSD: computeUsd(
+            tokenData.priceUsd,
+            topics.paymentAmount,
+            tokenData.decimals,
+          ).toFixed(),
         },
-        event.getTimestamp(),
       ];
+    }
   }
 }

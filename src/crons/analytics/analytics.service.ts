@@ -2,19 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as moment from 'moment';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
 import { trendingEventsEnum } from './trendingEventsEnum';
-import BigNumber from 'bignumber.js';
 import { BuyEventParser } from './buy-event.parser';
-import { computeUsd } from 'src/utils/helpers';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 import { CollectionVolumeLast24 } from './collection-volume';
 import { CachingService, PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import {
   AuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
+import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
 
 @Injectable()
 export class AnalyticsService {
@@ -24,7 +22,6 @@ export class AnalyticsService {
   constructor(
     private readonly indexerService: ElasticAnalyticsService,
     private readonly marketplacesService: MarketplacesService,
-    private readonly usdPriceService: UsdPriceService,
     private readonly cacheService: CachingService,
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
@@ -36,9 +33,9 @@ export class AnalyticsService {
   }
 
   public async reindexTrendingCollections(
-    startDateUtc: string,
-    endDateUtc: string,
-  ): Promise<CollectionVolumeLast24[]> {
+    startDateUtc: number,
+    endDateUtc: number,
+  ): Promise<void> {
     try {
       const performanceProfiler = new PerformanceProfiler();
 
@@ -63,9 +60,9 @@ export class AnalyticsService {
   }
 
   private async fetchLogsUsingScrollApi(
-    startDateUtc: string,
-    endDateUtc: string,
-  ): Promise<CollectionVolumeLast24[]> {
+    startDateUtc: number,
+    endDateUtc: number,
+  ): Promise<void> {
     this.logger.log(
       `Scroll logs between '${startDateUtc}' and '${endDateUtc}'`,
     );
@@ -82,41 +79,41 @@ export class AnalyticsService {
     return await this.getTrendingCollections();
   }
 
-  private async getTrendingCollections(): Promise<CollectionVolumeLast24[]> {
+  private async getTrendingCollections(): Promise<void> {
     const tokensWithPrice = await this.getTokensWithDetails();
-    const collections = this.getDataGroupedByCollectionAndToken();
-    let trending = [];
-    for (const collection of collections) {
-      let priceUsd: BigNumber = new BigNumber(0);
+    // const collections = this.getDataGroupedByCollectionAndToken();
+    // let trending = [];
+    // for (const collection of collections) {
+    //   let priceUsd: BigNumber = new BigNumber(0);
 
-      for (const token of collection.tokens) {
-        const tokenDetails = tokensWithPrice[token.paymentToken];
-        if (
-          tokenDetails &&
-          tokenDetails.length > 0 &&
-          tokenDetails[0].usdPrice
-        ) {
-          priceUsd = priceUsd.plus(
-            computeUsd(
-              tokenDetails[0].usdPrice,
-              token.sum,
-              tokenDetails[0].decimals,
-            ),
-          );
-        }
-      }
-      trending.push({
-        collection: collection.collection,
-        volume: priceUsd.toString(),
-        tokens: collection.tokens,
-      });
-    }
-    return trending.sortedDescending((x) => parseFloat(x.volume));
+    //   for (const token of collection.tokens) {
+    //     const tokenDetails = tokensWithPrice[token.paymentToken];
+    //     if (
+    //       tokenDetails &&
+    //       tokenDetails.length > 0 &&
+    //       tokenDetails[0].usdPrice
+    //     ) {
+    //       priceUsd = priceUsd.plus(
+    //         computeUsd(
+    //           tokenDetails[0].usdPrice,
+    //           token.sum,
+    //           tokenDetails[0].decimals,
+    //         ),
+    //       );
+    //     }
+    //   }
+    //   trending.push({
+    //     collection: collection.collection,
+    //     volume: priceUsd.toString(),
+    //     tokens: collection.tokens,
+    //   });
+    // }
+    // return trending.sortedDescending((x) => parseFloat(x.volume));
   }
 
   private async getParsedEvents(
-    startDateUtc: string,
-    endDateUtc: string,
+    startDateUtc: number,
+    endDateUtc: number,
     scrollPage: number,
     lastBlockLogs: any[],
   ) {
@@ -135,6 +132,7 @@ export class AnalyticsService {
           (key) => groupedLogs[key],
         );
 
+        console.log('blockLogs', JSON.stringify(blockLogs));
         if (blockLogs.length > 0) {
           blockLogs[0] = [...lastBlockLogs, ...blockLogs[0]];
 
@@ -151,6 +149,8 @@ export class AnalyticsService {
           const eventsRaw = blockLogs[i]
             .map((logs: { events: any }) => logs.events)
             .flat();
+
+          console.log(JSON.stringify(eventsRaw));
           const events = eventsRaw.filter((event: { identifier: string }) =>
             trendingEventsEnum.includes(event.identifier),
           );
@@ -186,17 +186,18 @@ export class AnalyticsService {
   }
 
   private async getTokensWithDetails() {
-    const tokens = [...new Set(this.data.map((item) => item.paymentToken))];
-    let tokensWithPrice = [];
-    for (const token of tokens) {
-      const tokenData = await this.usdPriceService.getToken(token);
-      tokensWithPrice.push({
-        key: token,
-        usdPrice: tokenData.priceUsd,
-        decimals: tokenData.decimals,
-      });
-    }
-    return tokensWithPrice.groupBy((t) => t.key);
+    console.log({ date: this.data });
+    // const tokens = [...new Set(this.data.map((item) => item.paymentToken))];
+    // let tokensWithPrice = [];
+    // for (const token of tokens) {
+    //   const tokenData = await this.usdPriceService.getToken(token);
+    //   tokensWithPrice.push({
+    //     key: token,
+    //     usdPrice: tokenData.priceUsd,
+    //     decimals: tokenData.decimals,
+    //   });
+    // }
+    // return tokensWithPrice.groupBy((t) => t.key);
   }
 
   async getFilterAddresses(): Promise<void> {
@@ -208,7 +209,7 @@ export class AnalyticsService {
   private async processEvents(rawEvents: any[]): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
 
-    const events: any[] = rawEvents.filter(
+    const events: GenericEvent[] = rawEvents.filter(
       (rawEvent: { address: string; identifier: string }) =>
         this.filterAddresses.find(
           (filterAddress) => rawEvent.address === filterAddress,
@@ -219,33 +220,29 @@ export class AnalyticsService {
       return;
     }
 
-    let timestamp: number;
     for (const rawEvent of events) {
       try {
         let parsedEvent = undefined;
-        switch (rawEvent.identifier) {
+        switch (rawEvent.getIdentifier()) {
           case AuctionEventEnum.AcceptOffer:
           case ExternalAuctionEventEnum.AcceptGlobalOffer:
-            [parsedEvent, timestamp] = await this.acceptEventParser.handle(
-              rawEvent,
-            );
+            [parsedEvent] = await this.acceptEventParser.handle(rawEvent);
             break;
           case AuctionEventEnum.BuySftEvent:
           case ExternalAuctionEventEnum.BulkBuy:
           case ExternalAuctionEventEnum.Buy:
           case ExternalAuctionEventEnum.BuyNft:
           case ExternalAuctionEventEnum.BuyFor:
-            [parsedEvent, timestamp] = await this.buyEventHandler.handle(
-              rawEvent,
-            );
+            [parsedEvent] = await this.buyEventHandler.handle(rawEvent);
             break;
-          case AuctionEventEnum.AuctionTokenEvent:
-          case ExternalAuctionEventEnum.Listing:
-          case ExternalAuctionEventEnum.ListNftOnMarketplace:
-            parsedEvent = await this.buyEventHandler.handle(rawEvent);
-            break;
+          // case AuctionEventEnum.AuctionTokenEvent:
+          // case ExternalAuctionEventEnum.Listing:
+          // case ExternalAuctionEventEnum.ListNftOnMarketplace:
+          //   parsedEvent = await this.buyEventHandler.handle(rawEvent);
+          //   break;
         }
 
+        console.log({ parsedEvent });
         if (parsedEvent) this.data.push(parsedEvent);
       } catch (error) {
         if (error?.message?.includes('Cannot create address from')) {

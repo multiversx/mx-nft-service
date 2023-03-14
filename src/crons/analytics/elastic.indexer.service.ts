@@ -11,17 +11,17 @@ export class ElasticAnalyticsService {
   constructor(private readonly elasticService: MxElasticService) {}
 
   public async getAllEvents(
-    startDateUtc: string,
-    endDateUtc: string,
+    startDateUtc: number,
+    endDateUtc: number,
     eventNames: string[],
     addresses: string[],
     action: (items: any[]) => Promise<void>,
   ): Promise<void> {
-    const gte = new Date(startDateUtc).getTime() / 1000;
-    const lte = new Date(endDateUtc).getTime() / 1000;
+    const gte = new Date(startDateUtc).getTime();
+    const lte = new Date(endDateUtc).getTime();
 
     const elasticQuery = ElasticQuery.create()
-      .withPagination({ from: 0, size: 9999 })
+      .withPagination({ from: 0, size: 50 })
       .withMustCondition(
         QueryType.Should(
           eventNames.map((eventName) =>
@@ -42,7 +42,6 @@ export class ElasticAnalyticsService {
       )
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
-
     await this.elasticService.getScrollableList(
       'logs',
       '_id',
