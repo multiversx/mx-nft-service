@@ -1,0 +1,32 @@
+export const trendingEventsEnum = [
+  'buy',
+  'buyNft',
+  'buyFor',
+  'buySft',
+  'bulkBuy',
+  'acceptOffer',
+  // 'purchase',
+];
+
+export const analyticsEventsEnum = [
+  'auctionToken',
+  'withdraw',
+  'listing',
+  'listNftOnMarketplace',
+  'withdrawAuctionAndAcceptOffer',
+  'endAuction',
+  'changePrice',
+  'updatePrice',
+  'changeListing',
+  'nftSwapUpdate',
+  'returnListing',
+  'acceptGlobalOffer',
+  'claimBackNft',
+  'buy',
+  'buyNft',
+  'buyFor',
+  'buySft',
+  'bulkBuy',
+  'acceptOffer',
+  'purchase',
+];
