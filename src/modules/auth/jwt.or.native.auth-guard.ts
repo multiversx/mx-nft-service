@@ -1,3 +1,4 @@
+import { CachingService } from '@multiversx/sdk-nestjs';
 import {
   Injectable,
   CanActivate,
@@ -12,12 +13,16 @@ import { NativeAuthGuard } from './native.auth-guard';
 export class JwtOrNativeAuthGuard implements CanActivate {
   constructor(
     private readonly apiConfigService: ApiConfigService,
+    private readonly cachingService: CachingService,
     private readonly logger: Logger,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.apiConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(this.apiConfigService);
+    const nativeAuthGuard = new NativeAuthGuard(
+      this.apiConfigService,
+      this.cachingService,
+    );
 
     const guards = [jwtGuard, nativeAuthGuard];
 
