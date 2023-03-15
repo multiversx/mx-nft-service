@@ -80,36 +80,51 @@ export class MarketplaceEventsIndexingService {
   async reindexMarketplaceEvents(
     input: MarketplaceEventsIndexingRequest,
   ): Promise<void> {
-    try {
-      if (input.beforeTimestamp < input.afterTimestamp) {
-        throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
-      }
+    await Locker.lock(
+      `Reindex marketplace events for ${input.marketplaceAddress}`,
+      async () => {
+        try {
+          if (input.beforeTimestamp < input.afterTimestamp) {
+            throw new Error(
+              `beforeTimestamp can't be less than afterTimestamp`,
+            );
+          }
 
-      const newestTxTimestamp =
-        await this.addElasticTxToDbAndReturnNewestTimestamp(input);
-      const newestEventTimestamp =
-        await this.addElasticEventsToDbAndReturnNewestTimestamp(input);
+          const newestTxTimestamp =
+            await this.addElasticTxToDbAndReturnNewestTimestamp(input);
+          const newestEventTimestamp =
+            await this.addElasticEventsToDbAndReturnNewestTimestamp(input);
 
-      const newestTimestamp = Math.max(newestTxTimestamp, newestEventTimestamp);
+          const newestTimestamp = Math.max(
+            newestTxTimestamp,
+            newestEventTimestamp,
+          );
 
-      if (
-        newestTimestamp &&
-        (!input.marketplaceLastIndexTimestamp ||
-          newestTimestamp > input.marketplaceLastIndexTimestamp)
-      ) {
-        await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
-          input.marketplaceAddress,
-          newestTimestamp,
-        );
-        await this.marketplacesCachingService.invalidateMarketplacesCache();
-      }
-    } catch (error) {
-      this.logger.error('Error when reindexing marketplace events', {
-        path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
-        error: error.message,
-        marketplaceAddress: input.marketplaceAddress,
-      });
-    }
+          if (
+            newestTimestamp &&
+            (!input.marketplaceLastIndexTimestamp ||
+              newestTimestamp > input.marketplaceLastIndexTimestamp)
+          ) {
+            await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
+              input.marketplaceAddress,
+              newestTimestamp,
+            );
+            await this.marketplacesCachingService.invalidateMarketplacesCache();
+          }
+
+          this.logger.log(
+            `Reindexing marketplace events for ${input.marketplaceAddress} ended`,
+          );
+        } catch (error) {
+          this.logger.error('Error when reindexing marketplace events', {
+            path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
+            error: error.message,
+            marketplaceAddress: input.marketplaceAddress,
+          });
+        }
+      },
+      true,
+    );
   }
 
   private async addElasticTxToDbAndReturnNewestTimestamp(
