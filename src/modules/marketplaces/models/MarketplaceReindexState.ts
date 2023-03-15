@@ -18,12 +18,17 @@ import { Marketplace } from './Marketplace.dto';
 export class MarketplaceReindexState {
   marketplace: Marketplace;
   isReindexFromTheBeginning: boolean;
+  listedCollections: string[] = [];
   auctions: AuctionEntity[] = [];
   orders: OrderEntity[] = [];
   offers: OfferEntity[] = [];
 
   constructor(init?: Partial<MarketplaceReindexState>) {
     Object.assign(this, init);
+  }
+
+  isCollectionListed(collection: string): boolean {
+    return this.listedCollections.includes(collection);
   }
 
   getAuctionIndexByAuctionId(auctionId: number): number {
