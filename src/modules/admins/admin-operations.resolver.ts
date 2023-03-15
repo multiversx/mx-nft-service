@@ -158,7 +158,7 @@ export class AdminOperationsResolver {
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
     try {
-      await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
+      this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
         MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
           input,
         ),
@@ -176,7 +176,7 @@ export class AdminOperationsResolver {
     input: MarketplaceReindexDataArgs,
   ): Promise<boolean> {
     try {
-      await this.marketplacesReindexService.reindexMarketplaceData(input);
+      this.marketplacesReindexService.reindexMarketplaceData(input);
       return true;
     } catch (error) {
       throw new ApolloError(error);
