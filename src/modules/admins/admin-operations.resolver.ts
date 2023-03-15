@@ -1,5 +1,5 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
@@ -27,6 +27,7 @@ import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceRe
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
   constructor(
+    private readonly logger: Logger,
     private readonly flagService: FlagNftService,
     private reportNfts: ReportsService,
     private readonly nftRarityService: NftRarityService,
@@ -157,16 +158,16 @@ export class AdminOperationsResolver {
     @Args('input')
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
-    try {
-      await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
+    this.marketplaceEventsIndexingService
+      .reindexMarketplaceEvents(
         MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
           input,
         ),
-      );
-      return true;
-    } catch (error) {
-      throw new ApolloError(error);
-    }
+      )
+      .catch((error) => {
+        this.logger.error(error);
+      });
+    return true;
   }
 
   @Mutation(() => Boolean)
@@ -175,11 +176,11 @@ export class AdminOperationsResolver {
     @Args('input')
     input: MarketplaceReindexDataArgs,
   ): Promise<boolean> {
-    try {
-      await this.marketplacesReindexService.reindexMarketplaceData(input);
-      return true;
-    } catch (error) {
-      throw new ApolloError(error);
-    }
+    this.marketplacesReindexService
+      .reindexMarketplaceData(input)
+      .catch((error) => {
+        this.logger.error(error);
+      });
+    return true;
   }
 }

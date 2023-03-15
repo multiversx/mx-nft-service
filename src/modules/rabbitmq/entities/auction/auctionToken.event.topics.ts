@@ -44,6 +44,13 @@ export class AuctionTokenEventsTopics {
     this.auctionType = BinaryUtils.hexToNumber(
       BinaryUtils.base64ToHex(rawTopics[12]),
     ).toString();
+
+    if (this.startTime.toString().length > 10) {
+      this.startTime = parseInt(this.startTime.toString().substring(0, 10));
+    }
+    if (this.endTime.toString().length > 10) {
+      this.endTime = parseInt(this.endTime.toString().substring(0, 10));
+    }
   }
 
   toPlainObject() {
