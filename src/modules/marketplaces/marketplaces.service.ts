@@ -63,13 +63,15 @@ export class MarketplacesService {
     });
   }
 
+  async getInternalMarketplacesByAddress(
+    address: string,
+  ): Promise<Marketplace[]> {
+    const internalMarketplaces = await this.getInternalMarketplaces();
+    return internalMarketplaces.filter((m) => m.address === address);
+  }
+
   async getInternalMarketplacesAddreses(): Promise<string[]> {
-    let allMarketplaces = await this.getAllMarketplaces();
-
-    const internalMarketplaces = allMarketplaces?.items?.filter(
-      (m) => m.type === MarketplaceTypeEnum.Internal,
-    );
-
+    const internalMarketplaces = await this.getInternalMarketplaces();
     return internalMarketplaces.map((m) => m.address);
   }
 
@@ -152,6 +154,14 @@ export class MarketplacesService {
     return await this.cacheService.getAllMarketplaces(() =>
       this.getMarketplacesFromDb(),
     );
+  }
+
+  private async getInternalMarketplaces(): Promise<Marketplace[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+    const internalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.Internal,
+    );
+    return internalMarketplaces;
   }
 
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {

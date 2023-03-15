@@ -116,19 +116,14 @@ export class MarketplacesReindexService {
       ];
     }
 
-    const [marketplaces] = await this.persistenceService.getMarketplaces();
-
-    const internalMarketplaces: Marketplace[] = marketplaces
-      .filter(
-        (m) =>
-          m.type === MarketplaceTypeEnum.Internal &&
-          m.address === marketplace.address,
-      )
-      .map((m) => Marketplace.fromEntity(m));
+    const internalMarketplaces =
+      await this.marketplacesService.getInternalMarketplacesByAddress(
+        marketplace.address,
+      );
 
     for (let i = 0; i < internalMarketplaces.length; i++) {
       const marketplaceCollections =
-        await this.persistenceService.getCollectionsByMarketplace(
+        await this.marketplacesService.getCollectionsByMarketplace(
           internalMarketplaces[i].key,
         );
 
@@ -136,9 +131,7 @@ export class MarketplacesReindexService {
         new MarketplaceReindexState({
           marketplace: internalMarketplaces[i],
           isReindexFromTheBeginning: input.afterTimestamp ? false : true,
-          listedCollections: marketplaceCollections.map(
-            (c) => c.collectionIdentifier,
-          ),
+          listedCollections: marketplaceCollections,
         }),
       );
     }
