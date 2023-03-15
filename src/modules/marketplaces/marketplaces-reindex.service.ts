@@ -75,10 +75,10 @@ export class MarketplacesReindexService {
             ),
           );
 
-          marketplaceReindexStates.map(async (state) => {
+          for (let state of marketplaceReindexStates) {
             await this.populateAuctionAssetTags(state.auctions);
             await this.addMarketplaceStateToDb(state);
-          });
+          }
 
           this.logger.log(
             `Reindexing marketplace data/state for ${input.marketplaceAddress} ended`,
