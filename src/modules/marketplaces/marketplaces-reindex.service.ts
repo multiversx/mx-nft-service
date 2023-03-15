@@ -569,6 +569,10 @@ export class MarketplacesReindexService {
   private async addMarketplaceStateToDb(
     marketplaceReindexState: MarketplaceReindexState,
   ): Promise<void> {
+    marketplaceReindexState.auctions.map((a) => delete a.id);
+    marketplaceReindexState.orders.map((o) => delete o.id);
+    marketplaceReindexState.offers.map((o) => delete o.id);
+
     await this.auctionSetterService.saveBulkAuctions(
       marketplaceReindexState.auctions,
     );
