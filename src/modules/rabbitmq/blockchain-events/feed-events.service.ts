@@ -81,6 +81,8 @@ export class FeedEventsSenderService {
             tokenData: tokenData ?? undefined,
           },
           marketplaceKey: auctionTokenMarketplace.key,
+          isNsfw: nftData.isNsfw,
+          scamInfo: nftData.scamInfo,
         },
       }),
     );
@@ -127,6 +129,8 @@ export class FeedEventsSenderService {
           usdAmount: usdAmount ?? undefined,
           tokenData: tokenData ?? undefined,
           marketplaceKey: endMarketplace.key,
+          isNsfw: endAuctionNftData.isNsfw,
+          scamInfo: endAuctionNftData.scamInfo,
         },
       }),
     );
@@ -168,6 +172,8 @@ export class FeedEventsSenderService {
           auctionId: buyAuction.id,
           boughtTokens: boughtTokens,
           marketplaceKey: buyMarketplace.key,
+          isNsfw: buySftNftData.isNsfw,
+          scamInfo: buySftNftData.scamInfo,
         },
       }),
     );
@@ -190,6 +196,8 @@ export class FeedEventsSenderService {
           nftName: nftData?.name,
           verified: nftData?.verified ? true : false,
           collectionName: collection?.name,
+          isNsfw: nftData.isNsfw,
+          scamInfo: nftData.scamInfo,
         },
       }),
     );
@@ -237,6 +245,8 @@ export class FeedEventsSenderService {
           tokenData: tokenData ?? undefined,
           auctionId: auction.id,
           marketplaceKey: auction.marketplaceKey,
+          isNsfw: bidNftData.isNsfw,
+          scamInfo: bidNftData.scamInfo,
         },
       }),
     );
@@ -265,6 +275,8 @@ export class FeedEventsSenderService {
           usdAmount: usdAmount ?? undefined,
           tokenData: tokenData ?? undefined,
           marketplaceKey: offer.marketplaceKey,
+          isNsfw: nft.isNsfw,
+          scamInfo: nft.scamInfo,
         },
       }),
     );
@@ -294,6 +306,8 @@ export class FeedEventsSenderService {
           tokenData: tokenData ?? undefined,
           marketplaceKey: offer.marketplaceKey,
           offerOwner: offer.ownerAddress,
+          isNsfw: nft.isNsfw,
+          scamInfo: nft.scamInfo,
         },
       }),
     );
