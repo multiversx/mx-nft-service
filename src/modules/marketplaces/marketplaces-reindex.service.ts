@@ -56,7 +56,7 @@ export class MarketplacesReindexService {
     input: MarketplaceReindexDataArgs,
   ): Promise<void> {
     await Locker.lock(
-      'Reindex marketplace data',
+      `Reindex marketplace data/state for ${input.marketplaceAddress}`,
       async () => {
         try {
           const marketplace =
@@ -84,7 +84,7 @@ export class MarketplacesReindexService {
           await this.addMarketplaceStateToDb(marketplaceReindexState);
 
           this.logger.log(
-            `Reindexing marketplace ${input.marketplaceAddress} ended`,
+            `Reindexing marketplace data/state for ${input.marketplaceAddress} ended`,
           );
         } catch (error) {
           this.logger.error(
