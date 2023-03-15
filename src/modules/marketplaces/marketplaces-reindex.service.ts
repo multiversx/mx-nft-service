@@ -28,6 +28,8 @@ import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs';
 import { TagEntity } from 'src/db/auctions/tags.entity';
+import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { Marketplace } from './models';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -59,29 +61,24 @@ export class MarketplacesReindexService {
       `Reindex marketplace data/state for ${input.marketplaceAddress}`,
       async () => {
         try {
-          const marketplace =
-            await this.marketplacesService.getMarketplaceByAddress(
-              input.marketplaceAddress,
-            );
-
-          let marketplaceReindexState = new MarketplaceReindexState({
-            marketplace,
-            isReindexFromTheBeginning: input.afterTimestamp ? false : true,
-          });
+          let marketplaceReindexStates: MarketplaceReindexState[] =
+            await this.getInitialMarketplaceReindexStates(input);
 
           await this.processMarketplaceEventsInBatches(
-            marketplaceReindexState,
-            input.afterTimestamp,
-            input.beforeTimestamp,
+            marketplaceReindexStates,
+            input,
           );
 
-          marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(
-            input.beforeTimestamp ?? DateUtils.getCurrentTimestamp(),
+          marketplaceReindexStates.map((s) =>
+            s.setStateItemsToExpiredIfOlderThanTimestamp(
+              input.beforeTimestamp ?? DateUtils.getCurrentTimestamp(),
+            ),
           );
 
-          await this.populateAuctionAssetTags(marketplaceReindexState.auctions);
-
-          await this.addMarketplaceStateToDb(marketplaceReindexState);
+          marketplaceReindexStates.map(async (state) => {
+            await this.populateAuctionAssetTags(state.auctions);
+            await this.addMarketplaceStateToDb(state);
+          });
 
           this.logger.log(
             `Reindexing marketplace data/state for ${input.marketplaceAddress} ended`,
@@ -101,16 +98,64 @@ export class MarketplacesReindexService {
     );
   }
 
+  private async getInitialMarketplaceReindexStates(
+    input: MarketplaceReindexDataArgs,
+  ): Promise<MarketplaceReindexState[]> {
+    let marketplaceReindexStates: MarketplaceReindexState[] = [];
+
+    const marketplace = await this.marketplacesService.getMarketplaceByAddress(
+      input.marketplaceAddress,
+    );
+
+    if (marketplace.type === MarketplaceTypeEnum.External) {
+      return [
+        new MarketplaceReindexState({
+          marketplace,
+          isReindexFromTheBeginning: input.afterTimestamp ? false : true,
+        }),
+      ];
+    }
+
+    const [marketplaces] = await this.persistenceService.getMarketplaces();
+
+    const internalMarketplaces: Marketplace[] = marketplaces
+      .filter(
+        (m) =>
+          m.type === MarketplaceTypeEnum.Internal &&
+          m.address === marketplace.address,
+      )
+      .map((m) => Marketplace.fromEntity(m));
+
+    for (let i = 0; i < internalMarketplaces.length; i++) {
+      const marketplaceCollections =
+        await this.persistenceService.getCollectionsByMarketplace(
+          internalMarketplaces[i].key,
+        );
+
+      marketplaceReindexStates.push(
+        new MarketplaceReindexState({
+          marketplace: internalMarketplaces[i],
+          isReindexFromTheBeginning: input.afterTimestamp ? false : true,
+          listedCollections: marketplaceCollections.map(
+            (c) => c.collectionIdentifier,
+          ),
+        }),
+      );
+    }
+
+    return marketplaceReindexStates;
+  }
+
   private async processMarketplaceEventsInBatches(
-    marketplaceReindexState: MarketplaceReindexState,
-    afterTimestamp?: number,
-    beforeTimestamp?: number,
+    marketplaceReindexStates: MarketplaceReindexState[],
+    input: MarketplaceReindexDataArgs,
   ): Promise<void> {
+    let afterTimestamp = input.afterTimestamp;
     let processInNextBatch: MarketplaceEventsEntity[] = [];
     let nextBatchPromise: Promise<MarketplaceEventsEntity[]>;
 
     nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
-      marketplaceReindexState.marketplace.address,
+      marketplaceReindexStates[0].marketplace.address,
       afterTimestamp,
     );
 
@@ -124,25 +169,27 @@ export class MarketplacesReindexService {
       [batch, afterTimestamp] =
         this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(
           batch,
-          beforeTimestamp,
+          input.beforeTimestamp,
         );
 
       nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
-        marketplaceReindexState.marketplace.address,
+        marketplaceReindexStates[0].marketplace.address,
         afterTimestamp,
       );
 
       processInNextBatch =
         await this.processEventsBatchAndReturnUnprocessedEvents(
-          marketplaceReindexState,
+          marketplaceReindexStates,
           processInNextBatch.concat(batch),
         );
-    } while (beforeTimestamp ? afterTimestamp < beforeTimestamp : true);
+    } while (
+      input.beforeTimestamp ? afterTimestamp < input.beforeTimestamp : true
+    );
 
     const isFinalBatch = true;
     processInNextBatch =
       await this.processEventsBatchAndReturnUnprocessedEvents(
-        marketplaceReindexState,
+        marketplaceReindexStates,
         processInNextBatch,
         isFinalBatch,
       );
@@ -178,7 +225,7 @@ export class MarketplacesReindexService {
   }
 
   private async processEventsBatchAndReturnUnprocessedEvents(
-    marketplaceReindexState: MarketplaceReindexState,
+    marketplaceReindexStates: MarketplaceReindexState[],
     batch: MarketplaceEventsEntity[],
     isFinalBatch?: boolean,
   ): Promise<MarketplaceEventsEntity[]> {
@@ -207,32 +254,41 @@ export class MarketplacesReindexService {
         (event) => event.txHash !== txHash && event.originalTxHash !== txHash,
       );
 
-      await this.processEventsSet(marketplaceReindexState, eventOrdersAndTx);
+      await this.processEventsSet(marketplaceReindexStates, eventOrdersAndTx);
     }
 
     return [];
   }
 
   private async processEventsSet(
-    marketplaceReindexState: MarketplaceReindexState,
+    marketplaceReindexStates: MarketplaceReindexState[],
     eventOrdersAndTx: MarketplaceEventsEntity[],
   ): Promise<void> {
     const eventsSetSummaries =
       this.marketplacesReindexEventsSummaryService.getEventsSetSummaries(
-        marketplaceReindexState.marketplace,
+        marketplaceReindexStates[0].marketplace,
         eventOrdersAndTx,
       );
 
-    if (!marketplaceReindexState.isReindexFromTheBeginning) {
-      await this.getStateFromDbIfMissing(
-        marketplaceReindexState,
-        eventsSetSummaries,
+    if (!marketplaceReindexStates[0].isReindexFromTheBeginning) {
+      await Promise.all(
+        marketplaceReindexStates.map((state) => {
+          return this.getStateFromDbIfMissing(state, eventsSetSummaries);
+        }),
       );
     }
 
     for (let i = 0; i < eventsSetSummaries?.length; i++) {
       try {
-        await this.processEvent(marketplaceReindexState, eventsSetSummaries[i]);
+        const stateIndex = marketplaceReindexStates.findIndex((s) =>
+          s.isCollectionListed(eventsSetSummaries[i].collection),
+        );
+        if (stateIndex !== -1) {
+          await this.processEvent(
+            marketplaceReindexStates[stateIndex],
+            eventsSetSummaries[i],
+          );
+        }
       } catch (error) {
         this.logger.warn(
           `Error reprocessing marketplace event ${JSON.stringify(
