@@ -268,8 +268,18 @@ export class MarketplacesReindexService {
       );
     }
 
+    const areMultipleMarketplaces = marketplaceReindexStates.length !== 1;
+
     for (let i = 0; i < eventsSetSummaries?.length; i++) {
       try {
+        if (!areMultipleMarketplaces) {
+          await this.processEvent(
+            marketplaceReindexStates[0],
+            eventsSetSummaries[i],
+          );
+          continue;
+        }
+
         const stateIndex = marketplaceReindexStates.findIndex((s) =>
           s.isCollectionListed(eventsSetSummaries[i].collection),
         );
