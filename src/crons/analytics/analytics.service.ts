@@ -12,12 +12,13 @@ import {
   AuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
-import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
+import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class AnalyticsService {
   private filterAddresses: string[];
-  private data: any[] = [];
+  private data: any[];
 
   constructor(
     private readonly indexerService: ElasticAnalyticsService,
@@ -26,6 +27,7 @@ export class AnalyticsService {
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
     private readonly acceptEventParser: AcceptOfferEventParser,
+    private readonly dataSetterService: AnalyticsDataSetterService,
   ) {}
 
   public async getTrendingByVolume(): Promise<CollectionVolumeLast24[]> {
@@ -69,46 +71,12 @@ export class AnalyticsService {
 
     let scrollPage = 0;
     let lastBlockLogs = [];
-    ({ scrollPage, lastBlockLogs } = await this.getParsedEvents(
+    return await this.getParsedEvents(
       startDateUtc,
       endDateUtc,
       scrollPage,
       lastBlockLogs,
-    ));
-
-    return await this.getTrendingCollections();
-  }
-
-  private async getTrendingCollections(): Promise<void> {
-    const tokensWithPrice = await this.getTokensWithDetails();
-    // const collections = this.getDataGroupedByCollectionAndToken();
-    // let trending = [];
-    // for (const collection of collections) {
-    //   let priceUsd: BigNumber = new BigNumber(0);
-
-    //   for (const token of collection.tokens) {
-    //     const tokenDetails = tokensWithPrice[token.paymentToken];
-    //     if (
-    //       tokenDetails &&
-    //       tokenDetails.length > 0 &&
-    //       tokenDetails[0].usdPrice
-    //     ) {
-    //       priceUsd = priceUsd.plus(
-    //         computeUsd(
-    //           tokenDetails[0].usdPrice,
-    //           token.sum,
-    //           tokenDetails[0].decimals,
-    //         ),
-    //       );
-    //     }
-    //   }
-    //   trending.push({
-    //     collection: collection.collection,
-    //     volume: priceUsd.toString(),
-    //     tokens: collection.tokens,
-    //   });
-    // }
-    // return trending.sortedDescending((x) => parseFloat(x.volume));
+    );
   }
 
   private async getParsedEvents(
@@ -131,8 +99,6 @@ export class AnalyticsService {
         const blockLogs = Array.from(Object.keys(groupedLogs).sort()).map(
           (key) => groupedLogs[key],
         );
-
-        console.log('blockLogs', JSON.stringify(blockLogs));
         if (blockLogs.length > 0) {
           blockLogs[0] = [...lastBlockLogs, ...blockLogs[0]];
 
@@ -150,12 +116,15 @@ export class AnalyticsService {
             .map((logs: { events: any }) => logs.events)
             .flat();
 
-          console.log(JSON.stringify(eventsRaw));
           const events = eventsRaw.filter((event: { identifier: string }) =>
             trendingEventsEnum.includes(event.identifier),
           );
 
-          await this.processEvents(events);
+          await this.processEvents(
+            events,
+            startDateUtc,
+            blockLogs[i][0].timestamp,
+          );
         }
 
         this.logger.log(
@@ -166,38 +135,11 @@ export class AnalyticsService {
         }
       },
     );
-    return { scrollPage, lastBlockLogs };
-  }
-
-  private getDataGroupedByCollectionAndToken() {
-    return this.data
-      .groupBy((x) => x.collection, true)
-      .map((group: { key: any; values: any[] }) => ({
-        collection: group.key,
-        tokens: group.values
-          .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
-          .map((group: { key: any; values: any[] }) => ({
-            paymentToken: group.key,
-            sum: group.values
-              .sumBigInt((x: { value: BigInt }) => BigInt(x.value.toString()))
-              .toString(),
-          })),
-      }));
-  }
-
-  private async getTokensWithDetails() {
-    console.log({ date: this.data });
-    // const tokens = [...new Set(this.data.map((item) => item.paymentToken))];
-    // let tokensWithPrice = [];
-    // for (const token of tokens) {
-    //   const tokenData = await this.usdPriceService.getToken(token);
-    //   tokensWithPrice.push({
-    //     key: token,
-    //     usdPrice: tokenData.priceUsd,
-    //     decimals: tokenData.decimals,
-    //   });
-    // }
-    // return tokensWithPrice.groupBy((t) => t.key);
+    const eventsRaw = lastBlockLogs.map((logs) => logs.events).flat();
+    const events = eventsRaw.filter((event) =>
+      trendingEventsEnum.includes(event.identifier),
+    );
+    await this.processEvents(events, startDateUtc, startDateUtc);
   }
 
   async getFilterAddresses(): Promise<void> {
@@ -206,10 +148,14 @@ export class AnalyticsService {
       await this.marketplacesService.getMarketplacesAddreses();
   }
 
-  private async processEvents(rawEvents: any[]): Promise<void> {
+  private async processEvents(
+    rawEvents: any[],
+    startDateUtc: number,
+    eventsTimestamp: number,
+  ): Promise<void> {
     const performanceProfiler = new PerformanceProfiler();
 
-    const events: GenericEvent[] = rawEvents.filter(
+    const events: any[] = rawEvents.filter(
       (rawEvent: { address: string; identifier: string }) =>
         this.filterAddresses.find(
           (filterAddress) => rawEvent.address === filterAddress,
@@ -219,21 +165,21 @@ export class AnalyticsService {
     if (events.length === 0) {
       return;
     }
-
+    this.data = [];
     for (const rawEvent of events) {
       try {
         let parsedEvent = undefined;
-        switch (rawEvent.getIdentifier()) {
+        switch (rawEvent.identifier) {
           case AuctionEventEnum.AcceptOffer:
           case ExternalAuctionEventEnum.AcceptGlobalOffer:
-            [parsedEvent] = await this.acceptEventParser.handle(rawEvent);
+            parsedEvent = await this.acceptEventParser.handle(rawEvent);
             break;
           case AuctionEventEnum.BuySftEvent:
           case ExternalAuctionEventEnum.BulkBuy:
           case ExternalAuctionEventEnum.Buy:
           case ExternalAuctionEventEnum.BuyNft:
           case ExternalAuctionEventEnum.BuyFor:
-            [parsedEvent] = await this.buyEventHandler.handle(rawEvent);
+            parsedEvent = await this.buyEventHandler.handle(rawEvent);
             break;
           // case AuctionEventEnum.AuctionTokenEvent:
           // case ExternalAuctionEventEnum.Listing:
@@ -242,9 +188,9 @@ export class AnalyticsService {
           //   break;
         }
 
-        console.log({ parsedEvent });
-        if (parsedEvent) this.data.push(parsedEvent);
+        if (parsedEvent) this.updateIngestData(parsedEvent);
       } catch (error) {
+        console.log(error);
         if (error?.message?.includes('Cannot create address from')) {
           this.logger.log('Invalid event');
         } else {
@@ -256,5 +202,45 @@ export class AnalyticsService {
       }
     }
     performanceProfiler.stop();
+
+    if (Object.keys(this.data).length > 0) {
+      const isAfter = moment(eventsTimestamp * 1000).isSameOrAfter(
+        startDateUtc,
+      );
+      if (isAfter) {
+        await this.dataSetterService.ingest({
+          data: this.data,
+          timestamp: eventsTimestamp,
+          ingestLast: false,
+        });
+      }
+    }
+  }
+
+  private updateIngestData(eventData: any[]): void {
+    for (const series of Object.keys(eventData)) {
+      if (this.data[series] === undefined) {
+        this.data[series] = {};
+      }
+
+      for (const measure of Object.keys(eventData[series])) {
+        if (measure.toLowerCase().includes('volume')) {
+          this.data[series][measure] = this.data[series][measure]
+            ? new BigNumber(this.data[series][measure])
+                .plus(eventData[series][measure])
+                .toFixed()
+            : eventData[series][measure];
+        }
+        if (measure.toLowerCase().includes('volumeUSD')) {
+          this.data[series][measure] = this.data[series][measure]
+            ? new BigNumber(this.data[series][measure])
+                .plus(eventData[series][measure])
+                .toFixed()
+            : eventData[series][measure];
+        } else {
+          this.data[series][measure] = eventData[series][measure];
+        }
+      }
+    }
   }
 }

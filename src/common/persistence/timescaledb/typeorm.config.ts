@@ -1,11 +1,5 @@
 import { DataSource } from 'typeorm';
-import {
-  XNftsAnalyticsEntity,
-  SumDaily,
-  SumHourly,
-  CloseDaily,
-  CloseHourly,
-} from './entities/analytics.entities';
+import { XNftsAnalyticsEntity } from './entities/analytics.entity';
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
@@ -18,12 +12,6 @@ export default new DataSource({
   username: process.env.TIMESCALEDB_USERNAME,
   password: process.env.TIMESCALEDB_PASSWORD,
   database: process.env.TIMESCALEDB_DATABASE,
-  entities: [
-    XNftsAnalyticsEntity,
-    SumDaily,
-    SumHourly,
-    CloseDaily,
-    CloseHourly,
-  ],
+  entities: ['dist/common/**/**/entities/*.entity.{js,ts}'],
   migrations: ['dist/common/persistence/timescaledb/migrations/*.js'],
 });
