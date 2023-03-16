@@ -131,7 +131,7 @@ export class AdminOperationsResolver {
     try {
       await this.analyticsService.reindexTrendingCollections(
         1678617432,
-        1678703832,
+        1678622352,
       );
       // await this.cacheEventsPublisherService.publish(
       //   new ChangedEvent({

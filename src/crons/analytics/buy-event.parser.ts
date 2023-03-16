@@ -47,24 +47,22 @@ export class BuyEventParser {
 
     const tokenData = await this.usdPriceService.getToken(auction.paymentToken);
     const volume = topics.bid === '0' ? auction.minBid : topics.bid;
-    return [
-      {
-        collection: topics.collection,
-        paymentToken: auction.paymentToken,
-        paymentNonce: auction.paymentNonce,
-        usdPrice: tokenData.priceUsd,
-        decimals: tokenData.decimals,
-        volume: volume,
-        volumeUSD:
-          volume === '0'
-            ? '0'
-            : computeUsd(
-                tokenData.priceUsd,
-                volume,
-                tokenData.decimals,
-              ).toFixed(),
-      },
-    ];
+
+    const data = [];
+    data[topics.collection] = {
+      usdPrice: tokenData?.priceUsd,
+      decimals: tokenData?.decimals,
+      volume: volume,
+      volumeUSD:
+        volume === '0' || !tokenData
+          ? '0'
+          : computeUsd(
+              tokenData?.priceUsd,
+              volume,
+              tokenData?.decimals,
+            ).toFixed(),
+    };
+    return data;
   }
 
   private getEventAndTopics(event: any) {

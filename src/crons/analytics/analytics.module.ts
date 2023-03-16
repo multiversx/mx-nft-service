@@ -8,6 +8,7 @@ import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaledb.module';
 
 @Module({
   providers: [
@@ -19,6 +20,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
     AcceptOfferEventParser,
   ],
   imports: [
+    TimescaleDbModule,
     MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
