@@ -729,6 +729,13 @@ export class PersistenceService {
     );
   }
 
+  async saveBulkOrders(orders: OrderEntity[]) {
+    return await this.execute(
+      this.saveBulkOrders.name,
+      this.ordersRepository.saveBulkOrders(orders),
+    );
+  }
+
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {
     return await this.execute(
       this.updateOrderWithStatus.name,
@@ -878,6 +885,18 @@ export class PersistenceService {
       this.auctionsRepository.getBulkAuctions(auctionsIds),
     );
   }
+  async getBulkAuctionsByAuctionIdsAndMarketplace(
+    auctionsIds: number[],
+    marketplaceKey: string,
+  ): Promise<AuctionEntity[]> {
+    return await this.execute(
+      this.getBulkAuctionsByAuctionIdsAndMarketplace.name,
+      this.auctionsRepository.getBulkAuctionsByAuctionIdsAndMarketplace(
+        auctionsIds,
+        marketplaceKey,
+      ),
+    );
+  }
 
   async getAuctionByMarketplace(
     id: number,
@@ -915,6 +934,19 @@ export class PersistenceService {
     return await this.execute(
       this.getAuctionsForIdentifiers.name,
       this.auctionsRepository.getAuctionsForIdentifiers(identifiers),
+    );
+  }
+
+  async getBulkAuctionsByIdentifierAndMarketplace(
+    identifiers: string[],
+    marletplaceKey: string,
+  ): Promise<any[]> {
+    return await this.execute(
+      this.getBulkAuctionsByIdentifierAndMarketplace.name,
+      this.auctionsRepository.getBulkAuctionsByIdentifiersAndMarketplace(
+        identifiers,
+        marletplaceKey,
+      ),
     );
   }
 
@@ -975,6 +1007,13 @@ export class PersistenceService {
     return await this.execute(
       this.insertAuction.name,
       this.auctionsRepository.insertAuction(auction),
+    );
+  }
+
+  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
+    return await this.execute(
+      this.saveBulkAuctions.name,
+      this.auctionsRepository.saveBulkAuctions(auctions),
     );
   }
 
@@ -1078,6 +1117,13 @@ export class PersistenceService {
     );
   }
 
+  async saveBulkOffers(offers: OfferEntity[]): Promise<void> {
+    return await this.execute(
+      this.saveBulkOffers.name,
+      this.offersRepository.saveBulkOffers(offers),
+    );
+  }
+
   async getOffersThatReachedDeadline(): Promise<OfferEntity[]> {
     return await this.execute(
       this.getOffersThatReachedDeadline.name,
@@ -1089,6 +1135,19 @@ export class PersistenceService {
     return await this.execute(
       this.updateOffers.name,
       this.offersRepository.updateOffers(offers),
+    );
+  }
+
+  async getBulkOffersByOfferIdsAndMarketplace(
+    offerIds: number[],
+    marketplaceKey: string,
+  ): Promise<OfferEntity[]> {
+    return await this.execute(
+      this.getBulkOffersByOfferIdsAndMarketplace.name,
+      this.offersRepository.getBulkOffersByOfferIdsAndMarketplace(
+        offerIds,
+        marketplaceKey,
+      ),
     );
   }
 

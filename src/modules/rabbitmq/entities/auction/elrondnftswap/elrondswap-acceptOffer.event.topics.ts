@@ -6,33 +6,32 @@ import {
   TokenIdentifierType,
   U64Type,
 } from '@multiversx/sdk-core/out';
-export class ElrondSwapUpdateTopics {
-  private auctionId: string;
+
+export class ElrondSwapAcceptOfferTopics {
+  private offerId: number;
   private collection: string;
   private nonce: string;
-  private nrAuctionTokens: number;
-  private seller: Address;
-  private price: string;
-  private deadline: number;
+  private nrOfferTokens: string;
+  private originalOwner: Address;
+  private paymentAmount: string;
   private paymentToken: string;
   private paymentTokenNonce: string;
 
   constructor(rawTopics: string[]) {
-    this.auctionId = Buffer.from(rawTopics[1], 'base64').toString('hex');
+    this.offerId = parseInt(
+      Buffer.from(rawTopics[1], 'base64').toString('hex'),
+      16,
+    );
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.nrAuctionTokens = parseInt(
+    this.nrOfferTokens = parseInt(
       Buffer.from(rawTopics[4], 'base64').toString('hex'),
       16,
-    );
-    this.seller = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.price = Buffer.from(rawTopics[6], 'base64')
+    ).toString();
+    this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
+    this.paymentAmount = Buffer.from(rawTopics[6], 'base64')
       .toString('hex')
       .hexBigNumberToString();
-    this.deadline = parseInt(
-      Buffer.from(rawTopics[9], 'base64').toString('hex'),
-      16,
-    );
     let token = decodeToken(Buffer.from(rawTopics[7], 'base64'));
     this.paymentToken = token.token_type;
     this.paymentTokenNonce = token.nonce;
@@ -40,13 +39,12 @@ export class ElrondSwapUpdateTopics {
 
   toPlainObject() {
     return {
-      seller: this.seller.bech32(),
+      originalOwner: this.originalOwner.bech32(),
       collection: this.collection,
       nonce: this.nonce,
-      auctionId: this.auctionId,
-      nrAuctionTokens: this.nrAuctionTokens,
-      price: this.price,
-      deadline: this.deadline,
+      offerId: this.offerId,
+      nrOfferTokens: this.nrOfferTokens,
+      paymentAmount: this.paymentAmount,
       paymentToken: this.paymentToken,
       paymentTokenNonce: this.paymentTokenNonce,
     };

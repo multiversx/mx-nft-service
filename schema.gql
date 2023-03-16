@@ -115,12 +115,15 @@ type Asset {
 
 enum AssetActionEnum {
   Added
+  Bid
   Bought
   ClosedAuction
   Created
   EndedAuction
+  PriceUpdated
   Received
   StartedAuction
+  Updated
 }
 
 type AssetEdge {
@@ -768,6 +771,12 @@ type MarketplacePageInfo {
   startCursor: String
 }
 
+input MarketplaceReindexDataArgs {
+  afterTimestamp: Float
+  beforeTimestamp: Float
+  marketplaceAddress: String!
+}
+
 enum MarketplaceTypeEnum {
   External
   Internal
@@ -845,6 +854,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+  reindexMarketplaceData(input: MarketplaceReindexDataArgs!): Boolean!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!

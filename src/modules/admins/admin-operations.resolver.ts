@@ -1,5 +1,5 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
@@ -16,21 +16,25 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex.service';
 import { ReportsService } from '../reports/reports.service';
 import {
   ClearReportCollectionInput,
   ClearReportInput,
 } from './models/clear-report.input';
+import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
   constructor(
+    private readonly logger: Logger,
     private readonly flagService: FlagNftService,
     private reportNfts: ReportsService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
+    private readonly marketplacesReindexService: MarketplacesReindexService,
   ) {}
 
   @Mutation(() => Boolean)
@@ -154,15 +158,29 @@ export class AdminOperationsResolver {
     @Args('input')
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
-    try {
-      await this.marketplaceEventsIndexingService.reindexMarketplaceEvents(
+    this.marketplaceEventsIndexingService
+      .reindexMarketplaceEvents(
         MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
           input,
         ),
-      );
-      return true;
-    } catch (error) {
-      throw new ApolloError(error);
-    }
+      )
+      .catch((error) => {
+        this.logger.error(error);
+      });
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async reindexMarketplaceData(
+    @Args('input')
+    input: MarketplaceReindexDataArgs,
+  ): Promise<boolean> {
+    this.marketplacesReindexService
+      .reindexMarketplaceData(input)
+      .catch((error) => {
+        this.logger.error(error);
+      });
+    return true;
   }
 }

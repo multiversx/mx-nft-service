@@ -11,6 +11,11 @@ import {
   getMarketplaceEventsElasticQuery,
   getMarketplaceTransactionsElasticQuery,
 } from './marketplaces.elastic.queries';
+import {
+  AuctionEventEnum,
+  ElrondNftsSwapAuctionEventEnum,
+  ExternalAuctionEventEnum,
+} from '../assets/models';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -75,36 +80,51 @@ export class MarketplaceEventsIndexingService {
   async reindexMarketplaceEvents(
     input: MarketplaceEventsIndexingRequest,
   ): Promise<void> {
-    try {
-      if (input.beforeTimestamp < input.afterTimestamp) {
-        throw new Error(`beforeTimestamp can't be less than afterTimestamp`);
-      }
+    await Locker.lock(
+      `Reindex marketplace events for ${input.marketplaceAddress}`,
+      async () => {
+        try {
+          if (input.beforeTimestamp < input.afterTimestamp) {
+            throw new Error(
+              `beforeTimestamp can't be less than afterTimestamp`,
+            );
+          }
 
-      const newestTxTimestamp =
-        await this.addElasticTxToDbAndReturnNewestTimestamp(input);
-      const newestEventTimestamp =
-        await this.addElasticEventsToDbAndReturnNewestTimestamp(input);
+          const newestTxTimestamp =
+            await this.addElasticTxToDbAndReturnNewestTimestamp(input);
+          const newestEventTimestamp =
+            await this.addElasticEventsToDbAndReturnNewestTimestamp(input);
 
-      const newestTimestamp = Math.max(newestTxTimestamp, newestEventTimestamp);
+          const newestTimestamp = Math.max(
+            newestTxTimestamp,
+            newestEventTimestamp,
+          );
 
-      if (
-        newestTimestamp &&
-        (!input.marketplaceLastIndexTimestamp ||
-          newestTimestamp > input.marketplaceLastIndexTimestamp)
-      ) {
-        await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
-          input.marketplaceAddress,
-          newestTimestamp,
-        );
-        await this.marketplacesCachingService.invalidateMarketplacesCache();
-      }
-    } catch (error) {
-      this.logger.error('Error when reindexing marketplace events', {
-        path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
-        error: error.message,
-        marketplaceAddress: input.marketplaceAddress,
-      });
-    }
+          if (
+            newestTimestamp &&
+            (!input.marketplaceLastIndexTimestamp ||
+              newestTimestamp > input.marketplaceLastIndexTimestamp)
+          ) {
+            await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(
+              input.marketplaceAddress,
+              newestTimestamp,
+            );
+            await this.marketplacesCachingService.invalidateMarketplacesCache();
+          }
+
+          this.logger.log(
+            `Reindexing marketplace events for ${input.marketplaceAddress} ended`,
+          );
+        } catch (error) {
+          this.logger.error('Error when reindexing marketplace events', {
+            path: `${MarketplaceEventsIndexingService.name}.${this.reindexMarketplaceEvents.name}`,
+            error: error.message,
+            marketplaceAddress: input.marketplaceAddress,
+          });
+        }
+      },
+      true,
+    );
   }
 
   private async addElasticTxToDbAndReturnNewestTimestamp(
@@ -126,7 +146,7 @@ export class MarketplaceEventsIndexingService {
       getMarketplaceEventsElasticQuery(input),
       'logs',
       input.marketplaceAddress,
-      this.saveEventsToDb.bind(this),
+      this.filterEventsAndSaveToDb.bind(this),
       input.stopIfDuplicates,
     );
   }
@@ -211,7 +231,7 @@ export class MarketplaceEventsIndexingService {
     return [savedRecordsCount, marketplaceEvents.length];
   }
 
-  private async saveEventsToDb(
+  private async filterEventsAndSaveToDb(
     batch: any,
     marketplaceAddress: string,
   ): Promise<[number, number]> {
@@ -220,6 +240,10 @@ export class MarketplaceEventsIndexingService {
     for (let i = 0; i < batch.length; i++) {
       for (let j = 0; j < batch[i].events.length; j++) {
         const event = batch[i].events[j];
+
+        if (this.isUnknownMarketplaceEvent(event.identifier)) {
+          continue;
+        }
 
         const marketplaceEvent = new MarketplaceEventsEntity({
           txHash: batch[i].identifier,
@@ -239,6 +263,15 @@ export class MarketplaceEventsIndexingService {
       await this.persistenceService.saveOrIgnoreMarketplacesBulk(
         marketplaceEvents,
       );
+
     return [savedRecordsCount, marketplaceEvents.length];
+  }
+
+  private isUnknownMarketplaceEvent(eventIdentifier: any): boolean {
+    return (
+      !Object.values(AuctionEventEnum).includes(eventIdentifier) &&
+      !Object.values(ExternalAuctionEventEnum).includes(eventIdentifier) &&
+      !Object.values(ElrondNftsSwapAuctionEventEnum).includes(eventIdentifier)
+    );
   }
 }

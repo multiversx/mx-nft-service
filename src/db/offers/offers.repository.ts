@@ -10,6 +10,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtils } from 'src/utils/date-utils';
+import { constants } from 'src/config';
 
 @Injectable()
 export class OffersRepository {
@@ -70,6 +71,12 @@ export class OffersRepository {
     return savedOffer;
   }
 
+  async saveBulkOffers(orders: OfferEntity[]): Promise<void> {
+    await this.offersRepository.save(orders, {
+      chunk: constants.dbBatch,
+    });
+  }
+
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
     offer.status = status;
     offer.modifiedDate = new Date(new Date().toUTCString());
@@ -82,6 +89,21 @@ export class OffersRepository {
     const updatedOffers = await this.offersRepository.save(offers);
     await this.triggerCacheInvalidationForOffers(offers);
     return updatedOffers;
+  }
+
+  async getBulkOffersByOfferIdsAndMarketplace(
+    offerIds: number[],
+    marketplaceKey: string,
+  ): Promise<OfferEntity[]> {
+    return await this.offersRepository
+      .createQueryBuilder('offers')
+      .where(
+        `marketplaceOfferId IN(:...offerIds) and marketplaceKey='${marketplaceKey}'`,
+        {
+          offerIds: offerIds,
+        },
+      )
+      .getMany();
   }
 
   async rollbackOffersByHash(blockHash: string) {
