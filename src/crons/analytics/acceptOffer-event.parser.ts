@@ -51,22 +51,20 @@ export class AcceptOfferEventParser {
       const tokenData = await this.usdPriceService.getToken(
         topics.paymentTokenIdentifier,
       );
-
-      return [
-        {
-          collection: topics.collection,
-          paymentToken: topics.paymentTokenIdentifier,
-          paymentNonce: topics.paymentTokenNonce,
-          usdPrice: tokenData.priceUsd,
-          decimals: tokenData.decimals,
-          volume: topics.paymentAmount,
-          volumeUSD: computeUsd(
-            tokenData.priceUsd,
-            topics.paymentAmount,
-            tokenData.decimals,
-          ).toFixed(),
-        },
-      ];
+      const data = [];
+      data[topics.collection] = {
+        usdPrice: tokenData.priceUsd,
+        decimals: tokenData.decimals,
+        volume: topics.paymentAmount,
+        volumeUSD: !tokenData
+          ? '0'
+          : computeUsd(
+              tokenData.priceUsd,
+              topics.paymentAmount,
+              tokenData.decimals,
+            ).toFixed(),
+      };
+      return data;
     }
   }
 }

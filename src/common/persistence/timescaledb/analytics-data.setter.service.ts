@@ -1,27 +1,59 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from 'winston';
+import { Injectable, Logger } from '@nestjs/common';
 import { TimestreamWrite } from 'aws-sdk';
 import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { XNftsAnalyticsEntity } from './entities/analytics.entities';
+import { XNftsAnalyticsEntity } from './entities/analytics.entity';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 
 @Injectable()
 export class AnalyticsDataSetterService {
+  private pendingRecords: XNftsAnalyticsEntity[] = [];
   constructor(
     private readonly logger: Logger,
-    @InjectRepository(XNftsAnalyticsEntity)
-    private readonly dexAnalytics: Repository<XNftsAnalyticsEntity>,
+    @InjectRepository(XNftsAnalyticsEntity, 'timescaledb')
+    private nftAnalyticsRepo: Repository<XNftsAnalyticsEntity>,
   ) {}
 
-  async ingest({ data, Time }) {
+  async ingest({ data, timestamp, ingestLast }): Promise<void> {
+    if (!ingestLast) {
+      const newRecordsToIngest = this.createRecords({ data, timestamp });
+      this.pendingRecords.push(...newRecordsToIngest);
+
+      if (this.pendingRecords.length < 20) {
+        return;
+      }
+    }
+
     try {
-      const records = this.createRecords({ data, Time });
-      await this.writeRecords(records);
+      // Ingest entities array with one timestamp per entry
+      // Number of entries in entities === number of processed blocks
+      const entities = this.pendingRecords.map(
+        (record) =>
+          new XNftsAnalyticsEntity({
+            timestamp: record.timestamp,
+            series: record.series,
+            key: record.key,
+            value: record.value,
+          }),
+      );
+      const query = this.nftAnalyticsRepo
+        .createQueryBuilder()
+        .insert()
+        .into(XNftsAnalyticsEntity)
+        .values(entities)
+        .orUpdate(['value'], ['timestamp', 'series', 'key']);
+
+      await query.execute();
+
+      this.pendingRecords = [];
     } catch (error) {
-      this.logger.error(error);
+      console.log(
+        `Could not insert ${this.pendingRecords.length} records into TimescaleDb`,
+      );
+      console.log(error);
+      throw error;
     }
   }
 
@@ -41,7 +73,7 @@ export class AnalyticsDataSetterService {
     const profiler = new PerformanceProfiler('ingestData');
 
     try {
-      this.dexAnalytics.save(records);
+      this.nftAnalyticsRepo.save(records);
     } catch (errors) {
       this.logger.error(errors);
     } finally {
@@ -55,7 +87,7 @@ export class AnalyticsDataSetterService {
     }
   }
 
-  createRecords({ data, Time }): XNftsAnalyticsEntity[] {
+  createRecords({ data, timestamp }): XNftsAnalyticsEntity[] {
     const records: XNftsAnalyticsEntity[] = [];
     Object.keys(data).forEach((series) => {
       Object.keys(data[series]).forEach((key) => {
@@ -65,7 +97,7 @@ export class AnalyticsDataSetterService {
             series,
             key,
             value,
-            timestamp: moment.unix(Time).toDate(),
+            timestamp: moment.unix(timestamp).toDate(),
           }),
         );
       });
