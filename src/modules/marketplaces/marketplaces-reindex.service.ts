@@ -576,7 +576,15 @@ export class MarketplacesReindexService {
   private async addMarketplaceStateToDb(
     marketplaceReindexState: MarketplaceReindexState,
   ): Promise<void> {
-    marketplaceReindexState.auctions.map((a) => delete a.id);
+    marketplaceReindexState.auctions.map((a) => {
+      delete a.id;
+      if (a.startDate > constants.dbMaxTimestamp) {
+        a.startDate = constants.dbMaxTimestamp;
+      }
+      if (a.endDate > constants.dbMaxTimestamp) {
+        a.endDate = constants.dbMaxTimestamp;
+      }
+    });
     marketplaceReindexState.orders.map((o) => delete o.id);
     marketplaceReindexState.offers.map((o) => delete o.id);
 
