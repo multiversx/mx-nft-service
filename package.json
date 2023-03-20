@@ -5,6 +5,8 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "scripts": {
+    "init": "run-script-os",
+    "init:nix": "rimraf src/plugins && mkdir src/plugins && cp src/plugins.template/plugin.module.ts.template src/plugins/plugin.module.ts",
     "prebuild": "rimraf dist",
     "build": "nest build && npm run copy-pem",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

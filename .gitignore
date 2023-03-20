@@ -400,3 +400,4 @@ build.yaml
 
 # PEM file(s)
 *.pem
+/src/plugins

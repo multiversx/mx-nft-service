@@ -6,8 +6,8 @@ import {
   NftScamInfoModel,
   NftScamInfoDocument,
 } from 'src/modules/scam/models/nft-scam-info.model';
-import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
+import { Asset } from 'src/modules/assets/models';
 
 @Injectable()
 export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDocument> {
@@ -42,7 +42,7 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
   }
 
   async saveOrUpdateBulkNftScamInfo(
-    nfts: Nft[],
+    nfts: Asset[],
     version: string,
   ): Promise<void> {
     if (!nfts || nfts.length === 0) {
@@ -70,7 +70,7 @@ export class NftScamInfoRepositoryService extends EntityRepository<NftScamInfoDo
   }
 
   private async saveOrUpdateBulk(
-    nfts: Nft[],
+    nfts: Asset[],
     scamEngineVersion: string,
   ): Promise<void> {
     const updates: any = nfts.map((nft) => {

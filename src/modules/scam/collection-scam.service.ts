@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { MxApiService } from 'src/common';
-import { MxExtrasApiService } from 'src/common/services/mx-communication/mx-extras-api.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import {
   CacheEventTypeEnum,
@@ -10,7 +8,6 @@ import {
 @Injectable()
 export class CollectionScamService {
   constructor(
-    private mxExtrasApiService: MxExtrasApiService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
   ) {}
 

@@ -138,7 +138,7 @@ export class ElasticUpdatesEventsService {
   ): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    let nftsToUpdate: string[] = [];
+    let nftsToUpdate: Asset[] = [];
     let nftsToDelete: string[] = [];
     let collectionTypes: { [key: string]: string } = {};
 
@@ -174,7 +174,7 @@ export class ElasticUpdatesEventsService {
       }
 
       collectionTypes[collection] = nft.type;
-      nftsToUpdate.push(identifier);
+      nftsToUpdate.push(nft);
     }
 
     nftsToUpdate = [...new Set(nftsToUpdate)];
@@ -183,10 +183,11 @@ export class ElasticUpdatesEventsService {
       return this.documentDbService.deleteNftScamInfo(n);
     });
 
-    nftsToUpdate.map(
-      async (collection) =>
-        await this.nftScamInfoService.validateOrUpdateNftScamInfo(collection),
-    );
+    await this.nftScamInfoService.validateOrUpdateNftsScamInfo(nftsToUpdate);
+    // nftsToUpdate.map(
+    //   async (collection) =>
+    //     await this.nftScamInfoService.validateOrUpdateNftScamInfo(collection),
+    // );
 
     await Promise.all(deletes);
   }
