@@ -14,7 +14,7 @@ import { Marketplace } from './Marketplace.dto';
 @ObjectType()
 export class MarketplaceReindexState {
   marketplace: Marketplace;
-  isReindexFromTheBeginning: boolean;
+  isFullStateInMemory: boolean;
   listedCollections: string[] = [];
   auctions: AuctionEntity[] = [];
   orders: OrderEntity[] = [];
@@ -92,6 +92,41 @@ export class MarketplaceReindexState {
   setStateItemsToExpiredIfOlderThanTimestamp(timestamp: number): void {
     this.setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(timestamp);
     this.setOffersToExpiredIfOlderThanTimestamp(timestamp);
+  }
+
+  popInactiveItems(): [AuctionEntity[], OrderEntity[], OfferEntity[]] {
+    const inactiveAuctionStatuses = [AuctionStatusEnum.Closed, AuctionStatusEnum.Ended];
+    const inactiveOfferStatuses = [OfferStatusEnum.Accepted, OfferStatusEnum.Closed, OfferStatusEnum.Expired];
+
+    let inactiveAuctions = [];
+    let inactiveOrders = [];
+    let inactiveOffers = [];
+
+    for (let i = 0; i < this.auctions.length; i++) {
+      if (inactiveAuctionStatuses.includes(this.auctions[i].status)) {
+        inactiveAuctions.push(this.auctions[i]);
+        delete this.auctions[i];
+      }
+    }
+    this.auctions = this.auctions.filter((a) => a);
+
+    for (let i = 0; i < this.orders.length; i++) {
+      if (inactiveAuctions.findIndex((a) => a.id === this.orders[i].auctionId) !== -1) {
+        inactiveOrders.push(this.orders[i]);
+        delete this.orders[i];
+      }
+    }
+    this.orders = this.orders.filter((o) => o);
+
+    for (let i = 0; i < this.offers.length; i++) {
+      if (inactiveOfferStatuses.includes(this.offers[i].status)) {
+        inactiveOffers.push(this.offers[i]);
+        delete this.offers[i];
+      }
+    }
+    this.offers = this.offers.filter((o) => o);
+
+    return [inactiveAuctions, inactiveOrders, inactiveOffers];
   }
 
   private setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(timestamp: number): void {
