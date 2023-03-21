@@ -213,7 +213,11 @@ export class NftScamService {
   async manuallyClearNftScamInfo(identifier: string): Promise<boolean> {
     const nft = await this.assetByIdentifierService.getAsset(identifier);
     await Promise.all([
-      this.documentDbService.deleteNftScamInfo(identifier),
+      this.documentDbService.saveOrUpdateNftScamInfo(
+        identifier,
+        'manual',
+        new ScamInfo(),
+      ),
       this.nftScamElasticService.setNftScamInfoManuallyInElastic(identifier),
     ]);
     this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
