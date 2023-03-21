@@ -215,10 +215,8 @@ export class NftScamService {
       this.documentDbService.deleteNftScamInfo(identifier),
       this.nftScamElasticService.setNftScamInfoManuallyInElastic(identifier),
     ]);
-    const nft = await this.assetByIdentifierService.getAsset(identifier);
-    const cleared = await this.validateOrUpdateNftsScamInfo([nft], {}, true);
-    this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
-    return cleared;
+
+    return true;
   }
 
   private async triggerCacheInvalidation(
