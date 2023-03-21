@@ -36,9 +36,7 @@ export const getAllCollectionsFromElasticQuery = (): ElasticQuery => {
     });
 };
 
-export const getAllCollectionNftsFromElasticQuery = (
-  collection: string,
-): ElasticQuery => {
+export const getCollectionNftsQuery = (collection: string): ElasticQuery => {
   return ElasticQuery.create()
     .withMustExistCondition('nonce')
     .withMustCondition(QueryType.Match('token', collection, QueryOperator.AND))

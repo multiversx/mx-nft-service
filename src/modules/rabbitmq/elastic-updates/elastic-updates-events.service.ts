@@ -184,10 +184,6 @@ export class ElasticUpdatesEventsService {
     });
 
     await this.nftScamInfoService.validateOrUpdateNftsScamInfo(nftsToUpdate);
-    // nftsToUpdate.map(
-    //   async (collection) =>
-    //     await this.nftScamInfoService.validateOrUpdateNftScamInfo(collection),
-    // );
 
     await Promise.all(deletes);
   }
