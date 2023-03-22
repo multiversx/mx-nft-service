@@ -216,9 +216,12 @@ export class NftScamService {
       this.documentDbService.saveOrUpdateNftScamInfo(
         identifier,
         'manual',
-        new ScamInfo(),
+        new ScamInfo({ type: ScamInfoTypeEnum.none }),
       ),
-      this.nftScamElasticService.setNftScamInfoManuallyInElastic(identifier),
+      this.nftScamElasticService.setNftScamInfoManuallyInElastic(
+        identifier,
+        ScamInfoTypeEnum.none,
+      ),
     ]);
     this.triggerCacheInvalidation(identifier, nft?.ownerAddress);
     return true;
