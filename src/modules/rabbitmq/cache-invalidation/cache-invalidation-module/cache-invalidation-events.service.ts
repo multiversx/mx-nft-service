@@ -66,17 +66,12 @@ export class CacheInvalidationEventsService {
     this.assetsLikesCachingService.invalidateCache(payload.id, payload.address);
   }
 
-  async invalidateAssetHistory(identifier: string) {
-    await this.assetsHistoryCachingService.invalidateCache(identifier);
-  }
-
   async invalidateFeaturedCollectionsCache(): Promise<void> {
     await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 
   async invalidateBlacklistedCollectionsCache(): Promise<void> {
     await this.blacklistedCollectionsCachingService.invalidateBlacklistedCollectionsCache();
-    await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 
   async invalidateOffers(payload: ChangedEvent) {

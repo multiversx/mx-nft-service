@@ -45,7 +45,6 @@ export class CacheEventsConsumer {
         const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
           this.collectionAssetsRedisHandler.clearKey(collectionIdentifier),
           this.collectionAssetsForOwnerRedisHandler.clearKey(
             `${collectionIdentifier}_${event.address}`,
@@ -114,7 +113,6 @@ export class CacheEventsConsumer {
         const profilerUpdateAuction = new CpuProfiler();
         await Promise.all([
           this.cacheInvalidationEventsService.invalidateAuction(event),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
         ]);
         profilerUpdateAuction.stop('UpdateAuction');
         break;

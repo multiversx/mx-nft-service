@@ -29,17 +29,6 @@ export class AssetsHistoryCachingService {
     );
   }
 
-  async invalidateCache(identifier: string): Promise<void> {
-    const { collection, nonce } =
-      getCollectionAndNonceFromIdentifier(identifier);
-    const cacheKeyPattern = generateCacheKeyFromParams(
-      CacheInfo.AssetHistory.key,
-      collection,
-      nonce,
-    );
-    await this.redisCacheService.deleteByPattern(`${cacheKeyPattern}*`);
-  }
-
   getAssetHistoryCacheKey(
     collection: string,
     nonce: string,
