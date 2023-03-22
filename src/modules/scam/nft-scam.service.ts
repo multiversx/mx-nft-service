@@ -338,7 +338,7 @@ export class NftScamService {
     const apiNfts = await this.mxApiService.getNftsByIdentifiers(
       nftsMissingFromDb?.map((x) => x.identifier),
     );
-    const mappedNfts = apiNfts.map((x) => Asset.fromNft(x));
+    const mappedNfts = apiNfts?.map((x) => Asset.fromNft(x));
     await this.pluginsService.computeScamInfo(mappedNfts);
 
     const elasticUpdates =
@@ -357,6 +357,9 @@ export class NftScamService {
     nftsFromElastic: any,
     scamEngineVersion: string,
   ): Promise<[NftScamInfoModel[], NftScamInfoModel[]]> {
+    if (!nftsFromElastic || nftsFromElastic.length === 0) {
+      return [[], []];
+    }
     let nftsToMigrateFromDbToElastic: NftScamInfoModel[] = [];
     let nftsMissingFromDb: NftScamInfoModel[] = [];
 
@@ -366,10 +369,6 @@ export class NftScamService {
 
     const nftsFromDb: NftScamInfoModel[] =
       await this.documentDbService.getBulkNftScamInfo(identifiers);
-
-    if (!nftsFromElastic || nftsFromElastic.length === 0) {
-      return [[], []];
-    }
 
     for (let i = 0; i < nftsFromElastic?.length; i++) {
       const nftFromElastic = nftsFromElastic[i];
