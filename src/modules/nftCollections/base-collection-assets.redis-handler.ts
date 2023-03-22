@@ -68,10 +68,6 @@ export abstract class BaseCollectionsAssetsRedisHandler {
     await this.redisCacheService.delete(this.getCacheKey(key));
   }
 
-  async clearKeyByPattern(key: string): Promise<any> {
-    await this.redisCacheService.deleteByPattern(`${this.getCacheKey(key)}*`);
-  }
-
   private getCacheKeys(key: string[]) {
     return key.map((id) => this.getCacheKey(id));
   }

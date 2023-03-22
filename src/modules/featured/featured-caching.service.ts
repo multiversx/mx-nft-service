@@ -38,9 +38,7 @@ export class FeaturedCollectionsCachingService {
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
-    await this.redisCacheService.deleteByPattern(
-      `${CacheInfo.FeaturedCollections.key}*`,
-    );
+    await this.redisCacheService.delete(CacheInfo.FeaturedCollections.key);
   }
 
   private getFeaturedNftsCacheKey(limit?: number, offset?: number) {

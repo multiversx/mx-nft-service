@@ -156,7 +156,7 @@ export class CacheInfo {
 
   static AssetHistory: CacheInfo = {
     key: 'assetHistory',
-    ttl: Constants.oneDay(),
+    ttl: 5 * Constants.oneMinute(),
   };
 
   static CollectionTypes: CacheInfo = {
