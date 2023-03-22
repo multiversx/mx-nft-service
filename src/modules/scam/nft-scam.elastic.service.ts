@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService, Nft } from 'src/common';
 import { elasticDictionary } from 'src/config';
-import { ScamInfoTypeEnum } from '../assets/models';
+import { Asset, ScamInfoTypeEnum } from '../assets/models';
 import { NftScamInfoModel } from './models/nft-scam-info.model';
 import {
   getAllCollectionsFromElasticQuery,
@@ -40,7 +40,7 @@ export class NftScamElasticService {
   }
 
   async setBulkNftScamInfoInElastic(
-    nfts: Nft[],
+    nfts: Asset[],
     clearScamInfoIfEmpty?: boolean,
   ): Promise<void> {
     if (nfts.length > 0) {
@@ -119,7 +119,7 @@ export class NftScamElasticService {
     return collections;
   }
 
-  buildNftScamInfoBulkUpdate(nfts: Nft[], clearScamInfo?: boolean): string[] {
+  buildNftScamInfoBulkUpdate(nfts: Asset[], clearScamInfo?: boolean): string[] {
     let updates: string[] = [];
     for (const nft of nfts) {
       if (nft.scamInfo) {

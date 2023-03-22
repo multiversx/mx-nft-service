@@ -10,6 +10,7 @@ registerEnumType(NftTypeEnum, {
 });
 
 export enum ScamInfoTypeEnum {
+  none = 'none',
   potentialScam = 'potentialScam',
   scam = 'scam',
 }

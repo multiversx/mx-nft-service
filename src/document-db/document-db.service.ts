@@ -1,12 +1,12 @@
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { NftScamInfoModel } from 'src/modules/scam/models/nft-scam-info.model';
 import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { NftScamInfoRepositoryService } from './repositories/nft-scam.repository';
 import { TraitRepositoryService } from './repositories/traits.repository';
+import { Asset } from 'src/modules/assets/models';
 
 @Injectable()
 export class DocumentDbService {
@@ -73,7 +73,7 @@ export class DocumentDbService {
   }
 
   async saveOrUpdateBulkNftScamInfo(
-    nfts: Nft[],
+    nfts: Asset[],
     version: string,
   ): Promise<void> {
     return await this.execute(

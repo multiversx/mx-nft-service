@@ -1211,6 +1211,7 @@ type ScamInfo {
 }
 
 enum ScamInfoTypeEnum {
+  none
   potentialScam
   scam
 }
