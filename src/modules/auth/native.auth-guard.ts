@@ -42,6 +42,7 @@ export class NativeAuthGuard implements CanActivate {
           await this.cachingService.setCache(key, value, ttl);
         },
       },
+      extraRequestHeaders: { origin: 'NftService' },
     });
   }
 
