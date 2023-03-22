@@ -13,8 +13,8 @@ export class FeaturedCollectionsCachingService {
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
-    limit?: number,
-    offset?: number,
+    _limit?: number,
+    _offset?: number,
   ): Promise<[FeaturedCollectionEntity[], number]> {
     const cacheKey = this.getFeaturedCollectionsCacheKey();
     return await this.redisCacheService.getOrSet(
