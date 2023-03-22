@@ -234,7 +234,7 @@ export class NftScamService {
     await this.cacheEventsPublisher.publish(
       new ChangedEvent({
         id: identifier,
-        type: CacheEventTypeEnum.AssetRefresh,
+        type: CacheEventTypeEnum.ScamUpdate,
         address: ownerAddress,
       }),
     );
