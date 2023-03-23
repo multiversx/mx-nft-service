@@ -63,15 +63,23 @@ export class OrdersRepository {
       .getMany();
   }
 
-  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+  async getOrdersByAuctionIdsGroupByAuctionId(auctionIds: number[]): Promise<OrderEntity[]> {
     const orders = await this.ordersRepository
-      .createQueryBuilder('orders')
-      .where(`auctionId IN(:...auctionIds) and status in ('active')`, {
+      .createQueryBuilder('o')
+      .where(`o.auctionId IN(:...auctionIds)`, {
         auctionIds: auctionIds,
       })
       .getMany();
-
     return orders?.groupBy((asset) => asset.auctionId);
+  }
+
+  async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
+    return await this.ordersRepository
+      .createQueryBuilder('o')
+      .where(`o.auctionId IN(:...auctionIds)`, {
+        auctionIds: auctionIds,
+      })
+      .getMany();
   }
 
   async getOrders(queryRequest: QueryRequest): Promise<[OrderEntity[], number]> {
@@ -88,10 +96,77 @@ export class OrdersRepository {
     return await this.ordersRepository.save(order);
   }
 
-  async saveBulkOrders(orders: OrderEntity[]): Promise<void> {
-    await this.ordersRepository.save(orders, {
-      chunk: constants.dbBatch,
-    });
+  async getBulkOrdersByMarketplaceAndAuctionIds(orders: OrderEntity[]): Promise<OrderEntity[]> {
+    const auctionIds = orders.filter((o) => o.id === undefined).map((o) => o.auctionId);
+    if (auctionIds.length === 0) {
+      return [];
+    }
+    const ordersResponse = await this.ordersRepository
+      .createQueryBuilder('o')
+      .select('*')
+      .where(`o.auctionId IN(:...auctionIds)`, {
+        auctionIds: auctionIds,
+      })
+      .execute();
+
+    for (let i = 0; i < orders.length; i++) {
+      if (orders[i].id !== undefined) {
+        continue;
+      }
+      let similarOrders = orders.filter(
+        (o) =>
+          o.auctionId === orders[i].auctionId &&
+          o.ownerAddress === orders[i].ownerAddress &&
+          o.priceToken === orders[i].priceToken &&
+          o.priceAmount === orders[i].priceAmount,
+      );
+      const similarOrdersWithIdsCount = similarOrders.filter((o) => o.id !== undefined).length;
+      const correspondingDbOrders = ordersResponse.filter(
+        (o: OrderEntity) =>
+          o.auctionId === orders[i].auctionId &&
+          o.ownerAddress === orders[i].ownerAddress &&
+          o.priceToken === orders[i].priceToken &&
+          o.priceAmount === orders[i].priceAmount,
+      );
+      orders[i].id = correspondingDbOrders?.[similarOrders.length - similarOrdersWithIdsCount - 1]?.id;
+    }
+    return orders;
+  }
+
+  async saveBulkOrdersOrUpdateAndFillId(orders: OrderEntity[]): Promise<void> {
+    if (orders.length === 0) {
+      return;
+    }
+    orders = await this.getBulkOrdersByMarketplaceAndAuctionIds(orders);
+
+    const saveOrUpdateResponse = await this.ordersRepository
+      .createQueryBuilder()
+      .insert()
+      .into('orders')
+      .values(orders)
+      .orUpdate({
+        overwrite: [
+          'creationDate',
+          'modifiedDate',
+          'boughtTokensNo',
+          'status',
+          'priceToken',
+          'priceNonce',
+          'priceAmount',
+          'priceAmountDenominated',
+          'ownerAddress',
+          'blockHash',
+        ],
+        conflict_target: ['id', 'auctionId', 'blockHash'],
+      })
+      .execute();
+
+    if (saveOrUpdateResponse.identifiers.length === 0 || orders.findIndex((a) => a.id === undefined) !== -1) {
+      orders = await this.getBulkOrdersByMarketplaceAndAuctionIds(orders);
+    }
+    if (orders.findIndex((a) => a.id === undefined) !== -1) {
+      throw new Error('oooppps');
+    }
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {

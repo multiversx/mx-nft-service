@@ -89,8 +89,12 @@ export class AuctionsSetterService {
     }
   }
 
-  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
-    return await this.persistenceService.saveBulkAuctions(auctions);
+  async saveBulkAuctionsOrUpdateAndFillId(
+    auctions: AuctionEntity[],
+  ): Promise<void> {
+    return await this.persistenceService.saveBulkAuctionsOrUpdateAndFillId(
+      auctions,
+    );
   }
 
   async saveAuctionEntity(auctionEntity: AuctionEntity, assetTags: string[]): Promise<AuctionEntity> {

@@ -37,7 +37,7 @@ export class NotificationsService {
 
   async generateNotifications(auctions: AuctionEntity[]): Promise<void> {
     await this.updateNotificationStatus(auctions?.map((a) => a.id));
-    const orders = await this.ordersService.getOrdersByAuctionIds(auctions?.map((a) => a.id));
+    const orders = await this.ordersService.getOrdersByAuctionIdsGroupByAuctionId(auctions?.map((a) => a.id));
     for (const auction of auctions) {
       this.addNotifications(auction, orders[auction.id]);
     }

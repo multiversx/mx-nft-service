@@ -81,4 +81,38 @@ export class TagsRepository {
       throw err;
     }
   }
+
+  async getBulkTagsByAuctionIds(auctionIds: number[]): Promise<TagEntity[]> {
+    return await this.tagsRepository
+      .createQueryBuilder('t')
+      .select('t.id, t.auctionId, t.tag')
+      .where(`t.auctionId IN(:...auctionIds)`, {
+        auctionIds: auctionIds,
+      })
+      .execute();
+  }
+
+  async saveTagsOrIgnore(tags: TagEntity[]): Promise<void> {
+    if (tags.length === 0) {
+      return;
+    }
+    const dbTags = await this.getBulkTagsByAuctionIds(
+      tags.map((t) => t.auctionId),
+    );
+    for (const dbTag of dbTags) {
+      const correspondingTagIndex = tags.findIndex(
+        (t) => t.auctionId === dbTag.auctionId && t.tag === dbTag.tag,
+      );
+      if (correspondingTagIndex !== -1) {
+        tags[correspondingTagIndex].id = dbTag.id;
+      }
+    }
+    await this.tagsRepository
+      .createQueryBuilder()
+      .insert()
+      .into('tags')
+      .values(tags.filter((t) => t.id === undefined))
+      .orIgnore(true)
+      .execute();
+  }
 }

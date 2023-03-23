@@ -421,10 +421,83 @@ export class AuctionsRepository {
     return await this.auctionsRepository.save(auction);
   }
 
-  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
-    await this.auctionsRepository.save(auctions, {
-      chunk: constants.dbBatch,
-    });
+  async getBulkAuctionsByMarketplaceAndAuctionIds(
+    marketplaceKey: string,
+    marketplaceAuctionIds: number[],
+  ): Promise<AuctionEntity[]> {
+    return await this.auctionsRepository
+      .createQueryBuilder('a')
+      .select('id, marketplaceAuctionId')
+      .where(`a.marketplaceKey = '${marketplaceKey}'`)
+      .andWhere(`a.marketplaceAuctionId IN(:...marketplaceAuctionIds)`, {
+        marketplaceAuctionIds: marketplaceAuctionIds,
+      })
+      .orderBy('a.marketplaceAuctionId', 'ASC')
+      .execute();
+  }
+
+  async saveBulkAuctionsOrUpdateAndFillId(
+    auctions: AuctionEntity[],
+  ): Promise<void> {
+    if (auctions.length === 0) {
+      return;
+    }
+    const saveOrUpdateResponse = await this.auctionsRepository
+      .createQueryBuilder()
+      .insert()
+      .into('auctions')
+      .values(auctions)
+      .orUpdate({
+        overwrite: [
+          'creationDate',
+          'modifiedDate',
+          'collection',
+          'nrAuctionedTokens',
+          'identifier',
+          'nonce',
+          'status',
+          'type',
+          'paymentToken',
+          'paymentNonce',
+          'ownerAddress',
+          'minBidDiff',
+          'minBid',
+          'minBidDenominated',
+          'maxBid',
+          'maxBidDenominated',
+          'startDate',
+          'endDate',
+          'tags',
+          'blockHash',
+        ],
+        conflict_target: ['marketplaceAuctionId', 'marketplaceKey'],
+      })
+      .updateEntity(false)
+      .execute();
+    if (
+      saveOrUpdateResponse.identifiers.length === 0 ||
+      auctions.findIndex((a) => a.id === undefined) !== -1
+    ) {
+      const dbAuctions = await this.getBulkAuctionsByMarketplaceAndAuctionIds(
+        auctions?.[0]?.marketplaceKey,
+        auctions?.map((a) => a.marketplaceAuctionId),
+      );
+      for (let i = 0; i < dbAuctions.length; i++) {
+        const auctionIndex = auctions.findIndex(
+          (a) => a.marketplaceAuctionId === dbAuctions[i].marketplaceAuctionId,
+        );
+        auctions[auctionIndex].id = dbAuctions[i].id;
+      }
+    }
+    if (auctions.findIndex((a) => a.id === undefined) !== -1) {
+      const wtf = auctions
+        .filter((a) => a.id === undefined)
+        .map((a) => a.marketplaceAuctionId);
+      const duplicate = auctions.filter(
+        (a) => a.marketplaceAuctionId === 31434,
+      );
+      throw new Error(`oooppps ${JSON.stringify(duplicate)}`);
+    }
   }
 
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {

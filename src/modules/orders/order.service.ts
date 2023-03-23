@@ -146,6 +146,18 @@ export class OrdersService {
     return this.ordersCachingService.getOrSetOrders(queryRequest, () => this.getMappedOrders(queryRequest));
   }
 
+  async getOrdersByAuctionIdsGroupByAuctionId(
+    auctionIds: number[],
+  ): Promise<OrderEntity[]> {
+    if (auctionIds?.length > 0) {
+      const orders =
+        await this.persistenceService.getOrdersByAuctionIdsGroupByAuctionId(
+          auctionIds,
+        );
+      return orders;
+    }
+  }
+
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
     if (auctionIds?.length > 0) {
       const orders = await this.persistenceService.getOrdersByAuctionIds(auctionIds);

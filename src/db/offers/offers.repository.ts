@@ -59,10 +59,64 @@ export class OffersRepository {
     return savedOffer;
   }
 
-  async saveBulkOffers(orders: OfferEntity[]): Promise<void> {
-    await this.offersRepository.save(orders, {
-      chunk: constants.dbBatch,
-    });
+  async getBulkIdsByMarketplaceAndOfferIds(
+    marketplaceKey: string,
+    marketplaceOfferIds: number[],
+  ): Promise<number[]> {
+    const res = await this.offersRepository
+      .createQueryBuilder('o')
+      .select('id')
+      .where(`o.marketplaceKey = '${marketplaceKey}'`)
+      .andWhere(`o.marketplaceOfferId IN(:...marketplaceOfferIds)`, {
+        marketplaceOfferIds: marketplaceOfferIds,
+      })
+      .orderBy('marketplaceOfferId', 'ASC')
+      .execute();
+    return res.map((o) => o.id);
+  }
+
+  async saveBulkOffersOrUpdateAndFillId(offers: OfferEntity[]): Promise<void> {
+    if (offers.length === 0) {
+      return;
+    }
+    const saveOrUpdateResponse = await this.offersRepository
+      .createQueryBuilder()
+      .insert()
+      .into('offers')
+      .values(offers)
+      .orUpdate({
+        overwrite: [
+          'creationDate',
+          'modifiedDate',
+          'boughtTokensNo',
+          'status',
+          'priceToken',
+          'priceNonce',
+          'priceAmount',
+          'priceAmountDenominated',
+          'ownerAddress',
+          'endDate',
+          'blockHash',
+        ],
+        conflict_target: ['marketplaceOfferId', 'marketplaceKey'],
+      })
+      .updateEntity(false)
+      .execute();
+    if (
+      saveOrUpdateResponse.identifiers.length === 0 ||
+      offers.findIndex((a) => a.id === undefined) !== -1
+    ) {
+      const ids = await this.getBulkIdsByMarketplaceAndOfferIds(
+        offers?.[0]?.marketplaceKey,
+        offers?.map((o) => o.marketplaceOfferId),
+      );
+      for (let i = 0; i < offers.length; i++) {
+        offers[i].id = ids[i];
+      }
+    }
+    if (offers.findIndex((a) => a.id === undefined) !== -1) {
+      throw new Error('oooppps');
+    }
   }
 
   async updateOfferWithStatus(offer: OfferEntity, status: OfferStatusEnum) {
