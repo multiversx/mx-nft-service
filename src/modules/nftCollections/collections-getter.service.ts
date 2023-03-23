@@ -108,7 +108,7 @@ export class CollectionsGetterService {
       (x) => !blacklistedCollections.includes(x.collection),
     );
     activeWithoutTrending = orderBy(
-      trendingCollections,
+      activeWithoutTrending,
       ['verified'],
       ['desc'],
     );
