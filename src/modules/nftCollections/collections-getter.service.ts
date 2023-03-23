@@ -99,8 +99,21 @@ export class CollectionsGetterService {
     const collectionIdentifiers = trendingCollections.map(
       (x: { collection: any }) => x.collection,
     );
-    const activeWithoutTrending = collections.filter(
+    let activeWithoutTrending = collections.filter(
       (x) => !collectionIdentifiers.includes(x.collection),
+    );
+    activeWithoutTrending = activeWithoutTrending?.filter(
+      (x) => !blacklistedCollections.includes(x.collection),
+    );
+    activeWithoutTrending = orderBy(
+      trendingCollections,
+      ['verified'],
+      ['desc'],
+    );
+    trendingCollections = orderBy(
+      trendingCollections,
+      ['verified', 'last24Volume'],
+      ['desc', 'desc'],
     );
 
     trendingCollections = [...trendingCollections, ...activeWithoutTrending];
@@ -111,11 +124,6 @@ export class CollectionsGetterService {
       (x) => !blacklistedCollections.includes(x.collection),
     );
     const count = trendingCollections.length;
-    trendingCollections = orderBy(
-      trendingCollections,
-      ['verified', 'last24Volume'],
-      ['desc', 'desc'],
-    );
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
