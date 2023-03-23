@@ -51,12 +51,6 @@ export class AuctionsCachingService {
     ]);
   }
 
-  public async invalidateCacheByPattern(address: string) {
-    await this.redisCacheService.deleteByPattern(
-      `${generateCacheKeyFromParams('claimable_auctions', address)}*`,
-    );
-  }
-
   public async getOrSetAuctions(
     queryRequest: QueryRequest,
     getAuctions: () => any,

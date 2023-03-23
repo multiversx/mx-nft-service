@@ -30,9 +30,6 @@ export class CacheInvalidationEventsService {
         payload.address,
         payload.extraInfo?.marketplaceKey,
       ),
-      await this.auctionsCachingService.invalidateCacheByPattern(
-        payload.address,
-      ),
       await this.availableTokensCount.clearKey(payload.id),
     ]);
   }
