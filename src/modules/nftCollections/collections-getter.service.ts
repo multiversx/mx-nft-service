@@ -82,27 +82,48 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     let trendingCollections = [];
+    const [collections] = await this.getOrSetFullCollections();
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
-      const collections = await this.analyticsService.getTrendingByVolume();
-      if (collections) {
-        [trendingCollections] = await this.addCollectionsDetails(collections);
+      const trendingByVolume =
+        await this.analyticsService.getTrendingByVolume();
+      if (trendingByVolume) {
+        [trendingCollections] = await this.addCollectionsDetails(
+          trendingByVolume,
+          collections,
+        );
       }
     } else {
       [trendingCollections] =
         await this.getOrSetTrendingByAuctionsCollections();
     }
-    trendingCollections = this.applyFilters(filters, trendingCollections);
     const blacklistedCollections =
       await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
+    const collectionIdentifiers = trendingCollections.map(
+      (x: { collection: any }) => x.collection,
+    );
+    let activeWithoutTrending = collections.filter(
+      (x) => !collectionIdentifiers.includes(x.collection),
+    );
+    activeWithoutTrending = activeWithoutTrending?.filter(
+      (x) => !blacklistedCollections.includes(x.collection),
+    );
     trendingCollections = trendingCollections?.filter(
       (x) => !blacklistedCollections.includes(x.collection),
     );
-    const count = trendingCollections.length;
+    activeWithoutTrending = orderBy(
+      activeWithoutTrending,
+      ['verified'],
+      ['desc'],
+    );
     trendingCollections = orderBy(
       trendingCollections,
       ['verified', 'last24Volume'],
       ['desc', 'desc'],
     );
+
+    trendingCollections = [...trendingCollections, ...activeWithoutTrending];
+    trendingCollections = this.applyFilters(filters, trendingCollections);
+    const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
   }
@@ -127,9 +148,12 @@ export class CollectionsGetterService {
 
   private async addCollectionsDetails(
     trendingCollections: any[],
+    collections?: Collection[],
   ): Promise<[Collection[], number]> {
     const mappedCollections: Collection[] = [];
-    const [collections] = await this.getOrSetFullCollections();
+    if (!collections) {
+      [collections] = await this.getOrSetFullCollections();
+    }
     for (const trendingCollection of trendingCollections) {
       const mappedCollection = collections.find(
         (c) => c.collection === trendingCollection.collection,
