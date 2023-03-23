@@ -26,6 +26,7 @@ import { ReindexAuctionPriceUpdatedHandler } from './marketplaces-reindex-handle
 import { ReindexGlobalOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-global-offer-accepted.handler';
 import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-updated.handler';
 import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver';
+import { OrdersModuleGraph } from '../orders/orders.module';
 
 @Module({
   providers: [
@@ -58,6 +59,7 @@ import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver
     MxCommunicationModule,
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
+    forwardRef(() => OrdersModuleGraph),
     forwardRef(() => OffersModuleGraph),
   ],
   exports: [MarketplacesService, MarketplaceEventsIndexingService, MarketplacesReindexService],

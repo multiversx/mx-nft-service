@@ -76,7 +76,8 @@
     "defaultPageOffset": 0,
     "defaultPageSize": 10,
     "dbMaxDenominatedValue": 99999999999999999,
-    "dbMaxTagLength": 20
+    "dbMaxTagLength": 20,
+    "marketplaceReindexDataMaxInMemoryItems": 25000
   },
   "elasticDictionary": {
     "scamInfo": {

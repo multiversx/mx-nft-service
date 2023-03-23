@@ -40,13 +40,15 @@ export class MarketplacesReindexEventsSummaryService {
     });
     const tx = eventsSet[0].isTx ? eventsSet[0] : undefined;
 
-    if (eventsOrderedByOrderAsc.length === 1 && tx) {
-      return [undefined, undefined];
-    }
-
     const eventsStartIdx = tx ? 1 : 0;
 
-    return [eventsOrderedByOrderAsc.slice(eventsStartIdx), tx?.data?.txData];
+    const txData = tx?.data?.txData;
+
+    if (eventsOrderedByOrderAsc.length === 1 && tx) {
+      return [undefined, txData];
+    }
+
+    return [eventsOrderedByOrderAsc.slice(eventsStartIdx), txData];
   }
 
   private getEventSummary(event: MarketplaceEventsEntity, txData: MarketplaceTransactionData, marketplace: Marketplace): any {

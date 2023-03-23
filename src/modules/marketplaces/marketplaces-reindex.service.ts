@@ -28,6 +28,7 @@ import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs-common';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { OrdersService } from '../orders/order.service';
 import { Token } from '../usdPrice/Token.model';
 
 @Injectable()
@@ -37,6 +38,7 @@ export class MarketplacesReindexService {
     private readonly marketplacesService: MarketplacesService,
     private readonly usdPriceService: UsdPriceService,
     private readonly auctionSetterService: AuctionsSetterService,
+    private readonly ordersService: OrdersService,
     private readonly marketplacesReindexEventsSummaryService: MarketplacesReindexEventsSummaryService,
     private readonly reindexAuctionStartedHandler: ReindexAuctionStartedHandler,
     private readonly reindexAuctionBidHandler: ReindexAuctionBidHandler,
@@ -60,16 +62,7 @@ export class MarketplacesReindexService {
         try {
           let marketplaceReindexStates: MarketplaceReindexState[] = await this.getInitialMarketplaceReindexStates(input);
 
-          await this.processMarketplaceEventsInBatches(marketplaceReindexStates, input);
-
-          marketplaceReindexStates.map((s) =>
-            s.setStateItemsToExpiredIfOlderThanTimestamp(input.beforeTimestamp ?? DateUtils.getCurrentTimestamp()),
-          );
-
-          for (let state of marketplaceReindexStates) {
-            await this.populateAuctionAssetTags(state.auctions);
-            await this.addMarketplaceStateToDb(state);
-          }
+          await this.processMarketplaceEventsInBatchesAndAddToDb(marketplaceReindexStates, input);
 
           this.logger.log(`Reindexing marketplace data/state for ${input.marketplaceAddress} ended`);
         } catch (error) {
@@ -115,7 +108,7 @@ export class MarketplacesReindexService {
     return marketplaceReindexStates;
   }
 
-  private async processMarketplaceEventsInBatches(
+  private async processMarketplaceEventsInBatchesAndAddToDb(
     marketplaceReindexStates: MarketplaceReindexState[],
     input: MarketplaceReindexDataArgs,
   ): Promise<void> {
@@ -153,6 +146,8 @@ export class MarketplacesReindexService {
       processInNextBatch,
       isFinalBatch,
     );
+
+    await this.addInactiveStateItemsToDb(marketplaceReindexStates, isFinalBatch);
 
     if (processInNextBatch.length > 0) {
       this.logger.warn(`Could not handle ${processInNextBatch.length} events`);
@@ -216,12 +211,8 @@ export class MarketplacesReindexService {
       eventOrdersAndTx,
     );
 
-    if (!marketplaceReindexStates[0].isFullStateInMemory) {
-      await Promise.all(
-        marketplaceReindexStates.map((state) => {
-          return this.getStateFromDbIfMissing(state, eventsSetSummaries);
-        }),
-      );
+    for (const state of marketplaceReindexStates) {
+      await this.getStateFromDbIfMissing(state, eventsSetSummaries);
     }
 
     const areMultipleMarketplaces = marketplaceReindexStates.length !== 1;
@@ -244,15 +235,19 @@ export class MarketplacesReindexService {
   }
 
   private async getStateFromDbIfMissing(marketplaceReindexState: MarketplaceReindexState, eventsSetSummaries: any[]): Promise<void> {
-    const [missingAuctionIds, missingOfferIds, missingStateForIdentifiers] = this.getMissingStateIds(
+    if (marketplaceReindexState.isFullStateInMemory) {
+      return;
+    }
+
+    const [missingMarketplaceAuctionsIds, missingMarketplaceOffersIds, missingStateForIdentifiers] = this.getMissingStateIds(
       marketplaceReindexState,
       eventsSetSummaries,
     );
 
     let auctions: AuctionEntity[];
-    if (missingAuctionIds.length > 0) {
+    if (missingMarketplaceAuctionsIds.length > 0) {
       auctions = await this.persistenceService.getBulkAuctionsByAuctionIdsAndMarketplace(
-        missingAuctionIds,
+        missingMarketplaceAuctionsIds,
         marketplaceReindexState.marketplace.key,
       );
     } else if (missingStateForIdentifiers.length > 0) {
@@ -262,14 +257,21 @@ export class MarketplacesReindexService {
       );
     }
 
-    const auctionIds = auctions?.map((a) => a.id);
+    const missingAuctionsIds = auctions?.map((a) => a.id);
+
     const [orders, offers] = await Promise.all([
-      auctionIds?.length > 0 ? this.persistenceService.getOrdersByAuctionIds(auctionIds) : [],
-      missingOfferIds?.length > 0
-        ? this.persistenceService.getBulkOffersByOfferIdsAndMarketplace(missingOfferIds, marketplaceReindexState.marketplace.key)
+      missingAuctionsIds?.length > 0 ? this.ordersService.getOrdersByAuctionIds(missingAuctionsIds) : [],
+      missingMarketplaceOffersIds?.length > 0
+        ? this.persistenceService.getBulkOffersByOfferIdsAndMarketplace(
+            missingMarketplaceOffersIds,
+            marketplaceReindexState.marketplace.key,
+          )
         : [],
     ]);
 
+    if (auctions?.length > 0) {
+      marketplaceReindexState.auctions = marketplaceReindexState.auctions.concat(auctions);
+    }
     if (orders?.length > 0) {
       marketplaceReindexState.orders = marketplaceReindexState.orders.concat(orders);
     }
@@ -288,7 +290,11 @@ export class MarketplacesReindexService {
         continue;
       }
 
-      if (eventsSetSummaries[i].auctionId && eventsSetSummaries[i].action !== AssetActionEnum.StartedAuction) {
+      if (
+        eventsSetSummaries[i].auctionId &&
+        eventsSetSummaries[i].action !== AssetActionEnum.StartedAuction &&
+        eventsSetSummaries[i].action !== AssetOfferEnum.Created
+      ) {
         const auctionIndex =
           marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
             ? marketplaceReindexState.getAuctionIndexByAuctionId(eventsSetSummaries[i].auctionId)
@@ -346,7 +352,7 @@ export class MarketplacesReindexService {
         break;
       }
       case AssetActionEnum.Updated: {
-        const paymentToken = await this.usdPriceService.getToken(eventsSetSummary.paymentToken);
+        const [paymentToken] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
         this.reindexAuctionUpdatedHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken.decimals);
         break;
       }
@@ -409,102 +415,105 @@ export class MarketplacesReindexService {
     }
   }
 
-  private async addInactiveStateItemsToDb(marketplaceReindexStates: MarketplaceReindexState[]): Promise<void> {
-    for (const marketplaceReindexState of marketplaceReindexStates) {
-      marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
+  private async addInactiveStateItemsToDb(marketplaceReindexStates: MarketplaceReindexState[], isFinalBatch?: boolean): Promise<void> {
+    try {
+      for (const marketplaceReindexState of marketplaceReindexStates) {
+        marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
 
-      const [inactiveAuctions, inactiveOrders, inactiveOffers] = marketplaceReindexState.popInactiveItems();
+        let [inactiveAuctions, inactiveOrders, inactiveOffers] = isFinalBatch
+          ? marketplaceReindexState.popAllItems()
+          : marketplaceReindexState.popInactiveItems();
 
-      await this.populateAuctionAssetTags(inactiveAuctions);
+        if (inactiveAuctions.length === 0 && inactiveOffers.length === 0) {
+          continue;
+        }
 
-      for (let i = 0; i < inactiveOrders.length; i++) {
-        inactiveOrders[i].auctionId = inactiveAuctions.findIndex((a) => a.id === inactiveOrders[i].auctionId);
-        delete inactiveOrders[i].id;
-      }
+        marketplaceReindexState.isFullStateInMemory = false;
 
-      for (let i = 0; i < inactiveAuctions.length; i++) {
-        delete inactiveAuctions[i].id;
-      }
+        await this.populateAuctionMissingAssetTags(inactiveAuctions);
 
-      await this.auctionSetterService.saveBulkAuctions(inactiveAuctions);
+        for (let i = 0; i < inactiveOrders.length; i++) {
+          if (inactiveOrders[i].auctionId < 0) {
+            const auctionIndex = inactiveAuctions.findIndex((a) => a.id === inactiveOrders[i].auctionId);
+            if (auctionIndex !== -1) {
+              inactiveOrders[i].auctionId = -inactiveAuctions[auctionIndex].marketplaceAuctionId;
+            } else {
+              this.logger.warn(`Corresponding auction not found`);
+            }
+          }
 
-      let tags: TagEntity[] = [];
-      inactiveAuctions.map((auction) => {
-        const assetTags = auction.tags.split(',');
-        assetTags.map((assetTag) => {
-          if (assetTag !== '') {
-            tags.push(
-              new TagEntity({
-                auctionId: auction.id,
-                tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
-                auction: auction,
-              }),
-            );
+          if (inactiveOrders[i].id < 0) {
+            delete inactiveOrders[i].id;
+          }
+        }
+
+        for (let i = 0; i < inactiveAuctions.length; i++) {
+          if (inactiveAuctions[i].id < 0) {
+            delete inactiveAuctions[i].id;
+          }
+        }
+
+        await this.auctionSetterService.saveBulkAuctionsOrUpdateAndFillId(inactiveAuctions);
+
+        let tags: TagEntity[] = [];
+        inactiveAuctions.map((auction) => {
+          const assetTags = auction.tags.split(',');
+          assetTags.map((assetTag) => {
+            if (assetTag !== '') {
+              tags.push(
+                new TagEntity({
+                  auctionId: auction.id,
+                  tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
+                  auction: auction,
+                }),
+              );
+            }
+          });
+        });
+
+        const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
+
+        for (let i = 0; i < inactiveOrders.length; i++) {
+          if (inactiveOrders[i].auctionId < 0) {
+            const auctionIndex = inactiveAuctions.findIndex((a) => a.marketplaceAuctionId === -inactiveOrders[i].auctionId);
+            if (auctionIndex === -1) {
+              this.logger.warn(
+                `Auction for ${marketplaceReindexState.marketplace.key} with marketplaceAuctionId ${-inactiveOrders[i]
+                  .auctionId} was not found`,
+              );
+              inactiveOrders.splice(i--, 1);
+              continue;
+            }
+            inactiveOrders[i].auction = inactiveAuctions[auctionIndex];
+            inactiveOrders[i].auctionId = inactiveAuctions[auctionIndex].id;
+          }
+        }
+
+        inactiveOffers.map((o) => {
+          if (o.id < 0) {
+            delete o.id;
           }
         });
-      });
 
-      const saveTagsPromise = this.persistenceService.saveTags(tags);
-
-      for (let i = 0; i < inactiveOrders.length; i++) {
-        inactiveOrders[i].auction = inactiveAuctions[inactiveOrders[i].auctionId];
-        inactiveOrders[i].auctionId = inactiveAuctions[inactiveOrders[i].auctionId].id;
+        await Promise.all([
+          saveTagsPromise,
+          this.persistenceService.saveBulkOrdersOrUpdateAndFillId(inactiveOrders),
+          this.persistenceService.saveBulkOffersOrUpdateAndFillId(inactiveOffers),
+        ]);
       }
-      inactiveOffers.map((o) => delete o.id);
-
-      await Promise.all([
-        saveTagsPromise,
-        this.persistenceService.saveBulkOrders(inactiveOrders),
-        this.persistenceService.saveBulkOffers(inactiveOffers),
-      ]);
+    } catch (error) {
+      throw error;
     }
   }
 
-  private async addMarketplaceStateToDb(marketplaceReindexState: MarketplaceReindexState): Promise<void> {
-    marketplaceReindexState.auctions.map((a) => {
-      delete a.id;
-    });
-    marketplaceReindexState.orders.map((o) => delete o.id);
-    marketplaceReindexState.offers.map((o) => delete o.id);
-
-    await this.auctionSetterService.saveBulkAuctions(marketplaceReindexState.auctions);
-
-    for (let i = 0; i < marketplaceReindexState.orders.length; i++) {
-      marketplaceReindexState.orders[i].auction = marketplaceReindexState.auctions[marketplaceReindexState.orders[i].auctionId];
-      marketplaceReindexState.orders[i].auctionId = marketplaceReindexState.auctions[marketplaceReindexState.orders[i].auctionId].id;
-    }
-
-    let tags: TagEntity[] = [];
-    marketplaceReindexState.auctions.map((auction) => {
-      const assetTags = auction.tags.split(',');
-      assetTags.map((assetTag) => {
-        if (assetTag !== '') {
-          tags.push(
-            new TagEntity({
-              auctionId: auction.id,
-              tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
-              auction: auction,
-            }),
-          );
-        }
-      });
-    });
-
-    await Promise.all([
-      this.persistenceService.saveBulkOrders(marketplaceReindexState.orders),
-      this.persistenceService.saveBulkOffers(marketplaceReindexState.offers),
-      this.persistenceService.saveTags(tags),
-    ]);
-  }
-
-  private async populateAuctionAssetTags(auctions: AuctionEntity[]): Promise<void> {
+  private async populateAuctionMissingAssetTags(auctions: AuctionEntity[]): Promise<void> {
     const batchSize = constants.getNftsFromApiBatchSize;
     for (let i = 0; i < auctions.length; i += batchSize) {
       const assetsWithNoTagsIdentifiers = [
         ...new Set(
           auctions
             .slice(i, i + batchSize)
-            .filter((a) => a.tags === '')
+            .filter((a) => a.tags === '' && a.id < 0)
             .map((a) => a.identifier),
         ),
       ];

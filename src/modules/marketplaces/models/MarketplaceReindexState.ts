@@ -1,5 +1,6 @@
 import { ObjectType } from '@nestjs/graphql';
 import BigNumber from 'bignumber.js';
+import { constants } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
@@ -20,8 +21,24 @@ export class MarketplaceReindexState {
   orders: OrderEntity[] = [];
   offers: OfferEntity[] = [];
 
+  private auctionsTemporaryIdCounter = -1;
+  private ordersTemporaryIdCounter = -1;
+  private offersTemporaryIdCounter = -1;
+
   constructor(init?: Partial<MarketplaceReindexState>) {
     Object.assign(this, init);
+  }
+
+  getNewAuctionId(): number {
+    return this.auctionsTemporaryIdCounter--;
+  }
+
+  getNewOrderId(): number {
+    return this.ordersTemporaryIdCounter--;
+  }
+
+  getNewOfferId(): number {
+    return this.offersTemporaryIdCounter--;
   }
 
   isCollectionListed(collection: string): boolean {
@@ -44,14 +61,14 @@ export class MarketplaceReindexState {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const price = input.price ?? input.currentBid;
     return new OrderEntity({
-      id: this.orders.length,
+      id: this.getNewOrderId(),
       creationDate: modifiedDate,
       modifiedDate,
       auctionId: this.auctions[auctionIndex].id,
       ownerAddress: input.address,
       priceToken: paymentToken.identifier,
       priceNonce: paymentNonce ?? 0,
-      priceAmount: price !== '0' ? price : this.auctions[auctionIndex].maxBid,
+      priceAmount: new BigNumber(price !== '0' ? price : this.auctions[auctionIndex].maxBid).toFixed(),
       priceAmountDenominated:
         price !== '0' ? BigNumberUtils.denominateAmount(price, paymentToken.decimals) : this.auctions[auctionIndex].maxBidDenominated,
       blockHash: input.blockHash ?? '',
@@ -94,6 +111,16 @@ export class MarketplaceReindexState {
     this.setOffersToExpiredIfOlderThanTimestamp(timestamp);
   }
 
+  popAllItems(): [AuctionEntity[], OrderEntity[], OfferEntity[]] {
+    const inactiveAuctions = this.auctions;
+    const inactiveOrders = this.orders;
+    const inactiveOffers = this.offers;
+    this.auctions = [];
+    this.orders = [];
+    this.offers = [];
+    return [inactiveAuctions, inactiveOrders, inactiveOffers];
+  }
+
   popInactiveItems(): [AuctionEntity[], OrderEntity[], OfferEntity[]] {
     const inactiveAuctionStatuses = [AuctionStatusEnum.Closed, AuctionStatusEnum.Ended];
     const inactiveOfferStatuses = [OfferStatusEnum.Accepted, OfferStatusEnum.Closed, OfferStatusEnum.Expired];
@@ -102,31 +129,84 @@ export class MarketplaceReindexState {
     let inactiveOrders = [];
     let inactiveOffers = [];
 
+    // if (this.marketplace.key === 'elrondapes')
+    //   console.log(
+    //     `state`,
+    //     JSON.stringify(this.auctions),
+    //     JSON.stringify(this.orders),
+    //     JSON.stringify(this.offers),
+    //   );
+    // if (this.marketplace.key === 'elrondapes')
+    //   console.log(
+    //     `inactive`,
+    //     JSON.stringify(inactiveAuctions),
+    //     JSON.stringify(inactiveOrders),
+    //     JSON.stringify(inactiveOffers),
+    //   );
+
+    if (this.marketplace.key === 'elrondapes') {
+      console.log(
+        `orders state`,
+        this.orders.map((o) => o.id),
+        this.orders.map((o) => o.auctionId),
+      );
+    }
+
     for (let i = 0; i < this.auctions.length; i++) {
-      if (inactiveAuctionStatuses.includes(this.auctions[i].status)) {
-        inactiveAuctions.push(this.auctions[i]);
-        delete this.auctions[i];
+      const isInactiveAuction = inactiveAuctionStatuses.includes(this.auctions[i].status);
+      const isOldAuction =
+        this.auctions.length > constants.marketplaceReindexDataMaxInMemoryItems &&
+        i < this.auctions.length - constants.marketplaceReindexDataMaxInMemoryItems;
+
+      if (isInactiveAuction || isOldAuction) {
+        inactiveAuctions.push(this.auctions.splice(i--, 1)[0]);
       }
     }
-    this.auctions = this.auctions.filter((a) => a);
 
     for (let i = 0; i < this.orders.length; i++) {
-      if (inactiveAuctions.findIndex((a) => a.id === this.orders[i].auctionId) !== -1) {
-        inactiveOrders.push(this.orders[i]);
-        delete this.orders[i];
+      const isInactiveOrOldOrder = inactiveAuctions.findIndex((a) => a.id === this.orders[i].auctionId) !== -1;
+
+      if (isInactiveOrOldOrder) {
+        inactiveOrders.push(this.orders.splice(i--, 1)[0]);
       }
     }
-    this.orders = this.orders.filter((o) => o);
 
     for (let i = 0; i < this.offers.length; i++) {
-      if (inactiveOfferStatuses.includes(this.offers[i].status)) {
-        inactiveOffers.push(this.offers[i]);
-        delete this.offers[i];
+      const isInactiveOffer = inactiveOfferStatuses.includes(this.offers[i].status);
+      const isOldOffer =
+        this.offers.length > constants.marketplaceReindexDataMaxInMemoryItems &&
+        i < this.offers.length - constants.marketplaceReindexDataMaxInMemoryItems;
+
+      if (isInactiveOffer || isOldOffer) {
+        inactiveOffers.push(this.offers.splice(i--, 1)[0]);
       }
     }
-    this.offers = this.offers.filter((o) => o);
 
     return [inactiveAuctions, inactiveOrders, inactiveOffers];
+  }
+
+  deleteAuctionIfDuplicates(marketplaceAuctionId: number) {
+    if (this.isFullStateInMemory) {
+      return;
+    }
+
+    let index;
+    do {
+      index = this.auctions.findIndex((a) => a.marketplaceAuctionId === marketplaceAuctionId);
+      this.auctions.splice(index, 1);
+    } while (index !== -1);
+  }
+
+  deleteOfferIfDuplicates(marketplaceOfferId: number) {
+    if (this.isFullStateInMemory) {
+      return;
+    }
+
+    let index;
+    do {
+      index = this.offers.findIndex((a) => a.marketplaceOfferId === marketplaceOfferId);
+      this.offers.splice(index, 1);
+    } while (index !== -1);
   }
 
   private setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(timestamp: number): void {
