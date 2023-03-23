@@ -107,6 +107,9 @@ export class CollectionsGetterService {
     activeWithoutTrending = activeWithoutTrending?.filter(
       (x) => !blacklistedCollections.includes(x.collection),
     );
+    trendingCollections = trendingCollections?.filter(
+      (x) => !blacklistedCollections.includes(x.collection),
+    );
     activeWithoutTrending = orderBy(
       activeWithoutTrending,
       ['verified'],
@@ -120,9 +123,6 @@ export class CollectionsGetterService {
 
     trendingCollections = [...trendingCollections, ...activeWithoutTrending];
     trendingCollections = this.applyFilters(filters, trendingCollections);
-    trendingCollections = trendingCollections?.filter(
-      (x) => !blacklistedCollections.includes(x.collection),
-    );
     const count = trendingCollections.length;
     trendingCollections = trendingCollections?.slice(offset, offset + limit);
     return [trendingCollections, count];
