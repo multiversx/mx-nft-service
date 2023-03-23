@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { TrendingCollectionsWarmerService } from 'src/crons/cache.warmer/trendingCollections.warmer.service';
-import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-history-caching.service';
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
@@ -19,7 +17,6 @@ export class CacheInvalidationEventsService {
     private notificationsCachingService: NotificationsCachingService,
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private assetsLikesCachingService: AssetsLikesCachingService,
-    private assetsHistoryCachingService: AssetsHistoryCachingService,
     private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
     private blacklistedCollectionsCachingService: BlacklistedCollectionsCachingService,
     // private analyticsService: TrendingCollectionsWarmerService,

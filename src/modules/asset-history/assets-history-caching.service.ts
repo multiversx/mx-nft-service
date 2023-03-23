@@ -3,7 +3,6 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { AssetHistoryLog } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class AssetsHistoryCachingService {

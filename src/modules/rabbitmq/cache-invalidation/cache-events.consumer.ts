@@ -84,7 +84,6 @@ export class CacheEventsConsumer {
             );
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
           this.collectionAssetsRedisHandler.clearKey(collection),
           collectionsAssetForOnwerPromise,
@@ -176,6 +175,12 @@ export class CacheEventsConsumer {
         const profilerUpdateOffer = new CpuProfiler();
         await this.cacheInvalidationEventsService.invalidateOffers(event);
         profilerUpdateOffer.stop('UpdateOffer');
+        break;
+
+      case CacheEventTypeEnum.ScamUpdate:
+        const profileScamUpdate = new CpuProfiler();
+        this.assetScamInfoRedisHandler.clearKey(event.id),
+          profileScamUpdate.stop('ScamUpdate');
         break;
 
       // case CacheEventTypeEnum.RefreshTrending:
