@@ -98,15 +98,15 @@ export class CollectionsGetterService {
     }
     const blacklistedCollections =
       await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
-    const collectionIdentifiers = trendingCollections.map(
-      (x: { collection: any }) => x.collection,
+    const collectionIdentifiers = new Set(
+      trendingCollections.map((x: { collection: any }) => x.collection),
     );
     let activeWithoutTrending = collections.filter(
-      (x) => !collectionIdentifiers.includes(x.collection),
+      (x) =>
+        !collectionIdentifiers.has(x.collection) &&
+        !blacklistedCollections.includes(x.collection),
     );
-    activeWithoutTrending = activeWithoutTrending?.filter(
-      (x) => !blacklistedCollections.includes(x.collection),
-    );
+
     trendingCollections = trendingCollections?.filter(
       (x) => !blacklistedCollections.includes(x.collection),
     );
