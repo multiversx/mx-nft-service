@@ -96,6 +96,8 @@ export class CollectionsGetterService {
       [trendingCollections] =
         await this.getOrSetTrendingByAuctionsCollections();
     }
+    const blacklistedCollections =
+      await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
     const collectionIdentifiers = trendingCollections.map(
       (x: { collection: any }) => x.collection,
     );
@@ -118,8 +120,6 @@ export class CollectionsGetterService {
 
     trendingCollections = [...trendingCollections, ...activeWithoutTrending];
     trendingCollections = this.applyFilters(filters, trendingCollections);
-    const blacklistedCollections =
-      await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
     trendingCollections = trendingCollections?.filter(
       (x) => !blacklistedCollections.includes(x.collection),
     );
