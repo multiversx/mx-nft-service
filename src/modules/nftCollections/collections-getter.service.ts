@@ -82,15 +82,28 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
     let trendingCollections = [];
+    const [collections] = await this.getOrSetFullCollections();
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
-      const collections = await this.analyticsService.getTrendingByVolume();
-      if (collections) {
-        [trendingCollections] = await this.addCollectionsDetails(collections);
+      const trendingByVolume =
+        await this.analyticsService.getTrendingByVolume();
+      if (trendingByVolume) {
+        [trendingCollections] = await this.addCollectionsDetails(
+          trendingByVolume,
+          collections,
+        );
       }
     } else {
       [trendingCollections] =
         await this.getOrSetTrendingByAuctionsCollections();
     }
+    const collectionIdentifiers = trendingCollections.map(
+      (x: { collection: any }) => x.collection,
+    );
+    const activeWithoutTrending = collections.filter(
+      (x) => !collectionIdentifiers.includes(x.collection),
+    );
+
+    trendingCollections = [...trendingCollections, ...activeWithoutTrending];
     trendingCollections = this.applyFilters(filters, trendingCollections);
     const blacklistedCollections =
       await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
@@ -127,9 +140,12 @@ export class CollectionsGetterService {
 
   private async addCollectionsDetails(
     trendingCollections: any[],
+    collections?: Collection[],
   ): Promise<[Collection[], number]> {
     const mappedCollections: Collection[] = [];
-    const [collections] = await this.getOrSetFullCollections();
+    if (!collections) {
+      [collections] = await this.getOrSetFullCollections();
+    }
     for (const trendingCollection of trendingCollections) {
       const mappedCollection = collections.find(
         (c) => c.collection === trendingCollection.collection,
