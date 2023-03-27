@@ -183,7 +183,7 @@ export class ElasticUpdatesEventsService {
       return this.documentDbService.deleteNftScamInfo(n);
     });
 
-    await this.nftScamInfoService.validateOrUpdateNftsScamInfo(nftsToUpdate);
+    await this.nftScamInfoService.validateNftsScamInfoArray(nftsToUpdate);
 
     await Promise.all(deletes);
   }

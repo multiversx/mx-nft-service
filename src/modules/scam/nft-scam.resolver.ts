@@ -16,7 +16,9 @@ export class NftScamResolver {
     @Args('identifier') identifier: string,
   ): Promise<boolean> {
     try {
-      return await this.nftScamService.validateOrUpdateNftScamInfo(identifier);
+      return await this.nftScamService.validateNftScamInfoForIdentifier(
+        identifier,
+      );
     } catch (error) {
       throw new ApolloError(error);
     }
