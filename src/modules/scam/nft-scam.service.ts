@@ -108,7 +108,7 @@ export class NftScamService {
           nftFromDb,
         );
       }
-
+      await this.triggerCacheInvalidation(nft?.identifier, nft?.ownerAddress);
       return true;
     }
   }
