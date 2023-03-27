@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MxElasticService, Nft } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { elasticDictionary } from 'src/config';
-import { Asset, ScamInfoTypeEnum } from '../assets/models';
+import { Asset } from '../assets/models';
+import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { NftScamInfoModel } from './models/nft-scam-info.model';
 import {
   getAllCollectionsFromElasticQuery,
@@ -73,8 +74,7 @@ export class NftScamElasticService {
 
   async setNftScamInfoManuallyInElastic(
     identifier: string,
-    type?: ScamInfoTypeEnum,
-    info?: string,
+    scamInfo: ScamInfo,
   ): Promise<void> {
     try {
       const updates = [
@@ -82,13 +82,13 @@ export class NftScamElasticService {
           'tokens',
           identifier,
           elasticDictionary.scamInfo.typeKey,
-          type ?? null,
+          scamInfo?.type ?? null,
         ),
         this.mxService.buildBulkUpdate<string>(
           'tokens',
           identifier,
           elasticDictionary.scamInfo.infoKey,
-          info ?? null,
+          scamInfo?.info ?? null,
         ),
       ];
       await this.mxService.bulkRequest('tokens', updates);
@@ -97,6 +97,37 @@ export class NftScamElasticService {
         'Error when manually setting nft scam info in Elastic',
         {
           path: `${NftScamElasticService.name}.${this.setNftScamInfoManuallyInElastic.name}`,
+          exception: error?.message,
+        },
+      );
+    }
+  }
+
+  async setCollectionScamInfoManuallyInElastic(
+    collection: string,
+    scamInfo: ScamInfo,
+  ): Promise<void> {
+    try {
+      const updates = [
+        this.mxService.buildBulkUpdate<string>(
+          'tokens',
+          collection,
+          elasticDictionary.scamInfo.typeKey,
+          scamInfo?.type ?? null,
+        ),
+        this.mxService.buildBulkUpdate<string>(
+          'tokens',
+          collection,
+          elasticDictionary.scamInfo.infoKey,
+          scamInfo?.info ?? null,
+        ),
+      ];
+      await this.mxService.bulkRequest('tokens', updates);
+    } catch (error) {
+      this.logger.error(
+        'Error when manually setting collection scam info in Elastic',
+        {
+          path: `${NftScamElasticService.name}.${this.setCollectionScamInfoManuallyInElastic.name}`,
           exception: error?.message,
         },
       );

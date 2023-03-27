@@ -66,6 +66,14 @@ export class ScamInfo {
   static none(): ScamInfo {
     return new ScamInfo({
       type: ScamInfoTypeEnum.none,
+      info: null,
+    });
+  }
+
+  static scam(): ScamInfo {
+    return new ScamInfo({
+      type: ScamInfoTypeEnum.scam,
+      info: 'Scam report',
     });
   }
 }

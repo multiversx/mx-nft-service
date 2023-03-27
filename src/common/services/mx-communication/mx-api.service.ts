@@ -567,18 +567,6 @@ export class MxApiService {
     return [nfts, lastTimestamp];
   }
 
-  async getNftsWithScamInfoBeforeTimestamp(
-    beforeTimestamp: number,
-    size: number,
-  ): Promise<[Nft[], number]> {
-    let [nfts, lastTimestamp] = await this.getNftsBeforeTimestamp(
-      beforeTimestamp,
-      size,
-      ['identifier', 'scamInfo', 'timestamp'],
-    );
-    return [nfts, lastTimestamp];
-  }
-
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
     return await this.doGetGeneric(
       this.getTagsBySearch.name,

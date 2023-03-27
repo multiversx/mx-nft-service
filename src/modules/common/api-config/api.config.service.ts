@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { mxConfig } from 'src/config';
 
 @Injectable()
 export class ApiConfigService {
   constructor(private readonly configService: ConfigService) {}
 
+  getElasticUrl(): string {
+    return this.getGenericConfig<string>('ELROND_ELASTICSEARCH');
+  }
   private getGenericConfig<T>(path: string, alias?: string): T {
     const value = this.configService.get<T>(path);
     if (!value) {
@@ -93,5 +97,23 @@ export class ApiConfigService {
 
   getExtrasApiUrl(): string {
     return this.getGenericConfig<string>('MX_EXTRAS_API');
+  }
+
+  getRateLimiterSecret(): string | undefined {
+    return this.configService.get<string>('rateLimiterSecret');
+  }
+
+  getUseKeepAliveAgentFlag(): boolean {
+    return mxConfig.keepAlive ?? true;
+  }
+
+  getAxiosTimeout(): number {
+    return (
+      this.getGenericConfig<number>('KEEPALIVE_TIMEOUT_DOWNSTREAM') ?? 61000
+    );
+  }
+
+  getServerTimeout(): number {
+    return this.getGenericConfig<number>('KEEPALIVE_TIMEOUT_UPSTREAM') ?? 60000;
   }
 }
