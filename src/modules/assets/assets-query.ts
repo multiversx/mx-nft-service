@@ -126,13 +126,6 @@ export class AssetsQuery {
     return this;
   }
 
-  addComputeScamInfo(computeScamInfo: boolean): this {
-    if (!computeScamInfo) {
-      return this;
-    }
-    return this.addParamToQuery('computeScamInfo', true);
-  }
-
   build(addDefaultQuery: boolean = true): string {
     // TODO(whiteListedStorage): handle whitelisting in a different way
     // then uncomment where TODO(whiteListedStorage)

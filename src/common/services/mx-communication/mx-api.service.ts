@@ -567,18 +567,6 @@ export class MxApiService {
     return [nfts, lastTimestamp];
   }
 
-  async getNftsWithScamInfoBeforeTimestamp(
-    beforeTimestamp: number,
-    size: number,
-  ): Promise<[Nft[], number]> {
-    let [nfts, lastTimestamp] = await this.getNftsBeforeTimestamp(
-      beforeTimestamp,
-      size,
-      ['identifier', 'scamInfo', 'timestamp'],
-    );
-    return [nfts, lastTimestamp];
-  }
-
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
     return await this.doGetGeneric(
       this.getTagsBySearch.name,
@@ -717,32 +705,6 @@ export class MxApiService {
   async getMxApiAbout(): Promise<MxApiAbout> {
     const about = await this.doGetGeneric(this.getMxStats.name, 'about');
     return new MxApiAbout(about);
-  }
-
-  async getBulkNftScamInfo(
-    identifiers: string[],
-    computeScamInfo: boolean,
-  ): Promise<Nft[]> {
-    const query = new AssetsQuery()
-      .addIdentifiers(identifiers)
-      .addPageSize(0, identifiers.length)
-      .addFields(['identifier', 'scamInfo'])
-      .addComputeScamInfo(computeScamInfo);
-    const url = `nfts${query.build(false)}`;
-    let nfts = await this.doGetGeneric(this.getBulkNftScamInfo.name, url);
-    return nfts;
-  }
-
-  async getNftScamInfo(
-    identifier: string,
-    computeScamInfo: boolean,
-  ): Promise<Nft> {
-    const query = new AssetsQuery()
-      .addFields(['identifier', 'scamInfo'])
-      .addComputeScamInfo(computeScamInfo);
-    const url = `nfts/${identifier}${query.build(false)}`;
-    let nftScamInfo = await this.doGetGeneric(this.getNftScamInfo.name, url);
-    return nftScamInfo;
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

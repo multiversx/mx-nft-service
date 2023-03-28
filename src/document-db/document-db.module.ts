@@ -14,6 +14,11 @@ import {
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { DocumentDbService } from './document-db.service';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
+import { CollectionScamInfoRepositoryService } from './repositories/collection-scam.repository';
+import {
+  CollectionScamInfoModel,
+  CollectionScamInfoSchema,
+} from 'src/modules/scam/models/collection-scam-info.model';
 
 @Global()
 @Module({
@@ -41,11 +46,18 @@ import { ApiConfigService } from 'src/modules/common/api-config/api.config.servi
         schema: NftScamInfoSchema,
       },
     ]),
+    MongooseModule.forFeature([
+      {
+        name: CollectionScamInfoModel.name,
+        schema: CollectionScamInfoSchema,
+      },
+    ]),
   ],
   providers: [
     DocumentDbService,
     TraitRepositoryService,
     NftScamInfoRepositoryService,
+    CollectionScamInfoRepositoryService,
   ],
   exports: [DocumentDbService],
 })
