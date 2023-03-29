@@ -614,7 +614,7 @@ export class MxApiService {
   async getAllTokens(): Promise<Token[]> {
     const allTokens = await this.doGetGeneric(
       this.getAllTokens.name,
-      'tokens?size=10000&fields=identifier,name,ticker,decimals',
+      'tokens?size=10000&fields=identifier,name,ticker,decimals,price',
     );
     return allTokens.map((t) => Token.fromMxApiToken(t));
   }
@@ -629,7 +629,7 @@ export class MxApiService {
   async getTokenData(tokenId: string): Promise<Token | undefined> {
     const token = await this.doGetGeneric(
       this.getTokenData.name,
-      `tokens/${tokenId}?fields=identifier,name,ticker,decimals`,
+      `tokens/${tokenId}?fields=identifier,name,ticker,decimals,price`,
     );
     return token
       ? new Token({
