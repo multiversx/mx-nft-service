@@ -34,6 +34,7 @@ export class Token {
       symbol: token.ticker,
       name: token.name,
       decimals: token.decimals,
+      priceUsd: token.price,
     });
   }
 }
