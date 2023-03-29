@@ -1,8 +1,8 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { mxConfig } from 'src/config';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import {
   DEADRARE_KEY,
   ELRONDNFTSWAP_KEY,

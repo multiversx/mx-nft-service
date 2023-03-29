@@ -1,8 +1,8 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';

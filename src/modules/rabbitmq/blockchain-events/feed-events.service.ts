@@ -12,8 +12,8 @@ import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { OfferEntity } from 'src/db/offers';
+import { Token } from 'src/modules/usdPrice/Token.model';
 
 @Injectable()
 export class FeedEventsSenderService {

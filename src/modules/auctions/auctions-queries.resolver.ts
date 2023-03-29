@@ -33,11 +33,11 @@ import { MarketplaceProvider } from '../marketplaces/loaders/marketplace.loader'
 import { TokenFilter } from './models/Token.Filter';
 import { mxConfig } from 'src/config';
 import { XOXNO_KEY } from 'src/utils/constants';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { Fields } from '../common/fields.decorator';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
+import { Token } from '../usdPrice/Token.model';
 
 @Resolver(() => Auction)
 export class AuctionsQueriesResolver extends BaseResolver(Auction) {

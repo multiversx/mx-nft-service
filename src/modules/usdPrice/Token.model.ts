@@ -1,4 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import {
+  ApiToken,
+  DexToken,
+} from '../../common/services/mx-communication/models/api-token.model';
 
 @ObjectType()
 export class Token {
@@ -19,7 +23,7 @@ export class Token {
     Object.assign(this, init);
   }
 
-  static fromMxApiDexToken(token: any): Token {
+  static fromMxApiDexToken(token: DexToken): Token {
     return new Token({
       identifier: token.id,
       symbol: token.symbol,
@@ -28,7 +32,7 @@ export class Token {
     });
   }
 
-  static fromMxApiToken(token: any): Token {
+  static fromMxApiToken(token: ApiToken): Token {
     return new Token({
       identifier: token.identifier,
       symbol: token.ticker,

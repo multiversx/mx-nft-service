@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { CachingService } from '@multiversx/sdk-nestjs';
+import { Token } from './Token.model';
 
 @Injectable()
 export class UsdPriceService {
