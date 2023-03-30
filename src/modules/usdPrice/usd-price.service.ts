@@ -5,12 +5,15 @@ import { mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
 import { CachingService } from '@multiversx/sdk-nestjs';
 import { Token } from './Token.model';
+import { MxDataApiService } from 'src/common/services/mx-communication/mx-data.service';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class UsdPriceService {
   constructor(
     private readonly cacheService: CachingService,
     private readonly mxApiService: MxApiService,
+    private readonly mxDataApi: MxDataApiService,
   ) {}
 
   async getUsdAmountDenom(token: string, amount: string): Promise<string> {
@@ -30,6 +33,17 @@ export class UsdPriceService {
       CacheInfo.AllTokens.key,
       async () => await this.setAllCachedTokens(),
       CacheInfo.AllTokens.ttl,
+    );
+  }
+
+  public async getTokenPriceFromDate(
+    token: string,
+    timestamp: number,
+  ): Promise<number> {
+    return await this.cacheService.getOrSetCache(
+      `${CacheInfo.TokenHistoricalPrice.key}_${token}_${timestamp}`,
+      async () => await this.getTokenHistoricalPrice(token, timestamp),
+      CacheInfo.TokenHistoricalPrice.ttl,
     );
   }
 
@@ -86,6 +100,29 @@ export class UsdPriceService {
     return apiTokens.concat([egldToken]);
   }
 
+  private async getTokenHistoricalPrice(
+    tokenId: string,
+    timestamp: number,
+  ): Promise<number> {
+    let [cexTokens, xExchangeTokens] = await Promise.all([
+      this.getCexTokens(),
+      this.getXexchangeTokens(),
+    ]);
+
+    if (cexTokens.includes(tokenId)) {
+      {
+        return await this.mxDataApi.getCexPrice(
+          DateUtils.timestampToIsoStringWithoutTime(timestamp),
+        );
+      }
+    } else if (xExchangeTokens.includes(tokenId)) {
+      return await this.mxDataApi.getXechangeTokenPrice(
+        tokenId,
+        DateUtils.timestampToIsoStringWithoutTime(timestamp),
+      );
+    }
+  }
+
   private async getCachedDexTokens(): Promise<Token[]> {
     return await this.cacheService.getOrSetCache(
       CacheInfo.AllDexTokens.key,
@@ -107,6 +144,22 @@ export class UsdPriceService {
       CacheInfo.EgldToken.key,
       async () => await this.mxApiService.getEgldPriceFromEconomics(),
       CacheInfo.EgldToken.ttl,
+    );
+  }
+
+  private async getCexTokens(): Promise<string[]> {
+    return await this.cacheService.getOrSetCache(
+      CacheInfo.CexTokens.key,
+      async () => await this.mxDataApi.getCexTokens(),
+      CacheInfo.CexTokens.ttl,
+    );
+  }
+
+  private async getXexchangeTokens(): Promise<string[]> {
+    return await this.cacheService.getOrSetCache(
+      CacheInfo.xExchangeTokens.key,
+      async () => await this.mxDataApi.getXexchangeTokens(),
+      CacheInfo.xExchangeTokens.ttl,
     );
   }
 }

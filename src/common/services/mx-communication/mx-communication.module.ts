@@ -10,6 +10,7 @@ import { MxStatsService } from './mx-stats.service';
 import { SlackReportService } from './slack-report.service';
 import { ConfigService } from '@nestjs/config';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
+import { MxDataApiService } from './mx-data.service';
 
 @Module({
   providers: [
@@ -25,6 +26,7 @@ import { ApiConfigService } from 'src/modules/common/api-config/api.config.servi
     MxIdentityService,
     MxFeedService,
     SlackReportService,
+    MxDataApiService,
   ],
   exports: [
     ApiService,
@@ -36,6 +38,7 @@ import { ApiConfigService } from 'src/modules/common/api-config/api.config.servi
     MxIdentityService,
     MxFeedService,
     SlackReportService,
+    MxDataApiService,
   ],
 })
 export class MxCommunicationModule {}
