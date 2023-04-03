@@ -54,6 +54,14 @@ input AddLikeArgs {
   identifier: String!
 }
 
+input AnalyticsArgs {
+  bin: String
+  metric: String!
+  series: String!
+  start: String
+  time: String
+}
+
 input ArtistFilters {
   sorting: ArtistSortingEnum!
 }
@@ -695,6 +703,11 @@ input HandleQuantityArgs {
   quantity: String!
 }
 
+type HistoricDataModel {
+  timestamp: String!
+  value: String!
+}
+
 input HistoryPagination {
   """Paginate first"""
   first: Int = 10
@@ -1166,6 +1179,8 @@ type Query {
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
+  latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
+  latestHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
@@ -1178,6 +1193,7 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
+  values24hSum(input: AnalyticsArgs!): [HistoricDataModel!]!
 }
 
 type Rarity {
