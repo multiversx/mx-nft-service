@@ -3,10 +3,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common.module';
 import { CacheModule } from 'src/common/services/caching/caching.module';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
-
 import { AnalyticsDataGetterService } from './analytics-data.getter.service';
 import { AnalyticsDataSetterService } from './analytics-data.setter.service';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
+import { SumDaily } from './entities/sum-daily.entity';
+import { SumWeekly } from './entities/sum-weekly.entity';
 
 @Module({
   imports: [
@@ -29,11 +30,14 @@ import { XNftsAnalyticsEntity } from './entities/analytics.entity';
         //     rejectUnauthorized: false,
         //   },
         // },
-        entities: [XNftsAnalyticsEntity],
+        entities: ['dist/**/**/**/**/*.entity{.ts,.js}'],
       }),
       inject: [ApiConfigService],
     }),
-    TypeOrmModule.forFeature([XNftsAnalyticsEntity], 'timescaledb'),
+    TypeOrmModule.forFeature(
+      [XNftsAnalyticsEntity, SumDaily, SumWeekly],
+      'timescaledb',
+    ),
   ],
   providers: [AnalyticsDataGetterService, AnalyticsDataSetterService],
   exports: [AnalyticsDataGetterService, AnalyticsDataSetterService],
