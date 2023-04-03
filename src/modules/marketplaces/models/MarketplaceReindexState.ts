@@ -1,6 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
 import BigNumber from 'bignumber.js';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';
 import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
@@ -10,6 +9,7 @@ import {
 } from 'src/modules/auctions/models';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { Marketplace } from './Marketplace.dto';

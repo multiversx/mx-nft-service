@@ -1,44 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { MxApiService, MxToolsService } from 'src/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
+import { MxApiService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { CachingService } from '@multiversx/sdk-nestjs';
+import { Token } from './Token.model';
+import { MxDataApiService } from 'src/common/services/mx-communication/mx-data.service';
 import { DateUtils } from 'src/utils/date-utils';
-import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class UsdPriceService {
   constructor(
-    private cacheService: CachingService,
+    private readonly cacheService: CachingService,
     private readonly mxApiService: MxApiService,
-    private readonly mxToolsService: MxToolsService,
+    private readonly mxDataApi: MxDataApiService,
   ) {}
 
-  async getUsdAmountDenom(
-    token: string,
-    amount: string,
-    timestamp?: number,
-  ): Promise<string | undefined> {
+  async getUsdAmountDenom(token: string, amount: string): Promise<string> {
     if (amount === '0') {
       return amount;
     }
 
-    if (token === mxConfig.egld || token === mxConfig.wegld) {
-      return computeUsdAmount(
-        await this.getEgldPrice(timestamp),
-        amount,
-        mxConfig.decimals,
-      );
-    }
-
-    const tokenPriceUsd = await this.getEsdtPriceUsd(token, timestamp);
-    if (!tokenPriceUsd) {
+    const tokenData = await this.getToken(token);
+    if (!tokenData.priceUsd) {
       return;
     }
-    const tokenData = await this.getToken(token);
-    return computeUsdAmount(tokenPriceUsd, amount, tokenData.decimals);
+    return computeUsdAmount(tokenData.priceUsd, amount, tokenData.decimals);
   }
 
   public async getAllCachedTokens(): Promise<Token[]> {
@@ -49,14 +36,25 @@ export class UsdPriceService {
     );
   }
 
-  public async getToken(tokenId: string): Promise<Token | null> {
-    if (tokenId === mxConfig.egld) {
+  public async getTokenPriceFromDate(
+    token: string,
+    timestamp: number,
+  ): Promise<number> {
+    return await this.cacheService.getOrSetCache(
+      `${CacheInfo.TokenHistoricalPrice.key}_${token}_${timestamp}`,
+      async () => await this.getTokenHistoricalPrice(token, timestamp),
+      CacheInfo.TokenHistoricalPrice.ttl,
+    );
+  }
+
+  public async getToken(tokenId: string): Promise<Token> {
+    if (tokenId === mxConfig.egld || tokenId === mxConfig.wegld) {
       return new Token({
         identifier: mxConfig.egld,
         symbol: mxConfig.egld,
         name: mxConfig.egld,
         decimals: mxConfig.decimals,
-        priceUsd: await this.getEgldPrice(),
+        priceUsd: await this.getCurrentEgldPrice(),
       });
     }
 
@@ -75,56 +73,23 @@ export class UsdPriceService {
 
   async getTokenPriceUsd(token: string): Promise<string | undefined> {
     if (token === mxConfig.egld || token === mxConfig.wegld) {
-      return await this.getEgldPrice();
+      return await this.getCurrentEgldPrice();
     }
     return await this.getEsdtPriceUsd(token);
   }
 
-  private async getEsdtPriceUsd(
-    tokenId: string,
-    timestamp?: number,
-  ): Promise<string | undefined> {
-    if (!timestamp || DateUtils.isTimestampToday(timestamp)) {
-      const dexTokens = await this.getCachedDexTokens();
-      const token = dexTokens.find((token) => token.identifier === tokenId);
-      return token?.priceUsd;
-    }
-
-    return await this.getTokenHistoricalPriceByEgld(tokenId, timestamp);
-  }
-
-  private async getTokenHistoricalPriceByEgld(
-    token: string,
-    timestamp: number,
-  ): Promise<string | undefined> {
-    const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
-    const egldPriceUsd = await this.getEgldHistoricalPrice(timestamp);
-    const cacheKey = this.getTokenHistoricalPriceCacheKey(token, isoDateOnly);
-    return await this.cacheService.getOrSetCache(
-      cacheKey,
-      async () =>
-        await this.mxToolsService.getTokenHistoricalPriceByEgld(
-          token,
-          isoDateOnly,
-          egldPriceUsd,
-        ),
-      DateUtils.isTimestampToday(timestamp)
-        ? Constants.oneDay()
-        : CacheInfo.TokenHistoricalPrice.ttl,
-    );
+  private async getEsdtPriceUsd(tokenId: string): Promise<string | undefined> {
+    const dexTokens = await this.getCachedDexTokens();
+    const token = dexTokens.find((token) => token.identifier === tokenId);
+    return token?.priceUsd;
   }
 
   private async setAllCachedTokens(): Promise<Token[]> {
-    let [apiTokens, dexTokens, egldPriceUSD] = await Promise.all([
+    let [apiTokens, egldPriceUSD] = await Promise.all([
       this.getCachedApiTokens(),
-      this.getCachedDexTokens(),
-      this.getEgldPrice(),
+      this.getCurrentEgldPrice(),
     ]);
-    dexTokens.map((dexToken) => {
-      apiTokens.find(
-        (apiToken) => apiToken.identifier === dexToken.identifier,
-      ).priceUsd = dexToken.priceUsd;
-    });
+
     const egldToken: Token = new Token({
       identifier: mxConfig.egld,
       symbol: mxConfig.egld,
@@ -133,6 +98,29 @@ export class UsdPriceService {
       priceUsd: egldPriceUSD,
     });
     return apiTokens.concat([egldToken]);
+  }
+
+  private async getTokenHistoricalPrice(
+    tokenId: string,
+    timestamp: number,
+  ): Promise<number> {
+    let [cexTokens, xExchangeTokens] = await Promise.all([
+      this.getCexTokens(),
+      this.getXexchangeTokens(),
+    ]);
+
+    if (cexTokens.includes(tokenId)) {
+      {
+        return await this.mxDataApi.getCexPrice(
+          DateUtils.timestampToIsoStringWithoutTime(timestamp),
+        );
+      }
+    } else if (xExchangeTokens.includes(tokenId)) {
+      return await this.mxDataApi.getXechangeTokenPrice(
+        tokenId,
+        DateUtils.timestampToIsoStringWithoutTime(timestamp),
+      );
+    }
   }
 
   private async getCachedDexTokens(): Promise<Token[]> {
@@ -151,13 +139,6 @@ export class UsdPriceService {
     );
   }
 
-  private async getEgldPrice(timestamp?: number): Promise<string> {
-    if (!timestamp || DateUtils.isTimestampToday(timestamp)) {
-      return await this.getCurrentEgldPrice();
-    }
-    return await this.getEgldHistoricalPrice(timestamp);
-  }
-
   private async getCurrentEgldPrice(): Promise<string> {
     return await this.cacheService.getOrSetCache(
       CacheInfo.EgldToken.key,
@@ -166,25 +147,19 @@ export class UsdPriceService {
     );
   }
 
-  private async getEgldHistoricalPrice(timestamp?: number): Promise<string> {
-    const isoDateOnly = DateUtils.timestampToIsoStringWithoutTime(timestamp);
-    const cacheKey = this.getTokenHistoricalPriceCacheKey(
-      mxConfig.wegld,
-      isoDateOnly,
-    );
+  private async getCexTokens(): Promise<string[]> {
     return await this.cacheService.getOrSetCache(
-      cacheKey,
-      async () => await this.mxToolsService.getEgldHistoricalPrice(isoDateOnly),
-      DateUtils.isTimestampToday(timestamp)
-        ? Constants.oneDay()
-        : CacheInfo.TokenHistoricalPrice.ttl,
+      CacheInfo.CexTokens.key,
+      async () => await this.mxDataApi.getCexTokens(),
+      CacheInfo.CexTokens.ttl,
     );
   }
 
-  private getTokenHistoricalPriceCacheKey(
-    token: string,
-    isoDateOnly: string,
-  ): string {
-    return generateCacheKeyFromParams(token, isoDateOnly);
+  private async getXexchangeTokens(): Promise<string[]> {
+    return await this.cacheService.getOrSetCache(
+      CacheInfo.xExchangeTokens.key,
+      async () => await this.mxDataApi.getXexchangeTokens(),
+      CacheInfo.xExchangeTokens.ttl,
+    );
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { OrderEntity } from 'src/db/orders';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';

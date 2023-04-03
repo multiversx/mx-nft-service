@@ -7,7 +7,6 @@ import { AuctionsSetterService } from '../auctions';
 import { AssetActionEnum } from '../assets/models';
 import { AssetOfferEnum } from '../assets/models/AssetOfferEnum';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-events-summary.service';
 import { ReindexAuctionStartedHandler } from './marketplaces-reindex-handlers/reindex-auction-started.handler';
 import { ReindexAuctionBidHandler } from './marketplaces-reindex-handlers/reindex-auction-bid.handler';
@@ -29,6 +28,7 @@ import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { Token } from '../usdPrice/Token.model';
 
 @Injectable()
 export class MarketplacesReindexService {

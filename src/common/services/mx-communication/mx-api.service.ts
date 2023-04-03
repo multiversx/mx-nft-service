@@ -11,7 +11,7 @@ import {
   TransactionOnNetwork,
 } from '@multiversx/sdk-network-providers';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
-import { Token } from './models/Token.model';
+import { Token } from '../../../modules/usdPrice/Token.model';
 import { Address } from '@multiversx/sdk-core';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
@@ -614,7 +614,7 @@ export class MxApiService {
   async getAllTokens(): Promise<Token[]> {
     const allTokens = await this.doGetGeneric(
       this.getAllTokens.name,
-      'tokens?size=10000&fields=identifier,name,ticker,decimals',
+      'tokens?size=10000&fields=identifier,name,ticker,decimals,price',
     );
     return allTokens.map((t) => Token.fromMxApiToken(t));
   }
@@ -629,7 +629,7 @@ export class MxApiService {
   async getTokenData(tokenId: string): Promise<Token | undefined> {
     const token = await this.doGetGeneric(
       this.getTokenData.name,
-      `tokens/${tokenId}?fields=identifier,name,ticker,decimals`,
+      `tokens/${tokenId}?fields=identifier,name,ticker,decimals,price`,
     );
     return token
       ? new Token({

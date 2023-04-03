@@ -12,7 +12,6 @@ import { Constants } from '@multiversx/sdk-nestjs';
 import { mxConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
 import {
   auctionsByNoBidsRequest,
@@ -24,6 +23,7 @@ import {
 import { CurrentPaymentTokensFilters } from './models/CurrentPaymentTokens.Filter';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
+import { Token } from '../usdPrice/Token.model';
 
 @Injectable()
 export class AuctionsGetterService {

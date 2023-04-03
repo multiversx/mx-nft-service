@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
 import { AuctionEndedSummary } from '../models/marketplaces-reindex-events-summaries/AuctionEndedSummary';
