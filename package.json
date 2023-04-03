@@ -29,13 +29,14 @@
     "revert-migrations": "npm run typeorm migration:revert",
     "typeormTimescale": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/common/persistence/timescaledb/typeorm.config.ts",
     "generate-migration-timescale": "npm run typeormTimescale -- migration:generate src/common/persistence/timescaledb/migrations/$npm_config_name",
-    "run-migrations-timescale": "npm run typeormTimescale migration:run",
+    "run-migrations-timescale": "npm run typeormTimescale migration:run --transaction=each",
     "revert-migrations-timescale": "npm run typeormTimescale migration:revert"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
     "@golevelup/nestjs-rabbitmq": "3.4.0",
     "@multiversx/sdk-core": "11.2.0",
+    "@multiversx/sdk-data-api-client": "^0.7.0",
     "@multiversx/sdk-native-auth-server": "1.0.6",
     "@multiversx/sdk-nestjs": "0.4.16",
     "@multiversx/sdk-network-providers": "^1.2.1",
