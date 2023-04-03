@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import moment from 'moment';
+import * as moment from 'moment';
 import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
 import { Repository } from 'typeorm';
@@ -132,7 +132,7 @@ export class AnalyticsDataGetterService {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.nftsAnalytics
       .createQueryBuilder()
-      .select('time')
+      .select('timestamp')
       .addSelect('value')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })

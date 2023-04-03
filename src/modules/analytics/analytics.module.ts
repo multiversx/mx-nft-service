@@ -8,6 +8,9 @@ import { AnalyticsService } from './analytics.service';
 import { BuyEventParser } from './buy-event.parser';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
+import { AnalyticsResolver } from './analytics.resolver';
+import { AnalyticsGetterService } from './analytics.getter.service';
+import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaledb.module';
 
 @Module({
   providers: [
@@ -17,11 +20,14 @@ import { AcceptOfferEventParser } from './acceptOffer-event.parser';
     ElasticAnalyticsService,
     BuyEventParser,
     AcceptOfferEventParser,
+    AnalyticsResolver,
+    AnalyticsGetterService,
   ],
   imports: [
     MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
+    TimescaleDbModule,
   ],
   exports: [AnalyticsService, ElasticAnalyticsService],
 })
