@@ -1,7 +1,7 @@
 import { TimeResolution } from '@multiversx/sdk-data-api-client';
 import { DataApiHistoricalResponse } from '@multiversx/sdk-data-api-client/lib/src/responses';
 import BigNumber from 'bignumber.js';
-import moment from 'moment';
+import * as moment from 'moment';
 
 export const decodeTime = (time: string): [string, moment.unitOfTime.Base] => {
   const [timeAmount, timeUnit] = time.match(/[a-zA-Z]+|[0-9]+/g);
