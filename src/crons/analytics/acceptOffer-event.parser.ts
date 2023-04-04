@@ -7,6 +7,7 @@ import { AcceptOfferDeadrareEvent } from 'src/modules/rabbitmq/entities/auction/
 import { AcceptOfferFrameitEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferFrameit.event';
 import { AcceptOfferXoxnoEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferXoxno.event';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { computeUsd } from 'src/utils/helpers';
 
@@ -53,9 +54,11 @@ export class AcceptOfferEventParser {
       );
       const data = [];
       data[topics.collection] = {
-        usdPrice: tokenData.priceUsd,
-        decimals: tokenData.decimals,
-        volume: topics.paymentAmount,
+        usdPrice: tokenData?.priceUsd,
+        volume: BigNumberUtils.denominateAmount(
+          topics.paymentAmount,
+          tokenData?.decimals,
+        ),
         volumeUSD: !tokenData
           ? '0'
           : computeUsd(
@@ -63,6 +66,8 @@ export class AcceptOfferEventParser {
               topics.paymentAmount,
               tokenData.decimals,
             ).toFixed(),
+        paymentToken: tokenData?.identifier,
+        marketplaceKey: marketplace.key,
       };
       return data;
     }

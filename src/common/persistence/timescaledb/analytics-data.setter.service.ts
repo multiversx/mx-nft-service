@@ -29,20 +29,12 @@ export class AnalyticsDataSetterService {
     try {
       // Ingest entities array with one timestamp per entry
       // Number of entries in entities === number of processed blocks
-      const entities = this.pendingRecords.map(
-        (record) =>
-          new XNftsAnalyticsEntity({
-            timestamp: record.timestamp,
-            series: record.series,
-            key: record.key,
-            value: record.value,
-          }),
-      );
+
       const query = this.nftAnalyticsRepo
         .createQueryBuilder()
         .insert()
         .into(XNftsAnalyticsEntity)
-        .values(entities)
+        .values(this.pendingRecords)
         .orUpdate(['value'], ['timestamp', 'series', 'key']);
 
       await query.execute();
@@ -91,6 +83,9 @@ export class AnalyticsDataSetterService {
     const records: XNftsAnalyticsEntity[] = [];
     Object.keys(data).forEach((series) => {
       Object.keys(data[series]).forEach((key) => {
+        if (key === 'paymentToken' || key === 'marketplaceKey') {
+          return;
+        }
         const value = data[series][key].toString();
         records.push(
           new XNftsAnalyticsEntity({
@@ -98,6 +93,8 @@ export class AnalyticsDataSetterService {
             key,
             value,
             timestamp: moment.unix(timestamp).toDate(),
+            paymentToken: data[series]['paymentToken'].toString(),
+            marketplaceKey: data[series]['marketplaceKey'].toString(),
           }),
         );
       });

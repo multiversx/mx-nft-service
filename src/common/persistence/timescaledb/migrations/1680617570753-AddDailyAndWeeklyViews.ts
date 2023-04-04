@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddViews1680181708885 implements MigrationInterface {
-  name = 'AddViews1680181708885';
+export class AddDailyAndWeeklyViews1680617570753 implements MigrationInterface {
+  name = 'AddDailyAndWeeklyViews1680617570753';
   transaction = false;
 
   public async up(queryRunner: QueryRunner): Promise<void> {

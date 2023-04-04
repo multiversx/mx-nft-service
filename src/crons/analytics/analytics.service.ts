@@ -181,11 +181,6 @@ export class AnalyticsService {
           case ExternalAuctionEventEnum.BuyFor:
             parsedEvent = await this.buyEventHandler.handle(rawEvent);
             break;
-          // case AuctionEventEnum.AuctionTokenEvent:
-          // case ExternalAuctionEventEnum.Listing:
-          // case ExternalAuctionEventEnum.ListNftOnMarketplace:
-          //   parsedEvent = await this.buyEventHandler.handle(rawEvent);
-          //   break;
         }
 
         if (parsedEvent) this.updateIngestData(parsedEvent);
