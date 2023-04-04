@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import {
   ElrondNftsSwapAuctionEventEnum,
@@ -10,6 +10,7 @@ import { BuySftEvent } from 'src/modules/rabbitmq/entities/auction';
 import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
 import { ElrondSwapBuyEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
+import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
@@ -51,8 +52,7 @@ export class BuyEventParser {
     const data = [];
     data[topics.collection] = {
       usdPrice: tokenData?.priceUsd,
-      decimals: tokenData?.decimals,
-      volume: volume,
+      volume: BigNumberUtils.denominateAmount(volume, tokenData?.decimals),
       volumeUSD:
         volume === '0' || !tokenData
           ? '0'
@@ -61,6 +61,8 @@ export class BuyEventParser {
               volume,
               tokenData?.decimals,
             ).toFixed(),
+      paymentToken: tokenData?.identifier,
+      marketplaceKey: marketplace.key,
     };
     return data;
   }

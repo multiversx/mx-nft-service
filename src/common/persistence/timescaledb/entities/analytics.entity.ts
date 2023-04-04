@@ -20,6 +20,12 @@ export class XNftsAnalyticsEntity {
   })
   value = '0';
 
+  @Column({ nullable: false, type: 'varchar' })
+  paymentToken: string;
+
+  @Column({ nullable: false, type: 'varchar' })
+  marketplaceKey: string;
+
   constructor(init?: Partial<XNftsAnalyticsEntity>) {
     Object.assign(this, init);
   }
