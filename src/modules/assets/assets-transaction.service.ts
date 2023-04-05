@@ -24,11 +24,13 @@ import {
   UpdateQuantityRequest,
   CreateNftRequest,
   TransferNftRequest,
+  CreateNftWithMultipleFilesRequest,
 } from './models/requests';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-
+import { FileUpload } from 'graphql-upload';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { UploadToIpfsResult } from '../ipfs/ipfs.model';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -97,45 +99,26 @@ export class AssetsTransactionService {
     );
   }
 
+  async createNftWithMultipleFiles(
+    ownerAddress: string,
+    request: CreateNftWithMultipleFilesRequest,
+  ): Promise<TransactionNode> {
+    let uploadFilePromises = [];
+    for (const file of request.files) {
+      uploadFilePromises.push(this.uploadFileToPinata(file));
+    }
+    const filesToIpfs = await Promise.all(uploadFilePromises);
+
+    return this.getCreateNftTransaction(ownerAddress, request, filesToIpfs);
+  }
+
   async createNft(
     ownerAddress: string,
     request: CreateNftRequest,
   ): Promise<TransactionNode> {
-    const file = await request.file;
-    const fileData = await this.pinataService.uploadFile(file);
-    const fileMetadata = new FileContent({
-      description: request.attributes.description,
-    });
-    const assetMetadata = await this.pinataService.uploadText(fileMetadata);
+    const fileData = await this.uploadFileToPinata(request.file);
 
-    await this.s3Service.upload(file, fileData.hash);
-    await this.s3Service.uploadText(fileMetadata, assetMetadata.hash);
-
-    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
-
-    const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [
-        BytesValue.fromUTF8(request.collection),
-        new U64Value(new BigNumber(request.quantity)),
-        BytesValue.fromUTF8(request.name),
-        BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
-        BytesValue.fromUTF8(fileData.hash),
-        BytesValue.fromUTF8(attributes),
-        BytesValue.fromUTF8(fileData.url),
-      ],
-      gasLimit: gas.nftCreate,
-      chainID: mxConfig.chainID,
-    });
-    let response = transaction.toPlainObject(new Address(ownerAddress));
-
-    return {
-      ...response,
-      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
-      chainID: mxConfig.chainID,
-    };
+    return this.getCreateNftTransaction(ownerAddress, request, [fileData]);
   }
 
   async transferNft(
@@ -167,6 +150,68 @@ export class AssetsTransactionService {
       ...response,
       chainID: mxConfig.chainID,
     };
+  }
+
+  private async getCreateNftTransaction(
+    ownerAddress: string,
+    request: CreateNftRequest | CreateNftWithMultipleFilesRequest,
+    filesData: UploadToIpfsResult[],
+  ) {
+    const assetMetadata = await this.uploadFileMetadata(
+      request.attributes.description,
+    );
+    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
+    const contract = getSmartContract(ownerAddress);
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTCreate'),
+      value: TokenPayment.egldFromAmount(0),
+      args: this.getCreateNftsArgs(request, filesData, attributes),
+      gasLimit: gas.nftCreate,
+      chainID: mxConfig.chainID,
+    });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
+
+    return {
+      ...response,
+      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
+      chainID: mxConfig.chainID,
+    };
+  }
+
+  private async uploadFileMetadata(description: string): Promise<any> {
+    const fileMetadata = new FileContent({
+      description: description,
+    });
+    const assetMetadata = await this.pinataService.uploadText(fileMetadata);
+
+    await this.s3Service.uploadText(fileMetadata, assetMetadata.hash);
+    return assetMetadata;
+  }
+
+  private async uploadFileToPinata(fileUpload: FileUpload) {
+    const file = await fileUpload;
+    const fileData = await this.pinataService.uploadFile(file);
+    await this.s3Service.upload(file, fileData.hash);
+    return fileData;
+  }
+
+  private getCreateNftsArgs(
+    request: CreateNftWithMultipleFilesRequest | CreateNftRequest,
+    filesToIpfs: any[],
+    attributes: string,
+  ) {
+    const args = [
+      BytesValue.fromUTF8(request.collection),
+      new U64Value(new BigNumber(request.quantity)),
+      BytesValue.fromUTF8(request.name),
+      BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
+      BytesValue.fromUTF8(filesToIpfs[0].hash),
+      BytesValue.fromUTF8(attributes),
+    ];
+    for (const file of filesToIpfs) {
+      args.push(BytesValue.fromUTF8(file.url));
+    }
+    return args;
   }
 
   private async getOrSetAproximateMxStats(): Promise<MxStats> {
