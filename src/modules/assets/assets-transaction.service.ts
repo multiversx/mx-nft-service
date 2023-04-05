@@ -30,6 +30,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { FileUpload } from 'graphql-upload';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { UploadToIpfsResult } from '../ipfs/ipfs.model';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -102,60 +103,22 @@ export class AssetsTransactionService {
     ownerAddress: string,
     request: CreateNftWithMultipleFilesRequest,
   ): Promise<TransactionNode> {
-    const assetMetadata = await this.uploadFileMetadata(
-      request.attributes.description,
-    );
     let uploadFilePromises = [];
     for (const file of request.files) {
       uploadFilePromises.push(this.uploadFileToPinata(file));
     }
     const filesToIpfs = await Promise.all(uploadFilePromises);
 
-    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
-
-    const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateNftsArgs(request, filesToIpfs, attributes),
-      gasLimit: gas.nftCreate,
-      chainID: mxConfig.chainID,
-    });
-    let response = transaction.toPlainObject(new Address(ownerAddress));
-
-    return {
-      ...response,
-      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
-      chainID: mxConfig.chainID,
-    };
+    return this.getCreateNftTransacion(ownerAddress, request, filesToIpfs);
   }
 
   async createNft(
     ownerAddress: string,
     request: CreateNftRequest,
   ): Promise<TransactionNode> {
-    const assetMetadata = await this.uploadFileMetadata(
-      request.attributes.description,
-    );
     const fileData = await this.uploadFileToPinata(request.file);
 
-    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
-
-    const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateNftsArgs(request, [fileData], attributes),
-      gasLimit: gas.nftCreate,
-      chainID: mxConfig.chainID,
-    });
-    let response = transaction.toPlainObject(new Address(ownerAddress));
-
-    return {
-      ...response,
-      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
-      chainID: mxConfig.chainID,
-    };
+    return this.getCreateNftTransacion(ownerAddress, request, [fileData]);
   }
 
   async transferNft(
@@ -185,6 +148,32 @@ export class AssetsTransactionService {
     );
     return {
       ...response,
+      chainID: mxConfig.chainID,
+    };
+  }
+
+  private async getCreateNftTransacion(
+    ownerAddress: string,
+    request: CreateNftRequest | CreateNftWithMultipleFilesRequest,
+    filesData: UploadToIpfsResult[],
+  ) {
+    const assetMetadata = await this.uploadFileMetadata(
+      request.attributes.description,
+    );
+    const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
+    const contract = getSmartContract(ownerAddress);
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTCreate'),
+      value: TokenPayment.egldFromAmount(0),
+      args: this.getCreateNftsArgs(request, filesData, attributes),
+      gasLimit: gas.nftCreate,
+      chainID: mxConfig.chainID,
+    });
+    let response = transaction.toPlainObject(new Address(ownerAddress));
+
+    return {
+      ...response,
+      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
       chainID: mxConfig.chainID,
     };
   }
