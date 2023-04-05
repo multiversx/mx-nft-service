@@ -109,7 +109,7 @@ export class AssetsTransactionService {
     }
     const filesToIpfs = await Promise.all(uploadFilePromises);
 
-    return this.getCreateNftTransacion(ownerAddress, request, filesToIpfs);
+    return this.getCreateNftTransaction(ownerAddress, request, filesToIpfs);
   }
 
   async createNft(
@@ -118,7 +118,7 @@ export class AssetsTransactionService {
   ): Promise<TransactionNode> {
     const fileData = await this.uploadFileToPinata(request.file);
 
-    return this.getCreateNftTransacion(ownerAddress, request, [fileData]);
+    return this.getCreateNftTransaction(ownerAddress, request, [fileData]);
   }
 
   async transferNft(
@@ -152,7 +152,7 @@ export class AssetsTransactionService {
     };
   }
 
-  private async getCreateNftTransacion(
+  private async getCreateNftTransaction(
     ownerAddress: string,
     request: CreateNftRequest | CreateNftWithMultipleFilesRequest,
     filesData: UploadToIpfsResult[],
