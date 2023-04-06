@@ -18,7 +18,7 @@ export class AcceptOfferEventParser {
     private readonly usdPriceService: UsdPriceService,
   ) {}
 
-  async handle(event: any) {
+  async handle(event: any, timestamp: number) {
     const marketplace = await this.marketplaceService.getMarketplaceByAddress(
       event.address,
     );
@@ -52,9 +52,13 @@ export class AcceptOfferEventParser {
       const tokenData = await this.usdPriceService.getToken(
         topics.paymentTokenIdentifier,
       );
+      const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(
+        topics.paymentTokenIdentifier,
+        timestamp,
+      );
       const data = [];
       data[topics.collection] = {
-        usdPrice: tokenData?.priceUsd,
+        usdPrice: tokenPrice,
         volume: BigNumberUtils.denominateAmount(
           topics.paymentAmount,
           tokenData?.decimals,
@@ -62,7 +66,7 @@ export class AcceptOfferEventParser {
         volumeUSD: !tokenData
           ? '0'
           : computeUsd(
-              tokenData.priceUsd,
+              tokenPrice.toString(),
               topics.paymentAmount,
               tokenData.decimals,
             ).toFixed(),
