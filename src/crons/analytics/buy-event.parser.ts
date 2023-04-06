@@ -21,7 +21,7 @@ export class BuyEventParser {
     private readonly usdPriceService: UsdPriceService,
   ) {}
 
-  async handle(event: any) {
+  async handle(event: any, timestamp: number) {
     const { buySftEvent, topics } = this.getEventAndTopics(event);
     let auction: AuctionEntity;
 
@@ -47,17 +47,22 @@ export class BuyEventParser {
     if (!auction) return;
 
     const tokenData = await this.usdPriceService.getToken(auction.paymentToken);
+    const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(
+      auction.paymentToken,
+      timestamp,
+    );
+
     const volume = topics.bid === '0' ? auction.minBid : topics.bid;
 
     const data = [];
     data[topics.collection] = {
-      usdPrice: tokenData?.priceUsd,
+      usdPrice: tokenPrice,
       volume: BigNumberUtils.denominateAmount(volume, tokenData?.decimals),
       volumeUSD:
-        volume === '0' || !tokenData
+        volume === '0' || !tokenPrice
           ? '0'
           : computeUsd(
-              tokenData?.priceUsd,
+              tokenPrice.toString(),
               volume,
               tokenData?.decimals,
             ).toFixed(),
