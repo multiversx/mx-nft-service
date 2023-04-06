@@ -172,14 +172,20 @@ export class AnalyticsService {
         switch (rawEvent.identifier) {
           case AuctionEventEnum.AcceptOffer:
           case ExternalAuctionEventEnum.AcceptGlobalOffer:
-            parsedEvent = await this.acceptEventParser.handle(rawEvent);
+            parsedEvent = await this.acceptEventParser.handle(
+              rawEvent,
+              eventsTimestamp,
+            );
             break;
           case AuctionEventEnum.BuySftEvent:
           case ExternalAuctionEventEnum.BulkBuy:
           case ExternalAuctionEventEnum.Buy:
           case ExternalAuctionEventEnum.BuyNft:
           case ExternalAuctionEventEnum.BuyFor:
-            parsedEvent = await this.buyEventHandler.handle(rawEvent);
+            parsedEvent = await this.buyEventHandler.handle(
+              rawEvent,
+              eventsTimestamp,
+            );
             break;
         }
 

@@ -60,6 +60,10 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('ELROND_TOOLS');
   }
 
+  getDataToolsApiKey(): string {
+    return this.configService.get<string>('DATA_API_KEY');
+  }
+
   getKeepAliveTimeoutDownstream(): number {
     return parseInt(
       this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
