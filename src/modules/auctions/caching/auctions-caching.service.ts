@@ -58,7 +58,7 @@ export class AuctionsCachingService {
     return this.redisCacheService.getOrSet(
       this.getAuctionsCacheKey(queryRequest),
       () => getAuctions(),
-      15 * Constants.oneSecond(),
+      5 * Constants.oneSecond(),
     );
   }
 
