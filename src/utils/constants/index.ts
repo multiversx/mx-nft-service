@@ -20,4 +20,4 @@ export const DEADRARE_KEY = 'deadrare';
 export const ELRONDNFTSWAP_KEY = 'elrondnftswap';
 export const ENEFTOR_KEY = 'eneftor';
 export const FRAMEIT_KEY = 'frameit';
-export const ICI_KEY = 'aquaverse';
+export const ICI_KEY = 'ici';
