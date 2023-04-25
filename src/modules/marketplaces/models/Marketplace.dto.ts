@@ -7,6 +7,7 @@ import {
   DEADRARE_KEY,
   ELRONDNFTSWAP_KEY,
   FRAMEIT_KEY,
+  ICI_KEY,
   XOXNO_KEY,
 } from 'src/utils/constants';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
@@ -110,6 +111,8 @@ export class Marketplace {
             ? `${entity.url}${identifier}/${marketplaceAuctionId}`
             : entity.url;
 
+        case ICI_KEY:
+          return `${entity.url}${identifier}`;
         case DEADRARE_KEY:
           return `${entity.url}${identifier}`;
         default:
