@@ -20,7 +20,10 @@ export class CollectionAssetsModelResolver extends BaseResolver(
     const { identifier } = collectionAssetModel;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
-    return scamInfoValue?.type && Object.keys(scamInfoValue).length > 1
+
+    return scamInfoValue &&
+      Object.keys(scamInfoValue).length > 1 &&
+      ScamInfo.isScam(scamInfoValue)
       ? scamInfoValue
       : null;
   }
