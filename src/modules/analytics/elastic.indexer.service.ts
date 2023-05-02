@@ -21,7 +21,7 @@ export class ElasticAnalyticsService {
     const lte = new Date(endDateUtc).getTime();
 
     const elasticQuery = ElasticQuery.create()
-      .withPagination({ from: 0, size: 50 })
+      .withPagination({ from: 0, size: 500 })
       .withMustCondition(
         QueryType.Should(
           eventNames.map((eventName) =>
