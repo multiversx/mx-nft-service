@@ -6,9 +6,9 @@ import {
 } from 'src/modules/assets/models';
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
-import { BuySftEvent } from '../rabbitmq/entities/auction';
-import { ClaimEvent } from '../rabbitmq/entities/auction/claim.event';
-import { ElrondSwapBuyEvent } from '../rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
+import { BuySftEvent } from '../../rabbitmq/entities/auction';
+import { ClaimEvent } from '../../rabbitmq/entities/auction/claim.event';
+import { ElrondSwapBuyEvent } from '../../rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
 
 @Injectable()
 export class BuyEventParser {

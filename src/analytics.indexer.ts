@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import BigNumber from 'bignumber.js';
-import { AnalyticsModule } from './crons/analytics/analytics.module';
-import { AnalyticsService } from './crons/analytics/analytics.service';
+import { AnalyticsService } from './modules/analytics/analytics.service';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 export async function run(startDateUtc: string, endDateUtc: string) {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
