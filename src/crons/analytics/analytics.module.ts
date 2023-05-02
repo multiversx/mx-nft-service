@@ -9,6 +9,9 @@ import { AuctionsModuleGraph } from 'src/modules/auctions/auctions.module';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaledb.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as ormconfig from 'src/ormconfig';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   providers: [
@@ -20,6 +23,10 @@ import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaled
     AcceptOfferEventParser,
   ],
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     TimescaleDbModule,
     MxCommunicationModule,
     CommonModule,
