@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as moment from 'moment';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
-import { BuyEventParser } from './buy-event-analytics.parser';
+import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { AcceptOfferEventParser } from './acceptOffer-event-analytics.parser';
+import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
 import { CachingService, PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import {
@@ -23,8 +23,8 @@ export class AnalyticsService {
     private readonly indexerService: ElasticAnalyticsService,
     private readonly marketplacesService: MarketplacesService,
     private readonly logger: Logger,
-    private readonly buyEventHandler: BuyEventParser,
-    private readonly acceptEventParser: AcceptOfferEventParser,
+    private readonly buyEventHandler: BuyEventAnalyticsParser,
+    private readonly acceptEventParser: AcceptOfferEventAnalyticsParser,
     private readonly dataSetterService: AnalyticsDataSetterService,
   ) {}
 
