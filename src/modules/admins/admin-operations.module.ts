@@ -25,7 +25,6 @@ import { AnalyticsModule } from 'src/crons/analytics/analytics.module';
     MarketplacesModuleGraph,
     AuthModule,
     ReportsModuleGraph,
-    AnalyticsModule,
   ],
   providers: [
     Logger,
