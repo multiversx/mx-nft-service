@@ -27,9 +27,6 @@ export class AnalyticsDataSetterService {
     }
 
     try {
-      // Ingest entities array with one timestamp per entry
-      // Number of entries in entities === number of processed blocks
-
       const query = this.nftAnalyticsRepo
         .createQueryBuilder()
         .insert()
