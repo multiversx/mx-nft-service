@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { AnalyticsService } from 'src/modules/analytics/analytics.service';
 import { CachingService, Locker } from '@multiversx/sdk-nestjs';
+import { TrendingCollectionsService } from 'src/modules/analytics/trending/trending-collections.service';
 
 @Injectable()
 export class TrendingCollectionsWarmerService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
-    private analytics: AnalyticsService,
+    private trendingCollectionsService: TrendingCollectionsService,
     private cacheService: CachingService,
   ) {}
 
@@ -18,9 +18,10 @@ export class TrendingCollectionsWarmerService {
     await Locker.lock(
       'Trending Collections invalidations',
       async () => {
-        const tokens = await this.analytics.reindexTrendingCollections(
-          forTheLastHours,
-        );
+        const tokens =
+          await this.trendingCollectionsService.reindexTrendingCollections(
+            forTheLastHours,
+          );
 
         await this.invalidateKey(
           CacheInfo.TrendingByVolume.key,

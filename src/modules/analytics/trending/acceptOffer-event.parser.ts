@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
-import { ExternalAuctionEventEnum } from '../assets/models';
-import { MarketplaceTypeEnum } from '../marketplaces/models/MarketplaceType.enum';
-import { AcceptOfferEvent } from '../rabbitmq/entities/auction/acceptOffer.event';
-import { AcceptOfferDeadrareEvent } from '../rabbitmq/entities/auction/acceptOfferDeadrare.event';
-import { AcceptOfferFrameitEvent } from '../rabbitmq/entities/auction/acceptOfferFrameit.event';
-import { AcceptOfferXoxnoEvent } from '../rabbitmq/entities/auction/acceptOfferXoxno.event';
+import { ExternalAuctionEventEnum } from '../../assets/models';
+import { MarketplaceTypeEnum } from '../../marketplaces/models/MarketplaceType.enum';
+import { AcceptOfferEvent } from '../../rabbitmq/entities/auction/acceptOffer.event';
+import { AcceptOfferDeadrareEvent } from '../../rabbitmq/entities/auction/acceptOfferDeadrare.event';
+import { AcceptOfferFrameitEvent } from '../../rabbitmq/entities/auction/acceptOfferFrameit.event';
+import { AcceptOfferXoxnoEvent } from '../../rabbitmq/entities/auction/acceptOfferXoxno.event';
 
 @Injectable()
 export class AcceptOfferEventParser {
