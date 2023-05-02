@@ -11,6 +11,12 @@ import { AcceptOfferEventParser } from './trending/acceptOffer-event.parser';
 import { AnalyticsResolver } from './analytics.resolver';
 import { AnalyticsGetterService } from './analytics.getter.service';
 import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaledb.module';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import * as ormconfig from 'src/ormconfig';
+import { AnalyticsService } from './analytics.service';
+import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
+import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
 
 @Module({
   providers: [
@@ -22,13 +28,24 @@ import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaled
     AcceptOfferEventParser,
     AnalyticsResolver,
     AnalyticsGetterService,
+    AnalyticsService,
+    AcceptOfferEventAnalyticsParser,
+    BuyEventAnalyticsParser,
   ],
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     TimescaleDbModule,
   ],
-  exports: [TrendingCollectionsService, ElasticAnalyticsService],
+  exports: [
+    TrendingCollectionsService,
+    ElasticAnalyticsService,
+    AnalyticsService,
+  ],
 })
 export class AnalyticsModule {}
