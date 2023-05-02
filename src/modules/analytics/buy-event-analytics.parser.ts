@@ -14,7 +14,7 @@ import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
-export class BuyEventParser {
+export class BuyEventAnalyticsParser {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private readonly marketplaceService: MarketplacesService,

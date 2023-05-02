@@ -12,7 +12,7 @@ import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
-export class AcceptOfferEventParser {
+export class AcceptOfferEventAnalyticsParser {
   constructor(
     private readonly marketplaceService: MarketplacesService,
     private readonly usdPriceService: UsdPriceService,
