@@ -4,10 +4,10 @@ import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { CommonModule } from 'src/common.module';
-import { AnalyticsService } from './analytics.service';
-import { BuyEventParser } from './buy-event.parser';
+import { TrendingCollectionsService } from './trending/trending-collections.service';
+import { BuyEventParser } from './trending/buy-event.parser';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
-import { AcceptOfferEventParser } from './acceptOffer-event.parser';
+import { AcceptOfferEventParser } from './trending/acceptOffer-event.parser';
 import { AnalyticsResolver } from './analytics.resolver';
 import { AnalyticsGetterService } from './analytics.getter.service';
 import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaledb.module';
@@ -16,7 +16,7 @@ import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaled
   providers: [
     MarketplacesService,
     MarketplacesCachingService,
-    AnalyticsService,
+    TrendingCollectionsService,
     ElasticAnalyticsService,
     BuyEventParser,
     AcceptOfferEventParser,
@@ -29,6 +29,6 @@ import { TimescaleDbModule } from 'src/common/persistence/timescaledb/timescaled
     forwardRef(() => AuctionsModuleGraph),
     TimescaleDbModule,
   ],
-  exports: [AnalyticsService, ElasticAnalyticsService],
+  exports: [TrendingCollectionsService, ElasticAnalyticsService],
 })
 export class AnalyticsModule {}

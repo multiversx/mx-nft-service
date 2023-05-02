@@ -19,7 +19,7 @@ import { randomBetween } from 'src/utils/helpers';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
-import { AnalyticsService } from '../analytics/analytics.service';
+import { TrendingCollectionsService } from '../analytics/trending/trending-collections.service';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -31,7 +31,7 @@ export class CollectionsGetterService {
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
     private cacheService: CachingService,
-    private analyticsService: AnalyticsService,
+    private analyticsService: TrendingCollectionsService,
     private documentDbService: DocumentDbService,
     private blacklistedCollectionsService: BlacklistedCollectionsService,
   ) {}
