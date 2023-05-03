@@ -10,13 +10,6 @@ export class AnalyticsResolver {
   constructor(private readonly analyticsGetter: AnalyticsGetterService) {}
 
   @Query(() => [HistoricDataModel])
-  @UsePipes(
-    new ValidationPipe({
-      skipNullProperties: true,
-      skipMissingProperties: true,
-      skipUndefinedProperties: true,
-    }),
-  )
   async values24hSum(
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
@@ -27,13 +20,6 @@ export class AnalyticsResolver {
   }
 
   @Query(() => [HistoricDataModel])
-  @UsePipes(
-    new ValidationPipe({
-      skipNullProperties: true,
-      skipMissingProperties: true,
-      skipUndefinedProperties: true,
-    }),
-  )
   async latestHistoricData(
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
@@ -46,13 +32,18 @@ export class AnalyticsResolver {
   }
 
   @Query(() => [HistoricDataModel])
-  @UsePipes(
-    new ValidationPipe({
-      skipNullProperties: true,
-      skipMissingProperties: true,
-      skipUndefinedProperties: true,
-    }),
-  )
+  async topCollectionsDaily(
+    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
+  ): Promise<HistoricDataModel[]> {
+    return this.analyticsGetter.getLatestHistoricData(
+      input.time,
+      input.series,
+      input.metric,
+      input.start,
+    );
+  }
+
+  @Query(() => [HistoricDataModel])
   async latestBinnedHistoricData(
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
