@@ -185,14 +185,12 @@ export class AnalyticsService {
 
         if (parsedEvent) this.updateIngestData(parsedEvent);
       } catch (error) {
-        console.log(error);
         if (error?.message?.includes('Cannot create address from')) {
           this.logger.log('Invalid event');
         } else {
           this.logger.log(`Could not process event:`, rawEvent);
           this.logger.log(error);
         }
-        // throw error;
         continue;
       }
     }

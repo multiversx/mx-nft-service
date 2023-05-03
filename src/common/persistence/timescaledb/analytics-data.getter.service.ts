@@ -10,7 +10,6 @@ import {
 } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
 import { SumDaily } from './entities/sum-daily.entity';
-import { SumWeekly } from './entities/sum-weekly.entity';
 
 @Injectable()
 export class AnalyticsDataGetterService {
@@ -19,8 +18,6 @@ export class AnalyticsDataGetterService {
     private readonly nftsAnalytics: Repository<XNftsAnalyticsEntity>,
     @InjectRepository(SumDaily, 'timescaledb')
     private readonly sumDaily: Repository<SumDaily>,
-    @InjectRepository(SumWeekly, 'timescaledb')
-    private readonly sumWeekly: Repository<SumWeekly>,
   ) {}
 
   async getAggregatedValue({
@@ -54,6 +51,45 @@ export class AnalyticsDataGetterService {
       .where('series = :series', { series })
       .andWhere('key = :metric', { metric })
       .orderBy('time', 'ASC')
+      .limit(1)
+      .getRawOne();
+
+    if (!firstRow) {
+      return [];
+    }
+
+    const query = await this.sumDaily
+      .createQueryBuilder()
+      .select("time_bucket_gapfill('1 day', time) as day")
+      .addSelect('sum(sum) as sum')
+      .where('series = :series', { series })
+      .andWhere('key = :metric', { metric })
+      .andWhere('time between :start and now()', {
+        start: firstRow.time,
+      })
+      .groupBy('day')
+      .getRawMany();
+    return (
+      query?.map(
+        (row) =>
+          new HistoricDataModel({
+            timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
+            value: row.sum ?? '0',
+          }),
+      ) ?? []
+    );
+  }
+
+  async getTopCollectionsDaily({
+    series,
+    metric,
+  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
+    const firstRow = await this.sumDaily
+      .createQueryBuilder()
+      .select('time')
+      .where('series = :series', { series })
+      .andWhere('key = :metric', { metric })
+      .orderBy('sum', 'DESC')
       .limit(1)
       .getRawOne();
 

@@ -4,8 +4,6 @@ import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
-import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
-import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 
 @Injectable()
 export class AnalyticsDataSetterService {
@@ -38,41 +36,10 @@ export class AnalyticsDataSetterService {
 
       this.pendingRecords = [];
     } catch (error) {
-      console.log(
-        `Could not insert ${this.pendingRecords.length} records into TimescaleDb`,
+      this.logger.error(
+        `Could not insert ${this.pendingRecords.length} records into TimescaleDb, ${error}}`,
       );
-      console.log(error);
       throw error;
-    }
-  }
-
-  async multiRecordsIngest(
-    _tableName: string,
-    Records: TimestreamWrite.Records,
-  ) {
-    try {
-      const ingestRecords = this.convertAWSRecordsToDataAPIRecords(Records);
-      await this.writeRecords(ingestRecords);
-    } catch (error) {
-      this.logger.error(error);
-    }
-  }
-
-  private async writeRecords(records: XNftsAnalyticsEntity[]): Promise<void> {
-    const profiler = new PerformanceProfiler('ingestData');
-
-    try {
-      this.nftAnalyticsRepo.save(records);
-    } catch (errors) {
-      this.logger.error(errors);
-    } finally {
-      profiler.stop();
-
-      MetricsCollector.setExternalCall(
-        AnalyticsDataSetterService.name,
-        profiler.duration,
-        'ingestData',
-      );
     }
   }
 
@@ -97,19 +64,5 @@ export class AnalyticsDataSetterService {
       });
     });
     return records;
-  }
-
-  private convertAWSRecordsToDataAPIRecords(
-    Records: TimestreamWrite.Records,
-  ): XNftsAnalyticsEntity[] {
-    const ingestRecords = Records.map((record) => {
-      return new XNftsAnalyticsEntity({
-        timestamp: moment.unix(parseInt(record.Time)).toDate(),
-        series: record.Dimensions[0].Value,
-        key: record.MeasureName,
-        value: record.MeasureValue,
-      });
-    });
-    return ingestRecords;
   }
 }
