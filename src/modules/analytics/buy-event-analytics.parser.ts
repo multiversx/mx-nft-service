@@ -44,11 +44,13 @@ export class BuyEventAnalyticsParser {
           marketplace.key,
         );
     }
-    if (!auction) return;
+    if (!auction && !topics.paymentToken) return;
 
-    const tokenData = await this.usdPriceService.getToken(auction.paymentToken);
+    const tokenData = await this.usdPriceService.getToken(
+      auction?.paymentToken ?? topics.paymentToken,
+    );
     const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(
-      auction.paymentToken,
+      tokenData.identifier,
       timestamp,
     );
 
@@ -56,15 +58,18 @@ export class BuyEventAnalyticsParser {
 
     const data = [];
     data[topics.collection] = {
-      usdPrice: tokenPrice,
-      volume: BigNumberUtils.denominateAmount(volume, tokenData?.decimals),
+      usdPrice: tokenPrice ?? 0,
+      volume: BigNumberUtils.denominateAmount(
+        volume,
+        tokenData?.decimals ?? 18,
+      ),
       volumeUSD:
         volume === '0' || !tokenPrice
           ? '0'
           : computeUsd(
-              tokenPrice.toString(),
+              tokenPrice?.toString() ?? '0',
               volume,
-              tokenData?.decimals,
+              tokenData?.decimals ?? 18,
             ).toFixed(),
       paymentToken: tokenData?.identifier,
       marketplaceKey: marketplace.key,
@@ -75,7 +80,7 @@ export class BuyEventAnalyticsParser {
   private getEventAndTopics(event: any) {
     if (event.identifier === ElrondNftsSwapAuctionEventEnum.Purchase) {
       if (
-        Buffer.from(event.topics[0], 'base64').toString() ===
+        Buffer.from(event.topics[0], 'base64')?.toString() ===
         ElrondNftsSwapAuctionEventEnum.UpdateListing
       ) {
         return;
