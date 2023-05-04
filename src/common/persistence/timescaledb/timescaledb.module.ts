@@ -24,12 +24,12 @@ import { SumWeekly } from './entities/sum-weekly.entity';
         database: apiConfig.getTimescaleDbDatabase(),
         username: apiConfig.getTimescaleDbUsername(),
         password: apiConfig.getTimescaleDbPassword(),
-        // ssl: true,
-        // extra: {
-        //   ssl: {
-        //     rejectUnauthorized: false,
-        //   },
-        // },
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
         entities: ['dist/**/**/**/**/*.entity{.ts,.js}'],
       }),
       inject: [ApiConfigService],
