@@ -1192,6 +1192,7 @@ type Query {
   primarySale(filters: PrimarySaleFilter!): PrimarySale!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
+  topCollectionsDaily(input: AnalyticsArgs!): [HistoricDataModel!]!
   trendingAssets: [Asset!]!
   values24hSum(input: AnalyticsArgs!): [HistoricDataModel!]!
 }
