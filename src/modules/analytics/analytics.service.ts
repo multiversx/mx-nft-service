@@ -137,7 +137,6 @@ export class AnalyticsService {
   }
 
   async getFilterAddresses(): Promise<void> {
-    this.filterAddresses = [];
     this.filterAddresses =
       await this.marketplacesService.getMarketplacesAddreses();
   }
