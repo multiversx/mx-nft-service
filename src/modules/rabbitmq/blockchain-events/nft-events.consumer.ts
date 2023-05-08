@@ -8,6 +8,7 @@ import { CompetingRabbitConsumer } from '../rabbitmq.consumers';
 import { MarketplaceEventsService } from './marketplace-events.service';
 import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
+import { AnalyticsEventsService } from './analytics-events.service';
 
 @Injectable()
 export class NftEventsConsumer {
@@ -18,6 +19,7 @@ export class NftEventsConsumer {
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
+    private readonly analyticsEventsService: AnalyticsEventsService,
   ) {}
 
   @CompetingRabbitConsumer({
@@ -72,6 +74,11 @@ export class NftEventsConsumer {
         nftAuctionEvents.hash,
       );
 
+        await this.analyticsEventsService.handleBuyEvents(
+          [...internalMarketplaceEvents,...externalMarketplaceEvents],
+        );
+
+      
       if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
         await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
           internalMarketplaceEvents.concat(externalMarketplaceEvents),
