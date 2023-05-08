@@ -141,7 +141,7 @@ export class AnalyticsService {
       await this.marketplacesService.getMarketplacesAddreses();
   }
 
-  private async processEvents(
+  public async processEvents(
     rawEvents: any[],
     startDateUtc: number,
     eventsTimestamp: number,
