@@ -167,6 +167,7 @@ export class MarketplacesService {
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
     let [campaigns, count]: [MarketplaceEntity[], number] =
       await this.persistenceService.getMarketplaces();
+      console.log({campaigns})
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
