@@ -150,7 +150,7 @@ export class AnalyticsService {
 
     const events: any[] = rawEvents.filter(
       (rawEvent: { address: string; identifier: string }) =>
-        this.filterAddresses.find(
+        this.filterAddresses?.find(
           (filterAddress) => rawEvent.address === filterAddress,
         ) !== undefined,
     );
