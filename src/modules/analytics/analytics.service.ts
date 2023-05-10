@@ -26,7 +26,7 @@ export class AnalyticsService {
     private readonly buyEventHandler: BuyEventAnalyticsParser,
     private readonly acceptEventParser: AcceptOfferEventAnalyticsParser,
     private readonly dataSetterService: AnalyticsDataSetterService,
-  ) {}
+  ) { }
 
   public async reindexTrendingCollections(
     startDateUtc: number,
@@ -171,6 +171,8 @@ export class AnalyticsService {
             );
             break;
           case AuctionEventEnum.BuySftEvent:
+          case AuctionEventEnum.BidEvent && Buffer.from(rawEvent.topics[0], 'base64')?.toString() ===
+            ExternalAuctionEventEnum.EndTokenEvent:
           case ExternalAuctionEventEnum.BulkBuy:
           case ExternalAuctionEventEnum.Buy:
           case ExternalAuctionEventEnum.BuyNft:
@@ -219,15 +221,15 @@ export class AnalyticsService {
         if (measure.toLowerCase().includes('volume')) {
           this.data[series][measure] = this.data[series][measure]
             ? new BigNumber(this.data[series][measure])
-                .plus(eventData[series][measure])
-                .toFixed()
+              .plus(eventData[series][measure])
+              .toFixed()
             : eventData[series][measure];
         }
         if (measure.toLowerCase().includes('volumeUSD')) {
           this.data[series][measure] = this.data[series][measure]
             ? new BigNumber(this.data[series][measure])
-                .plus(eventData[series][measure])
-                .toFixed()
+              .plus(eventData[series][measure])
+              .toFixed()
             : eventData[series][measure];
         } else {
           this.data[series][measure] = eventData[series][measure];
