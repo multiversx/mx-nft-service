@@ -146,11 +146,13 @@ export class AnalyticsService {
     startDateUtc: number,
     eventsTimestamp: number,
   ): Promise<void> {
+
+    const marketplaceAddresses = await this.marketplacesService.getMarketplacesAddreses();
     const performanceProfiler = new PerformanceProfiler();
 
     const events: any[] = rawEvents.filter(
       (rawEvent: { address: string; identifier: string }) =>
-        this.filterAddresses?.find(
+        marketplaceAddresses?.find(
           (filterAddress) => rawEvent.address === filterAddress,
         ) !== undefined,
     );
@@ -171,8 +173,7 @@ export class AnalyticsService {
             );
             break;
           case AuctionEventEnum.BuySftEvent:
-          case AuctionEventEnum.BidEvent && Buffer.from(rawEvent.topics[0], 'base64')?.toString() ===
-            ExternalAuctionEventEnum.EndTokenEvent:
+          case AuctionEventEnum.BidEvent:
           case ExternalAuctionEventEnum.BulkBuy:
           case ExternalAuctionEventEnum.Buy:
           case ExternalAuctionEventEnum.BuyNft:
