@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import {
+  AuctionEventEnum,
   ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
@@ -22,12 +23,14 @@ export class BuyEventAnalyticsParser {
   ) { }
 
   async handle(event: any, timestamp: number) {
-    if (
-      Buffer.from(event.topics[0], 'base64')?.toString() ===
-      ExternalAuctionEventEnum.EndTokenEvent
-    ) {
-      return this.getBuyNowData(event, timestamp)
-    }
+    if (event.identifier === AuctionEventEnum.BidEvent)
+      if (
+        Buffer.from(event.topics[0], 'base64')?.toString() ===
+        ExternalAuctionEventEnum.EndTokenEvent
+      ) {
+        return this.getBuyNowData(event, timestamp)
+      }
+      else return;
     const { buySftEvent, topics } = this.getEventAndTopics(event);
     let auction: AuctionEntity;
 
