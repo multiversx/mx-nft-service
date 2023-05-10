@@ -9,6 +9,7 @@ export class AnalyticsEventsService {
   constructor(private analyticsService: AnalyticsService) {}
 
   public async handleBuyEvents(auctionEvents: any[]) {
+    console.log({auctionEvents})
     this.analyticsService.processEvents(
       auctionEvents,
       DateUtils.getCurrentTimestamp(),
