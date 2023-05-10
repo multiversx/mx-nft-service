@@ -6,10 +6,9 @@ import { DateUtils } from 'src/utils/date-utils';
 export class AnalyticsEventsService {
   private readonly logger = new Logger(AnalyticsEventsService.name);
 
-  constructor(private analyticsService: AnalyticsService) {}
+  constructor(private analyticsService: AnalyticsService) { }
 
   public async handleBuyEvents(auctionEvents: any[]) {
-    console.log({auctionEvents})
     this.analyticsService.processEvents(
       auctionEvents,
       DateUtils.getCurrentTimestamp(),
