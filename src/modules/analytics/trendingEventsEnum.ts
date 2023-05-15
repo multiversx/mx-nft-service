@@ -5,6 +5,6 @@ export const trendingEventsEnum = [
   'buySft',
   'bulkBuy',
   'acceptOffer',
-  'bid'
+  'bid',
   'purchase',
 ];
