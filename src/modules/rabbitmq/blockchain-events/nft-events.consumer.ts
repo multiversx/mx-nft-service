@@ -20,7 +20,7 @@ export class NftEventsConsumer {
     private readonly minterEventsService: MinterEventsService,
     private readonly marketplaceService: MarketplacesService,
     private readonly analyticsEventsService: AnalyticsEventsService,
-  ) {}
+  ) { }
 
   @CompetingRabbitConsumer({
     connection: 'default',
@@ -44,7 +44,7 @@ export class NftEventsConsumer {
           externalMarketplaces.includes(e.address) === true,
       );
 
-      const minters = process.env.MINTERS_ADDRESSES.split(',').map((entry) => {
+      const minters = process.env.MINTERS_ADDRESSES?.split(',').map((entry) => {
         return entry.toLowerCase().trim();
       });
       await this.nftEventsService.handleNftMintEvents(
@@ -69,16 +69,16 @@ export class NftEventsConsumer {
       );
       await this.minterEventsService.handleNftMinterEvents(
         nftAuctionEvents?.events?.filter(
-          (e: { address: any }) => minters.includes(e.address) === true,
+          (e: { address: any }) => minters?.includes(e.address) === true,
         ),
         nftAuctionEvents.hash,
       );
 
-        await this.analyticsEventsService.handleBuyEvents(
-          [...internalMarketplaceEvents,...externalMarketplaceEvents],
-        );
+      await this.analyticsEventsService.handleBuyEvents(
+        [...internalMarketplaceEvents, ...externalMarketplaceEvents],
+      );
 
-      
+
       if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
         await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
           internalMarketplaceEvents.concat(externalMarketplaceEvents),

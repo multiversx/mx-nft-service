@@ -145,6 +145,7 @@ export class AnalyticsService {
     rawEvents: any[],
     startDateUtc: number,
     eventsTimestamp: number,
+    singleEvent: boolean = false,
   ): Promise<void> {
 
     const marketplaceAddresses = await this.marketplacesService.getMarketplacesAddreses();
@@ -203,11 +204,19 @@ export class AnalyticsService {
         startDateUtc,
       );
       if (isAfter) {
-        await this.dataSetterService.ingest({
-          data: this.data,
-          timestamp: eventsTimestamp,
-          ingestLast: false,
-        });
+        if (singleEvent) {
+          await this.dataSetterService.ingestSingleEvent({
+            data: this.data,
+            timestamp: eventsTimestamp,
+          });
+        }
+        else {
+          await this.dataSetterService.ingest({
+            data: this.data,
+            timestamp: eventsTimestamp,
+            ingestLast: false,
+          });
+        }
       }
     }
   }
