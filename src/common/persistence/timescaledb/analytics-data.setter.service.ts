@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TimestreamWrite } from 'aws-sdk';
 import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,7 +11,7 @@ export class AnalyticsDataSetterService {
     private readonly logger: Logger,
     @InjectRepository(XNftsAnalyticsEntity, 'timescaledb')
     private nftAnalyticsRepo: Repository<XNftsAnalyticsEntity>,
-  ) {}
+  ) { }
 
   async ingest({ data, timestamp, ingestLast }): Promise<void> {
     if (!ingestLast) {
@@ -42,6 +41,28 @@ export class AnalyticsDataSetterService {
       throw error;
     }
   }
+
+  async ingestSingleEvent({ data, timestamp }): Promise<void> {
+    const newRecordsToIngest = this.createRecords({ data, timestamp });
+
+    try {
+      const query = this.nftAnalyticsRepo
+        .createQueryBuilder()
+        .insert()
+        .into(XNftsAnalyticsEntity)
+        .values(newRecordsToIngest)
+        .orUpdate(['value'], ['timestamp', 'series', 'key']);
+
+      await query.execute();
+
+    } catch (error) {
+      this.logger.error(
+        `Could not insert ${data} records into TimescaleDb, ${error}}`,
+      );
+      throw error;
+    }
+  }
+
 
   createRecords({ data, timestamp }): XNftsAnalyticsEntity[] {
     const records: XNftsAnalyticsEntity[] = [];

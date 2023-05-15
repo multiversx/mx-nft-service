@@ -23,6 +23,7 @@ export class BuyEventAnalyticsParser {
   ) { }
 
   async handle(event: any, timestamp: number) {
+
     if (event.identifier === AuctionEventEnum.BidEvent)
       if (
         Buffer.from(event.topics[0], 'base64')?.toString() ===
