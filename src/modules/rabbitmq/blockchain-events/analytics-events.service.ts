@@ -13,6 +13,7 @@ export class AnalyticsEventsService {
       auctionEvents,
       DateUtils.getCurrentTimestamp(),
       DateUtils.getCurrentTimestamp(),
+      true
     );
   }
 }
