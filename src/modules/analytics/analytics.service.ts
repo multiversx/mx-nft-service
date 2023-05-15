@@ -133,7 +133,7 @@ export class AnalyticsService {
     const events = eventsRaw.filter((event) =>
       trendingEventsEnum.includes(event.identifier),
     );
-    await this.processEvents(events, startDateUtc, startDateUtc);
+    await this.processEvents(events, startDateUtc, lastBlockLogs[0].timestamp);
   }
 
   async getFilterAddresses(): Promise<void> {
