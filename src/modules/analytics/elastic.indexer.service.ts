@@ -8,7 +8,7 @@ import { MxElasticService } from 'src/common';
 
 @Injectable()
 export class ElasticAnalyticsService {
-  constructor(private readonly elasticService: MxElasticService) {}
+  constructor(private readonly elasticService: MxElasticService) { }
 
   public async getAllEvents(
     startDateUtc: number,
