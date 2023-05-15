@@ -13,7 +13,7 @@ export class MarketplacesService {
   constructor(
     private persistenceService: PersistenceService,
     private cacheService: MarketplacesCachingService,
-  ) {}
+  ) { }
 
   async getMarketplaces(
     limit: number = 10,
@@ -167,7 +167,6 @@ export class MarketplacesService {
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
     let [campaigns, count]: [MarketplaceEntity[], number] =
       await this.persistenceService.getMarketplaces();
-      console.log({campaigns})
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
