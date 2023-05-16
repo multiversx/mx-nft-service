@@ -24,6 +24,7 @@ export class AnalyticsDataSetterService {
     }
 
     try {
+      console.log(JSON.stringify(this.pendingRecords))
       const query = this.nftAnalyticsRepo
         .createQueryBuilder()
         .insert()
@@ -71,11 +72,11 @@ export class AnalyticsDataSetterService {
         if (key === 'paymentToken' || key === 'marketplaceKey') {
           return;
         }
-        console.log({
-          date:
-            moment.unix(timestamp).toDate(),
-          np: new Date(timestamp * 1000),
-        })
+        // console.log({
+        //   date:
+        //     moment.unix(timestamp).toDate(),
+        //   np: new Date(timestamp * 1000),
+        // })
         const value = data[series][key].toString();
         records.push(
           new XNftsAnalyticsEntity({
