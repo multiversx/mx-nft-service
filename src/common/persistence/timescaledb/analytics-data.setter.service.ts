@@ -73,7 +73,8 @@ export class AnalyticsDataSetterService {
         }
         console.log({
           date:
-            moment.unix(timestamp).toDate()
+            moment.unix(timestamp).toDate(),
+          np: new Date(timestamp * 1000),
         })
         const value = data[series][key].toString();
         records.push(
@@ -81,7 +82,7 @@ export class AnalyticsDataSetterService {
             series,
             key,
             value,
-            timestamp: moment.unix(timestamp).toDate(),
+            timestamp: new Date(timestamp * 1000),
             paymentToken: data[series]['paymentToken'].toString(),
             marketplaceKey: data[series]['marketplaceKey'].toString(),
           }),
