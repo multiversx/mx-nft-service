@@ -71,6 +71,10 @@ export class AnalyticsDataSetterService {
         if (key === 'paymentToken' || key === 'marketplaceKey') {
           return;
         }
+        console.log({
+          date:
+            moment.unix(timestamp).toDate()
+        })
         const value = data[series][key].toString();
         records.push(
           new XNftsAnalyticsEntity({
