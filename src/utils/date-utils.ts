@@ -41,6 +41,11 @@ export class DateUtils {
     return new Date(new Date(timestamp * 1000).toUTCString());
   }
 
+  static getDatewithTimezoneInfo(timestamp: number): Date {
+    const date = new Date(timestamp * 1000);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  }
+
   static timestampToIsoStringWithHour(timestamp: number): string {
     let date = new Date(timestamp * 1000);
     date.setUTCMinutes(0, 0, 0) / 1000;
