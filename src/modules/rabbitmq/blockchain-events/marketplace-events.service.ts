@@ -38,7 +38,7 @@ export class MarketplaceEventsService {
     private readonly slackReportService: SlackReportService,
     private sendOfferEventHandler: SendOfferEventHandler,
     private withdrawOfferEventHandler: WithdrawOfferEventHandler,
-  ) {}
+  ) { }
 
   public async handleNftAuctionEvents(
     auctionEvents: any[],
@@ -66,7 +66,7 @@ export class MarketplaceEventsService {
             this.logger.log(
               `${eventName} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`,
             );
-            return;
+            continue;
           }
           await this.buyEventHandler.handle(event, hash, marketplaceType);
           break;
@@ -81,7 +81,7 @@ export class MarketplaceEventsService {
             this.logger.log(
               `${event.topics[0]} event detected for hash '${hash}' for marketplace ${event.addreses}, ignore it for the moment`,
             );
-            return;
+            continue;
           }
           await this.withdrawAuctionEventHandler.handle(
             event,
@@ -128,7 +128,7 @@ export class MarketplaceEventsService {
             'base64',
           ).toString();
           if (acceptOfferEventName === ExternalAuctionEventEnum.UserDeposit) {
-            return;
+            continue;
           }
           if (acceptOfferEventName === ExternalAuctionEventEnum.EndTokenEvent) {
             await this.withdrawAuctionEventHandler.handle(
