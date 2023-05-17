@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AnalyticsDataSetterService {
@@ -18,13 +18,12 @@ export class AnalyticsDataSetterService {
       const newRecordsToIngest = this.createRecords({ data, timestamp });
       this.pendingRecords.push(...newRecordsToIngest);
 
-      if (this.pendingRecords.length < 20) {
+      if (this.pendingRecords.length < 1) {
         return;
       }
     }
 
     try {
-      console.log(JSON.stringify(this.pendingRecords))
       const query = this.nftAnalyticsRepo
         .createQueryBuilder()
         .insert()
@@ -72,18 +71,13 @@ export class AnalyticsDataSetterService {
         if (key === 'paymentToken' || key === 'marketplaceKey') {
           return;
         }
-        // console.log({
-        //   date:
-        //     moment.unix(timestamp).toDate(),
-        //   np: new Date(timestamp * 1000),
-        // })
         const value = data[series][key].toString();
         records.push(
           new XNftsAnalyticsEntity({
             series,
             key,
             value,
-            timestamp: new Date(timestamp * 1000),
+            timestamp: DateUtils.getDatewithTimezoneInfo(timestamp),
             paymentToken: data[series]['paymentToken'].toString(),
             marketplaceKey: data[series]['marketplaceKey'].toString(),
           }),
