@@ -7,7 +7,7 @@ export async function run(startDateUtc: string, endDateUtc: string) {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });
   const app = await NestFactory.create(AnalyticsModule);
   const analyticsService = app.get<AnalyticsService>(AnalyticsService);
-  await analyticsService.reindexTrendingCollections(
+  await analyticsService.indexAnalyticsLogs(
     parseInt(startDateUtc),
     parseInt(endDateUtc),
   );
