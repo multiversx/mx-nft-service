@@ -6,7 +6,7 @@ import { AnalyticsArgs } from './models/AnalyticsArgs';
 import { AnalyticsGetterService } from './analytics.getter.service';
 
 @Resolver()
-export class AnalyticsResolver {
+export class StatsResolver {
   constructor(private readonly analyticsGetter: AnalyticsGetterService) { }
 
   @Query(() => [HistoricDataModel])
