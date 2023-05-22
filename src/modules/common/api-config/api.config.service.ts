@@ -60,6 +60,10 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('ELROND_TOOLS');
   }
 
+  getDataUrl(): string {
+    return this.getGenericConfig<string>('MX_EXTRAS_API');
+  }
+
   getDataToolsApiKey(): string {
     return this.configService.get<string>('DATA_API_KEY');
   }

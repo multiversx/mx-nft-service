@@ -18,7 +18,7 @@ export class MarketplacesService {
   async getMarketplaces(
     limit: number = 10,
     offset: number = 0,
-    filters: MarketplaceFilters,
+    filters?: MarketplaceFilters,
   ): Promise<CollectionType<Marketplace>> {
     let allMarketplaces = await this.getAllMarketplaces();
 

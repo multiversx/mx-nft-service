@@ -8,6 +8,14 @@ export class ExploreStats {
   collections: number;
   @Field(() => Int)
   artists: number;
+  @Field(() => Int)
+  holders: number;
+  @Field(() => Int)
+  createdLastMonth: number;
+  @Field(() => Int)
+  volume: number;
+  @Field(() => Int)
+  marketplaces: number;
 
   constructor(init?: Partial<ExploreStats>) {
     Object.assign(this, init);
