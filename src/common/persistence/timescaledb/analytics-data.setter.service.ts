@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { TimestreamWrite } from 'aws-sdk';
-import * as moment from 'moment';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AnalyticsDataSetterService {
@@ -12,7 +11,7 @@ export class AnalyticsDataSetterService {
     private readonly logger: Logger,
     @InjectRepository(XNftsAnalyticsEntity, 'timescaledb')
     private nftAnalyticsRepo: Repository<XNftsAnalyticsEntity>,
-  ) {}
+  ) { }
 
   async ingest({ data, timestamp, ingestLast }): Promise<void> {
     if (!ingestLast) {
@@ -43,6 +42,28 @@ export class AnalyticsDataSetterService {
     }
   }
 
+  async ingestSingleEvent({ data, timestamp }): Promise<void> {
+    const newRecordsToIngest = this.createRecords({ data, timestamp });
+
+    try {
+      const query = this.nftAnalyticsRepo
+        .createQueryBuilder()
+        .insert()
+        .into(XNftsAnalyticsEntity)
+        .values(newRecordsToIngest)
+        .orUpdate(['value'], ['timestamp', 'series', 'key']);
+
+      await query.execute();
+
+    } catch (error) {
+      this.logger.error(
+        `Could not insert ${data} records into TimescaleDb, ${error}}`,
+      );
+      throw error;
+    }
+  }
+
+
   createRecords({ data, timestamp }): XNftsAnalyticsEntity[] {
     const records: XNftsAnalyticsEntity[] = [];
     Object.keys(data).forEach((series) => {
@@ -56,7 +77,7 @@ export class AnalyticsDataSetterService {
             series,
             key,
             value,
-            timestamp: moment.unix(timestamp).toDate(),
+            timestamp: DateUtils.getDatewithTimezoneInfo(timestamp),
             paymentToken: data[series]['paymentToken'].toString(),
             marketplaceKey: data[series]['marketplaceKey'].toString(),
           }),

@@ -93,7 +93,7 @@
     "save": "2.5.0",
     "swagger-ui-express": "4.3.0",
     "tiny-async-pool": "1.2.0",
-    "typeorm": "0.3.15",
+    "typeorm": "0.3.16",
     "winston": "3.7.2"
   },
   "devDependencies": {
