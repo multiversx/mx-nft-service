@@ -2,12 +2,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { NativeAuthSigner } from '@multiversx/sdk-nestjs/lib/src/utils/native.auth.signer';
-import BigNumber from 'bignumber.js';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
-import { json } from 'express';
 
 @Injectable()
 export class MxToolsService {
@@ -62,7 +60,6 @@ export class MxToolsService {
         console.log({ element })
       }
     }
-    console.log(JSON.stringify(res), res)
     return res?.data?.trading?.pair?.price?.[0]?.last?.toFixed(20) ?? undefined;
   }
 
