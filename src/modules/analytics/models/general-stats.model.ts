@@ -7,8 +7,8 @@ export class GeneralAnalyticsModel {
   holders: number;
   @Field(() => Int)
   marketplaces: number;
-  @Field(() => [AggregateValue])
-  collections: AggregateValue[];
+  @Field(() => Int)
+  collections: number;
   @Field(() => [AggregateValue])
   nfts: AggregateValue[];
   @Field(() => [AggregateValue])
