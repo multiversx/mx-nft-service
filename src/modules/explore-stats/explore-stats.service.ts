@@ -15,8 +15,6 @@ import {
 import { OffersService } from '../offers/offers.service';
 import { CachingService } from '@multiversx/sdk-nestjs';
 import { DateUtils } from 'src/utils/date-utils';
-import { MarketplacesService } from '../marketplaces/marketplaces.service';
-import { MxToolsService } from 'src/common/services/mx-communication/mx-tools.service';
 
 @Injectable()
 export class ExploreStatsService {
@@ -24,7 +22,6 @@ export class ExploreStatsService {
     private cachingService: CachingService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
-    private marketplacesService: MarketplacesService,
     private apiService: MxApiService,
     private offersService: OffersService,
   ) { }
