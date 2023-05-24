@@ -1171,7 +1171,6 @@ enum Privacy {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
-  analytics(input: AnalyticsInput): GeneralAnalyticsModel!
   artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs, sorting: AssetsSortingEnum): AssetsResponse!
@@ -1201,6 +1200,7 @@ type Query {
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
   latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!

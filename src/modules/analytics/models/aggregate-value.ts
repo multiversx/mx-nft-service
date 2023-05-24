@@ -24,7 +24,7 @@ export class AggregateValue {
         Object.assign(this, init);
     }
 
-    static fromRow(row: any) {
+    static fromDataApi(row: any) {
         return new AggregateValue({
             time: row.time ?? undefined,
             min: row.min,
@@ -33,17 +33,5 @@ export class AggregateValue {
             sum: row.sum,
             avg: row.avg,
         });
-    }
-
-    static fromProxyResponse(response: any[]): AggregateValue[] {
-        const result = response.map(row => new AggregateValue({
-            time: row.time,
-            min: row.min,
-            max: row.max,
-            count: row.count,
-            sum: row.sum,
-            avg: row.avg,
-        }));
-        return result;
     }
 }

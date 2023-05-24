@@ -17,8 +17,9 @@ import * as ormconfig from 'src/ormconfig';
 import { AnalyticsService } from './analytics.service';
 import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
 import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
-import { StatsResolver } from './stats.resolver';
+import { StatsResolver } from './general-analytics.resolver';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
+import { GeneralAnalyticsService } from './general-analytics.service';
 
 @Module({
   providers: [
@@ -33,7 +34,8 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     AnalyticsService,
     AcceptOfferEventAnalyticsParser,
     BuyEventAnalyticsParser,
-    StatsResolver
+    StatsResolver,
+    GeneralAnalyticsService
   ],
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +52,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     TrendingCollectionsService,
     ElasticAnalyticsService,
     AnalyticsService,
+    GeneralAnalyticsService
   ],
 })
 export class AnalyticsModule { }

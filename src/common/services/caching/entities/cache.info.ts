@@ -193,4 +193,14 @@ export class CacheInfo {
     key: 'nftScamInfo',
     ttl: Constants.oneDay(),
   };
+
+  static NftGeneralAnalytics: CacheInfo = {
+    key: 'nftGeneralAnalytics',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static NftsHolders: CacheInfo = {
+    key: 'nftsHolders',
+    ttl: 10 * Constants.oneMinute(),
+  };
 }
