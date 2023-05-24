@@ -1,5 +1,4 @@
 import { Field, Float, ObjectType } from "@nestjs/graphql";
-import moment from "moment";
 
 @ObjectType()
 export class AggregateValue {
@@ -27,7 +26,7 @@ export class AggregateValue {
 
     static fromRow(row: any) {
         return new AggregateValue({
-            time: row.time ? moment(row.time).toISOString() : undefined,
+            time: row.time ?? undefined,
             min: row.min,
             max: row.max,
             count: row.count,

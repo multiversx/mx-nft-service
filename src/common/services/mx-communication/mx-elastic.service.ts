@@ -18,7 +18,7 @@ export class MxElasticService {
   constructor(
     private readonly apiService: ApiService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   async getNftHistory(
     collection: string,
@@ -310,6 +310,41 @@ export class MxElasticService {
         scroll_id: scrollId,
       },
     );
+  }
+
+  async getHoldersCount(): Promise<number> {
+    const query = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "should": [
+            {
+              "match": {
+                "type": "NonFungibleESDT",
+              },
+            },
+            {
+              "match": {
+                "type": "SemiFungibleESDT",
+              },
+            },
+          ],
+        },
+      },
+      "aggs": {
+        "unique_addresses": {
+          "cardinality": {
+            "field": "address",
+          },
+        },
+      },
+    };
+
+    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
+      timeout: 120000,
+    });
+    const result = resultRaw?.data?.aggregations?.unique_addresses?.value;
+    return result as number;
   }
 
   buildUpdateBody<T>(fieldName: string, fieldValue: T): any {

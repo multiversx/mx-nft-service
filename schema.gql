@@ -54,12 +54,26 @@ input AddLikeArgs {
   identifier: String!
 }
 
+type AggregateValue {
+  avg: Float
+  count: Float
+  max: Float
+  min: Float
+  sum: Float
+  time: String
+}
+
 input AnalyticsArgs {
   bin: String
   metric: String!
   series: String!
   start: String
   time: String
+}
+
+input AnalyticsInput {
+  range: TimeRange
+  resolution: TimeResolutionsEnum
 }
 
 input ArtistFilters {
@@ -693,6 +707,15 @@ input FlagNftInput {
   nsfwFlag: Float!
 }
 
+type GeneralAnalyticsModel {
+  collections: [AggregateValue!]!
+  holders: Int!
+  listing: [AggregateValue!]!
+  marketplaces: Int!
+  nfts: [AggregateValue!]!
+  volume: [AggregateValue!]!
+}
+
 enum GroupBy {
   IDENTIFIER
 }
@@ -1152,6 +1175,7 @@ enum Privacy {
 
 type Query {
   accountStats(filters: AccountStatsFilter!): AccountStats!
+  analytics(input: AnalyticsInput): GeneralAnalyticsModel!
   artists(filters: ArtistFilters!, pagination: ConnectionArgs): ArtistResponse!
   assetHistory(filters: AssetHistoryFilter!, pagination: HistoryPagination): AssetHistoryLogResponse!
   assets(filters: AssetsFilter, pagination: ConnectionArgs, sorting: AssetsSortingEnum): AssetsResponse!
@@ -1345,6 +1369,25 @@ input TierArgs {
 enum TierStatusEnum {
   Running
   Sold
+}
+
+enum TimeRange {
+  ALL
+  DAY
+  HOUR
+  MONTH
+  WEEK
+  YEAR
+}
+
+enum TimeResolutionsEnum {
+  INTERVAL_1_MINUTE
+  INTERVAL_10_MINUTES
+  INTERVAL_30_MINUTES
+  INTERVAL_DAY
+  INTERVAL_HOUR
+  INTERVAL_MONTH
+  INTERVAL_WEEK
 }
 
 type Token {
