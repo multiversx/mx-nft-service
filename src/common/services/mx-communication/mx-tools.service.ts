@@ -30,27 +30,40 @@ export class MxToolsService {
 
   async getNftsStats(input: AnalyticsInput
   ): Promise<GeneralAnalyticsModel> {
-    const query = this.getTokenPriceByTimestampQuery(input);
-    let response = new GeneralAnalyticsModel()
-    const res = await this.doPost(this.getNftsStats.name, query);
-    for (const key in res.data.nfts) {
-      if (Object.prototype.hasOwnProperty.call(res.data.nfts, key)) {
-        const elem = res.data.nfts[key]
-        switch (key) {
-          case 'count':
-            response.nfts = elem.map(x => AggregateValue.fromRow(x))
-            break;
-          case 'active_nfts':
-            response.listing = elem.map(x => AggregateValue.fromRow(x))
-            break;
-          case 'count24h':
-            response.volume = elem.map(x => AggregateValue.fromRow(x))
-            break;
+    try {
+      const query = this.getTokenPriceByTimestampQuery(input);
+      let response = new GeneralAnalyticsModel()
+      const res = await this.doPost(this.getNftsStats.name, query);
+      for (const key in res.data.nfts) {
+        if (Object.prototype.hasOwnProperty.call(res.data.nfts, key)) {
+          const elem = res.data.nfts[key]
+          switch (key) {
+            case 'count':
+              response.nfts = elem.map(x => AggregateValue.fromDataApi(x))
+              break;
+            case 'active_nfts':
+              response.listing = elem.map(x => AggregateValue.fromDataApi(x))
+              break;
+            case 'count24h':
+              response.volume = elem.map(x => AggregateValue.fromDataApi(x))
+              break;
 
+          }
         }
       }
+      return response;
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while mapping data api response`,
+        {
+          path: this.getNftsStats.name,
+          input,
+          exception: error,
+        },
+      );
+      return;
     }
-    return response;
+
   }
 
   private getTokenPriceByTimestampQuery(input: AnalyticsInput): string {
