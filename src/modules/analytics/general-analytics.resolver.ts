@@ -5,7 +5,7 @@ import { AnalyticsInput } from './models/AnalyticsInput';
 import { GeneralAnalyticsService } from './general-analytics.service';
 
 @Resolver(() => GeneralAnalyticsModel)
-export class StatsResolver {
+export class GeneralAnalyticsResolver {
   constructor(
     private generalAnalyticsService: GeneralAnalyticsService) { }
 

@@ -17,7 +17,7 @@ import * as ormconfig from 'src/ormconfig';
 import { AnalyticsService } from './analytics.service';
 import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
 import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
-import { StatsResolver } from './general-analytics.resolver';
+import { GeneralAnalyticsResolver } from './general-analytics.resolver';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { GeneralAnalyticsService } from './general-analytics.service';
 
@@ -34,7 +34,7 @@ import { GeneralAnalyticsService } from './general-analytics.service';
     AnalyticsService,
     AcceptOfferEventAnalyticsParser,
     BuyEventAnalyticsParser,
-    StatsResolver,
+    GeneralAnalyticsResolver,
     GeneralAnalyticsService
   ],
   imports: [
