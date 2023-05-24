@@ -7,6 +7,7 @@ import {
 
 @InputType()
 export class AnalyticsArgs {
+  @IsOptional()
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
     message: COLLECTION_IDENTIFIER_ERROR,
   })
