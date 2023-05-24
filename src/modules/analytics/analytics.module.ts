@@ -17,6 +17,8 @@ import * as ormconfig from 'src/ormconfig';
 import { AnalyticsService } from './analytics.service';
 import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
 import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
+import { StatsResolver } from './stats.resolver';
+import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 
 @Module({
   providers: [
@@ -31,6 +33,7 @@ import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
     AnalyticsService,
     AcceptOfferEventAnalyticsParser,
     BuyEventAnalyticsParser,
+    StatsResolver
   ],
   imports: [
     ConfigModule.forRoot({
@@ -40,6 +43,7 @@ import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
     MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
+    forwardRef(() => CollectionsModuleGraph),
     TimescaleDbModule,
   ],
   exports: [
@@ -48,4 +52,4 @@ import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
     AnalyticsService,
   ],
 })
-export class AnalyticsModule {}
+export class AnalyticsModule { }

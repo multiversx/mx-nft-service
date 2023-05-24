@@ -1,68 +1,43 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
-import { Query } from '@nestjs/graphql';
+import { Int, Parent, Query, ResolveField } from '@nestjs/graphql';
 import { Args, Resolver } from '@nestjs/graphql';
 import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
 import { AnalyticsArgs } from './models/AnalyticsArgs';
 import { AnalyticsGetterService } from './analytics.getter.service';
+import { GeneralAnalyticsModel } from './models/general-stats.model';
+import { MxToolsService } from 'src/common/services/mx-communication/mx-tools.service';
+import { AnalyticsInput } from './models/AnalyticsInput';
+import { MxElasticService } from 'src/common';
+import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
-@Resolver()
+@Resolver(() => GeneralAnalyticsModel)
 export class StatsResolver {
-  constructor(private readonly analyticsGetter: AnalyticsGetterService) { }
+  constructor(private readonly analyticsGetter: AnalyticsGetterService,
+    private toolsService: MxToolsService, private elasticService: MxElasticService,
+    private collectionsService: CollectionsGetterService,
+    private marketplacesService: MarketplacesService,) { }
 
-  @Query(() => [HistoricDataModel])
-  async values24hSum(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return await this.analyticsGetter.getValues24hSum(
-      input.series,
-      input.metric,
-    );
+  @Query(() => GeneralAnalyticsModel)
+  async analytics(
+    @Args('input', { type: () => AnalyticsInput, nullable: true }) input: AnalyticsInput,
+  ): Promise<GeneralAnalyticsModel> {
+    return await this.toolsService.getNftsStats(input);
   }
 
-  @Query(() => [HistoricDataModel])
-  async collectionStats(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return await this.analyticsGetter.getValues24hSum(
-      input.series,
-      input.metric,
-    );
+  @ResolveField('holders', () => Int)
+  async holders() {
+    return await this.elasticService.getHoldersCount();
   }
 
-  @Query(() => [HistoricDataModel])
-  async latestHistoricData(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getLatestHistoricData(
-      input.time,
-      input.series,
-      input.metric,
-      input.start,
-    );
+  @ResolveField('collections', () => Int)
+  async collections() {
+    const [, collections] = await this.collectionsService.getCollections();
+    return collections;
   }
 
-  @Query(() => [HistoricDataModel])
-  async topCollectionsDaily(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getLatestHistoricData(
-      input.time,
-      input.series,
-      input.metric,
-      input.start,
-    );
-  }
-
-  @Query(() => [HistoricDataModel])
-  async latestBinnedHistoricData(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getLatestBinnedHistoricData(
-      input.time,
-      input.series,
-      input.metric,
-      input.bin,
-      input.start,
-    );
+  @ResolveField('marketplaces', () => Int)
+  async marketplaces() {
+    const marketplaces = await this.marketplacesService.getMarketplaces();
+    return marketplaces?.count;
   }
 }

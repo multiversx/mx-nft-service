@@ -24,26 +24,18 @@ export class ExploreStatsService {
     private cachingService: CachingService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
-    // private marketplacesService: MarketplacesService,
-    private toolsService: MxToolsService,
+    private marketplacesService: MarketplacesService,
     private apiService: MxApiService,
     private offersService: OffersService,
-  ) {}
+  ) { }
 
   async getExploreStats(): Promise<ExploreStats> {
-    // const [, collections] =
-    //   await this.collectionsService.getOrSetFullCollections();
-    // const nfts = await this.getOrSetTotalNftsCount();
-    // const [, artists] =
-    //   await this.collectionsService.getOrSetMostActiveCollections();
-
-    console.log(await this.toolsService.getNftsStats())
-    // const [, holders] =
-    //   await this.collectionsService.getOrSetFullCollections();
-    // const createdLastMonth = await this.getOrSetTotalNftsCount();
-    // const marketplaces =
-    //   await this.marketplacesService.getMarketplaces(0, 10, undefined);
-    return new ExploreStats();
+    const [, collections] =
+      await this.collectionsService.getOrSetFullCollections();
+    const nfts = await this.getOrSetTotalNftsCount();
+    const [, artists] =
+      await this.collectionsService.getOrSetMostActiveCollections();
+    return new ExploreStats({ collections, nfts, artists });
   }
 
   async getExploreCollectionsStats(): Promise<ExploreCollectionsStats> {

@@ -6,6 +6,9 @@ import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
+import { GeneralAnalyticsModel } from 'src/modules/analytics/models/general-stats.model';
+import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
+import { AnalyticsInput } from 'src/modules/analytics/models/AnalyticsInput';
 
 @Injectable()
 export class MxToolsService {
@@ -25,47 +28,64 @@ export class MxToolsService {
     });
   }
 
-  async getNftsStats(
-  ): Promise<string | undefined> {
-    return await this.getTokenPriceByTimestamp();
+  async getNftsStats(input: AnalyticsInput
+  ): Promise<GeneralAnalyticsModel> {
+    const query = this.getTokenPriceByTimestampQuery(input);
+    let response = new GeneralAnalyticsModel()
+    const res = await this.doPost(this.getNftsStats.name, query);
+    for (const key in res.data.nfts) {
+      if (Object.prototype.hasOwnProperty.call(res.data.nfts, key)) {
+        const elem = res.data.nfts[key]
+        switch (key) {
+          case 'count':
+            response.nfts = elem.map(x => AggregateValue.fromRow(x))
+            break;
+          case 'active_nfts':
+            response.listing = elem.map(x => AggregateValue.fromRow(x))
+            break;
+          case 'count24h':
+            response.volume = elem.map(x => AggregateValue.fromRow(x))
+            break;
+
+        }
+      }
+    }
+    return response;
   }
-  private getTokenPriceByTimestampQuery(): string {
+
+  private getTokenPriceByTimestampQuery(input: AnalyticsInput): string {
     return `{
       nfts {
-        count(query: { range: WEEK, resolution: INTERVAL_DAY }) {
+        count(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
           time
+          avg
+          count
           max
+          min
+          sum
         }
-        count24h(query: { range: WEEK, resolution: INTERVAL_DAY }) {
+        count24h(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
           time
+          avg
+          count
           max
+          min
+          sum
         }
-        active_nfts(query: { range: MONTH, resolution: INTERVAL_WEEK }) {
+        active_nfts(query: { range: ${input.range}, resolution:  ${input.resolution}}) {
           time
+          avg
+          count
           max
+          min
+          sum
         }
       }
     }`;
   }
 
-  private async getTokenPriceByTimestamp(
-  ): Promise<string | undefined> {
-    const query = this.getTokenPriceByTimestampQuery(
-
-    );
-    const res = await this.doPost(this.getTokenPriceByTimestamp.name, query);
-    for (const key in res.data.nfts) {
-      if (Object.prototype.hasOwnProperty.call(res.data.nfts, key)) {
-        const element = res.data.nfts[key];
-        console.log({ element })
-      }
-    }
-    return res?.data?.trading?.pair?.price?.[0]?.last?.toFixed(20) ?? undefined;
-  }
-
   private async getConfig(): Promise<ApiSettings> {
     const accessTokenInfo = await this.nativeAuthSigner.getToken();
-    console.log(accessTokenInfo.token)
     return {
       authorization: `Bearer ${accessTokenInfo.token}`,
       timeout: 500,
