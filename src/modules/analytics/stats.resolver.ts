@@ -1,7 +1,5 @@
-import { Int, Parent, Query, ResolveField } from '@nestjs/graphql';
+import { Int, Query, ResolveField } from '@nestjs/graphql';
 import { Args, Resolver } from '@nestjs/graphql';
-import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
-import { AnalyticsArgs } from './models/AnalyticsArgs';
 import { AnalyticsGetterService } from './analytics.getter.service';
 import { GeneralAnalyticsModel } from './models/general-stats.model';
 import { MxToolsService } from 'src/common/services/mx-communication/mx-tools.service';
@@ -12,7 +10,7 @@ import { MarketplacesService } from '../marketplaces/marketplaces.service';
 
 @Resolver(() => GeneralAnalyticsModel)
 export class StatsResolver {
-  constructor(private readonly analyticsGetter: AnalyticsGetterService,
+  constructor(
     private toolsService: MxToolsService, private elasticService: MxElasticService,
     private collectionsService: CollectionsGetterService,
     private marketplacesService: MarketplacesService,) { }

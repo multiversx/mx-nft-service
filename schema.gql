@@ -664,11 +664,7 @@ type ExploreNftsStats {
 type ExploreStats {
   artists: Int!
   collections: Int!
-  createdLastMonth: Int!
-  holders: Int!
-  marketplaces: Int!
   nfts: Int!
-  volume: Int!
 }
 
 enum FeaturedCollectionTypeEnum {
@@ -708,7 +704,7 @@ input FlagNftInput {
 }
 
 type GeneralAnalyticsModel {
-  collections: [AggregateValue!]!
+  collections: Int!
   holders: Int!
   listing: [AggregateValue!]!
   marketplaces: Int!
