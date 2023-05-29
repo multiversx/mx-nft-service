@@ -6,7 +6,6 @@ import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
-import { GeneralAnalyticsModel } from 'src/modules/analytics/models/general-stats.model';
 import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
 import { AnalyticsInput } from 'src/modules/analytics/models/AnalyticsInput';
 
@@ -20,7 +19,7 @@ export class MxToolsService {
     private readonly apiConfigService: ApiConfigService,
     private readonly apiService: ApiService,
   ) {
-    this.url = this.apiConfigService.getDataUrl();
+    this.url = this.apiConfigService.getToolsUrl();
     this.nativeAuthSigner = new NativeAuthSigner({
       origin: 'NftService',
       apiUrl: this.apiConfigService.getApiUrl(),
@@ -28,35 +27,17 @@ export class MxToolsService {
     });
   }
 
-  async getNftsStats(input: AnalyticsInput
-  ): Promise<GeneralAnalyticsModel> {
+  async getNftsCount(input: AnalyticsInput
+  ): Promise<AggregateValue[]> {
     try {
-      const query = this.getTokenPriceByTimestampQuery(input);
-      let response = new GeneralAnalyticsModel()
-      const res = await this.doPost(this.getNftsStats.name, query);
-      for (const key in res.data.nfts) {
-        if (Object.prototype.hasOwnProperty.call(res.data.nfts, key)) {
-          const elem = res.data.nfts[key]
-          switch (key) {
-            case 'count':
-              response.nfts = elem.map(x => AggregateValue.fromDataApi(x))
-              break;
-            case 'active_nfts':
-              response.listing = elem.map(x => AggregateValue.fromDataApi(x))
-              break;
-            case 'count24h':
-              response.volume = elem.map(x => AggregateValue.fromDataApi(x))
-              break;
-
-          }
-        }
-      }
-      return response;
+      const query = this.getNftsCountQuery(input);
+      const res = await this.doPost(this.getActiveNftsStats.name, query);
+      return res.data?.nfts?.count.map(x => AggregateValue.fromDataApi(x));
     } catch (error) {
       this.logger.error(
         `An error occurred while mapping data api response`,
         {
-          path: this.getNftsStats.name,
+          path: this.getNftsCount.name,
           input,
           exception: error,
         },
@@ -66,7 +47,48 @@ export class MxToolsService {
 
   }
 
-  private getTokenPriceByTimestampQuery(input: AnalyticsInput): string {
+  async getActiveNftsStats(input: AnalyticsInput
+  ): Promise<AggregateValue[]> {
+    try {
+      const query = this.getLatestListingNumber(input);
+      const res = await this.doPost(this.getActiveNftsStats.name, query);
+      return res.data?.nfts?.active_nfts.map(x => AggregateValue.fromDataApi(x));
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while mapping data api response`,
+        {
+          path: this.getActiveNftsStats.name,
+          input,
+          exception: error,
+        },
+      );
+      return;
+    }
+
+  }
+
+
+  async getLast24HActive(input: AnalyticsInput
+  ): Promise<AggregateValue[]> {
+    try {
+      const query = this.getNftsCountLast24h(input);
+      const res = await this.doPost(this.getActiveNftsStats.name, query);
+      return res.data?.nfts?.count24h.map(x => AggregateValue.fromDataApi(x));
+    } catch (error) {
+      this.logger.error(
+        `An error occurred while mapping data api response`,
+        {
+          path: this.getLast24HActive.name,
+          input,
+          exception: error,
+        },
+      );
+      return;
+    }
+
+  }
+
+  private getNftsCountQuery(input: AnalyticsInput): string {
     return `{
       nfts {
         count(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
@@ -77,6 +99,13 @@ export class MxToolsService {
           min
           sum
         }
+      }
+    }`;
+  }
+
+  private getNftsCountLast24h(input: AnalyticsInput): string {
+    return `{
+      nfts {
         count24h(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
           time
           avg
@@ -85,6 +114,14 @@ export class MxToolsService {
           min
           sum
         }
+      }
+    }`;
+  }
+
+
+  private getLatestListingNumber(input: AnalyticsInput): string {
+    return `{
+      nfts {
         active_nfts(query: { range: ${input.range}, resolution:  ${input.resolution}}) {
           time
           avg

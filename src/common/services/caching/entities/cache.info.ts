@@ -194,8 +194,18 @@ export class CacheInfo {
     ttl: Constants.oneDay(),
   };
 
-  static NftGeneralAnalytics: CacheInfo = {
-    key: 'nftGeneralAnalytics',
+  static NftAnalytic24hCount: CacheInfo = {
+    key: 'nftAnalytic24hCount',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static NftAnalytic24hListing: CacheInfo = {
+    key: 'nftAnalytic24hListing',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static NftAnalyticsCount: CacheInfo = {
+    key: 'nftAnalyticsCount',
     ttl: 10 * Constants.oneMinute(),
   };
 
