@@ -8,7 +8,6 @@ export enum TimeResolutionsEnum {
     INTERVAL_DAY = "INTERVAL_DAY",
     INTERVAL_WEEK = "INTERVAL_WEEK",
     INTERVAL_MONTH = "INTERVAL_MONTH",
-
 }
 
 registerEnumType(TimeResolutionsEnum, {
