@@ -706,10 +706,10 @@ input FlagNftInput {
 type GeneralAnalyticsModel {
   collections: Int!
   holders: Int!
-  listing(input: AnalyticsInput): [AggregateValue!]!
+  listing(input: AnalyticsInput!): [AggregateValue!]!
   marketplaces: Int!
-  nfts(input: AnalyticsInput): [AggregateValue!]!
-  volume(input: AnalyticsInput): [AggregateValue!]!
+  nfts(input: AnalyticsInput!): [AggregateValue!]!
+  volume(input: AnalyticsInput!): [AggregateValue!]!
 }
 
 enum GroupBy {
