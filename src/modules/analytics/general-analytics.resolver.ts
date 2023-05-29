@@ -18,17 +18,17 @@ export class GeneralAnalyticsResolver {
   }
 
   @ResolveField('listing', () => [AggregateValue])
-  async listing(@Args('input', { type: () => AnalyticsInput, nullable: true }) input: AnalyticsInput,) {
+  async listing(@Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,) {
     return await this.generalAnalyticsService.getActiveNftsStats(input);
   }
 
   @ResolveField('volume', () => [AggregateValue])
-  async volume(@Args('input', { type: () => AnalyticsInput, nullable: true }) input: AnalyticsInput,) {
+  async volume(@Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,) {
     return await this.generalAnalyticsService.getLast24HActive(input);
   }
 
   @ResolveField('nfts', () => [AggregateValue])
-  async nfts(@Args('input', { type: () => AnalyticsInput, nullable: true }) input: AnalyticsInput,) {
+  async nfts(@Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,) {
     return await this.generalAnalyticsService.getNftsCount(input);
 
   }
