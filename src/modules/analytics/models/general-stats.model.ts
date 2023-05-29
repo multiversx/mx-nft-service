@@ -19,6 +19,4 @@ export class GeneralAnalyticsModel {
   constructor(init?: Partial<GeneralAnalyticsModel>) {
     Object.assign(this, init);
   }
-
-
 }
