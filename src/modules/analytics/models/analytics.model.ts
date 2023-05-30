@@ -10,6 +10,8 @@ export class HistoricDataModel {
   timestamp: string;
   @Field()
   value: string;
+  @Field({ nullable: true })
+  series: string;
 
   constructor(init?: Partial<HistoricDataModel>) {
     Object.assign(this, init);
@@ -25,10 +27,11 @@ export class HistoricDataModel {
     });
   }
 
-  static fromCompleteValues({ field, value }, type: 'last' | 'sum') {
+  static fromCompleteValues({ field, value, series }, type: 'last' | 'sum') {
     return new HistoricDataModel({
       timestamp: moment.utc(field).format('yyyy-MM-DD HH:mm:ss'),
       value: value ? new BigNumber(value[type] ?? '0').toFixed() : '0',
+      series: series
     });
   }
 }

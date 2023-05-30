@@ -66,7 +66,7 @@ type AggregateValue {
 input AnalyticsArgs {
   bin: String
   metric: String!
-  series: String!
+  series: String
   start: String
   time: String
 }
@@ -568,6 +568,36 @@ input CollectionStatsFilter {
   paymentToken: String
 }
 
+type CollectionsAnalyticsModel {
+  collectionIdentifier: String!
+  collectionName: String!
+  floorPrice: [AggregateValue!]!
+  holders: Int!
+  items: Int!
+  listing(input: AnalyticsInput!): [AggregateValue!]!
+  nfts(input: AnalyticsInput!): [AggregateValue!]!
+  volume(input: AnalyticsInput!): [AggregateValue!]!
+  volume24h: [AggregateValue!]!
+}
+
+type CollectionsAnalyticsModelEdge {
+  cursor: String
+  node: CollectionsAnalyticsModel
+}
+
+type CollectionsAnalyticsModelPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type CollectionsAnalyticsResponse {
+  edges: [CollectionsAnalyticsModelEdge!]
+  pageData: PageData
+  pageInfo: CollectionsAnalyticsModelPageInfo
+}
+
 input CollectionsFilter {
   """Flag for active last 30 days"""
   activeLast30Days: Boolean
@@ -734,6 +764,7 @@ input HandleQuantityArgs {
 }
 
 type HistoricDataModel {
+  series: String
   timestamp: String!
   value: String!
 }
@@ -1207,7 +1238,7 @@ type Query {
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
-  generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
+  generalAnalytics(filters: AnalyticsInput, pagination: ConnectionArgs): CollectionsAnalyticsResponse!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
   latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!

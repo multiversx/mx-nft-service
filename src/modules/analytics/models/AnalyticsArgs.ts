@@ -11,7 +11,7 @@ export class AnalyticsArgs {
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
     message: COLLECTION_IDENTIFIER_ERROR,
   })
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   series: string;
   @Field()
   metric: string;

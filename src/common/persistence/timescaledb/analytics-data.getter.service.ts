@@ -18,7 +18,7 @@ export class AnalyticsDataGetterService {
     private readonly nftsAnalytics: Repository<XNftsAnalyticsEntity>,
     @InjectRepository(SumDaily, 'timescaledb')
     private readonly sumDaily: Repository<SumDaily>,
-  ) {}
+  ) { }
 
   async getAggregatedValue({
     series,
@@ -130,8 +130,8 @@ export class AnalyticsDataGetterService {
       .createQueryBuilder()
       .select('timestamp')
       .addSelect('value')
+      .addSelect('series')
       .where('key = :metric', { metric })
-      .andWhere('series = :series', { series })
       .andWhere(
         endDate
           ? 'timestamp BETWEEN :startDate AND :endDate'
@@ -140,12 +140,15 @@ export class AnalyticsDataGetterService {
       )
       .orderBy('timestamp', 'ASC')
       .getRawMany();
+
+    console.log({ query, startDate, endDate })
     return (
       query?.map(
         (row) =>
           new HistoricDataModel({
             timestamp: moment.utc(row.timestamp).format('yyyy-MM-DD HH:mm:ss'),
             value: row.value,
+            series: row.series
           }),
       ) ?? []
     );
