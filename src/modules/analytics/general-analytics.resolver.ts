@@ -30,7 +30,6 @@ export class GeneralAnalyticsResolver {
   @ResolveField('nfts', () => [AggregateValue])
   async nfts(@Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,) {
     return await this.generalAnalyticsService.getNftsCount(input);
-
   }
 
   @ResolveField('holders', () => Int)
@@ -41,7 +40,6 @@ export class GeneralAnalyticsResolver {
   @ResolveField('collections', () => Int)
   async collections() {
     return await this.generalAnalyticsService.getCollections();
-
   }
 
   @ResolveField('marketplaces', () => Int)

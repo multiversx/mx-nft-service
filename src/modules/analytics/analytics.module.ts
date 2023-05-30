@@ -20,6 +20,8 @@ import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
 import { GeneralAnalyticsResolver } from './general-analytics.resolver';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { GeneralAnalyticsService } from './general-analytics.service';
+import { CollectionsAnalyticsResolver } from './collections-analytics.resolver';
+import { CollectionsAnalyticsService } from './collections-analytics.service';
 
 @Module({
   providers: [
@@ -35,7 +37,9 @@ import { GeneralAnalyticsService } from './general-analytics.service';
     AcceptOfferEventAnalyticsParser,
     BuyEventAnalyticsParser,
     GeneralAnalyticsResolver,
-    GeneralAnalyticsService
+    GeneralAnalyticsService,
+    CollectionsAnalyticsResolver,
+    CollectionsAnalyticsService
   ],
   imports: [
     ConfigModule.forRoot({
@@ -52,7 +56,8 @@ import { GeneralAnalyticsService } from './general-analytics.service';
     TrendingCollectionsService,
     ElasticAnalyticsService,
     AnalyticsService,
-    GeneralAnalyticsService
+    GeneralAnalyticsService,
+    CollectionsAnalyticsService
   ],
 })
 export class AnalyticsModule { }

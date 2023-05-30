@@ -204,6 +204,11 @@ export class CacheInfo {
     ttl: 10 * Constants.oneMinute(),
   };
 
+  static CollectionFloorPrice: CacheInfo = {
+    key: 'collectionFloorPrice',
+    ttl: 30 * Constants.oneMinute(),
+  };
+
   static NftAnalyticsCount: CacheInfo = {
     key: 'nftAnalyticsCount',
     ttl: 10 * Constants.oneMinute(),
