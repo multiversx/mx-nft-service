@@ -31,7 +31,7 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] =
-      await this.featuredService.getFeaturedCollections(limit, offset, filters);
+      await this.featuredService.getFeaturedCollections(filters, limit, offset,);
     return PageResponse.mapResponse<Collection>(
       collections || [],
       pagination,

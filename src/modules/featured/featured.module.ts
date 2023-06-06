@@ -15,5 +15,6 @@ import { FeaturedService } from './featured.service';
     FeaturedCollectionsResolver,
     FeaturedCollectionsCachingService,
   ],
+  exports: [FeaturedService]
 })
-export class FeaturedModuleGraph {}
+export class FeaturedModuleGraph { }

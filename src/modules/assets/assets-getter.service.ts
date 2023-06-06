@@ -8,7 +8,6 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetsFilter, Sort } from '../common/filters/filtersTypes';
-
 import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import * as hash from 'object-hash';
@@ -26,12 +25,17 @@ import {
   RedisCacheService,
 } from '@multiversx/sdk-nestjs';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
+import { FeaturedService } from '../featured/featured.service';
+import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';
+import { FeaturedCollectionTypeEnum } from '../featured/FeatureCollectionType.enum';
+import { constants } from 'src/config';
 
 @Injectable()
 export class AssetsGetterService {
   constructor(
     private apiService: MxApiService,
     private collectionsService: CollectionsGetterService,
+    private featuredCollectionsService: FeaturedService,
     private elasticService: MxElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
@@ -41,7 +45,7 @@ export class AssetsGetterService {
     private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {}
+  ) { }
 
   async getAssetsForUser(
     address: string,
@@ -63,8 +67,8 @@ export class AssetsGetterService {
   }
 
   async getAssets(
-    offset: number = 0,
-    limit: number = 10,
+    offset: number = constants.defaultPageOffset,
+    limit: number = constants.defaultPageSize,
     filters: AssetsFilter,
     sorting: AssetsSortingEnum,
   ): Promise<CollectionType<Asset>> {
@@ -72,6 +76,16 @@ export class AssetsGetterService {
       ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
+
+    if (filters.ownerAddress && filters.customFilters) {
+      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }))
+      const ticketCollectionIdentifiers = ticketsCollections.map(x => x.collection).toString();
+      return await this.getAssetsForUser(
+        filters.ownerAddress,
+        `?collections=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
+        `?collections=${ticketCollectionIdentifiers}`,
+      );
+    }
 
     if (sorting === AssetsSortingEnum.MostLikes) {
       const assets = await this.assetsLikedService.getMostLikedAssets();

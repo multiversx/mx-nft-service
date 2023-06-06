@@ -11,6 +11,7 @@ import {
   CacheEventTypeEnum,
   ChangedEvent,
 } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { constants } from 'src/config';
 
 @Injectable()
 export class FeaturedService {
@@ -20,7 +21,7 @@ export class FeaturedService {
     private readonly logger: Logger,
     private readonly featuredCollectionsCachingService: FeaturedCollectionsCachingService,
     private cacheEventsPublisherService: CacheEventsPublisherService,
-  ) {}
+  ) { }
 
   async getFeaturedNfts(
     limit: number = 10,
@@ -48,9 +49,9 @@ export class FeaturedService {
   }
 
   async getFeaturedCollections(
-    limit: number = 10,
-    offset: number,
     filters: FeaturedCollectionsFilter,
+    limit: number = constants.defaultPageSize,
+    offset: number = constants.defaultPageOffset,
   ): Promise<[Collection[], number]> {
     try {
       const getFeaturedCollections = () =>

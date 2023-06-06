@@ -184,6 +184,7 @@ input AssetsFilter {
   """This will work only with an owner address"""
   collections: [String!]
   creatorAddress: String
+  customFilters: CustomFiltersEnum
   identifier: String
   identifiers: [String!]
   likedByAddress: String
@@ -626,6 +627,10 @@ input CurrentPaymentTokensFilters {
   marketplaceKey: String
 }
 
+enum CustomFiltersEnum {
+  Tickets
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -648,6 +653,7 @@ type ExploreStats {
 enum FeaturedCollectionTypeEnum {
   Featured
   Hero
+  Tickets
 }
 
 input FeaturedCollectionsArgs {
