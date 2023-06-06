@@ -9,7 +9,7 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class FeaturedCollectionsCachingService {
-  constructor(private readonly redisCacheService: RedisCacheService) {}
+  constructor(private readonly redisCacheService: RedisCacheService) { }
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
@@ -23,6 +23,7 @@ export class FeaturedCollectionsCachingService {
       CacheInfo.FeaturedCollections.ttl,
     );
   }
+
 
   async getOrSetFeaturedNfts(
     getFeaturedNfts: () => any,

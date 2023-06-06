@@ -18,3 +18,12 @@ export enum ScamInfoTypeEnum {
 registerEnumType(ScamInfoTypeEnum, {
   name: 'ScamInfoTypeEnum',
 });
+
+
+export enum CustomFiltersEnum {
+  Tickets = 'Tickets',
+}
+
+registerEnumType(CustomFiltersEnum, {
+  name: 'CustomFiltersEnum',
+});

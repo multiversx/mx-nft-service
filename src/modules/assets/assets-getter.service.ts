@@ -26,12 +26,17 @@ import {
   RedisCacheService,
 } from '@multiversx/sdk-nestjs';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
+import { FeaturedCollectionsCachingService } from '../featured/featured-caching.service';
+import { FeaturedService } from '../featured/featured.service';
+import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';
+import { FeaturedCollectionTypeEnum } from '../featured/FeatureCollectionType.enum';
 
 @Injectable()
 export class AssetsGetterService {
   constructor(
     private apiService: MxApiService,
     private collectionsService: CollectionsGetterService,
+    private featuredCollectionsService: FeaturedService,
     private elasticService: MxElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
@@ -41,7 +46,7 @@ export class AssetsGetterService {
     private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) {}
+  ) { }
 
   async getAssetsForUser(
     address: string,
@@ -72,6 +77,19 @@ export class AssetsGetterService {
       ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
+
+    if (filters.ownerAddress && filters.customFilters) {
+      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(10, 0, new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }))
+      const response = await this.getAssetsForUser(
+        filters.ownerAddress,
+        `?collections=${ticketsCollections.map(x => x.collection).toString()}&from=${offset}&size=${limit}`,
+        `?collections=${ticketsCollections.map(x => x.collection).toString()}`,
+      );
+      return new CollectionType({
+        count: response.count ?? 0,
+        items: response?.items?.slice(offset, offset + limit) ?? [],
+      });
+    }
 
     if (sorting === AssetsSortingEnum.MostLikes) {
       const assets = await this.assetsLikedService.getMostLikedAssets();

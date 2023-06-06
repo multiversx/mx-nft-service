@@ -52,6 +52,7 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.service';
 import { AuthModule } from '../auth/auth.module';
+import { FeaturedModuleGraph } from '../featured/featured.module';
 
 @Module({
   providers: [
@@ -106,6 +107,7 @@ import { AuthModule } from '../auth/auth.module';
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CollectionsModuleGraph),
+    forwardRef(() => FeaturedModuleGraph),
     forwardRef(() => AuthModule),
     IpfsModule,
     PersistenceModule,
@@ -126,4 +128,4 @@ import { AuthModule } from '../auth/auth.module';
     AssetsProvider,
   ],
 })
-export class AssetsModuleGraph {}
+export class AssetsModuleGraph { }
