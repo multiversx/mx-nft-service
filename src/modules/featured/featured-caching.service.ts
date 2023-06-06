@@ -24,7 +24,6 @@ export class FeaturedCollectionsCachingService {
     );
   }
 
-
   async getOrSetFeaturedNfts(
     getFeaturedNfts: () => any,
     limit?: number,
