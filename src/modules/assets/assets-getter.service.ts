@@ -62,6 +62,7 @@ export class AssetsGetterService {
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, countQuery),
     ]);
+
     const assets = nfts?.map((element) => Asset.fromNft(element, address));
     return new CollectionType({ count, items: assets });
   }
@@ -79,6 +80,8 @@ export class AssetsGetterService {
 
     if (filters.ownerAddress && filters.customFilters) {
       const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }))
+      if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>()
+
       const ticketCollectionIdentifiers = ticketsCollections.map(x => x.collection).toString();
       return await this.getAssetsForUser(
         filters.ownerAddress,
