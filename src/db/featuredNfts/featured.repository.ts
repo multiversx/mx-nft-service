@@ -69,11 +69,11 @@ export class FeaturedCollectionsRepository {
     return !!res.id;
   }
 
-  async getFeaturedCollectionsByIdentifiers(collections: string[]): Promise<FeaturedCollectionEntity[]> {
+  async getFeaturedCollectionsByIdentifiers(identifiers: string[]): Promise<FeaturedCollectionEntity[]> {
     return await this.featuredCollectionsRepository
       .createQueryBuilder('featuredCollections')
-      .where('identifier IN(:...collections)', {
-        collections: collections,
+      .where('identifier IN(:...identifiers)', {
+        identifiers: identifiers,
       })
       .getMany();
   }

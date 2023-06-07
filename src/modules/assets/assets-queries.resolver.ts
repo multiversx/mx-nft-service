@@ -263,7 +263,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   async isTicket(@Parent() asset: Asset) {
     const { collection } = asset;
     const isAssetTicket = await this.isTicketProvider.load(collection);
-    return !!isAssetTicket?.value ?? false;
+    return isAssetTicket?.value ?? false;
   }
 
   private async getMarketplaceForNft(

@@ -17,8 +17,8 @@ export class IsTicketRedisHandler extends RedisKeyValueDataloaderHandler<string>
     for (const item of returnValues) {
       if (item.value === null) {
         item.value = collectionIdentifiers[item.key]
-          ? collectionIdentifiers[item.key][0].identifier
-          : 0;
+          ? true
+          : false;
         redisValues.push(item);
       }
     }
