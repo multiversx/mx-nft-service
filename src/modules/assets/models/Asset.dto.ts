@@ -97,6 +97,8 @@ export class Asset {
   rarity: Rarity;
   @Field(() => CollectionBranding, { nullable: true })
   branding: CollectionBranding;
+  @Field(() => Boolean, { nullable: true })
+  isTicket: boolean;
 
   constructor(init?: Partial<Asset>) {
     Object.assign(this, init);
@@ -105,30 +107,30 @@ export class Asset {
   static fromNft(nft: Nft, address: string = null) {
     return nft
       ? new Asset({
-          collection: nft.collection,
-          type: NftTypeEnum[nft.type],
-          nonce: nft.nonce ?? 0,
-          identifier: nft.identifier,
-          creatorAddress: nft.creator ?? '',
-          ownerAddress: nft.owner ? nft.owner : address,
-          attributes: nft.attributes ?? '',
-          creationDate: nft.timestamp,
-          hash: nft.hash ?? '',
-          balance: nft.balance,
-          supply: nft.supply,
-          name: nft.name,
-          royalties: nft.royalties ?? '',
-          rarity: Rarity.fromNftRarity(nft),
-          uris: nft.uris || [''],
-          metadata: Metadata.fromNftMetadata(nft.metadata),
-          tags: nft.tags,
-          isWhitelistedStorage: nft.isWhitelistedStorage,
-          isNsfw: nft.isNsfw,
-          scamInfo: ScamInfo.fromScamInfoApi(nft.scamInfo),
-          media: nft.media?.map((m) => Media.fromNftMedia(m)),
-          verified: !!nft.assets ?? false,
-          branding: CollectionBranding.fromNftAssets(nft.assets),
-        })
+        collection: nft.collection,
+        type: NftTypeEnum[nft.type],
+        nonce: nft.nonce ?? 0,
+        identifier: nft.identifier,
+        creatorAddress: nft.creator ?? '',
+        ownerAddress: nft.owner ? nft.owner : address,
+        attributes: nft.attributes ?? '',
+        creationDate: nft.timestamp,
+        hash: nft.hash ?? '',
+        balance: nft.balance,
+        supply: nft.supply,
+        name: nft.name,
+        royalties: nft.royalties ?? '',
+        rarity: Rarity.fromNftRarity(nft),
+        uris: nft.uris || [''],
+        metadata: Metadata.fromNftMetadata(nft.metadata),
+        tags: nft.tags,
+        isWhitelistedStorage: nft.isWhitelistedStorage,
+        isNsfw: nft.isNsfw,
+        scamInfo: ScamInfo.fromScamInfoApi(nft.scamInfo),
+        media: nft.media?.map((m) => Media.fromNftMedia(m)),
+        verified: !!nft.assets ?? false,
+        branding: CollectionBranding.fromNftAssets(nft.assets),
+      })
       : null;
   }
 }
