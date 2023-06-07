@@ -84,7 +84,7 @@ export class PersistenceService {
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
     private readonly offersRepository: OffersRepository,
-  ) {}
+  ) { }
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
     const profiler = new PerformanceProfiler();
@@ -335,6 +335,13 @@ export class PersistenceService {
     return await this.execute(
       this.getFeaturedCollections.name,
       this.featuredCollectionsRepository.getFeaturedCollections(limit, offset),
+    );
+  }
+
+  async getFeaturedCollectionsByIdentifiers(collections: string[]): Promise<FeaturedCollectionEntity[]> {
+    return await this.execute(
+      this.getFeaturedCollections.name,
+      this.featuredCollectionsRepository.getFeaturedCollectionsByIdentifiers(collections),
     );
   }
 
