@@ -31,7 +31,7 @@ export class HistoricDataModel {
     return new HistoricDataModel({
       timestamp: moment.utc(field).format('yyyy-MM-DD HH:mm:ss'),
       value: value ? new BigNumber(value[type] ?? '0').toFixed() : '0',
-      series: series
+      series: series,
     });
   }
 }

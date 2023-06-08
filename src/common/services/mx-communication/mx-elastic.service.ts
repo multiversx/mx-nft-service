@@ -18,7 +18,7 @@ export class MxElasticService {
   constructor(
     private readonly apiService: ApiService,
     private readonly logger: Logger,
-  ) { }
+  ) {}
 
   async getNftHistory(
     collection: string,
@@ -314,65 +314,75 @@ export class MxElasticService {
 
   async getHoldersCount(): Promise<number> {
     const query = {
-      "size": 0,
-      "query": {
-        "bool": {
-          "should": [
+      size: 0,
+      query: {
+        bool: {
+          should: [
             {
-              "match": {
-                "type": "NonFungibleESDT",
+              match: {
+                type: 'NonFungibleESDT',
               },
             },
             {
-              "match": {
-                "type": "SemiFungibleESDT",
+              match: {
+                type: 'SemiFungibleESDT',
               },
             },
           ],
         },
       },
-      "aggs": {
-        "unique_addresses": {
-          "cardinality": {
-            "field": "address",
+      aggs: {
+        unique_addresses: {
+          cardinality: {
+            field: 'address',
           },
         },
       },
     };
 
-    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
-      timeout: 120000,
-    });
+    const resultRaw = await this.apiService.post(
+      `${this.url}/accountsesdt/_search`,
+      query,
+      {
+        timeout: 120000,
+      },
+    );
     const result = resultRaw?.data?.aggregations?.unique_addresses?.value;
     return result as number;
   }
 
-  async getHoldersCountForCollection(collectionIdentifier: string): Promise<number> {
+  async getHoldersCountForCollection(
+    collectionIdentifier: string,
+  ): Promise<number> {
     const query = {
-      "size": 0,
-      "query": {
-        "bool": {
-          "should": [
+      size: 0,
+      query: {
+        bool: {
+          should: [
             {
-              "match": {
-                "token": `"${collectionIdentifier}"`
-              }
-            }
+              match: {
+                token: `${collectionIdentifier}`,
+              },
+            },
           ],
         },
       },
-      "aggs": {
-        "unique_addresses": {
-          "cardinality": {
-            "field": "address",
+      aggs: {
+        unique_addresses: {
+          cardinality: {
+            field: 'address',
           },
         },
       },
     };
 
-    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
-      timeout: 120000,
-    });
+    const resultRaw = await this.apiService.post(
+      `${this.url}/accountsesdt/_search`,
+      query,
+      {
+        timeout: 120000,
+      },
+    );
     const result = resultRaw?.data?.aggregations?.unique_addresses?.value;
     return result as number;
   }

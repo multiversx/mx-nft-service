@@ -6,7 +6,7 @@ import { getCollectionStats } from './collection-stats.querries';
 
 @Injectable()
 export class CollectionStatsRepository {
-  constructor(public readonly manager: EntityManager) { }
+  constructor(public readonly manager: EntityManager) {}
   async getStats(
     identifier: string,
     marketplaceKey: string = undefined,
@@ -26,6 +26,6 @@ export class CollectionStatsRepository {
     const response = await this.manager.query(
       getCollectionStats(identifier, marketplaceKey, paymentToken),
     );
-    return response?.length > 0 ? response[0].minPrice : 0;
+    return response?.length > 0 ? response[0]?.minPrice ?? 0 : 0;
   }
 }

@@ -14,36 +14,87 @@ import { AnalyticsGetterService } from './analytics.getter.service';
 @Injectable()
 export class CollectionsAnalyticsService {
   constructor(
-    private toolsService: MxToolsService, private elasticService: MxElasticService,
-    private cacheService: CachingService, private collectionsService: CollectionsGetterService,
-    private persistenceService: PersistenceService, private readonly analyticsGetter: AnalyticsGetterService) { }
+    private toolsService: MxToolsService,
+    private elasticService: MxElasticService,
+    private cacheService: CachingService,
+    private persistenceService: PersistenceService,
+    private readonly analyticsGetter: AnalyticsGetterService,
+  ) {}
 
   public async getNftsCount(input: AnalyticsInput): Promise<AggregateValue[]> {
-    return this.cacheService.getOrSetCache(`${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`, () => this.toolsService.getNftsCount(input), CacheInfo.NftAnalyticsCount.ttl, CacheInfo.NftAnalyticsCount.ttl / 2)
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`,
+      () => this.toolsService.getNftsCount(input),
+      CacheInfo.NftAnalyticsCount.ttl,
+      CacheInfo.NftAnalyticsCount.ttl / 2,
+    );
   }
 
-  public async getLast24HActive(input: AnalyticsInput): Promise<AggregateValue[]> {
-    return this.cacheService.getOrSetCache(`${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`, () => this.toolsService.getLast24HActive(input), CacheInfo.NftAnalytic24hCount.ttl, CacheInfo.NftAnalytic24hCount.ttl / 2)
+  public async getLast24HActive(
+    input: AnalyticsInput,
+  ): Promise<AggregateValue[]> {
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`,
+      () => this.toolsService.getLast24HActive(input),
+      CacheInfo.NftAnalytic24hCount.ttl,
+      CacheInfo.NftAnalytic24hCount.ttl / 2,
+    );
   }
-  public async getActiveNftsStats(input: AnalyticsInput): Promise<AggregateValue[]> {
-    return this.cacheService.getOrSetCache(`${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`, () => this.toolsService.getActiveNftsStats(input), CacheInfo.NftAnalytic24hListing.ttl, CacheInfo.NftAnalytic24hListing.ttl / 2)
+  public async getActiveNftsStats(
+    input: AnalyticsInput,
+  ): Promise<AggregateValue[]> {
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
+      () => this.toolsService.getActiveNftsStats(input),
+      CacheInfo.NftAnalytic24hListing.ttl,
+      CacheInfo.NftAnalytic24hListing.ttl / 2,
+    );
   }
 
   public async getHolders(collectionIdentifier: string): Promise<number> {
-    return this.cacheService.getOrSetCache(CacheInfo.NftsHolders.key, () => this.elasticService.getHoldersCountForCollection(collectionIdentifier), CacheInfo.NftsHolders.ttl, CacheInfo.NftsHolders.ttl / 2)
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.NftsHolders.key}_${collectionIdentifier}`,
+      () =>
+        this.elasticService.getHoldersCountForCollection(collectionIdentifier),
+      CacheInfo.NftsHolders.ttl,
+      CacheInfo.NftsHolders.ttl / 2,
+    );
   }
 
-  public async getCollections(limit: number = 10, offset: number = 0,): Promise<[CollectionsAnalyticsModel[], number]> {
-    const [collections, count] = await this.collectionsService.getCollections(limit, offset);
-    return [collections.map(c => CollectionsAnalyticsModel.fromApiCollection(c)), count]
+  public async getCollectionsOrderByVolum(
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<[CollectionsAnalyticsModel[], number]> {
+    const [collections, count] =
+      await this.analyticsGetter.getTopCollectionsDaily(
+        'volumeUSD',
+        limit,
+        offset,
+      );
+
+    return [
+      collections.map((c) => CollectionsAnalyticsModel.fromTimescaleModel(c)),
+      count,
+    ];
   }
 
-  public async getVolum24H(series: string, metric: string,): Promise<AggregateValue[]> {
+  public async getVolum24H(
+    series: string,
+    metric: string,
+  ): Promise<AggregateValue[]> {
     const response = await this.analyticsGetter.getValues24h(series, metric);
-    return response.map(c => AggregateValue.fromDataApi(c));
+    return response.map((c) => AggregateValue.fromDataApi(c));
   }
 
-  public async getCollectionFloorPrice(collectionIdentifier: string): Promise<number> {
-    return this.cacheService.getOrSetCache(`${CacheInfo.CollectionFloorPrice.key}_${collectionIdentifier}}`, () => this.persistenceService.getCollectionFloorPrice(collectionIdentifier), CacheInfo.CollectionFloorPrice.ttl, CacheInfo.CollectionFloorPrice.ttl / 2)
+  public async getCollectionFloorPrice(
+    collectionIdentifier: string,
+  ): Promise<number> {
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.CollectionFloorPrice.key}_${collectionIdentifier}`,
+      () =>
+        this.persistenceService.getCollectionFloorPrice(collectionIdentifier),
+      CacheInfo.CollectionFloorPrice.ttl,
+      CacheInfo.CollectionFloorPrice.ttl / 2,
+    );
   }
 }
