@@ -76,6 +76,16 @@ export class CollectionsGetterService {
     return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
+  async getCollectionsByIdentifiers(
+    identifiers: string[],
+  ): Promise<Collection[]> {
+    const [collections] = await this.getOrSetFullCollections();
+
+    return collections?.filter(
+      (x) => identifiers.includes(x.collection) === true,
+    );
+  }
+
   async getTrendingCollections(
     offset: number = 0,
     limit: number = 10,

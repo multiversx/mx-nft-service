@@ -18,7 +18,7 @@ export class AnalyticsDataGetterService {
     private readonly nftsAnalytics: Repository<XNftsAnalyticsEntity>,
     @InjectRepository(SumDaily, 'timescaledb')
     private readonly sumDaily: Repository<SumDaily>,
-  ) { }
+  ) {}
 
   async getAggregatedValue({
     series,
@@ -41,82 +41,36 @@ export class AnalyticsDataGetterService {
     return query?.sum ?? '0';
   }
 
-  async getSumCompleteValues({
-    series,
-    metric,
-  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
-    const firstRow = await this.sumDaily
+  async getTopCollectionsDaily(
+    { metric }: AnalyticsArgs,
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<[HistoricDataModel[], number]> {
+    const query = this.sumDaily
       .createQueryBuilder()
-      .select('time')
-      .where('series = :series', { series })
+      .select('sum(sum) as sum')
+      .addSelect('series')
+      .addSelect('time')
       .andWhere('key = :metric', { metric })
-      .orderBy('time', 'ASC')
-      .limit(1)
-      .getRawOne();
-
-    if (!firstRow) {
-      return [];
-    }
-
-    const query = await this.sumDaily
-      .createQueryBuilder()
-      .select("time_bucket_gapfill('1 day', time) as day")
-      .addSelect('sum(sum) as sum')
-      .where('series = :series', { series })
-      .andWhere('key = :metric', { metric })
-      .andWhere('time between :start and now()', {
-        start: firstRow.time,
-      })
-      .groupBy('day')
-      .getRawMany();
-    return (
-      query?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.sum ?? '0',
-          }),
-      ) ?? []
-    );
-  }
-
-  async getTopCollectionsDaily({
-    series,
-    metric,
-  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
-    const firstRow = await this.sumDaily
-      .createQueryBuilder()
-      .select('time')
-      .where('series = :series', { series })
-      .andWhere('key = :metric', { metric })
+      .andWhere(`time between now() - INTERVAL '1 day' and now()`)
       .orderBy('sum', 'DESC')
-      .limit(1)
-      .getRawOne();
+      .groupBy('series, sum, time');
+    const [response, count] = await Promise.all([
+      query.offset(offset).limit(limit).getRawMany(),
+      query.getCount(),
+    ]);
 
-    if (!firstRow) {
-      return [];
-    }
-
-    const query = await this.sumDaily
-      .createQueryBuilder()
-      .select("time_bucket_gapfill('1 day', time) as day")
-      .addSelect('sum(sum) as sum')
-      .where('series = :series', { series })
-      .andWhere('key = :metric', { metric })
-      .andWhere('time between :start and now()', {
-        start: firstRow.time,
-      })
-      .groupBy('day')
-      .getRawMany();
-    return (
-      query?.map(
+    return [
+      response?.map(
         (row) =>
           new HistoricDataModel({
-            timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
+            timestamp: moment.utc(row.time).format('yyyy-MM-DD HH:mm:ss'),
             value: row.sum ?? '0',
+            series: row.series,
           }),
-      ) ?? []
-    );
+      ) ?? [],
+      count ?? 0,
+    ];
   }
 
   async getLatestHistoricData({
@@ -141,14 +95,13 @@ export class AnalyticsDataGetterService {
       .orderBy('timestamp', 'ASC')
       .getRawMany();
 
-    console.log({ query, startDate, endDate })
     return (
       query?.map(
         (row) =>
           new HistoricDataModel({
             timestamp: moment.utc(row.timestamp).format('yyyy-MM-DD HH:mm:ss'),
             value: row.value,
-            series: row.series
+            series: row.series,
           }),
       ) ?? []
     );

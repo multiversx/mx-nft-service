@@ -218,4 +218,9 @@ export class CacheInfo {
     key: 'nftsHolders',
     ttl: 10 * Constants.oneMinute(),
   };
+
+  static CollectionDetails: CacheInfo = {
+    key: 'collectionDetails',
+    ttl: 5 * Constants.oneMinute(),
+  };
 }

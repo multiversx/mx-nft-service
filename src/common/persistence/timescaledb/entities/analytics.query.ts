@@ -1,6 +1,6 @@
 export interface AnalyticsArgs {
-  table: string;
-  series: string;
+  table?: string;
+  series?: string;
   metric: string;
   time?: string;
   start?: string;

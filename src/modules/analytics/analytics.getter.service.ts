@@ -59,9 +59,16 @@ export class AnalyticsGetterService {
   async getValues24h(
     series: string,
     metric: string,
-  ): Promise<HistoricDataModel[]> {
+  ): Promise<[HistoricDataModel[], number]> {
     const cacheKey = this.getAnalyticsCacheKey('values24h', series, metric);
-    return await this.cachingService.getCache(cacheKey);
+    return await this.cachingService.getOrSetCache(
+      cacheKey,
+      () =>
+        this.analyticsQuery.getTopCollectionsDaily({
+          metric,
+        }),
+      Constants.oneMinute() * 2,
+    );
   }
 
   async getLatestHistoricData(
@@ -92,28 +99,20 @@ export class AnalyticsGetterService {
   }
 
   async getTopCollectionsDaily(
-    time: string,
-    series: string,
     metric: string,
-    start: string,
-  ): Promise<HistoricDataModel[]> {
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<[HistoricDataModel[], number]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'getTopCollectionsDaily',
-      time,
-      series,
       metric,
-      start,
+      limit,
+      offset,
     );
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
-        this.analyticsQuery.getTopCollectionsDaily({
-          table: 'hyper_nfts_analytics',
-          series,
-          metric,
-          time,
-          start,
-        }),
+        this.analyticsQuery.getTopCollectionsDaily({ metric }, limit, offset),
       Constants.oneMinute() * 2,
     );
   }

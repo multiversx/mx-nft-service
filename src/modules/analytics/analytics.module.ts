@@ -22,6 +22,8 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { GeneralAnalyticsService } from './general-analytics.service';
 import { CollectionsAnalyticsResolver } from './collections-analytics.resolver';
 import { CollectionsAnalyticsService } from './collections-analytics.service';
+import { CollectionDetailsProvider } from './loaders/collection-details.loader';
+import { CollectionDetailsRedisHandler } from './loaders/collection-details.redis-handler';
 
 @Module({
   providers: [
@@ -39,7 +41,9 @@ import { CollectionsAnalyticsService } from './collections-analytics.service';
     GeneralAnalyticsResolver,
     GeneralAnalyticsService,
     CollectionsAnalyticsResolver,
-    CollectionsAnalyticsService
+    CollectionsAnalyticsService,
+    CollectionDetailsProvider,
+    CollectionDetailsRedisHandler,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -57,7 +61,7 @@ import { CollectionsAnalyticsService } from './collections-analytics.service';
     ElasticAnalyticsService,
     AnalyticsService,
     GeneralAnalyticsService,
-    CollectionsAnalyticsService
+    CollectionsAnalyticsService,
   ],
 })
-export class AnalyticsModule { }
+export class AnalyticsModule {}
