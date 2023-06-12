@@ -12,7 +12,7 @@ export class MxDataApiService {
     private readonly apiConfigService: ApiConfigService,
     private readonly apiService: ApiService,
   ) {
-    this.url = this.apiConfigService.getToolsUrl();
+    this.url = this.apiConfigService.getPublicDataApi();
   }
 
   async getCexPrice(timestamp: string): Promise<number> {
