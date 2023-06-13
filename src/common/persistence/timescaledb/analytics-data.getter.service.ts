@@ -10,6 +10,7 @@ import {
 } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
 import { SumDaily } from './entities/sum-daily.entity';
+import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
 
 @Injectable()
 export class AnalyticsDataGetterService {
@@ -45,7 +46,7 @@ export class AnalyticsDataGetterService {
     { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const query = this.sumDaily
       .createQueryBuilder()
       .select('sum(sum) as sum')
@@ -64,14 +65,7 @@ export class AnalyticsDataGetterService {
     ]);
 
     return [
-      response?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.time).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.sum ?? '0',
-            series: row.series,
-          }),
-      ) ?? [],
+      response?.map((row) => AggregateValue.fromDataApi(row)) ?? [],
       count ?? 0,
     ];
   }
@@ -81,11 +75,11 @@ export class AnalyticsDataGetterService {
     series,
     metric,
     start,
-  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
+  }: AnalyticsArgs): Promise<AggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.sumDaily
       .createQueryBuilder()
-      .select("time_bucket_gapfill('1 day', time) as day")
+      .select("time_bucket_gapfill('1 day', time) as timestamp")
       .addSelect('sum(sum) as sum')
       .addSelect('max(sum) as max')
       .addSelect('min(sum) as min')
@@ -95,21 +89,11 @@ export class AnalyticsDataGetterService {
         endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
         { startDate, endDate },
       )
-      .orderBy('day', 'ASC')
-      .groupBy('day')
+      .orderBy('timestamp', 'ASC')
+      .groupBy('timestamp')
       .getRawMany();
 
-    return (
-      query?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.sum ?? 0,
-            max: row.max ?? 0,
-            min: row.min ?? 0,
-          }),
-      ) ?? []
-    );
+    return query?.map((row) => AggregateValue.fromDataApi(row)) ?? [];
   }
 
   async getLatestBinnedHistoricData({

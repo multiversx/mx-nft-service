@@ -5,6 +5,7 @@ import { AnalyticsDataGetterService } from 'src/common/persistence/timescaledb/a
 import { HistoricDataModel } from './models/analytics.model';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AnalyticsArgs } from 'src/common/persistence/timescaledb/entities/analytics.query';
+import { AggregateValue } from './models/aggregate-value';
 
 @Injectable()
 export class AnalyticsGetterService {
@@ -60,7 +61,7 @@ export class AnalyticsGetterService {
   async getValues24h(
     series: string,
     metric: string,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const cacheKey = this.getAnalyticsCacheKey('values24h', series, metric);
     return await this.cachingService.getOrSetCache(
       cacheKey,
@@ -76,7 +77,7 @@ export class AnalyticsGetterService {
     time: string,
     series: string,
     metric: string,
-  ): Promise<HistoricDataModel[]> {
+  ): Promise<AggregateValue[]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'volumeData',
       time,
@@ -99,7 +100,7 @@ export class AnalyticsGetterService {
     { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'getTopCollectionsDaily',
       metric,

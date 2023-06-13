@@ -59,6 +59,7 @@ type AggregateValue {
   count: Float
   max: Float
   min: Float
+  series: String
   sum: Float
   time: String
 }
@@ -576,7 +577,7 @@ type CollectionsAnalyticsModel {
   floorPrice: Float!
   holders: Int!
   volume24h: Float
-  volumeData(input: AnalyticsArgs): [HistoricDataModel!]!
+  volumeData(input: AnalyticsArgs): [AggregateValue!]!
 }
 
 type CollectionsAnalyticsModelEdge {
@@ -1251,7 +1252,6 @@ type Query {
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
   latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
-  latestHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
@@ -1263,7 +1263,6 @@ type Query {
   primarySale(filters: PrimarySaleFilter!): PrimarySale!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
-  topCollectionsDaily(input: AnalyticsArgs!): [HistoricDataModel!]!
   trendingAssets: [Asset!]!
   values24hSum(input: AnalyticsArgs!): [HistoricDataModel!]!
 }

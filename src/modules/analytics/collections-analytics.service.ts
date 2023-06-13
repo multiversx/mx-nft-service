@@ -1,5 +1,5 @@
 import { MxToolsService } from 'src/common/services/mx-communication/mx-tools.service';
-import { AnalyticsInput } from './models/AnalyticsInput';
+import { AnalyticsInput } from './models/analytics-input.model';
 import { MxElasticService } from 'src/common';
 import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
@@ -9,7 +9,6 @@ import { AggregateValue } from './models/aggregate-value';
 import { CollectionsAnalyticsModel } from './models/collections-stats.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AnalyticsGetterService } from './analytics.getter.service';
-import { HistoricDataModel } from './models/analytics.model';
 
 @Injectable()
 export class CollectionsAnalyticsService {
@@ -83,7 +82,7 @@ export class CollectionsAnalyticsService {
     time: string,
     series: string,
     metric: string,
-  ): Promise<HistoricDataModel[]> {
+  ): Promise<AggregateValue[]> {
     return await this.analyticsGetter.getVolumeDataForTimePeriod(
       time,
       series,

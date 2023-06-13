@@ -1,4 +1,4 @@
-import { Field, GraphQLISODateTime, InputType } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { TimeResolutionsEnum } from './time-resolutions.enum';
 import { TimeRangeEnum } from './time-range.enum';
 

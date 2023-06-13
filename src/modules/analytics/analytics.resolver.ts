@@ -1,7 +1,7 @@
 import { Query } from '@nestjs/graphql';
 import { Args, Resolver } from '@nestjs/graphql';
 import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
-import { AnalyticsArgs } from './models/AnalyticsArgs';
+import { AnalyticsArgs } from './models/analytics-args.model';
 import { AnalyticsGetterService } from './analytics.getter.service';
 
 @Resolver()
@@ -23,28 +23,6 @@ export class AnalyticsResolver {
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
     return await this.analyticsGetter.getValues24hSum(
-      input.series,
-      input.metric,
-    );
-  }
-
-  @Query(() => [HistoricDataModel])
-  async latestHistoricData(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getVolumeDataForTimePeriod(
-      input.time,
-      input.series,
-      input.metric,
-    );
-  }
-
-  @Query(() => [HistoricDataModel])
-  async topCollectionsDaily(
-    @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
-  ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getVolumeDataForTimePeriod(
-      input.time,
       input.series,
       input.metric,
     );
