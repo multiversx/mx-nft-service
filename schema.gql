@@ -513,7 +513,7 @@ type CollectionResponse {
 }
 
 type CollectionRole {
-  address: String!
+  address: String
   canAddQuantity: Boolean
   canAddUri: Boolean
   canBurn: Boolean

@@ -131,7 +131,7 @@ export class Collection {
 
 @ObjectType()
 export class CollectionRole {
-  @Field()
+  @Field({ nullable: true })
   address?: string;
   @Field({ nullable: true })
   canCreate: boolean;
