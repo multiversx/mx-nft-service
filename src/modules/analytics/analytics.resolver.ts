@@ -1,4 +1,3 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { Query } from '@nestjs/graphql';
 import { Args, Resolver } from '@nestjs/graphql';
 import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
@@ -7,7 +6,7 @@ import { AnalyticsGetterService } from './analytics.getter.service';
 
 @Resolver()
 export class AnalyticsResolver {
-  constructor(private readonly analyticsGetter: AnalyticsGetterService) { }
+  constructor(private readonly analyticsGetter: AnalyticsGetterService) {}
 
   @Query(() => [HistoricDataModel])
   async values24hSum(
@@ -33,11 +32,10 @@ export class AnalyticsResolver {
   async latestHistoricData(
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getLatestHistoricData(
+    return this.analyticsGetter.getVolumeDataForTimePeriod(
       input.time,
       input.series,
       input.metric,
-      input.start,
     );
   }
 
@@ -45,11 +43,10 @@ export class AnalyticsResolver {
   async topCollectionsDaily(
     @Args('input', { type: () => AnalyticsArgs }) input: AnalyticsArgs,
   ): Promise<HistoricDataModel[]> {
-    return this.analyticsGetter.getLatestHistoricData(
+    return this.analyticsGetter.getVolumeDataForTimePeriod(
       input.time,
       input.series,
       input.metric,
-      input.start,
     );
   }
 
@@ -61,8 +58,6 @@ export class AnalyticsResolver {
       input.time,
       input.series,
       input.metric,
-      input.bin,
-      input.start,
     );
   }
 }

@@ -42,7 +42,7 @@ export class AnalyticsDataGetterService {
   }
 
   async getTopCollectionsDaily(
-    { metric }: AnalyticsArgs,
+    { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
   ): Promise<[HistoricDataModel[], number]> {
@@ -55,6 +55,9 @@ export class AnalyticsDataGetterService {
       .andWhere(`time between now() - INTERVAL '1 day' and now()`)
       .orderBy('sum', 'DESC')
       .groupBy('series, sum, time');
+    if (series) {
+      query.andWhere('series = :series', { series });
+    }
     const [response, count] = await Promise.all([
       query.offset(offset).limit(limit).getRawMany(),
       query.getCount(),
@@ -73,35 +76,33 @@ export class AnalyticsDataGetterService {
     ];
   }
 
-  async getLatestHistoricData({
+  async getVolumeData({
     time,
     series,
     metric,
     start,
   }: AnalyticsArgs): Promise<HistoricDataModel[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
-    const query = await this.nftsAnalytics
+    const query = await this.sumDaily
       .createQueryBuilder()
-      .select('timestamp')
-      .addSelect('value')
-      .addSelect('series')
+      .select("time_bucket_gapfill('1 day', time) as day")
+      .addSelect('sum(sum) as sum')
       .where('key = :metric', { metric })
+      .andWhere('series = :series', { series })
       .andWhere(
-        endDate
-          ? 'timestamp BETWEEN :startDate AND :endDate'
-          : 'timestamp >= :startDate',
+        endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
         { startDate, endDate },
       )
-      .orderBy('timestamp', 'ASC')
+      .orderBy('day', 'ASC')
+      .groupBy('day')
       .getRawMany();
 
     return (
       query?.map(
         (row) =>
           new HistoricDataModel({
-            timestamp: moment.utc(row.timestamp).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.value,
-            series: row.series,
+            timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
+            value: row.sum ?? 0,
           }),
       ) ?? []
     );

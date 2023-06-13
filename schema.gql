@@ -64,10 +64,8 @@ type AggregateValue {
 }
 
 input AnalyticsArgs {
-  bin: String
   metric: String!
   series: String
-  start: String
   time: String
 }
 
@@ -574,6 +572,7 @@ type CollectionsAnalyticsModel {
   floorPrice: Float!
   holders: Int!
   volume24h: String!
+  volumeData(input: AnalyticsArgs): [HistoricDataModel!]!
 }
 
 type CollectionsAnalyticsModelEdge {
@@ -1235,7 +1234,7 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
-  collectionsAnalytics(pagination: ConnectionArgs): CollectionsAnalyticsResponse!
+  collectionsAnalytics(input: AnalyticsArgs, pagination: ConnectionArgs): CollectionsAnalyticsResponse!
   currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
   exploreCollectionsStats: ExploreCollectionsStats!
   exploreNftsStats: ExploreNftsStats!

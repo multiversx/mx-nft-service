@@ -19,11 +19,4 @@ export class AnalyticsArgs {
   @Field({ nullable: true })
   @Matches(new RegExp('[1-60][s,m,h,d]'))
   time: string;
-  @IsOptional()
-  @Field({ nullable: true })
-  start: string;
-  @IsOptional()
-  @Field({ nullable: true })
-  @Matches(new RegExp('[1-60][s,m,h,d]'))
-  bin: string;
 }

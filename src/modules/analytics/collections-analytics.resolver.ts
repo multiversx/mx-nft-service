@@ -8,6 +8,8 @@ import PageResponse from '../common/PageResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionsDetailsModel } from './models/collections-details.model';
+import { AnalyticsArgs } from './models/AnalyticsArgs';
+import { HistoricDataModel } from './models/analytics.model';
 
 @Resolver(() => CollectionsAnalyticsModel)
 export class CollectionsAnalyticsResolver extends BaseResolver(
@@ -24,12 +26,15 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
   async collectionsAnalytics(
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
+    @Args('input', { type: () => AnalyticsArgs, nullable: true })
+    input: AnalyticsArgs,
   ): Promise<CollectionsAnalyticsResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] =
       await this.generalAnalyticsService.getCollectionsOrderByVolum(
         limit,
         offset,
+        input.series,
       );
     return PageResponse.mapResponse<CollectionsAnalyticsModel>(
       collections || [],
@@ -60,5 +65,18 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
       collection.collectionIdentifier,
     );
     return collectionDetails?.value ?? null;
+  }
+
+  @ResolveField('volumeData', () => [HistoricDataModel])
+  async volumeData(
+    @Args('input', { type: () => AnalyticsArgs, nullable: true })
+    input: AnalyticsArgs,
+    @Parent() collection: CollectionsAnalyticsModel,
+  ) {
+    return await this.generalAnalyticsService.getVolumeForTimePeriod(
+      input.time,
+      collection.collectionIdentifier,
+      input.metric,
+    );
   }
 }
