@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { HistoricDataModel } from './analytics.model';
 import { CollectionsDetailsModel } from './collections-details.model';
 
@@ -10,8 +10,8 @@ export class CollectionsAnalyticsModel {
   details: CollectionsDetailsModel;
   @Field(() => Int)
   holders: number;
-  @Field()
-  volume24h: string;
+  @Field(() => Float, { nullable: true })
+  volume24h: number;
   @Field()
   floorPrice: number;
 

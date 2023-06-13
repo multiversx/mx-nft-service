@@ -87,6 +87,8 @@ export class AnalyticsDataGetterService {
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as day")
       .addSelect('sum(sum) as sum')
+      .addSelect('max(sum) as max')
+      .addSelect('min(sum) as min')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(
@@ -103,6 +105,8 @@ export class AnalyticsDataGetterService {
           new HistoricDataModel({
             timestamp: moment.utc(row.day).format('yyyy-MM-DD HH:mm:ss'),
             value: row.sum ?? 0,
+            max: row.max ?? 0,
+            min: row.min ?? 0,
           }),
       ) ?? []
     );

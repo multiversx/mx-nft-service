@@ -78,7 +78,7 @@ export class AnalyticsGetterService {
     metric: string,
   ): Promise<HistoricDataModel[]> {
     const cacheKey = this.getAnalyticsCacheKey(
-      'latestHistoricData',
+      'volumeData',
       time,
       series,
       metric,
@@ -87,7 +87,6 @@ export class AnalyticsGetterService {
       cacheKey,
       () =>
         this.analyticsQuery.getVolumeData({
-          table: 'hyper_nfts_analytics',
           series,
           metric,
           time,

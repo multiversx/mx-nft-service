@@ -6,6 +6,16 @@ import {
 } from 'src/utils/constants';
 
 @InputType()
+export class CollectionAnalyticsArgs {
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+  })
+  @Field(() => String, { nullable: true })
+  series: string;
+}
+
+@InputType()
 export class AnalyticsArgs {
   @IsOptional()
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {

@@ -8,7 +8,7 @@ import PageResponse from '../common/PageResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionsDetailsModel } from './models/collections-details.model';
-import { AnalyticsArgs } from './models/AnalyticsArgs';
+import { AnalyticsArgs, CollectionAnalyticsArgs } from './models/AnalyticsArgs';
 import { HistoricDataModel } from './models/analytics.model';
 
 @Resolver(() => CollectionsAnalyticsModel)
@@ -26,8 +26,8 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
   async collectionsAnalytics(
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
-    @Args('input', { type: () => AnalyticsArgs, nullable: true })
-    input: AnalyticsArgs,
+    @Args('input', { type: () => CollectionAnalyticsArgs, nullable: true })
+    input: CollectionAnalyticsArgs,
   ): Promise<CollectionsAnalyticsResponse> {
     const { limit, offset } = pagination.pagingParams();
     const [collections, count] =
