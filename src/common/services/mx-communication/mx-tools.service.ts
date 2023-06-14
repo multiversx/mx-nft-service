@@ -78,6 +78,10 @@ export class MxToolsService {
       nfts {
         count(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
           time
+          avg
+          count
+          max
+          min
           sum
         }
       }
@@ -89,6 +93,10 @@ export class MxToolsService {
       nfts {
         count24h(query: { range: ${input.range}, resolution:  ${input.resolution} }) {
           time
+          avg
+          count
+          max
+          min
           sum
         }
       }
@@ -100,6 +108,10 @@ export class MxToolsService {
       nfts {
         active_nfts(query: { range: ${input.range}, resolution:  ${input.resolution}}) {
           time
+          avg
+          count
+          max
+          min
           sum
         }
       }

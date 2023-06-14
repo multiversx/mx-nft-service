@@ -55,6 +55,10 @@ input AddLikeArgs {
 }
 
 type AggregateValue {
+  avg: Float
+  count: Float
+  max: Float
+  min: Float
   series: String
   sum: Float
   time: String
