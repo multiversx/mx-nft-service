@@ -11,7 +11,7 @@ import { PrimaryColumn, ViewColumn, ViewEntity } from 'typeorm';
   `,
   materialized: true,
   database: 'timescaledb',
-  name: 'sum_weekly',
+  name: 'nfts_sum_weekly',
 })
 export class SumWeekly {
   @ViewColumn()

@@ -10,7 +10,7 @@ import { PrimaryColumn, ViewColumn, ViewEntity } from 'typeorm';
     GROUP BY time, series, key;
   `,
   materialized: true,
-  name: 'sum_daily',
+  name: 'nfts_sum_daily',
 })
 export class SumDaily {
   @ViewColumn()
