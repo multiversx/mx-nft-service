@@ -207,7 +207,6 @@ export class AnalyticsService {
       case ExternalAuctionEventEnum.Buy:
       case ExternalAuctionEventEnum.BuyNft:
       case ExternalAuctionEventEnum.BuyFor:
-      case ElrondNftsSwapAuctionEventEnum.Purchase:
         parsedEvent = await this.buyEventHandler.handle(
           rawEvent,
           eventsTimestamp,
