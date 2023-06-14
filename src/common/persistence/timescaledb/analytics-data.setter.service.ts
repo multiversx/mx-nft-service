@@ -11,7 +11,7 @@ export class AnalyticsDataSetterService {
     private readonly logger: Logger,
     @InjectRepository(XNftsAnalyticsEntity, 'timescaledb')
     private nftAnalyticsRepo: Repository<XNftsAnalyticsEntity>,
-  ) { }
+  ) {}
 
   async ingest({ data, timestamp, ingestLast }): Promise<void> {
     if (!ingestLast) {
@@ -38,7 +38,7 @@ export class AnalyticsDataSetterService {
       this.logger.error(
         `Could not insert ${this.pendingRecords.length} records into TimescaleDb, ${error}}`,
       );
-      throw error;
+      return;
     }
   }
 
@@ -54,7 +54,6 @@ export class AnalyticsDataSetterService {
         .orUpdate(['value'], ['timestamp', 'series', 'key']);
 
       await query.execute();
-
     } catch (error) {
       this.logger.error(
         `Could not insert ${data} records into TimescaleDb, ${error}}`,
@@ -62,7 +61,6 @@ export class AnalyticsDataSetterService {
       throw error;
     }
   }
-
 
   createRecords({ data, timestamp }): XNftsAnalyticsEntity[] {
     const records: XNftsAnalyticsEntity[] = [];
