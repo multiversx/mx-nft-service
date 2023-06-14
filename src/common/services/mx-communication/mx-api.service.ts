@@ -633,9 +633,9 @@ export class MxApiService {
     );
     return token
       ? new Token({
-        ...token,
-        symbol: token.ticker,
-      })
+          ...token,
+          symbol: token.ticker,
+        })
       : undefined;
   }
 

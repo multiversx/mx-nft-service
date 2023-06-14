@@ -61,6 +61,7 @@ export class AuctionTokenEventsTopics {
       auctionId: this.auctionId,
       nrAuctionTokens: this.nrAuctionTokens,
       minBid: this.minBid,
+      price: this.minBid,
       maxBid: this.maxBid,
       startTime: this.startTime,
       endTime: this.endTime,

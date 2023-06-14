@@ -2,17 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import * as moment from 'moment';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
 import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
-import { CachingService, PerformanceProfiler } from '@multiversx/sdk-nestjs';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import {
   AuctionEventEnum,
+  ElrondNftsSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
 import BigNumber from 'bignumber.js';
 import { trendingEventsEnum } from './trendingEventsEnum';
+import { StartAuctionAnalyticsHandler } from './listing-event-analytics.parser';
 
 @Injectable()
 export class AnalyticsService {
@@ -25,8 +26,9 @@ export class AnalyticsService {
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventAnalyticsParser,
     private readonly acceptEventParser: AcceptOfferEventAnalyticsParser,
+    private readonly startAuctionEventParser: StartAuctionAnalyticsHandler,
     private readonly dataSetterService: AnalyticsDataSetterService,
-  ) { }
+  ) {}
 
   public async indexAnalyticsLogs(
     startDateUtc: number,
@@ -56,10 +58,10 @@ export class AnalyticsService {
     rawEvents: any[],
     startDateUtc: number,
     eventsTimestamp: number,
-    singleEvent: boolean = false,
+    isSingleEvent: boolean = false,
   ): Promise<void> {
-
-    const marketplaceAddresses = await this.marketplacesService.getMarketplacesAddreses();
+    const marketplaceAddresses =
+      await this.marketplacesService.getMarketplacesAddreses();
     const performanceProfiler = new PerformanceProfiler();
 
     const events: any[] = rawEvents.filter(
@@ -76,7 +78,6 @@ export class AnalyticsService {
     for (const rawEvent of events) {
       try {
         let parsedEvent = await this.getParsedEvent(rawEvent, eventsTimestamp);
-
         if (parsedEvent) this.updateIngestData(parsedEvent);
       } catch (error) {
         if (error?.message?.includes('Cannot create address from')) {
@@ -95,7 +96,7 @@ export class AnalyticsService {
         startDateUtc,
       );
       if (isAfter) {
-        await this.ingestEvent(singleEvent, eventsTimestamp);
+        await this.ingestEvent(isSingleEvent, eventsTimestamp);
       }
     }
   }
@@ -136,7 +137,10 @@ export class AnalyticsService {
         this.logger.log(`Fetched ${logs.length} logs on page ${scrollPage}`);
         scrollPage += 1;
 
-        const { blockLogsLength, blockLogs } = this.getBlocksGroupedByTimestamp(logs, lastBlockLogs);
+        const { blockLogsLength, blockLogs } = this.getBlocksGroupedByTimestamp(
+          logs,
+          lastBlockLogs,
+        );
         for (let i = 0; i < blockLogsLength; i++) {
           const eventsRaw = blockLogs[i]
             .map((logs: { events: any }) => logs.events)
@@ -172,19 +176,18 @@ export class AnalyticsService {
     const groupedLogs = logs.groupBy((log) => log.timestamp);
 
     const blockLogs = Array.from(Object.keys(groupedLogs).sort()).map(
-      (key) => groupedLogs[key]
+      (key) => groupedLogs[key],
     );
     if (blockLogs.length > 0) {
       blockLogs[0] = [...lastBlockLogs, ...blockLogs[0]];
 
-      this.logger.log(
-        `Remained logs from last block: ${lastBlockLogs.length}`
-      );
+      this.logger.log(`Remained logs from last block: ${lastBlockLogs.length}`);
     } else {
       blockLogs.push(lastBlockLogs);
     }
 
-    const blockLogsLength = blockLogs.length === 0 ? blockLogs.length : blockLogs.length - 1;
+    const blockLogsLength =
+      blockLogs.length === 0 ? blockLogs.length : blockLogs.length - 1;
     return { blockLogsLength, blockLogs };
   }
 
@@ -195,7 +198,7 @@ export class AnalyticsService {
       case ExternalAuctionEventEnum.AcceptGlobalOffer:
         parsedEvent = await this.acceptEventParser.handle(
           rawEvent,
-          eventsTimestamp
+          eventsTimestamp,
         );
         break;
       case AuctionEventEnum.BuySftEvent:
@@ -204,9 +207,19 @@ export class AnalyticsService {
       case ExternalAuctionEventEnum.Buy:
       case ExternalAuctionEventEnum.BuyNft:
       case ExternalAuctionEventEnum.BuyFor:
+      case ElrondNftsSwapAuctionEventEnum.Purchase:
         parsedEvent = await this.buyEventHandler.handle(
           rawEvent,
-          eventsTimestamp
+          eventsTimestamp,
+        );
+        break;
+      case AuctionEventEnum.AuctionTokenEvent:
+      case ExternalAuctionEventEnum.ListNftOnMarketplace:
+      case ExternalAuctionEventEnum.Listing:
+      case ElrondNftsSwapAuctionEventEnum.NftSwap:
+        parsedEvent = await this.startAuctionEventParser.handle(
+          rawEvent,
+          eventsTimestamp,
         );
         break;
     }
@@ -219,8 +232,7 @@ export class AnalyticsService {
         data: this.data,
         timestamp: eventsTimestamp,
       });
-    }
-    else {
+    } else {
       await this.dataSetterService.ingest({
         data: this.data,
         timestamp: eventsTimestamp,
@@ -239,15 +251,29 @@ export class AnalyticsService {
         if (measure.toLowerCase().includes('volume')) {
           this.data[series][measure] = this.data[series][measure]
             ? new BigNumber(this.data[series][measure])
-              .plus(eventData[series][measure])
-              .toFixed()
+                .plus(eventData[series][measure])
+                .toFixed()
             : eventData[series][measure];
         }
         if (measure.toLowerCase().includes('volumeUSD')) {
           this.data[series][measure] = this.data[series][measure]
             ? new BigNumber(this.data[series][measure])
-              .plus(eventData[series][measure])
-              .toFixed()
+                .plus(eventData[series][measure])
+                .toFixed()
+            : eventData[series][measure];
+        }
+        if (measure.toLowerCase().includes('floorPrice')) {
+          this.data[series][measure] = this.data[series][measure]
+            ? new BigNumber(this.data[series][measure])
+                .plus(eventData[series][measure])
+                .toFixed()
+            : eventData[series][measure];
+        }
+        if (measure.toLowerCase().includes('floorPriceUSD')) {
+          this.data[series][measure] = this.data[series][measure]
+            ? new BigNumber(this.data[series][measure])
+                .plus(eventData[series][measure])
+                .toFixed()
             : eventData[series][measure];
         } else {
           this.data[series][measure] = eventData[series][measure];

@@ -7,4 +7,8 @@ export const trendingEventsEnum = [
   'acceptOffer',
   'bid',
   'purchase',
+  'auctionToken',
+  'listing',
+  'listNftOnMarketplace',
+  'nftSwap',
 ];
