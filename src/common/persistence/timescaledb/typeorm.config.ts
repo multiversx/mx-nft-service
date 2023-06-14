@@ -1,16 +1,18 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
-import * as dotenvExpand from 'dotenv-expand';
+import { ConfigService } from '@nestjs/config';
 
-dotenvExpand.expand(dotenv.config());
+dotenv.config();
+
+const configService = new ConfigService();
 
 export default new DataSource({
   type: 'postgres',
-  host: process.env.TIMESCALEDB_URL,
-  port: parseInt(process.env.TIMESCALEDB_PORT),
-  username: process.env.TIMESCALEDB_USERNAME,
-  password: process.env.TIMESCALEDB_PASSWORD,
-  database: process.env.TIMESCALEDB_DATABASE,
+  host: configService.get('TIMESCALEDB_URL'),
+  port: configService.get('TIMESCALEDB_PORT'),
+  username: configService.get('TIMESCALEDB_USERNAME'),
+  password: configService.get('TIMESCALEDB_PASSWORD'),
+  database: configService.get('TIMESCALEDB_DATABASE'),
   migrationsTransactionMode: 'none',
   entities: ['dist/common/**/**/entities/*.entity.{js,ts}'],
   migrations: ['dist/common/persistence/timescaledb/migrations/*.js'],
