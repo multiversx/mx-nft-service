@@ -8,7 +8,7 @@ import { MxElasticService } from 'src/common';
 
 @Injectable()
 export class ElasticAnalyticsService {
-  constructor(private readonly elasticService: MxElasticService) { }
+  constructor(private readonly elasticService: MxElasticService) {}
 
   public async getAllEvents(
     startDateUtc: number,
@@ -63,8 +63,8 @@ export class ElasticAnalyticsService {
 
     eventGroups.sort(
       (a, b) =>
-        new Date(a._source.timestamp).getTime() -
-        new Date(b._source.timestamp).getTime(),
+        new Date(a._source?.timestamp).getTime() -
+        new Date(b._source?.timestamp).getTime(),
     );
 
     return eventGroups;

@@ -153,7 +153,7 @@ export class AnalyticsService {
           await this.processEvents(
             events,
             startDateUtc,
-            blockLogs[i][0].timestamp,
+            blockLogs[i][0]?.timestamp,
           );
         }
 
