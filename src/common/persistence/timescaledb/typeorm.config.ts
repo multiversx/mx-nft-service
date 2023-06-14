@@ -11,7 +11,7 @@ export default new DataSource({
   username: process.env.TIMESCALEDB_USERNAME,
   password: process.env.TIMESCALEDB_PASSWORD,
   database: process.env.TIMESCALEDB_DATABASE,
-  migrationsTransactionMode: 'each',
+  migrationsTransactionMode: 'none',
   entities: ['dist/common/**/**/entities/*.entity.{js,ts}'],
   migrations: ['dist/common/persistence/timescaledb/migrations/*.js'],
 });
