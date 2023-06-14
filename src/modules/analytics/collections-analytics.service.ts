@@ -63,7 +63,7 @@ export class CollectionsAnalyticsService {
   public async getCollectionsOrderByVolum(
     limit: number = 10,
     offset: number = 0,
-    series: string = '',
+    series: string = null,
   ): Promise<[CollectionsAnalyticsModel[], number]> {
     const [collections, count] =
       await this.analyticsGetter.getTopCollectionsDaily(

@@ -108,22 +108,14 @@ export class AnalyticsGetterService {
       offset,
       series,
     );
-    if (series !== '') {
-      return await this.cachingService.getOrSetCache(
-        cacheKey,
-        () =>
-          this.analyticsQuery.getTopCollectionsDaily(
-            { metric, series },
-            limit,
-            offset,
-          ),
-        Constants.oneMinute() * 2,
-      );
-    }
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
-        this.analyticsQuery.getTopCollectionsDaily({ metric }, limit, offset),
+        this.analyticsQuery.getTopCollectionsDaily(
+          { metric, series },
+          limit,
+          offset,
+        ),
       Constants.oneMinute() * 2,
     );
   }

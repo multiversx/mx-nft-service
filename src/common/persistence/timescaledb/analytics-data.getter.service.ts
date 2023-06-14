@@ -81,8 +81,6 @@ export class AnalyticsDataGetterService {
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as timestamp")
       .addSelect('sum(sum) as sum')
-      .addSelect('max(sum) as max')
-      .addSelect('min(sum) as min')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(
