@@ -12,6 +12,7 @@ import { ElrondSwapAuctionEvent } from '../rabbitmq/entities/auction/elrondnftsw
 import { ListNftEvent } from '../rabbitmq/entities/auction/listNft.event';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
+import BigNumber from 'bignumber.js';
 
 @Injectable()
 export class StartAuctionAnalyticsHandler {
@@ -39,25 +40,30 @@ export class StartAuctionAnalyticsHandler {
     );
 
     const data = [];
-    data[topics.collection] = {
-      usdPrice: tokenPrice ?? 0,
-      floorPrice: BigNumberUtils.denominateAmount(
-        topics.price,
-        tokenData?.decimals ?? 18,
-      ),
-      floorPriceUSD:
-        topics.price === '0' || !tokenPrice
-          ? '0'
-          : computeUsd(
-              tokenPrice?.toString() ?? '0',
-              topics.price,
-              tokenData?.decimals ?? 18,
-            ).toFixed(),
-      paymentToken: tokenData?.identifier,
-      marketplaceKey: marketplace.key,
-    };
 
-    return data;
+    const floorPrice = BigNumberUtils.denominateAmount(
+      topics.price,
+      tokenData?.decimals ?? 18,
+    );
+
+    if (floorPrice < Math.pow(10, 128)) {
+      data[topics.collection] = {
+        usdPrice: tokenPrice ?? 0,
+        floorPrice: floorPrice,
+        floorPriceUSD:
+          topics.price === '0' || !tokenPrice
+            ? '0'
+            : computeUsd(
+                tokenPrice?.toString() ?? '0',
+                topics.price,
+                tokenData?.decimals ?? 18,
+              ).toFixed(),
+        paymentToken: tokenData?.identifier,
+        marketplaceKey: marketplace.key,
+      };
+
+      return data;
+    }
   }
 
   private getEventAndTopics(event: any) {
