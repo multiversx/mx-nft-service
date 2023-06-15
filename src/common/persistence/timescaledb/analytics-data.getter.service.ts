@@ -65,6 +65,9 @@ export class AnalyticsDataGetterService {
       query.offset(offset).limit(limit).getRawMany(),
       query.getCount(),
     ]);
+    if (series && count === 0) {
+      return [[new AggregateValue({ sum: 0, series: series })], 1];
+    }
 
     return [
       response?.map((row) => AggregateValue.fromDataApi(row)) ?? [],
