@@ -10,6 +10,7 @@ import {
 } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
 import { SumDaily } from './entities/sum-daily.entity';
+import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
 
 @Injectable()
 export class AnalyticsDataGetterService {
@@ -42,10 +43,10 @@ export class AnalyticsDataGetterService {
   }
 
   async getTopCollectionsDaily(
-    { metric }: AnalyticsArgs,
+    { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const query = this.sumDaily
       .createQueryBuilder()
       .select('sum(sum) as sum')
@@ -55,56 +56,42 @@ export class AnalyticsDataGetterService {
       .andWhere(`time between now() - INTERVAL '1 day' and now()`)
       .orderBy('sum', 'DESC')
       .groupBy('series, sum, time');
+    if (series) {
+      query.andWhere('series = :series', { series });
+    }
     const [response, count] = await Promise.all([
       query.offset(offset).limit(limit).getRawMany(),
       query.getCount(),
     ]);
 
     return [
-      response?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.time).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.sum ?? '0',
-            series: row.series,
-          }),
-      ) ?? [],
+      response?.map((row) => AggregateValue.fromDataApi(row)) ?? [],
       count ?? 0,
     ];
   }
 
-  async getLatestHistoricData({
+  async getVolumeData({
     time,
     series,
     metric,
     start,
-  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
+  }: AnalyticsArgs): Promise<AggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
-    const query = await this.nftsAnalytics
+    const query = await this.sumDaily
       .createQueryBuilder()
-      .select('timestamp')
-      .addSelect('value')
-      .addSelect('series')
+      .select("time_bucket_gapfill('1 day', time) as timestamp")
+      .addSelect('sum(sum) as sum')
       .where('key = :metric', { metric })
+      .andWhere('series = :series', { series })
       .andWhere(
-        endDate
-          ? 'timestamp BETWEEN :startDate AND :endDate'
-          : 'timestamp >= :startDate',
+        endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
         { startDate, endDate },
       )
       .orderBy('timestamp', 'ASC')
+      .groupBy('timestamp')
       .getRawMany();
 
-    return (
-      query?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.timestamp).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.value,
-            series: row.series,
-          }),
-      ) ?? []
-    );
+    return query?.map((row) => AggregateValue.fromDataApi(row)) ?? [];
   }
 
   async getLatestBinnedHistoricData({

@@ -6,6 +6,16 @@ import {
 } from 'src/utils/constants';
 
 @InputType()
+export class CollectionAnalyticsArgs {
+  @IsOptional()
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+  })
+  @Field(() => String, { nullable: true })
+  series: string;
+}
+
+@InputType()
 export class AnalyticsArgs {
   @IsOptional()
   @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
@@ -19,11 +29,4 @@ export class AnalyticsArgs {
   @Field({ nullable: true })
   @Matches(new RegExp('[1-60][s,m,h,d]'))
   time: string;
-  @IsOptional()
-  @Field({ nullable: true })
-  start: string;
-  @IsOptional()
-  @Field({ nullable: true })
-  @Matches(new RegExp('[1-60][s,m,h,d]'))
-  bin: string;
 }

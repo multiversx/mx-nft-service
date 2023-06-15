@@ -1,4 +1,3 @@
-
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { NativeAuthSigner } from '@multiversx/sdk-nestjs/lib/src/utils/native.auth.signer';
@@ -7,7 +6,7 @@ import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
-import { AnalyticsInput } from 'src/modules/analytics/models/AnalyticsInput';
+import { AnalyticsInput } from 'src/modules/analytics/models/analytics-input.model';
 
 @Injectable()
 export class MxToolsService {
@@ -27,65 +26,51 @@ export class MxToolsService {
     });
   }
 
-  async getNftsCount(input: AnalyticsInput
-  ): Promise<AggregateValue[]> {
+  async getNftsCount(input: AnalyticsInput): Promise<AggregateValue[]> {
     try {
       const query = this.getNftsCountQuery(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
-      return res.data?.nfts?.count.map(x => AggregateValue.fromDataApi(x));
+      return res.data?.nfts?.count.map((x) => AggregateValue.fromDataApi(x));
     } catch (error) {
-      this.logger.error(
-        `An error occurred while mapping data api response`,
-        {
-          path: this.getNftsCount.name,
-          input,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while mapping data api response`, {
+        path: this.getNftsCount.name,
+        input,
+        exception: error,
+      });
       return;
     }
-
   }
 
-  async getActiveNftsStats(input: AnalyticsInput
-  ): Promise<AggregateValue[]> {
+  async getActiveNftsStats(input: AnalyticsInput): Promise<AggregateValue[]> {
     try {
       const query = this.getLatestListingNumber(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
-      return res.data?.nfts?.active_nfts.map(x => AggregateValue.fromDataApi(x));
-    } catch (error) {
-      this.logger.error(
-        `An error occurred while mapping data api response`,
-        {
-          path: this.getActiveNftsStats.name,
-          input,
-          exception: error,
-        },
+      return res.data?.nfts?.active_nfts.map((x) =>
+        AggregateValue.fromDataApi(x),
       );
+    } catch (error) {
+      this.logger.error(`An error occurred while mapping data api response`, {
+        path: this.getActiveNftsStats.name,
+        input,
+        exception: error,
+      });
       return;
     }
-
   }
 
-
-  async getLast24HActive(input: AnalyticsInput
-  ): Promise<AggregateValue[]> {
+  async getLast24HActive(input: AnalyticsInput): Promise<AggregateValue[]> {
     try {
       const query = this.getNftsCountLast24h(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
-      return res.data?.nfts?.count24h.map(x => AggregateValue.fromDataApi(x));
+      return res.data?.nfts?.count24h.map((x) => AggregateValue.fromDataApi(x));
     } catch (error) {
-      this.logger.error(
-        `An error occurred while mapping data api response`,
-        {
-          path: this.getLast24HActive.name,
-          input,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while mapping data api response`, {
+        path: this.getLast24HActive.name,
+        input,
+        exception: error,
+      });
       return;
     }
-
   }
 
   private getNftsCountQuery(input: AnalyticsInput): string {
@@ -117,7 +102,6 @@ export class MxToolsService {
       }
     }`;
   }
-
 
   private getLatestListingNumber(input: AnalyticsInput): string {
     return `{

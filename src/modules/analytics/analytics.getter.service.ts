@@ -4,6 +4,8 @@ import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { AnalyticsDataGetterService } from 'src/common/persistence/timescaledb/analytics-data.getter.service';
 import { HistoricDataModel } from './models/analytics.model';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { AnalyticsArgs } from 'src/common/persistence/timescaledb/entities/analytics.query';
+import { AggregateValue } from './models/aggregate-value';
 
 @Injectable()
 export class AnalyticsGetterService {
@@ -59,7 +61,7 @@ export class AnalyticsGetterService {
   async getValues24h(
     series: string,
     metric: string,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const cacheKey = this.getAnalyticsCacheKey('values24h', series, metric);
     return await this.cachingService.getOrSetCache(
       cacheKey,
@@ -71,48 +73,49 @@ export class AnalyticsGetterService {
     );
   }
 
-  async getLatestHistoricData(
+  async getVolumeDataForTimePeriod(
     time: string,
     series: string,
     metric: string,
-    start: string,
-  ): Promise<HistoricDataModel[]> {
+  ): Promise<AggregateValue[]> {
     const cacheKey = this.getAnalyticsCacheKey(
-      'latestHistoricData',
+      'volumeData',
       time,
       series,
       metric,
-      start,
     );
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
-        this.analyticsQuery.getLatestHistoricData({
-          table: 'hyper_nfts_analytics',
+        this.analyticsQuery.getVolumeData({
           series,
           metric,
           time,
-          start,
         }),
       Constants.oneMinute() * 2,
     );
   }
 
   async getTopCollectionsDaily(
-    metric: string,
+    { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[HistoricDataModel[], number]> {
+  ): Promise<[AggregateValue[], number]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'getTopCollectionsDaily',
       metric,
       limit,
       offset,
+      series,
     );
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
-        this.analyticsQuery.getTopCollectionsDaily({ metric }, limit, offset),
+        this.analyticsQuery.getTopCollectionsDaily(
+          { metric, series },
+          limit,
+          offset,
+        ),
       Constants.oneMinute() * 2,
     );
   }
@@ -121,16 +124,12 @@ export class AnalyticsGetterService {
     time: string,
     series: string,
     metric: string,
-    bin: string,
-    start: string,
   ): Promise<HistoricDataModel[]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'latestBinnedHistoricData',
       time,
       series,
       metric,
-      bin,
-      start,
     );
     return await this.cachingService.getOrSetCache(
       cacheKey,
@@ -140,8 +139,6 @@ export class AnalyticsGetterService {
           series,
           metric,
           time,
-          start,
-          bin,
         }),
       Constants.oneMinute() * 2,
     );

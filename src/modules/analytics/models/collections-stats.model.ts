@@ -1,8 +1,6 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { AggregateValue } from './aggregate-value';
-import { Collection } from 'src/modules/nftCollections/models/Collection.dto';
-import { HistoricDataModel } from './analytics.model';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { CollectionsDetailsModel } from './collections-details.model';
+import { AggregateValue } from './aggregate-value';
 
 @ObjectType()
 export class CollectionsAnalyticsModel {
@@ -12,19 +10,22 @@ export class CollectionsAnalyticsModel {
   details: CollectionsDetailsModel;
   @Field(() => Int)
   holders: number;
-  @Field()
-  volume24h: string;
+  @Field(() => Float, { nullable: true })
+  volume24h: number;
   @Field()
   floorPrice: number;
+
+  @Field(() => [AggregateValue])
+  volumeData: AggregateValue[];
 
   constructor(init?: Partial<CollectionsAnalyticsModel>) {
     Object.assign(this, init);
   }
 
-  static fromTimescaleModel(collection: HistoricDataModel) {
+  static fromTimescaleModel(collection: AggregateValue) {
     return new CollectionsAnalyticsModel({
       collectionIdentifier: collection.series,
-      volume24h: collection.value,
+      volume24h: collection.sum,
     });
   }
 }

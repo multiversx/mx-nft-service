@@ -59,15 +59,14 @@ type AggregateValue {
   count: Float
   max: Float
   min: Float
+  series: String
   sum: Float
   time: String
 }
 
 input AnalyticsArgs {
-  bin: String
   metric: String!
   series: String
-  start: String
   time: String
 }
 
@@ -481,6 +480,10 @@ type Collection {
   website: String
 }
 
+input CollectionAnalyticsArgs {
+  series: String
+}
+
 type CollectionAsset {
   assets(input: CollectionAssetsRetriveCount): [CollectionAssetModel]
   totalCount: String
@@ -573,7 +576,8 @@ type CollectionsAnalyticsModel {
   details: CollectionsDetailsModel!
   floorPrice: Float!
   holders: Int!
-  volume24h: String!
+  volume24h: Float
+  volumeData(input: AnalyticsArgs): [AggregateValue!]!
 }
 
 type CollectionsAnalyticsModelEdge {
@@ -767,9 +771,11 @@ input HandleQuantityArgs {
 }
 
 type HistoricDataModel {
-  series: String
+  max: Float
+  min: Float
+  series: String!
   timestamp: String!
-  value: String!
+  value: Float
 }
 
 input HistoryPagination {
@@ -1235,7 +1241,7 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
-  collectionsAnalytics(pagination: ConnectionArgs): CollectionsAnalyticsResponse!
+  collectionsAnalytics(input: CollectionAnalyticsArgs, pagination: ConnectionArgs): CollectionsAnalyticsResponse!
   currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
   exploreCollectionsStats: ExploreCollectionsStats!
   exploreNftsStats: ExploreNftsStats!
@@ -1246,7 +1252,6 @@ type Query {
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
   latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
-  latestHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
@@ -1258,7 +1263,6 @@ type Query {
   primarySale(filters: PrimarySaleFilter!): PrimarySale!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
-  topCollectionsDaily(input: AnalyticsArgs!): [HistoricDataModel!]!
   trendingAssets: [Asset!]!
   values24hSum(input: AnalyticsArgs!): [HistoricDataModel!]!
 }

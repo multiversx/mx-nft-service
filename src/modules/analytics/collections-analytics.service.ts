@@ -1,7 +1,6 @@
 import { MxToolsService } from 'src/common/services/mx-communication/mx-tools.service';
-import { AnalyticsInput } from './models/AnalyticsInput';
+import { AnalyticsInput } from './models/analytics-input.model';
 import { MxElasticService } from 'src/common';
-import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import * as hash from 'object-hash';
@@ -64,10 +63,11 @@ export class CollectionsAnalyticsService {
   public async getCollectionsOrderByVolum(
     limit: number = 10,
     offset: number = 0,
+    series: string = null,
   ): Promise<[CollectionsAnalyticsModel[], number]> {
     const [collections, count] =
       await this.analyticsGetter.getTopCollectionsDaily(
-        'volumeUSD',
+        { metric: 'volumeUSD', series },
         limit,
         offset,
       );
@@ -78,12 +78,16 @@ export class CollectionsAnalyticsService {
     ];
   }
 
-  public async getVolum24H(
+  public async getVolumeForTimePeriod(
+    time: string,
     series: string,
     metric: string,
   ): Promise<AggregateValue[]> {
-    const response = await this.analyticsGetter.getValues24h(series, metric);
-    return response.map((c) => AggregateValue.fromDataApi(c));
+    return await this.analyticsGetter.getVolumeDataForTimePeriod(
+      time,
+      series,
+      metric,
+    );
   }
 
   public async getCollectionFloorPrice(
