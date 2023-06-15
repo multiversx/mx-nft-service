@@ -51,8 +51,5 @@ export class AddViews1686731191902 implements MigrationInterface {
       ['MATERIALIZED_VIEW', 'nfts_sum_weekly', 'public'],
     );
     await queryRunner.query(`DROP MATERIALIZED VIEW "nfts_sum_weekly"`);
-    await queryRunner.query(
-      `CREATE INDEX "hyper_nfts_analytics_timestamp_idx" ON "hyper_nfts_analytics" ("timestamp") `,
-    );
   }
 }

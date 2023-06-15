@@ -90,6 +90,18 @@ export class CollectionsAnalyticsService {
     );
   }
 
+  public async getFloorPriceVolumeForTimePeriod(
+    time: string,
+    series: string,
+    metric: string,
+  ): Promise<AggregateValue[]> {
+    return await this.analyticsGetter.getFloorPriceVolumeForTimePeriod(
+      time,
+      series,
+      metric,
+    );
+  }
+
   public async getCollectionFloorPrice(
     collectionIdentifier: string,
   ): Promise<number> {

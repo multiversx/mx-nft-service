@@ -82,4 +82,17 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
       input.metric,
     );
   }
+
+  @ResolveField('floorPriceData', () => [AggregateValue])
+  async floorPriceData(
+    @Args('input', { type: () => AnalyticsArgs, nullable: true })
+    input: AnalyticsArgs,
+    @Parent() collection: CollectionsAnalyticsModel,
+  ) {
+    return await this.generalAnalyticsService.getFloorPriceVolumeForTimePeriod(
+      input.time,
+      collection.collectionIdentifier,
+      input.metric,
+    );
+  }
 }
