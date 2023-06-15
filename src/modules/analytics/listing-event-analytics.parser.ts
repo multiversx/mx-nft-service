@@ -12,10 +12,9 @@ import { ElrondSwapAuctionEvent } from '../rabbitmq/entities/auction/elrondnftsw
 import { ListNftEvent } from '../rabbitmq/entities/auction/listNft.event';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
-import BigNumber from 'bignumber.js';
 
 @Injectable()
-export class StartAuctionAnalyticsHandler {
+export class ListingAuctionAnalyticsHandler {
   constructor(
     private usdPriceService: UsdPriceService,
     private readonly marketplaceService: MarketplacesService,

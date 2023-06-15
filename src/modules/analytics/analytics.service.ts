@@ -13,7 +13,7 @@ import {
 import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
 import BigNumber from 'bignumber.js';
 import { trendingEventsEnum } from './trendingEventsEnum';
-import { StartAuctionAnalyticsHandler } from './listing-event-analytics.parser';
+import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser';
 
 @Injectable()
 export class AnalyticsService {
@@ -26,7 +26,7 @@ export class AnalyticsService {
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventAnalyticsParser,
     private readonly acceptEventParser: AcceptOfferEventAnalyticsParser,
-    private readonly startAuctionEventParser: StartAuctionAnalyticsHandler,
+    private readonly startAuctionEventParser: ListingAuctionAnalyticsHandler,
     private readonly dataSetterService: AnalyticsDataSetterService,
   ) {}
 

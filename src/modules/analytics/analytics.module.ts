@@ -24,7 +24,7 @@ import { CollectionsAnalyticsResolver } from './collections-analytics.resolver';
 import { CollectionsAnalyticsService } from './collections-analytics.service';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionDetailsRedisHandler } from './loaders/collection-details.redis-handler';
-import { StartAuctionAnalyticsHandler } from './listing-event-analytics.parser';
+import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser';
 
 @Module({
   providers: [
@@ -39,7 +39,7 @@ import { StartAuctionAnalyticsHandler } from './listing-event-analytics.parser';
     AnalyticsService,
     AcceptOfferEventAnalyticsParser,
     BuyEventAnalyticsParser,
-    StartAuctionAnalyticsHandler,
+    ListingAuctionAnalyticsHandler,
     GeneralAnalyticsResolver,
     GeneralAnalyticsService,
     CollectionsAnalyticsResolver,
