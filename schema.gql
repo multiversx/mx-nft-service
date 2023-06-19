@@ -60,8 +60,8 @@ type AggregateValue {
   max: Float
   min: Float
   series: String
-  sum: Float
   time: String
+  value: Float
 }
 
 input AnalyticsArgs {

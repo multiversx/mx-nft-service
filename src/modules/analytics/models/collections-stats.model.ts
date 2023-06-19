@@ -25,7 +25,7 @@ export class CollectionsAnalyticsModel {
   static fromTimescaleModel(collection: AggregateValue) {
     return new CollectionsAnalyticsModel({
       collectionIdentifier: collection.series,
-      volume24h: collection.sum,
+      volume24h: collection.value,
     });
   }
 }

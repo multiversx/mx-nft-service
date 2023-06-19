@@ -66,7 +66,7 @@ export class AnalyticsDataGetterService {
       query.getCount(),
     ]);
     if (series && count === 0) {
-      return [[new AggregateValue({ sum: 0, series: series })], 1];
+      return [[new AggregateValue({ value: 0, series: series })], 1];
     }
 
     return [

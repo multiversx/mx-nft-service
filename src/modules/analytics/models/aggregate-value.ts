@@ -19,7 +19,7 @@ export class AggregateValue {
   count?: number;
 
   @Field(() => Float, { nullable: true })
-  sum?: number;
+  value?: number;
 
   @Field(() => Float, { nullable: true })
   avg?: number;
@@ -35,7 +35,7 @@ export class AggregateValue {
       min: row.min ?? 0,
       max: row.max ?? 0,
       count: row.count ?? 0,
-      sum: row.sum ?? 0,
+      value: row.sum ?? 0,
       avg: row.avg ?? 0,
     });
   }
