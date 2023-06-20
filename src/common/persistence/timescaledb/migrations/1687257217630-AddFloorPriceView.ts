@@ -1,13 +1,13 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddFloorPriceView1686832805529 implements MigrationInterface {
-  name = 'AddFloorPriceView1686832805529';
+export class AddFloorPriceView1687257217630 implements MigrationInterface {
+  name = 'AddFloorPriceView1687257217630';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE MATERIALIZED VIEW "nfts_floor_price_daily" WITH (timescaledb.continuous) AS 
     SELECT
       time_bucket('1 day', timestamp) AS time, series, key,
-      last(value, timestamp) AS last,sum(value) AS sum
+      last(value, timestamp) AS last,min(value) AS min
     FROM "hyper_nfts_analytics"
     WHERE key = 'floorPriceUSD'
     GROUP BY time, series, key;
@@ -18,7 +18,7 @@ export class AddFloorPriceView1686832805529 implements MigrationInterface {
         'public',
         'MATERIALIZED_VIEW',
         'nfts_floor_price_daily',
-        "SELECT\n      time_bucket('1 day', timestamp) AS time, series, key,\n      last(value, timestamp) AS last,sum(value) AS sum\n    FROM \"hyper_nfts_analytics\"\n    WHERE key = 'floorPriceUSD'\n    GROUP BY time, series, key;",
+        "SELECT\n      time_bucket('1 day', timestamp) AS time, series, key,\n      last(value, timestamp) AS last,min(value) AS min\n    FROM \"hyper_nfts_analytics\"\n    WHERE key = 'floorPriceUSD'\n    GROUP BY time, series, key;",
       ],
     );
   }

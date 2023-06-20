@@ -35,7 +35,7 @@ export class SumDaily {
   expression: `
     SELECT
       time_bucket('1 day', timestamp) AS time, series, key,
-      last(value, timestamp) AS last,sum(value) AS sum
+      last(value, timestamp) AS last,min(value) AS min
     FROM "hyper_nfts_analytics"
     WHERE key = 'floorPriceUSD'
     GROUP BY time, series, key;
@@ -49,7 +49,7 @@ export class FloorPriceDaily {
   time: Date = new Date();
 
   @ViewColumn()
-  sum = '0';
+  min = '0';
 
   @ViewColumn()
   series?: string;
