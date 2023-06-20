@@ -13,7 +13,7 @@ import {
 } from './marketplaces.elastic.queries';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from '../assets/models';
 
@@ -271,7 +271,7 @@ export class MarketplaceEventsIndexingService {
     return (
       !Object.values(AuctionEventEnum).includes(eventIdentifier) &&
       !Object.values(ExternalAuctionEventEnum).includes(eventIdentifier) &&
-      !Object.values(ElrondNftsSwapAuctionEventEnum).includes(eventIdentifier)
+      !Object.values(KroganSwapAuctionEventEnum).includes(eventIdentifier)
     );
   }
 }

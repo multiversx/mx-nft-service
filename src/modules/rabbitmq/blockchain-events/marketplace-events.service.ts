@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
   MarketplaceEventEnum,
 } from 'src/modules/assets/models';
@@ -38,7 +38,7 @@ export class MarketplaceEventsService {
     private readonly slackReportService: SlackReportService,
     private sendOfferEventHandler: SendOfferEventHandler,
     private withdrawOfferEventHandler: WithdrawOfferEventHandler,
-  ) { }
+  ) {}
 
   public async handleNftAuctionEvents(
     auctionEvents: any[],
@@ -48,7 +48,7 @@ export class MarketplaceEventsService {
     for (let event of auctionEvents) {
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
-        case ElrondNftsSwapAuctionEventEnum.Bid:
+        case KroganSwapAuctionEventEnum.Bid:
           await this.bidEventHandler.handle(event, hash, marketplaceType);
 
           break;
@@ -57,11 +57,11 @@ export class MarketplaceEventsService {
         case ExternalAuctionEventEnum.BulkBuy:
         case ExternalAuctionEventEnum.BuyFor:
         case ExternalAuctionEventEnum.BuyNft:
-        case ElrondNftsSwapAuctionEventEnum.Purchase:
+        case KroganSwapAuctionEventEnum.Purchase:
           const eventName = Buffer.from(event.topics[0], 'base64').toString();
           if (
             eventName === ExternalAuctionEventEnum.UpdateOffer ||
-            eventName === ElrondNftsSwapAuctionEventEnum.UpdateListing
+            eventName === KroganSwapAuctionEventEnum.UpdateListing
           ) {
             this.logger.log(
               `${eventName} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`,
@@ -71,7 +71,7 @@ export class MarketplaceEventsService {
           await this.buyEventHandler.handle(event, hash, marketplaceType);
           break;
         case AuctionEventEnum.WithdrawEvent:
-        case ElrondNftsSwapAuctionEventEnum.WithdrawSwap:
+        case KroganSwapAuctionEventEnum.WithdrawSwap:
         case ExternalAuctionEventEnum.ClaimBackNft:
         case ExternalAuctionEventEnum.ReturnListing:
           if (
@@ -99,7 +99,7 @@ export class MarketplaceEventsService {
         case AuctionEventEnum.AuctionTokenEvent:
         case ExternalAuctionEventEnum.Listing:
         case ExternalAuctionEventEnum.ListNftOnMarketplace:
-        case ElrondNftsSwapAuctionEventEnum.NftSwap:
+        case KroganSwapAuctionEventEnum.NftSwap:
           await this.startAuctionEventHandler.handle(
             event,
             hash,
@@ -180,8 +180,8 @@ export class MarketplaceEventsService {
             marketplaceType,
           );
           break;
-        case ElrondNftsSwapAuctionEventEnum.NftSwapUpdate:
-        case ElrondNftsSwapAuctionEventEnum.NftSwapExtend:
+        case KroganSwapAuctionEventEnum.NftSwapUpdate:
+        case KroganSwapAuctionEventEnum.NftSwapExtend:
           await this.swapUpdateEventHandler.handle(
             event,
             hash,

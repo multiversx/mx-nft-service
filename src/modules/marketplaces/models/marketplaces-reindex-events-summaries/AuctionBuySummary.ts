@@ -3,7 +3,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import {
   AssetActionEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { BuySftEvent } from 'src/modules/rabbitmq/entities/auction';
@@ -39,7 +39,7 @@ export class AuctionBuySummary extends ReindexGenericSummary {
     if (
       event.hasOneOfEventTopicIdentifiers([
         ExternalAuctionEventEnum.UpdateOffer,
-        ElrondNftsSwapAuctionEventEnum.UpdateListing,
+        KroganSwapAuctionEventEnum.UpdateListing,
       ])
     ) {
       return;
@@ -82,7 +82,7 @@ export class AuctionBuySummary extends ReindexGenericSummary {
         return new ClaimEvent(genericEvent).getTopics();
       }
 
-      if (event.hasEventIdentifier(ElrondNftsSwapAuctionEventEnum.Purchase)) {
+      if (event.hasEventIdentifier(KroganSwapAuctionEventEnum.Purchase)) {
         return new ElrondSwapBuyEvent(genericEvent).getTopics();
       }
 
