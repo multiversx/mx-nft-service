@@ -25,6 +25,8 @@ import { CollectionsAnalyticsService } from './collections-analytics.service';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionDetailsRedisHandler } from './loaders/collection-details.redis-handler';
 import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser';
+import { UpdatePriceEventParser } from './updatePrice-event.parser';
+import { UpdateListingEventParser } from './updateListing-event.parser';
 
 @Module({
   providers: [
@@ -46,6 +48,8 @@ import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser
     CollectionsAnalyticsService,
     CollectionDetailsProvider,
     CollectionDetailsRedisHandler,
+    UpdatePriceEventParser,
+    UpdateListingEventParser,
   ],
   imports: [
     ConfigModule.forRoot({
