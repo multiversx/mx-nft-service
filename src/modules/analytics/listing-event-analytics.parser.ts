@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import {
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
@@ -66,7 +66,7 @@ export class ListingAuctionAnalyticsHandler {
   }
 
   private getEventAndTopics(event: any) {
-    if (event.identifier === ElrondNftsSwapAuctionEventEnum.NftSwap) {
+    if (event.identifier === KroganSwapAuctionEventEnum.NftSwap) {
       const auctionTokenEvent = new ElrondSwapAuctionEvent(event);
       const topics = auctionTokenEvent.getTopics();
       if (parseInt(topics.auctionType) === ElrondSwapAuctionTypeEnum.Swap) {

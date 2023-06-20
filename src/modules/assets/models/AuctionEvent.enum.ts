@@ -31,7 +31,7 @@ export enum ExternalAuctionEventEnum {
   UserDeposit = 'user_deposit',
 }
 
-export enum ElrondNftsSwapAuctionEventEnum {
+export enum KroganSwapAuctionEventEnum {
   NftSwap = 'nftSwap',
   WithdrawSwap = 'withdrawSwap',
   NftSwapUpdate = 'nftSwapUpdate',

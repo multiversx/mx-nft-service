@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   AssetActionEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
@@ -14,7 +14,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
     mainEvent: any,
   ): AssetHistoryLogInput {
     switch (eventType) {
-      case ElrondNftsSwapAuctionEventEnum.NftSwap: {
+      case KroganSwapAuctionEventEnum.NftSwap: {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
@@ -23,7 +23,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
           sender: mainEvent.events[1].address,
         });
       }
-      case ElrondNftsSwapAuctionEventEnum.WithdrawSwap: {
+      case KroganSwapAuctionEventEnum.WithdrawSwap: {
         const withdrawSwap = mainEvent.events.find(
           (event) => event.identifier === eventType,
         );
@@ -37,7 +37,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
           sender: txSender,
         });
       }
-      case ElrondNftsSwapAuctionEventEnum.Purchase: {
+      case KroganSwapAuctionEventEnum.Purchase: {
         const purchaseEvent = mainEvent.events.find(
           (event) => event.identifier === eventType,
         );

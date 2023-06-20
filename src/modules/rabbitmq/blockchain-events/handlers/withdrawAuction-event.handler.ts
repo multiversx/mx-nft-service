@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import {
@@ -65,7 +65,7 @@ export class WithdrawAuctionEventHandler {
   }
 
   private getEventAndTopics(event: any) {
-    if (event.identifier === ElrondNftsSwapAuctionEventEnum.WithdrawSwap) {
+    if (event.identifier === KroganSwapAuctionEventEnum.WithdrawSwap) {
       const withdraw = new ElrondSwapWithdrawEvent(event);
       const topics = withdraw.getTopics();
       return { withdraw, topics };

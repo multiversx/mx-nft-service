@@ -7,7 +7,7 @@ import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
@@ -215,7 +215,7 @@ export class AnalyticsService {
       case AuctionEventEnum.AuctionTokenEvent:
       case ExternalAuctionEventEnum.ListNftOnMarketplace:
       case ExternalAuctionEventEnum.Listing:
-      case ElrondNftsSwapAuctionEventEnum.NftSwap:
+      case KroganSwapAuctionEventEnum.NftSwap:
         parsedEvent = await this.startAuctionEventParser.handle(
           rawEvent,
           eventsTimestamp,
@@ -262,18 +262,10 @@ export class AnalyticsService {
             : eventData[series][measure];
         }
         if (measure.toLowerCase().includes('floorPrice')) {
-          this.data[series][measure] = this.data[series][measure]
-            ? new BigNumber(this.data[series][measure])
-                .plus(eventData[series][measure])
-                .toFixed()
-            : eventData[series][measure];
+          this.data[series][measure] = eventData[series][measure];
         }
         if (measure.toLowerCase().includes('floorPriceUSD')) {
-          this.data[series][measure] = this.data[series][measure]
-            ? new BigNumber(this.data[series][measure])
-                .plus(eventData[series][measure])
-                .toFixed()
-            : eventData[series][measure];
+          this.data[series][measure] = eventData[series][measure];
         } else {
           this.data[series][measure] = eventData[series][measure];
         }
