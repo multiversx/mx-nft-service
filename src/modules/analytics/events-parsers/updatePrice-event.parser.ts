@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { UpdatePriceEvent } from '../rabbitmq/entities/auction/updatePrice.event';
 import { computeUsd } from 'src/utils/helpers';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { UpdatePriceEvent } from 'src/modules/rabbitmq/entities/auction/updatePrice.event';
 
 @Injectable()
 export class UpdatePriceEventParser {

@@ -1,6 +1,6 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { CollectionsDetailsModel } from './collections-details.model';
-import { AggregateValue } from './aggregate-value';
+import { AnalyticsAggregateValue } from './analytics-aggregate-value';
 
 @ObjectType()
 export class CollectionsAnalyticsModel {
@@ -15,14 +15,14 @@ export class CollectionsAnalyticsModel {
   @Field()
   floorPrice: number;
 
-  @Field(() => [AggregateValue])
-  volumeData: AggregateValue[];
+  @Field(() => [AnalyticsAggregateValue])
+  volumeData: AnalyticsAggregateValue[];
 
   constructor(init?: Partial<CollectionsAnalyticsModel>) {
     Object.assign(this, init);
   }
 
-  static fromTimescaleModel(collection: AggregateValue) {
+  static fromTimescaleModel(collection: AnalyticsAggregateValue) {
     return new CollectionsAnalyticsModel({
       collectionIdentifier: collection.series,
       volume24h: collection.value,

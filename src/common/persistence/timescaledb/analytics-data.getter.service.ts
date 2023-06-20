@@ -1,16 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import * as moment from 'moment';
-import { HistoricDataModel } from 'src/modules/analytics/models/analytics.model';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  computeTimeInterval,
-  convertBinToTimeResolution,
-} from 'src/utils/analytics.utils';
+import { computeTimeInterval } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
 import { FloorPriceDaily, SumDaily } from './entities/sum-daily.entity';
-import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
+import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
 
 @Injectable()
 export class AnalyticsDataGetterService {
@@ -48,7 +43,7 @@ export class AnalyticsDataGetterService {
     { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[AggregateValue[], number]> {
+  ): Promise<[AnalyticsAggregateValue[], number]> {
     const query = this.sumDaily
       .createQueryBuilder()
       .select('sum(sum) as sum')
@@ -66,11 +61,11 @@ export class AnalyticsDataGetterService {
       query.getCount(),
     ]);
     if (series && count === 0) {
-      return [[new AggregateValue({ value: 0, series: series })], 1];
+      return [[new AnalyticsAggregateValue({ value: 0, series: series })], 1];
     }
 
     return [
-      response?.map((row) => AggregateValue.fromDataApi(row)) ?? [],
+      response?.map((row) => AnalyticsAggregateValue.fromDataApi(row)) ?? [],
       count ?? 0,
     ];
   }
@@ -80,7 +75,7 @@ export class AnalyticsDataGetterService {
     series,
     metric,
     start,
-  }: AnalyticsArgs): Promise<AggregateValue[]> {
+  }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.sumDaily
       .createQueryBuilder()
@@ -96,7 +91,7 @@ export class AnalyticsDataGetterService {
       .groupBy('timestamp')
       .getRawMany();
 
-    return query?.map((row) => AggregateValue.fromDataApi(row)) ?? [];
+    return query?.map((row) => AnalyticsAggregateValue.fromDataApi(row)) ?? [];
   }
 
   async getFloorPriceData({
@@ -104,7 +99,7 @@ export class AnalyticsDataGetterService {
     series,
     metric,
     start,
-  }: AnalyticsArgs): Promise<AggregateValue[]> {
+  }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.floorPriceDaily
       .createQueryBuilder()
@@ -120,39 +115,6 @@ export class AnalyticsDataGetterService {
       .groupBy('timestamp')
       .getRawMany();
 
-    return query?.map((row) => AggregateValue.fromDataApi(row)) ?? [];
-  }
-
-  async getLatestBinnedHistoricData({
-    time,
-    series,
-    metric,
-    start,
-    bin,
-  }: AnalyticsArgs): Promise<HistoricDataModel[]> {
-    const [startDate, endDate] = computeTimeInterval(time, start);
-    const timeResolution = convertBinToTimeResolution(bin);
-
-    const query = await this.nftsAnalytics
-      .createQueryBuilder()
-      .select(`time_bucket(${timeResolution}, timestamp) as time`)
-      .addSelect('avg(value) as avg')
-      .where('series = :series', { series })
-      .andWhere('key = :metric', { metric })
-      .andWhere('timestamp BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      })
-      .getRawMany();
-
-    return (
-      query?.map(
-        (row) =>
-          new HistoricDataModel({
-            timestamp: moment.utc(row.time).format('yyyy-MM-DD HH:mm:ss'),
-            value: row.avg,
-          }),
-      ) ?? []
-    );
+    return query?.map((row) => AnalyticsAggregateValue.fromDataApi(row)) ?? [];
   }
 }

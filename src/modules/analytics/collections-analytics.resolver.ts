@@ -12,7 +12,7 @@ import {
   AnalyticsArgs,
   CollectionAnalyticsArgs,
 } from './models/analytics-args.model';
-import { AggregateValue } from './models/aggregate-value';
+import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 
 @Resolver(() => CollectionsAnalyticsModel)
 export class CollectionsAnalyticsResolver extends BaseResolver(
@@ -70,7 +70,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
     return collectionDetails?.value ?? null;
   }
 
-  @ResolveField('volumeData', () => [AggregateValue])
+  @ResolveField('volumeData', () => [AnalyticsAggregateValue])
   async volumeData(
     @Args('input', { type: () => AnalyticsArgs, nullable: true })
     input: AnalyticsArgs,
@@ -83,7 +83,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
     );
   }
 
-  @ResolveField('floorPriceData', () => [AggregateValue])
+  @ResolveField('floorPriceData', () => [AnalyticsAggregateValue])
   async floorPriceData(
     @Args('input', { type: () => AnalyticsArgs, nullable: true })
     input: AnalyticsArgs,

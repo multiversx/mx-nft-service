@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { UpdateListingEvent } from '../rabbitmq/entities/auction/updateListing.event';
+import { UpdateListingEvent } from '../../rabbitmq/entities/auction/updateListing.event';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
 import { mxConfig } from 'src/config';

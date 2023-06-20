@@ -54,7 +54,7 @@ input AddLikeArgs {
   identifier: String!
 }
 
-type AggregateValue {
+type AnalyticsAggregateValue {
   avg: Float
   count: Float
   max: Float
@@ -575,10 +575,10 @@ type CollectionsAnalyticsModel {
   collectionIdentifier: String!
   details: CollectionsDetailsModel!
   floorPrice: Float!
-  floorPriceData(input: AnalyticsArgs): [AggregateValue!]!
+  floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
   holders: Int!
   volume24h: Float
-  volumeData(input: AnalyticsArgs): [AggregateValue!]!
+  volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
 }
 
 type CollectionsAnalyticsModelEdge {
@@ -751,10 +751,10 @@ input FlagNftInput {
 type GeneralAnalyticsModel {
   collections: Int!
   holders: Int!
-  listing(input: AnalyticsInput!): [AggregateValue!]!
+  listing(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
   marketplaces: Int!
-  nfts(input: AnalyticsInput!): [AggregateValue!]!
-  volume(input: AnalyticsInput!): [AggregateValue!]!
+  nfts(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
+  volume(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
 }
 
 enum GroupBy {
@@ -769,14 +769,6 @@ input HandleQuantityArgs {
   addOrBurnRoleAddress: String!
   identifier: String!
   quantity: String!
-}
-
-type HistoricDataModel {
-  max: Float
-  min: Float
-  series: String!
-  timestamp: String!
-  value: Float
 }
 
 input HistoryPagination {
@@ -1252,7 +1244,6 @@ type Query {
   generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
-  latestBinnedHistoricData(input: AnalyticsArgs!): [HistoricDataModel!]!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
   myTickets(collectionIdentifier: String!): [TicketInfo!]!
@@ -1265,7 +1256,6 @@ type Query {
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
-  values24hSum(input: AnalyticsArgs!): [HistoricDataModel!]!
 }
 
 type Rarity {

@@ -5,8 +5,8 @@ import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
-import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
 import { AnalyticsInput } from 'src/modules/analytics/models/analytics-input.model';
+import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
 
 @Injectable()
 export class MxToolsService {
@@ -26,11 +26,15 @@ export class MxToolsService {
     });
   }
 
-  async getNftsCount(input: AnalyticsInput): Promise<AggregateValue[]> {
+  async getNftsCount(
+    input: AnalyticsInput,
+  ): Promise<AnalyticsAggregateValue[]> {
     try {
       const query = this.getNftsCountQuery(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
-      return res.data?.nfts?.count.map((x) => AggregateValue.fromDataApi(x));
+      return res.data?.nfts?.count.map((x) =>
+        AnalyticsAggregateValue.fromDataApi(x),
+      );
     } catch (error) {
       this.logger.error(`An error occurred while mapping data api response`, {
         path: this.getNftsCount.name,
@@ -41,12 +45,14 @@ export class MxToolsService {
     }
   }
 
-  async getActiveNftsStats(input: AnalyticsInput): Promise<AggregateValue[]> {
+  async getActiveNftsStats(
+    input: AnalyticsInput,
+  ): Promise<AnalyticsAggregateValue[]> {
     try {
       const query = this.getLatestListingNumber(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
       return res.data?.nfts?.active_nfts.map((x) =>
-        AggregateValue.fromDataApi(x),
+        AnalyticsAggregateValue.fromDataApi(x),
       );
     } catch (error) {
       this.logger.error(`An error occurred while mapping data api response`, {
@@ -58,11 +64,15 @@ export class MxToolsService {
     }
   }
 
-  async getLast24HActive(input: AnalyticsInput): Promise<AggregateValue[]> {
+  async getLast24HActive(
+    input: AnalyticsInput,
+  ): Promise<AnalyticsAggregateValue[]> {
     try {
       const query = this.getNftsCountLast24h(input);
       const res = await this.doPost(this.getActiveNftsStats.name, query);
-      return res.data?.nfts?.count24h.map((x) => AggregateValue.fromDataApi(x));
+      return res.data?.nfts?.count24h.map((x) =>
+        AnalyticsAggregateValue.fromDataApi(x),
+      );
     } catch (error) {
       this.logger.error(`An error occurred while mapping data api response`, {
         path: this.getLast24HActive.name,

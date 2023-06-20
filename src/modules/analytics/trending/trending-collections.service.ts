@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PerformanceProfiler } from '../../metrics/performance.profiler';
 import * as moment from 'moment';
 import { ElasticAnalyticsService } from '../elastic.indexer.service';
-import { trendingEventsEnum } from '../trendingEventsEnum';
+import { analyticsEventsEnum } from '../analyticsEventsEnum';
 import { MarketplacesService } from '../../marketplaces/marketplaces.service';
 import BigNumber from 'bignumber.js';
 import { BuyEventParser } from './buy-event.parser';
@@ -10,7 +10,7 @@ import { UsdPriceService } from '../../usdPrice/usd-price.service';
 import { computeUsd } from 'src/utils/helpers';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
-import { CollectionVolumeLast24 } from '../collection-volume';
+import { CollectionVolumeLast24 } from '../models/collection-volume';
 import { CachingService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
@@ -124,7 +124,7 @@ export class TrendingCollectionsService {
     await this.indexerService.getAllEvents(
       startDateUtc,
       endDateUtc,
-      trendingEventsEnum,
+      analyticsEventsEnum,
       this.filterAddresses,
       async (logs: any[]) => {
         this.logger.log(`Fetched ${logs.length} logs on page ${scrollPage}`);
@@ -149,7 +149,7 @@ export class TrendingCollectionsService {
             .map((logs: { events: any }) => logs.events)
             .flat();
           const events = eventsRaw.filter((event: { identifier: string }) =>
-            trendingEventsEnum.includes(event.identifier),
+            analyticsEventsEnum.includes(event.identifier),
           );
 
           await this.processEvents(events);

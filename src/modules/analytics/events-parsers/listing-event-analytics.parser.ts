@@ -7,9 +7,9 @@ import {
 import { ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { AuctionTokenEvent } from '../rabbitmq/entities/auction';
-import { ElrondSwapAuctionEvent } from '../rabbitmq/entities/auction/elrondnftswap/elrondswap-auction.event';
-import { ListNftEvent } from '../rabbitmq/entities/auction/listNft.event';
+import { AuctionTokenEvent } from '../../rabbitmq/entities/auction';
+import { ElrondSwapAuctionEvent } from '../../rabbitmq/entities/auction/elrondnftswap/elrondswap-auction.event';
+import { ListNftEvent } from '../../rabbitmq/entities/auction/listNft.event';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { computeUsd } from 'src/utils/helpers';
 

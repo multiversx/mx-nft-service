@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as moment from 'moment';
 import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { AnalyticsDataGetterService } from 'src/common/persistence/timescaledb/analytics-data.getter.service';
-import { HistoricDataModel } from './models/analytics.model';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AnalyticsArgs } from 'src/common/persistence/timescaledb/entities/analytics.query';
-import { AggregateValue } from './models/aggregate-value';
+import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 
 @Injectable()
 export class AnalyticsGetterService {
@@ -15,69 +13,11 @@ export class AnalyticsGetterService {
     private readonly analyticsQuery: AnalyticsDataGetterService,
   ) {}
 
-  async getLatestCompleteValues(
-    series: string,
-    metric: string,
-    start?: string,
-    time?: string,
-  ): Promise<HistoricDataModel[]> {
-    const cacheKey = this.getAnalyticsCacheKey(
-      'latestCompleteValues',
-      series,
-      metric,
-    );
-    let data = await this.cachingService.getCache<HistoricDataModel[]>(
-      cacheKey,
-    );
-    if (start) {
-      const formattedStart = moment.unix(parseInt(start)).utc();
-
-      data = data.filter((historicData) =>
-        moment.utc(historicData.timestamp).isSameOrAfter(formattedStart),
-      );
-
-      if (time) {
-        const [timeAmount, timeUnit] = time.match(/[a-zA-Z]+|[0-9]+/g);
-        const endDate = formattedStart.add(
-          moment.duration(timeAmount, timeUnit as moment.unitOfTime.Base),
-        );
-        data = data.filter((historicData) =>
-          moment.utc(historicData.timestamp).isSameOrBefore(endDate),
-        );
-      }
-    }
-
-    return data;
-  }
-
-  async getValues24hSum(
-    series: string,
-    metric: string,
-  ): Promise<HistoricDataModel[]> {
-    const cacheKey = this.getAnalyticsCacheKey('values24hSum', series, metric);
-    return await this.cachingService.getCache(cacheKey);
-  }
-
-  async getValues24h(
-    series: string,
-    metric: string,
-  ): Promise<[AggregateValue[], number]> {
-    const cacheKey = this.getAnalyticsCacheKey('values24h', series, metric);
-    return await this.cachingService.getOrSetCache(
-      cacheKey,
-      () =>
-        this.analyticsQuery.getTopCollectionsDaily({
-          metric,
-        }),
-      Constants.oneMinute() * 2,
-    );
-  }
-
   async getVolumeDataForTimePeriod(
     time: string,
     series: string,
     metric: string,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'volumeData',
       time,
@@ -100,7 +40,7 @@ export class AnalyticsGetterService {
     time: string,
     series: string,
     metric: string,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'floorPriceData',
       time,
@@ -123,7 +63,7 @@ export class AnalyticsGetterService {
     { metric, series }: AnalyticsArgs,
     limit: number = 10,
     offset: number = 0,
-  ): Promise<[AggregateValue[], number]> {
+  ): Promise<[AnalyticsAggregateValue[], number]> {
     const cacheKey = this.getAnalyticsCacheKey(
       'getTopCollectionsDaily',
       metric,
@@ -139,30 +79,6 @@ export class AnalyticsGetterService {
           limit,
           offset,
         ),
-      Constants.oneMinute() * 2,
-    );
-  }
-
-  async getLatestBinnedHistoricData(
-    time: string,
-    series: string,
-    metric: string,
-  ): Promise<HistoricDataModel[]> {
-    const cacheKey = this.getAnalyticsCacheKey(
-      'latestBinnedHistoricData',
-      time,
-      series,
-      metric,
-    );
-    return await this.cachingService.getOrSetCache(
-      cacheKey,
-      () =>
-        this.analyticsQuery.getLatestBinnedHistoricData({
-          table: 'hyper_nfts_analytics',
-          series,
-          metric,
-          time,
-        }),
       Constants.oneMinute() * 2,
     );
   }
