@@ -109,7 +109,7 @@ export class AnalyticsDataGetterService {
     const query = await this.floorPriceDaily
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as timestamp")
-      .addSelect('min(min) as sum')
+      .addSelect('locf(min(min)) as sum')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(

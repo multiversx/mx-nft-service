@@ -96,7 +96,7 @@ export class AnalyticsGetterService {
     );
   }
 
-  async getFloorPriceVolumeForTimePeriod(
+  async getFloorPriceForTimePeriod(
     time: string,
     series: string,
     metric: string,

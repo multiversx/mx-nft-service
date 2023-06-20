@@ -95,7 +95,7 @@ export class CollectionsAnalyticsService {
     series: string,
     metric: string,
   ): Promise<AggregateValue[]> {
-    return await this.analyticsGetter.getFloorPriceVolumeForTimePeriod(
+    return await this.analyticsGetter.getFloorPriceForTimePeriod(
       time,
       series,
       metric,
