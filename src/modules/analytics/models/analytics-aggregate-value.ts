@@ -39,4 +39,12 @@ export class AnalyticsAggregateValue {
       avg: row.avg ?? 0,
     });
   }
+
+  static fromTimescaleObjext(row: any) {
+    return new AnalyticsAggregateValue({
+      series: row.series,
+      time: moment.utc(row.timestamp ?? row.time).format('yyyy-MM-DD HH:mm:ss'),
+      value: row.value ?? 0,
+    });
+  }
 }
