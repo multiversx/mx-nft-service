@@ -9,7 +9,7 @@ import {
   convertBinToTimeResolution,
 } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
-import { SumDaily } from './entities/sum-daily.entity';
+import { FloorPriceDaily, SumDaily } from './entities/sum-daily.entity';
 import { AggregateValue } from 'src/modules/analytics/models/aggregate-value';
 
 @Injectable()
@@ -19,6 +19,8 @@ export class AnalyticsDataGetterService {
     private readonly nftsAnalytics: Repository<XNftsAnalyticsEntity>,
     @InjectRepository(SumDaily, 'timescaledb')
     private readonly sumDaily: Repository<SumDaily>,
+    @InjectRepository(FloorPriceDaily, 'timescaledb')
+    private readonly floorPriceDaily: Repository<FloorPriceDaily>,
   ) {}
 
   async getAggregatedValue({
@@ -63,6 +65,9 @@ export class AnalyticsDataGetterService {
       query.offset(offset).limit(limit).getRawMany(),
       query.getCount(),
     ]);
+    if (series && count === 0) {
+      return [[new AggregateValue({ value: 0, series: series })], 1];
+    }
 
     return [
       response?.map((row) => AggregateValue.fromDataApi(row)) ?? [],
@@ -81,6 +86,30 @@ export class AnalyticsDataGetterService {
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as timestamp")
       .addSelect('sum(sum) as sum')
+      .where('key = :metric', { metric })
+      .andWhere('series = :series', { series })
+      .andWhere(
+        endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
+        { startDate, endDate },
+      )
+      .orderBy('timestamp', 'ASC')
+      .groupBy('timestamp')
+      .getRawMany();
+
+    return query?.map((row) => AggregateValue.fromDataApi(row)) ?? [];
+  }
+
+  async getFloorPriceData({
+    time,
+    series,
+    metric,
+    start,
+  }: AnalyticsArgs): Promise<AggregateValue[]> {
+    const [startDate, endDate] = computeTimeInterval(time, start);
+    const query = await this.floorPriceDaily
+      .createQueryBuilder()
+      .select("time_bucket_gapfill('1 day', time) as timestamp")
+      .addSelect('locf(min(min)) as sum')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(

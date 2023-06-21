@@ -60,8 +60,8 @@ type AggregateValue {
   max: Float
   min: Float
   series: String
-  sum: Float
   time: String
+  value: Float
 }
 
 input AnalyticsArgs {
@@ -575,6 +575,7 @@ type CollectionsAnalyticsModel {
   collectionIdentifier: String!
   details: CollectionsDetailsModel!
   floorPrice: Float!
+  floorPriceData(input: AnalyticsArgs): [AggregateValue!]!
   holders: Int!
   volume24h: Float
   volumeData(input: AnalyticsArgs): [AggregateValue!]!

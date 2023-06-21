@@ -96,6 +96,29 @@ export class AnalyticsGetterService {
     );
   }
 
+  async getFloorPriceForTimePeriod(
+    time: string,
+    series: string,
+    metric: string,
+  ): Promise<AggregateValue[]> {
+    const cacheKey = this.getAnalyticsCacheKey(
+      'floorPriceData',
+      time,
+      series,
+      metric,
+    );
+    return await this.cachingService.getOrSetCache(
+      cacheKey,
+      () =>
+        this.analyticsQuery.getFloorPriceData({
+          series,
+          metric,
+          time,
+        }),
+      Constants.oneMinute() * 2,
+    );
+  }
+
   async getTopCollectionsDaily(
     { metric, series }: AnalyticsArgs,
     limit: number = 10,
