@@ -11,4 +11,7 @@ export const trendingEventsEnum = [
   'listing',
   'listNftOnMarketplace',
   'nftSwap',
+  'changePrice',
+  'updatePrice',
+  'changeListing',
 ];

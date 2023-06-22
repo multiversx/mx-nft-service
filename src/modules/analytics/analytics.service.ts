@@ -14,6 +14,8 @@ import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/a
 import BigNumber from 'bignumber.js';
 import { trendingEventsEnum } from './trendingEventsEnum';
 import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser';
+import { UpdatePriceEventParser } from './updatePrice-event.parser';
+import { UpdateListingEventParser } from './updateListing-event.parser';
 
 @Injectable()
 export class AnalyticsService {
@@ -27,6 +29,8 @@ export class AnalyticsService {
     private readonly buyEventHandler: BuyEventAnalyticsParser,
     private readonly acceptEventParser: AcceptOfferEventAnalyticsParser,
     private readonly startAuctionEventParser: ListingAuctionAnalyticsHandler,
+    private readonly updatePriceEventParser: UpdatePriceEventParser,
+    private readonly updateListingEventParser: UpdateListingEventParser,
     private readonly dataSetterService: AnalyticsDataSetterService,
   ) {}
 
@@ -217,6 +221,20 @@ export class AnalyticsService {
       case ExternalAuctionEventEnum.Listing:
       case KroganSwapAuctionEventEnum.NftSwap:
         parsedEvent = await this.startAuctionEventParser.handle(
+          rawEvent,
+          eventsTimestamp,
+        );
+        break;
+      case ExternalAuctionEventEnum.ChangePrice:
+      case ExternalAuctionEventEnum.UpdatePrice:
+        parsedEvent = await this.updatePriceEventParser.handle(
+          rawEvent,
+          eventsTimestamp,
+        );
+        break;
+
+      case ExternalAuctionEventEnum.UpdateListing:
+        parsedEvent = await this.updateListingEventParser.handle(
           rawEvent,
           eventsTimestamp,
         );
