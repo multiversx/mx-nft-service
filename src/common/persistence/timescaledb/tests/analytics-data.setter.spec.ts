@@ -31,6 +31,7 @@ describe('Analytics Data Setter Service', () => {
     timestamp: 12121,
     ingestLast: false,
   };
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
