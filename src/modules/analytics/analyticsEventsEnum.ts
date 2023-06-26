@@ -1,4 +1,4 @@
-export const trendingEventsEnum = [
+export const analyticsEventsEnum = [
   'buy',
   'buyNft',
   'buyFor',

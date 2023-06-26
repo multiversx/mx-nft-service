@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as moment from 'moment';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
-import { BuyEventAnalyticsParser } from './buy-event-analytics.parser';
-import { AcceptOfferEventAnalyticsParser } from './acceptOffer-event-analytics.parser';
+import { BuyEventAnalyticsParser } from './events-parsers/buy-event-analytics.parser';
+import { AcceptOfferEventAnalyticsParser } from './events-parsers/acceptOffer-event-analytics.parser';
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import {
@@ -12,10 +12,10 @@ import {
 } from 'src/modules/assets/models';
 import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
 import BigNumber from 'bignumber.js';
-import { trendingEventsEnum } from './trendingEventsEnum';
-import { ListingAuctionAnalyticsHandler } from './listing-event-analytics.parser';
-import { UpdatePriceEventParser } from './updatePrice-event.parser';
-import { UpdateListingEventParser } from './updateListing-event.parser';
+import { analyticsEventsEnum } from './analyticsEventsEnum';
+import { ListingAuctionAnalyticsHandler } from './events-parsers/listing-event-analytics.parser';
+import { UpdateListingEventParser } from './events-parsers/updateListing-event.parser';
+import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parser';
 
 @Injectable()
 export class AnalyticsService {
@@ -135,7 +135,7 @@ export class AnalyticsService {
     await this.indexerService.getAllEvents(
       startDateUtc,
       endDateUtc,
-      trendingEventsEnum,
+      analyticsEventsEnum,
       this.filterAddresses,
       async (logs: any[]) => {
         this.logger.log(`Fetched ${logs.length} logs on page ${scrollPage}`);
@@ -151,7 +151,7 @@ export class AnalyticsService {
             .flat();
 
           const events = eventsRaw.filter((event: { identifier: string }) =>
-            trendingEventsEnum.includes(event.identifier),
+            analyticsEventsEnum.includes(event.identifier),
           );
 
           await this.processEvents(
@@ -171,7 +171,7 @@ export class AnalyticsService {
     );
     const eventsRaw = lastBlockLogs.map((logs) => logs.events).flat();
     const events = eventsRaw.filter((event) =>
-      trendingEventsEnum.includes(event.identifier),
+      analyticsEventsEnum.includes(event.identifier),
     );
     await this.processEvents(events, startDateUtc, lastBlockLogs[0].timestamp);
   }

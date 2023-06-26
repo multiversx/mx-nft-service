@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { AggregateValue } from './aggregate-value';
+import { AnalyticsAggregateValue } from './analytics-aggregate-value';
 
 @ObjectType()
 export class GeneralAnalyticsModel {
@@ -9,12 +9,12 @@ export class GeneralAnalyticsModel {
   marketplaces: number;
   @Field(() => Int)
   collections: number;
-  @Field(() => [AggregateValue])
-  nfts: AggregateValue[];
-  @Field(() => [AggregateValue])
-  volume: AggregateValue[];
-  @Field(() => [AggregateValue])
-  listing: AggregateValue[];
+  @Field(() => [AnalyticsAggregateValue])
+  nfts: AnalyticsAggregateValue[];
+  @Field(() => [AnalyticsAggregateValue])
+  volume: AnalyticsAggregateValue[];
+  @Field(() => [AnalyticsAggregateValue])
+  listing: AnalyticsAggregateValue[];
 
   constructor(init?: Partial<GeneralAnalyticsModel>) {
     Object.assign(this, init);

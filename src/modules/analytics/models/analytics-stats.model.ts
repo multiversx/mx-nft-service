@@ -1,11 +1,7 @@
-import { HistoricalValue } from '@multiversx/sdk-data-api-client';
-import { DataApiHistoricalResponse } from '@multiversx/sdk-data-api-client/lib/src/responses';
 import { Field, ObjectType } from '@nestjs/graphql';
-import BigNumber from 'bignumber.js';
-import moment from 'moment';
 
 @ObjectType()
-export class Stats {
+export class AnalyticsStats {
   @Field()
   nfts: number;
   @Field()
@@ -19,8 +15,7 @@ export class Stats {
   @Field()
   marketplaces: number;
 
-  constructor(init?: Partial<Stats>) {
+  constructor(init?: Partial<AnalyticsStats>) {
     Object.assign(this, init);
   }
-
 }

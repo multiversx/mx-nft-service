@@ -2,7 +2,7 @@ import { Field, Float, ObjectType } from '@nestjs/graphql';
 import * as moment from 'moment';
 
 @ObjectType()
-export class AggregateValue {
+export class AnalyticsAggregateValue {
   @Field(() => String, { nullable: true })
   time?: string;
 
@@ -24,12 +24,12 @@ export class AggregateValue {
   @Field(() => Float, { nullable: true })
   avg?: number;
 
-  constructor(init?: Partial<AggregateValue>) {
+  constructor(init?: Partial<AnalyticsAggregateValue>) {
     Object.assign(this, init);
   }
 
   static fromDataApi(row: any) {
-    return new AggregateValue({
+    return new AnalyticsAggregateValue({
       series: row.series,
       time: moment.utc(row.timestamp ?? row.time).format('yyyy-MM-DD HH:mm:ss'),
       min: row.min ?? 0,
@@ -37,6 +37,14 @@ export class AggregateValue {
       count: row.count ?? 0,
       value: row.sum ?? 0,
       avg: row.avg ?? 0,
+    });
+  }
+
+  static fromTimescaleObjext(row: any) {
+    return new AnalyticsAggregateValue({
+      series: row.series,
+      time: moment.utc(row.timestamp ?? row.time).format('yyyy-MM-DD HH:mm:ss'),
+      value: row.value ?? 0,
     });
   }
 }

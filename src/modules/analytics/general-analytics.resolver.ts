@@ -3,7 +3,7 @@ import { Args, Resolver } from '@nestjs/graphql';
 import { GeneralAnalyticsModel } from './models/general-stats.model';
 import { AnalyticsInput } from './models/analytics-input.model';
 import { GeneralAnalyticsService } from './general-analytics.service';
-import { AggregateValue } from './models/aggregate-value';
+import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 
 @Resolver(() => GeneralAnalyticsModel)
 export class GeneralAnalyticsResolver {
@@ -17,21 +17,21 @@ export class GeneralAnalyticsResolver {
     return new GeneralAnalyticsModel();
   }
 
-  @ResolveField('listing', () => [AggregateValue])
+  @ResolveField('listing', () => [AnalyticsAggregateValue])
   async listing(
     @Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,
   ) {
     return await this.generalAnalyticsService.getActiveNftsStats(input);
   }
 
-  @ResolveField('volume', () => [AggregateValue])
+  @ResolveField('volume', () => [AnalyticsAggregateValue])
   async volume(
     @Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,
   ) {
     return await this.generalAnalyticsService.getLast24HActive(input);
   }
 
-  @ResolveField('nfts', () => [AggregateValue])
+  @ResolveField('nfts', () => [AnalyticsAggregateValue])
   async nfts(
     @Args('input', { type: () => AnalyticsInput }) input: AnalyticsInput,
   ) {

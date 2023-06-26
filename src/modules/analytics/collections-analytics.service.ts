@@ -5,7 +5,7 @@ import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import * as hash from 'object-hash';
 import { Injectable } from '@nestjs/common';
-import { AggregateValue } from './models/aggregate-value';
+import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 import { CollectionsAnalyticsModel } from './models/collections-stats.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AnalyticsGetterService } from './analytics.getter.service';
@@ -20,7 +20,9 @@ export class CollectionsAnalyticsService {
     private readonly analyticsGetter: AnalyticsGetterService,
   ) {}
 
-  public async getNftsCount(input: AnalyticsInput): Promise<AggregateValue[]> {
+  public async getNftsCount(
+    input: AnalyticsInput,
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`,
       () => this.toolsService.getNftsCount(input),
@@ -31,7 +33,7 @@ export class CollectionsAnalyticsService {
 
   public async getLast24HActive(
     input: AnalyticsInput,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`,
       () => this.toolsService.getLast24HActive(input),
@@ -41,7 +43,7 @@ export class CollectionsAnalyticsService {
   }
   public async getActiveNftsStats(
     input: AnalyticsInput,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
       () => this.toolsService.getActiveNftsStats(input),
@@ -82,7 +84,7 @@ export class CollectionsAnalyticsService {
     time: string,
     series: string,
     metric: string,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return await this.analyticsGetter.getVolumeDataForTimePeriod(
       time,
       series,
@@ -94,7 +96,7 @@ export class CollectionsAnalyticsService {
     time: string,
     series: string,
     metric: string,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return await this.analyticsGetter.getFloorPriceForTimePeriod(
       time,
       series,

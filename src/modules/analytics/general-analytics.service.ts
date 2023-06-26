@@ -7,7 +7,7 @@ import { CachingService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import * as hash from 'object-hash';
 import { Injectable } from '@nestjs/common';
-import { AggregateValue } from './models/aggregate-value';
+import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 
 @Injectable()
 export class GeneralAnalyticsService {
@@ -19,7 +19,9 @@ export class GeneralAnalyticsService {
     private marketplacesService: MarketplacesService,
   ) {}
 
-  public async getNftsCount(input: AnalyticsInput): Promise<AggregateValue[]> {
+  public async getNftsCount(
+    input: AnalyticsInput,
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`,
       () => this.toolsService.getNftsCount(input),
@@ -30,7 +32,7 @@ export class GeneralAnalyticsService {
 
   public async getLast24HActive(
     input: AnalyticsInput,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`,
       () => this.toolsService.getLast24HActive(input),
@@ -40,7 +42,7 @@ export class GeneralAnalyticsService {
   }
   public async getActiveNftsStats(
     input: AnalyticsInput,
-  ): Promise<AggregateValue[]> {
+  ): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
       () => this.toolsService.getActiveNftsStats(input),
