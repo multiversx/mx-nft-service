@@ -90,7 +90,7 @@ describe('Analytics Data Setter Service', () => {
     });
   });
 
-  it('Returns undefined when ingestlast false and we have less the 20 data events', async () => {
+  it('returns undefined when ingestlast false and we have less the 20 data events', async () => {
     const execute = jest.fn(() => {
       throw new Error();
     });
@@ -137,20 +137,20 @@ describe('Analytics Data Setter Service', () => {
         service.ingestSingleEvent({ ...validInputData }),
       ).rejects.toThrowError(Error);
     });
-  });
 
-  it('when input data is correct the execute function is succesfully called', async () => {
-    const execute = jest.fn().mockReturnValueOnce({});
-    nftAnalyticsRepository.createQueryBuilder = jest.fn(() => ({
-      insert,
-      into,
-      values,
-      orUpdate,
-      execute,
-    }));
+    it('when input data is correct and the execute function is succesfully called does not throw error', async () => {
+      const execute = jest.fn().mockReturnValueOnce({});
+      nftAnalyticsRepository.createQueryBuilder = jest.fn(() => ({
+        insert,
+        into,
+        values,
+        orUpdate,
+        execute,
+      }));
 
-    await expect(
-      service.ingestSingleEvent(validInputData),
-    ).resolves.not.toThrow();
+      await expect(
+        service.ingestSingleEvent(validInputData),
+      ).resolves.not.toThrow();
+    });
   });
 });
