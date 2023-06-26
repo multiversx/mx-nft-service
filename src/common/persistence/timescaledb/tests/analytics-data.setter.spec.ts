@@ -138,7 +138,7 @@ describe('Analytics Data Setter Service', () => {
       ).rejects.toThrowError(Error);
     });
 
-    it('when input data is correct and the execute function is succesfully called does not throw error', async () => {
+    it('does not throw error when valid input', async () => {
       const execute = jest.fn().mockReturnValueOnce({});
       nftAnalyticsRepository.createQueryBuilder = jest.fn(() => ({
         insert,

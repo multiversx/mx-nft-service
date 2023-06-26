@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsDataGetterService } from '../analytics-data.getter.service';
 import { FloorPriceDaily, SumDaily } from '../entities/sum-daily.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -6,8 +6,7 @@ import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-
 
 describe('Analytics Data Getter Service', () => {
   let service: AnalyticsDataGetterService;
-  let floorPriceRepository: any;
-  let sumDailyRepository: any;
+  let module: TestingModule;
   const offset = jest.fn().mockReturnThis();
   const limit = jest.fn().mockReturnThis();
   const select = jest.fn().mockReturnThis();
@@ -18,20 +17,16 @@ describe('Analytics Data Getter Service', () => {
   const groupBy = jest.fn().mockReturnThis();
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
         AnalyticsDataGetterService,
         {
           provide: getRepositoryToken(SumDaily, 'timescaledb'),
-          useFactory: () => ({
-            save: jest.fn(() => true),
-          }),
+          useFactory: () => ({}),
         },
         {
           provide: getRepositoryToken(FloorPriceDaily, 'timescaledb'),
-          useFactory: () => ({
-            save: jest.fn(() => true),
-          }),
+          useFactory: () => ({}),
         },
       ],
     }).compile();
@@ -39,21 +34,19 @@ describe('Analytics Data Getter Service', () => {
     service = module.get<AnalyticsDataGetterService>(
       AnalyticsDataGetterService,
     );
-    floorPriceRepository = module.get(
-      getRepositoryToken(FloorPriceDaily, 'timescaledb'),
-    );
-    sumDailyRepository = module.get(
-      getRepositoryToken(SumDaily, 'timescaledb'),
-    );
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
   describe('getTopCollectionsDaily', () => {
     it('returns empty list when no data and no key present', async () => {
       const getRawMany = jest.fn().mockReturnValueOnce([]);
       const getCount = jest.fn().mockReturnValueOnce(0);
+      const sumDailyRepository = module.get(
+        getRepositoryToken(SumDaily, 'timescaledb'),
+      );
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -74,6 +67,9 @@ describe('Analytics Data Getter Service', () => {
     it('returns list with one item when no data and the searched key', async () => {
       const getRawMany = jest.fn().mockReturnValueOnce([]);
       const getCount = jest.fn().mockReturnValueOnce(0);
+      const sumDailyRepository = module.get(
+        getRepositoryToken(SumDaily, 'timescaledb'),
+      );
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -103,6 +99,9 @@ describe('Analytics Data Getter Service', () => {
         { value: 121, series: 'test2' },
       ]);
       const getCount = jest.fn().mockReturnValueOnce(2);
+      const sumDailyRepository = module.get(
+        getRepositoryToken(SumDaily, 'timescaledb'),
+      );
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -137,6 +136,9 @@ describe('Analytics Data Getter Service', () => {
   describe('getFloorPriceData', () => {
     it('returns empty list when no data for specific collection', async () => {
       const getRawMany = jest.fn().mockReturnValueOnce([]);
+      const floorPriceRepository = module.get(
+        getRepositoryToken(FloorPriceDaily, 'timescaledb'),
+      );
       floorPriceRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -167,6 +169,9 @@ describe('Analytics Data Getter Service', () => {
         new AnalyticsAggregateValue({ value: 2, series: 'test' }),
         new AnalyticsAggregateValue({ value: 121, series: 'test' }),
       ];
+      const floorPriceRepository = module.get(
+        getRepositoryToken(FloorPriceDaily, 'timescaledb'),
+      );
       floorPriceRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -192,6 +197,9 @@ describe('Analytics Data Getter Service', () => {
   describe('getVolumeData', () => {
     it('returns empty list when no data for specific collection', async () => {
       const getRawMany = jest.fn().mockReturnValueOnce([]);
+      const sumDailyRepository = module.get(
+        getRepositoryToken(SumDaily, 'timescaledb'),
+      );
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -222,6 +230,9 @@ describe('Analytics Data Getter Service', () => {
         new AnalyticsAggregateValue({ value: 2, series: 'test' }),
         new AnalyticsAggregateValue({ value: 121, series: 'test' }),
       ];
+      const sumDailyRepository = module.get(
+        getRepositoryToken(SumDaily, 'timescaledb'),
+      );
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
