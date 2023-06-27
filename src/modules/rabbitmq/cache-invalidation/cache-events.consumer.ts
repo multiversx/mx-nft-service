@@ -45,7 +45,6 @@ export class CacheEventsConsumer {
         const collectionIdentifier = event.id.split('-').slice(0, 2).join('-');
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
           this.collectionAssetsRedisHandler.clearKey(collectionIdentifier),
           this.collectionAssetsForOwnerRedisHandler.clearKey(
             `${collectionIdentifier}_${event.address}`,
@@ -85,7 +84,6 @@ export class CacheEventsConsumer {
             );
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
-          this.assetScamInfoRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
           this.collectionAssetsRedisHandler.clearKey(collection),
           collectionsAssetForOnwerPromise,
@@ -114,7 +112,6 @@ export class CacheEventsConsumer {
         const profilerUpdateAuction = new CpuProfiler();
         await Promise.all([
           this.cacheInvalidationEventsService.invalidateAuction(event),
-          this.cacheInvalidationEventsService.invalidateAssetHistory(event.id),
         ]);
         profilerUpdateAuction.stop('UpdateAuction');
         break;
@@ -178,6 +175,12 @@ export class CacheEventsConsumer {
         const profilerUpdateOffer = new CpuProfiler();
         await this.cacheInvalidationEventsService.invalidateOffers(event);
         profilerUpdateOffer.stop('UpdateOffer');
+        break;
+
+      case CacheEventTypeEnum.ScamUpdate:
+        const profileScamUpdate = new CpuProfiler();
+        this.assetScamInfoRedisHandler.clearKey(event.id),
+          profileScamUpdate.stop('ScamUpdate');
         break;
 
       // case CacheEventTypeEnum.RefreshTrending:

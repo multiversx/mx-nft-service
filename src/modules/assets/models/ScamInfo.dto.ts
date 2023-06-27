@@ -1,9 +1,8 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Nft } from 'src/common';
 import { ScamInfoApi } from 'src/common/services/mx-communication/models/scam-info.dto';
 import { elasticDictionary } from 'src/config';
 import { NftScamInfoModel } from 'src/modules/scam/models/nft-scam-info.model';
-import { ScamInfoTypeEnum } from '.';
+import { Asset, ScamInfoTypeEnum } from '.';
 @ObjectType()
 export class ScamInfo {
   @Field(() => ScamInfoTypeEnum, { nullable: true })
@@ -25,7 +24,7 @@ export class ScamInfo {
   }
 
   static areApiAndElasticScamInfoDifferent(
-    nftFromApi: Nft,
+    nftFromApi: Asset,
     nftFromElastic: any,
   ): boolean {
     return (
@@ -37,7 +36,7 @@ export class ScamInfo {
   }
 
   static areApiAndDbScamInfoDifferent(
-    nftFromApi: Nft,
+    nftFromApi: Asset,
     nftFromDb: NftScamInfoModel,
     version: string,
   ): boolean {
@@ -58,5 +57,23 @@ export class ScamInfo {
         nftFromElastic?.[elasticDictionary.scamInfo.typeKey] ||
       (!nftFromDb.type && nftFromElastic?.[elasticDictionary.scamInfo.typeKey])
     );
+  }
+
+  static isScam(scamInfo: ScamInfo): boolean {
+    return scamInfo.type !== ScamInfoTypeEnum.none;
+  }
+
+  static none(): ScamInfo {
+    return new ScamInfo({
+      type: ScamInfoTypeEnum.none,
+      info: null,
+    });
+  }
+
+  static scam(): ScamInfo {
+    return new ScamInfo({
+      type: ScamInfoTypeEnum.scam,
+      info: 'Scam report',
+    });
   }
 }

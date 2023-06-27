@@ -29,3 +29,27 @@ export class Attribute {
   tags: string[];
   description: string;
 }
+
+export class CreateNftWithMultipleFilesRequest {
+  collection: string;
+  quantity: string = '1';
+  name: string;
+  royalties: string = '0';
+  attributes: Attribute;
+  files: FileUpload[];
+
+  constructor(init?: Partial<CreateNftWithMultipleFilesRequest>) {
+    Object.assign(this, init);
+  }
+
+  static fromArgs(nftArgs: CreateNftArgs, files: FileUpload[]) {
+    return new CreateNftWithMultipleFilesRequest({
+      collection: nftArgs.collection,
+      quantity: nftArgs.quantity,
+      name: nftArgs.name,
+      royalties: nftArgs.royalties,
+      attributes: nftArgs.attributes,
+      files: files,
+    });
+  }
+}

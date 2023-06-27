@@ -88,6 +88,7 @@ type Asset {
   identifier: String!
   isLiked(byAddress: String!): Boolean
   isNsfw: Boolean
+  isTicket: Boolean
   isWhitelistedStorage: Boolean!
   likesCount: Int
   lowestAuction(filters: MarketplaceFilters): Auction
@@ -115,12 +116,15 @@ type Asset {
 
 enum AssetActionEnum {
   Added
+  Bid
   Bought
   ClosedAuction
   Created
   EndedAuction
+  PriceUpdated
   Received
   StartedAuction
+  Updated
 }
 
 type AssetEdge {
@@ -181,6 +185,7 @@ input AssetsFilter {
   """This will work only with an owner address"""
   collections: [String!]
   creatorAddress: String
+  customFilters: CustomFiltersEnum
   identifier: String
   identifiers: [String!]
   likedByAddress: String
@@ -508,7 +513,7 @@ type CollectionResponse {
 }
 
 type CollectionRole {
-  address: String!
+  address: String
   canAddQuantity: Boolean
   canAddUri: Boolean
   canBurn: Boolean
@@ -623,6 +628,10 @@ input CurrentPaymentTokensFilters {
   marketplaceKey: String
 }
 
+enum CustomFiltersEnum {
+  Tickets
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -645,6 +654,7 @@ type ExploreStats {
 enum FeaturedCollectionTypeEnum {
   Featured
   Hero
+  Tickets
 }
 
 input FeaturedCollectionsArgs {
@@ -768,6 +778,12 @@ type MarketplacePageInfo {
   startCursor: String
 }
 
+input MarketplaceReindexDataArgs {
+  afterTimestamp: Float
+  beforeTimestamp: Float
+  marketplaceAddress: String!
+}
+
 enum MarketplaceTypeEnum {
   External
   Internal
@@ -838,6 +854,7 @@ type Mutation {
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
+  createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
@@ -845,6 +862,7 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+  reindexMarketplaceData(input: MarketplaceReindexDataArgs!): Boolean!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
@@ -1201,6 +1219,7 @@ type ScamInfo {
 }
 
 enum ScamInfoTypeEnum {
+  none
   potentialScam
   scam
 }

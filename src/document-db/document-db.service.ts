@@ -1,18 +1,21 @@
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
 import { Injectable } from '@nestjs/common';
-import { Nft } from 'src/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import { NftScamInfoModel } from 'src/modules/scam/models/nft-scam-info.model';
 import { CollectionTraitSummary } from 'src/modules/nft-traits/models/collection-traits.model';
 import { NftScamInfoRepositoryService } from './repositories/nft-scam.repository';
 import { TraitRepositoryService } from './repositories/traits.repository';
+import { Asset } from 'src/modules/assets/models';
+import { CollectionScamInfoRepositoryService } from './repositories/collection-scam.repository';
+import { CollectionScamInfoModel } from 'src/modules/scam/models/collection-scam-info.model';
 
 @Injectable()
 export class DocumentDbService {
   constructor(
     private readonly traitRepositoryService: TraitRepositoryService,
     private readonly nftScamInfoRepositoryService: NftScamInfoRepositoryService,
+    private readonly collectionScamInfoRepositoryService: CollectionScamInfoRepositoryService,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -73,7 +76,7 @@ export class DocumentDbService {
   }
 
   async saveOrUpdateBulkNftScamInfo(
-    nfts: Nft[],
+    nfts: Asset[],
     version: string,
   ): Promise<void> {
     return await this.execute(
@@ -105,6 +108,41 @@ export class DocumentDbService {
     return await this.execute(
       this.getNftScamInfo.name,
       this.nftScamInfoRepositoryService.getNftScamInfo(identifier),
+    );
+  }
+
+  async saveOrUpdateCollectionScamInfo(
+    collection: string,
+    version: string,
+    scamInfo?: ScamInfo,
+  ): Promise<void> {
+    return await this.execute(
+      this.saveOrUpdateCollectionScamInfo.name,
+      this.collectionScamInfoRepositoryService.saveOrUpdateCollectionScamInfo(
+        collection,
+        version,
+        scamInfo,
+      ),
+    );
+  }
+
+  async deleteCollectionScamInfo(collection: string): Promise<void> {
+    return await this.execute(
+      this.deleteCollectionScamInfo.name,
+      this.collectionScamInfoRepositoryService.deleteCollectionScamInfo(
+        collection,
+      ),
+    );
+  }
+
+  async getCollectionScamInfo(
+    collection: string,
+  ): Promise<CollectionScamInfoModel | undefined> {
+    return await this.execute(
+      this.getCollectionScamInfo.name,
+      this.collectionScamInfoRepositoryService.getCollectionScamInfo(
+        collection,
+      ),
     );
   }
 }

@@ -1,8 +1,8 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { mxConfig } from 'src/config';
 import { OrderEntity } from 'src/db/orders';
 import { DateUtils } from 'src/utils/date-utils';
+import { Token } from '../../usdPrice/Token.model';
 
 @ObjectType()
 export class Price {

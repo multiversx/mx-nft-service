@@ -9,12 +9,12 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class FeaturedCollectionsCachingService {
-  constructor(private readonly redisCacheService: RedisCacheService) {}
+  constructor(private readonly redisCacheService: RedisCacheService) { }
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
-    limit?: number,
-    offset?: number,
+    _limit?: number,
+    _offset?: number,
   ): Promise<[FeaturedCollectionEntity[], number]> {
     const cacheKey = this.getFeaturedCollectionsCacheKey();
     return await this.redisCacheService.getOrSet(
@@ -38,9 +38,7 @@ export class FeaturedCollectionsCachingService {
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
-    await this.redisCacheService.deleteByPattern(
-      `${CacheInfo.FeaturedCollections.key}*`,
-    );
+    await this.redisCacheService.delete(CacheInfo.FeaturedCollections.key);
   }
 
   private getFeaturedNftsCacheKey(limit?: number, offset?: number) {

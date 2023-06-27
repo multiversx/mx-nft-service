@@ -31,6 +31,7 @@ export interface Nft {
   nonce: number;
   royalties: string;
   timestamp: number;
+  url: string;
   uris: string[];
   tags: string[];
   metadata: NftMetadata;

@@ -11,7 +11,7 @@ import {
   TransactionOnNetwork,
 } from '@multiversx/sdk-network-providers';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
-import { Token } from './models/Token.model';
+import { Token } from '../../../modules/usdPrice/Token.model';
 import { Address } from '@multiversx/sdk-core';
 import { SmartContractApi } from './models/smart-contract.api';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
@@ -567,18 +567,6 @@ export class MxApiService {
     return [nfts, lastTimestamp];
   }
 
-  async getNftsWithScamInfoBeforeTimestamp(
-    beforeTimestamp: number,
-    size: number,
-  ): Promise<[Nft[], number]> {
-    let [nfts, lastTimestamp] = await this.getNftsBeforeTimestamp(
-      beforeTimestamp,
-      size,
-      ['identifier', 'scamInfo', 'timestamp'],
-    );
-    return [nfts, lastTimestamp];
-  }
-
   async getTagsBySearch(searchTerm: string = ''): Promise<NftTag[]> {
     return await this.doGetGeneric(
       this.getTagsBySearch.name,
@@ -626,7 +614,7 @@ export class MxApiService {
   async getAllTokens(): Promise<Token[]> {
     const allTokens = await this.doGetGeneric(
       this.getAllTokens.name,
-      'tokens?size=10000&fields=identifier,name,ticker,decimals',
+      'tokens?size=10000&fields=identifier,name,ticker,decimals,price',
     );
     return allTokens.map((t) => Token.fromMxApiToken(t));
   }
@@ -641,13 +629,13 @@ export class MxApiService {
   async getTokenData(tokenId: string): Promise<Token | undefined> {
     const token = await this.doGetGeneric(
       this.getTokenData.name,
-      `tokens/${tokenId}?fields=identifier,name,ticker,decimals`,
+      `tokens/${tokenId}?fields=identifier,name,ticker,decimals,price`,
     );
     return token
       ? new Token({
-          ...token,
-          symbol: token.ticker,
-        })
+        ...token,
+        symbol: token.ticker,
+      })
       : undefined;
   }
 
@@ -717,32 +705,6 @@ export class MxApiService {
   async getMxApiAbout(): Promise<MxApiAbout> {
     const about = await this.doGetGeneric(this.getMxStats.name, 'about');
     return new MxApiAbout(about);
-  }
-
-  async getBulkNftScamInfo(
-    identifiers: string[],
-    computeScamInfo: boolean,
-  ): Promise<Nft[]> {
-    const query = new AssetsQuery()
-      .addIdentifiers(identifiers)
-      .addPageSize(0, identifiers.length)
-      .addFields(['identifier', 'scamInfo'])
-      .addComputeScamInfo(computeScamInfo);
-    const url = `nfts${query.build(false)}`;
-    let nfts = await this.doGetGeneric(this.getBulkNftScamInfo.name, url);
-    return nfts;
-  }
-
-  async getNftScamInfo(
-    identifier: string,
-    computeScamInfo: boolean,
-  ): Promise<Nft> {
-    const query = new AssetsQuery()
-      .addFields(['identifier', 'scamInfo'])
-      .addComputeScamInfo(computeScamInfo);
-    const url = `nfts/${identifier}${query.build(false)}`;
-    let nftScamInfo = await this.doGetGeneric(this.getNftScamInfo.name, url);
-    return nftScamInfo;
   }
 
   private filterUniqueNftsByNonce(nfts: Nft[]): Nft[] {

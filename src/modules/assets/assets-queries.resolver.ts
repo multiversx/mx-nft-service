@@ -36,6 +36,7 @@ import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { randomBetween } from 'src/utils/helpers';
 import { ScamInfo } from './models/ScamInfo.dto';
+import { IsTicketProvider } from './loaders/asset-is-ticket.loader';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -55,6 +56,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     private assetRarityProvider: AssetRarityInfoProvider,
     private marketplaceProvider: FeaturedMarketplaceProvider,
     private internalMarketplaceProvider: InternalMarketplaceProvider,
+    private isTicketProvider: IsTicketProvider,
   ) {
     super();
   }
@@ -146,7 +148,9 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
-    return scamInfoValue && Object.keys(scamInfoValue).length > 1
+    return scamInfoValue &&
+      Object.keys(scamInfoValue).length > 1 &&
+      ScamInfo.isScam(scamInfoValue)
       ? scamInfoValue
       : null;
   }
@@ -253,6 +257,13 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const randomIdx = randomBetween(0, descriptions.length);
     asset.metadata.description = descriptions[randomIdx];
     return asset.metadata;
+  }
+
+  @ResolveField('isTicket', () => Boolean)
+  async isTicket(@Parent() asset: Asset) {
+    const { collection } = asset;
+    const isAssetTicket = await this.isTicketProvider.load(collection);
+    return isAssetTicket?.value ?? false;
   }
 
   private async getMarketplaceForNft(

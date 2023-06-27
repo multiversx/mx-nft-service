@@ -1,6 +1,5 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { Injectable, Logger } from '@nestjs/common';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { AuctionEntity } from 'src/db/auctions';
 import { ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import {
@@ -9,6 +8,7 @@ import {
 } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { UpdateListingEvent } from '../../entities/auction/updateListing.event';

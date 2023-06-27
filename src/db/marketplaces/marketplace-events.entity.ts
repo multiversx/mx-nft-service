@@ -33,4 +33,28 @@ export class MarketplaceEventsEntity extends BaseEntity {
     super();
     Object.assign(this, init);
   }
+
+  hasEventIdentifier(eventType: string): boolean {
+    return eventType === this.getEventIdentifier();
+  }
+
+  hasOneOfEventIdentifiers(eventType: string[]): boolean {
+    return eventType.includes(this.getEventIdentifier());
+  }
+
+  hasEventTopicIdentifier(eventType: string): boolean {
+    return eventType === this.getEventTopicIdentifier();
+  }
+
+  hasOneOfEventTopicIdentifiers(eventType: string[]): boolean {
+    return eventType.includes(this.getEventTopicIdentifier());
+  }
+
+  getEventIdentifier(): string {
+    return this.data?.eventData?.identifier;
+  }
+
+  getEventTopicIdentifier(): string {
+    return Buffer.from(this.data?.eventData?.topics?.[0], 'base64').toString();
+  }
 }

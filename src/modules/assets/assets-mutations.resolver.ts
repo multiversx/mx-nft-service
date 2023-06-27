@@ -18,6 +18,7 @@ import {
   CreateNftRequest,
   UpdateQuantityRequest,
   TransferNftRequest,
+  CreateNftWithMultipleFilesRequest,
 } from './models/requests';
 import { AuthorizationHeader } from '../auth/authorization-header';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
@@ -43,6 +44,20 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   ): Promise<TransactionNode> {
     const request = CreateNftRequest.fromArgs(input, file);
     return await this.assetsTransactionService.createNft(user.address, request);
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard)
+  async createNftWithMultipleFiles(
+    @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
+    @Args({ name: 'files', type: () => [GraphQLUpload] }) files: [FileUpload],
+    @AuthUser() user: UserAuthResult,
+  ): Promise<TransactionNode> {
+    const request = CreateNftWithMultipleFilesRequest.fromArgs(input, files);
+    return await this.assetsTransactionService.createNftWithMultipleFiles(
+      user.address,
+      request,
+    );
   }
 
   @Mutation(() => Boolean)

@@ -7,6 +7,7 @@ import { Sorting, Sort } from 'src/modules/common/filters/filtersTypes';
 import { getOrdersForAuctions } from '../auctions/sql.queries';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { constants } from 'src/config';
 
 @Injectable()
 export class OrdersRepository {
@@ -96,6 +97,12 @@ export class OrdersRepository {
 
   async saveOrder(order: OrderEntity) {
     return await this.ordersRepository.save(order);
+  }
+
+  async saveBulkOrders(orders: OrderEntity[]): Promise<void> {
+    await this.ordersRepository.save(orders, {
+      chunk: constants.dbBatch,
+    });
   }
 
   async updateOrderWithStatus(order: OrderEntity, status: OrderStatusEnum) {

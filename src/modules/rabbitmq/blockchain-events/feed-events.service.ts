@@ -12,8 +12,8 @@ import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { OfferEntity } from 'src/db/offers';
+import { Token } from 'src/modules/usdPrice/Token.model';
 
 @Injectable()
 export class FeedEventsSenderService {
@@ -81,8 +81,8 @@ export class FeedEventsSenderService {
             tokenData: tokenData ?? undefined,
           },
           marketplaceKey: auctionTokenMarketplace.key,
-          isNsfw: nftData.isNsfw,
-          scamInfo: nftData.scamInfo,
+          isNsfw: nftData?.isNsfw,
+          scamInfo: nftData?.scamInfo,
         },
       }),
     );
@@ -129,8 +129,8 @@ export class FeedEventsSenderService {
           usdAmount: usdAmount ?? undefined,
           tokenData: tokenData ?? undefined,
           marketplaceKey: endMarketplace.key,
-          isNsfw: endAuctionNftData.isNsfw,
-          scamInfo: endAuctionNftData.scamInfo,
+          isNsfw: endAuctionNftData?.isNsfw,
+          scamInfo: endAuctionNftData?.scamInfo,
         },
       }),
     );
@@ -172,8 +172,8 @@ export class FeedEventsSenderService {
           auctionId: buyAuction.id,
           boughtTokens: boughtTokens,
           marketplaceKey: buyMarketplace.key,
-          isNsfw: buySftNftData.isNsfw,
-          scamInfo: buySftNftData.scamInfo,
+          isNsfw: buySftNftData?.isNsfw,
+          scamInfo: buySftNftData?.scamInfo,
         },
       }),
     );
@@ -196,8 +196,8 @@ export class FeedEventsSenderService {
           nftName: nftData?.name,
           verified: nftData?.verified ? true : false,
           collectionName: collection?.name,
-          isNsfw: nftData.isNsfw,
-          scamInfo: nftData.scamInfo,
+          isNsfw: nftData?.isNsfw,
+          scamInfo: nftData?.scamInfo,
         },
       }),
     );
@@ -245,8 +245,8 @@ export class FeedEventsSenderService {
           tokenData: tokenData ?? undefined,
           auctionId: auction.id,
           marketplaceKey: auction.marketplaceKey,
-          isNsfw: bidNftData.isNsfw,
-          scamInfo: bidNftData.scamInfo,
+          isNsfw: bidNftData?.isNsfw,
+          scamInfo: bidNftData?.scamInfo,
         },
       }),
     );
@@ -275,8 +275,8 @@ export class FeedEventsSenderService {
           usdAmount: usdAmount ?? undefined,
           tokenData: tokenData ?? undefined,
           marketplaceKey: offer.marketplaceKey,
-          isNsfw: nft.isNsfw,
-          scamInfo: nft.scamInfo,
+          isNsfw: nft?.isNsfw,
+          scamInfo: nft?.scamInfo,
         },
       }),
     );
@@ -306,8 +306,8 @@ export class FeedEventsSenderService {
           tokenData: tokenData ?? undefined,
           marketplaceKey: offer.marketplaceKey,
           offerOwner: offer.ownerAddress,
-          isNsfw: nft.isNsfw,
-          scamInfo: nft.scamInfo,
+          isNsfw: nft?.isNsfw,
+          scamInfo: nft?.scamInfo,
         },
       }),
     );

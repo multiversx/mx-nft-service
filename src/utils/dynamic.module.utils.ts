@@ -1,6 +1,11 @@
 import {
+  ApiModule,
+  ApiModuleOptions,
+  ApiService,
   CachingModule,
   CachingModuleOptions,
+  ElasticModule,
+  ElasticModuleOptions,
   RedisCacheModule,
   RedisCacheModuleOptions,
 } from '@multiversx/sdk-nestjs';
@@ -10,9 +15,35 @@ import {
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+import { ApiConfigModule } from 'src/modules/common/api-config/api.config.module';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 
 export class DynamicModuleUtils {
+  static getElasticModule(): DynamicModule {
+    return ElasticModule.forRootAsync({
+      useFactory: (apiConfigService: ApiConfigService) =>
+        new ElasticModuleOptions({
+          url: apiConfigService.getElasticUrl(),
+          customValuePrefix: 'nft',
+        }),
+      inject: [ApiConfigService, ApiService],
+    });
+  }
+
+  static getApiModule(): DynamicModule {
+    return ApiModule.forRootAsync({
+      imports: [ApiConfigModule],
+      useFactory: (apiConfigService: ApiConfigService) =>
+        new ApiModuleOptions({
+          axiosTimeout: apiConfigService.getAxiosTimeout(),
+          rateLimiterSecret: apiConfigService.getRateLimiterSecret(),
+          serverTimeout: apiConfigService.getServerTimeout(),
+          useKeepAliveAgent: apiConfigService.getUseKeepAliveAgentFlag(),
+        }),
+      inject: [ApiConfigService],
+    });
+  }
+
   static getCachingModule(): DynamicModule {
     return CachingModule.forRootAsync({
       useFactory: (apiConfigService: ApiConfigService) =>

@@ -27,6 +27,7 @@ export const getMarketplaceTransactionsElasticQuery = (
       'timestamp',
       new RangeLowerThan(input.txTimestampDelimiter),
     )
+    .withRangeFilter('timestamp', new RangeLowerThan(input.beforeTimestamp))
     .withRangeFilter('timestamp', new RangeGreaterThan(input.afterTimestamp))
     .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
     .withFields([

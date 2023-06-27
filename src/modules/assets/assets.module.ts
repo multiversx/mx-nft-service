@@ -52,6 +52,9 @@ import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { NftTraitsElasticService } from '../nft-traits/nft-traits.elastic.service';
 import { AuthModule } from '../auth/auth.module';
+import { FeaturedModuleGraph } from '../featured/featured.module';
+import { IsTicketProvider } from './loaders/asset-is-ticket.loader';
+import { IsTicketRedisHandler } from './loaders/asset-is-ticket.redis-handler';
 
 @Module({
   providers: [
@@ -100,12 +103,15 @@ import { AuthModule } from '../auth/auth.module';
     InternalMarketplaceRedisHandler,
     NftTraitsService,
     NftTraitsElasticService,
+    IsTicketProvider,
+    IsTicketRedisHandler
   ],
   imports: [
     MxCommunicationModule,
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CollectionsModuleGraph),
+    forwardRef(() => FeaturedModuleGraph),
     forwardRef(() => AuthModule),
     IpfsModule,
     PersistenceModule,
@@ -124,6 +130,8 @@ import { AuthModule } from '../auth/auth.module';
     AssetScamInfoProvider,
     AssetsRedisHandler,
     AssetsProvider,
+    IsTicketProvider,
+    IsTicketRedisHandler
   ],
 })
-export class AssetsModuleGraph {}
+export class AssetsModuleGraph { }

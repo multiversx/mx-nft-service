@@ -10,7 +10,7 @@ export class FeaturedNftsRepository {
   constructor(
     @InjectRepository(FeaturedNftEntity)
     private featuredNftsRepository: Repository<FeaturedNftEntity>,
-  ) {}
+  ) { }
   async getFeaturedNfts(
     limit: number = 20,
     offset: number = 0,
@@ -33,7 +33,8 @@ export class FeaturedCollectionsRepository {
   constructor(
     @InjectRepository(FeaturedCollectionEntity)
     private featuredCollectionsRepository: Repository<FeaturedCollectionEntity>,
-  ) {}
+  ) { }
+
   async getFeaturedCollections(
     limit: number = 20,
     offset: number = 0,
@@ -61,9 +62,19 @@ export class FeaturedCollectionsRepository {
     collection: string,
     type: FeaturedCollectionTypeEnum,
   ): Promise<boolean> {
+    if (!collection) return false
     const res = await this.featuredCollectionsRepository.save(
       new FeaturedCollectionEntity({ identifier: collection, type }),
     );
     return !!res.id;
+  }
+
+  async getFeaturedCollectionsByIdentifiers(identifiers: string[]): Promise<FeaturedCollectionEntity[]> {
+    return await this.featuredCollectionsRepository
+      .createQueryBuilder('featuredCollections')
+      .where('identifier IN(:...identifiers)', {
+        identifiers: identifiers,
+      })
+      .getMany();
   }
 }

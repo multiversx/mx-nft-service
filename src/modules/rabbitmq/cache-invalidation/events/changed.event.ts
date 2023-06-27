@@ -22,6 +22,7 @@ export enum CacheEventTypeEnum {
   SetCacheKey = 'SetCacheKey',
   UpdateOffer = 'UpdateOffer',
   AssetRefresh = 'AssetRefresh',
+  ScamUpdate = 'ScamUpdate',
   BlacklistedCollections = 'BlacklistedCollections',
   RefreshTrending = 'RefreshTrending',
   MarkCollection = 'MarkCollection',

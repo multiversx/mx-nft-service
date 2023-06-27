@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { TrendingCollectionsWarmerService } from 'src/crons/cache.warmer/trendingCollections.warmer.service';
-import { AssetsHistoryCachingService } from 'src/modules/asset-history/assets-history-caching.service';
 import { AssetsLikesCachingService } from 'src/modules/assets/assets-likes.caching.service';
 import { AssetAvailableTokensCountRedisHandler } from 'src/modules/assets/loaders/asset-available-tokens-count.redis-handler';
 import { AuctionsCachingService } from 'src/modules/auctions/caching/auctions-caching.service';
@@ -19,7 +17,6 @@ export class CacheInvalidationEventsService {
     private notificationsCachingService: NotificationsCachingService,
     private availableTokensCount: AssetAvailableTokensCountRedisHandler,
     private assetsLikesCachingService: AssetsLikesCachingService,
-    private assetsHistoryCachingService: AssetsHistoryCachingService,
     private featuredCollectionsCachingService: FeaturedCollectionsCachingService,
     private blacklistedCollectionsCachingService: BlacklistedCollectionsCachingService,
     // private analyticsService: TrendingCollectionsWarmerService,
@@ -32,9 +29,6 @@ export class CacheInvalidationEventsService {
         payload.id,
         payload.address,
         payload.extraInfo?.marketplaceKey,
-      ),
-      await this.auctionsCachingService.invalidateCacheByPattern(
-        payload.address,
       ),
       await this.availableTokensCount.clearKey(payload.id),
     ]);
@@ -66,17 +60,12 @@ export class CacheInvalidationEventsService {
     this.assetsLikesCachingService.invalidateCache(payload.id, payload.address);
   }
 
-  async invalidateAssetHistory(identifier: string) {
-    await this.assetsHistoryCachingService.invalidateCache(identifier);
-  }
-
   async invalidateFeaturedCollectionsCache(): Promise<void> {
     await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 
   async invalidateBlacklistedCollectionsCache(): Promise<void> {
     await this.blacklistedCollectionsCachingService.invalidateBlacklistedCollectionsCache();
-    await this.featuredCollectionsCachingService.invalidateFeaturedCollectionsCache();
   }
 
   async invalidateOffers(payload: ChangedEvent) {

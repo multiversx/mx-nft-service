@@ -6,7 +6,6 @@ import { RevertEventsService } from './revert.events.service';
 import { MxCommunicationModule } from 'src/common';
 import { MinterEventsService } from './minter-events.service';
 import { CommonModule } from 'src/common.module';
-import { CacheModule } from 'src/common/services/caching/caching.module';
 import { RarityUpdaterService } from 'src/crons/elastic.updater/rarity.updater.service';
 import { NsfwUpdaterService } from 'src/crons/elastic.updater/nsfw.updater.service';
 import { FlagNftService } from 'src/modules/admins/flag-nft.service';
@@ -42,6 +41,7 @@ import { OffersModuleGraph } from 'src/modules/offers/offers.module';
 import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 import { UpdateListingEventHandler } from './handlers/updateListing-event.handler';
+import { PluginModule } from 'src/plugins/plugin.module';
 
 @Module({
   imports: [
@@ -54,6 +54,7 @@ import { UpdateListingEventHandler } from './handlers/updateListing-event.handle
     forwardRef(() => MarketplacesModuleGraph),
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => OffersModuleGraph),
+    forwardRef(() => PluginModule),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     ScamModule,

@@ -3,7 +3,6 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { AssetHistoryLog } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 
 @Injectable()
 export class AssetsHistoryCachingService {
@@ -27,17 +26,6 @@ export class AssetsHistoryCachingService {
       getOrSetHistoryLog,
       CacheInfo.AssetHistory.ttl,
     );
-  }
-
-  async invalidateCache(identifier: string): Promise<void> {
-    const { collection, nonce } =
-      getCollectionAndNonceFromIdentifier(identifier);
-    const cacheKeyPattern = generateCacheKeyFromParams(
-      CacheInfo.AssetHistory.key,
-      collection,
-      nonce,
-    );
-    await this.redisCacheService.deleteByPattern(`${cacheKeyPattern}*`);
   }
 
   getAssetHistoryCacheKey(

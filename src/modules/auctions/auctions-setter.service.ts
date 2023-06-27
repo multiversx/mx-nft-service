@@ -106,6 +106,10 @@ export class AuctionsSetterService {
     }
   }
 
+  async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
+    return await this.persistenceService.saveBulkAuctions(auctions);
+  }
+
   async saveAuctionEntity(
     auctionEntity: AuctionEntity,
     assetTags: string[],

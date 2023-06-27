@@ -28,7 +28,7 @@
     "cdnUrl": "https://ipfs.io/ipfs/"
   },
   "gas": {
-    "nftCreate": 3000000,
+    "nftCreate": 3500000,
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
@@ -66,7 +66,10 @@
     "elasticMaxBatch": 10000,
     "dbBatch": 1000,
     "complexityLevel": 200,
-    "getLogsFromElasticBatchSize": 1000
+    "getLogsFromElasticBatchSize": 1000,
+    "dbMaxTimestamp": 2147483647,
+    "defaultPageOffset": 0,
+    "defaultPageSize": 10
   },
   "elasticDictionary": {
     "scamInfo": {
@@ -83,8 +86,12 @@
       "{size} magnificently designed and truly inspiring NFTs.",
       "An alluring collection of {size} wonderfully minted NFTs."
     ],
-    "forSmallCollections": [""],
-    "forAssets": [""]
+    "forSmallCollections": [
+      ""
+    ],
+    "forAssets": [
+      ""
+    ]
   },
   "ports": {
     "rarity": 6013,

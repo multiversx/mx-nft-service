@@ -129,6 +129,16 @@ export class CacheInfo {
     ttl: 10 * Constants.oneMinute(),
   };
 
+  static CexTokens: CacheInfo = {
+    key: 'cexTokens',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static xExchangeTokens: CacheInfo = {
+    key: 'xExchangeTokens',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
   static AllTokens: CacheInfo = {
     key: 'allTokens',
     ttl: Constants.oneMinute(),
@@ -156,7 +166,7 @@ export class CacheInfo {
 
   static AssetHistory: CacheInfo = {
     key: 'assetHistory',
-    ttl: Constants.oneDay(),
+    ttl: 5 * Constants.oneMinute(),
   };
 
   static CollectionTypes: CacheInfo = {

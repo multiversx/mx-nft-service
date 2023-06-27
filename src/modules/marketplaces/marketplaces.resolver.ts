@@ -8,8 +8,8 @@ import { MarketplacesResponse } from './models';
 import { NftMarketplaceAbiService } from '../auctions/nft-marketplace.abi.service';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
-import { Token } from 'src/common/services/mx-communication/models/Token.model';
 import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { Token } from '../usdPrice/Token.model';
 
 @Resolver(() => Marketplace)
 export class MarketplacesResolver extends BaseResolver(Marketplace) {

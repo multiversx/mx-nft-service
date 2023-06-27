@@ -4,6 +4,7 @@ export interface ScamInfoApi {
 }
 
 export enum ScamInfoTypeApiEnum {
+  none = 'none',
   scam = 'scam',
   potentialScam = 'potentialScam',
 }

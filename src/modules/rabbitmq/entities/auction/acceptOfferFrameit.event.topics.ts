@@ -32,13 +32,15 @@ export class AcceptOfferFrameitEventsTopics {
     this.paymentAmount = Buffer.from(rawTopics[8], 'base64')
       .toString('hex')
       .hexBigNumberToString();
-    this.nftOwner = new Address(Buffer.from(rawTopics[10], 'base64'));
+    if (rawTopics.length > 10) {
+      this.nftOwner = new Address(Buffer.from(rawTopics[10], 'base64'));
+    }
   }
 
   toPlainObject() {
     return {
       offerOwner: this.offerOwner.bech32(),
-      nftOwner: this.nftOwner.bech32(),
+      nftOwner: this.nftOwner?.bech32(),
       collection: this.collection,
       nonce: this.nonce,
       offerId: this.offerId,
