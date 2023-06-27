@@ -60,6 +60,8 @@ import { NotificationTypeEnum } from 'src/modules/notifications/models/Notificat
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { DeleteResult } from 'typeorm';
 import { NftTag } from '../services/mx-communication/models/nft.dto';
+import { MinterEntity } from 'src/db/minters';
+import { MintersRepository } from 'src/db/minters/minters.repository';
 
 @Injectable()
 export class PersistenceService {
@@ -84,6 +86,7 @@ export class PersistenceService {
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
     private readonly offersRepository: OffersRepository,
+    private readonly mintersRepository: MintersRepository,
   ) {}
 
   private async execute<T>(key: string, action: Promise<T>): Promise<T> {
@@ -1240,6 +1243,13 @@ export class PersistenceService {
       this.blacklistedCollectionsRepository.removeBlacklistedCollection(
         collection,
       ),
+    );
+  }
+
+  async saveMinter(minter: MinterEntity): Promise<MinterEntity> {
+    return await this.execute(
+      this.saveMinter.name,
+      this.mintersRepository.saveMinter(minter),
     );
   }
 }

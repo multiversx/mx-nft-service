@@ -38,6 +38,7 @@ import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
+import { MintersModuleGraph } from './modules/minters/minters.module';
 
 @Module({
   imports: [
@@ -93,6 +94,7 @@ import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.
     ExploreStatsModuleGraph,
     PrimarySaleModuleGraph,
     TimescaleDbModule,
+    MintersModuleGraph,
   ],
 })
 export class AppModule {}
