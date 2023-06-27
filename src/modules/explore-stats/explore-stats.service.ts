@@ -24,7 +24,7 @@ export class ExploreStatsService {
     private auctionsService: AuctionsGetterService,
     private apiService: MxApiService,
     private offersService: OffersService,
-  ) {}
+  ) { }
 
   async getExploreStats(): Promise<ExploreStats> {
     const [, collections] =
@@ -50,7 +50,7 @@ export class ExploreStatsService {
     });
   }
 
-  async getExpoloreNftsStats(): Promise<ExploreNftsStats> {
+  async getExploreNftsStats(): Promise<ExploreNftsStats> {
     const allNftsCount = await this.getOrSetTotalNftsCount();
 
     const [, buyNowCount] =

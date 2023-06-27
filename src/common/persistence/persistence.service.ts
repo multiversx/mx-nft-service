@@ -258,6 +258,21 @@ export class PersistenceService {
     );
   }
 
+  async getCollectionFloorPrice(
+    identifier: string,
+    marketplaceKey: string = undefined,
+    paymentToken: string = mxConfig.egld,
+  ): Promise<number> {
+    return await this.execute(
+      this.getCollectionStats.name,
+      this.collectionStatsRepository.getFloorPriceForCollection(
+        identifier,
+        marketplaceKey,
+        paymentToken,
+      ),
+    );
+  }
+
   async getCampaign(
     campaignId: string,
     minterAddress: string,

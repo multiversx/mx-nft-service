@@ -7,6 +7,7 @@ export class ClaimEventsTopics {
   private bid: string = '0';
   private auctionId: string;
   private boughtTokens: string = '1';
+  private paymentToken: string;
 
   constructor(rawTopics: string[]) {
     this.currentWinner = new Address(Buffer.from(rawTopics[1], 'base64'));
@@ -22,6 +23,7 @@ export class ClaimEventsTopics {
       auctionId: this.auctionId,
       boughtTokens: this.boughtTokens,
       bid: this.bid,
+      paymentToken: this.paymentToken,
     };
   }
 }

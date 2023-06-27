@@ -3,7 +3,7 @@ import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.
 import { Marketplace } from './models';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from '../assets/models';
 import { AuctionStartedSummary as AuctionStartedSummary } from './models/marketplaces-reindex-events-summaries/AuctionStartedSummary';
@@ -69,12 +69,12 @@ export class MarketplacesReindexEventsSummaryService {
       case AuctionEventEnum.AuctionTokenEvent:
       case ExternalAuctionEventEnum.Listing:
       case ExternalAuctionEventEnum.ListNftOnMarketplace:
-      case ElrondNftsSwapAuctionEventEnum.NftSwap: {
+      case KroganSwapAuctionEventEnum.NftSwap: {
         return AuctionStartedSummary.fromAuctionTokenEventAndTx(event, txData);
       }
       case AuctionEventEnum.WithdrawEvent:
       case ExternalAuctionEventEnum.ClaimBackNft:
-      case ElrondNftsSwapAuctionEventEnum.WithdrawSwap:
+      case KroganSwapAuctionEventEnum.WithdrawSwap:
       case ExternalAuctionEventEnum.ReturnListing: {
         return AuctionClosedSummary.fromWithdrawAuctionEventAndTx(
           event,
@@ -88,7 +88,7 @@ export class MarketplacesReindexEventsSummaryService {
       case ExternalAuctionEventEnum.Buy:
       case ExternalAuctionEventEnum.BuyFor:
       case ExternalAuctionEventEnum.BuyNft:
-      case ElrondNftsSwapAuctionEventEnum.Purchase:
+      case KroganSwapAuctionEventEnum.Purchase:
       case ExternalAuctionEventEnum.BulkBuy: {
         return AuctionBuySummary.fromBuySftEventAndTx(
           event,
@@ -97,7 +97,7 @@ export class MarketplacesReindexEventsSummaryService {
         );
       }
       case AuctionEventEnum.BidEvent:
-      case ElrondNftsSwapAuctionEventEnum.Bid: {
+      case KroganSwapAuctionEventEnum.Bid: {
         return AuctionBidSummary.fromBidEventAndTx(
           event,
           txData,
@@ -141,8 +141,8 @@ export class MarketplacesReindexEventsSummaryService {
         );
       }
       case ExternalAuctionEventEnum.UpdateListing:
-      case ElrondNftsSwapAuctionEventEnum.NftSwapUpdate:
-      case ElrondNftsSwapAuctionEventEnum.NftSwapExtend: {
+      case KroganSwapAuctionEventEnum.NftSwapUpdate:
+      case KroganSwapAuctionEventEnum.NftSwapExtend: {
         return AuctionUpdatedSummary.fromUpdateListingEventAndTx(event, txData);
       }
       case ExternalAuctionEventEnum.AcceptGlobalOffer: {

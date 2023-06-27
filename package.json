@@ -26,7 +26,11 @@
     "typeorm": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/datasource.ts",
     "generate-migration": "npm run typeorm -- migration:generate src/db/migrations/$npm_config_name",
     "run-migrations": "npm run typeorm migration:run",
-    "revert-migrations": "npm run typeorm migration:revert"
+    "revert-migrations": "npm run typeorm migration:revert",
+    "typeormTimescale": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/common/persistence/timescaledb/typeorm.config.ts",
+    "generate-migration-timescale": "npm run typeormTimescale -- migration:generate src/common/persistence/timescaledb/migrations/$npm_config_name",
+    "run-migrations-timescale": "npm run typeormTimescale migration:run --transaction=each",
+    "revert-migrations-timescale": "npm run typeormTimescale migration:revert"
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",
@@ -52,7 +56,7 @@
     "amqp-connection-manager": "3.7.0",
     "amqplib": "0.8.0",
     "apollo-server": "3.11.1",
-    "aws-sdk": "2.974.0",
+    "aws-sdk": "2.1366.0",
     "axios": "0.21.4",
     "axios-retry": "3.1.8",
     "bignumber.js": "9.0.1",
@@ -71,6 +75,7 @@
     "graphql-upload": "13.0.0",
     "helmet": "4.4.1",
     "jwks-rsa": "2.0.3",
+    "moment": "^2.29.4",
     "mongoose": "6.9.0",
     "mysql2": "2.2.5",
     "nest-winston": "1.8.0",
@@ -78,6 +83,7 @@
     "passport": "0.6.0",
     "passport-jwt": "4.0.1",
     "passport-local": "1.0.0",
+    "pg": "8.10.0",
     "prom-client": "13.1.0",
     "redis": "3.1.2",
     "reflect-metadata": "0.1.13",
@@ -86,11 +92,11 @@
     "save": "2.5.0",
     "swagger-ui-express": "4.3.0",
     "tiny-async-pool": "1.2.0",
-    "typeorm": "0.3.11",
+    "typeorm": "0.3.16",
     "winston": "3.7.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "9.2.0",
+    "@nestjs/cli": "9.4.2",
     "@nestjs/schematics": "9.0.4",
     "@nestjs/testing": "9.3.12",
     "@types/express": "^4.17.11",

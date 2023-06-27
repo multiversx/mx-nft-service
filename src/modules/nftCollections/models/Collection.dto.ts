@@ -1,13 +1,13 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { CollectionApi, RolesApi } from 'src/common';
 import { Account } from 'src/modules/account-stats/models';
-import { CollectionVolumeLast24 } from 'src/modules/analytics/collection-volume';
 import { AssetsResponse } from 'src/modules/assets/models';
 import { NftTypeEnum } from 'src/modules/assets/models/NftTypes.enum';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-traits.model';
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
+import { CollectionVolumeLast24 } from 'src/modules/analytics/models/collection-volume';
 
 @ObjectType()
 export class Collection {
