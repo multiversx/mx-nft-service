@@ -35,11 +35,13 @@ export class Metadata {
   static getInteractiveUrl(url: string): string {
     if (!url) return null;
     let isAcceptedUrl = false;
-    isAcceptedUrl = isAcceptedUrl || url.startsWith(mxConfig.ipfs);
     isAcceptedUrl = isAcceptedUrl || url.startsWith(mxConfig.dwebLink);
     isAcceptedUrl =
       isAcceptedUrl ||
       (url.includes(mxConfig.pinata) && url.startsWith('https://'));
+    isAcceptedUrl =
+      isAcceptedUrl ||
+      (url.includes(mxConfig.ipfs) && url.startsWith('https://'));
     if (isAcceptedUrl) return url;
     return null;
   }

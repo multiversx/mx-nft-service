@@ -11,7 +11,6 @@ describe('Metadata', () => {
       const expectedUrl =
         'https://maiar.mypinata.cloud/ipfs/QmXp1LVtVgykpXLzDmjgcwU9LVSK7myCo2L7uES3FoDuXF';
       const results = Metadata.getInteractiveUrl(expectedUrl);
-      console.log({ results });
       expect(results).toMatch(expectedUrl);
     });
 
