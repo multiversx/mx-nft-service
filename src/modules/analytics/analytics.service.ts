@@ -63,6 +63,7 @@ export class AnalyticsService {
     startDateUtc: number,
     eventsTimestamp: number,
     isSingleEvent: boolean = false,
+    ingestLast: boolean = false,
   ): Promise<void> {
     const marketplaceAddresses =
       await this.marketplacesService.getMarketplacesAddreses();
@@ -100,7 +101,7 @@ export class AnalyticsService {
         startDateUtc,
       );
       if (isAfter) {
-        await this.ingestEvent(isSingleEvent, eventsTimestamp);
+        await this.ingestEvent(isSingleEvent, eventsTimestamp, ingestLast);
       }
     }
   }
@@ -173,7 +174,13 @@ export class AnalyticsService {
     const events = eventsRaw.filter((event) =>
       analyticsEventsEnum.includes(event.identifier),
     );
-    await this.processEvents(events, startDateUtc, lastBlockLogs[0].timestamp);
+    await this.processEvents(
+      events,
+      startDateUtc,
+      lastBlockLogs[0].timestamp,
+      false,
+      true,
+    );
   }
 
   private getBlocksGroupedByTimestamp(logs: any[], lastBlockLogs: any[]) {
@@ -243,7 +250,11 @@ export class AnalyticsService {
     return parsedEvent;
   }
 
-  private async ingestEvent(singleEvent: boolean, eventsTimestamp: number) {
+  private async ingestEvent(
+    singleEvent: boolean,
+    eventsTimestamp: number,
+    ingestLast: boolean = false,
+  ) {
     if (singleEvent) {
       await this.dataSetterService.ingestSingleEvent({
         data: this.data,
@@ -253,7 +264,7 @@ export class AnalyticsService {
       await this.dataSetterService.ingest({
         data: this.data,
         timestamp: eventsTimestamp,
-        ingestLast: false,
+        ingestLast: ingestLast,
       });
     }
   }

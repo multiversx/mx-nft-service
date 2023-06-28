@@ -18,7 +18,7 @@ export class AnalyticsDataSetterService {
       const newRecordsToIngest = this.createRecords({ data, timestamp });
       this.pendingRecords.push(...newRecordsToIngest);
 
-      if (this.pendingRecords.length < 20) {
+      if (this.pendingRecords.length < 1000) {
         return;
       }
     }
