@@ -9,6 +9,9 @@ export class Metadata {
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
 
+  @Field(() => String, { nullable: true })
+  interactiveUrl: string;
+
   constructor(init?: Partial<Metadata>) {
     Object.assign(this, init);
   }
@@ -24,6 +27,7 @@ export class Metadata {
       attributes: metadataBody?.attributes
         ? AttributeType.fromMetadataAttributes(metadataBody.attributes)
         : null,
+      interactiveUrl: metadataBody.interactive_url,
     });
   }
 }

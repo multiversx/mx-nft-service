@@ -80,6 +80,7 @@ export interface NftTag {
 
 export interface NftMetadata {
   description: string;
+  interactive_url: string;
   attributes: [{ [key: string]: string }];
 }
 

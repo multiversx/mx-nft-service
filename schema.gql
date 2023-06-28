@@ -894,6 +894,7 @@ enum MediaTypeEnum {
 type Metadata {
   attributes: [AttributeType!]
   description: String
+  interactiveUrl: String
 }
 
 type MintPrice {
