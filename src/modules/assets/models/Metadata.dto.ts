@@ -1,5 +1,6 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 import { NftMetadata } from 'src/common';
+import { mxConfig } from 'src/config';
 
 @ObjectType()
 export class Metadata {
@@ -8,6 +9,9 @@ export class Metadata {
 
   @Field(() => [AttributeType], { nullable: true })
   attributes: AttributeType[];
+
+  @Field(() => String, { nullable: true })
+  interactiveUrl: string;
 
   constructor(init?: Partial<Metadata>) {
     Object.assign(this, init);
@@ -24,7 +28,22 @@ export class Metadata {
       attributes: metadataBody?.attributes
         ? AttributeType.fromMetadataAttributes(metadataBody.attributes)
         : null,
+      interactiveUrl: Metadata.getInteractiveUrl(metadataBody),
     });
+  }
+
+  static getInteractiveUrl(url: string): string {
+    if (!url) return null;
+    let isAcceptedUrl = false;
+    isAcceptedUrl = isAcceptedUrl || url.startsWith(mxConfig.dwebLink);
+    isAcceptedUrl =
+      isAcceptedUrl ||
+      (url.includes(mxConfig.pinata) && url.startsWith('https://'));
+    isAcceptedUrl =
+      isAcceptedUrl ||
+      (url.includes(mxConfig.ipfs) && url.startsWith('https://'));
+
+    return isAcceptedUrl ? url : null;
   }
 }
 

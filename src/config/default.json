@@ -19,7 +19,10 @@
     "egld": "EGLD",
     "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
     "pemFileName": "wallet.pem",
-    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
+    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets",
+    "ipfs": "ipfs.io/ipfs/",
+    "pinata": "pinata.cloud/ipfs",
+    "dwebLink": "https://dweb.link/ipfs"
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
@@ -86,12 +89,8 @@
       "{size} magnificently designed and truly inspiring NFTs.",
       "An alluring collection of {size} wonderfully minted NFTs."
     ],
-    "forSmallCollections": [
-      ""
-    ],
-    "forAssets": [
-      ""
-    ]
+    "forSmallCollections": [""],
+    "forAssets": [""]
   },
   "ports": {
     "rarity": 6013,
