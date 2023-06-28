@@ -1252,4 +1252,11 @@ export class PersistenceService {
       this.mintersRepository.saveMinter(minter),
     );
   }
+
+  async getMinters(): Promise<MinterEntity[]> {
+    return await this.execute(
+      this.getMinters.name,
+      this.mintersRepository.getMinters(),
+    );
+  }
 }

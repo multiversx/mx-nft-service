@@ -223,4 +223,9 @@ export class CacheInfo {
     key: 'collectionDetails',
     ttl: 5 * Constants.oneMinute(),
   };
+
+  static Minters: CacheInfo = {
+    key: 'minters',
+    ttl: Constants.oneHour(),
+  };
 }

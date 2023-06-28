@@ -11,6 +11,10 @@ export class MintersRepository {
     private mintersRepository: Repository<MinterEntity>,
   ) {}
 
+  async getMinters(): Promise<MinterEntity[]> {
+    return await this.mintersRepository.find();
+  }
+
   async saveMinter(minter: MinterEntity): Promise<MinterEntity> {
     try {
       return await this.mintersRepository.save(minter);
