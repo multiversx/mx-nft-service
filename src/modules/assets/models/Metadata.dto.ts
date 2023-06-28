@@ -42,8 +42,8 @@ export class Metadata {
     isAcceptedUrl =
       isAcceptedUrl ||
       (url.includes(mxConfig.ipfs) && url.startsWith('https://'));
-    if (isAcceptedUrl) return url;
-    return null;
+
+    return isAcceptedUrl ? url : null;
   }
 }
 
