@@ -7,6 +7,7 @@ export class ElrondSwapBuyTopics {
   private boughtTokens: string;
   private currentWinner: Address;
   private bid: string;
+  private paymentToken: string;
 
   constructor(rawTopics: string[]) {
     this.auctionId = Buffer.from(rawTopics[1], 'base64').toString('hex');
@@ -30,6 +31,7 @@ export class ElrondSwapBuyTopics {
       auctionId: this.auctionId,
       boughtTokens: this.boughtTokens,
       bid: this.bid,
+      paymentToken: this.paymentToken,
     };
   }
 }

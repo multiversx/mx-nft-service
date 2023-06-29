@@ -48,6 +48,18 @@ services:
     ports:
       - 27017:27017
 
+  timescaledb:
+    image: timescale/timescaledb:latest-pg12
+    restart: always
+    shm_size: 1gb
+    ports:
+      - 5431:5432
+    environment:
+      POSTGRES_USER: timescaledb
+      POSTGRES_PASSWORD: password
+    volumes:
+      - timescaledb:/var/lib/postgresql/data
+
   db:
     image: mysql:latest
     container_name: nft-db
@@ -69,6 +81,9 @@ services:
       # Where our data will be persisted
     volumes:
       - my-db:/var/lib/mysql
+
 # Names our volume
 volumes:
   my-db:
+  timescaledb:
+    name: timescaledb

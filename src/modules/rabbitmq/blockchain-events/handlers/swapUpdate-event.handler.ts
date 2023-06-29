@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
-import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
+import { KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
 import {
   AuctionsGetterService,
   AuctionsSetterService,
@@ -43,7 +43,7 @@ export class SwapUpdateEventHandler {
       await this.updateAuctionPrice(auction, topics, hash);
       this.auctionsService.updateAuction(
         auction,
-        ElrondNftsSwapAuctionEventEnum.NftSwapUpdate,
+        KroganSwapAuctionEventEnum.NftSwapUpdate,
       );
     }
   }

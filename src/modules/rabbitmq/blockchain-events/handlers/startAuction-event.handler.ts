@@ -3,7 +3,7 @@ import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import {
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import {
@@ -124,7 +124,7 @@ export class StartAuctionEventHandler {
   }
 
   private getEventAndTopics(event: any) {
-    if (event.identifier === ElrondNftsSwapAuctionEventEnum.NftSwap) {
+    if (event.identifier === KroganSwapAuctionEventEnum.NftSwap) {
       const auctionTokenEvent = new ElrondSwapAuctionEvent(event);
       const topics = auctionTokenEvent.getTopics();
       if (parseInt(topics.auctionType) === ElrondSwapAuctionTypeEnum.Swap) {

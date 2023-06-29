@@ -60,6 +60,18 @@ export class ApiConfigService {
     return this.getGenericConfig<string>('ELROND_TOOLS');
   }
 
+  getPublicDataApi(): string {
+    return this.getGenericConfig<string>('MX_PUBLIC_DATA_API');
+  }
+
+  getDataUrl(): string {
+    return this.getGenericConfig<string>('MX_EXTRAS_API');
+  }
+
+  getDataToolsApiKey(): string {
+    return this.configService.get<string>('DATA_API_KEY');
+  }
+
   getKeepAliveTimeoutDownstream(): number {
     return parseInt(
       this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
@@ -115,5 +127,45 @@ export class ApiConfigService {
 
   getServerTimeout(): number {
     return this.getGenericConfig<number>('KEEPALIVE_TIMEOUT_UPSTREAM') ?? 60000;
+  }
+
+  getTimescaleDbHost(): string {
+    const host = this.configService.get<string>('TIMESCALEDB_URL');
+    if (!host) {
+      throw new Error('No TIMESCALEDB_URL present');
+    }
+    return host;
+  }
+
+  getTimescaleDbPort(): number {
+    const port = this.configService.get<string>('TIMESCALEDB_PORT');
+    if (!port) {
+      throw new Error('No TIMESCALEDB_PORT present');
+    }
+    return parseInt(port);
+  }
+
+  getTimescaleDbDatabase(): string {
+    const database = this.configService.get<string>('TIMESCALEDB_DATABASE');
+    if (!database) {
+      throw new Error('No TIMESCALEDB_DATABASE present');
+    }
+    return database;
+  }
+
+  getTimescaleDbUsername(): string {
+    const username = this.configService.get<string>('TIMESCALEDB_USERNAME');
+    if (!username) {
+      throw new Error('No TIMESCALEDB_USERNAME present');
+    }
+    return username;
+  }
+
+  getTimescaleDbPassword(): string {
+    const password = this.configService.get<string>('TIMESCALEDB_PASSWORD');
+    if (!password) {
+      throw new Error('No TIMESCALEDB_PASSWORD present');
+    }
+    return password;
   }
 }

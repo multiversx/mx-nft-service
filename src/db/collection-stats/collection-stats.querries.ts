@@ -37,3 +37,20 @@ export function getCollectionStats(
     ) temp
   `;
 }
+
+
+export function getCollectionFloorPrice(
+  identifier: string,
+  marketplaceKey: string = undefined,
+  paymentToken: string = mxConfig.egld,
+) {
+  return `
+  SELECT MIN(if(o.priceAmountDenominated, o.priceAmountDenominated , a.minBidDenominated)) AS minPrice
+    FROM auctions a
+    LEFT JOIN orders o ON o.auctionId = a.id AND o.status ='Active'
+    WHERE a.collection  = '${identifier}' AND a.status = 'Running' AND a.paymentToken='${paymentToken}' ${getMarketplaceKeyFilter(
+    'a',
+    marketplaceKey,
+  )}
+  `;
+}

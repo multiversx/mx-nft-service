@@ -1,5 +1,6 @@
 import { Address } from '@multiversx/sdk-core';
 import '../../../../utils/extensions';
+import { BinaryUtils } from '@multiversx/sdk-nestjs';
 
 export class BuySftEventsTopics {
   private collection: string;
@@ -8,6 +9,7 @@ export class BuySftEventsTopics {
   private currentWinner: Address;
   private bid: string;
   private boughtTokens: string;
+  private paymentToken: string;
 
   constructor(rawTopics: string[]) {
     this.collection = Buffer.from(rawTopics[1], 'base64').toString();
@@ -20,6 +22,7 @@ export class BuySftEventsTopics {
     this.bid = Buffer.from(rawTopics[6], 'base64')
       .toString('hex')
       .hexBigNumberToString();
+    this.paymentToken = BinaryUtils.base64Decode(rawTopics[8] ?? '');
   }
 
   toPlainObject() {
@@ -30,6 +33,7 @@ export class BuySftEventsTopics {
       auctionId: this.auctionId,
       bid: this.bid,
       boughtTokens: this.boughtTokens,
+      paymentToken: this.paymentToken,
     };
   }
 }

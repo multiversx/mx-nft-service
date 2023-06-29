@@ -1,3 +1,5 @@
+import * as moment from 'moment';
+
 export class DateUtils {
   static getTimestamp(date: Date = new Date()): number {
     return new Date(date).getTime() / 1000;
@@ -39,10 +41,15 @@ export class DateUtils {
     return new Date(new Date(timestamp * 1000).toUTCString());
   }
 
-  static timestampToIsoStringWithoutTime(timestamp: number): string {
+  static getDatewithTimezoneInfo(timestamp: number): Date {
+    const date = new Date(timestamp * 1000);
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  }
+
+  static timestampToIsoStringWithHour(timestamp: number): string {
     let date = new Date(timestamp * 1000);
-    date.setUTCHours(0, 0, 0, 0);
-    return date.toISOString();
+    date.setUTCMinutes(0, 0, 0) / 1000;
+    return moment.utc(date).format('yyyy-MM-DD HH:mm:ss');
   }
 
   static isTimestampToday(timestamp: number): boolean {

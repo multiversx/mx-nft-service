@@ -3,7 +3,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import {
   AssetActionEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import {
@@ -88,7 +88,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
       ? GenericEvent.fromEventResponse(event.data.eventData)
       : undefined;
 
-    if (event.hasEventIdentifier(ElrondNftsSwapAuctionEventEnum.NftSwap)) {
+    if (event.hasEventIdentifier(KroganSwapAuctionEventEnum.NftSwap)) {
       try {
         const topics = new ElrondSwapAuctionEvent(genericEvent).getTopics();
         if (parseInt(topics.auctionType) === ElrondSwapAuctionTypeEnum.Swap) {

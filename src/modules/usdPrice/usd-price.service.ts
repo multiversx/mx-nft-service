@@ -41,7 +41,9 @@ export class UsdPriceService {
     timestamp: number,
   ): Promise<number> {
     return await this.cacheService.getOrSetCache(
-      `${CacheInfo.TokenHistoricalPrice.key}_${token}_${timestamp}`,
+      `${
+        CacheInfo.TokenHistoricalPrice.key
+      }_${token}_${DateUtils.timestampToIsoStringWithHour(timestamp)}`,
       async () => await this.getTokenHistoricalPrice(token, timestamp),
       CacheInfo.TokenHistoricalPrice.ttl,
     );
@@ -109,16 +111,16 @@ export class UsdPriceService {
       this.getXexchangeTokens(),
     ]);
 
-    if (cexTokens.includes(tokenId)) {
+    if (cexTokens?.includes(tokenId)) {
       {
         return await this.mxDataApi.getCexPrice(
-          DateUtils.timestampToIsoStringWithoutTime(timestamp),
+          DateUtils.timestampToIsoStringWithHour(timestamp),
         );
       }
     } else if (xExchangeTokens.includes(tokenId)) {
       return await this.mxDataApi.getXechangeTokenPrice(
         tokenId,
-        DateUtils.timestampToIsoStringWithoutTime(timestamp),
+        DateUtils.timestampToIsoStringWithHour(timestamp),
       );
     }
   }

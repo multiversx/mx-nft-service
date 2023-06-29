@@ -42,6 +42,8 @@ import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 import { UpdateListingEventHandler } from './handlers/updateListing-event.handler';
 import { PluginModule } from 'src/plugins/plugin.module';
+import { AnalyticsEventsService } from './analytics-events.service';
+import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -58,6 +60,7 @@ import { PluginModule } from 'src/plugins/plugin.module';
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     ScamModule,
+    AnalyticsModule,
   ],
   providers: [
     Logger,
@@ -91,6 +94,7 @@ import { PluginModule } from 'src/plugins/plugin.module';
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
+    AnalyticsEventsService,
   ],
   exports: [NftEventsService],
 })

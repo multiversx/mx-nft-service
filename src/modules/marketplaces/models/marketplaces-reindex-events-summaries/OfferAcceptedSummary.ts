@@ -1,6 +1,6 @@
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import { ElrondNftsSwapAuctionEventEnum } from 'src/modules/assets/models';
+import { KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
 import { AssetOfferEnum } from 'src/modules/assets/models/AssetOfferEnum';
 import { AcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/acceptOffer.event';
 import { AcceptOfferDeadrareEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferDeadrare.event';

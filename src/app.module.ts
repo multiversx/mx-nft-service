@@ -37,6 +37,7 @@ import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-co
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
 import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
+import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
     ArtistsModuleGraph,
     ExploreStatsModuleGraph,
     PrimarySaleModuleGraph,
+    TimescaleDbModule,
   ],
 })
 export class AppModule {}

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import {
   AuctionEventEnum,
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
   NftEventEnum,
   Price,
@@ -218,9 +218,7 @@ export class AssetsHistoryService {
           ];
         }
         if (
-          Object.values(ElrondNftsSwapAuctionEventEnum).includes(
-            eventIdentifier,
-          )
+          Object.values(KroganSwapAuctionEventEnum).includes(eventIdentifier)
         ) {
           return [
             NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum,
