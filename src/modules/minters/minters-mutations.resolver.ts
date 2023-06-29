@@ -5,6 +5,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { MintersService } from './minters.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
+import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
 
 @Resolver(() => Minter)
 export class MintersMutationsResolver extends BaseResolver(Minter) {
@@ -18,9 +19,7 @@ export class MintersMutationsResolver extends BaseResolver(Minter) {
     @Args('input') input: WhitelistMinterArgs,
   ): Promise<Minter> {
     return await this.minterService.whitelistMinter(
-      input.address,
-      input.name,
-      input.description,
+      WhitelistMinterRequest.fromArgs(input),
     );
   }
 }

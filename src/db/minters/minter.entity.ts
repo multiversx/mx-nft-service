@@ -1,5 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base-entity';
+import { WhitelistMinterRequest } from 'src/modules/minters/models/requests/whitelistMinterRequest';
 
 @Entity('minters')
 export class MinterEntity extends BaseEntity {
@@ -11,6 +12,26 @@ export class MinterEntity extends BaseEntity {
 
   @Column()
   description: string;
+
+  @Column({ length: 62 })
+  royaltiesClaimAddress: string;
+
+  @Column({ length: 62 })
+  mintClaimAddress: string;
+
+  @Column()
+  maxNftsPerTransaction: number;
+
+  static fromRequest(args: WhitelistMinterRequest) {
+    return new MinterEntity({
+      address: args.address,
+      name: args.name,
+      description: args.description,
+      royaltiesClaimAddress: args.royaltiesClaimAddress,
+      mintClaimAddress: args.mintClaimAddress,
+      maxNftsPerTransaction: args.maxNftsPerTransaction,
+    });
+  }
 
   constructor(init?: Partial<MinterEntity>) {
     super();

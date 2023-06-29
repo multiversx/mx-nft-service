@@ -7,6 +7,7 @@ import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error
 import { MinterEntity } from 'src/db/minters';
 import { Minter } from '../models';
 import { CollectionType } from 'src/modules/assets/models';
+import { WhitelistMinterRequest } from '../models/requests/whitelistMinterRequest';
 
 describe('Minters Service', () => {
   let service: MintersService;
@@ -42,9 +43,9 @@ describe('Minters Service', () => {
       persistenceService.saveMinter = jest.fn(() => {
         throw new Error();
       });
-      await expect(service.whitelistMinter('', '', '')).rejects.toThrowError(
-        UnableToLoadError,
-      );
+      await expect(
+        service.whitelistMinter(new WhitelistMinterRequest()),
+      ).rejects.toThrowError(UnableToLoadError);
     });
 
     it('when saves succed returns expected object', async () => {
@@ -61,7 +62,9 @@ describe('Minters Service', () => {
 
       cachingService.invalidateMinters = jest.fn();
 
-      const result = await service.whitelistMinter('', '', '');
+      const result = await service.whitelistMinter(
+        new WhitelistMinterRequest(),
+      );
       const expectedResult = new Minter({ address: 'address', name: 'name' });
 
       expect(result).toMatchObject(expectedResult);

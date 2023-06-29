@@ -4,6 +4,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MinterEntity } from 'src/db/minters';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { MintersCachingService } from './minters-caching.service';
+import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
 
 @Injectable()
 export class MintersService {
@@ -13,25 +14,21 @@ export class MintersService {
     private readonly logger: Logger,
   ) {}
 
-  async whitelistMinter(
-    minterAddress: string,
-    name: string,
-    description: string,
-  ): Promise<Minter> {
+  async whitelistMinter(request: WhitelistMinterRequest): Promise<Minter> {
     try {
       const savedMinter = await this.persistenceService.saveMinter(
-        new MinterEntity({ address: minterAddress, name, description }),
+        MinterEntity.fromRequest(request),
       );
       this.cacheService.invalidateMinters();
       return Minter.fromEntity(savedMinter);
     } catch (error) {
       this.logger.error('An error has occured while saving the minter ', {
         path: this.whitelistMinter.name,
-        minterAddress,
+        minterAddress: request?.address,
         exception: error,
       });
       throw new UnableToLoadError(
-        `An error has ocurred while saving the minter: ${minterAddress}`,
+        `An error has ocurred while saving the minter: ${request?.address}`,
       );
     }
   }

@@ -1481,7 +1481,10 @@ scalar Upload
 input WhitelistMinterArgs {
   address: String!
   description: String!
+  maxNftsPerTransaction: Int!
+  mintClaimAddress: String!
   name: String!
+  royaltiesClaimAddress: String!
 }
 
 type WhitelistedInfo {
