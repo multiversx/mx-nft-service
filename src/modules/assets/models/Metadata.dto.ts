@@ -28,7 +28,7 @@ export class Metadata {
       attributes: metadataBody?.attributes
         ? AttributeType.fromMetadataAttributes(metadataBody.attributes)
         : null,
-      interactiveUrl: Metadata.getInteractiveUrl(metadataBody),
+      interactiveUrl: Metadata.getInteractiveUrl(metadataBody.interactive_url),
     });
   }
 
