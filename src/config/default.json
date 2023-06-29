@@ -19,7 +19,10 @@
     "egld": "EGLD",
     "burnAddress": "erd1deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaqtv0gag",
     "pemFileName": "wallet.pem",
-    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets"
+    "marketplacesIconsBaseUrl": "https://media.elrond.com/markets",
+    "ipfs": "ipfs.io/ipfs/",
+    "pinata": "pinata.cloud/ipfs",
+    "dwebLink": "https://dweb.link/ipfs"
   },
   "fileStorage": {
     "host": "ipfs.infura.io",

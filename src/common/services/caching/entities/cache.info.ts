@@ -193,4 +193,34 @@ export class CacheInfo {
     key: 'nftScamInfo',
     ttl: Constants.oneDay(),
   };
+
+  static NftAnalytic24hCount: CacheInfo = {
+    key: 'nftAnalytic24hCount',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static NftAnalytic24hListing: CacheInfo = {
+    key: 'nftAnalytic24hListing',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static CollectionFloorPrice: CacheInfo = {
+    key: 'collectionFloorPrice',
+    ttl: 30 * Constants.oneMinute(),
+  };
+
+  static NftAnalyticsCount: CacheInfo = {
+    key: 'nftAnalyticsCount',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static NftsHolders: CacheInfo = {
+    key: 'nftsHolders',
+    ttl: 10 * Constants.oneMinute(),
+  };
+
+  static CollectionDetails: CacheInfo = {
+    key: 'collectionDetails',
+    ttl: 5 * Constants.oneMinute(),
+  };
 }

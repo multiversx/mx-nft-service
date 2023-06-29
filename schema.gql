@@ -54,6 +54,27 @@ input AddLikeArgs {
   identifier: String!
 }
 
+type AnalyticsAggregateValue {
+  avg: Float
+  count: Float
+  max: Float
+  min: Float
+  series: String
+  time: String
+  value: Float
+}
+
+input AnalyticsArgs {
+  metric: String!
+  series: String
+  time: String
+}
+
+input AnalyticsInput {
+  range: TimeRange
+  resolution: TimeResolutionsEnum
+}
+
 input ArtistFilters {
   sorting: ArtistSortingEnum!
 }
@@ -459,6 +480,10 @@ type Collection {
   website: String
 }
 
+input CollectionAnalyticsArgs {
+  series: String
+}
+
 type CollectionAsset {
   assets(input: CollectionAssetsRetriveCount): [CollectionAssetModel]
   totalCount: String
@@ -544,6 +569,41 @@ input CollectionStatsFilter {
   identifier: String!
   marketplaceKey: String
   paymentToken: String
+}
+
+type CollectionsAnalyticsModel {
+  collectionIdentifier: String!
+  details: CollectionsDetailsModel!
+  floorPrice: Float!
+  floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+  holders: Int!
+  volume24h: Float
+  volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+}
+
+type CollectionsAnalyticsModelEdge {
+  cursor: String
+  node: CollectionsAnalyticsModel
+}
+
+type CollectionsAnalyticsModelPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type CollectionsAnalyticsResponse {
+  edges: [CollectionsAnalyticsModelEdge!]
+  pageData: PageData
+  pageInfo: CollectionsAnalyticsModelPageInfo
+}
+
+type CollectionsDetailsModel {
+  collectionIdentifier: String!
+  collectionName: String!
+  items: Int!
+  owner: String!
 }
 
 input CollectionsFilter {
@@ -688,6 +748,15 @@ input FlagNftInput {
   nsfwFlag: Float!
 }
 
+type GeneralAnalyticsModel {
+  collections: Int!
+  holders: Int!
+  listing(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
+  marketplaces: Int!
+  nfts(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
+  volume(input: AnalyticsInput!): [AnalyticsAggregateValue!]!
+}
+
 enum GroupBy {
   IDENTIFIER
 }
@@ -825,6 +894,7 @@ enum MediaTypeEnum {
 type Metadata {
   attributes: [AttributeType!]
   description: String
+  interactiveUrl: String
 }
 
 type MintPrice {
@@ -1165,12 +1235,14 @@ type Query {
   campaigns(filters: CampaignsFilter, pagination: ConnectionArgs): CampaignsResponse!
   collectionStats(filters: CollectionStatsFilter!): CollectionStats!
   collections(filters: CollectionsFilter, pagination: ConnectionArgs, sorting: CollectionsSortingEnum): CollectionResponse!
+  collectionsAnalytics(input: CollectionAnalyticsArgs, pagination: ConnectionArgs): CollectionsAnalyticsResponse!
   currentPaymentTokens(filters: CurrentPaymentTokensFilters): [Token!]!
   exploreCollectionsStats: ExploreCollectionsStats!
   exploreNftsStats: ExploreNftsStats!
   exploreStats: ExploreStats!
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
+  generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
   hasClaimedTickets(collectionIdentifier: String!): Boolean!
   isWhitelisted: WhitelistedInfo!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
@@ -1331,6 +1403,25 @@ input TierArgs {
 enum TierStatusEnum {
   Running
   Sold
+}
+
+enum TimeRange {
+  ALL
+  DAY
+  HOUR
+  MONTH
+  WEEK
+  YEAR
+}
+
+enum TimeResolutionsEnum {
+  INTERVAL_1_MINUTE
+  INTERVAL_10_MINUTES
+  INTERVAL_30_MINUTES
+  INTERVAL_DAY
+  INTERVAL_HOUR
+  INTERVAL_MONTH
+  INTERVAL_WEEK
 }
 
 type Token {

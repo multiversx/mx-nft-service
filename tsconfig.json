@@ -13,6 +13,7 @@
     "incremental": true,
     "strict": false,
     "skipLibCheck": true,
-    "allowJs": true
+    "allowJs": true,
+    "lib": ["es2019"]
   }
 }

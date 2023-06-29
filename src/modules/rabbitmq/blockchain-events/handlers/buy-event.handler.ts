@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import {
-  ElrondNftsSwapAuctionEventEnum,
+  KroganSwapAuctionEventEnum,
   ExternalAuctionEventEnum,
 } from 'src/modules/assets/models';
 import {
@@ -99,10 +99,10 @@ export class BuyEventHandler {
   }
 
   private getEventAndTopics(event: any, hash: string) {
-    if (event.identifier === ElrondNftsSwapAuctionEventEnum.Purchase) {
+    if (event.identifier === KroganSwapAuctionEventEnum.Purchase) {
       if (
         Buffer.from(event.topics[0], 'base64').toString() ===
-        ElrondNftsSwapAuctionEventEnum.UpdateListing
+        KroganSwapAuctionEventEnum.UpdateListing
       ) {
         this.logger.log(
           `Update Listing event detected for hash '${hash}' at Purchase external marketplace ${event.address}, ignore it for the moment`,

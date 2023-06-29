@@ -1,8 +1,9 @@
 import { EventResponse } from 'src/common/services/mx-communication/models/elastic-search/event.response';
+import BigNumber from 'bignumber.js';
 
 export class GenericEvent {
-  private address = '';
-  private identifier = '';
+  protected address = '';
+  protected identifier = '';
   protected topics = [];
   protected data = '';
 

@@ -17,7 +17,7 @@ export class ExploreStatsResolver {
 
   @Query(() => ExploreNftsStats)
   async exploreNftsStats(): Promise<ExploreNftsStats> {
-    return this.exploreStatsService.getExpoloreNftsStats();
+    return this.exploreStatsService.getExploreNftsStats();
   }
 
   @Query(() => ExploreCollectionsStats)
