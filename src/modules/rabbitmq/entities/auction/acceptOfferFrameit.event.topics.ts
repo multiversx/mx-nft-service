@@ -10,6 +10,7 @@ export class AcceptOfferFrameitEventsTopics {
   private paymentTokenNonce: number;
   private paymentAmount: string;
   private nftOwner: Address;
+  private auctionId: number;
 
   constructor(rawTopics: string[]) {
     this.offerId = parseInt(
@@ -35,6 +36,11 @@ export class AcceptOfferFrameitEventsTopics {
     if (rawTopics.length > 10) {
       this.nftOwner = new Address(Buffer.from(rawTopics[10], 'base64'));
     }
+    if (rawTopics.length > 11) {
+      this.auctionId = parseInt(
+        BinaryUtils.tryBase64ToBigInt(rawTopics[11])?.toString() ?? '0',
+      );
+    }
   }
 
   toPlainObject() {
@@ -48,6 +54,7 @@ export class AcceptOfferFrameitEventsTopics {
       paymentTokenIdentifier: this.paymentTokenIdentifier,
       paymentTokenNonce: this.paymentTokenNonce,
       paymentAmount: this.paymentAmount,
+      auctionId: this.auctionId,
     };
   }
 }
