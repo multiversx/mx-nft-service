@@ -19,9 +19,10 @@ export class IsTicketProvider extends BaseProvider<string> {
   }
 
   async getData(identifiers: string[]) {
-    const assetTickets = await this.persistenceService.getFeaturedCollectionsByIdentifiers(
-      identifiers,
-    );
+    const assetTickets =
+      await this.persistenceService.getTicketCollectionsByIdentifiers(
+        identifiers,
+      );
     return assetTickets?.groupBy((collection) => collection.identifier);
   }
 }
