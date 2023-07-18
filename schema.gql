@@ -642,7 +642,11 @@ input ConnectionArgs {
   before: String
 
   """Paginate first"""
+<<<<<<< HEAD
   first: Int
+=======
+  first: Int = 10
+>>>>>>> 7c3d3236 (Rebase)
 
   """Paginate last"""
   last: Int
@@ -983,12 +987,15 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
+<<<<<<< HEAD
   deployBulkSmartContract(input: DeployBulkArgs!): TransactionNode!
   deployMarketplaceContract(input: DeployMarketplaceArgs!): TransactionNode!
   deployMinter(input: DeployMinterArgs!): TransactionNode!
   deployMinterSmartContract(input: DeployMinterArgs!): TransactionNode!
   disableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   enableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
+=======
+>>>>>>> 7c3d3236 (Rebase)
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
@@ -996,10 +1003,16 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+<<<<<<< HEAD
   minters(filters: MinterFilters!, pagination: ConnectionArgs): MintersResponse!
   pauseMinter(input: UpgradeMinterArgs!): TransactionNode!
   reindexMarketplaceData(input: MarketplaceReindexDataArgs!): Boolean!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
+=======
+  processMarketplaceEvent(input: ProcessMarketplaceEventInput!): Boolean!
+  reindexEventForMarketplace(input: MarketplaceEventsIndexingArgs!): Boolean!
+  reindexMarketplaceData(input: MarketplaceReindexDataArgs!): Boolean!
+>>>>>>> 7c3d3236 (Rebase)
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
@@ -1288,8 +1301,16 @@ type Query {
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
+<<<<<<< HEAD
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
+=======
+  hasClaimedTickets(collectionIdentifier: String!): Boolean!
+  isWhitelisted: WhitelistedInfo!
+  marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
+  myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
+  myTickets(collectionIdentifier: String!): [TicketInfo!]!
+>>>>>>> 7c3d3236 (Rebase)
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   offers(filters: OffersFilters, pagination: ConnectionArgs): OffersResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
@@ -1527,6 +1548,7 @@ enum UpdateNftTraitsResponse {
   NftTraitsValid
 }
 
+<<<<<<< HEAD
 input UpgradeMinterArgs {
   minterAddress: String!
 }
@@ -1567,4 +1589,12 @@ input WhitelistMarketplaceArgs {
 input WhitelistMinterArgs {
   address: String!
   adminAddress: String!
+=======
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type WhitelistedInfo {
+  isWhitelisted: Boolean!
+  message: String
+>>>>>>> 7c3d3236 (Rebase)
 }
