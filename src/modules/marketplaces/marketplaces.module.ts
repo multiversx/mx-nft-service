@@ -2,7 +2,7 @@ import { forwardRef, Logger, Module } from '@nestjs/common';
 import { MxCommunicationModule } from 'src/common';
 import { MarketplacesService } from './marketplaces.service';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
-import { MarketplacesResolver } from './marketplaces.resolver';
+import { MarketplacesQueriesResolver } from './marketplaces-queries.resolver';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { NftMarketplaceAbiService } from '../auctions';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
@@ -25,11 +25,13 @@ import { MarketplacesReindexEventsSummaryService } from './marketplaces-reindex-
 import { ReindexAuctionPriceUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-price-updated.handler';
 import { ReindexGlobalOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-global-offer-accepted.handler';
 import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-updated.handler';
+import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver';
 
 @Module({
   providers: [
     Logger,
-    MarketplacesResolver,
+    MarketplacesQueriesResolver,
+    MarketplacesMutationsResolver,
     MarketplacesService,
     MarketplacesCachingService,
     NftMarketplaceAbiService,
