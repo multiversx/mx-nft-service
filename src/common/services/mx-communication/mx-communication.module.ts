@@ -28,7 +28,7 @@ import { MxToolsService } from './mx-tools.service';
     MxFeedService,
     SlackReportService,
     MxDataApiService,
-    MxToolsService
+    MxToolsService,
   ],
   exports: [
     ApiService,
@@ -44,4 +44,4 @@ import { MxToolsService } from './mx-tools.service';
     MxToolsService,
   ],
 })
-export class MxCommunicationModule { }
+export class MxCommunicationModule {}

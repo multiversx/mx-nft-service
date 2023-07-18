@@ -38,7 +38,7 @@ export class MarketplaceEventsService {
     private readonly slackReportService: SlackReportService,
     private sendOfferEventHandler: SendOfferEventHandler,
     private withdrawOfferEventHandler: WithdrawOfferEventHandler,
-  ) {}
+  ) { }
 
   public async handleNftAuctionEvents(
     auctionEvents: any[],

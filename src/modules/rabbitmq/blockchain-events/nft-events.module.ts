@@ -60,7 +60,7 @@ import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     ScamModule,
-    AnalyticsModule
+    AnalyticsModule,
   ],
   providers: [
     Logger,
@@ -94,7 +94,7 @@ import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
     NsfwUpdaterService,
     FeedEventsSenderService,
     UsdPriceService,
-    AnalyticsEventsService
+    AnalyticsEventsService,
   ],
   exports: [NftEventsService],
 })

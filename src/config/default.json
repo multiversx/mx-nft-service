@@ -89,8 +89,12 @@
       "{size} magnificently designed and truly inspiring NFTs.",
       "An alluring collection of {size} wonderfully minted NFTs."
     ],
-    "forSmallCollections": [""],
-    "forAssets": [""]
+    "forSmallCollections": [
+      ""
+    ],
+    "forAssets": [
+      ""
+    ]
   },
   "ports": {
     "rarity": 6013,
