@@ -10,10 +10,11 @@ import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/Marketplace
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
-import { XOXNO_KEY } from 'src/utils/constants';
+import { FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { AcceptOfferEvent } from '../../entities/auction/acceptOffer.event';
 import { AcceptOfferXoxnoEvent } from '../../entities/auction/acceptOfferXoxno.event';
 import { FeedEventsSenderService } from '../feed-events.service';
+import { AcceptOfferFrameitEvent } from '../../entities/auction/acceptOfferFrameit.event';
 
 @Injectable()
 export class AcceptOfferEventHandler {
@@ -35,10 +36,18 @@ export class AcceptOfferEventHandler {
       );
 
     if (generalMarketplace?.type === MarketplaceTypeEnum.External) {
-      if (generalMarketplace.key !== XOXNO_KEY) return;
+      let acceptOfferEvent = undefined;
+      let topics = undefined;
+      if (generalMarketplace.key === XOXNO_KEY) {
+        acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
+        topics = acceptOfferEvent.getTopics();
+      }
+      if (generalMarketplace.key === FRAMEIT_KEY) {
+        acceptOfferEvent = new AcceptOfferFrameitEvent(event);
+        topics = acceptOfferEvent.getTopics();
+      }
+      if (!acceptOfferEvent) return;
 
-      const acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
-      const topics = acceptOfferEvent.getTopics();
       this.logger.log(
         `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
           generalMarketplace?.name

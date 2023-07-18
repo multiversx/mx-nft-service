@@ -24,6 +24,7 @@ export enum ExternalAuctionEventEnum {
   UpdateListing = 'changeListing',
   ReturnListing = 'returnListing',
   AcceptOffer = 'acceptOffer',
+  AcceptOfferFromAuction = 'acceptOfferFromAuction',
   UpdateOffer = 'update_offer_event',
   AcceptGlobalOffer = 'acceptGlobalOffer',
   ClaimBackNft = 'claimBackNft',

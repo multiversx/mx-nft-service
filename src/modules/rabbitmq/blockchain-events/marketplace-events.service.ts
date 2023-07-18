@@ -123,6 +123,7 @@ export class MarketplaceEventsService {
           break;
         }
         case ExternalAuctionEventEnum.AcceptOffer:
+        case ExternalAuctionEventEnum.AcceptOfferFromAuction:
           const acceptOfferEventName = Buffer.from(
             event.topics[0],
             'base64',
