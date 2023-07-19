@@ -1480,6 +1480,9 @@ input UpgradeNftArgs {
   """The campaign id where the user wants to buy the nft/s"""
   campaignId: String!
 
+  """The identifier of the nft to be upgraded"""
+  identifier: String!
+
   """The smart contract address of the campaign"""
   minterAddress: String!
 

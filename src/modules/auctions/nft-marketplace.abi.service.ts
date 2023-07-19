@@ -274,7 +274,7 @@ export class NftMarketplaceAbiService {
       .withSingleESDTNFTTransfer(
         TokenPayment.metaEsdtFromBigInteger(
           collection,
-          parseInt(nonce),
+          parseInt(nonce, 16),
           asset.type === NftTypeEnum.SemiFungibleESDT
             ? new BigNumber(offer.boughtTokensNo)
             : new BigNumber(1),

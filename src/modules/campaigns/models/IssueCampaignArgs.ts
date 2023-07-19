@@ -4,6 +4,8 @@ import { mxConfig } from 'src/config';
 import {
   ADDRESS_ERROR,
   ADDRESS_RGX,
+  NFT_IDENTIFIER_ERROR,
+  NFT_IDENTIFIER_RGX,
   NUMERIC_ERROR,
   NUMERIC_RGX,
 } from 'src/utils/constants';
@@ -128,6 +130,12 @@ export class UpgradeNftArgs {
     description: 'The smart contract address of the campaign',
   })
   minterAddress: string;
+
+  @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
+  @Field(() => String, {
+    description: 'The identifier of the nft to be upgraded',
+  })
+  identifier: string;
 }
 
 export enum MediaTypeEnum {
