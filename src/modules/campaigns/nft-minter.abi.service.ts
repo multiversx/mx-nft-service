@@ -26,6 +26,7 @@ import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
 import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
+import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
 
 @Injectable()
 export class NftMinterAbiService {
@@ -60,7 +61,7 @@ export class NftMinterAbiService {
       func: new ContractFunction('issueTokenForBrand'),
       value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
       args: this.getIssueCampaignArgs(request),
-      gasLimit: gas.issueToken,
+      gasLimit: gas.issueCamapaign,
       chainID: mxConfig.chainID,
     });
     return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
@@ -86,6 +87,26 @@ export class NftMinterAbiService {
       );
     }
     return buyRandomNft.toPlainObject(new Address(ownerAddress));
+  }
+
+  async upgradeNft(
+    ownerAddress: string,
+    request: UpgradeNftRequest,
+  ): Promise<TransactionNode> {
+    const contract = await this.contract.getContract(request.minterAddress);
+
+    let upgradeNft = contract.call({
+      func: new ContractFunction('nftUpgrade'),
+      value: 0,
+      args: [
+        BytesValue.fromUTF8(request.campaignId),
+        BytesValue.fromUTF8(request.tier),
+      ],
+      gasLimit: gas.endAuction,
+      chainID: mxConfig.chainID,
+    });
+
+    return upgradeNft.toPlainObject(new Address(ownerAddress));
   }
 
   private async getFirstQueryResult(interaction: Interaction) {

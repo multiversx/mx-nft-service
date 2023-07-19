@@ -95,6 +95,7 @@ export class CampaignsService {
         ...tier,
         campaignId: savedCampaign?.id,
       }));
+      if (!savedCampaign) continue;
       savedCampaigns = [...savedCampaigns, savedCampaign];
       await this.persistenceService.saveTiers(tiers);
     }

@@ -18,7 +18,6 @@ export class MinterEventsService {
             const address = brandEvent.getAddress();
             await this.campaignService.saveCampaign(address);
           }
-          console.log('brand created');
           await this.campaignService.invalidateKey();
 
           break;

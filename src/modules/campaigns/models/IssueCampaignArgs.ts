@@ -113,6 +113,23 @@ export class BuyRandomNftActionArgs {
   quantity: string;
 }
 
+@InputType()
+export class UpgradeNftArgs {
+  @Field(() => String, {
+    description: 'The campaign id where the user wants to buy the nft/s',
+  })
+  campaignId: string;
+  @Field(() => String, {
+    description: 'The tier name on which the user wants to buy the nft',
+  })
+  tier: string;
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, {
+    description: 'The smart contract address of the campaign',
+  })
+  minterAddress: string;
+}
+
 export enum MediaTypeEnum {
   png = 'image/png',
   jpeg = 'image/jpeg',
