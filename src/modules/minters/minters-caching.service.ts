@@ -9,9 +9,7 @@ import { MinterEntity } from 'src/db/minters';
 export class MintersCachingService {
   constructor(private cacheService: CachingService) {}
 
-  public async getMinters(
-    getMinters: () => any,
-  ): Promise<CollectionType<MinterEntity>> {
+  public async getMinters(getMinters: () => any): Promise<MinterEntity> {
     return await this.cacheService.getOrSetCache(
       CacheInfo.Minters.key,
       () => getMinters(),
