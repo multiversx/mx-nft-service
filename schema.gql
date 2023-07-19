@@ -902,6 +902,12 @@ type MintPrice {
   token: ID!
 }
 
+type Minter {
+  address: ID!
+  description: String
+  name: String!
+}
+
 type Mutation {
   acceptOffer(input: AcceptOfferArgs!): TransactionNode!
   addBlacklistedCollection(collection: String!): Boolean!
@@ -954,6 +960,7 @@ type Mutation {
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
+  whitelistMinter(input: WhitelistMinterArgs!): Minter!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
 }
@@ -1470,6 +1477,15 @@ enum UpdateNftTraitsResponse {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input WhitelistMinterArgs {
+  address: String!
+  description: String!
+  maxNftsPerTransaction: Int!
+  mintClaimAddress: String!
+  name: String!
+  royaltiesClaimAddress: String!
+}
 
 type WhitelistedInfo {
   isWhitelisted: Boolean!

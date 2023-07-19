@@ -44,6 +44,7 @@ import { UpdateListingEventHandler } from './handlers/updateListing-event.handle
 import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
+import { MintersModuleGraph } from 'src/modules/minters/minters.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
     forwardRef(() => OrdersModuleGraph),
     forwardRef(() => NotificationsModuleGraph),
     forwardRef(() => MarketplacesModuleGraph),
+    forwardRef(() => MintersModuleGraph),
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => OffersModuleGraph),
     forwardRef(() => PluginModule),
