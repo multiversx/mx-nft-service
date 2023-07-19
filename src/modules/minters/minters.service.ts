@@ -38,7 +38,7 @@ export class MintersService {
       const minters = await this.cacheService.getMinters(() =>
         this.persistenceService.getMinters(),
       );
-      return minters?.items?.map((minter) => Minter.fromEntity(minter));
+      return minters?.map((minter) => Minter.fromEntity(minter));
     } catch (error) {
       this.logger.error('An error has occured while getting minters', {
         path: this.getMinters.name,
