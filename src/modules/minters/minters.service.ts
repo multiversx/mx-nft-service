@@ -53,10 +53,13 @@ export class MintersService {
       const minters = await this.getMinters();
       return minters.map((x) => x.address);
     } catch (error) {
-      this.logger.error('An error has occured while getting minters', {
-        path: this.getMintersAddresses.name,
-        exception: error,
-      });
+      this.logger.error(
+        'An error has occured while getting minters addresses',
+        {
+          path: this.getMintersAddresses.name,
+          exception: error,
+        },
+      );
       return [];
     }
   }
