@@ -49,6 +49,21 @@ export class CacheInfo {
     ttl: Constants.oneHour(),
   };
 
+  static CollectionsByMarketplace: CacheInfo = {
+    key: 'collections_by_marketplace',
+    ttl: Constants.oneHour(),
+  };
+
+  static MarketplaceCollection: CacheInfo = {
+    key: 'marketplace_collection',
+    ttl: Constants.oneHour(),
+  };
+
+  static MarketplaceAddressCollection: CacheInfo = {
+    key: 'marketplace_address_collection',
+    ttl: Constants.oneHour(),
+  };
+
   static AuctionsEndingToday: CacheInfo = {
     key: 'auctionsEndingToday',
     ttl: Constants.oneHour(),

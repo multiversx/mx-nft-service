@@ -4,7 +4,6 @@ import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Marketplace } from './models';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 @Injectable()
 export class MarketplacesCachingService {
@@ -25,9 +24,9 @@ export class MarketplacesCachingService {
     key: string,
   ): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
-      generateCacheKeyFromParams('marketplace_address_collection', key),
+      `${CacheInfo.MarketplaceAddressCollection.key}_${key}`,
       () => getMarketplaceByAddress(),
-      Constants.oneHour(),
+      CacheInfo.MarketplaceAddressCollection.ttl,
     );
   }
 
@@ -36,9 +35,9 @@ export class MarketplacesCachingService {
     key: string,
   ): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
-      generateCacheKeyFromParams('marketplace_collection', key),
+      `${CacheInfo.MarketplaceCollection.key}_${key}`,
       () => getMarketplaceByCollection(),
-      Constants.oneHour(),
+      CacheInfo.MarketplaceCollection.ttl,
     );
   }
 
@@ -47,17 +46,13 @@ export class MarketplacesCachingService {
     key: string,
   ): Promise<string[]> {
     return await this.cacheService.getOrSetCache(
-      generateCacheKeyFromParams('collections_by_marketplace', key),
+      `${CacheInfo.CollectionsByMarketplace.key}_${key}`,
       () => getCollectionsByMarketplace(),
-      30 * Constants.oneMinute(),
+      CacheInfo.CollectionsByMarketplace.ttl,
     );
   }
 
   public async invalidateMarketplacesCache() {
     await this.cacheService.deleteInCache(CacheInfo.AllMarketplaces.key);
-  }
-
-  public async invalidateCache() {
-    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
   }
 }

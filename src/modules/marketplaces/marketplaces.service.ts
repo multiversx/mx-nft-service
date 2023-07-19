@@ -219,6 +219,10 @@ export class MarketplacesService {
           marketplaceId: marketplace.id,
         }),
       );
+
+    if (savedCollection) {
+      this.cacheService.invalidateMarketplacesCache();
+    }
     return savedCollection ? true : false;
   }
 
