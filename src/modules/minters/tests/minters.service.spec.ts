@@ -95,15 +95,12 @@ describe('Minters Service', () => {
           new MinterEntity({ address: 'address2', name: 'name2' }),
         ]);
 
-      cachingService.getMinters = jest.fn().mockReturnValueOnce(
-        new CollectionType({
-          items: [
-            new MinterEntity({ address: 'address', name: 'name' }),
-            new MinterEntity({ address: 'address2', name: 'name2' }),
-          ],
-          count: 2,
-        }),
-      );
+      cachingService.getMinters = jest
+        .fn()
+        .mockReturnValueOnce([
+          new MinterEntity({ address: 'address', name: 'name' }),
+          new MinterEntity({ address: 'address2', name: 'name2' }),
+        ]);
 
       const result = await service.getMinters();
       const expectedResult = [
@@ -139,15 +136,12 @@ describe('Minters Service', () => {
           new MinterEntity({ address: 'address2', name: 'name2' }),
         ]);
 
-      cachingService.getMinters = jest.fn().mockReturnValueOnce(
-        new CollectionType({
-          items: [
-            new MinterEntity({ address: 'address', name: 'name' }),
-            new MinterEntity({ address: 'address2', name: 'name2' }),
-          ],
-          count: 2,
-        }),
-      );
+      cachingService.getMinters = jest
+        .fn()
+        .mockReturnValueOnce([
+          new MinterEntity({ address: 'address', name: 'name' }),
+          new MinterEntity({ address: 'address2', name: 'name2' }),
+        ]);
 
       const result = await service.getMintersAddresses();
       const expectedResult = ['address', 'address2'];
