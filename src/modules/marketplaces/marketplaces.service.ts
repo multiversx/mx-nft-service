@@ -213,6 +213,10 @@ export class MarketplacesService {
 
       if (savedCollection) {
         this.cacheService.invalidateMarketplacesCache();
+        this.cacheService.invalidateMarketplaceByCollection(request.collection);
+        this.cacheService.invalidateCollectionsByMarketplace(
+          request.marketplaceKey,
+        );
       }
       return savedCollection ? true : false;
     } catch (error) {

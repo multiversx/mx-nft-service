@@ -807,6 +807,8 @@ describe('Marketplaces Service', () => {
         }),
       );
       cachingService.invalidateMarketplacesCache = jest.fn();
+      cachingService.invalidateMarketplaceByCollection = jest.fn();
+      cachingService.invalidateCollectionsByMarketplace = jest.fn();
 
       persistenceService.saveMarketplaceCollection = jest
         .fn()
