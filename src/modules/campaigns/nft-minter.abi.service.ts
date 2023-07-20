@@ -109,7 +109,7 @@ export class NftMinterAbiService {
           parseInt(nonce, 16),
           new BigNumber(1),
         ),
-        contract.getAddress(),
+        new Address(ownerAddress),
       )
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buySft)
