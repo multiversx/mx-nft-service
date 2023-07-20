@@ -38,7 +38,7 @@ export class MintersService {
       const minters = await this.cacheService.getMinters(() =>
         this.persistenceService.getMinters(),
       );
-      return minters?.items?.map((minter) => Minter.fromEntity(minter));
+      return minters?.map((minter) => Minter.fromEntity(minter));
     } catch (error) {
       this.logger.error('An error has occured while getting minters', {
         path: this.getMinters.name,
@@ -51,12 +51,15 @@ export class MintersService {
   async getMintersAddresses(): Promise<string[]> {
     try {
       const minters = await this.getMinters();
-      return minters.map((x) => x.address);
+      return minters?.map((x) => x.address);
     } catch (error) {
-      this.logger.error('An error has occured while getting minters', {
-        path: this.getMintersAddresses.name,
-        exception: error,
-      });
+      this.logger.error(
+        'An error has occured while getting minters addresses',
+        {
+          path: this.getMintersAddresses.name,
+          exception: error,
+        },
+      );
       return [];
     }
   }

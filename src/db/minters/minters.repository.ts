@@ -12,7 +12,7 @@ export class MintersRepository {
   ) {}
 
   async getMinters(): Promise<MinterEntity[]> {
-    return await this.mintersRepository.find();
+    return await this.mintersRepository.createQueryBuilder('minters').getMany();
   }
 
   async saveMinter(minter: MinterEntity): Promise<MinterEntity> {

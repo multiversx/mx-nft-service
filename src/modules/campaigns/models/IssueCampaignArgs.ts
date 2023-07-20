@@ -4,6 +4,8 @@ import { mxConfig } from 'src/config';
 import {
   ADDRESS_ERROR,
   ADDRESS_RGX,
+  NFT_IDENTIFIER_ERROR,
+  NFT_IDENTIFIER_RGX,
   NUMERIC_ERROR,
   NUMERIC_RGX,
 } from 'src/utils/constants';
@@ -111,6 +113,29 @@ export class BuyRandomNftActionArgs {
     description: 'The number of nfts the user wants to buy',
   })
   quantity: string;
+}
+
+@InputType()
+export class UpgradeNftArgs {
+  @Field(() => String, {
+    description: 'The campaign id where the user wants to buy the nft/s',
+  })
+  campaignId: string;
+  @Field(() => String, {
+    description: 'The tier name on which the user wants to buy the nft',
+  })
+  tier: string;
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field(() => String, {
+    description: 'The smart contract address of the campaign',
+  })
+  minterAddress: string;
+
+  @Matches(RegExp(NFT_IDENTIFIER_RGX), { message: NFT_IDENTIFIER_ERROR })
+  @Field(() => String, {
+    description: 'The identifier of the nft to be upgraded',
+  })
+  identifier: string;
 }
 
 export enum MediaTypeEnum {
