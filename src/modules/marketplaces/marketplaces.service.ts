@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
@@ -18,6 +18,7 @@ export class MarketplacesService {
   constructor(
     private persistenceService: PersistenceService,
     private cacheService: MarketplacesCachingService,
+    private readonly logger: Logger,
   ) {}
 
   async getMarketplaces(
@@ -96,30 +97,20 @@ export class MarketplacesService {
     return allMarketplaces.items.map((m) => m.address);
   }
 
-  async getMarketplaceAddressByKey(marketplaceKey: string): Promise<string[]> {
+  async getMarketplaceAddressByKey(marketplaceKey: string): Promise<string> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const externalMarketplaces = allMarketplaces?.items?.filter(
+    const marketplaceAddress = allMarketplaces?.items?.find(
       (m) => m.key === marketplaceKey,
     );
 
-    return externalMarketplaces.map((m) => m.address);
+    return marketplaceAddress?.address;
   }
 
   async getMarketplaceByKey(marketplaceKey: string): Promise<Marketplace> {
     let allMarketplaces = await this.getAllMarketplaces();
 
     return allMarketplaces?.items?.find((m) => m.key === marketplaceKey);
-  }
-
-  async getInternalMarketplacesAddresesByKey(key: string): Promise<string> {
-    let allMarketplaces = await this.getAllMarketplaces();
-
-    const internalMarketplace = allMarketplaces?.items?.find(
-      (m) => m.key === key,
-    );
-
-    return internalMarketplace?.address;
   }
 
   async getMarketplaceByCollectionAndAddress(
@@ -211,23 +202,33 @@ export class MarketplacesService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this key');
     }
+    try {
+      let savedCollection =
+        await this.persistenceService.saveMarketplaceCollection(
+          new MarketplaceCollectionEntity({
+            collectionIdentifier: request.collection,
+            marketplaceId: marketplace.id,
+          }),
+        );
 
-    let savedCollection =
-      await this.persistenceService.saveMarketplaceCollection(
-        new MarketplaceCollectionEntity({
-          collectionIdentifier: request.collection,
-          marketplaceId: marketplace.id,
-        }),
-      );
-
-    if (savedCollection) {
-      this.cacheService.invalidateMarketplacesCache();
+      if (savedCollection) {
+        this.cacheService.invalidateMarketplacesCache();
+      }
+      return savedCollection ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while whitelisting collection', {
+        path: this.whitelistCollectionOnMarketplace.name,
+        collection: request?.collection,
+        marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
     }
-    return savedCollection ? true : false;
   }
 
   async getAllCollectionsIdentifiersFromDb(): Promise<string[]> {
-    const collections = await this.persistenceService.getAllCollections();
+    const collections =
+      await this.persistenceService.getAllMarketplaceCollections();
     return collections.map((c) => c.collectionIdentifier);
   }
 

@@ -463,7 +463,7 @@ export class NftMarketplaceAbiService {
   private async configureTransactionData(auctionId: number) {
     const auction = await this.auctionsService.getAuctionById(auctionId);
     const marketplaceAddress =
-      await this.marketplaceService.getInternalMarketplacesAddresesByKey(
+      await this.marketplaceService.getMarketplaceAddressByKey(
         auction.marketplaceKey,
       );
 

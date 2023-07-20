@@ -427,9 +427,9 @@ export class PersistenceService {
     );
   }
 
-  async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
+  async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(
-      this.getAllCollections.name,
+      this.getAllMarketplaceCollections.name,
       this.marketplaceCollectionsRepository.getAllCollections(),
     );
   }
