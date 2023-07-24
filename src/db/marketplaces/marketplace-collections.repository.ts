@@ -29,6 +29,7 @@ export class MarketplaceCollectionsRepository {
       )
       .execute();
   }
+
   async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.marketplaceCollectionRepository.find();
   }
@@ -80,5 +81,11 @@ export class MarketplaceCollectionsRepository {
         marketplaceKey: marketplaceKey,
       })
       .execute();
+  }
+
+  async saveMarketplaceCollection(
+    entity: MarketplaceCollectionEntity,
+  ): Promise<MarketplaceCollectionEntity> {
+    return await this.marketplaceCollectionRepository.save(entity);
   }
 }

@@ -961,6 +961,7 @@ type Mutation {
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
+  whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
   whitelistMinter(input: WhitelistMinterArgs!): Minter!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
@@ -1492,6 +1493,11 @@ input UpgradeNftArgs {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input WhitelistCollectionArgs {
+  collection: String!
+  marketplaceKey: String!
+}
 
 input WhitelistMinterArgs {
   address: String!

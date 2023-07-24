@@ -427,9 +427,9 @@ export class PersistenceService {
     );
   }
 
-  async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
+  async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(
-      this.getAllCollections.name,
+      this.getAllMarketplaceCollections.name,
       this.marketplaceCollectionsRepository.getAllCollections(),
     );
   }
@@ -464,6 +464,15 @@ export class PersistenceService {
       this.marketplaceCollectionsRepository.getCollectionsByMarketplace(
         marketplaceKey,
       ),
+    );
+  }
+
+  async saveMarketplaceCollection(
+    entity: MarketplaceCollectionEntity,
+  ): Promise<MarketplaceCollectionEntity> {
+    return await this.execute(
+      this.getCollectionsByMarketplace.name,
+      this.marketplaceCollectionsRepository.saveMarketplaceCollection(entity),
     );
   }
 
