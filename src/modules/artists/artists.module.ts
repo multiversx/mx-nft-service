@@ -5,6 +5,7 @@ import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
 import { ArtistsService } from './artists.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
+import { CommonModule } from 'src/common.module';
 
 @Module({
   providers: [
@@ -13,7 +14,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
     MarketplacesService,
     MarketplacesCachingService,
   ],
-  imports: [MxCommunicationModule, CollectionsModuleGraph],
+  imports: [MxCommunicationModule, CollectionsModuleGraph, CommonModule],
   exports: [ArtistsService],
 })
 export class ArtistsModuleGraph {}
