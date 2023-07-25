@@ -19,7 +19,7 @@
     "copy-pem": "mkdir -p dist && cp -u ./wallet.pem ./dist/wallet.pem | true",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test:cov": "jest --coverage --config ./test/jest-config.json --forceExit",
     "clear_jest": "jest --clearCache",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "NODE_ENV=test-e2e jest --config ./test/jest-e2e.json --forceExit --maxWorkers=4",
