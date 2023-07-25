@@ -99,10 +99,7 @@ export class NftMinterAbiService {
     );
     const contract = await this.contract.getContract(request.minterAddress);
     return contract.methodsExplicit
-      .nftUpgrade([
-        BytesValue.fromUTF8(request.campaignId),
-        BytesValue.fromUTF8(request.tier),
-      ])
+      .nftUpgrade([BytesValue.fromUTF8(request.campaignId)])
       .withSingleESDTNFTTransfer(
         TokenPayment.metaEsdtFromBigInteger(
           collection,
