@@ -1,19 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
-import { MarketplaceEntity } from 'src/db/marketplaces';
+import {
+  MarketplaceCollectionEntity,
+  MarketplaceEntity,
+} from 'src/db/marketplaces';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { WhitelistCollectionRequest } from './models/requests/whitelistMinterRequest';
+import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 
 @Injectable()
 export class MarketplacesService {
   constructor(
     private persistenceService: PersistenceService,
     private cacheService: MarketplacesCachingService,
-  ) { }
+    private readonly logger: Logger,
+  ) {}
 
   async getMarketplaces(
     limit: number = 10,
@@ -91,24 +97,20 @@ export class MarketplacesService {
     return allMarketplaces.items.map((m) => m.address);
   }
 
-  async getMarketplaceByKey(marketplaceKey: string): Promise<string[]> {
+  async getMarketplaceAddressByKey(marketplaceKey: string): Promise<string> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const externalMarketplaces = allMarketplaces?.items?.filter(
+    const marketplaceAddress = allMarketplaces?.items?.find(
       (m) => m.key === marketplaceKey,
     );
 
-    return externalMarketplaces.map((m) => m.address);
+    return marketplaceAddress?.address;
   }
 
-  async getInternalMarketplacesAddresesByKey(key: string): Promise<string> {
+  async getMarketplaceByKey(marketplaceKey: string): Promise<Marketplace> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const internalMarketplace = allMarketplaces?.items?.find(
-      (m) => m.key === key,
-    );
-
-    return internalMarketplace?.address;
+    return allMarketplaces?.items?.find((m) => m.key === marketplaceKey);
   }
 
   async getMarketplaceByCollectionAndAddress(
@@ -193,26 +195,44 @@ export class MarketplacesService {
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 
-  async getMarketplaceByCollectionFromDb(
-    collection: string,
-  ): Promise<Marketplace> {
-    let marketplace: MarketplaceEntity[] =
-      await this.persistenceService.getMarketplaceByCollection(collection);
-    return marketplace?.length > 0
-      ? Marketplace.fromEntity(marketplace[0])
-      : null;
-  }
+  async whitelistCollectionOnMarketplace(
+    request: WhitelistCollectionRequest,
+  ): Promise<Boolean> {
+    const marketplace = await this.getMarketplaceByKey(request.marketplaceKey);
+    if (!marketplace) {
+      throw new BadRequestError('No marketplace available for this key');
+    }
+    try {
+      let savedCollection =
+        await this.persistenceService.saveMarketplaceCollection(
+          new MarketplaceCollectionEntity({
+            collectionIdentifier: request.collection,
+            marketplaceId: marketplace.id,
+          }),
+        );
 
-  async getCollectionsByMarketplaceFromDb(
-    marketplaceKey: string,
-  ): Promise<string[]> {
-    const collections =
-      await this.persistenceService.getCollectionsByMarketplace(marketplaceKey);
-    return collections.map((c) => c.collectionIdentifier);
+      if (savedCollection) {
+        this.cacheService.invalidateMarketplacesCache();
+        this.cacheService.invalidateMarketplaceByCollection(request.collection);
+        this.cacheService.invalidateCollectionsByMarketplace(
+          request.marketplaceKey,
+        );
+      }
+      return savedCollection ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while whitelisting collection', {
+        path: this.whitelistCollectionOnMarketplace.name,
+        collection: request?.collection,
+        marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
+    }
   }
 
   async getAllCollectionsIdentifiersFromDb(): Promise<string[]> {
-    const collections = await this.persistenceService.getAllCollections();
+    const collections =
+      await this.persistenceService.getAllMarketplaceCollections();
     return collections.map((c) => c.collectionIdentifier);
   }
 
@@ -224,5 +244,23 @@ export class MarketplacesService {
       address,
       lastIndexTimestamp,
     );
+  }
+
+  private async getMarketplaceByCollectionFromDb(
+    collection: string,
+  ): Promise<Marketplace> {
+    let marketplace: MarketplaceEntity[] =
+      await this.persistenceService.getMarketplaceByCollection(collection);
+    return marketplace?.length > 0
+      ? Marketplace.fromEntity(marketplace[0])
+      : null;
+  }
+
+  private async getCollectionsByMarketplaceFromDb(
+    marketplaceKey: string,
+  ): Promise<string[]> {
+    const collections =
+      await this.persistenceService.getCollectionsByMarketplace(marketplaceKey);
+    return collections.map((c) => c.collectionIdentifier);
   }
 }

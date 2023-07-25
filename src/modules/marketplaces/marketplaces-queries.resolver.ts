@@ -12,7 +12,7 @@ import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { Token } from '../usdPrice/Token.model';
 
 @Resolver(() => Marketplace)
-export class MarketplacesResolver extends BaseResolver(Marketplace) {
+export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
   constructor(
     private marketplaceService: MarketplacesService,
     private nftAbiService: NftMarketplaceAbiService,

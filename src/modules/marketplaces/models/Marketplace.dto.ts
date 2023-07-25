@@ -14,6 +14,8 @@ import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
 export class Marketplace {
+  id: number;
+
   @Field(() => ID)
   key: string;
 
@@ -63,6 +65,7 @@ export class Marketplace {
       return null;
     }
     return new Marketplace({
+      id: entity.id,
       address: entity.address,
       name: entity.name,
       acceptedPaymentIdentifiers: entity.acceptedPaymentTokens
@@ -123,7 +126,6 @@ export class Marketplace {
           return url;
       }
     }
-
     return entity.url;
   }
 

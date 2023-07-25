@@ -44,7 +44,8 @@
     "transferNFTCreateRole": 60000000,
     "addBurnQuantity": 200000,
     "buyTickets": 36000000,
-    "nftBurn": 10000000
+    "nftBurn": 10000000,
+    "issueCamapaign": 70000000
   },
   "cronJobs": {
     "rarity": {
@@ -89,12 +90,8 @@
       "{size} magnificently designed and truly inspiring NFTs.",
       "An alluring collection of {size} wonderfully minted NFTs."
     ],
-    "forSmallCollections": [
-      ""
-    ],
-    "forAssets": [
-      ""
-    ]
+    "forSmallCollections": [""],
+    "forAssets": [""]
   },
   "ports": {
     "rarity": 6013,

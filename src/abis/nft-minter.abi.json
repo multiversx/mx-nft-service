@@ -1,20 +1,19 @@
 {
   "buildInfo": {
     "rustc": {
-      "version": "1.62.0-nightly",
-      "commitHash": "4ca19e09d302a4cbde14f9cb1bc109179dc824cd",
-      "commitDate": "2022-04-19",
+      "version": "1.71.0-nightly",
+      "commitHash": "7f94b314cead7059a71a265a8b64905ef2511796",
+      "commitDate": "2023-04-23",
       "channel": "Nightly",
-      "short": "rustc 1.62.0-nightly (4ca19e09d 2022-04-19)"
+      "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
     },
     "contractCrate": {
       "name": "nft-minter",
-      "version": "0.0.0",
-      "git_version": "0ff3788"
+      "version": "0.0.0"
     },
     "framework": {
-      "name": "elrond-wasm",
-      "version": "0.31.1"
+      "name": "multiversx-sc",
+      "version": "0.41.3"
     }
   },
   "name": "NftMinter",
@@ -214,7 +213,7 @@
         },
         {
           "name": "mint_price_token_id",
-          "type": "TokenIdentifier"
+          "type": "EgldOrEsdtTokenIdentifier"
         },
         {
           "name": "token_display_name",
@@ -333,6 +332,22 @@
       "outputs": []
     },
     {
+      "name": "nftUpgrade",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes"
+        },
+        {
+          "name": "tier",
+          "type": "bytes"
+        }
+      ],
+      "outputs": []
+    },
+    {
       "name": "getNftTiersForBrand",
       "mutability": "readonly",
       "inputs": [
@@ -441,7 +456,7 @@
       "inputs": [],
       "outputs": [
         {
-          "type": "variadic<multi<TokenIdentifier,BigUint>>",
+          "type": "variadic<multi<EgldOrEsdtTokenIdentifier,BigUint>>",
           "multi_result": true
         }
       ]
@@ -452,7 +467,7 @@
       "inputs": [],
       "outputs": [
         {
-          "type": "variadic<multi<TokenIdentifier,BigUint>>",
+          "type": "variadic<multi<EgldOrEsdtTokenIdentifier,BigUint>>",
           "multi_result": true
         }
       ]
@@ -467,7 +482,7 @@
         },
         {
           "name": "tokens",
-          "type": "variadic<TokenIdentifier>",
+          "type": "variadic<EgldOrEsdtTokenIdentifier>",
           "multi_arg": true
         }
       ],
@@ -496,6 +511,66 @@
         {
           "type": "variadic<BrandInfoViewResultType>",
           "multi_result": true
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "identifier": "brandCreated",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes",
+          "indexed": true
+        },
+        {
+          "name": "nft_token_id",
+          "type": "TokenIdentifier",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "identifier": "nftBought",
+      "inputs": [
+        {
+          "name": "buyer_address",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "brand_id",
+          "type": "bytes",
+          "indexed": true
+        },
+        {
+          "name": "tier",
+          "type": "bytes",
+          "indexed": true
+        },
+        {
+          "name": "nr_nfts_bought",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "identifier": "nftGiveaway",
+      "inputs": [
+        {
+          "name": "brand_id",
+          "type": "bytes",
+          "indexed": true
+        },
+        {
+          "name": "tier",
+          "type": "bytes",
+          "indexed": true
+        },
+        {
+          "name": "total_nfts_given",
+          "type": "u32"
         }
       ]
     }
@@ -549,7 +624,7 @@
       "fields": [
         {
           "name": "token_id",
-          "type": "TokenIdentifier"
+          "type": "EgldOrEsdtTokenIdentifier"
         },
         {
           "name": "amount",
@@ -599,38 +674,9 @@
         }
       ]
     },
-    "EsdtTokenType": {
-      "type": "enum",
-      "variants": [
-        {
-          "name": "Fungible",
-          "discriminant": 0
-        },
-        {
-          "name": "NonFungible",
-          "discriminant": 1
-        },
-        {
-          "name": "SemiFungible",
-          "discriminant": 2
-        },
-        {
-          "name": "Meta",
-          "discriminant": 3
-        },
-        {
-          "name": "Invalid",
-          "discriminant": 4
-        }
-      ]
-    },
     "EsdtTokenPayment": {
       "type": "struct",
       "fields": [
-        {
-          "name": "token_type",
-          "type": "EsdtTokenType"
-        },
         {
           "name": "token_identifier",
           "type": "TokenIdentifier"

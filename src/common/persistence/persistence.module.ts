@@ -49,6 +49,8 @@ import {
 import { NftFlagsEntity } from 'src/db/nftFlags';
 import { NftRarityEntity } from 'src/db/nft-rarity';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
+import { MinterEntity } from 'src/db/minters';
+import { MintersRepository } from 'src/db/minters/minters.repository';
 
 @Global()
 @Module({
@@ -71,6 +73,7 @@ import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.
     TypeOrmModule.forFeature([AuctionEntity]),
     TypeOrmModule.forFeature([OfferEntity]),
     TypeOrmModule.forFeature([MarketplaceEventsEntity]),
+    TypeOrmModule.forFeature([MinterEntity]),
     CacheEventsPublisherModule,
     MxCommunicationModule,
   ],
@@ -97,6 +100,7 @@ import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.
     NotificationsRepository,
     OrdersRepository,
     MarketplaceEventsRepository,
+    MintersRepository,
   ],
   exports: [PersistenceService, UsdPriceService],
 })
