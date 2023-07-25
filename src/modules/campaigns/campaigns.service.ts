@@ -22,7 +22,7 @@ export class CampaignsService {
   async getCampaigns(
     limit: number = 10,
     offset: number = 0,
-    filters: CampaignsFilter,
+    filters?: CampaignsFilter,
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
 
