@@ -46,7 +46,6 @@ describe('AccountStatsResolver', () => {
       jest
         .spyOn(accountStatsService, 'getCollectionsCount')
         .mockResolvedValue(5);
-      jest.spyOn(accountStatsService, 'getCreationsCount').mockResolvedValue(5);
 
       return request(app.getHttpServer())
         .post('/graphql')
