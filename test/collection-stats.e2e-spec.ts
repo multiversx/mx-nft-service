@@ -45,7 +45,7 @@ describe('CollectionStatsResolver', () => {
       );
       jest
         .spyOn(collectionStatsService, 'getItemsCount')
-        .mockResolvedValue({ key: 'test', value: 4 });
+        .mockResolvedValue({ key: 'test', value: '4' });
 
       return request(app.getHttpServer())
         .post('/graphql')
