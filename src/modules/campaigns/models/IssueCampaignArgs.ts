@@ -121,10 +121,6 @@ export class UpgradeNftArgs {
     description: 'The campaign id where the user wants to buy the nft/s',
   })
   campaignId: string;
-  @Field(() => String, {
-    description: 'The tier name on which the user wants to buy the nft',
-  })
-  tier: string;
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, {
     description: 'The smart contract address of the campaign',
