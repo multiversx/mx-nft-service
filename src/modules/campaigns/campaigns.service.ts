@@ -65,8 +65,10 @@ export class CampaignsService {
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
     const campaigns: BrandInfoViewResultType[] =
       await this.nftMinterService.getCampaignsForScAddress(minterAddress);
+    const maxNftsPerTransaction: number =
+      await this.getOrSetNrOfTransactionOnSC(minterAddress);
     const campaignsfromBlockchain = campaigns.map((c) =>
-      CampaignEntity.fromCampaignAbi(c, minterAddress),
+      CampaignEntity.fromCampaignAbi(c, minterAddress, maxNftsPerTransaction),
     );
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
@@ -121,6 +123,17 @@ export class CampaignsService {
       Constants.oneHour(),
     );
     return campaigns;
+  }
+
+  private async getOrSetNrOfTransactionOnSC(
+    scAddress: string,
+  ): Promise<number> {
+    const nfOfTransaction = await this.cacheService.getOrSetCache(
+      `${CacheInfo.NrOfNftsOnTransaction.key}_${scAddress}`,
+      () => this.nftMinterService.getMaxNftsPerTransaction(scAddress),
+      Constants.oneHour(),
+    );
+    return nfOfTransaction;
   }
 
   private async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {

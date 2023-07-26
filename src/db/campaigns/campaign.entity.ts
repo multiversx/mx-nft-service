@@ -58,6 +58,7 @@ export class CampaignEntity extends BaseEntity {
   static fromCampaignAbi(
     campaign: BrandInfoViewResultType,
     address: string,
+    maxNftsPerTransaction: number,
     decimals: number = mxConfig.decimals,
   ) {
     return campaign
@@ -86,7 +87,7 @@ export class CampaignEntity extends BaseEntity {
           tiers: campaign.tier_info_entries.map((t) =>
             TierEntity.fromTierAbi(t, decimals),
           ),
-          maxNftsPerTransaction: 3,
+          maxNftsPerTransaction: maxNftsPerTransaction,
           verified: 1,
           description: 'This is a default description for a campaign',
         })

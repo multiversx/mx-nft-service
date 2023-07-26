@@ -4,7 +4,6 @@ import { CampaignsService } from '../campaigns.service';
 import { CachingService } from '@multiversx/sdk-nestjs';
 import { NftMinterAbiService } from '../nft-minter.abi.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { Campaign } from '../models';
 import { CollectionType } from 'src/modules/assets/models';
 import { CampaignsFilter } from 'src/modules/common/filters/filtersTypes';
 import {
@@ -160,6 +159,8 @@ describe('Campaigns Service', () => {
       nftMinterService.getCampaignsForScAddress = jest
         .fn()
         .mockReturnValueOnce([]);
+      const cachingService = module.get<CachingService>(CachingService);
+      cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(7);
 
       const expectedResult = [];
 
@@ -173,6 +174,8 @@ describe('Campaigns Service', () => {
         module.get<NftMinterAbiService>(NftMinterAbiService);
       const persistenceService =
         module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<CachingService>(CachingService);
+      cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(7);
 
       persistenceService.saveCampaign = jest
         .fn()
@@ -195,6 +198,8 @@ describe('Campaigns Service', () => {
         module.get<NftMinterAbiService>(NftMinterAbiService);
       const persistenceService =
         module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<CachingService>(CachingService);
+      cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(7);
 
       persistenceService.saveCampaign = jest
         .fn()

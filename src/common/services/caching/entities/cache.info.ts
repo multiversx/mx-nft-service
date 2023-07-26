@@ -109,6 +109,11 @@ export class CacheInfo {
     ttl: Constants.oneHour(),
   };
 
+  static NrOfNftsOnTransaction: CacheInfo = {
+    key: 'NrOfNftsOnTransaction',
+    ttl: Constants.oneHour(),
+  };
+
   static AuctionTags: CacheInfo = {
     key: 'auctionTags',
     ttl: 5 * Constants.oneHour(),

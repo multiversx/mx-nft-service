@@ -53,6 +53,17 @@ export class NftMinterAbiService {
     return campaigns;
   }
 
+  public async getMaxNftsPerTransaction(address: string) {
+    const contract = await this.contract.getContract(address);
+    let getDataQuery = <Interaction>(
+      contract.methodsExplicit.getMaxNftsPerTransaction()
+    );
+
+    const response = await this.getFirstQueryResult(getDataQuery);
+    const maxNftsPerTransaction: BigNumber = response?.firstValue?.valueOf();
+    return maxNftsPerTransaction?.toNumber() ?? 0;
+  }
+
   async issueToken(
     ownerAddress: string,
     request: IssueCampaignRequest,
