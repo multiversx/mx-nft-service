@@ -1486,9 +1486,6 @@ input UpgradeNftArgs {
 
   """The smart contract address of the campaign"""
   minterAddress: String!
-
-  """The tier name on which the user wants to buy the nft"""
-  tier: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
