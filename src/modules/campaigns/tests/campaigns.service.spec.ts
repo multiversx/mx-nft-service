@@ -7,33 +7,18 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Campaign } from '../models';
 import { CollectionType } from 'src/modules/assets/models';
 import { CampaignsFilter } from 'src/modules/common/filters/filtersTypes';
+import {
+  getCampaignsExpectedList,
+  getCampaignsInputMockData,
+  getCampaignsMockData,
+  getSaveCampaignsExpectedResult,
+  saveCampaignInput,
+} from './campaigns.testData';
 
 describe('Campaigns Service', () => {
   let service: CampaignsService;
   let module: TestingModule;
-  const [inputCampaign, inputCount] = [
-    [
-      new Campaign({
-        campaignId: 'campaing1',
-        description: 'name',
-        minterAddress: 'address1',
-        maxNftsPerTransaction: 7,
-      }),
-      new Campaign({
-        campaignId: 'campaing1',
-        description: 'name',
-        minterAddress: 'address12',
-        maxNftsPerTransaction: 7,
-      }),
-      new Campaign({
-        minterAddress: 'address2',
-        campaignId: 'campaing2',
-        description: 'name3',
-        maxNftsPerTransaction: 3,
-      }),
-    ],
-    2,
-  ];
+  const [inputCampaigns, inputCount] = getCampaignsInputMockData;
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
@@ -76,32 +61,13 @@ describe('Campaigns Service', () => {
       const cachingService = module.get<CachingService>(CachingService);
       cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputCampaign,
+          items: inputCampaigns,
           count: inputCount,
         }),
       );
 
       const expectedResult = new CollectionType({
-        items: [
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address1',
-            maxNftsPerTransaction: 7,
-          }),
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address12',
-            maxNftsPerTransaction: 7,
-          }),
-          new Campaign({
-            minterAddress: 'address2',
-            campaignId: 'campaing2',
-            description: 'name3',
-            maxNftsPerTransaction: 3,
-          }),
-        ],
+        items: getCampaignsExpectedList,
         count: 3,
       });
 
@@ -114,20 +80,13 @@ describe('Campaigns Service', () => {
       const cachingService = module.get<CachingService>(CachingService);
       cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputCampaign,
+          items: inputCampaigns,
           count: inputCount,
         }),
       );
 
       const expectedResult = new CollectionType({
-        items: [
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address1',
-            maxNftsPerTransaction: 7,
-          }),
-        ],
+        items: [getCampaignsExpectedList[0]],
         count: 1,
       });
 
@@ -147,27 +106,14 @@ describe('Campaigns Service', () => {
       const cachingService = module.get<CachingService>(CachingService);
       cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputCampaign,
+          items: inputCampaigns,
           count: inputCount,
         }),
       );
 
       const expectedResult = new CollectionType({
-        items: [
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address1',
-            maxNftsPerTransaction: 7,
-          }),
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address12',
-            maxNftsPerTransaction: 7,
-          }),
-        ],
-        count: 1,
+        items: [getCampaignsExpectedList[0], getCampaignsExpectedList[1]],
+        count: 2,
       });
 
       const result = await service.getCampaigns(
@@ -185,20 +131,13 @@ describe('Campaigns Service', () => {
       const cachingService = module.get<CachingService>(CachingService);
       cachingService.getOrSetCache = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputCampaign,
+          items: inputCampaigns,
           count: inputCount,
         }),
       );
 
       const expectedResult = new CollectionType({
-        items: [
-          new Campaign({
-            campaignId: 'campaing1',
-            description: 'name',
-            minterAddress: 'address12',
-            maxNftsPerTransaction: 7,
-          }),
-        ],
+        items: [getCampaignsExpectedList[1]],
         count: 1,
       });
 
@@ -211,6 +150,65 @@ describe('Campaigns Service', () => {
       );
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('saveCampaign', () => {
+    it('when no campaign present returns empty list', async () => {
+      const nftMinterService =
+        module.get<NftMinterAbiService>(NftMinterAbiService);
+      nftMinterService.getCampaignsForScAddress = jest
+        .fn()
+        .mockReturnValueOnce([]);
+
+      const expectedResult = [];
+
+      const result = await service.saveCampaign('');
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    it('when one campaign present returns list with one item', async () => {
+      const nftMinterService =
+        module.get<NftMinterAbiService>(NftMinterAbiService);
+      const persistenceService =
+        module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.saveCampaign = jest
+        .fn()
+        .mockReturnValueOnce(saveCampaignInput[0]);
+      persistenceService.saveTiers = jest.fn().mockReturnValueOnce({});
+
+      nftMinterService.getCampaignsForScAddress = jest
+        .fn()
+        .mockReturnValueOnce([getCampaignsMockData[0]]);
+
+      const expectedResult = getSaveCampaignsExpectedResult[0];
+
+      const result = await service.saveCampaign('address');
+
+      expect(result).toMatchObject([expectedResult]);
+    });
+
+    it('when 2 campaigns present returns list with 2 items', async () => {
+      const nftMinterService =
+        module.get<NftMinterAbiService>(NftMinterAbiService);
+      const persistenceService =
+        module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.saveCampaign = jest
+        .fn()
+        .mockReturnValueOnce(saveCampaignInput[0])
+        .mockReturnValueOnce(saveCampaignInput[1]);
+      persistenceService.saveTiers = jest.fn().mockReturnValueOnce({});
+
+      nftMinterService.getCampaignsForScAddress = jest
+        .fn()
+        .mockReturnValueOnce(getCampaignsMockData);
+
+      const result = await service.saveCampaign('address');
+
+      expect(result).toMatchObject(getSaveCampaignsExpectedResult);
     });
   });
 });

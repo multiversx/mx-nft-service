@@ -62,24 +62,6 @@ export class CampaignsService {
     });
   }
 
-  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    const campaigns = await this.cacheService.getOrSetCache(
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      Constants.oneHour(),
-    );
-    return campaigns;
-  }
-
-  async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
-    let [campaigns, count]: [CampaignEntity[], number] =
-      await this.persistenceService.getCampaigns();
-    return new CollectionType({
-      count: count,
-      items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
-    });
-  }
-
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
     const campaigns: BrandInfoViewResultType[] =
       await this.nftMinterService.getCampaignsForScAddress(minterAddress);
@@ -128,14 +110,32 @@ export class CampaignsService {
     await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
   }
 
+  public async invalidateCache() {
+    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
+  }
+
+  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
+    const campaigns = await this.cacheService.getOrSetCache(
+      CacheInfo.Campaigns.key,
+      () => this.getCampaignsFromDb(),
+      Constants.oneHour(),
+    );
+    return campaigns;
+  }
+
+  private async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
+    let [campaigns, count]: [CampaignEntity[], number] =
+      await this.persistenceService.getCampaigns();
+    return new CollectionType({
+      count: count,
+      items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
+    });
+  }
+
   private async refreshCacheKey(key: string, ttl: number) {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
     });
-  }
-
-  public async invalidateCache() {
-    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
   }
 }

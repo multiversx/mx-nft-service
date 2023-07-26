@@ -48,8 +48,9 @@ export class NftMinterAbiService {
     let getDataQuery = <Interaction>contract.methodsExplicit.getAllBrandsInfo();
 
     const response = await this.getFirstQueryResult(getDataQuery);
-    const campaign: BrandInfoViewResultType[] = response?.firstValue?.valueOf();
-    return campaign;
+    const campaigns: BrandInfoViewResultType[] =
+      response?.firstValue?.valueOf();
+    return campaigns;
   }
 
   async issueToken(
