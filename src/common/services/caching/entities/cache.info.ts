@@ -253,4 +253,24 @@ export class CacheInfo {
     key: 'minters',
     ttl: Constants.oneHour(),
   };
+
+  static SearchCollection: CacheInfo = {
+    key: 'search_collection',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchNfts: CacheInfo = {
+    key: 'search_nfts',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchAccount: CacheInfo = {
+    key: 'search_account',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchTag: CacheInfo = {
+    key: 'search_tag',
+    ttl: 5 * Constants.oneSecond(),
+  };
 }
