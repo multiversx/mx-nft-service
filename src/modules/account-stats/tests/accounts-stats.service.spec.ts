@@ -10,6 +10,7 @@ import { OffersService } from 'src/modules/offers/offers.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { AccountsStatsCachingService } from '../accounts-stats.caching.service';
 import { OffersFilters } from 'src/modules/offers/models/Offers-Filters';
+import { Token } from 'src/modules/usdPrice/Token.model';
 
 describe('AccountsStatsService', () => {
   let service: AccountsStatsService;
@@ -49,6 +50,7 @@ describe('AccountsStatsService', () => {
             getCollectionsCount: jest.fn(),
             getArtistCreationsInfo: jest.fn(),
             getLikesCount: jest.fn(),
+            getBiddingBalance: jest.fn(),
           },
         },
         {
@@ -60,7 +62,7 @@ describe('AccountsStatsService', () => {
         {
           provide: UsdPriceService,
           useValue: {
-            getOrSet: jest.fn(),
+            getToken: jest.fn(),
           },
         },
         {
@@ -181,6 +183,48 @@ describe('AccountsStatsService', () => {
 
       const results = await service.getClaimableCount('address');
       expect(results).toStrictEqual(0);
+    });
+  });
+
+  describe('getBiddingBalance', () => {
+    it('should return bidding balance and call with right params', async () => {
+      const accountsStatsCachingService = module.get<AccountsStatsCachingService>(AccountsStatsCachingService);
+      const getBiddingBalanceStub = jest
+        .spyOn(accountsStatsCachingService, 'getBiddingBalance')
+        .mockImplementation(() => Promise.resolve([{ biddingBalance: '10000', priceToken: 'EGLD' }]));
+
+      const usdPriceService = module.get<UsdPriceService>(UsdPriceService);
+      jest.spyOn(usdPriceService, 'getToken').mockImplementation(() => Promise.resolve(new Token({ decimals: 18 })));
+
+      const results = await service.getBiddingBalance('address');
+
+      expect(getBiddingBalanceStub).toBeCalledWith('address', expect.anything());
+      expect(results).toMatchObject([{ amount: '10000000000000000000000', nonce: 0, token: 'EGLD', tokenData: { decimals: 18 } }]);
+    });
+
+    it('should return bidding balance and call with right params, marketplace included', async () => {
+      const accountsStatsCachingService = module.get<AccountsStatsCachingService>(AccountsStatsCachingService);
+      const getBiddingBalanceStub = jest
+        .spyOn(accountsStatsCachingService, 'getBiddingBalance')
+        .mockImplementation(() => Promise.resolve([{ biddingBalance: '10000', priceToken: 'EGLD' }]));
+
+      const usdPriceService = module.get<UsdPriceService>(UsdPriceService);
+      jest.spyOn(usdPriceService, 'getToken').mockImplementation(() => Promise.resolve(new Token({ decimals: 18 })));
+
+      const results = await service.getBiddingBalance('address', 'marketplace');
+
+      expect(getBiddingBalanceStub).toBeCalledWith('address_marketplace', expect.anything());
+      expect(results).toMatchObject([{ amount: '10000000000000000000000', nonce: 0, token: 'EGLD', tokenData: { decimals: 18 } }]);
+    });
+
+    it('when error occurs returns 0', async () => {
+      const accountsStatsCachingService = module.get<AccountsStatsCachingService>(AccountsStatsCachingService);
+      jest.spyOn(accountsStatsCachingService, 'getBiddingBalance').mockImplementation(() => {
+        throw new Error();
+      });
+
+      const results = await service.getBiddingBalance('address');
+      expect(results).toBeUndefined();
     });
   });
 
