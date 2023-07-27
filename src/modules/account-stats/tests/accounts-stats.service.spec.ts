@@ -9,7 +9,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { OffersService } from 'src/modules/offers/offers.service';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { AccountsStatsCachingService } from '../accounts-stats.caching.service';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { OffersFilters } from 'src/modules/offers/models/Offers-Filters';
 
 describe('AccountsStatsService', () => {
   let service: AccountsStatsService;
@@ -48,6 +48,7 @@ describe('AccountsStatsService', () => {
             getCollectedCount: jest.fn(),
             getCollectionsCount: jest.fn(),
             getArtistCreationsInfo: jest.fn(),
+            getLikesCount: jest.fn(),
           },
         },
         {
@@ -65,7 +66,7 @@ describe('AccountsStatsService', () => {
         {
           provide: OffersService,
           useValue: {
-            getOrSet: jest.fn(),
+            getOffersForAddress: jest.fn(),
           },
         },
       ],
@@ -179,6 +180,59 @@ describe('AccountsStatsService', () => {
       });
 
       const results = await service.getClaimableCount('address');
+      expect(results).toStrictEqual(0);
+    });
+  });
+
+  describe('getOffersCount', () => {
+    it('should return offers count and call with right params, marketplace null', async () => {
+      const offersService = module.get<OffersService>(OffersService);
+      const getOffersForAddressStub = jest.spyOn(offersService, 'getOffersForAddress').mockImplementation(() => Promise.resolve([[], 4]));
+
+      const results = await service.getOffersCount('address');
+
+      expect(getOffersForAddressStub).toBeCalledWith(new OffersFilters({ ownerAddress: 'address', marketplaceKey: null }));
+      expect(results).toStrictEqual(4);
+    });
+
+    it('should return offers count and call with right params, address and marketplace', async () => {
+      const offersService = module.get<OffersService>(OffersService);
+      const getOffersForAddressStub = jest.spyOn(offersService, 'getOffersForAddress').mockImplementation(() => Promise.resolve([[], 4]));
+
+      const results = await service.getOffersCount('address', 'marketplace');
+
+      expect(getOffersForAddressStub).toBeCalledWith(new OffersFilters({ ownerAddress: 'address', marketplaceKey: 'marketplace' }));
+      expect(results).toStrictEqual(4);
+    });
+
+    it('when error occurs returns 0', async () => {
+      const offersService = module.get<OffersService>(OffersService);
+      jest.spyOn(offersService, 'getOffersForAddress').mockImplementation(() => {
+        throw new Error();
+      });
+      const results = await service.getOffersCount('address');
+      expect(results).toStrictEqual(0);
+    });
+  });
+
+  describe('getLikesCount', () => {
+    it('should return likes count and call with right params', async () => {
+      const accountsStatsCachingService = module.get<AccountsStatsCachingService>(AccountsStatsCachingService);
+      const getLikesCountStub = jest.spyOn(accountsStatsCachingService, 'getLikesCount').mockImplementation(() => Promise.resolve(4));
+
+      const results = await service.getLikesCount('address');
+
+      expect(getLikesCountStub).toBeCalledWith('address', expect.anything());
+      expect(results).toStrictEqual(4);
+    });
+
+    it('when error occurs returns 0', async () => {
+      const accountsStatsCachingService = module.get<AccountsStatsCachingService>(AccountsStatsCachingService);
+      jest.spyOn(accountsStatsCachingService, 'getLikesCount').mockImplementation(() => {
+        throw new Error();
+      });
+
+      const results = await service.getLikesCount('address');
       expect(results).toStrictEqual(0);
     });
   });
