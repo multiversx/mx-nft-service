@@ -22,7 +22,7 @@ export class CampaignsService {
   async getCampaigns(
     limit: number = 10,
     offset: number = 0,
-    filters: CampaignsFilter,
+    filters?: CampaignsFilter,
   ): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
 
@@ -62,29 +62,13 @@ export class CampaignsService {
     });
   }
 
-  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    const campaigns = await this.cacheService.getOrSetCache(
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      Constants.oneHour(),
-    );
-    return campaigns;
-  }
-
-  async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
-    let [campaigns, count]: [CampaignEntity[], number] =
-      await this.persistenceService.getCampaigns();
-    return new CollectionType({
-      count: count,
-      items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
-    });
-  }
-
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
     const campaigns: BrandInfoViewResultType[] =
       await this.nftMinterService.getCampaignsForScAddress(minterAddress);
+    const maxNftsPerTransaction: number =
+      await this.getOrSetNrOfTransactionOnSC(minterAddress);
     const campaignsfromBlockchain = campaigns.map((c) =>
-      CampaignEntity.fromCampaignAbi(c, minterAddress),
+      CampaignEntity.fromCampaignAbi(c, minterAddress, maxNftsPerTransaction),
     );
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
@@ -128,14 +112,43 @@ export class CampaignsService {
     await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
   }
 
+  public async invalidateCache() {
+    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
+  }
+
+  private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
+    const campaigns = await this.cacheService.getOrSetCache(
+      CacheInfo.Campaigns.key,
+      () => this.getCampaignsFromDb(),
+      Constants.oneHour(),
+    );
+    return campaigns;
+  }
+
+  private async getOrSetNrOfTransactionOnSC(
+    scAddress: string,
+  ): Promise<number> {
+    const nfOfTransaction = await this.cacheService.getOrSetCache(
+      `${CacheInfo.NrOfNftsOnTransaction.key}_${scAddress}`,
+      () => this.nftMinterService.getMaxNftsPerTransaction(scAddress),
+      Constants.oneHour(),
+    );
+    return nfOfTransaction;
+  }
+
+  private async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
+    let [campaigns, count]: [CampaignEntity[], number] =
+      await this.persistenceService.getCampaigns();
+    return new CollectionType({
+      count: count,
+      items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
+    });
+  }
+
   private async refreshCacheKey(key: string, ttl: number) {
     this.clientProxy.emit('refreshCacheKey', {
       key,
       ttl,
     });
-  }
-
-  public async invalidateCache() {
-    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
   }
 }

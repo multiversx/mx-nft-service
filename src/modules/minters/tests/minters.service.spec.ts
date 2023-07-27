@@ -6,7 +6,6 @@ import { MintersCachingService } from '../minters-caching.service';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { MinterEntity } from 'src/db/minters';
 import { Minter } from '../models';
-import { CollectionType } from 'src/modules/assets/models';
 import { WhitelistMinterRequest } from '../models/requests/whitelistMinterRequest';
 
 describe('Minters Service', () => {
