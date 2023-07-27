@@ -15,7 +15,12 @@ describe('CollectionsStatsService', () => {
     module = await Test.createTestingModule({
       providers: [
         CollectionsStatsService,
-        Logger,
+        {
+          provide: Logger,
+          useValue: {
+            error: jest.fn().mockImplementation(() => {}),
+          },
+        },
         {
           provide: RedisCacheService,
           useValue: {
