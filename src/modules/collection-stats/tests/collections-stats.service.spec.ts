@@ -1,52 +1,43 @@
 import { CollectionsStatsService } from '../collections-stats.service';
-import { Test } from '@nestjs/testing';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
-import * as winston from 'winston';
-import * as Transport from 'winston-transport';
+import { Test, TestingModule } from '@nestjs/testing';
 import { MxApiService } from 'src/common';
-import { CollectionStatsRepository } from 'src/db/collection-stats/collection-stats.repository';
-import { CollectionStatsRepositoryMock } from 'src/db/collection-stats/collection-stats.repository-mock';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
-import { MxApiServiceMock } from 'src/common/services/mx-communication/mx-api.service.mock';
+import { Logger } from '@nestjs/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
-describe.skip('CollectionsStatsService', () => {
+describe('CollectionsStatsService', () => {
   let service: CollectionsStatsService;
-  const MxApiServiceProvider = {
-    provide: MxApiService,
-    useClass: MxApiServiceMock,
-  };
+  let module: TestingModule;
 
-  const CollectionStatsRepositoryProvider = {
-    provide: CollectionStatsRepository,
-    useClass: CollectionStatsRepositoryMock,
-  };
-
-  const logTransports: Transport[] = [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        nestWinstonModuleUtilities.format.nestLike(),
-      ),
-    }),
-  ];
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [
-        MxApiServiceProvider,
-        CollectionStatsRepositoryProvider,
         CollectionsStatsService,
-      ],
-      imports: [
-        WinstonModule.forRoot({
-          transports: logTransports,
-        }),
+        Logger,
+        {
+          provide: RedisCacheService,
+          useValue: {
+            getOrSet: jest.fn(),
+          },
+        },
+        {
+          provide: MxApiService,
+          useValue: {
+            getNftsCountForCollection: jest.fn(),
+          },
+        },
+        {
+          provide: PersistenceService,
+          useValue: {
+            getOrSetCache: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
-    service = moduleRef.get<CollectionsStatsService>(CollectionsStatsService);
+    service = module.get<CollectionsStatsService>(CollectionsStatsService);
   });
 
   beforeEach(() => {
@@ -59,9 +50,33 @@ describe.skip('CollectionsStatsService', () => {
 
   describe('getItemsCount', () => {
     it('should return total nfts count', async () => {
-      const results = await service.getItemsCount('');
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => Promise.resolve({ key: 'identifier', value: '4' }));
 
-      expect(results).toStrictEqual(4);
+      const results = await service.getItemsCount('identifier');
+
+      expect(results).toStrictEqual({ key: 'identifier', value: '4' });
+    });
+
+    it('is called with expected arguments', async () => {
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      const stub = jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => Promise.resolve({ key: 'identifier', value: '4' }));
+
+      const results = await service.getItemsCount('identifier');
+      const expectedCacheKey = `${CacheInfo.CollectionAssetsCount.key}_identifier_undefined`;
+      expect(stub).toHaveBeenCalled();
+      expect(stub).toBeCalledWith(expectedCacheKey, expect.anything(), CacheInfo.CollectionAssetsCount.ttl);
+      expect(results).toMatchObject({ key: 'identifier', value: '4' });
+    });
+
+    it('when error return value 0', async () => {
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => {
+        throw new Error();
+      });
+
+      const results = await service.getItemsCount('identifier');
+      expect(results).toMatchObject({ key: 'identifier', value: '0' });
     });
   });
 
@@ -75,8 +90,44 @@ describe.skip('CollectionsStatsService', () => {
         saleAverage: '11111111100',
         volumeTraded: '211111111110',
       });
+
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() =>
+        Promise.resolve(
+          new CollectionStatsEntity({
+            activeAuctions: 2,
+            auctionsEnded: 4,
+            maxPrice: '1111111111111',
+            minPrice: '1000000000000',
+            saleAverage: '11111111100',
+            volumeTraded: '211111111110',
+          }),
+        ),
+      );
+
       const results = await service.getStats('test');
       expect(results).toMatchObject(expected);
+    });
+
+    it('it is called with expected arguments', async () => {
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      const stub = jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => Promise.resolve({ key: 'identifier', value: '4' }));
+
+      const results = await service.getStats('identifier');
+      const expectedCacheKey = `collection_stats_identifier__EGLD`;
+      expect(stub).toHaveBeenCalled();
+      expect(stub).toBeCalledWith(expectedCacheKey, expect.anything(), 5 * Constants.oneMinute());
+      expect(results).toMatchObject({ key: 'identifier', value: '4' });
+    });
+
+    it('when error return value default object', async () => {
+      const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
+      jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => {
+        throw new Error();
+      });
+
+      const results = await service.getStats('test');
+      expect(results).toMatchObject(new CollectionStatsEntity());
     });
   });
 });
