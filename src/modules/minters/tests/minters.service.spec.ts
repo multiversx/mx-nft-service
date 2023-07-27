@@ -16,7 +16,12 @@ describe('Minters Service', () => {
     module = await Test.createTestingModule({
       providers: [
         MintersService,
-        Logger,
+        {
+          provide: Logger,
+          useValue: {
+            error: jest.fn().mockImplementation(() => {}),
+          },
+        },
         {
           provide: MintersCachingService,
           useFactory: () => ({}),
@@ -37,33 +42,21 @@ describe('Minters Service', () => {
 
   describe('whitelistMinter', () => {
     it('throws error when input data not in correct format', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
       persistenceService.saveMinter = jest.fn(() => {
         throw new Error();
       });
-      await expect(
-        service.whitelistMinter(new WhitelistMinterRequest()),
-      ).rejects.toThrowError(UnableToLoadError);
+      await expect(service.whitelistMinter(new WhitelistMinterRequest())).rejects.toThrowError(UnableToLoadError);
     });
 
     it('when saves succed returns expected object', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
-      const cachingService = module.get<MintersCachingService>(
-        MintersCachingService,
-      );
-      persistenceService.saveMinter = jest
-        .fn()
-        .mockReturnValueOnce(
-          new MinterEntity({ address: 'address', name: 'name' }),
-        );
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      persistenceService.saveMinter = jest.fn().mockReturnValueOnce(new MinterEntity({ address: 'address', name: 'name' }));
 
       cachingService.invalidateMinters = jest.fn();
 
-      const result = await service.whitelistMinter(
-        new WhitelistMinterRequest(),
-      );
+      const result = await service.whitelistMinter(new WhitelistMinterRequest());
       const expectedResult = new Minter({ address: 'address', name: 'name' });
 
       expect(result).toMatchObject(expectedResult);
@@ -72,8 +65,7 @@ describe('Minters Service', () => {
 
   describe('getMinters', () => {
     it('when database layer throws error returns empty array', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
       persistenceService.getMinters = jest.fn(() => {
         throw new Error();
       });
@@ -82,11 +74,8 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns expected response', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
-      const cachingService = module.get<MintersCachingService>(
-        MintersCachingService,
-      );
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
       persistenceService.getMinters = jest
         .fn()
         .mockReturnValueOnce([
@@ -102,10 +91,7 @@ describe('Minters Service', () => {
         ]);
 
       const result = await service.getMinters();
-      const expectedResult = [
-        new Minter({ address: 'address', name: 'name' }),
-        new Minter({ address: 'address2', name: 'name2' }),
-      ];
+      const expectedResult = [new Minter({ address: 'address', name: 'name' }), new Minter({ address: 'address2', name: 'name2' })];
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -113,8 +99,7 @@ describe('Minters Service', () => {
 
   describe('getMintersAddresses', () => {
     it('when database layer throws error returns empty array', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
       persistenceService.getMinters = jest.fn(() => {
         throw new Error();
       });
@@ -123,11 +108,8 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns addresses', async () => {
-      const persistenceService =
-        module.get<PersistenceService>(PersistenceService);
-      const cachingService = module.get<MintersCachingService>(
-        MintersCachingService,
-      );
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
       persistenceService.getMinters = jest
         .fn()
         .mockReturnValueOnce([

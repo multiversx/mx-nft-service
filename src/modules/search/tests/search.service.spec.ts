@@ -19,7 +19,7 @@ describe('SearchService', () => {
         {
           provide: Logger,
           useValue: {
-            error: jest.fn(),
+            error: jest.fn().mockImplementation(() => {}),
           },
         },
         {
