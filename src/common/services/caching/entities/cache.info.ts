@@ -273,4 +273,29 @@ export class CacheInfo {
     key: 'search_tag',
     ttl: 5 * Constants.oneSecond(),
   };
+
+  static AccountStats: CacheInfo = {
+    key: 'account_stats',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
+  static AccountBidding: CacheInfo = {
+    key: 'account_bidding',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
+  static AccountCollected: CacheInfo = {
+    key: 'account_collected',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static AccountClaimableCount: CacheInfo = {
+    key: 'account_claimable_count',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static AccountLikesCount: CacheInfo = {
+    key: 'account_likes_count',
+    ttl: 5 * Constants.oneSecond(),
+  };
 }
