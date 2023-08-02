@@ -692,6 +692,14 @@ enum CustomFiltersEnum {
   Tickets
 }
 
+input DeployMinterArgs {
+  collectionCategory: String!
+  maxNftsPerTransaction: Int!
+  mintClaimAddress: String!
+  ownerAddress: String!
+  royaltiesClaimAddress: String!
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -931,6 +939,7 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
+  deployMinter(input: DeployMinterArgs!): Minter!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
