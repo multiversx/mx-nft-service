@@ -23,7 +23,7 @@ export class MintersMutationsResolver extends BaseResolver(Minter) {
     return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
   }
 
-  @Mutation(() => Minter)
+  @Mutation(() => TransactionNode)
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMinter(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployMinter(DeployMinterRequest.fromArgs(input));
