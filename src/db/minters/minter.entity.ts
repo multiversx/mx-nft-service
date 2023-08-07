@@ -7,6 +7,9 @@ export class MinterEntity extends BaseEntity {
   @Column({ length: 62 })
   address: string;
 
+  @Column({ length: 62 })
+  adminAddress: string;
+
   @Column({ length: 20 })
   name: string;
 
@@ -29,6 +32,7 @@ export class MinterEntity extends BaseEntity {
       description: args.description,
       royaltiesClaimAddress: args.royaltiesClaimAddress,
       mintClaimAddress: args.mintClaimAddress,
+      adminAddress: args.adminAddress,
       maxNftsPerTransaction: args.maxNftsPerTransaction,
     });
   }
