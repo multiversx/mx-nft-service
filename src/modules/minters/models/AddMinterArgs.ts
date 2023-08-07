@@ -22,6 +22,10 @@ export class WhitelistMinterArgs {
   @Field()
   mintClaimAddress: string;
 
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field()
+  adminAddress: string;
+
   @Field(() => Int)
   maxNftsPerTransaction: number;
 }

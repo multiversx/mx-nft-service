@@ -7,9 +7,16 @@ import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
 import { MintersCachingService } from './minters-caching.service';
 import { MintersDeployerAbiService } from './minters-deployer.abi.service';
+import { MintersQueriesResolver } from './minters-queries.resolver';
 
 @Module({
-  providers: [MintersMutationsResolver, MintersService, MintersCachingService, MintersDeployerAbiService],
+  providers: [
+    MintersMutationsResolver,
+    MintersQueriesResolver,
+    MintersService,
+    MintersCachingService,
+    MintersDeployerAbiService,
+  ],
   imports: [PubSubListenerModule, MxCommunicationModule, CommonModule, forwardRef(() => AuthModule)],
   exports: [MintersService, MintersCachingService],
 })

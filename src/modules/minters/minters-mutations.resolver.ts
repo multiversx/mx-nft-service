@@ -12,16 +12,17 @@ import { MintersDeployerAbiService } from './minters-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
 import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/userAuthResult';
+import { MintersResponse } from './models/MintersResponse';
 
-@Resolver(() => Minter)
-export class MintersMutationsResolver extends BaseResolver(Minter) {
+@Resolver(() => MintersResponse)
+export class MintersMutationsResolver extends BaseResolver(MintersResponse) {
   constructor(private minterService: MintersService, private minterDeployerService: MintersDeployerAbiService) {
     super();
   }
 
-  @Mutation(() => Minter)
+  @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async whitelistMinter(@Args('input') input: WhitelistMinterArgs): Promise<Minter> {
+  async whitelistMinter(@Args('input') input: WhitelistMinterArgs): Promise<Boolean> {
     return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
   }
 
