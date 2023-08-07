@@ -6,10 +6,12 @@ import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { MintersService } from './minters.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
-import { DeployMinterArgs } from './models/DeployMinterArgs';
-import { DeployMinterRequest } from './models/requests/DeployMinterRequest';
+import { DeployMinterArgs, UpgradeMinterArgs } from './models/DeployMinterArgs';
+import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { MintersDeployerAbiService } from './minters-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
+import { AuthUser } from '../auth/authUser';
+import { UserAuthResult } from '../auth/userAuthResult';
 
 @Resolver(() => Minter)
 export class MintersMutationsResolver extends BaseResolver(Minter) {
@@ -27,5 +29,23 @@ export class MintersMutationsResolver extends BaseResolver(Minter) {
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMinter(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployMinter(DeployMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async pauseMinter(
+    @Args('input') input: UpgradeMinterArgs,
+    @AuthUser() user: UserAuthResult,
+  ): Promise<TransactionNode> {
+    return await this.minterDeployerService.pauseNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async resumeMinter(
+    @Args('input') input: UpgradeMinterArgs,
+    @AuthUser() user: UserAuthResult,
+  ): Promise<TransactionNode> {
+    return await this.minterDeployerService.resumeNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
   }
 }
