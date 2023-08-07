@@ -22,3 +22,10 @@ export class DeployMinterArgs {
   @Field(() => Int)
   maxNftsPerTransaction: number;
 }
+
+@InputType()
+export class UpgradeMinterArgs {
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field()
+  minterAddress: string;
+}

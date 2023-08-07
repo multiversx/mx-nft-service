@@ -3,7 +3,7 @@ import { Address, AddressValue, BytesValue, U32Value } from '@multiversx/sdk-cor
 import { ContractLoader } from '@multiversx/sdk-nestjs';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
-import { DeployMinterRequest } from './models/requests/DeployMinterRequest';
+import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { mxConfig, gas } from 'src/config';
 
 @Injectable()
@@ -25,5 +25,29 @@ export class MintersDeployerAbiService {
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
       .toPlainObject(new Address(request.ownerAddress));
+  }
+
+  async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
+    const contract = await this.contract.getContract('erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam');
+
+    return contract.methodsExplicit
+      .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
+
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.deployMinter)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
+  }
+
+  async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
+    const contract = await this.contract.getContract('erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam');
+
+    return contract.methodsExplicit
+      .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
+
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.deployMinter)
+      .buildTransaction()
+      .toPlainObject(new Address(ownerAddress));
   }
 }

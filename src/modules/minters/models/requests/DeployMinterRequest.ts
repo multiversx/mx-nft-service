@@ -1,4 +1,4 @@
-import { DeployMinterArgs } from '../DeployMinterArgs';
+import { DeployMinterArgs, UpgradeMinterArgs } from '../DeployMinterArgs';
 
 export class DeployMinterRequest {
   collectionCategory: string;
@@ -17,6 +17,20 @@ export class DeployMinterRequest {
       mintClaimAddress: args.mintClaimAddress,
       maxNftsPerTransaction: args.maxNftsPerTransaction,
       ownerAddress: args.ownerAddress,
+    });
+  }
+}
+
+export class UpgradeMinterRequest {
+  minterAddress: string;
+
+  constructor(init?: Partial<UpgradeMinterRequest>) {
+    Object.assign(this, init);
+  }
+
+  static fromArgs(args: UpgradeMinterArgs) {
+    return new UpgradeMinterRequest({
+      minterAddress: args.minterAddress,
     });
   }
 }
