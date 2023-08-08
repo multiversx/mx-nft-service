@@ -74,14 +74,7 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns expected response', async () => {
-      const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cachingService = module.get<MintersCachingService>(MintersCachingService);
-      persistenceService.getMinters = jest
-        .fn()
-        .mockReturnValueOnce([
-          new MinterEntity({ address: 'address', name: 'name' }),
-          new MinterEntity({ address: 'address2', name: 'name2' }),
-        ]);
 
       cachingService.getMinters = jest
         .fn()
@@ -96,25 +89,53 @@ describe('Minters Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('when filters by address returns only one minter', async () => {
-      const persistenceService = module.get<PersistenceService>(PersistenceService);
+    it('when filters by minterAddress returns only one minter', async () => {
       const cachingService = module.get<MintersCachingService>(MintersCachingService);
-      persistenceService.getMinters = jest
-        .fn()
-        .mockReturnValueOnce([
-          new MinterEntity({ address: 'address', name: 'name' }),
-          new MinterEntity({ address: 'address2', name: 'name2' }),
-        ]);
 
       cachingService.getMinters = jest
         .fn()
         .mockReturnValueOnce([
-          new MinterEntity({ address: 'address', name: 'name' }),
-          new MinterEntity({ address: 'address2', name: 'name2' }),
+          new MinterEntity({ address: 'address', name: 'name', adminAddress: 'adminAddr' }),
+          new MinterEntity({ address: 'address2', name: 'name2', adminAddress: 'adminAddr2' }),
         ]);
 
       const result = await service.getMinters(new MinterFilters({ minterAddress: 'address' }));
-      const expectedResult = [new Minter({ address: 'address', name: 'name' })];
+      const expectedResult = [new Minter({ address: 'address', name: 'name', adminAddress: 'adminAddr' })];
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    it('when filters by minterAdminAddress returns only one minter', async () => {
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+
+      cachingService.getMinters = jest
+        .fn()
+        .mockReturnValueOnce([
+          new MinterEntity({ address: 'address', name: 'name', adminAddress: 'adminAddr' }),
+          new MinterEntity({ address: 'address2', name: 'name2', adminAddress: 'adminAddr2' }),
+        ]);
+
+      const result = await service.getMinters(new MinterFilters({ minterAdminAddress: 'adminAddr' }));
+      const expectedResult = [new Minter({ address: 'address', name: 'name', adminAddress: 'adminAddr' })];
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    it('when filters by minterAdminAddress returns all minters minter for that owner', async () => {
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+
+      cachingService.getMinters = jest
+        .fn()
+        .mockReturnValueOnce([
+          new MinterEntity({ address: 'address', name: 'name', adminAddress: 'adminAddr' }),
+          new MinterEntity({ address: 'address2', name: 'name2', adminAddress: 'adminAddr' }),
+        ]);
+
+      const result = await service.getMinters(new MinterFilters({ minterAdminAddress: 'adminAddr' }));
+      const expectedResult = [
+        new Minter({ address: 'address', name: 'name', adminAddress: 'adminAddr' }),
+        new Minter({ address: 'address2', name: 'name2', adminAddress: 'adminAddr' }),
+      ];
 
       expect(result).toMatchObject(expectedResult);
     });
@@ -131,14 +152,7 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns addresses', async () => {
-      const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cachingService = module.get<MintersCachingService>(MintersCachingService);
-      persistenceService.getMinters = jest
-        .fn()
-        .mockReturnValueOnce([
-          new MinterEntity({ address: 'address', name: 'name' }),
-          new MinterEntity({ address: 'address2', name: 'name2' }),
-        ]);
 
       cachingService.getMinters = jest
         .fn()

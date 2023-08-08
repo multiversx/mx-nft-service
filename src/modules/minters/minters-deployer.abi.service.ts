@@ -20,7 +20,6 @@ export class MintersDeployerAbiService {
         new AddressValue(new Address(request.mintClaimAddress)),
         new U32Value(request.maxNftsPerTransaction),
       ])
-
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
@@ -32,7 +31,6 @@ export class MintersDeployerAbiService {
 
     return contract.methodsExplicit
       .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
-
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
@@ -44,7 +42,6 @@ export class MintersDeployerAbiService {
 
     return contract.methodsExplicit
       .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
-
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
