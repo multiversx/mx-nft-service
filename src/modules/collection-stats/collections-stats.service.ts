@@ -5,7 +5,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetsQuery } from '../assets';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
@@ -23,86 +23,41 @@ export class CollectionsStatsService {
     paymentToken: string = mxConfig.egld,
   ): Promise<CollectionStatsEntity> {
     try {
-      const cacheKey = this.getStatsCacheKey(
+      const cacheKey = this.getStatsCacheKey(identifier, marketplaceKey, paymentToken);
+      const getCollectionStats = () => this.persistenceService.getCollectionStats(identifier, marketplaceKey, paymentToken);
+      return this.redisCacheService.getOrSet(cacheKey, getCollectionStats, CacheInfo.CollectionStats.ttl);
+    } catch (err) {
+      this.logger.error('An error occurred while getting stats for a collection', {
+        path: 'CollectionsStatsService.getStats',
         identifier,
         marketplaceKey,
-        paymentToken,
-      );
-      const getCollectionStats = () =>
-        this.persistenceService.getCollectionStats(
-          identifier,
-          marketplaceKey,
-          paymentToken,
-        );
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        getCollectionStats,
-        5 * Constants.oneMinute(),
-      );
-    } catch (err) {
-      this.logger.error(
-        'An error occurred while getting stats for a collection',
-        {
-          path: 'CollectionsStatsService.getStats',
-          identifier,
-          marketplaceKey,
-          exception: err?.message,
-        },
-      );
+        exception: err?.message,
+      });
       return new CollectionStatsEntity();
     }
   }
 
-  private getStatsCacheKey(
-    identifier: string,
-    marketplaceKey: string = undefined,
-    paymentToken: string = mxConfig.egld,
-  ) {
-    return generateCacheKeyFromParams(
-      'collection_stats',
-      identifier,
-      marketplaceKey ?? '',
-      paymentToken ?? '',
-    );
-  }
-
-  async getItemsCount(
-    identifier: string,
-  ): Promise<{ key: string; value: string }> {
+  async getItemsCount(identifier: string): Promise<{ key: string; value: string }> {
     try {
       const cacheKey = this.getCollectionNftsCacheKey(identifier);
-      const getAccountStats = () =>
-        this.apiService.getNftsCountForCollection(
-          this.getQueryForCollection(identifier),
-          identifier,
-        );
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        getAccountStats,
-        Constants.oneDay(),
-      );
+      const getAccountStats = () => this.apiService.getNftsCountForCollection(this.getQueryForCollection(identifier), identifier);
+      return this.redisCacheService.getOrSet(cacheKey, getAccountStats, CacheInfo.CollectionAssetsCount.ttl);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting total nfts count for collection',
-        {
-          path: 'CollectionsStatsService.getItemsCount',
-          identifier,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting total nfts count for collection', {
+        path: 'CollectionsStatsService.getItemsCount',
+        identifier,
+        exception: err?.message,
+      });
       return { key: identifier, value: '0' };
     }
   }
 
-  private getCollectionNftsCacheKey(
-    key: string,
-    marketplaceKey: string = undefined,
-  ) {
-    return generateCacheKeyFromParams(
-      CacheInfo.CollectionAssetsCount,
-      key,
-      marketplaceKey,
-    );
+  private getStatsCacheKey(identifier: string, marketplaceKey: string = undefined, paymentToken: string = mxConfig.egld) {
+    return generateCacheKeyFromParams(CacheInfo.CollectionStats.key, identifier, marketplaceKey ?? '', paymentToken ?? '');
+  }
+
+  private getCollectionNftsCacheKey(key: string, marketplaceKey: string = undefined) {
+    return generateCacheKeyFromParams(CacheInfo.CollectionAssetsCount.key, key, marketplaceKey);
   }
 
   private getQueryForCollection(identifier: string): string {
@@ -111,8 +66,6 @@ export class CollectionsStatsService {
 
   public async invalidateStats(identifier: string) {
     await this.redisCacheService.delete(this.getStatsCacheKey(identifier));
-    await this.redisCacheService.delete(
-      this.getCollectionNftsCacheKey(identifier),
-    );
+    await this.redisCacheService.delete(this.getCollectionNftsCacheKey(identifier));
   }
 }

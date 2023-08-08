@@ -2,13 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService, MxIdentityService } from 'src/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
-import {
-  SearchNftCollectionResponse,
-  SearchItemResponse,
-} from './models/SearchItemResponse';
+import { SearchNftCollectionResponse, SearchItemResponse } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 import { NftTypeEnum } from '../assets/models';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()
 export class SearchService {
@@ -25,20 +23,13 @@ export class SearchService {
   async getHerotagForAddress(address: string): Promise<any> {
     try {
       const cacheKey = this.getAddressHerotagCacheKey(address);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getAddressHerotag(address),
-        5 * Constants.oneMinute(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getAddressHerotag(address), 5 * Constants.oneMinute());
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting herotags for search term',
-        {
-          path: this.getHerotagForAddress.name,
-          address,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting herotags for search term', {
+        path: this.getHerotagForAddress.name,
+        address,
+        exception: err?.message,
+      });
       return [];
     }
   }
@@ -46,27 +37,18 @@ export class SearchService {
   async getHerotags(searchTerm: string): Promise<any> {
     try {
       const cacheKey = this.getAccountsCacheKey(searchTerm);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getMappedHerotags(searchTerm),
-        5 * Constants.oneSecond(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getMappedHerotags(searchTerm), CacheInfo.SearchAccount.ttl);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting herotags for search term',
-        {
-          path: this.getHerotags.name,
-          searchTerm,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting herotags for search term', {
+        path: this.getHerotags.name,
+        searchTerm,
+        exception: err?.message,
+      });
       return [];
     }
   }
 
-  private async getAddressHerotag(
-    address: string,
-  ): Promise<SearchItemResponse> {
+  private async getAddressHerotag(address: string): Promise<SearchItemResponse> {
     const herotagsResponse = await this.accountsService.getProfile(address);
     return new SearchItemResponse({
       identifier: address,
@@ -74,17 +56,10 @@ export class SearchService {
     });
   }
 
-  private async getMappedHerotags(
-    searchTerm: string,
-    limit: number = 5,
-  ): Promise<SearchItemResponse[]> {
-    const herotagsResponse = await this.accountsService.getAcountsByHerotag(
-      searchTerm,
-    );
+  private async getMappedHerotags(searchTerm: string, limit: number = 5): Promise<SearchItemResponse[]> {
+    const herotagsResponse = await this.accountsService.getAcountsByHerotag(searchTerm);
     const herotags = herotagsResponse?.herotags.slice(0, limit);
-    const addresses = herotags.map((hero) =>
-      this.accountsService.getAddressByHerotag(hero),
-    );
+    const addresses = herotags.map((hero) => this.accountsService.getAddressByHerotag(hero));
     const response = await Promise.all(addresses);
     return response?.map(
       (r) =>
@@ -96,7 +71,7 @@ export class SearchService {
   }
 
   private getAccountsCacheKey(searchTerm: string) {
-    return generateCacheKeyFromParams('search_account', searchTerm);
+    return generateCacheKeyFromParams(CacheInfo.SearchAccount.key, searchTerm);
   }
 
   private getAddressHerotagCacheKey(address: string) {
@@ -106,35 +81,24 @@ export class SearchService {
   async getCollections(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getCollectionCacheKey(searchTerm);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getMappedCollections(searchTerm),
-        5 * Constants.oneSecond(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getMappedCollections(searchTerm), 5 * Constants.oneSecond());
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting collections for search term',
-        {
-          path: this.getCollections.name,
-          searchTerm,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting collections for search term', {
+        path: this.getCollections.name,
+        searchTerm,
+        exception: err?.message,
+      });
       return [];
     }
   }
 
-  private async getMappedCollections(
-    searchTerm: string,
-  ): Promise<SearchItemResponse[]> {
-    const [collections] =
-      await this.collectionsGetterService.getOrSetFullCollections();
+  private async getMappedCollections(searchTerm: string): Promise<SearchItemResponse[]> {
+    const [collections] = await this.collectionsGetterService.getOrSetFullCollections();
     let allResults = collections
       .filter(
         (x) =>
           x.verified &&
-          (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-            x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
+          (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
       )
       .slice(0, 5);
 
@@ -143,8 +107,7 @@ export class SearchService {
         .filter(
           (x) =>
             !x.verified &&
-            (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-              x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
+            (x.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) || x.collection?.toLowerCase()?.includes(searchTerm.toLowerCase())),
         )
         .slice(0, 5 - allResults.length);
       allResults.push(...nonVerifiedResults);
@@ -163,38 +126,26 @@ export class SearchService {
   }
 
   private getCollectionCacheKey(searchTerm: string) {
-    return generateCacheKeyFromParams('search_collection', searchTerm);
+    return generateCacheKeyFromParams(CacheInfo.SearchCollection.key, searchTerm);
   }
 
   async getNfts(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getNftsCacheKey(searchTerm);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getMappedNfts(searchTerm),
-        5 * Constants.oneSecond(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getMappedNfts(searchTerm), 5 * Constants.oneSecond());
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting tags for search term',
-        {
-          path: 'SearchService.getTags',
-          searchTerm,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting tags for search term', {
+        path: 'SearchService.getTags',
+        searchTerm,
+        exception: err?.message,
+      });
       return [];
     }
   }
 
-  private async getMappedNfts(
-    searchTerm: string,
-  ): Promise<SearchItemResponse[]> {
+  private async getMappedNfts(searchTerm: string): Promise<SearchItemResponse[]> {
     if (searchTerm.match(NFT_IDENTIFIER_RGX)) {
-      const response = await this.apiService.getNftByIdentifierForQuery(
-        searchTerm,
-        `fields=${this.fieldsRequested}`,
-      );
+      const response = await this.apiService.getNftByIdentifierForQuery(searchTerm, `fields=${this.fieldsRequested}`);
       if (!NftTypeEnum[response?.type]) {
         return [];
       }
@@ -206,11 +157,7 @@ export class SearchService {
         }),
       ];
     }
-    const response = await this.apiService.getNftsBySearch(
-      searchTerm,
-      this.searchSize,
-      this.fieldsRequested,
-    );
+    const response = await this.apiService.getNftsBySearch(searchTerm, this.searchSize, this.fieldsRequested);
     return response?.map(
       (c) =>
         new SearchNftCollectionResponse({
@@ -222,38 +169,29 @@ export class SearchService {
   }
 
   private getNftsCacheKey(searchTerm: string) {
-    return generateCacheKeyFromParams('search_nfts', searchTerm);
+    return generateCacheKeyFromParams(CacheInfo.SearchNfts.key, searchTerm);
   }
 
   async getTags(searchTerm: string): Promise<SearchItemResponse[]> {
     try {
       const cacheKey = this.getTagsCacheKey(searchTerm);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getMappedTags(searchTerm),
-        5 * Constants.oneSecond(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getMappedTags(searchTerm), CacheInfo.SearchTag.ttl);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting tags for search term',
-        {
-          path: 'SearchService.getTags',
-          searchTerm,
-          exception: err?.message,
-        },
-      );
+      this.logger.error('An error occurred while getting tags for search term', {
+        path: 'SearchService.getTags',
+        searchTerm,
+        exception: err?.message,
+      });
       return [];
     }
   }
 
-  private async getMappedTags(
-    searchTerm: string,
-  ): Promise<SearchItemResponse[]> {
+  private async getMappedTags(searchTerm: string): Promise<SearchItemResponse[]> {
     const response = await this.apiService.getTagsBySearch(searchTerm);
     return response?.map((c) => new SearchItemResponse({ identifier: c.tag }));
   }
 
   private getTagsCacheKey(searchTerm: string) {
-    return generateCacheKeyFromParams('search_tag', searchTerm);
+    return generateCacheKeyFromParams(CacheInfo.SearchTag.key, searchTerm);
   }
 }

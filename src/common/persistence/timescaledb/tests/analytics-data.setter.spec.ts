@@ -36,7 +36,12 @@ describe('Analytics Data Setter Service', () => {
     const module = await Test.createTestingModule({
       providers: [
         AnalyticsDataSetterService,
-        Logger,
+        {
+          provide: Logger,
+          useValue: {
+            error: jest.fn().mockImplementation(() => {}),
+          },
+        },
         {
           provide: getRepositoryToken(XNftsAnalyticsEntity, 'timescaledb'),
           useFactory: () => ({
@@ -46,12 +51,8 @@ describe('Analytics Data Setter Service', () => {
       ],
     }).compile();
 
-    service = module.get<AnalyticsDataSetterService>(
-      AnalyticsDataSetterService,
-    );
-    nftAnalyticsRepository = module.get(
-      getRepositoryToken(XNftsAnalyticsEntity, 'timescaledb'),
-    );
+    service = module.get<AnalyticsDataSetterService>(AnalyticsDataSetterService);
+    nftAnalyticsRepository = module.get(getRepositoryToken(XNftsAnalyticsEntity, 'timescaledb'));
   });
 
   it('should be defined', () => {
@@ -69,9 +70,7 @@ describe('Analytics Data Setter Service', () => {
         execute,
       }));
 
-      await expect(service.ingest(invalidInputData)).rejects.toThrowError(
-        TypeError,
-      );
+      await expect(service.ingest(invalidInputData)).rejects.toThrowError(TypeError);
     });
 
     it('throws error when execute fails and ingestlast true', async () => {
@@ -85,9 +84,7 @@ describe('Analytics Data Setter Service', () => {
         orUpdate,
         execute,
       }));
-      await expect(
-        service.ingest({ ...validInputData, ingestLast: true }),
-      ).rejects.toThrowError(Error);
+      await expect(service.ingest({ ...validInputData, ingestLast: true })).rejects.toThrowError(Error);
     });
   });
 
@@ -117,9 +114,7 @@ describe('Analytics Data Setter Service', () => {
         execute,
       }));
 
-      await expect(
-        service.ingestSingleEvent(invalidInputData),
-      ).rejects.toThrowError(TypeError);
+      await expect(service.ingestSingleEvent(invalidInputData)).rejects.toThrowError(TypeError);
     });
 
     it('throws error when execute fails', async () => {
@@ -134,9 +129,7 @@ describe('Analytics Data Setter Service', () => {
         execute,
       }));
 
-      await expect(
-        service.ingestSingleEvent({ ...validInputData }),
-      ).rejects.toThrowError(Error);
+      await expect(service.ingestSingleEvent({ ...validInputData })).rejects.toThrowError(Error);
     });
 
     it('does not throw error when valid input', async () => {
@@ -149,9 +142,7 @@ describe('Analytics Data Setter Service', () => {
         execute,
       }));
 
-      await expect(
-        service.ingestSingleEvent(validInputData),
-      ).resolves.not.toThrow();
+      await expect(service.ingestSingleEvent(validInputData)).resolves.not.toThrow();
     });
   });
 });
