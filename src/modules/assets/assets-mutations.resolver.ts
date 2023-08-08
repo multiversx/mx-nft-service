@@ -1,14 +1,7 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsTransactionService } from '.';
-import {
-  Asset,
-  CreateNftArgs,
-  TransferNftArgs,
-  HandleQuantityArgs,
-  AddLikeArgs,
-  RemoveLikeArgs,
-} from './models';
+import { Asset, CreateNftArgs, TransferNftArgs, HandleQuantityArgs, AddLikeArgs, RemoveLikeArgs } from './models';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
@@ -36,14 +29,24 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtOrNativeAuthGuard)
+  // @UseGuards(GqlAuthGuard)
   async createNft(
-    @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-    @AuthUser() user: UserAuthResult,
+    @Args('input') input: CreateNftArgs,
+    // @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
+    // @User() user: any,
   ): Promise<TransactionNode> {
-    const request = CreateNftRequest.fromArgs(input, file);
-    return await this.assetsTransactionService.createNft(user.address, request);
+    // const fileData = await file;
+    // if (
+    //   !Object.values(MediaMimeTypeEnum).includes(
+    //     fileData.mimetype as MediaMimeTypeEnum,
+    //   )
+    // )
+    //   throw new Error('unsuported_media_type');
+    // input.file = fileData;
+    return await this.assetsTransactionService.createNft(
+      'erd178ah2z70a442g9hrt39w2ld67lav62jq72gzp3r9tu5egz4hr4cswr5unp',
+      CreateNftRequest.fromArgs(input),
+    );
   }
 
   @Mutation(() => TransactionNode)
@@ -54,23 +57,16 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateNftWithMultipleFilesRequest.fromArgs(input, files);
-    return await this.assetsTransactionService.createNftWithMultipleFiles(
-      user.address,
-      request,
-    );
+    return await this.assetsTransactionService.createNftWithMultipleFiles(user.address, request);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard)
-  async verifyContent(
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-  ): Promise<Boolean> {
+  async verifyContent(@Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload): Promise<Boolean> {
     const fileData = await file;
 
     const contentStatus = (
-      await this.contentValidation
-        .checkContentType(fileData)
-        .checkContentSensitivity(fileData)
+      await this.contentValidation.checkContentType(fileData).checkContentSensitivity(fileData)
     ).getStatus();
     if (contentStatus) {
       return true;
@@ -86,10 +82,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTAddQuantity');
-    return await this.assetsTransactionService.updateQuantity(
-      user.address,
-      request,
-    );
+    return await this.assetsTransactionService.updateQuantity(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -100,10 +93,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = UpdateQuantityRequest.fromArgs(input, 'ESDTNFTBurn');
-    return await this.assetsTransactionService.burnQuantity(
-      user.address,
-      request,
-    );
+    return await this.assetsTransactionService.burnQuantity(user.address, request);
   }
 
   @Mutation(() => TransactionNode)
@@ -113,10 +103,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = TransferNftRequest.fromArgs(input);
-    return await this.assetsTransactionService.transferNft(
-      user.address,
-      request,
-    );
+    return await this.assetsTransactionService.transferNft(user.address, request);
   }
 
   @Mutation(() => Boolean)
@@ -126,11 +113,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
-    return this.assetsLikesService.addLike(
-      input.identifier,
-      user.address,
-      authorizationHeader,
-    );
+    return this.assetsLikesService.addLike(input.identifier, user.address, authorizationHeader);
   }
 
   @Mutation(() => Boolean)
@@ -140,10 +123,6 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @AuthUser() user: UserAuthResult,
     @AuthorizationHeader() authorizationHeader: string,
   ): Promise<boolean> {
-    return this.assetsLikesService.removeLike(
-      input.identifier,
-      user.address,
-      authorizationHeader,
-    );
+    return this.assetsLikesService.removeLike(input.identifier, user.address, authorizationHeader);
   }
 }

@@ -1,18 +1,8 @@
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  TokenPayment,
-  U64Value,
-} from '@multiversx/sdk-core';
+import { Address, AddressValue, BytesValue, ContractFunction, TokenPayment, U64Value } from '@multiversx/sdk-core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MxApiService, getSmartContract } from 'src/common';
 import { mxConfig, gas } from 'src/config';
-import {
-  getCollectionAndNonceFromIdentifier,
-  timestampToEpochAndRound,
-} from 'src/utils/helpers';
+import { getCollectionAndNonceFromIdentifier, timestampToEpochAndRound } from 'src/utils/helpers';
 import '../../utils/extensions';
 import { nominateVal } from '../../utils/formatters';
 import { FileContent } from '../ipfs/file.content';
@@ -42,32 +32,20 @@ export class AssetsTransactionService {
     private redisCacheService: RedisCacheService,
   ) {}
 
-  async updateQuantity(
-    ownerAddress: string,
-    request: UpdateQuantityRequest,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      request.identifier,
-    );
+  async updateQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
     const contract = getSmartContract(request.updateQuantityRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction(request.functionName),
       value: TokenPayment.egldFromAmount(0),
-      args: [
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(request.quantity)),
-      ],
+      args: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
       gasLimit: gas.addBurnQuantity,
       chainID: mxConfig.chainID,
     });
     return transaction.toPlainObject(new Address(ownerAddress));
   }
 
-  async burnQuantity(
-    ownerAddress: string,
-    request: UpdateQuantityRequest,
-  ): Promise<TransactionNode> {
+  async burnQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const [nft, mxStats] = await Promise.all([
       this.mxApiService.getNftByIdentifier(request.identifier),
       this.getOrSetAproximateMxStats(),
@@ -112,22 +90,37 @@ export class AssetsTransactionService {
     return this.getCreateNftTransaction(ownerAddress, request, filesToIpfs);
   }
 
-  async createNft(
-    ownerAddress: string,
-    request: CreateNftRequest,
-  ): Promise<TransactionNode> {
-    const fileData = await this.uploadFileToPinata(request.file);
+  async createNft(ownerAddress: string, args: CreateNftRequest): Promise<TransactionNode> {
+    const attributes = `tags:${args.attributes.tags};metadata:QmaFsaKcjXJJYVray4XHxg6aJQoshGgS16HtzsaN3gxVGH`;
 
-    return this.getCreateNftTransaction(ownerAddress, request, [fileData]);
+    const contract = getSmartContract(ownerAddress);
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTCreate'),
+      value: TokenPayment.egldFromAmount(0),
+      args: [
+        BytesValue.fromUTF8(args.collection),
+        new U64Value(new BigNumber(args.quantity)),
+        BytesValue.fromUTF8(args.name),
+        BytesValue.fromHex(nominateVal(parseFloat(args.royalties))),
+        BytesValue.fromUTF8('Qmdx3v5eSJMQh8xvwt6GiZtnTDNFQcZHaYSF1nVSKXhnbZ'),
+        BytesValue.fromUTF8(attributes),
+        BytesValue.fromUTF8('https://ipfs.io/ipfs/Qmdx3v5eSJMQh8xvwt6GiZtnTDNFQcZHaYSF1nVSKXhnbZ'),
+      ],
+      gasLimit: gas.nftCreate,
+      chainID: mxConfig.chainID,
+    });
+
+    return transaction.toPlainObject(new Address(ownerAddress));
   }
 
-  async transferNft(
-    ownerAddress: string,
-    transferRequest: TransferNftRequest,
-  ): Promise<TransactionNode> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      transferRequest.identifier,
-    );
+  // async createNft(ownerAddress: string, request: CreateNftRequest): Promise<TransactionNode> {
+  //   const fileData = await this.uploadFileToPinata(request.file);
+
+  //   return this.getCreateNftTransaction(ownerAddress, request, [fileData]);
+  // }
+
+  async transferNft(ownerAddress: string, transferRequest: TransferNftRequest): Promise<TransactionNode> {
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(transferRequest.identifier);
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
@@ -157,9 +150,7 @@ export class AssetsTransactionService {
     request: CreateNftRequest | CreateNftWithMultipleFilesRequest,
     filesData: UploadToIpfsResult[],
   ) {
-    const assetMetadata = await this.uploadFileMetadata(
-      request.attributes.description,
-    );
+    const assetMetadata = await this.uploadFileMetadata(request.attributes.description);
     const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
@@ -218,11 +209,7 @@ export class AssetsTransactionService {
     try {
       const cacheKey = this.getApproximateMxStatsCacheKey();
       const getMxStats = () => this.mxApiService.getMxStats();
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        getMxStats,
-        Constants.oneDay(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, getMxStats, Constants.oneDay());
     } catch (error) {
       this.logger.error('An error occurred while getting mx stats', {
         path: `${AssetsTransactionService.name}.${this.getOrSetAproximateMxStats.name}`,

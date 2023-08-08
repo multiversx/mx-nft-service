@@ -929,7 +929,7 @@ type Mutation {
   clearReportCollection(input: ClearReportCollectionInput!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
-  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
+  createNft(input: CreateNftArgs!): TransactionNode!
   createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
