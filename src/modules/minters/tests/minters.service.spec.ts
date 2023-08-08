@@ -58,7 +58,6 @@ describe('Minters Service', () => {
       cachingService.invalidateMinters = jest.fn();
 
       const result = await service.whitelistMinter(new WhitelistMinterRequest());
-      const expectedResult = new Minter({ address: 'address', name: 'name' });
 
       expect(result).toBeTruthy();
     });
