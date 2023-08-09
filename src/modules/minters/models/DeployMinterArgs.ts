@@ -4,9 +4,6 @@ import { ADDRESS_ERROR, ADDRESS_RGX } from 'src/utils/constants';
 
 @InputType()
 export class DeployMinterArgs {
-  @Field()
-  collectionCategory: string;
-
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
   royaltiesClaimAddress: string;

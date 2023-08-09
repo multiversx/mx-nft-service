@@ -693,7 +693,6 @@ enum CustomFiltersEnum {
 }
 
 input DeployMinterArgs {
-  collectionCategory: String!
   maxNftsPerTransaction: Int!
   mintClaimAddress: String!
   ownerAddress: String!
@@ -912,6 +911,7 @@ type MintPrice {
 
 type Minter {
   address: ID!
+  adminAddress: ID!
   description: String
   name: String!
 }
@@ -923,7 +923,7 @@ type MinterEdge {
 
 input MinterFilters {
   minterAddress: String!
-  minterOwnerAddress: String!
+  minterAdminAddress: String!
 }
 
 type MinterPageInfo {
