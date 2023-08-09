@@ -11,7 +11,7 @@ export class MintersDeployerAbiService {
   private contract = new ContractLoader(MarketplaceUtils.deployerMintersAbiPath, MarketplaceUtils.deployerAbiInterface);
 
   async deployMinter(request: DeployMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract('erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam');
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .createNftMinter([
@@ -27,7 +27,7 @@ export class MintersDeployerAbiService {
   }
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract('erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam');
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
@@ -38,7 +38,7 @@ export class MintersDeployerAbiService {
   }
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract('erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam');
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])

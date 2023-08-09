@@ -143,6 +143,9 @@
     ],
     "moduleDirectories": [
       "node_modules"
+    ],
+    "setupFiles": [
+      "<rootDir>/.jest/setEnvVars.js"
     ]
   }
 }
