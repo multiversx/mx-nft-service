@@ -20,10 +20,6 @@
   "constructor": {
     "inputs": [
       {
-        "name": "collections_category",
-        "type": "bytes"
-      },
-      {
         "name": "royalties_claim_address",
         "type": "Address"
       },
@@ -55,16 +51,6 @@
         }
       ],
       "outputs": []
-    },
-    {
-      "name": "getCollectionsCategory",
-      "mutability": "readonly",
-      "inputs": [],
-      "outputs": [
-        {
-          "type": "bytes"
-        }
-      ]
     },
     {
       "name": "getMaxNftsPerTransaction",
