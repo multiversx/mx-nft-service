@@ -1,14 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { Address, AddressValue, BytesValue, U32Value } from '@multiversx/sdk-core/out';
+import { Address, AddressValue, Interaction, ResultsParser, U32Value, VariadicType } from '@multiversx/sdk-core/out';
 import { ContractLoader } from '@multiversx/sdk-nestjs';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { mxConfig, gas } from 'src/config';
+import { MxProxyService } from 'src/common';
 
 @Injectable()
 export class MintersDeployerAbiService {
+  private readonly parser: ResultsParser;
   private contract = new ContractLoader(MarketplaceUtils.deployerMintersAbiPath, MarketplaceUtils.deployerAbiInterface);
+
+  constructor(private mxProxyService: MxProxyService) {
+    this.parser = new ResultsParser();
+  }
 
   async deployMinter(request: DeployMinterRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
@@ -45,5 +51,20 @@ export class MintersDeployerAbiService {
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
       .toPlainObject(new Address(ownerAddress));
+  }
+
+  public async getMintersForAddress(address: string): Promise<string[]> {
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    let getDataQuery = <Interaction>contract.methodsExplicit.getUserNftMinterContracts([new AddressValue(new Address(address))]);
+
+    const response = await this.getFirstQueryResult(getDataQuery);
+    const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();
+    return contractAddresses.map((x) => x.valueOf().bech32());
+  }
+
+  private async getFirstQueryResult(interaction: Interaction) {
+    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
+    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
+    return result;
   }
 }

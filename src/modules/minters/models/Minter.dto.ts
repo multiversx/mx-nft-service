@@ -9,12 +9,6 @@ export class Minter {
   @Field(() => ID)
   adminAddress!: string;
 
-  @Field(() => String)
-  name: string;
-
-  @Field(() => String, { nullable: true })
-  description: string;
-
   constructor(init?: Partial<Minter>) {
     Object.assign(this, init);
   }
@@ -23,8 +17,6 @@ export class Minter {
     return minter
       ? new Minter({
           address: minter.address,
-          name: minter.name,
-          description: minter.description,
           adminAddress: minter.adminAddress,
         })
       : null;

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MintersDeployerAbiService } from '../minters-deployer.abi.service';
 import { DeployMinterRequest, UpgradeMinterRequest } from '../models/requests/DeployMinterRequest';
+import { MxProxyService } from 'src/common';
 
 describe('Minters Deployer Abi Service', () => {
   let service: MintersDeployerAbiService;
@@ -8,7 +9,13 @@ describe('Minters Deployer Abi Service', () => {
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      providers: [MintersDeployerAbiService],
+      providers: [
+        MintersDeployerAbiService,
+        {
+          provide: MxProxyService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
