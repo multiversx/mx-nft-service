@@ -7,6 +7,7 @@ export class WhitelistMinterRequest {
   royaltiesClaimAddress: string;
   mintClaimAddress: string;
   maxNftsPerTransaction: number;
+  adminAddress: string;
   constructor(init?: Partial<WhitelistMinterRequest>) {
     Object.assign(this, init);
   }
@@ -18,6 +19,7 @@ export class WhitelistMinterRequest {
       description: args.description,
       royaltiesClaimAddress: args.royaltiesClaimAddress,
       mintClaimAddress: args.mintClaimAddress,
+      adminAddress: args.adminAddress,
       maxNftsPerTransaction: args.maxNftsPerTransaction,
     });
   }

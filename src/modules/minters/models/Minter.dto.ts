@@ -6,6 +6,9 @@ export class Minter {
   @Field(() => ID)
   address!: string;
 
+  @Field(() => ID)
+  adminAddress!: string;
+
   @Field(() => String)
   name: string;
 
@@ -22,6 +25,7 @@ export class Minter {
           address: minter.address,
           name: minter.name,
           description: minter.description,
+          adminAddress: minter.adminAddress,
         })
       : null;
   }

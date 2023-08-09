@@ -3,16 +3,9 @@ import { Matches } from 'class-validator';
 import { ADDRESS_ERROR, ADDRESS_RGX } from 'src/utils/constants';
 
 @InputType()
-export class WhitelistMinterArgs {
-  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+export class DeployMinterArgs {
   @Field()
-  address: string;
-
-  @Field()
-  name: string;
-
-  @Field()
-  description: string;
+  collectionCategory: string;
 
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
@@ -20,12 +13,19 @@ export class WhitelistMinterArgs {
 
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
-  mintClaimAddress: string;
+  ownerAddress: string;
 
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
-  adminAddress: string;
+  mintClaimAddress: string;
 
   @Field(() => Int)
   maxNftsPerTransaction: number;
+}
+
+@InputType()
+export class UpgradeMinterArgs {
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field()
+  minterAddress: string;
 }

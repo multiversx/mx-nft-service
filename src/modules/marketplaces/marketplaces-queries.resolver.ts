@@ -29,18 +29,14 @@ export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const marketplaces = await this.marketplaceService.getMarketplaces(
-      limit,
-      offset,
-      filters,
-    );
+    const marketplaces = await this.marketplaceService.getMarketplaces(limit, offset, filters);
     // todo: investigate
     pagination.after = undefined;
     return PageResponse.mapResponse<Marketplace>(
       marketplaces?.items || [],
       pagination,
       marketplaces?.count || 0,
-      0,
+      offset,
       limit,
     );
   }
@@ -55,9 +51,7 @@ export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
   @ResolveField(() => Boolean)
   async isPaused(@Parent() contractInfo: Marketplace) {
     const { address, type } = contractInfo;
-    return address && type === MarketplaceTypeEnum.Internal
-      ? await this.nftAbiService.getIsPaused(address)
-      : null;
+    return address && type === MarketplaceTypeEnum.Internal ? await this.nftAbiService.getIsPaused(address) : null;
   }
 
   @ResolveField(() => [String])

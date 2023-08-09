@@ -6,20 +6,41 @@ import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { MintersService } from './minters.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
+import { DeployMinterArgs, UpgradeMinterArgs } from './models/DeployMinterArgs';
+import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
+import { MintersDeployerAbiService } from './minters-deployer.abi.service';
+import { TransactionNode } from '../common/transaction';
+import { AuthUser } from '../auth/authUser';
+import { UserAuthResult } from '../auth/userAuthResult';
+import { MintersResponse } from './models/MintersResponse';
 
-@Resolver(() => Minter)
-export class MintersMutationsResolver extends BaseResolver(Minter) {
-  constructor(private minterService: MintersService) {
+@Resolver(() => MintersResponse)
+export class MintersMutationsResolver extends BaseResolver(MintersResponse) {
+  constructor(private minterService: MintersService, private minterDeployerService: MintersDeployerAbiService) {
     super();
   }
 
-  @Mutation(() => Minter)
+  @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async whitelistMinter(
-    @Args('input') input: WhitelistMinterArgs,
-  ): Promise<Minter> {
-    return await this.minterService.whitelistMinter(
-      WhitelistMinterRequest.fromArgs(input),
-    );
+  async whitelistMinter(@Args('input') input: WhitelistMinterArgs): Promise<Boolean> {
+    return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async deployMinter(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
+    return await this.minterDeployerService.deployMinter(DeployMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async pauseMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
+    return await this.minterDeployerService.pauseNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async resumeMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
+    return await this.minterDeployerService.resumeNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
   }
 }

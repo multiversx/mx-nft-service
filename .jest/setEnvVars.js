@@ -1,0 +1,1 @@
+process.env.DEPLOYER_ADDRESS = 'erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam';
