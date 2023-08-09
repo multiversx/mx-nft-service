@@ -27,26 +27,20 @@ export class MintersMutationsResolver extends BaseResolver(MintersResponse) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMinter(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployMinter(DeployMinterRequest.fromArgs(input));
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async pauseMinter(
-    @Args('input') input: UpgradeMinterArgs,
-    @AuthUser() user: UserAuthResult,
-  ): Promise<TransactionNode> {
+  async pauseMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
     return await this.minterDeployerService.pauseNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
   }
 
   @Mutation(() => TransactionNode)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async resumeMinter(
-    @Args('input') input: UpgradeMinterArgs,
-    @AuthUser() user: UserAuthResult,
-  ): Promise<TransactionNode> {
+  async resumeMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
     return await this.minterDeployerService.resumeNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
   }
 }
