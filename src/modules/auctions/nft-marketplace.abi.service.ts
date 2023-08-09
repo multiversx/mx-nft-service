@@ -44,6 +44,7 @@ export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
 
   private contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath, MarketplaceUtils.abiInterface);
+  private contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath, MarketplaceUtils.abiInterface);
 
   constructor(
     private mxProxyService: MxProxyService,
@@ -76,8 +77,9 @@ export class NftMarketplaceAbiService {
       args: this.getCreateAuctionArgs(args, marketplace.address),
       gasLimit: gas.startAuction,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    return createAuctionTx.toPlainObject();
   }
 
   async bid(ownerAddress: string, request: BidRequest): Promise<TransactionNode> {
@@ -98,8 +100,9 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.withdraw,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return withdraw.toPlainObject(new Address(ownerAddress));
+    return withdraw.toPlainObject();
   }
 
   async createOffer(ownerAddress: string, request: CreateOfferRequest): Promise<TransactionNode> {
@@ -119,13 +122,15 @@ export class NftMarketplaceAbiService {
     if (request.paymentToken !== mxConfig.egld) {
       return intermediateInteraction
         .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(request.paymentToken, new BigNumber(request.paymentAmount)))
+        .withSender(new Address(ownerAddress))
         .buildTransaction()
-        .toPlainObject(new Address(ownerAddress));
+        .toPlainObject();
     }
     return intermediateInteraction
       .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
+      .withSender(new Address(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async getGenericOfferInteraction(
@@ -153,8 +158,9 @@ export class NftMarketplaceAbiService {
       .withValue(TokenPayment.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(new Address(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   async acceptOffer(ownerAddress: string, request: AcceptOfferRequest): Promise<TransactionNode> {
@@ -200,8 +206,9 @@ export class NftMarketplaceAbiService {
       )
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(new Address(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async acceptOfferAndWithdrawAuction(ownerAddress: string, offerId: number, auctionId: number): Promise<TransactionNode> {
@@ -226,8 +233,9 @@ export class NftMarketplaceAbiService {
       .withValue(TokenPayment.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(new Address(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   async endAuction(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
@@ -239,9 +247,10 @@ export class NftMarketplaceAbiService {
       args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
       gasLimit: gas.endAuction,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
 
-    return endAuction.toPlainObject(new Address(ownerAddress));
+    return endAuction.toPlainObject();
   }
 
   async buySft(ownerAddress: string, request: BuySftRequest): Promise<TransactionNode> {
@@ -416,8 +425,9 @@ export class NftMarketplaceAbiService {
         args: [new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)],
         gasLimit: gas.bid,
         chainID: mxConfig.chainID,
+        caller: new Address(ownerAddress),
       })
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async bidWithEsdt(
@@ -433,8 +443,9 @@ export class NftMarketplaceAbiService {
       .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.bid)
+      .withSender(new Address(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async buySftWithEgld(
@@ -450,8 +461,9 @@ export class NftMarketplaceAbiService {
         args: this.getBuySftArguments(request, marketplaceAuctionId),
         gasLimit: gas.buySft,
         chainID: mxConfig.chainID,
+        caller: new Address(ownerAddress),
       })
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async buySftWithEsdt(
@@ -466,6 +478,6 @@ export class NftMarketplaceAbiService {
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buySft)
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 }

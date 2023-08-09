@@ -1,22 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  ContractFunction,
-  TokenPayment,
-  TypedValue,
-} from '@multiversx/sdk-core';
+import { Address, AddressValue, BytesValue, ContractFunction, TokenPayment, TypedValue } from '@multiversx/sdk-core';
 import { mxConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { getSmartContract } from 'src/common';
 import { TransactionNode } from '../common/transaction';
-import {
-  IssueCollectionRequest,
-  StopNftCreateRequest,
-  TransferNftCreateRoleRequest,
-  SetNftRolesRequest,
-} from './models/requests';
+import { IssueCollectionRequest, StopNftCreateRequest, TransferNftCreateRoleRequest, SetNftRolesRequest } from './models/requests';
 
 @Injectable()
 export class CollectionsTransactionsService {
@@ -29,14 +17,12 @@ export class CollectionsTransactionsService {
       args: transactionArgs,
       gasLimit: gas.issueToken,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return transaction.toPlainObject();
   }
 
-  async stopNFTCreate(
-    ownerAddress: string,
-    request: StopNftCreateRequest,
-  ): Promise<TransactionNode> {
+  async stopNFTCreate(ownerAddress: string, request: StopNftCreateRequest): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
@@ -44,14 +30,12 @@ export class CollectionsTransactionsService {
       args: [BytesValue.fromUTF8(request.collection)],
       gasLimit: gas.stopNFTCreate,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return transaction.toPlainObject();
   }
 
-  async transferNFTCreateRole(
-    ownerAddress: string,
-    request: TransferNftCreateRoleRequest,
-  ): Promise<TransactionNode> {
+  async transferNFTCreateRole(ownerAddress: string, request: TransferNftCreateRoleRequest): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
     let transactionArgs = this.getTransferCreateRoleArgs(request);
     const transaction = smartContract.call({
@@ -60,14 +44,12 @@ export class CollectionsTransactionsService {
       args: transactionArgs,
       gasLimit: gas.transferNFTCreateRole,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return transaction.toPlainObject();
   }
 
-  async setNftRoles(
-    ownerAddress: string,
-    args: SetNftRolesRequest,
-  ): Promise<TransactionNode> {
+  async setNftRoles(ownerAddress: string, args: SetNftRolesRequest): Promise<TransactionNode> {
     let transactionArgs = this.getSetRolesArgs(args);
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction('setSpecialRole'),
@@ -75,15 +57,13 @@ export class CollectionsTransactionsService {
       args: transactionArgs,
       gasLimit: gas.setRoles,
       chainID: mxConfig.chainID,
+      caller: new Address(ownerAddress),
     });
-    return transaction.toPlainObject(new Address(ownerAddress));
+    return transaction.toPlainObject();
   }
 
   private getIssueTokenArguments(args: IssueCollectionRequest) {
-    let transactionArgs = [
-      BytesValue.fromUTF8(args.tokenName),
-      BytesValue.fromUTF8(args.tokenTicker),
-    ];
+    let transactionArgs = [BytesValue.fromUTF8(args.tokenName), BytesValue.fromUTF8(args.tokenTicker)];
     if (args.canFreeze) {
       transactionArgs.push(BytesValue.fromUTF8('canFreeze'));
       transactionArgs.push(BytesValue.fromUTF8(args.canFreeze.toString()));
@@ -98,18 +78,13 @@ export class CollectionsTransactionsService {
     }
     if (args.canTransferNFTCreateRole) {
       transactionArgs.push(BytesValue.fromUTF8('canTransferNFTCreateRole'));
-      transactionArgs.push(
-        BytesValue.fromUTF8(args.canTransferNFTCreateRole.toString()),
-      );
+      transactionArgs.push(BytesValue.fromUTF8(args.canTransferNFTCreateRole.toString()));
     }
     return transactionArgs;
   }
 
   private getSetRolesArgs(args: SetNftRolesArgs) {
-    let transactionArgs = [
-      BytesValue.fromUTF8(args.collection),
-      new AddressValue(new Address(args.addressToTransfer)),
-    ];
+    let transactionArgs = [BytesValue.fromUTF8(args.collection), new AddressValue(new Address(args.addressToTransfer))];
     args.roles.forEach((role) => {
       transactionArgs.push(BytesValue.fromUTF8(role));
     });
@@ -124,7 +99,5 @@ export class CollectionsTransactionsService {
     return transactionArgs;
   }
 
-  private readonly esdtSmartContract = getSmartContract(
-    mxConfig.esdtNftAddress,
-  );
+  private readonly esdtSmartContract = getSmartContract(mxConfig.esdtNftAddress);
 }
