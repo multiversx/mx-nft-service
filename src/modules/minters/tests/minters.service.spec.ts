@@ -121,7 +121,7 @@ describe('Minters Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('when filters by minterAdminAddress returns all minters minter for that owner', async () => {
+    it('when filters by minterAdminAddress returns all minters for that owner', async () => {
       const cachingService = module.get<MintersCachingService>(MintersCachingService);
 
       cachingService.getMinters = jest
