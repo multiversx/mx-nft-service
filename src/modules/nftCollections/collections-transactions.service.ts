@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Address, AddressValue, BytesValue, ContractFunction, TokenPayment, TypedValue } from '@multiversx/sdk-core';
+import { Address, AddressValue, BytesValue, ContractFunction, TokenTransfer, TypedValue } from '@multiversx/sdk-core';
 import { mxConfig, gas } from 'src/config';
 import { SetNftRolesArgs } from './models/SetNftRolesArgs';
 import { getSmartContract } from 'src/common';
@@ -13,53 +13,50 @@ export class CollectionsTransactionsService {
 
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction(request.collectionType),
-      value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
+      value: TokenTransfer.egldFromBigInteger(mxConfig.issueNftCost),
       args: transactionArgs,
       gasLimit: gas.issueToken,
       chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
+      caller: Address.fromString(ownerAddress),
     });
     return transaction.toPlainObject();
   }
 
   async stopNFTCreate(ownerAddress: string, request: StopNftCreateRequest): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
-    const transaction = smartContract.call({
-      func: new ContractFunction('stopNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [BytesValue.fromUTF8(request.collection)],
-      gasLimit: gas.stopNFTCreate,
-      chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
-    });
-    return transaction.toPlainObject();
+
+    return smartContract.methodsExplicit
+      .stopNFTCreate([BytesValue.fromUTF8(request.collection)])
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromAmount(0))
+      .withGasLimit(gas.stopNFTCreate)
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async transferNFTCreateRole(ownerAddress: string, request: TransferNftCreateRoleRequest): Promise<TransactionNode> {
     const smartContract = getSmartContract(request.ownerAddress);
-    let transactionArgs = this.getTransferCreateRoleArgs(request);
-    const transaction = smartContract.call({
-      func: new ContractFunction('transferNFTCreateRole'),
-      value: TokenPayment.egldFromAmount(0),
-      args: transactionArgs,
-      gasLimit: gas.transferNFTCreateRole,
-      chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
-    });
-    return transaction.toPlainObject();
+
+    return smartContract.methodsExplicit
+      .transferNFTCreateRole(this.getTransferCreateRoleArgs(request))
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromAmount(0))
+      .withGasLimit(gas.transferNFTCreateRole)
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async setNftRoles(ownerAddress: string, args: SetNftRolesRequest): Promise<TransactionNode> {
-    let transactionArgs = this.getSetRolesArgs(args);
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction('setSpecialRole'),
-      value: TokenPayment.egldFromAmount(0),
-      args: transactionArgs,
-      gasLimit: gas.setRoles,
-      chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
-    });
-    return transaction.toPlainObject();
+    return this.esdtSmartContract.methodsExplicit
+      .setSpecialRole(this.getSetRolesArgs(args))
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromAmount(0))
+      .withGasLimit(gas.setRoles)
+      .buildTransaction()
+      .toPlainObject();
   }
 
   private getIssueTokenArguments(args: IssueCollectionRequest) {

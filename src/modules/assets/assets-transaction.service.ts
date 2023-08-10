@@ -1,4 +1,4 @@
-import { Address, AddressValue, BytesValue, ContractFunction, TokenPayment, U64Value } from '@multiversx/sdk-core';
+import { Address, AddressValue, BytesValue, ContractFunction, TokenTransfer, U64Value } from '@multiversx/sdk-core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MxApiService, getSmartContract } from 'src/common';
 import { mxConfig, gas } from 'src/config';
@@ -30,13 +30,14 @@ export class AssetsTransactionService {
   async updateQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
     const contract = getSmartContract(request.updateQuantityRoleAddress);
+
     const transaction = contract.call({
       func: new ContractFunction(request.functionName),
-      value: TokenPayment.egldFromAmount(0),
+      value: TokenTransfer.egldFromAmount(0),
       args: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
       gasLimit: gas.addBurnQuantity,
       chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
+      caller: Address.fromString(ownerAddress),
     });
     return transaction.toPlainObject();
   }
@@ -89,23 +90,23 @@ export class AssetsTransactionService {
   async transferNft(ownerAddress: string, transferRequest: TransferNftRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(transferRequest.identifier);
     const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [
+    const transaction = contract.methodsExplicit
+      .ESDTNFTTransfer([
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
         new U64Value(new BigNumber(transferRequest.quantity)),
         new AddressValue(new Address(transferRequest.destinationAddress)),
-      ],
-      gasLimit: gas.nftTransfer,
-      chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
-    });
-    let response = transaction.toPlainObject();
-    response.gasLimit = Math.max(mxConfig.transferMinCost + response.data.length * mxConfig.pricePerByte, gas.nftTransfer);
+      ])
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromAmount(0))
+      .withGasLimit(gas.nftTransfer)
+      .buildTransaction()
+      .toPlainObject();
+
+    transaction.gasLimit = Math.max(mxConfig.transferMinCost + transaction.data.length * mxConfig.pricePerByte, gas.nftTransfer);
     return {
-      ...response,
+      ...transaction,
       chainID: mxConfig.chainID,
     };
   }
@@ -117,16 +118,16 @@ export class AssetsTransactionService {
   ) {
     const assetMetadata = await this.uploadFileMetadata(request.attributes.description);
     const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
+
     const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateNftsArgs(request, filesData, attributes),
-      gasLimit: gas.nftCreate,
-      chainID: mxConfig.chainID,
-      caller: new Address(ownerAddress),
-    });
-    let response = transaction.toPlainObject();
+    const response = contract.methodsExplicit
+      .ESDTNFTCreate(this.getCreateNftsArgs(request, filesData, attributes))
+      .withValue(TokenTransfer.egldFromAmount(0))
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.nftCreate)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
 
     return {
       ...response,

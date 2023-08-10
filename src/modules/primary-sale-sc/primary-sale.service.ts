@@ -9,7 +9,7 @@ import {
   Interaction,
   ResultsParser,
   TokenIdentifierValue,
-  TokenPayment,
+  TokenTransfer,
   U32Value,
 } from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
@@ -258,10 +258,10 @@ export class PrimarySaleService {
 
     return contract.methodsExplicit
       .buy_tickets([BytesValue.fromUTF8(request.collectionIdentifier), new U32Value(new BigNumber(request.ticketsNumber))])
-      .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(process.env.HOLORIDE_PAYMENT_TOKEN, new BigNumber(request.price)))
+      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(process.env.HOLORIDE_PAYMENT_TOKEN, new BigNumber(request.price)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buyTickets)
-      .withSender(new Address(ownerAddress))
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
       .toPlainObject();
   }
@@ -270,10 +270,10 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
     return contract.methodsExplicit
       .claim([new TokenIdentifierValue(request.collectionIdentifier)])
-      .withValue(TokenPayment.egldFromAmount(0))
+      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
-      .withSender(new Address(ownerAddress))
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
       .toPlainObject();
   }
