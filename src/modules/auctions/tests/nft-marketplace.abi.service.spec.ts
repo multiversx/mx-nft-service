@@ -109,7 +109,7 @@ describe('Nft Marketplace Abi Service', () => {
       version: 1,
     };
 
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
       const result = await service.createAuction(ownerAddress, createAuctionRequestWithEgld);
@@ -132,7 +132,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
     });
 
-    it('with accepted payment identifier returns build transaction with right arguments', async () => {
+    it('with accepted payment identifier returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
 
@@ -184,7 +184,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
     });
 
-    it('bid with egld payment token returns build transaction with right arguments', async () => {
+    it('bid with egld payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
@@ -209,7 +209,7 @@ describe('Nft Marketplace Abi Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('bid with ESDT payment token returns build transaction with right arguments', async () => {
+    it('bid with ESDT payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
@@ -247,7 +247,7 @@ describe('Nft Marketplace Abi Service', () => {
   });
 
   describe('withdraw', () => {
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
@@ -301,7 +301,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
     });
 
-    it('with EGLD payment token returns build transaction with right arguments', async () => {
+    it('with EGLD payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
@@ -326,7 +326,7 @@ describe('Nft Marketplace Abi Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('with ESDT payment token returns build transaction with right arguments', async () => {
+    it('with ESDT payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
@@ -374,7 +374,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('No marketplace available for this collection'));
     });
 
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
 
@@ -454,7 +454,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('Not enough balance to accept this offer!'));
     });
 
-    it('without active auction returns build transaction with right arguments', async () => {
+    it('without active auction returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
 
@@ -541,7 +541,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('No offer/auction available'));
     });
 
-    it('with active auction returns build transaction with right arguments', async () => {
+    it('with active auction returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
@@ -570,7 +570,7 @@ describe('Nft Marketplace Abi Service', () => {
   });
 
   describe('endAuction', () => {
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
@@ -617,7 +617,7 @@ describe('Nft Marketplace Abi Service', () => {
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
     });
 
-    it('with EGLD payment token returns build transaction with right arguments', async () => {
+    it('with EGLD payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
@@ -643,7 +643,7 @@ describe('Nft Marketplace Abi Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('with ESDT payment token returns build transaction with right arguments', async () => {
+    it('with ESDT payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
       marketplaceService.getMarketplaceAddressByKey = jest.fn().mockReturnValueOnce(marketplace.address);
 
