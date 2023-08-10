@@ -30,7 +30,6 @@ export class AssetsTransactionService {
   async updateQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
     const contract = getSmartContract(request.updateQuantityRoleAddress);
-
     const transaction = contract.call({
       func: new ContractFunction(request.functionName),
       value: TokenTransfer.egldFromAmount(0),
@@ -90,23 +89,23 @@ export class AssetsTransactionService {
   async transferNft(ownerAddress: string, transferRequest: TransferNftRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(transferRequest.identifier);
     const contract = getSmartContract(ownerAddress);
-    const transaction = contract.methodsExplicit
-      .ESDTNFTTransfer([
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTTransfer'),
+      value: TokenTransfer.egldFromAmount(0),
+      args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
         new U64Value(new BigNumber(transferRequest.quantity)),
         new AddressValue(new Address(transferRequest.destinationAddress)),
-      ])
-      .withSender(Address.fromString(ownerAddress))
-      .withChainID(mxConfig.chainId)
-      .withValue(TokenTransfer.egldFromAmount(0))
-      .withGasLimit(gas.nftTransfer)
-      .buildTransaction()
-      .toPlainObject();
-
-    transaction.gasLimit = Math.max(mxConfig.transferMinCost + transaction.data.length * mxConfig.pricePerByte, gas.nftTransfer);
+      ],
+      gasLimit: gas.nftTransfer,
+      chainID: mxConfig.chainID,
+      caller: Address.fromString(ownerAddress),
+    });
+    let response = transaction.toPlainObject();
+    response.gasLimit = Math.max(mxConfig.transferMinCost + response.data.length * mxConfig.pricePerByte, gas.nftTransfer);
     return {
-      ...transaction,
+      ...response,
       chainID: mxConfig.chainID,
     };
   }
@@ -118,16 +117,16 @@ export class AssetsTransactionService {
   ) {
     const assetMetadata = await this.uploadFileMetadata(request.attributes.description);
     const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
-
     const contract = getSmartContract(ownerAddress);
-    const response = contract.methodsExplicit
-      .ESDTNFTCreate(this.getCreateNftsArgs(request, filesData, attributes))
-      .withValue(TokenTransfer.egldFromAmount(0))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.nftCreate)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const transaction = contract.call({
+      func: new ContractFunction('ESDTNFTCreate'),
+      value: TokenTransfer.egldFromAmount(0),
+      args: this.getCreateNftsArgs(request, filesData, attributes),
+      gasLimit: gas.nftCreate,
+      chainID: mxConfig.chainID,
+      caller: Address.fromString(ownerAddress),
+    });
+    let response = transaction.toPlainObject();
 
     return {
       ...response,
