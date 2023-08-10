@@ -20,7 +20,7 @@ describe('Collections Transactions Service', () => {
   });
 
   describe('issueToken', () => {
-    it('returns build transaction for issue non fungile with right arguments', async () => {
+    it('returns built transaction for issue non fungible with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
         data: 'aXNzdWVOb25GdW5naWJsZUA0ZTYxNmQ2NTczQDRlNDE0ZDQ1QDYzNjE2ZTQ2NzI2NTY1N2E2NUA3NDcyNzU2NUA2MzYxNmU1MDYxNzU3MzY1QDc0NzI3NTY1QDYzNjE2ZTU0NzI2MTZlNzM2NjY1NzI0ZTQ2NTQ0MzcyNjU2MTc0NjU1MjZmNmM2NUA3NDcyNzU2NQ==',
@@ -49,7 +49,7 @@ describe('Collections Transactions Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
 
-    it('returns build transaction for issue semi fungile with right arguments', async () => {
+    it('returns built transaction for issue semi fungible with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
         data: 'aXNzdWVTZW1pRnVuZ2libGVANGU2MTZkNjU3M0A0ZTQxNGQ0NUA2MzYxNmU0NjcyNjU2NTdhNjVANzQ3Mjc1NjVANjM2MTZlNTA2MTc1NzM2NUA3NDcyNzU2NUA2MzYxNmU1NDcyNjE2ZTczNjY2NTcyNGU0NjU0NDM3MjY1NjE3NDY1NTI2ZjZjNjVANzQ3Mjc1NjU=',
@@ -80,7 +80,7 @@ describe('Collections Transactions Service', () => {
   });
 
   describe('stopNFTCreate', () => {
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
         data: 'c3RvcE5GVENyZWF0ZUA2MzZmNmM2YzY1NjM3NDY5NmY2ZQ==',
@@ -107,7 +107,7 @@ describe('Collections Transactions Service', () => {
   });
 
   describe('transferNFTCreateRole', () => {
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
         data: 'dHJhbnNmZXJORlRDcmVhdGVSb2xlQDYzNmY2YzZjNjU2Mzc0Njk2ZjZlQGY5ZjRlNWMzN2I4Yjg2Mjg5ZTgyMDY5OTA1OTBjNjYxODRhZWM2NzY5NjYyOTQyYzFiYjZkZTRkOWFhYWQwMmI=',
@@ -135,7 +135,7 @@ describe('Collections Transactions Service', () => {
   });
 
   describe('setNftRoles', () => {
-    it('returns build transaction with right arguments', async () => {
+    it('returns built transaction with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
         data: 'c2V0U3BlY2lhbFJvbGVANjM2ZjZjNmM2NTYzNzQ2OTZmNmVAZjlmNGU1YzM3YjhiODYyODllODIwNjk5MDU5MGM2NjE4NGFlYzY3Njk2NjI5NDJjMWJiNmRlNGQ5YWFhZDAyYkA1NDY1NzM3NA==',
