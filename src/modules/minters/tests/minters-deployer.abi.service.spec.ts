@@ -22,7 +22,6 @@ describe('Minters Deployer Abi Service', () => {
     it('returns build transaction with right arguments', async () => {
       const result = await service.deployMinter(
         new DeployMinterRequest({
-          collectionCategory: 'test',
           maxNftsPerTransaction: 4,
           mintClaimAddress: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
           royaltiesClaimAddress: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
@@ -32,7 +31,7 @@ describe('Minters Deployer Abi Service', () => {
 
       const expectedResult = {
         chainID: 'T',
-        data: 'Y3JlYXRlTmZ0TWludGVyQDc0NjU3Mzc0QDZlMjI0MTE4ZDkwNjhhZTYyNjg3OGExY2ZiZWJjYjZhOTVhNDcxNWRiODZkMWI1MWUwNmEwNDIyNmNmMzBmZDZANmUyMjQxMThkOTA2OGFlNjI2ODc4YTFjZmJlYmNiNmE5NWE0NzE1ZGI4NmQxYjUxZTA2YTA0MjI2Y2YzMGZkNkAwNA==',
+        data: 'Y3JlYXRlTmZ0TWludGVyQDZlMjI0MTE4ZDkwNjhhZTYyNjg3OGExY2ZiZWJjYjZhOTVhNDcxNWRiODZkMWI1MWUwNmEwNDIyNmNmMzBmZDZANmUyMjQxMThkOTA2OGFlNjI2ODc4YTFjZmJlYmNiNmE5NWE0NzE1ZGI4NmQxYjUxZTA2YTA0MjI2Y2YzMGZkNkAwNA==',
         gasLimit: 70000000,
         gasPrice: 1000000000,
         nonce: 0,

@@ -15,7 +15,6 @@ export class MintersDeployerAbiService {
 
     return contract.methodsExplicit
       .createNftMinter([
-        BytesValue.fromUTF8(request.collectionCategory),
         new AddressValue(new Address(request.royaltiesClaimAddress)),
         new AddressValue(new Address(request.mintClaimAddress)),
         new U32Value(request.maxNftsPerTransaction),
