@@ -4,12 +4,10 @@ import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
 import BigNumber from 'bignumber.js';
 import {
   Address,
-  AddressValue,
   BigUIntValue,
   BooleanType,
   BooleanValue,
   BytesValue,
-  ContractFunction,
   Interaction,
   OptionalValue,
   TokenIdentifierValue,
@@ -17,9 +15,9 @@ import {
   U64Type,
   U64Value,
   BigUIntType,
-  TokenPayment,
   ResultsParser,
   SmartContract,
+  TokenTransfer,
 } from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
@@ -29,7 +27,6 @@ import { TransactionNode } from '../common/transaction';
 import { BidRequest, BuySftRequest, CreateAuctionRequest } from './models/requests';
 import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { AuctionsGetterService } from './auctions-getter.service';
-import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { MarketplaceUtils } from './marketplaceUtils';
 import { Marketplace } from '../marketplaces/models';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
@@ -38,46 +35,45 @@ import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { ContractLoader } from './contractLoader';
 
 @Injectable()
 export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
-
-  private contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath, MarketplaceUtils.abiInterface);
+  private contractLoader = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
 
   constructor(
-    private mxProxyService: MxProxyService,
-    private apiService: MxApiService,
-    private auctionsService: AuctionsGetterService,
-    private offersService: OffersService,
+    private readonly mxProxyService: MxProxyService,
+    private readonly apiService: MxApiService,
+    private readonly auctionsService: AuctionsGetterService,
+    private readonly offersService: OffersService,
     private readonly logger: Logger,
-    private redisCacheService: RedisCacheService,
-    private marketplaceService: MarketplacesService,
+    private readonly redisCacheService: RedisCacheService,
+    private readonly marketplaceService: MarketplacesService,
   ) {
     this.parser = new ResultsParser();
   }
 
   async createAuction(ownerAddress: string, args: CreateAuctionRequest): Promise<TransactionNode> {
-    const contract = getSmartContract(ownerAddress);
-    const { collection } = getCollectionAndNonceFromIdentifier(args.identifier);
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(args.identifier);
     const marketplace = await this.marketplaceService.getMarketplaceByCollection(collection);
 
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
+    const contract = await this.contractLoader.getContract(marketplace.address);
     if (marketplace.acceptedPaymentIdentifiers && !marketplace.acceptedPaymentIdentifiers.includes(args.paymentToken)) {
       throw new BadRequestError('Unaccepted payment token');
     }
-
-    let createAuctionTx = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      value: TokenPayment.egldFromAmount(0),
-      args: this.getCreateAuctionArgs(args, marketplace.address),
-      gasLimit: gas.startAuction,
-      chainID: mxConfig.chainID,
-    });
-    return createAuctionTx.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .auctionToken(this.getCreateAuctionArgs(args))
+      .withSingleESDTNFTTransfer(TokenTransfer.metaEsdtFromBigInteger(collection, parseInt(nonce, 16), new BigNumber(args.quantity)))
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.startAuction)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async bid(ownerAddress: string, request: BidRequest): Promise<TransactionNode> {
@@ -92,14 +88,13 @@ export class NftMarketplaceAbiService {
   async withdraw(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
     const { contract, auction } = await this.configureTransactionData(auctionId);
 
-    let withdraw = contract.call({
-      func: new ContractFunction('withdraw'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
-      gasLimit: gas.withdraw,
-      chainID: mxConfig.chainID,
-    });
-    return withdraw.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .withdraw([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.withdraw)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async createOffer(ownerAddress: string, request: CreateOfferRequest): Promise<TransactionNode> {
@@ -113,19 +108,21 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('Unaccepted payment token');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     const intermediateInteraction = await this.getGenericOfferInteraction(contract, collection, nonce, request);
 
     if (request.paymentToken !== mxConfig.egld) {
       return intermediateInteraction
-        .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(request.paymentToken, new BigNumber(request.paymentAmount)))
+        .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentToken, new BigNumber(request.paymentAmount)))
+        .withSender(Address.fromString(ownerAddress))
         .buildTransaction()
-        .toPlainObject(new Address(ownerAddress));
+        .toPlainObject();
     }
     return intermediateInteraction
-      .withValue(TokenPayment.egldFromBigInteger(request.paymentAmount))
+      .withValue(TokenTransfer.egldFromBigInteger(request.paymentAmount))
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async getGenericOfferInteraction(
@@ -147,14 +144,15 @@ export class NftMarketplaceAbiService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
-    const contract = await this.contract.getContract(marketplace.address);
+
+    const contract = await this.contractLoader.getContract(marketplace.address);
     return contract.methodsExplicit
       .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withValue(TokenPayment.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   async acceptOffer(ownerAddress: string, request: AcceptOfferRequest): Promise<TransactionNode> {
@@ -186,22 +184,22 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('Not enough balance to accept this offer!');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(asset.identifier);
     return contract.methodsExplicit
       .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
       .withSingleESDTNFTTransfer(
-        TokenPayment.metaEsdtFromBigInteger(
+        TokenTransfer.metaEsdtFromBigInteger(
           collection,
           parseInt(nonce, 16),
           asset.type === NftTypeEnum.SemiFungibleESDT ? new BigNumber(offer.boughtTokensNo) : new BigNumber(1),
         ),
-        Address.fromString(ownerAddress),
       )
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async acceptOfferAndWithdrawAuction(ownerAddress: string, offerId: number, auctionId: number): Promise<TransactionNode> {
@@ -217,31 +215,29 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     return contract.methodsExplicit
       .withdrawAuctionAndAcceptOffer([
         new U64Value(new BigNumber(auction.marketplaceAuctionId)),
         new U64Value(new BigNumber(offer.marketplaceOfferId)),
       ])
-      .withValue(TokenPayment.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   async endAuction(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
     const { contract, auction } = await this.configureTransactionData(auctionId);
 
-    let endAuction = contract.call({
-      func: new ContractFunction('endAuction'),
-      value: TokenPayment.egldFromAmount(0),
-      args: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
-      gasLimit: gas.endAuction,
-      chainID: mxConfig.chainID,
-    });
-
-    return endAuction.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .endAuction([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.endAuction)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async buySft(ownerAddress: string, request: BuySftRequest): Promise<TransactionNode> {
@@ -256,10 +252,10 @@ export class NftMarketplaceAbiService {
   async getAuctionQuery(auctionId: number, marketplace: Marketplace): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
     if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
-      this.contract = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath, MarketplaceUtils.abiInterface);
-      scContract = await this.contract.getContract(marketplace.address);
+      this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
+      scContract = await this.contractLoader.getContract(marketplace.address);
     } else {
-      const contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath, MarketplaceUtils.abiInterface);
+      const contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
       scContract = await contract.getContract(marketplace.address);
     }
     let getDataQuery = <Interaction>scContract.methodsExplicit.getFullAuctionData([new U64Value(new BigNumber(auctionId))]);
@@ -275,8 +271,9 @@ export class NftMarketplaceAbiService {
     if (!MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
       return;
     }
-    this.contract = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath, MarketplaceUtils.abiInterface);
-    scContract = await this.contract.getContract(marketplace.address);
+
+    this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
+    scContract = await this.contractLoader.getContract(marketplace.address);
 
     let getDataQuery = <Interaction>scContract.methodsExplicit.getMinMaxBid([new U64Value(new BigNumber(auctionId))]);
 
@@ -317,12 +314,12 @@ export class NftMarketplaceAbiService {
     const auction = await this.auctionsService.getAuctionById(auctionId);
     const marketplaceAddress = await this.marketplaceService.getMarketplaceAddressByKey(auction.marketplaceKey);
 
-    const contract = await this.contract.getContract(marketplaceAddress);
+    const contract = await this.contractLoader.getContract(marketplaceAddress);
     return { contract, auction };
   }
 
   private async getCutPercentageMap(contractAddress: string): Promise<string> {
-    const contract = await this.contract.getContract(contractAddress);
+    const contract = await this.contractLoader.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.getMarketplaceCutPercentage();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf().toFixed();
@@ -350,7 +347,7 @@ export class NftMarketplaceAbiService {
   }
 
   private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
-    const contract = await this.contract.getContract(contractAddress);
+    const contract = await this.contractLoader.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf();
@@ -366,14 +363,8 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private getCreateAuctionArgs(args: CreateAuctionRequest, address: string): TypedValue[] {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(args.identifier);
+  private getCreateAuctionArgs(args: CreateAuctionRequest): TypedValue[] {
     let returnArgs: TypedValue[] = [
-      BytesValue.fromUTF8(collection),
-      BytesValue.fromHex(nonce),
-      new U64Value(new BigNumber(args.quantity)),
-      new AddressValue(new Address(address)),
-      BytesValue.fromUTF8('auctionToken'),
       new BigUIntValue(new BigNumber(args.minBid)),
       new BigUIntValue(new BigNumber(args.maxBid || 0)),
       new U64Value(new BigNumber(args.deadline)),
@@ -408,16 +399,14 @@ export class NftMarketplaceAbiService {
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
-
-    return contract
-      .call({
-        func: new ContractFunction('bid'),
-        value: TokenPayment.egldFromBigInteger(request.price),
-        args: [new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)],
-        gasLimit: gas.bid,
-        chainID: mxConfig.chainID,
-      })
-      .toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .bid([new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)])
+      .withValue(TokenTransfer.egldFromBigInteger(request.price))
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.bid)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
   }
 
   private async bidWithEsdt(
@@ -430,11 +419,12 @@ export class NftMarketplaceAbiService {
 
     return contract.methodsExplicit
       .bid([new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)])
-      .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
+      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.bid)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async buySftWithEgld(
@@ -443,15 +433,14 @@ export class NftMarketplaceAbiService {
     contract: SmartContract,
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
-    return contract
-      .call({
-        func: new ContractFunction('buySft'),
-        value: TokenPayment.egldFromBigInteger(request.price),
-        args: this.getBuySftArguments(request, marketplaceAuctionId),
-        gasLimit: gas.buySft,
-        chainID: mxConfig.chainID,
-      })
-      .toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .buySft(this.getBuySftArguments(request, marketplaceAuctionId))
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.buySft)
+      .withValue(TokenTransfer.egldFromBigInteger(request.price))
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
   }
 
   private async buySftWithEsdt(
@@ -462,10 +451,11 @@ export class NftMarketplaceAbiService {
   ): Promise<TransactionNode> {
     return contract.methodsExplicit
       .buySft(this.getBuySftArguments(request, marketplaceAuctionId))
-      .withSingleESDTTransfer(TokenPayment.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
+      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buySft)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 }

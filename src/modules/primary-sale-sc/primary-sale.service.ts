@@ -9,38 +9,28 @@ import {
   Interaction,
   ResultsParser,
   TokenIdentifierValue,
-  TokenPayment,
+  TokenTransfer,
   U32Value,
 } from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
-import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { MxProxyService, getSmartContract } from 'src/common';
-import {
-  PrimarySaleTimeAbi,
-  TicketInfoAbi,
-} from './models/PrimarySaleTimestamp.abi';
+import { PrimarySaleTimeAbi, TicketInfoAbi } from './models/PrimarySaleTimestamp.abi';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class PrimarySaleService {
-  private contract = new ContractLoader(
-    './src/abis/primary-sales-sc.abi.json',
-    'Sales',
-  );
+  private contract = new ContractLoader('./src/abis/primary-sales-sc.abi.json');
   private readonly parser: ResultsParser;
 
-  constructor(
-    private mxProxyService: MxProxyService,
-    private redisCacheService: RedisCacheService,
-    private logger: Logger,
-  ) {
+  constructor(private mxProxyService: MxProxyService, private redisCacheService: RedisCacheService, private logger: Logger) {
     this.parser = new ResultsParser();
   }
 
@@ -57,39 +47,27 @@ export class PrimarySaleService {
     }
   }
 
-  async getStatusMap(
-    collectionIdentifier: string,
-    saleTime: PrimarySaleTime,
-  ): Promise<PrimarySale> {
+  async getStatusMap(collectionIdentifier: string, saleTime: PrimarySaleTime): Promise<PrimarySale> {
     if (saleTime.startSale > DateUtils.getCurrentTimestamp()) {
       return new PrimarySale({
         status: PrimarySaleStatusEnum.NotStarted,
         collectionIdentifier: collectionIdentifier,
       });
     }
-    if (
-      saleTime.startSale <= DateUtils.getCurrentTimestamp() &&
-      saleTime.endSale > DateUtils.getCurrentTimestamp()
-    ) {
+    if (saleTime.startSale <= DateUtils.getCurrentTimestamp() && saleTime.endSale > DateUtils.getCurrentTimestamp()) {
       return new PrimarySale({
         status: PrimarySaleStatusEnum.SalePeriod,
         collectionIdentifier: collectionIdentifier,
       });
     }
 
-    if (
-      saleTime.endSale <= DateUtils.getCurrentTimestamp() &&
-      saleTime.startClaim > DateUtils.getCurrentTimestamp()
-    ) {
+    if (saleTime.endSale <= DateUtils.getCurrentTimestamp() && saleTime.startClaim > DateUtils.getCurrentTimestamp()) {
       return new PrimarySale({
         status: PrimarySaleStatusEnum.BetweenPeriod,
         collectionIdentifier: collectionIdentifier,
       });
     }
-    if (
-      saleTime.startClaim <= DateUtils.getCurrentTimestamp() &&
-      saleTime.endClaim > DateUtils.getCurrentTimestamp()
-    ) {
+    if (saleTime.startClaim <= DateUtils.getCurrentTimestamp() && saleTime.endClaim > DateUtils.getCurrentTimestamp()) {
       return new PrimarySale({
         status: PrimarySaleStatusEnum.ClaimPeriod,
         collectionIdentifier: collectionIdentifier,
@@ -109,10 +87,7 @@ export class PrimarySaleService {
 
   async getPricePerTicket(collectionIdentifier: string): Promise<string> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'primarySaleCollectionPrice',
-        collectionIdentifier,
-      );
+      const cacheKey = generateCacheKeyFromParams('primarySaleCollectionPrice', collectionIdentifier);
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getPricePerTicketMap(collectionIdentifier),
@@ -128,14 +103,8 @@ export class PrimarySaleService {
   }
 
   async getPricePerTicketMap(collectionIdentifier: string): Promise<string> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let price = <Interaction>(
-      contract.methodsExplicit.price([
-        BytesValue.fromUTF8(collectionIdentifier),
-      ])
-    );
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
+    let price = <Interaction>contract.methodsExplicit.price([BytesValue.fromUTF8(collectionIdentifier)]);
 
     const response = await this.getFirstQueryResult(price);
     return response.firstValue.valueOf();
@@ -143,35 +112,25 @@ export class PrimarySaleService {
 
   async getMaxNftPerWallet(collectionIdentifier: string): Promise<string> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'primarySaleMaxNftWallet',
-        collectionIdentifier,
-      );
+      const cacheKey = generateCacheKeyFromParams('primarySaleMaxNftWallet', collectionIdentifier);
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMaxNftPerWalletMap(collectionIdentifier),
         5 * Constants.oneSecond(),
       );
     } catch (err) {
-      this.logger.error(
-        'An error occurred while getting the max nfts per wallet.',
-        {
-          path: this.getMaxNftPerWallet.name,
-          collectionIdentifier,
-          exception: err,
-        },
-      );
+      this.logger.error('An error occurred while getting the max nfts per wallet.', {
+        path: this.getMaxNftPerWallet.name,
+        collectionIdentifier,
+        exception: err,
+      });
     }
   }
 
   async getMaxNftPerWalletMap(collectionIdentifier: string): Promise<string> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
     let maxNftPerWalletInteraction = <Interaction>(
-      contract.methodsExplicit.max_units_per_wallet([
-        BytesValue.fromUTF8(collectionIdentifier),
-      ])
+      contract.methodsExplicit.max_units_per_wallet([BytesValue.fromUTF8(collectionIdentifier)])
     );
 
     const response = await this.getFirstQueryResult(maxNftPerWalletInteraction);
@@ -180,15 +139,8 @@ export class PrimarySaleService {
 
   async getTimestamps(collectionIdentifier: string): Promise<PrimarySaleTime> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'primarySaleTimestamp',
-        collectionIdentifier,
-      );
-      return await this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getTimestampsMap(collectionIdentifier),
-        5 * Constants.oneSecond(),
-      );
+      const cacheKey = generateCacheKeyFromParams('primarySaleTimestamp', collectionIdentifier);
+      return await this.redisCacheService.getOrSet(cacheKey, () => this.getTimestampsMap(collectionIdentifier), 5 * Constants.oneSecond());
     } catch (err) {
       this.logger.error('An error occurred while getting timestamp.', {
         path: this.getTimestampsMap.name,
@@ -198,16 +150,9 @@ export class PrimarySaleService {
     }
   }
 
-  async getMyTickets(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<TicketInfo[]> {
+  async getMyTickets(collectionIdentifier: string, address: string): Promise<TicketInfo[]> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'myTickets',
-        address,
-        collectionIdentifier,
-      );
+      const cacheKey = generateCacheKeyFromParams('myTickets', address, collectionIdentifier);
       return await this.redisCacheService.getOrSet(
         cacheKey,
         () => this.getMyTicketsMap(collectionIdentifier, address),
@@ -222,18 +167,9 @@ export class PrimarySaleService {
     }
   }
 
-  async getClaimStatus(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<[boolean, number]> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let myTicketsInteraction = <Interaction>(
-      contract.methodsExplicit.claimers([
-        new TokenIdentifierValue(collectionIdentifier),
-      ])
-    );
+  async getClaimStatus(collectionIdentifier: string, address: string): Promise<[boolean, number]> {
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
+    let myTicketsInteraction = <Interaction>contract.methodsExplicit.claimers([new TokenIdentifierValue(collectionIdentifier)]);
 
     const response = await this.getFirstQueryResult(myTicketsInteraction);
     const addresses: Address[] = response?.firstValue?.valueOf();
@@ -244,18 +180,10 @@ export class PrimarySaleService {
     return [false, Constants.oneSecond()];
   }
 
-  async getMyTicketsMap(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<TicketInfo[]> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
+  async getMyTicketsMap(collectionIdentifier: string, address: string): Promise<TicketInfo[]> {
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
     let myTicketsInteraction = <Interaction>(
-      contract.methodsExplicit.all_tickets([
-        new AddressValue(new Address(address)),
-        new TokenIdentifierValue(collectionIdentifier),
-      ])
+      contract.methodsExplicit.all_tickets([new AddressValue(new Address(address)), new TokenIdentifierValue(collectionIdentifier)])
     );
 
     const response = await this.getFirstQueryResult(myTicketsInteraction);
@@ -263,16 +191,10 @@ export class PrimarySaleService {
     return myTickets?.map((t) => TicketInfo.fromAbi(t));
   }
 
-  async isWhitelisted(
-    address: string,
-  ): Promise<{ isWhitelisted: boolean; message?: string }> {
+  async isWhitelisted(address: string): Promise<{ isWhitelisted: boolean; message?: string }> {
     try {
       const cacheKey = generateCacheKeyFromParams('isWhitelisted', address);
-      return await this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.isWhitelistedMap(address),
-        5 * Constants.oneSecond(),
-      );
+      return await this.redisCacheService.getOrSet(cacheKey, () => this.isWhitelistedMap(address), 5 * Constants.oneSecond());
     } catch (err) {
       this.logger.error('An error occurred while getting is whitelisted.', {
         path: this.isWhitelisted.name,
@@ -281,24 +203,14 @@ export class PrimarySaleService {
     }
   }
 
-  async hasClaimedTickets(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<boolean> {
+  async hasClaimedTickets(collectionIdentifier: string, address: string): Promise<boolean> {
     try {
-      const cacheKey = generateCacheKeyFromParams(
-        'hasClaimedTickets',
-        address,
-        collectionIdentifier,
-      );
+      const cacheKey = generateCacheKeyFromParams('hasClaimedTickets', address, collectionIdentifier);
       const cachedValue = await this.redisCacheService.get<boolean>(cacheKey);
       if (cachedValue) {
         return cachedValue;
       }
-      const [value, ttl] = await this.getClaimStatus(
-        collectionIdentifier,
-        address,
-      );
+      const [value, ttl] = await this.getClaimStatus(collectionIdentifier, address);
       await this.redisCacheService.set(cacheKey, value, ttl);
       return value;
     } catch (err) {
@@ -309,19 +221,13 @@ export class PrimarySaleService {
     }
   }
 
-  async isWhitelistedMap(
-    address: string,
-  ): Promise<{ isWhitelisted: boolean; message?: string }> {
+  async isWhitelistedMap(address: string): Promise<{ isWhitelisted: boolean; message?: string }> {
     const contract = getSmartContract(process.env.HOLORIDE_WHITELIST_SC);
     const func = new ContractFunction('in_whitelist');
     const args = [new AddressValue(new Address(address))];
-    const query = new Interaction(contract, func, args)
-      .withQuerent(new Address(address))
-      .buildQuery();
+    const query = new Interaction(contract, func, args).withQuerent(new Address(address)).buildQuery();
 
-    const queryResponse = await this.mxProxyService
-      .getService()
-      .queryContract(query);
+    const queryResponse = await this.mxProxyService.getService().queryContract(query);
 
     const value =
       queryResponse?.returnData && queryResponse.returnData.length > 0
@@ -338,72 +244,42 @@ export class PrimarySaleService {
     };
   }
 
-  async getTimestampsMap(
-    collectionIdentifier: string,
-  ): Promise<PrimarySaleTime> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
-    let price = <Interaction>(
-      contract.methodsExplicit.timestamps([
-        BytesValue.fromUTF8(collectionIdentifier),
-      ])
-    );
+  async getTimestampsMap(collectionIdentifier: string): Promise<PrimarySaleTime> {
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
+    let price = <Interaction>contract.methodsExplicit.timestamps([BytesValue.fromUTF8(collectionIdentifier)]);
 
     const response = await this.getFirstQueryResult(price);
     const saleTime: PrimarySaleTimeAbi = response?.firstValue?.valueOf();
     return PrimarySaleTime.fromAbi(saleTime);
   }
 
-  async buyTicket(
-    ownerAddress: string,
-    request: BuyTicketsArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
+  async buyTicket(ownerAddress: string, request: BuyTicketsArgs): Promise<TransactionNode> {
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
 
     return contract.methodsExplicit
-      .buy_tickets([
-        BytesValue.fromUTF8(request.collectionIdentifier),
-        new U32Value(new BigNumber(request.ticketsNumber)),
-      ])
-      .withSingleESDTTransfer(
-        TokenPayment.fungibleFromBigInteger(
-          process.env.HOLORIDE_PAYMENT_TOKEN,
-          new BigNumber(request.price),
-        ),
-      )
+      .buy_tickets([BytesValue.fromUTF8(request.collectionIdentifier), new U32Value(new BigNumber(request.ticketsNumber))])
+      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(process.env.HOLORIDE_PAYMENT_TOKEN, new BigNumber(request.price)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buyTickets)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
-  async claim(
-    ownerAddress: string,
-    request: ClaimTicketsArgs,
-  ): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(
-      process.env.HOLORIDE_PRIMARY_SC,
-    );
+  async claim(ownerAddress: string, request: ClaimTicketsArgs): Promise<TransactionNode> {
+    const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
     return contract.methodsExplicit
       .claim([new TokenIdentifierValue(request.collectionIdentifier)])
-      .withValue(TokenPayment.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.mxProxyService
-      .getService()
-      .queryContract(interaction.buildQuery());
-    let result = this.parser.parseQueryResponse(
-      queryResponse,
-      interaction.getEndpoint(),
-    );
+    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
+    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
     return result;
   }
 }
