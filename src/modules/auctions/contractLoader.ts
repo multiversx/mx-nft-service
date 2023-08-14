@@ -5,9 +5,11 @@ import * as fs from 'fs';
 export class ContractLoader {
   private readonly abiPath: string;
   private abi: AbiRegistry | undefined = undefined;
+  private readonly logger: Logger;
 
   constructor(abiPath: string) {
     this.abiPath = abiPath;
+    this.logger = new Logger(ContractLoader.name);
   }
 
   private async load(): Promise<AbiRegistry> {
@@ -19,8 +21,8 @@ export class ContractLoader {
 
       return abiRegistry;
     } catch (error) {
-      //   this.logger.log(`Unexpected error when trying to create smart contract from abi`);
-      //   this.logger.error(error);
+      this.logger.log(`Unexpected error when trying to create smart contract from abi`);
+      this.logger.error(error);
 
       throw new Error('Error when creating contract from abi');
     }
