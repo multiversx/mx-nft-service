@@ -247,7 +247,6 @@ export class NftMarketplaceAbiService {
     const { contract, auction } = await this.configureTransactionData(request.auctionId);
     if (request.paymentTokenIdentifier !== auction.paymentToken) throw new BadRequestError('Unaccepted payment token');
 
-    console.log(request.paymentTokenIdentifier, mxConfig.egld, request.paymentTokenIdentifier !== mxConfig.egld);
     return request.paymentTokenIdentifier !== mxConfig.egld
       ? await this.buySftWithEsdt(ownerAddress, request, contract, auction.marketplaceAuctionId)
       : await this.buySftWithEgld(ownerAddress, request, contract, auction.marketplaceAuctionId);
