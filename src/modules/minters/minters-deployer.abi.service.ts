@@ -27,8 +27,9 @@ export class MintersDeployerAbiService {
       ])
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
+      .withSender(Address.fromString(request.ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(request.ownerAddress));
+      .toPlainObject();
   }
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
@@ -38,8 +39,9 @@ export class MintersDeployerAbiService {
       .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
@@ -48,9 +50,10 @@ export class MintersDeployerAbiService {
     return contract.methodsExplicit
       .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
       .withChainID(mxConfig.chainID)
+      .withSender(Address.fromString(ownerAddress))
       .withGasLimit(gas.deployMinter)
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   public async getMintersForAddress(address: string): Promise<string[]> {
