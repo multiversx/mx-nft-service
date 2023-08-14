@@ -28,6 +28,9 @@ export class CreateNftRequest {
 export class Attribute {
   tags: string[];
   description: string;
+  constructor(init?: Partial<Attribute>) {
+    Object.assign(this, init);
+  }
 }
 
 export class CreateNftWithMultipleFilesRequest {

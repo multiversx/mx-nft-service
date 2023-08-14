@@ -1,11 +1,4 @@
-import {
-  Resolver,
-  Args,
-  Query,
-  ResolveField,
-  Parent,
-  Int,
-} from '@nestjs/graphql';
+import { Resolver, Args, Query, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Collection, CollectionAsset } from './models';
 import CollectionResponse from './models/CollectionResponse';
@@ -19,11 +12,7 @@ import { ArtistAddressProvider } from '../artists/artists.loader';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { Asset, AssetsResponse } from '../assets/models';
 import { Nft } from 'src/common';
-import {
-  AssetsCollectionFilter,
-  CollectionsFilter,
-  CollectionsSortingEnum,
-} from './models/Collections-Filters';
+import { AssetsCollectionFilter, CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
 import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
@@ -57,21 +46,9 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] =
-      await this.collectionsGetterService.getCollections(
-        offset,
-        limit,
-        filters,
-        sorting,
-      );
+    const [collections, count] = await this.collectionsGetterService.getCollections(offset, limit, filters, sorting);
 
-    return PageResponse.mapResponse<Collection>(
-      collections || [],
-      pagination,
-      count || 0,
-      offset,
-      limit,
-    );
+    return PageResponse.mapResponse<Collection>(collections || [], pagination, count || 0, offset, limit);
   }
 
   @ResolveField('owner', () => Account)
@@ -88,9 +65,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     const { nftsCount, collection } = collectionNode;
 
     if (nftsCount) return nftsCount;
-    const assetsCount = await this.collectionAssetsCountProvider.load(
-      collection,
-    );
+    const assetsCount = await this.collectionAssetsCountProvider.load(collection);
     return assetsCount?.value ?? 0;
   }
 
@@ -105,7 +80,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
     if (!ownerAddress) return null;
 
-    const address = new Address(ownerAddress);
+    const address = Address.fromString(ownerAddress);
     let artist: string = ownerAddress;
     if (address.isContractAddress()) {
       const response = await this.artistAddressProvider.load(ownerAddress);
@@ -126,9 +101,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
   }
 
   @ResolveField('collectionAsset', () => CollectionAsset)
-  async collectionAssets(
-    @Parent() collectionResponse: Collection,
-  ): Promise<CollectionAsset> {
+  async collectionAssets(@Parent() collectionResponse: Collection): Promise<CollectionAsset> {
     const { collection, collectionAsset } = collectionResponse;
     if (collectionAsset) return collectionAsset;
     return new CollectionAsset({
@@ -143,8 +116,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
       name: 'pagination',
       type: () => ConnectionArgs,
       nullable: true,
-      description:
-        'This filter will be removed in the next version, we return the latest 10 assets for this collection',
+      description: 'This filter will be removed in the next version, we return the latest 10 assets for this collection',
     })
     pagination: ConnectionArgs,
     @Args({
@@ -158,9 +130,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
     if (!collection) return null;
     if (filters?.ownerAddress) {
-      const assets = await this.assetByOwnerProvider.load(
-        `${collection}_${filters.ownerAddress}`,
-      );
+      const assets = await this.assetByOwnerProvider.load(`${collection}_${filters.ownerAddress}`);
       const assetsValue = assets?.value;
       return PageResponse.mapResponse<Asset>(
         assetsValue?.nfts?.map((n: Nft) => Asset.fromNft(n)) ?? [],
@@ -184,22 +154,12 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
   @ResolveField('description')
   async description(@Parent() node: Collection): Promise<string> {
-    return (
-      node.description ??
-      (await this.collectionsGetterService.getRandomCollectionDescription(node))
-    );
+    return node.description ?? (await this.collectionsGetterService.getRandomCollectionDescription(node));
   }
 
   @ResolveField('traits')
-  async traits(
-    @Parent() collectionNode: Collection,
-  ): Promise<CollectionNftTrait[]> {
-    return (
-      collectionNode.traits ??
-      (await this.collectionsGetterService.getCollectionTraits(
-        collectionNode.collection,
-      ))
-    );
+  async traits(@Parent() collectionNode: Collection): Promise<CollectionNftTrait[]> {
+    return collectionNode.traits ?? (await this.collectionsGetterService.getCollectionTraits(collectionNode.collection));
   }
 
   @ResolveField(() => String)

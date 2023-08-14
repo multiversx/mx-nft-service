@@ -6,7 +6,6 @@ import {
   Address,
   BigUIntValue,
   BytesValue,
-  ContractFunction,
   OptionalValue,
   TokenIdentifierValue,
   TypedValue,
@@ -16,8 +15,8 @@ import {
   List,
   Interaction,
   CompositeValue,
-  TokenPayment,
   ResultsParser,
+  TokenTransfer,
 } from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { MxProxyService } from 'src/common';
@@ -60,31 +59,29 @@ export class NftMinterAbiService {
 
   async issueToken(ownerAddress: string, request: IssueCampaignRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(request.minterAddress);
-
-    let issueTokenForBrand = contract.call({
-      func: new ContractFunction('issueTokenForBrand'),
-      value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
-      args: this.getIssueCampaignArgs(request),
-      gasLimit: gas.issueCamapaign,
-      chainID: mxConfig.chainID,
-    });
-    return issueTokenForBrand.toPlainObject(new Address(ownerAddress));
+    return contract.methodsExplicit
+      .issueTokenForBrand(this.getIssueCampaignArgs(request))
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromBigInteger(mxConfig.issueNftCost))
+      .withGasLimit(gas.issueCamapaign)
+      .buildTransaction()
+      .toPlainObject();
   }
 
   async buyRandomNft(ownerAddress: string, request: BuyRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(request.minterAddress);
+    let buyRandomNft = contract.methodsExplicit
+      .buyRandomNft(this.getBuyNftArguments(request))
+      .withSender(Address.fromString(ownerAddress))
+      .withChainID(mxConfig.chainId)
+      .withValue(TokenTransfer.egldFromBigInteger(request.price))
+      .withGasLimit(gas.endAuction);
 
-    let buyRandomNft = contract.call({
-      func: new ContractFunction('buyRandomNft'),
-      value: TokenPayment.egldFromBigInteger(request.price),
-      args: this.getBuyNftArguments(request),
-      gasLimit: gas.endAuction,
-      chainID: mxConfig.chainID,
-    });
     if (parseInt(request.quantity) > 1) {
-      buyRandomNft.setGasLimit(buyRandomNft.getGasLimit().valueOf() + (parseInt(request.quantity) - 1) * gas.endAuction);
+      buyRandomNft.withGasLimit(buyRandomNft.getGasLimit().valueOf() + (parseInt(request.quantity) - 1) * gas.endAuction);
     }
-    return buyRandomNft.toPlainObject(new Address(ownerAddress));
+    return buyRandomNft.buildTransaction().toPlainObject();
   }
 
   async upgradeNft(ownerAddress: string, request: UpgradeNftRequest): Promise<TransactionNode> {
@@ -92,14 +89,12 @@ export class NftMinterAbiService {
     const contract = await this.contract.getContract(request.minterAddress);
     return contract.methodsExplicit
       .nftUpgrade([BytesValue.fromUTF8(request.campaignId)])
-      .withSingleESDTNFTTransfer(
-        TokenPayment.metaEsdtFromBigInteger(collection, parseInt(nonce, 16), new BigNumber(1)),
-        new Address(ownerAddress),
-      )
+      .withSingleESDTNFTTransfer(TokenTransfer.metaEsdtFromBigInteger(collection, parseInt(nonce, 16), new BigNumber(1)))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.buySft)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
-      .toPlainObject(new Address(ownerAddress));
+      .toPlainObject();
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
