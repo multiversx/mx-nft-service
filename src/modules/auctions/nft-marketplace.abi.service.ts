@@ -40,8 +40,7 @@ import { ContractLoader } from './contractLoader';
 @Injectable()
 export class NftMarketplaceAbiService {
   private readonly parser: ResultsParser;
-
-  private contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
+  private contractLoader = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
 
   constructor(
     private readonly mxProxyService: MxProxyService,
@@ -62,7 +61,7 @@ export class NftMarketplaceAbiService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     if (marketplace.acceptedPaymentIdentifiers && !marketplace.acceptedPaymentIdentifiers.includes(args.paymentToken)) {
       throw new BadRequestError('Unaccepted payment token');
     }
@@ -90,7 +89,6 @@ export class NftMarketplaceAbiService {
 
     return contract.methodsExplicit
       .withdraw([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
-      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .withSender(Address.fromString(ownerAddress))
@@ -109,7 +107,7 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('Unaccepted payment token');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     const intermediateInteraction = await this.getGenericOfferInteraction(contract, collection, nonce, request);
 
     if (request.paymentToken !== mxConfig.egld) {
@@ -145,10 +143,9 @@ export class NftMarketplaceAbiService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     return contract.methodsExplicit
       .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .withSender(Address.fromString(ownerAddress))
@@ -185,7 +182,7 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('Not enough balance to accept this offer!');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(asset.identifier);
     return contract.methodsExplicit
       .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
@@ -216,13 +213,12 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const contract = await this.contract.getContract(marketplace.address);
+    const contract = await this.contractLoader.getContract(marketplace.address);
     return contract.methodsExplicit
       .withdrawAuctionAndAcceptOffer([
         new U64Value(new BigNumber(auction.marketplaceAuctionId)),
         new U64Value(new BigNumber(offer.marketplaceOfferId)),
       ])
-      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .withSender(Address.fromString(ownerAddress))
@@ -235,7 +231,6 @@ export class NftMarketplaceAbiService {
 
     return contract.methodsExplicit
       .endAuction([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
-      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.endAuction)
       .withSender(Address.fromString(ownerAddress))
@@ -255,8 +250,8 @@ export class NftMarketplaceAbiService {
   async getAuctionQuery(auctionId: number, marketplace: Marketplace): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
     if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
-      this.contract = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
-      scContract = await this.contract.getContract(marketplace.address);
+      this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
+      scContract = await this.contractLoader.getContract(marketplace.address);
     } else {
       const contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
       scContract = await contract.getContract(marketplace.address);
@@ -274,8 +269,8 @@ export class NftMarketplaceAbiService {
     if (!MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
       return;
     }
-    this.contract = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
-    scContract = await this.contract.getContract(marketplace.address);
+    this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
+    scContract = await this.contractLoader.getContract(marketplace.address);
 
     let getDataQuery = <Interaction>scContract.methodsExplicit.getMinMaxBid([new U64Value(new BigNumber(auctionId))]);
 
@@ -316,12 +311,12 @@ export class NftMarketplaceAbiService {
     const auction = await this.auctionsService.getAuctionById(auctionId);
     const marketplaceAddress = await this.marketplaceService.getMarketplaceAddressByKey(auction.marketplaceKey);
 
-    const contract = await this.contract.getContract(marketplaceAddress);
+    const contract = await this.contractLoader.getContract(marketplaceAddress);
     return { contract, auction };
   }
 
   private async getCutPercentageMap(contractAddress: string): Promise<string> {
-    const contract = await this.contract.getContract(contractAddress);
+    const contract = await this.contractLoader.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.getMarketplaceCutPercentage();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf().toFixed();
@@ -349,7 +344,7 @@ export class NftMarketplaceAbiService {
   }
 
   private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
-    const contract = await this.contract.getContract(contractAddress);
+    const contract = await this.contractLoader.getContract(contractAddress);
     let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
     const response = await this.getFirstQueryResult(getDataQuery);
     return response.firstValue.valueOf();

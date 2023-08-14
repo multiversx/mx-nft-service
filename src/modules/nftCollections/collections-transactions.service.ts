@@ -26,7 +26,6 @@ export class CollectionsTransactionsService {
     const smartContract = getSmartContract(request.ownerAddress);
     const transaction = smartContract.call({
       func: new ContractFunction('stopNFTCreate'),
-      value: TokenTransfer.egldFromAmount(0),
       args: [BytesValue.fromUTF8(request.collection)],
       gasLimit: gas.stopNFTCreate,
       chainID: mxConfig.chainID,
@@ -40,7 +39,6 @@ export class CollectionsTransactionsService {
     let transactionArgs = this.getTransferCreateRoleArgs(request);
     const transaction = smartContract.call({
       func: new ContractFunction('transferNFTCreateRole'),
-      value: TokenPayment.egldFromAmount(0),
       args: transactionArgs,
       gasLimit: gas.transferNFTCreateRole,
       chainID: mxConfig.chainID,
@@ -53,7 +51,6 @@ export class CollectionsTransactionsService {
     let transactionArgs = this.getSetRolesArgs(args);
     const transaction = this.esdtSmartContract.call({
       func: new ContractFunction('setSpecialRole'),
-      value: TokenTransfer.egldFromAmount(0),
       args: transactionArgs,
       gasLimit: gas.setRoles,
       chainID: mxConfig.chainID,

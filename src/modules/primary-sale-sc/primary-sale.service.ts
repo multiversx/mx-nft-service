@@ -270,7 +270,6 @@ export class PrimarySaleService {
     const contract = await this.contract.getContract(process.env.HOLORIDE_PRIMARY_SC);
     return contract.methodsExplicit
       .claim([new TokenIdentifierValue(request.collectionIdentifier)])
-      .withValue(TokenTransfer.egldFromAmount(0))
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.withdraw)
       .withSender(Address.fromString(ownerAddress))

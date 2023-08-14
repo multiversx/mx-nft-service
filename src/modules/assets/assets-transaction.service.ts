@@ -32,7 +32,6 @@ export class AssetsTransactionService {
     const contract = getSmartContract(request.updateQuantityRoleAddress);
     const transaction = contract.call({
       func: new ContractFunction(request.functionName),
-      value: TokenTransfer.egldFromAmount(0),
       args: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
       gasLimit: gas.addBurnQuantity,
       chainID: mxConfig.chainID,
@@ -91,7 +90,6 @@ export class AssetsTransactionService {
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTTransfer'),
-      value: TokenTransfer.egldFromAmount(0),
       args: [
         BytesValue.fromUTF8(collection),
         BytesValue.fromHex(nonce),
@@ -120,7 +118,6 @@ export class AssetsTransactionService {
     const contract = getSmartContract(ownerAddress);
     const transaction = contract.call({
       func: new ContractFunction('ESDTNFTCreate'),
-      value: TokenTransfer.egldFromAmount(0),
       args: this.getCreateNftsArgs(request, filesData, attributes),
       gasLimit: gas.nftCreate,
       chainID: mxConfig.chainID,
