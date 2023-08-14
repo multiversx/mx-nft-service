@@ -8,6 +8,7 @@ import { MinterEntity } from 'src/db/minters';
 import { Minter } from '../models';
 import { WhitelistMinterRequest } from '../models/requests/whitelistMinterRequest';
 import { MinterFilters } from '../models/MinterFilters';
+import {MintersDeployerAbiService} from '../minters-deployer.abi.service';
 
 describe('Minters Service', () => {
   let service: MintersService;
@@ -25,6 +26,10 @@ describe('Minters Service', () => {
         },
         {
           provide: MintersCachingService,
+          useFactory: () => ({}),
+        },
+        {
+          provide: MintersDeployerAbiService,
           useFactory: () => ({}),
         },
         {
@@ -53,11 +58,13 @@ describe('Minters Service', () => {
     it('when saves succed returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
       persistenceService.saveMinter = jest.fn().mockReturnValueOnce(new MinterEntity({ address: 'address' }));
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address"]);
 
       cachingService.invalidateMinters = jest.fn();
 
-      const result = await service.whitelistMinter(new WhitelistMinterRequest());
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
 
       expect(result).toBeTruthy();
     });

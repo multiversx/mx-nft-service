@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Address, AddressValue, Interaction, ResultsParser, U32Value, VariadicType } from '@multiversx/sdk-core/out';
-import { ContractLoader } from '@multiversx/sdk-nestjs';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { mxConfig, gas } from 'src/config';
 import { MxProxyService } from 'src/common';
+import {ContractLoader} from '../auctions/contractLoader';
 
 @Injectable()
 export class MintersDeployerAbiService {
   private readonly parser: ResultsParser;
-  private contract = new ContractLoader(MarketplaceUtils.deployerMintersAbiPath, MarketplaceUtils.deployerAbiInterface);
+  private contract = new ContractLoader(MarketplaceUtils.deployerMintersAbiPath);
 
   constructor(private mxProxyService: MxProxyService) {
     this.parser = new ResultsParser();
