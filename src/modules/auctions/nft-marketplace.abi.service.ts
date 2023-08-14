@@ -61,6 +61,7 @@ export class NftMarketplaceAbiService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
+
     const contract = await this.contractLoader.getContract(marketplace.address);
     if (marketplace.acceptedPaymentIdentifiers && !marketplace.acceptedPaymentIdentifiers.includes(args.paymentToken)) {
       throw new BadRequestError('Unaccepted payment token');
@@ -143,6 +144,7 @@ export class NftMarketplaceAbiService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
+
     const contract = await this.contractLoader.getContract(marketplace.address);
     return contract.methodsExplicit
       .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
@@ -269,6 +271,7 @@ export class NftMarketplaceAbiService {
     if (!MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
       return;
     }
+
     this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
     scContract = await this.contractLoader.getContract(marketplace.address);
 
