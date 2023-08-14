@@ -14,7 +14,6 @@ import {
 } from '@multiversx/sdk-core';
 import { mxConfig, gas } from '../../config';
 import { TransactionNode } from '../common/transaction';
-import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { MxProxyService, getSmartContract } from 'src/common';
 import { PrimarySaleTimeAbi, TicketInfoAbi } from './models/PrimarySaleTimestamp.abi';
@@ -24,10 +23,11 @@ import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
 import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class PrimarySaleService {
-  private contract = new ContractLoader('./src/abis/primary-sales-sc.abi.json', 'Sales');
+  private contract = new ContractLoader('./src/abis/primary-sales-sc.abi.json');
   private readonly parser: ResultsParser;
 
   constructor(private mxProxyService: MxProxyService, private redisCacheService: RedisCacheService, private logger: Logger) {
