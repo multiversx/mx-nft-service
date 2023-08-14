@@ -1,11 +1,4 @@
-import {
-  Resolver,
-  Query,
-  Args,
-  ResolveField,
-  Parent,
-  Int,
-} from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Asset, AssetsResponse, Metadata, NftTypeEnum } from './models';
 import { Auction } from '../auctions/models';
@@ -71,20 +64,9 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     sorting: AssetsSortingEnum,
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const response = await this.assetsService.getAssets(
-      offset,
-      limit,
-      filters,
-      sorting,
-    );
+    const response = await this.assetsService.getAssets(offset, limit, filters, sorting);
 
-    return PageResponse.mapResponse<Asset>(
-      response?.items || [],
-      pagination,
-      response?.count || 0,
-      offset,
-      limit,
-    );
+    return PageResponse.mapResponse<Asset>(response?.items || [], pagination, response?.count || 0, offset, limit);
   }
 
   @ResolveField('likesCount', () => Int)
@@ -114,9 +96,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   @ResolveField('isLiked', () => Boolean)
   async isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     const { identifier } = asset;
-    const assetLikes = await this.isAssetLikedProvider.load(
-      `${identifier}_${byAddress}`,
-    );
+    const assetLikes = await this.isAssetLikedProvider.load(`${identifier}_${byAddress}`);
     return !!assetLikes?.value ?? false;
   }
 
@@ -137,9 +117,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   @ResolveField('totalAvailableTokens', () => String)
   async totalAvailableTokens(@Parent() asset: Asset) {
     const { identifier } = asset;
-    const availableTokens = await this.assetAvailableTokensCountProvider.load(
-      identifier,
-    );
+    const availableTokens = await this.assetAvailableTokensCountProvider.load(identifier);
     return availableTokens?.value ?? 0;
   }
 
@@ -148,11 +126,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     const { identifier } = asset;
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
-    return scamInfoValue &&
-      Object.keys(scamInfoValue).length > 1 &&
-      ScamInfo.isScam(scamInfoValue)
-      ? scamInfoValue
-      : null;
+    return scamInfoValue && Object.keys(scamInfoValue).length > 1 && ScamInfo.isScam(scamInfoValue) ? scamInfoValue : null;
   }
 
   @ResolveField('rarity', () => Rarity)
@@ -177,9 +151,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     }
 
     if (filters?.marketplaceKey) {
-      const auctions = await this.lowestAuctionForMarketplaceProvider.load(
-        `${identifier}_${filters?.marketplaceKey}`,
-      );
+      const auctions = await this.lowestAuctionForMarketplaceProvider.load(`${identifier}_${filters?.marketplaceKey}`);
       return auctions?.value ? Auction.fromEntity(auctions?.value) : null;
     }
     const auctions = await this.lowestAuctionProvider.load(identifier);
@@ -266,52 +238,29 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     return isAssetTicket?.value ?? false;
   }
 
-  private async getMarketplaceForNft(
-    ownerAddress: string,
-    collection: string,
-    identifier: string,
-  ): Promise<Marketplace[]> {
+  private async getMarketplaceForNft(ownerAddress: string, collection: string, identifier: string): Promise<Marketplace[]> {
     if (!ownerAddress) return null;
-    const address = new Address(ownerAddress);
-    if (
-      address.isContractAddress() &&
-      !address.equals(new Address(mxConfig.nftMarketplaceAddress))
-    ) {
+    const address = Address.fromString(ownerAddress);
+    if (address.isContractAddress() && !address.equals(new Address(mxConfig.nftMarketplaceAddress))) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
 
-      const mappedMarketplace = Marketplace.fromEntity(
-        marketplace?.value,
-        identifier,
-      );
+      const mappedMarketplace = Marketplace.fromEntity(marketplace?.value, identifier);
       return mappedMarketplace ? [mappedMarketplace] : null;
     }
 
     if (address.isContractAddress()) {
-      const marketplace = await this.internalMarketplaceProvider.load(
-        collection,
-      );
+      const marketplace = await this.internalMarketplaceProvider.load(collection);
 
-      const mappedMarketplace = Marketplace.fromEntity(
-        marketplace?.value,
-        identifier,
-      );
+      const mappedMarketplace = Marketplace.fromEntity(marketplace?.value, identifier);
       return mappedMarketplace ? [mappedMarketplace] : null;
     }
   }
 
-  private async getMarketplaceForSft(
-    collection: string,
-    identifier: string,
-  ): Promise<Marketplace[]> {
+  private async getMarketplaceForSft(collection: string, identifier: string): Promise<Marketplace[]> {
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
     if (!!assetAuctions?.value) {
-      const marketplace = await this.internalMarketplaceProvider.load(
-        collection,
-      );
-      const mappedMarketplace = Marketplace.fromEntity(
-        marketplace?.value,
-        identifier,
-      );
+      const marketplace = await this.internalMarketplaceProvider.load(collection);
+      const mappedMarketplace = Marketplace.fromEntity(marketplace?.value, identifier);
       return mappedMarketplace ? [mappedMarketplace] : null;
     }
     return null;
