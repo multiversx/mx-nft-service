@@ -68,6 +68,29 @@ describe('Minters Service', () => {
 
       expect(result).toBeTruthy();
     });
+
+    it('when minter address not in the expected list returns false', async () => {
+      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address1"]);
+
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
+
+      expect(result).toBeFalsy();
+    });
+
+    it('when minter address in the expected list but save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
+      persistenceService.saveMinter = jest.fn().mockReturnValueOnce(null);
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address"]);
+
+      cachingService.invalidateMinters = jest.fn();
+
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
+
+      expect(result).toBeFalsy();
+    });
   });
 
   describe('getMinters', () => {
