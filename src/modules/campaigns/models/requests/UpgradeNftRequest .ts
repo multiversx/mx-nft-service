@@ -1,4 +1,4 @@
-import { BuyRandomNftActionArgs, UpgradeNftArgs } from '..';
+import { UpgradeNftArgs } from '..';
 
 export class UpgradeNftRequest {
   campaignId: string;
