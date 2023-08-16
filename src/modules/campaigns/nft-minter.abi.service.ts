@@ -61,7 +61,7 @@ export class NftMinterAbiService {
     return contract.methodsExplicit
       .issueTokenForBrand(this.getIssueCampaignArgs(request))
       .withSender(Address.fromString(ownerAddress))
-      .withChainID(mxConfig.chainId)
+      .withChainID(mxConfig.chainID)
       .withValue(TokenTransfer.egldFromBigInteger(mxConfig.issueNftCost))
       .withGasLimit(gas.issueCamapaign)
       .buildTransaction()
@@ -73,7 +73,7 @@ export class NftMinterAbiService {
     let buyRandomNft = contract.methodsExplicit
       .buyRandomNft(this.getBuyNftArguments(request))
       .withSender(Address.fromString(ownerAddress))
-      .withChainID(mxConfig.chainId)
+      .withChainID(mxConfig.chainID)
       .withValue(TokenTransfer.egldFromBigInteger(request.price))
       .withGasLimit(gas.endAuction);
 
