@@ -26,7 +26,7 @@ import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
 import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import {ContractLoader} from '../auctions/contractLoader';
+import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class NftMinterAbiService {
