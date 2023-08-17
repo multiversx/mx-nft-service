@@ -912,8 +912,6 @@ type MintPrice {
 type Minter {
   address: ID!
   adminAddress: ID!
-  description: String
-  name: String!
 }
 
 type MinterEdge {
@@ -1538,11 +1536,6 @@ input WhitelistCollectionArgs {
 input WhitelistMinterArgs {
   address: String!
   adminAddress: String!
-  description: String!
-  maxNftsPerTransaction: Int!
-  mintClaimAddress: String!
-  name: String!
-  royaltiesClaimAddress: String!
 }
 
 type WhitelistedInfo {

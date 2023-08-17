@@ -6,10 +6,6 @@ export class MarketplaceUtils {
   public static readonly xoxnoMarketplaceAbiPath: string = './src/abis/xoxno-nft-marketplace.abi.json';
 
   public static readonly deployerMintersAbiPath: string = './src/abis/nft-minter-deployer.abi.json';
-  public static readonly deployerAbiInterface: string = 'NftMinterDeployer';
-
-  public static readonly abiInterface: string = 'EsdtNftMarketplace';
-
   static isExternalMarketplace(type: MarketplaceTypeEnum) {
     return type === MarketplaceTypeEnum.External;
   }
