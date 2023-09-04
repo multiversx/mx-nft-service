@@ -17,7 +17,7 @@ export class NativeAuthGuard implements CanActivate {
   private readonly authServer: NativeAuthServer;
 
   constructor(
-    apiConfigService: ApiConfigService,
+    private apiConfigService: ApiConfigService,
     private readonly cachingService: CachingService,
   ) {
     this.logger = new Logger(NativeAuthGuard.name);
@@ -59,7 +59,7 @@ export class NativeAuthGuard implements CanActivate {
     console.log("herreeerrr")
     const authorization: string = request.headers['authorization'];
     const origin = request.headers['origin'];
-    console.log("herreeerrr", authorization, origin)
+    console.log("herreeerrr", authorization, origin, this.apiConfigService.getNativeAuthAcceptedOrigins())
 
     if (!authorization) {
 
