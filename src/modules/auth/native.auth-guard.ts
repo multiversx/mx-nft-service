@@ -56,9 +56,11 @@ export class NativeAuthGuard implements CanActivate {
     if (AuthUtils.bypassAuthorizationOnTestnet(request)) {
       return true;
     }
-
+    console.log("herreeerrr")
     const authorization: string = request.headers['authorization'];
     const origin = request.headers['origin'];
+    console.log("herreeerrr", authorization, origin)
+
     if (!authorization) {
       throw new UnauthorizedException();
     }

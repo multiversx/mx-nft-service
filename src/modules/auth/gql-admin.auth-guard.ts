@@ -7,6 +7,7 @@ export class GqlAdminAuthGuard implements CanActivate {
   constructor(private readonly apiConfigService: ApiConfigService) {}
 
   canActivate(context: ExecutionContext): boolean {
+    console.log("Hereeee ")
     let request = context.switchToHttp().getRequest();
     if (!request) {
       const ctx = GqlExecutionContext.create(context);
@@ -15,6 +16,8 @@ export class GqlAdminAuthGuard implements CanActivate {
 
     const auth = request.auth;
     const admins = this.apiConfigService.getSecurityAdmins();
+    console.log("Hereeee ", {admins, auth})
+
     if (!admins) {
       return false;
     }
