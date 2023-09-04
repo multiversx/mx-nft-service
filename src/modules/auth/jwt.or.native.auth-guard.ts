@@ -26,6 +26,9 @@ export class JwtOrNativeAuthGuard implements CanActivate {
 
     const guards = [jwtGuard, nativeAuthGuard];
 
+    try {
+      
+    
     const canActivateResponses = await Promise.all(
       guards.map((guard) => {
         try {
@@ -41,6 +44,9 @@ export class JwtOrNativeAuthGuard implements CanActivate {
       (result, value) => result || value,
       false,
     );
-    return canActivate;
+    return canActivate;} 
+    catch (error) {
+     console.log({error})  
+    }
   }
 }
