@@ -62,13 +62,17 @@ export class NativeAuthGuard implements CanActivate {
     console.log("herreeerrr", authorization, origin)
 
     if (!authorization) {
+
+    console.log("np authj herreeerrr", authorization, origin)
       throw new UnauthorizedException();
     }
     const jwt = authorization.replace('Bearer ', '');
 
     try {
+      console.log({jwt})
       const userInfo = await this.authServer.validate(jwt);
 
+      console.log({userInfo})
       if (
         origin &&
         origin !== userInfo.origin &&
