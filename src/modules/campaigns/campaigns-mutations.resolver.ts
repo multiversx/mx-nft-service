@@ -14,6 +14,7 @@ import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/userAuthResult';
 import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
+import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 
 @Resolver(() => Campaign)
 export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
@@ -22,7 +23,7 @@ export class CampaignsMutationsResolver extends BaseResolver(Campaign) {
   }
 
   @Mutation(() => TransactionNode)
-  @UseGuards(JwtOrNativeAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async issueCampaign(
     @Args('input') input: IssueCampaignArgs,
     @AuthUser() user: UserAuthResult,
