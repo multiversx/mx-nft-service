@@ -3,12 +3,16 @@ import { Matches } from 'class-validator';
 import { ADDRESS_ERROR, ADDRESS_RGX } from 'src/utils/constants';
 
 @InputType()
-export class WhitelistMinterArgs {
+export class MinterFilters {
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
-  address: string;
+  minterAddress: string;
 
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
-  adminAddress: string;
+  minterAdminAddress: string;
+
+  constructor(init?: Partial<MinterFilters>) {
+    Object.assign(this, init);
+  }
 }

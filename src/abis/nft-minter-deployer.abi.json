@@ -1,0 +1,290 @@
+{
+  "buildInfo": {
+    "rustc": {
+      "version": "1.71.0-nightly",
+      "commitHash": "c373194cb6d882dc455a588bcc29c92a96b50252",
+      "commitDate": "2023-05-24",
+      "channel": "Nightly",
+      "short": "rustc 1.71.0-nightly (c373194cb 2023-05-24)"
+    },
+    "contractCrate": {
+      "name": "nft-minter-deployer",
+      "version": "0.0.0"
+    },
+    "framework": {
+      "name": "multiversx-sc",
+      "version": "0.41.3"
+    }
+  },
+  "name": "NftMinterDeployer",
+  "constructor": {
+    "inputs": [
+      {
+        "name": "nft_minter_template_address_opt",
+        "type": "optional<Address>",
+        "multi_arg": true
+      }
+    ],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "createNftMinter",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "royalties_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "mint_payments_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "max_nfts_per_transaction",
+          "type": "u32"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "upgradeNftMinter",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        },
+        {
+          "name": "royalties_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "mint_payments_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "max_nfts_per_transaction",
+          "type": "u32"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "pauseNftMinter",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "resumeNftMinter",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addAdminToNftMinterContract",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "admin_address",
+          "type": "Address"
+        },
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeAdminToNftMinterContract",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "admin_address",
+          "type": "Address"
+        },
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setNftMinterTemplateAddress",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setNftMinterCreationEnabled",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getUserNftMinterContracts",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getAllNftMinterContracts",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getNftMinterTemplateAddress",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "getNftMinterCreationEnabled",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "identifier": "createNftMinter",
+      "inputs": [
+        {
+          "name": "caller",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "epoch",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "block",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "timestamp",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "nft_minter_event",
+          "type": "CreateNftMinterEvent"
+        }
+      ]
+    },
+    {
+      "identifier": "upgradeNftMinter",
+      "inputs": [
+        {
+          "name": "caller",
+          "type": "Address",
+          "indexed": true
+        },
+        {
+          "name": "epoch",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "block",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "timestamp",
+          "type": "u64",
+          "indexed": true
+        },
+        {
+          "name": "nft_minter_event",
+          "type": "CreateNftMinterEvent"
+        }
+      ]
+    }
+  ],
+  "hasCallback": false,
+  "types": {
+    "CreateNftMinterEvent": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "royalties_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "mint_payments_claim_address",
+          "type": "Address"
+        },
+        {
+          "name": "max_nfts_per_transaction",
+          "type": "u32"
+        },
+        {
+          "name": "nft_minter_address",
+          "type": "Address"
+        }
+      ]
+    }
+  }
+}

@@ -24,16 +24,15 @@ import { TransactionNode } from '../common/transaction';
 import { BuyRequest, IssueCampaignRequest } from './models/requests';
 import { nominateVal } from 'src/utils';
 import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { ContractLoader } from '@multiversx/sdk-nestjs/lib/src/sc.interactions/contract.loader';
 import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class NftMinterAbiService {
   private readonly parser: ResultsParser;
   private readonly abiPath: string = './src/abis/nft-minter.abi.json';
-  private readonly abiInterface: string = 'NftMinter';
-  private readonly contract = new ContractLoader(this.abiPath, this.abiInterface);
+  private readonly contract = new ContractLoader(this.abiPath);
 
   constructor(private mxProxyService: MxProxyService) {
     this.parser = new ResultsParser();
