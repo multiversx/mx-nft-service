@@ -30,7 +30,6 @@ describe('Nft Minter Abi Service', () => {
   describe('issueToken', () => {
     it('returns build transaction with right arguments', async () => {
       const result = await service.issueToken(
-        'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         new IssueCampaignRequest({
           collectionIpfsHash: 'hash',
           campaignId: 'campaignId',
@@ -45,6 +44,7 @@ describe('Nft Minter Abi Service', () => {
           tags: ['tag'],
           tiers: [new TierRequest({ totalNfts: 100, mintPriceAmount: '100000000', tierName: 'tierName' })],
           minterAddress: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+          ownerAddress: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         }),
       );
 
