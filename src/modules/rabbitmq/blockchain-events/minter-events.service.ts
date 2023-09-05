@@ -9,7 +9,6 @@ export class MinterEventsService {
   constructor(private campaignService: CampaignsService) {}
 
   public async handleNftMinterEvents(mintEvents: any[], hash: string) {
-    console.log(JSON.stringify(mintEvents));
     for (let event of mintEvents) {
       switch (event.identifier) {
         case MinterEventEnum.callBack:
