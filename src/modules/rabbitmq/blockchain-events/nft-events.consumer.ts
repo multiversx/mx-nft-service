@@ -32,21 +32,18 @@ export class NftEventsConsumer {
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents?.events) {
-      const internalMarketplaces =
-        await this.marketplaceService.getInternalMarketplacesAddreses();
-      const externalMarketplaces =
-        await this.marketplaceService.getExternalMarketplacesAddreses();
+      const internalMarketplaces = await this.marketplaceService.getInternalMarketplacesAddreses();
+      const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
 
       const internalMarketplaceEvents = nftAuctionEvents?.events?.filter(
-        (e: { address: any }) =>
-          internalMarketplaces.includes(e.address) === true,
+        (e: { address: any }) => internalMarketplaces.includes(e.address) === true,
       );
       const externalMarketplaceEvents = nftAuctionEvents?.events?.filter(
-        (e: { address: any }) =>
-          externalMarketplaces.includes(e.address) === true,
+        (e: { address: any }) => externalMarketplaces.includes(e.address) === true,
       );
 
       const minters = await this.mintersService.getMintersAddresses();
+      console.log({ minters });
       await this.nftEventsService.handleNftMintEvents(
         nftAuctionEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
@@ -68,16 +65,11 @@ export class NftEventsConsumer {
         MarketplaceTypeEnum.External,
       );
       await this.minterEventsService.handleNftMinterEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { address: any }) => minters?.includes(e.address) === true,
-        ),
+        nftAuctionEvents?.events?.filter((e: { address: any }) => minters?.includes(e.address) === true),
         nftAuctionEvents.hash,
       );
 
-      await this.analyticsEventsService.handleBuyEvents([
-        ...internalMarketplaceEvents,
-        ...externalMarketplaceEvents,
-      ]);
+      await this.analyticsEventsService.handleBuyEvents([...internalMarketplaceEvents, ...externalMarketplaceEvents]);
 
       if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
         await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
