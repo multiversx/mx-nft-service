@@ -8,7 +8,8 @@ import { MinterEntity } from 'src/db/minters';
 import { Minter } from '../models';
 import { WhitelistMinterRequest } from '../models/requests/whitelistMinterRequest';
 import { MinterFilters } from '../models/MinterFilters';
-import {MintersDeployerAbiService} from '../minters-deployer.abi.service';
+import { MintersDeployerAbiService } from '../minters-deployer.abi.service';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 
 describe('Minters Service', () => {
   let service: MintersService;
@@ -36,6 +37,10 @@ describe('Minters Service', () => {
           provide: PersistenceService,
           useFactory: () => ({}),
         },
+        {
+          provide: CacheEventsPublisherService,
+          useFactory: () => ({}),
+        },
       ],
     }).compile();
 
@@ -57,37 +62,37 @@ describe('Minters Service', () => {
 
     it('when saves succed returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheEventsPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
       const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
       persistenceService.saveMinter = jest.fn().mockReturnValueOnce(new MinterEntity({ address: 'address' }));
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address"]);
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address']);
 
-      cachingService.invalidateMinters = jest.fn();
+      cacheEventsPublisher.publish = jest.fn();
 
-      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({ address: 'address' }));
 
       expect(result).toBeTruthy();
     });
 
     it('when minter address not in the expected list returns false', async () => {
       const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address1"]);
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address1']);
 
-      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({ address: 'address' }));
 
       expect(result).toBeFalsy();
     });
 
     it('when minter address in the expected list but save fails returns false', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheEventsPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
       const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
       persistenceService.saveMinter = jest.fn().mockReturnValueOnce(null);
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(["address"]);
+      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address']);
 
-      cachingService.invalidateMinters = jest.fn();
+      cacheEventsPublisher.publish = jest.fn();
 
-      const result = await service.whitelistMinter(new WhitelistMinterRequest({address: "address"}));
+      const result = await service.whitelistMinter(new WhitelistMinterRequest({ address: 'address' }));
 
       expect(result).toBeFalsy();
     });

@@ -13,6 +13,7 @@ import { CacheInvalidationAdminService } from './cache-admin-module/cache-admin-
 import { CacheSetterAdminService } from './cache-admin-module/cache-admin-setter.service';
 import { CacheInvalidationEventsService } from './cache-invalidation-module/cache-invalidation-events.service';
 import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
+import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -26,15 +27,14 @@ export class CacheEventsConsumer {
     private cacheInvalidationEventsService: CacheInvalidationEventsService,
     private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
+    private cacheMintersService: MintersCachingService,
     private logger: Logger,
   ) {}
 
   @PublicRabbitConsumer({
     connection: 'common',
     exchange: rabbitExchanges.CACHE_INVALIDATION,
-    queueName: `${rabbitQueues.CACHE_INVALIDATION}-${
-      process.env.CLUSTER ?? 'development'
-    }`,
+    queueName: `${rabbitQueues.CACHE_INVALIDATION}-${process.env.CLUSTER ?? 'development'}`,
     disable: !(process.env.ENABLE_CACHE_INVALIDATION === 'true'),
   })
   async consume(event: ChangedEvent): Promise<void> {
@@ -46,12 +46,8 @@ export class CacheEventsConsumer {
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.collectionAssetsRedisHandler.clearKey(collectionIdentifier),
-          this.collectionAssetsForOwnerRedisHandler.clearKey(
-            `${collectionIdentifier}_${event.address}`,
-          ),
-          this.collectionAssetsForOwnerRedisHandler.clearKey(
-            `${collectionIdentifier}_${event.extraInfo?.receiverAddress}`,
-          ),
+          this.collectionAssetsForOwnerRedisHandler.clearKey(`${collectionIdentifier}_${event.address}`),
+          this.collectionAssetsForOwnerRedisHandler.clearKey(`${collectionIdentifier}_${event.extraInfo?.receiverAddress}`),
         ]);
         profiler.stop('OwnerChanged');
 
@@ -60,8 +56,7 @@ export class CacheEventsConsumer {
       case CacheEventTypeEnum.AssetsRefresh:
         const profilerAssets = new CpuProfiler();
         const collections = event.id.map((identifier) => {
-          const { collection } =
-            getCollectionAndNonceFromIdentifier(identifier);
+          const { collection } = getCollectionAndNonceFromIdentifier(identifier);
           return collection;
         });
         await Promise.all([
@@ -76,12 +71,8 @@ export class CacheEventsConsumer {
         const profilerAssetRefresh = new CpuProfiler();
         const { collection } = getCollectionAndNonceFromIdentifier(event.id);
         const collectionsAssetForOnwerPromise = event.address
-          ? this.collectionAssetsForOwnerRedisHandler.clearKey(
-              `${collection}_${event.address}`,
-            )
-          : this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(
-              collection,
-            );
+          ? this.collectionAssetsForOwnerRedisHandler.clearKey(`${collection}_${event.address}`)
+          : this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(collection);
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
@@ -110,9 +101,7 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.UpdateAuction:
         const profilerUpdateAuction = new CpuProfiler();
-        await Promise.all([
-          this.cacheInvalidationEventsService.invalidateAuction(event),
-        ]);
+        await Promise.all([this.cacheInvalidationEventsService.invalidateAuction(event)]);
         profilerUpdateAuction.stop('UpdateAuction');
         break;
 
@@ -124,17 +113,13 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.UpdateNotifications:
         const profilerUpdateNotifications = new CpuProfiler();
-        await this.cacheInvalidationEventsService.invalidateNotifications(
-          event,
-        );
+        await this.cacheInvalidationEventsService.invalidateNotifications(event);
         profilerUpdateNotifications.stop('UpdateNotifications');
         break;
 
       case CacheEventTypeEnum.UpdateOneNotification:
         const profilerUpdateOneNotification = new CpuProfiler();
-        await this.cacheInvalidationEventsService.invalidateOneNotification(
-          event,
-        );
+        await this.cacheInvalidationEventsService.invalidateOneNotification(event);
         profilerUpdateOneNotification.stop('UpdateOneNotification');
         break;
 
@@ -179,8 +164,11 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.ScamUpdate:
         const profileScamUpdate = new CpuProfiler();
-        this.assetScamInfoRedisHandler.clearKey(event.id),
-          profileScamUpdate.stop('ScamUpdate');
+        this.assetScamInfoRedisHandler.clearKey(event.id), profileScamUpdate.stop('ScamUpdate');
+        break;
+      case CacheEventTypeEnum.Minters:
+        const profileMinters = new CpuProfiler();
+        this.cacheMintersService.invalidateMinters(), profileMinters.stop('Minters');
         break;
 
       // case CacheEventTypeEnum.RefreshTrending:
