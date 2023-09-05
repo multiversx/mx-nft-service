@@ -9,14 +9,10 @@ export class MintersCachingService {
   constructor(private cacheService: CachingService) {}
 
   public async getMinters(getMinters: () => any): Promise<MinterEntity[]> {
-    return await this.cacheService.getOrSetCache(
-      CacheInfo.Minters.key,
-      () => getMinters(),
-      CacheInfo.Minters.ttl,
-    );
+    return await this.cacheService.getOrSetCache(CacheInfo.Minters.key, () => getMinters(), CacheInfo.Minters.ttl);
   }
 
   public async invalidateMinters() {
-    await this.cacheService.deleteInCache(CacheInfo.AllMarketplaces.key);
+    await this.cacheService.deleteInCache(CacheInfo.Minters.key);
   }
 }
