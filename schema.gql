@@ -796,6 +796,7 @@ input IssueCampaignArgs {
   mintPriceToken: String! = "EGLD"
   mintStartTime: Int!
   minterAddress: String!
+  ownerAddress: String!
   royalties: String!
   tags: [String!]!
   tiers: [TierArgs!]!

@@ -7,6 +7,8 @@ import { MintersCachingService } from './minters-caching.service';
 import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
 import { MinterFilters } from './models/MinterFilters';
 import { MintersDeployerAbiService } from './minters-deployer.abi.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class MintersService {
@@ -14,6 +16,7 @@ export class MintersService {
     private persistenceService: PersistenceService,
     private cacheService: MintersCachingService,
     private minterDeployerService: MintersDeployerAbiService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -22,7 +25,7 @@ export class MintersService {
       const contractAddresses = await this.minterDeployerService.getMintersForAddress(request.adminAddress);
       if (contractAddresses.includes(request.address)) {
         const savedMinter = await this.persistenceService.saveMinter(MinterEntity.fromRequest(request));
-        this.cacheService.invalidateMinters();
+        await this.triggerCacheInvalidation();
         return savedMinter ? true : false;
       }
       return false;
@@ -66,5 +69,13 @@ export class MintersService {
       });
       return [];
     }
+  }
+
+  private async triggerCacheInvalidation(): Promise<void> {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.Minters,
+      }),
+    );
   }
 }

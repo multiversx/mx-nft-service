@@ -26,4 +26,5 @@ export enum CacheEventTypeEnum {
   BlacklistedCollections = 'BlacklistedCollections',
   RefreshTrending = 'RefreshTrending',
   MarkCollection = 'MarkCollection',
+  Minters = 'Minters',
 }

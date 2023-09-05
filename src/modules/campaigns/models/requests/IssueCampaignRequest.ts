@@ -15,6 +15,7 @@ export class IssueCampaignRequest {
   tags: string[];
   tiers: TierRequest[];
   minterAddress: string;
+  ownerAddress: string;
 
   constructor(init?: Partial<IssueCampaignRequest>) {
     Object.assign(this, init);
@@ -34,6 +35,7 @@ export class IssueCampaignRequest {
       whitelistEndTime: args.whitelistEndTime,
       tags: args.tags,
       minterAddress: args.minterAddress,
+      ownerAddress: args.ownerAddress,
       tiers: args.tiers.map(
         (t) =>
           new TierRequest({
