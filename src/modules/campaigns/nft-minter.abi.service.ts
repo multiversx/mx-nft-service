@@ -56,11 +56,11 @@ export class NftMinterAbiService {
     return maxNftsPerTransaction?.toNumber() ?? 0;
   }
 
-  async issueToken(ownerAddress: string, request: IssueCampaignRequest): Promise<TransactionNode> {
+  async issueToken(request: IssueCampaignRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(request.minterAddress);
     return contract.methodsExplicit
       .issueTokenForBrand(this.getIssueCampaignArgs(request))
-      .withSender(Address.fromString(ownerAddress))
+      .withSender(Address.fromString(request.ownerAddress))
       .withChainID(mxConfig.chainID)
       .withValue(TokenTransfer.egldFromBigInteger(mxConfig.issueNftCost))
       .withGasLimit(gas.issueCamapaign)
