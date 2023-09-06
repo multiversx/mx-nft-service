@@ -44,7 +44,6 @@
     "@multiversx/sdk-nestjs-http": "2.0.0-beta.1",
     "@multiversx/sdk-nestjs-cache": "2.0.0-beta.1",
     "@multiversx/sdk-nestjs-redis": "2.0.0-beta.1",
-    "@multiversx/sdk-nestjs-auth": "2.0.0-beta.1",
     "@multiversx/sdk-network-providers": "^1.2.1",
     "@nestjs/apollo": "12.0.7",
     "@nestjs/common": "10.2.4",
