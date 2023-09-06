@@ -3,7 +3,6 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
-import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { UpdateNftTraitsResponse } from '../nft-traits/models/update-nft-traits-response';
@@ -70,7 +69,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.updateCollectionRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 
@@ -83,7 +82,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 
@@ -96,7 +95,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateCollectionTraits(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 
@@ -115,7 +114,7 @@ export class AdminOperationsResolver {
       );
       return true;
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 
@@ -128,7 +127,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 

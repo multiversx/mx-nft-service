@@ -1,5 +1,4 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { ApolloError } from 'apollo-server-express';
 import { CollectionScamService } from './collection-scam.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
@@ -15,7 +14,7 @@ export class CollectionScamResolver {
     try {
       return await this.collectionScamService.manuallySetCollectionScamInfo(collection);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 
@@ -25,7 +24,7 @@ export class CollectionScamResolver {
     try {
       return await this.collectionScamService.manuallyClearCollectionScamInfo(collection);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 }

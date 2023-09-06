@@ -32,7 +32,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { ScamModule } from './modules/scam/scam.module';
-import { ComplexityPlugin } from './modules/common/complexity.plugin';
+// import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
