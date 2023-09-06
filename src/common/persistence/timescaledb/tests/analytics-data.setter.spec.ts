@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { AnalyticsDataSetterService } from '../analytics-data.setter.service';
 import { XNftsAnalyticsEntity } from '../entities/analytics.entity';
 import { Logger } from '@nestjs/common';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
 
 describe('Analytics Data Setter Service', () => {
   let service: AnalyticsDataSetterService;

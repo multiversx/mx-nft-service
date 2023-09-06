@@ -64,7 +64,7 @@ describe('Campaigns Service', () => {
 
   describe('getCampaigns', () => {
     it('without filters returns full list', async () => {
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() =>
         Promise.resolve(
           new CollectionType({
@@ -85,7 +85,7 @@ describe('Campaigns Service', () => {
     });
 
     it('when filters by campaignId and minterAddress returns list with one item', async () => {
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() =>
         Promise.resolve(
           new CollectionType({
@@ -113,7 +113,7 @@ describe('Campaigns Service', () => {
     });
 
     it('when filters by campaignId list with that campaignId', async () => {
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() =>
         Promise.resolve(
           new CollectionType({
@@ -140,7 +140,7 @@ describe('Campaigns Service', () => {
     });
 
     it('when filters by minterAddress list with that minterAddress', async () => {
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() =>
         Promise.resolve(
           new CollectionType({
@@ -170,7 +170,7 @@ describe('Campaigns Service', () => {
   describe('saveCampaign', () => {
     it('when no campaign present returns empty list', async () => {
       const nftMinterService = module.get<NftMinterAbiService>(NftMinterAbiService);
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(nftMinterService, 'getCampaignsForScAddress').mockImplementation(() => Promise.resolve([]));
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() => Promise.resolve(7));
 
@@ -184,7 +184,7 @@ describe('Campaigns Service', () => {
     it('when one campaign present returns list with one item', async () => {
       const nftMinterService = module.get<NftMinterAbiService>(NftMinterAbiService);
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() => Promise.resolve(7));
       jest.spyOn(persistenceService, 'saveCampaign').mockImplementation(() => Promise.resolve(saveCampaignInput[0]));
       jest.spyOn(persistenceService, 'saveTiers').mockImplementation(() => Promise.resolve([]));
@@ -201,7 +201,7 @@ describe('Campaigns Service', () => {
     it('when 2 campaigns present returns list with 2 items', async () => {
       const nftMinterService = module.get<NftMinterAbiService>(NftMinterAbiService);
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<CachingService>(CachingService);
+      const cacheService = module.get<CacheService>(CacheService);
       jest.spyOn(cacheService, 'getOrSet').mockImplementation(() => Promise.resolve(7));
       jest
         .spyOn(persistenceService, 'saveCampaign')
