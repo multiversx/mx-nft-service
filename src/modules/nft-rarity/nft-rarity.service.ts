@@ -8,7 +8,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { CustomRank } from './models/custom-rank.model';
 import { NftRarityElasticService } from './nft-rarity.elastic.service';
 import { constants } from 'src/config';
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 @Injectable()
 export class NftRarityService {
   constructor(

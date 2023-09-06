@@ -109,9 +109,9 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns expected response', async () => {
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheService = module.get<MintersCachingService>(MintersCachingService);
 
-      cachingService.getMinters = jest
+      cacheService.getMinters = jest
         .fn()
         .mockReturnValueOnce([new MinterEntity({ address: 'address' }), new MinterEntity({ address: 'address2' })]);
       const result = await service.getMinters();
@@ -121,9 +121,9 @@ describe('Minters Service', () => {
     });
 
     it('when filters by minterAddress returns only one minter', async () => {
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheService = module.get<MintersCachingService>(MintersCachingService);
 
-      cachingService.getMinters = jest
+      cacheService.getMinters = jest
         .fn()
         .mockReturnValueOnce([
           new MinterEntity({ address: 'address', adminAddress: 'adminAddr' }),
@@ -136,9 +136,9 @@ describe('Minters Service', () => {
     });
 
     it('when filters by minterAdminAddress returns only one minter', async () => {
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheService = module.get<MintersCachingService>(MintersCachingService);
 
-      cachingService.getMinters = jest
+      cacheService.getMinters = jest
         .fn()
         .mockReturnValueOnce([
           new MinterEntity({ address: 'address', adminAddress: 'adminAddr' }),
@@ -151,9 +151,9 @@ describe('Minters Service', () => {
     });
 
     it('when filters by minterAdminAddress returns all minters for that owner', async () => {
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheService = module.get<MintersCachingService>(MintersCachingService);
 
-      cachingService.getMinters = jest
+      cacheService.getMinters = jest
         .fn()
         .mockReturnValueOnce([
           new MinterEntity({ address: 'address', adminAddress: 'adminAddr' }),
@@ -181,9 +181,9 @@ describe('Minters Service', () => {
     });
 
     it('when repo returns value returns addresses', async () => {
-      const cachingService = module.get<MintersCachingService>(MintersCachingService);
+      const cacheService = module.get<MintersCachingService>(MintersCachingService);
 
-      cachingService.getMinters = jest
+      cacheService.getMinters = jest
         .fn()
         .mockReturnValueOnce([new MinterEntity({ address: 'address' }), new MinterEntity({ address: 'address2' })]);
 

@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';

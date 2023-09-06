@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 import { MxApiService } from 'src/common';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
@@ -12,7 +13,7 @@ export class XoxnoArtistsWarmerService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private mxApiService: MxApiService,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
   ) {}
 
   @Cron(CronExpression.EVERY_10_MINUTES)
@@ -55,7 +56,7 @@ export class XoxnoArtistsWarmerService {
   }
 
   private async getOrSetXoxnoScCount(address: string) {
-    return this.cacheService.getOrSetCache(
+    return this.cacheService.getOrSet(
       CacheInfo.XoxnoScCount.key,
       async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,
@@ -63,15 +64,15 @@ export class XoxnoArtistsWarmerService {
   }
 
   private async getArtistAddress(address: string) {
-    return this.cacheService.getCache(`${CacheInfo.Artist.key}_${address}`);
+    return this.cacheService.get(`${CacheInfo.Artist.key}_${address}`);
   }
 
   private async getCachedXoxnoScCount() {
-    return this.cacheService.getCache(CacheInfo.XoxnoScCount.key);
+    return this.cacheService.get(CacheInfo.XoxnoScCount.key);
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(key, data, ttl);
+    await this.cacheService.set(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 

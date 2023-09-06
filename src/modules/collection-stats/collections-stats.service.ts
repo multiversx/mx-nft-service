@@ -5,7 +5,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AssetsQuery } from '../assets';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 @Injectable()

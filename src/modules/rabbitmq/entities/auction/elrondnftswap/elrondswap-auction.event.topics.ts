@@ -1,5 +1,5 @@
 import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core';
-import { NumberUtils } from '@multiversx/sdk-nestjs';
+import { NumberUtils } from '@multiversx/sdk-nestjs-common';
 
 export class ElrondSwapAuctionTopics {
   private auctionId: string;

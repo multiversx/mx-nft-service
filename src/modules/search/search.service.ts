@@ -4,7 +4,8 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 import { SearchNftCollectionResponse, SearchItemResponse } from './models/SearchItemResponse';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { NftTypeEnum } from '../assets/models';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 

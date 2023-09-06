@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { FeaturedCollectionEntity, FeaturedNftEntity } from 'src/db/featuredNfts';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class FeaturedCollectionsCachingService {

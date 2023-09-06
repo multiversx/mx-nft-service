@@ -3,7 +3,7 @@ import { MxApiService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { mxConfig } from 'src/config';
 import { computeUsdAmount } from 'src/utils/helpers';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { Token } from './Token.model';
 import { MxDataApiService } from 'src/common/services/mx-communication/mx-data.service';
 import { DateUtils } from 'src/utils/date-utils';
@@ -11,7 +11,7 @@ import { DateUtils } from 'src/utils/date-utils';
 @Injectable()
 export class UsdPriceService {
   constructor(
-    private readonly cacheService: CachingService,
+    private readonly cacheService: CacheService,
     private readonly mxApiService: MxApiService,
     private readonly mxDataApi: MxDataApiService,
   ) {}
@@ -29,15 +29,11 @@ export class UsdPriceService {
   }
 
   public async getAllCachedTokens(): Promise<Token[]> {
-    return await this.cacheService.getOrSetCache(
-      CacheInfo.AllTokens.key,
-      async () => await this.setAllCachedTokens(),
-      CacheInfo.AllTokens.ttl,
-    );
+    return await this.cacheService.getOrSet(CacheInfo.AllTokens.key, async () => await this.setAllCachedTokens(), CacheInfo.AllTokens.ttl);
   }
 
   public async getTokenPriceFromDate(token: string, timestamp: number): Promise<number> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `${CacheInfo.TokenHistoricalPrice.key}_${token}_${DateUtils.timestampToIsoStringWithHour(timestamp)}`,
       async () => await this.getTokenHistoricalPrice(token, timestamp),
       CacheInfo.TokenHistoricalPrice.ttl,
@@ -61,7 +57,7 @@ export class UsdPriceService {
       return token;
     }
 
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `token_${tokenId}`,
       async () => await this.mxApiService.getTokenData(tokenId),
       CacheInfo.AllTokens.ttl,
@@ -107,7 +103,7 @@ export class UsdPriceService {
   }
 
   private async getCachedDexTokens(): Promise<Token[]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.AllDexTokens.key,
       async () => await this.mxApiService.getAllDexTokens(),
       CacheInfo.AllDexTokens.ttl,
@@ -115,7 +111,7 @@ export class UsdPriceService {
   }
 
   private async getCachedApiTokens(): Promise<Token[]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.AllApiTokens.key,
       async () => await this.mxApiService.getAllTokens(),
       CacheInfo.AllApiTokens.ttl,
@@ -123,7 +119,7 @@ export class UsdPriceService {
   }
 
   private async getCurrentEgldPrice(): Promise<string> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.EgldToken.key,
       async () => await this.mxApiService.getEgldPriceFromEconomics(),
       CacheInfo.EgldToken.ttl,
@@ -131,7 +127,7 @@ export class UsdPriceService {
   }
 
   private async getCexTokens(): Promise<string[]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.CexTokens.key,
       async () => await this.mxDataApi.getCexTokens(),
       CacheInfo.CexTokens.ttl,
@@ -139,7 +135,7 @@ export class UsdPriceService {
   }
 
   private async getXexchangeTokens(): Promise<string[]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.xExchangeTokens.key,
       async () => await this.mxDataApi.getXexchangeTokens(),
       CacheInfo.xExchangeTokens.ttl,

@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
 @Injectable()
 export class SmartContractArtistsService {
-  constructor(private cachingService: CachingService, private mxApiService: MxApiService, private logger: Logger) {}
+  constructor(private cacheService: CacheService, private mxApiService: MxApiService, private logger: Logger) {}
 
   async getOrSetArtistForScAddress(address: string) {
-    return this.cachingService.getOrSetCache(
+    return this.cacheService.getOrSet(
       `${CacheInfo.Artist.key}_${address}`,
       async () => this.getMappedArtistForScAddress(address),
       CacheInfo.Artist.ttl,
@@ -50,7 +50,7 @@ export class SmartContractArtistsService {
   }
 
   private async getOrSetXoxnoScCount(address: string) {
-    return this.cachingService.getOrSetCache(
+    return this.cacheService.getOrSet(
       CacheInfo.XoxnoScCount.key,
       async () => this.mxApiService.getAccountSmartContractsCount(address),
       CacheInfo.XoxnoScCount.ttl,

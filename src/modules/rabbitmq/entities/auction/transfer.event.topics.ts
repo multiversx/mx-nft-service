@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Address } from '@multiversx/sdk-core';
 import '../../../../utils/extensions';
 

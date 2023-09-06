@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { RedisValue } from '../common/redis-value.dto';
 

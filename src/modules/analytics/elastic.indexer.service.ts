@@ -1,4 +1,4 @@
-import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 

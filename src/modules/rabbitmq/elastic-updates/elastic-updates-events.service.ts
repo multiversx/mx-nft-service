@@ -11,7 +11,7 @@ import { UpdateAttributesEvent } from '../entities/auction/update-attributes.eve
 import { NftScamService } from 'src/modules/scam/nft-scam.service';
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class ElasticUpdatesEventsService {

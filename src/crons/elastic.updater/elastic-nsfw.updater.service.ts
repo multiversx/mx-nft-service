@@ -1,4 +1,4 @@
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { NsfwUpdaterService } from './nsfw.updater.service';

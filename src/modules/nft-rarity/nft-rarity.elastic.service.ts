@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { ElasticQuery, ElasticSortOrder, Locker, QueryOperator, QueryType } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { NftTypeEnum } from '../assets/models';
 import { NftRarityData } from './models/nft-rarity-data.model';
 import { constants } from 'src/config';

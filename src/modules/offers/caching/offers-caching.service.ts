@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { OfferEntity } from 'src/db/offers';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class OffersCachingService {

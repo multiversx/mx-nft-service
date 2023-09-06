@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
-import { NativeAuthSigner } from '@multiversx/sdk-nestjs/lib/src/utils/native.auth.signer';
+import { NativeAuthSigner } from '@multiversx/sdk-nestjs-http';
 import { ApiService } from './api.service';
 import { ApiSettings } from './models/api-settings';
 import { getFilePathFromDist } from 'src/utils/helpers';

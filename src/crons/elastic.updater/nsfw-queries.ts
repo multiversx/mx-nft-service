@@ -1,5 +1,5 @@
 import { NftTypeEnum } from 'src/modules/assets/models';
-import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 
 export const getNsfwNotMarkedQuery = ElasticQuery.create()

@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import { Constants, ElasticQuery, Locker, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
+import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,

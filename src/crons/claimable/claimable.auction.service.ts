@@ -1,4 +1,4 @@
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';

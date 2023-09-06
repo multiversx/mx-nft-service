@@ -4,7 +4,8 @@ import { MxApiService } from 'src/common';
 import { CollectionStatsEntity } from 'src/db/collection-stats/collection-stats';
 import { Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 
 describe('CollectionsStatsService', () => {
@@ -36,7 +37,7 @@ describe('CollectionsStatsService', () => {
         {
           provide: PersistenceService,
           useValue: {
-            getOrSetCache: jest.fn(),
+            getOrSet: jest.fn(),
           },
         },
       ],

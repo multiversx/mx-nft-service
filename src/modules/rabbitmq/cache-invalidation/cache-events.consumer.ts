@@ -1,4 +1,4 @@
-import { CpuProfiler } from '@multiversx/sdk-nestjs';
+import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { Injectable, Logger } from '@nestjs/common';
 import { AssetsRedisHandler } from 'src/modules/assets';
 import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';

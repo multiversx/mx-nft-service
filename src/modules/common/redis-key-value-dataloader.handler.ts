@@ -1,4 +1,4 @@
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable, Logger } from '@nestjs/common';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';

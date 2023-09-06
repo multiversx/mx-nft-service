@@ -34,9 +34,9 @@ import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.m
 import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 import { MintersModuleGraph } from './modules/minters/minters.module';
 
@@ -53,7 +53,7 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       introspection: process.env.NODE_ENV !== 'production',
       playground: true,
       sortSchema: true,
-      plugins: [new ComplexityPlugin()],
+      // plugins: [new ComplexityPlugin()],
       formatError: (error: GraphQLError) => {
         const graphQLFormattedError: GraphQLFormattedError = {
           ...error,

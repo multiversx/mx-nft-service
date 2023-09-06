@@ -1,4 +1,11 @@
-import { ElasticQuery, QueryType, QueryOperator, RangeGreaterThan, RangeLowerThanOrEqual, ElasticSortOrder } from '@multiversx/sdk-nestjs';
+import {
+  ElasticQuery,
+  QueryType,
+  QueryOperator,
+  RangeGreaterThan,
+  RangeLowerThanOrEqual,
+  ElasticSortOrder,
+} from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 import { NftTypeEnum } from '../assets/models';
 

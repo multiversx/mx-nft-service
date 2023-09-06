@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import '../../../utils/extensions';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
 import { PriceRange } from 'src/db/auctions/price-range';

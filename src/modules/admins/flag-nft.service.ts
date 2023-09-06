@@ -1,4 +1,5 @@
-import { ElasticQuery, Locker, QueryOperator, QueryType } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { MxElasticService, NftMedia } from 'src/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';

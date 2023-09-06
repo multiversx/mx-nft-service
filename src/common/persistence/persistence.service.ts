@@ -1,4 +1,4 @@
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';

@@ -1,4 +1,4 @@
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { Injectable } from '@nestjs/common';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';

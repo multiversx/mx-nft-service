@@ -8,7 +8,7 @@ import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
 import { CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
@@ -27,7 +27,7 @@ export class CollectionsGetterService {
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
     private analyticsService: TrendingCollectionsService,
     private documentDbService: DocumentDbService,
     private blacklistedCollectionsService: BlacklistedCollectionsService,
@@ -98,7 +98,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetTrendingByAuctionsCollections(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.TrendingCollections.key,
       async () => await this.getAllTrendingCollections(),
       CacheInfo.TrendingCollections.ttl,
@@ -145,7 +145,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.ActiveCollectionLast30Days.key,
       async () => await this.getActiveCollectionsFromLast30Days(),
       CacheInfo.ActiveCollectionLast30Days.ttl,
@@ -220,7 +220,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetFullCollections(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
       CacheInfo.AllCollections.ttl,
@@ -251,7 +251,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetMostActiveCollections(): Promise<[{ artist: string; nfts: number; collections: string[] }[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.CollectionsMostActive.key,
       async () => await this.getMostActiveCollections(),
       CacheInfo.CollectionsMostActive.ttl,
@@ -279,7 +279,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetMostFollowedCollections(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.CollectionsMostFollowed.key,
       async () => await this.getMostFollowedCollections(),
       CacheInfo.CollectionsMostFollowed.ttl,

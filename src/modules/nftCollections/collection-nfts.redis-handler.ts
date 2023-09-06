@@ -1,4 +1,5 @@
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';

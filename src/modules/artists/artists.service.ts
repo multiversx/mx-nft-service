@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxIdentityService } from 'src/common';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Account } from '../account-stats/models';
 import { ArtistSortingEnum } from './models/Artist-Sorting.enum';
@@ -11,7 +11,7 @@ import { CollectionsGetterService } from '../nftCollections/collections-getter.s
 export class ArtistsService {
   constructor(
     private idService: MxIdentityService,
-    private cachingService: CachingService,
+    private cacheService: CacheService,
     private collectionsGetterService: CollectionsGetterService,
   ) {}
 
@@ -63,7 +63,7 @@ export class ArtistsService {
   }
 
   async getOrSetAccount(address: string) {
-    return this.cachingService.getOrSetCache(
+    return this.cacheService.getOrSet(
       `${CacheInfo.Account.key}_${address}`,
       async () => this.getMappedAccountForRedis(address),
       CacheInfo.Account.ttl,

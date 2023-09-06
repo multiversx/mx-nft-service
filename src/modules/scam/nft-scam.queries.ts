@@ -1,4 +1,4 @@
-import { ElasticQuery, QueryType, QueryOperator } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, QueryType, QueryOperator } from '@multiversx/sdk-nestjs-elastic';
 import { constants, elasticDictionary } from 'src/config';
 import { NftTypeEnum } from '../assets/models';
 
