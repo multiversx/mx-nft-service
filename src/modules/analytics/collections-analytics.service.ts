@@ -84,7 +84,7 @@ export class CollectionsAnalyticsService {
   }
 
   public async getTopHolders(collectionIdentifier: string): Promise<HoldersCount[]> {
-    return this.cacheService.getOrSetCache(
+    return this.cacheService.getOrSet(
       `${CacheInfo.CollectionTopHolders.key}_${collectionIdentifier}`,
       () => this.elasticService.getTopHoldersCountForCollection(collectionIdentifier),
       CacheInfo.CollectionTopHolders.ttl,
