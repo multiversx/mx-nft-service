@@ -79,7 +79,6 @@
     "graphql-query-complexity": "0.12.0",
     "graphql-relay": "0.10.0",
     "graphql-tools": "8.3.18",
-    "graphql-upload": "13.0.0",
     "helmet": "4.4.1",
     "jwks-rsa": "2.0.3",
     "moment": "^2.29.4",
