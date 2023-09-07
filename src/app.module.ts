@@ -48,6 +48,7 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
     }),
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
+      csrfPrevention: false,
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
       introspection: process.env.NODE_ENV !== 'production',
