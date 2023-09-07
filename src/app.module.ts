@@ -48,26 +48,27 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      // csrfPrevention: false,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      introspection: process.env.NODE_ENV !== 'production',
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault(), new ComplexityPlugin()],
-      sortSchema: true,
-      formatError: (error: GraphQLError) => {
-        const graphQLFormattedError: GraphQLFormattedError = {
-          ...error,
-          message: error.message,
-        };
-        console.error(graphQLFormattedError);
+      useFactory: async () => ({
+        autoSchemaFile: 'schema.gql',
+        introspection: process.env.NODE_ENV !== 'production',
+        playground: false,
+        plugins: [ApolloServerPluginLandingPageLocalDefault(), new ComplexityPlugin()],
+        sortSchema: true,
+        formatError: (error: GraphQLError) => {
+          const graphQLFormattedError: GraphQLFormattedError = {
+            ...error,
+            message: error.message,
+          };
+          console.error(graphQLFormattedError);
 
-        return {
-          ...graphQLFormattedError,
-          extensions: { ...graphQLFormattedError.extensions, exception: null },
-        };
-      },
+          return {
+            ...graphQLFormattedError,
+            extensions: { ...graphQLFormattedError.extensions, exception: null },
+          };
+        },
+      }),
     }),
     CommonModule,
     CollectionsModuleGraph,
