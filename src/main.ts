@@ -117,7 +117,7 @@ async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
   });
-  app.use(graphqlUploadExpress());
+  // app.use(graphqlUploadExpress());
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
