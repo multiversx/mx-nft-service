@@ -34,10 +34,7 @@ import { SumWeekly } from './entities/sum-weekly.entity';
       }),
       inject: [ApiConfigService],
     }),
-    TypeOrmModule.forFeature(
-      [XNftsAnalyticsEntity, SumDaily, SumWeekly, FloorPriceDaily],
-      'timescaledb',
-    ),
+    TypeOrmModule.forFeature([XNftsAnalyticsEntity, SumDaily, SumWeekly, FloorPriceDaily], 'timescaledb'),
   ],
   providers: [AnalyticsDataGetterService, AnalyticsDataSetterService],
   exports: [AnalyticsDataGetterService, AnalyticsDataSetterService],

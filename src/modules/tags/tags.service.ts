@@ -9,17 +9,9 @@ import { CachingService, Constants } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class TagsService {
-  constructor(
-    private apiService: MxApiService,
-    private persistenceService: PersistenceService,
-    private cacheService: CachingService,
-  ) {}
+  constructor(private apiService: MxApiService, private persistenceService: PersistenceService, private cacheService: CachingService) {}
 
-  async getTags(
-    offset: number = 0,
-    limit: number = 10,
-    filters: TagsFilter,
-  ): Promise<[Tag[], number]> {
+  async getTags(offset: number = 0, limit: number = 10, filters: TagsFilter): Promise<[Tag[], number]> {
     if (filters.tagType === TagTypeEnum.Nft) {
       const [tagsApi, count] = await this.getNftTags(filters, offset, limit);
       const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
@@ -30,11 +22,7 @@ export class TagsService {
     return [tags, count];
   }
 
-  private async getNftTags(
-    filters: TagsFilter,
-    offset: number,
-    limit: number,
-  ): Promise<[Tag[], number]> {
+  private async getNftTags(filters: TagsFilter, offset: number, limit: number): Promise<[Tag[], number]> {
     let [tagsApi, count] = [[], 0];
     if (filters?.searchTerm) {
       [tagsApi, count] = await Promise.all([
@@ -48,27 +36,16 @@ export class TagsService {
     return [tagsApi, count];
   }
 
-  private async getCachedNftTags(
-    offset: number,
-    limit: number,
-    filters: TagsFilter,
-  ): Promise<[NftTag[], number]> {
+  private async getCachedNftTags(offset: number, limit: number, filters: TagsFilter): Promise<[NftTag[], number]> {
     return await this.cacheService.getOrSetCache(
       `${CacheInfo.NftTags.key}_${limit}_${offset}`,
       async () =>
-        Promise.all([
-          this.apiService.getTags(offset, limit, filters.searchTerm),
-          this.apiService.getTagsCount(filters.searchTerm),
-        ]),
+        Promise.all([this.apiService.getTags(offset, limit, filters.searchTerm), this.apiService.getTagsCount(filters.searchTerm)]),
       5 * Constants.oneMinute(),
     );
   }
 
-  private async getAuctionTags(
-    filters: TagsFilter,
-    offset: number,
-    limit: number,
-  ): Promise<[Tag[], number]> {
+  private async getAuctionTags(filters: TagsFilter, offset: number, limit: number): Promise<[Tag[], number]> {
     if (filters?.searchTerm) {
       return await this.getAuctionTagsWithSearch(filters, offset, limit);
     } else {
@@ -81,25 +58,14 @@ export class TagsService {
   }
 
   async getAuctionTagsFromDb(limit: number = 100): Promise<[Tag[], number]> {
-    const [tagsApi, count] = await Promise.all([
-      this.persistenceService.getTags(limit),
-      this.persistenceService.getTagsCount(),
-    ]);
+    const [tagsApi, count] = await Promise.all([this.persistenceService.getTags(limit), this.persistenceService.getTagsCount()]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));
     return [tags, count];
   }
 
-  async getAuctionTagsWithSearch(
-    filters: TagsFilter,
-    offset: number,
-    limit: number,
-  ): Promise<[Tag[], number]> {
+  async getAuctionTagsWithSearch(filters: TagsFilter, offset: number, limit: number): Promise<[Tag[], number]> {
     const [tagsApi, count] = await Promise.all([
-      this.persistenceService.getTagsBySearchTerm(
-        filters.searchTerm,
-        offset,
-        limit,
-      ),
+      this.persistenceService.getTagsBySearchTerm(filters.searchTerm, offset, limit),
       this.persistenceService.getTagsBySearchTermCount(filters.searchTerm),
     ]);
     const tags = tagsApi?.map((element) => Tag.fromApiTag(element));

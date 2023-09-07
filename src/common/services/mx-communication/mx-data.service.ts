@@ -22,13 +22,10 @@ export class MxDataApiService {
       let response = await this.apiService.get(requestUrl, this.getHeaders());
       return response.data.price;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx data service on url ${requestUrl}`,
-        {
-          path: this.getCexPrice.name,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx data service on url ${requestUrl}`, {
+        path: this.getCexPrice.name,
+        exception: error,
+      });
       return;
     }
   }
@@ -40,13 +37,10 @@ export class MxDataApiService {
 
       return response?.data?.map((x) => x.identifier);
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx data service on url ${requestUrl}`,
-        {
-          path: this.getCexTokens.name,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx data service on url ${requestUrl}`, {
+        path: this.getCexTokens.name,
+        exception: error,
+      });
       return;
     }
   }
@@ -57,34 +51,25 @@ export class MxDataApiService {
       let response = await this.apiService.get(requestUrl);
       return response?.data?.map((x) => x.identifier);
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx data service on url ${requestUrl}`,
-        {
-          path: this.getXexchangeTokens.name,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx data service on url ${requestUrl}`, {
+        path: this.getXexchangeTokens.name,
+        exception: error,
+      });
       return;
     }
   }
 
-  async getXechangeTokenPrice(
-    token: string,
-    isoDateOnly: string,
-  ): Promise<number> {
+  async getXechangeTokenPrice(token: string, isoDateOnly: string): Promise<number> {
     const requestUrl = `${this.url}/v1/quotes/xexchange/${token}?date=${isoDateOnly}&fields=price`;
     try {
       let response = await this.apiService.get(requestUrl, this.getHeaders());
 
       return response.data.price;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx data service on url ${requestUrl}`,
-        {
-          path: this.getCexPrice.name,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx data service on url ${requestUrl}`, {
+        path: this.getCexPrice.name,
+        exception: error,
+      });
       return;
     }
   }

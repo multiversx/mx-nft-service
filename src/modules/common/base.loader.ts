@@ -5,9 +5,7 @@ import { RedisValueDataloaderHandler } from './redis-value-dataloader.handler';
 @Injectable({ scope: Scope.REQUEST })
 export abstract class BaseProvider<T> {
   constructor(
-    private redisHandler:
-      | RedisKeyValueDataloaderHandler<T>
-      | RedisValueDataloaderHandler<T>,
+    private redisHandler: RedisKeyValueDataloaderHandler<T> | RedisValueDataloaderHandler<T>,
     private dataLoader: {
       load: (arg0: T) => any;
       clear: (arg0: T) => any;

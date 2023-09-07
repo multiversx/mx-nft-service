@@ -5,20 +5,11 @@ import { ApiSettings } from './models/api-settings';
 
 @Injectable()
 export class SlackReportService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly apiService: ApiService,
-  ) {}
+  constructor(private readonly logger: Logger, private readonly apiService: ApiService) {}
 
-  async sendReport(
-    identifier: string,
-    count: number,
-    type: 'nfts' | 'collections' = 'nfts',
-  ): Promise<boolean> {
+  async sendReport(identifier: string, count: number, type: 'nfts' | 'collections' = 'nfts'): Promise<boolean> {
     const url = process.env.SLACK_API;
-    const marketplaceUrl = new URL(
-      `${process.env.ELROND_MARKETPLACE}\\${type}\\${identifier}`,
-    );
+    const marketplaceUrl = new URL(`${process.env.ELROND_MARKETPLACE}\\${type}\\${identifier}`);
     try {
       const response = await this.apiService.post(
         url,
@@ -32,16 +23,11 @@ export class SlackReportService {
       );
       return response.data;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the slack report service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: 'SlackReportService.sendReport',
-          identifier,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the slack report service on url ${removeCredentialsFromUrl(url)}`, {
+        path: 'SlackReportService.sendReport',
+        identifier,
+        exception: error,
+      });
       return;
     }
   }
@@ -61,9 +47,7 @@ export class SlackReportService {
       );
     } catch (error) {
       this.logger.error(
-        `An error occurred while sending slack notification for marketplace SCUpgrade event url ${removeCredentialsFromUrl(
-          url,
-        )}`,
+        `An error occurred while sending slack notification for marketplace SCUpgrade event url ${removeCredentialsFromUrl(url)}`,
         {
           path: 'SlackReportService.sendScUpgradeNotification',
           marketplaceAddress,

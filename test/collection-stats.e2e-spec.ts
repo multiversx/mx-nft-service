@@ -30,9 +30,7 @@ describe('CollectionStatsResolver', () => {
     `;
 
     it('get stats for collection', async () => {
-      const collectionStatsService = app.get<CollectionsStatsService>(
-        CollectionsStatsService,
-      );
+      const collectionStatsService = app.get<CollectionsStatsService>(CollectionsStatsService);
       jest.spyOn(collectionStatsService, 'getStats').mockResolvedValue(
         new CollectionStatsEntity({
           activeAuctions: 2,
@@ -43,9 +41,7 @@ describe('CollectionStatsResolver', () => {
           volumeTraded: '21',
         }),
       );
-      jest
-        .spyOn(collectionStatsService, 'getItemsCount')
-        .mockResolvedValue({ key: 'test', value: '4' });
+      jest.spyOn(collectionStatsService, 'getItemsCount').mockResolvedValue({ key: 'test', value: '4' });
 
       return request(app.getHttpServer())
         .post('/graphql')

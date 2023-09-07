@@ -5,10 +5,7 @@ import { AssetsHistoryService } from '.';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { AssetHistoryLogResponse } from './models';
 import { DateUtils } from 'src/utils/date-utils';
-import {
-  HistoryPagination,
-  HistoryEdge,
-} from '../common/filters/ConnectionArgs';
+import { HistoryPagination, HistoryEdge } from '../common/filters/ConnectionArgs';
 import { AssetHistoryFilter } from '../common/filters/filtersTypes';
 
 @Resolver(() => AssetHistoryLogResponse)
@@ -24,28 +21,13 @@ export class AssetsHistoryResolver extends BaseResolver(AssetHistoryLog) {
     @Args({ name: 'pagination', type: () => HistoryPagination, nullable: true })
     pagination: HistoryPagination,
   ): Promise<AssetHistoryLogResponse> {
-    const { collection, nonce } = getCollectionAndNonceFromIdentifier(
-      filters.identifier,
-    );
-    const historyLog = await this.assetsHistoryService.getOrSetHistoryLog(
-      collection,
-      nonce,
-      pagination.first,
-      pagination.timestamp,
-    );
+    const { collection, nonce } = getCollectionAndNonceFromIdentifier(filters.identifier);
+    const historyLog = await this.assetsHistoryService.getOrSetHistoryLog(collection, nonce, pagination.first, pagination.timestamp);
     return this.mapResponse(historyLog, pagination.timestamp, pagination.first);
   }
 
-  private mapResponse(
-    returnList: AssetHistoryLog[],
-    offset: number,
-    limit: number,
-  ) {
-    const startTimestamp = offset
-      ? offset
-      : returnList.length > 0
-      ? returnList[0]?.actionDate
-      : DateUtils.getCurrentTimestamp();
+  private mapResponse(returnList: AssetHistoryLog[], offset: number, limit: number) {
+    const startTimestamp = offset ? offset : returnList.length > 0 ? returnList[0]?.actionDate : DateUtils.getCurrentTimestamp();
 
     return {
       edges: returnList?.map(

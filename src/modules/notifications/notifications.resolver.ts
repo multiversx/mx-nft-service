@@ -26,11 +26,7 @@ export class NotificationsResolver extends BaseResolver(Notification) {
     @AuthUser() user: UserAuthResult,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [notifications, count] =
-      await this.notificationsService.getNotifications(
-        user.address,
-        filters?.marketplaceKey,
-      );
+    const [notifications, count] = await this.notificationsService.getNotifications(user.address, filters?.marketplaceKey);
     const page = connectionFromArraySlice(notifications, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,

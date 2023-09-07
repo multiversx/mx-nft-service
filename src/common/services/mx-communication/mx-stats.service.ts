@@ -5,10 +5,7 @@ import { NftViewsCount } from './models/nft-views.dto';
 
 @Injectable()
 export class MxStatsService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly apiService: ApiService,
-  ) {}
+  constructor(private readonly logger: Logger, private readonly apiService: ApiService) {}
 
   async getTrending(dimension: 'identifier' | 'collection'): Promise<string[]> {
     const url = `${process.env.ELROND_STATS}api/v1/trending/${dimension}`;
@@ -17,16 +14,11 @@ export class MxStatsService {
       const response = await this.apiService.get(url);
       return response.data;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: `${MxStatsService.name}.${this.getTrending.name}`,
-          dimension,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(url)}`, {
+        path: `${MxStatsService.name}.${this.getTrending.name}`,
+        dimension,
+        exception: error,
+      });
       return;
     }
   }
@@ -38,16 +30,11 @@ export class MxStatsService {
       const response = await this.apiService.get(url);
       return response.data;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: `${MxStatsService.name}.${this.getNftsViewsCount.name}`,
-          identifier,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx stats service on url ${removeCredentialsFromUrl(url)}`, {
+        path: `${MxStatsService.name}.${this.getNftsViewsCount.name}`,
+        identifier,
+        exception: error,
+      });
       return new NftViewsCount({ identifier: identifier, viewsCount: 0 });
     }
   }

@@ -15,31 +15,11 @@ export class AssetsHistoryCachingService {
     timestamp: string | number,
     getOrSetHistoryLog: () => any,
   ): Promise<AssetHistoryLog[]> {
-    const cacheKey = this.getAssetHistoryCacheKey(
-      collection,
-      nonce,
-      limit,
-      timestamp,
-    );
-    return await this.redisCacheService.getOrSet(
-      cacheKey,
-      getOrSetHistoryLog,
-      CacheInfo.AssetHistory.ttl,
-    );
+    const cacheKey = this.getAssetHistoryCacheKey(collection, nonce, limit, timestamp);
+    return await this.redisCacheService.getOrSet(cacheKey, getOrSetHistoryLog, CacheInfo.AssetHistory.ttl);
   }
 
-  getAssetHistoryCacheKey(
-    collection: string,
-    nonce: string,
-    limit?: number,
-    timestamp?: string | number,
-  ) {
-    return generateCacheKeyFromParams(
-      CacheInfo.AssetHistory.key,
-      collection,
-      nonce,
-      limit,
-      timestamp,
-    );
+  getAssetHistoryCacheKey(collection: string, nonce: string, limit?: number, timestamp?: string | number) {
+    return generateCacheKeyFromParams(CacheInfo.AssetHistory.key, collection, nonce, limit, timestamp);
   }
 }

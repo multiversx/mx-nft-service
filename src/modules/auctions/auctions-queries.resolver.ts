@@ -1,11 +1,4 @@
-import {
-  Resolver,
-  Query,
-  Args,
-  ResolveField,
-  Parent,
-  Int,
-} from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Auction, AuctionTypeEnum, AuctionResponse } from './models';
 import { Asset, Price } from '../assets/models';
@@ -14,11 +7,7 @@ import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsProvider } from '../assets/loaders/assets.loader';
 import { Account } from '../account-stats/models';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
-import {
-  FiltersExpression,
-  Sorting,
-  Grouping,
-} from '../common/filters/filtersTypes';
+import { FiltersExpression, Sorting, Grouping } from '../common/filters/filtersTypes';
 import { AuctionCustomFilter } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
 import { QueryRequest } from '../common/filters/QueryRequest';
@@ -58,16 +47,14 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
       name: 'filters',
       type: () => FiltersExpression,
       nullable: true,
-      description:
-        'The values that can be used for this filters fields are the entity properties',
+      description: 'The values that can be used for this filters fields are the entity properties',
     })
     filters,
     @Args({
       name: 'sorting',
       type: () => [Sorting],
       nullable: true,
-      description:
-        'The values that can be used for this sorting fields are the entity properties',
+      description: 'The values that can be used for this sorting fields are the entity properties',
     })
     sorting,
     @Args({ name: 'grouping', type: () => Grouping, nullable: true })
@@ -82,33 +69,21 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count, priceRange] =
-      await this.auctionsGetterService.getAuctions(
-        new QueryRequest({
-          limit,
-          offset,
-          filters,
-          sorting,
-          groupByOption: groupBy,
-          customFilters,
-        }),
-      );
+    const [auctions, count, priceRange] = await this.auctionsGetterService.getAuctions(
+      new QueryRequest({
+        limit,
+        offset,
+        filters,
+        sorting,
+        groupByOption: groupBy,
+        customFilters,
+      }),
+    );
 
     return {
-      ...PageResponse.mapResponse<Auction>(
-        auctions,
-        pagination,
-        count,
-        offset,
-        limit,
-      ),
+      ...PageResponse.mapResponse<Auction>(auctions, pagination, count, offset, limit),
       priceRange: priceRange
-        ? PriceRange.fromEntity(
-            priceRange?.minBid,
-            priceRange?.maxBid,
-            priceRange?.paymentToken,
-            priceRange?.paymentDecimals,
-          )
+        ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid, priceRange?.paymentToken, priceRange?.paymentDecimals)
         : null,
     };
   }
@@ -124,25 +99,12 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   ) {
     const { limit, offset } = pagination.pagingParams();
 
-    const [auctions, count, priceRange] =
-      await this.auctionsGetterService.getAuctionsOrderByNoBids(
-        new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
-      );
+    const [auctions, count, priceRange] = await this.auctionsGetterService.getAuctionsOrderByNoBids(
+      new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
+    );
     return {
-      ...PageResponse.mapResponse<Auction>(
-        auctions,
-        pagination,
-        count,
-        offset,
-        limit,
-      ),
-      priceRange: priceRange
-        ? PriceRange.fromEntity(
-            priceRange?.minBid,
-            priceRange?.maxBid,
-            priceRange?.paymentToken,
-          )
-        : null,
+      ...PageResponse.mapResponse<Auction>(auctions, pagination, count, offset, limit),
+      priceRange: priceRange ? PriceRange.fromEntity(priceRange?.minBid, priceRange?.maxBid, priceRange?.paymentToken) : null,
     };
   }
 
@@ -155,9 +117,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     })
     filters: TokenFilter,
   ) {
-    const { minBid, maxBid } = await this.auctionsGetterService.getMinMaxPrice(
-      filters?.token ?? mxConfig.egld,
-    );
+    const { minBid, maxBid } = await this.auctionsGetterService.getMinMaxPrice(filters?.token ?? mxConfig.egld);
     return PriceRange.fromEntity(minBid, maxBid);
   }
 
@@ -175,20 +135,8 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [auctions, count] =
-      await this.auctionsGetterService.getClaimableAuctions(
-        limit,
-        offset,
-        user.address,
-        filters?.marketplaceKey,
-      );
-    return PageResponse.mapResponse<Auction>(
-      auctions,
-      pagination,
-      count,
-      offset,
-      limit,
-    );
+    const [auctions, count] = await this.auctionsGetterService.getClaimableAuctions(limit, offset, user.address, filters?.marketplaceKey);
+    return PageResponse.mapResponse<Auction>(auctions, pagination, count, offset, limit);
   }
 
   @ResolveField('asset', () => Asset)
@@ -208,23 +156,16 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
-    return activeOrdersValue?.length > 0
-      ? Price.fromEntity(activeOrdersValue[0])
-      : null;
+    return activeOrdersValue?.length > 0 ? Price.fromEntity(activeOrdersValue[0]) : null;
   }
 
   @ResolveField('topBidder', () => Account)
-  async topBidder(
-    @Parent() auction: Auction,
-    @Fields('topBidder', ['*.']) fields: string[],
-  ) {
+  async topBidder(@Parent() auction: Auction, @Fields('topBidder', ['*.']) fields: string[]) {
     const { id, type } = auction;
     if (type === AuctionTypeEnum.SftOnePerPayment) return null;
     const activeOrders = await this.lastOrderProvider.load(id);
     const activeOrdersValue = activeOrders?.value;
-    return activeOrdersValue && activeOrdersValue?.length > 0
-      ? await this.getAccount(fields, activeOrdersValue[0].ownerAddress)
-      : null;
+    return activeOrdersValue && activeOrdersValue?.length > 0 ? await this.getAccount(fields, activeOrdersValue[0].ownerAddress) : null;
   }
 
   @ResolveField('availableTokens', () => Int)
@@ -238,10 +179,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   }
 
   @ResolveField('owner', () => Account)
-  async owner(
-    @Parent() auction: Auction,
-    @Fields('owner', ['*.']) fields: string[],
-  ) {
+  async owner(@Parent() auction: Auction, @Fields('owner', ['*.']) fields: string[]) {
     const { ownerAddress } = auction;
 
     if (!ownerAddress) return null;
@@ -262,13 +200,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     }
 
     return marketplaceValue?.length > 0
-      ? Marketplace.fromEntity(
-          marketplaceValue[0],
-          identifier,
-          id,
-          marketplaceAuctionId,
-          asset?.type,
-        )
+      ? Marketplace.fromEntity(marketplaceValue[0], identifier, id, marketplaceAuctionId, asset?.type)
       : null;
   }
 
@@ -287,28 +219,19 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
   private hasToResolveAsset(fields: string[]) {
     return (
       fields.filter(
-        (x) =>
-          x !== 'totalAvailableTokens' &&
-          x !== 'totalRunningAuctions' &&
-          x !== 'identifier' &&
-          x !== 'hasAvailableAuctions',
+        (x) => x !== 'totalAvailableTokens' && x !== 'totalRunningAuctions' && x !== 'identifier' && x !== 'hasAvailableAuctions',
       ).length > 0
     );
   }
 
   private async getAccount(fields: string[], ownerAddress: any) {
     const account = this.hasToResolveAccount(fields)
-      ? Account.fromEntity(
-          (await this.accountsProvider.load(ownerAddress)).value,
-          ownerAddress,
-        )
+      ? Account.fromEntity((await this.accountsProvider.load(ownerAddress)).value, ownerAddress)
       : Account.fromEntity(null, ownerAddress);
     return account;
   }
 
   private hasToResolveAccount(fields: string[]) {
-    return (
-      fields.length > 1 || (fields.length === 1 && fields[0] !== 'address')
-    );
+    return fields.length > 1 || (fields.length === 1 && fields[0] !== 'address');
   }
 }

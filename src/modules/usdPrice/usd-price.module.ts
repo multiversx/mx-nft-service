@@ -6,12 +6,7 @@ import { UsdTokenPriceResolver } from './usd-token-price.resolver';
 import { CommonModule } from 'src/common.module';
 
 @Module({
-  providers: [
-    UsdPriceResolver,
-    UsdTokenPriceResolver,
-    UsdPriceRedisHandler,
-    UsdPriceService,
-  ],
+  providers: [UsdPriceResolver, UsdTokenPriceResolver, UsdPriceRedisHandler, UsdPriceService],
   imports: [CommonModule],
   exports: [UsdPriceService],
 })
