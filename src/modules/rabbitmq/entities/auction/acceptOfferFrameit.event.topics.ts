@@ -13,33 +13,19 @@ export class AcceptOfferFrameitEventsTopics {
   private auctionId: number;
 
   constructor(rawTopics: string[]) {
-    this.offerId = parseInt(
-      Buffer.from(rawTopics[1], 'base64').toString('hex'),
-      16,
-    );
+    this.offerId = parseInt(Buffer.from(rawTopics[1], 'base64').toString('hex'), 16);
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.nrOfferTokens = parseInt(
-      BinaryUtils.tryBase64ToBigInt(rawTopics[4])?.toString() ?? '1',
-    );
+    this.nrOfferTokens = parseInt(BinaryUtils.tryBase64ToBigInt(rawTopics[4])?.toString() ?? '1');
     this.offerOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.paymentTokenIdentifier = Buffer.from(
-      rawTopics[6],
-      'base64',
-    ).toString();
-    this.paymentTokenNonce = parseInt(
-      BinaryUtils.tryBase64ToBigInt(rawTopics[7])?.toString() ?? '0',
-    );
-    this.paymentAmount = Buffer.from(rawTopics[8], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.paymentTokenIdentifier = Buffer.from(rawTopics[6], 'base64').toString();
+    this.paymentTokenNonce = parseInt(BinaryUtils.tryBase64ToBigInt(rawTopics[7])?.toString() ?? '0');
+    this.paymentAmount = Buffer.from(rawTopics[8], 'base64').toString('hex').hexBigNumberToString();
     if (rawTopics.length > 10) {
       this.nftOwner = new Address(Buffer.from(rawTopics[10], 'base64'));
     }
     if (rawTopics.length > 11) {
-      this.auctionId = parseInt(
-        BinaryUtils.tryBase64ToBigInt(rawTopics[11])?.toString() ?? '0',
-      );
+      this.auctionId = parseInt(BinaryUtils.tryBase64ToBigInt(rawTopics[11])?.toString() ?? '0');
     }
   }
 

@@ -6,11 +6,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 export abstract class RedisValueDataloaderHandler<T> {
   protected redisCacheService: RedisCacheService;
   private cacheKeyName: string;
-  constructor(
-    redisCacheService: RedisCacheService,
-    cacheKeyName: string,
-    private ttl: number = Constants.oneWeek(),
-  ) {
+  constructor(redisCacheService: RedisCacheService, cacheKeyName: string, private ttl: number = Constants.oneWeek()) {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
   }

@@ -22,18 +22,8 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const campaigns = await this.campaignsService.getCampaigns(
-      limit,
-      offset,
-      filters,
-    );
-    return PageResponse.mapResponse<Campaign>(
-      campaigns?.items || [],
-      pagination,
-      campaigns?.count || 0,
-      offset,
-      limit,
-    );
+    const campaigns = await this.campaignsService.getCampaigns(limit, offset, filters);
+    return PageResponse.mapResponse<Campaign>(campaigns?.items || [], pagination, campaigns?.count || 0, offset, limit);
   }
 
   @ResolveField('status', () => CampaignStatusEnum)
@@ -42,8 +32,7 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     if (startDate > DateUtils.getCurrentTimestamp()) {
       return CampaignStatusEnum.NotStarted;
     }
-    if (endDate <= DateUtils.getCurrentTimestamp() || availableNfts <= 0)
-      return CampaignStatusEnum.Ended;
+    if (endDate <= DateUtils.getCurrentTimestamp() || availableNfts <= 0) return CampaignStatusEnum.Ended;
     return CampaignStatusEnum.Running;
   }
 

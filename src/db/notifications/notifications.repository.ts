@@ -12,10 +12,7 @@ export class NotificationsRepository {
     @InjectRepository(NotificationEntity)
     private notificationsRepository: Repository<NotificationEntity>,
   ) {}
-  async getNotificationsForAddress(
-    address: string,
-    marketplaceKey: string,
-  ): Promise<[NotificationEntity[], number]> {
+  async getNotificationsForAddress(address: string, marketplaceKey: string): Promise<[NotificationEntity[], number]> {
     const defaultSize = 100;
     return await this.notificationsRepository
       .createQueryBuilder('not')
@@ -31,9 +28,7 @@ export class NotificationsRepository {
       .getManyAndCount();
   }
 
-  async getNotificationsByAuctionIds(
-    auctionIds: number[],
-  ): Promise<NotificationEntity[]> {
+  async getNotificationsByAuctionIds(auctionIds: number[]): Promise<NotificationEntity[]> {
     return await this.notificationsRepository
       .createQueryBuilder('n')
       .where(`n.auctionId in (:...ids) and n.status='active'`, {
@@ -42,35 +37,23 @@ export class NotificationsRepository {
       .getMany();
   }
 
-  async getNotificationsByIdentifiersAndType(
-    auctionIds: string[],
-    type: NotificationTypeEnum[],
-  ): Promise<NotificationEntity[]> {
+  async getNotificationsByIdentifiersAndType(auctionIds: string[], type: NotificationTypeEnum[]): Promise<NotificationEntity[]> {
     return await this.notificationsRepository
       .createQueryBuilder('n')
-      .where(
-        `n.identifier in (:...ids) AND n.type in (:...types) and n.status='active'`,
-        {
-          ids: auctionIds,
-          types: type,
-        },
-      )
+      .where(`n.identifier in (:...ids) AND n.type in (:...types) and n.status='active'`, {
+        ids: auctionIds,
+        types: type,
+      })
       .getMany();
   }
 
-  async getNotificationByIdAndOwner(
-    auctionId: number,
-    ownerAddress: string,
-  ): Promise<NotificationEntity> {
+  async getNotificationByIdAndOwner(auctionId: number, ownerAddress: string): Promise<NotificationEntity> {
     return await this.notificationsRepository
       .createQueryBuilder('n')
-      .where(
-        `n.auctionId =:id and n.status='active' and n.ownerAddress=:ownerAddress`,
-        {
-          id: auctionId,
-          ownerAddress: ownerAddress,
-        },
-      )
+      .where(`n.auctionId =:id and n.status='active' and n.ownerAddress=:ownerAddress`, {
+        id: auctionId,
+        ownerAddress: ownerAddress,
+      })
       .getOne();
   }
 

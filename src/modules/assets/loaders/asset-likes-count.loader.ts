@@ -8,22 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class AssetLikesProvider extends BaseProvider<string> {
-  constructor(
-    assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      assetLikesProviderRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(assetLikesProviderRedisHandler: AssetLikesProviderRedisHandler, private persistenceService: PersistenceService) {
+    super(assetLikesProviderRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const assetsLike = await this.persistenceService.getBulkAssetLikesCount(
-      identifiers,
-    );
-    return assetsLike?.groupBy(
-      (asset: { identifier: any }) => asset.identifier,
-    );
+    const assetsLike = await this.persistenceService.getBulkAssetLikesCount(identifiers);
+    return assetsLike?.groupBy((asset: { identifier: any }) => asset.identifier);
   }
 }

@@ -8,12 +8,7 @@ import { OffersModuleGraph } from '../offers/offers.module';
 
 @Module({
   providers: [ExploreStatsService, ExploreStatsResolver],
-  imports: [
-    MxCommunicationModule,
-    CollectionsModuleGraph,
-    AuctionsModuleGraph,
-    OffersModuleGraph,
-  ],
+  imports: [MxCommunicationModule, CollectionsModuleGraph, AuctionsModuleGraph, OffersModuleGraph],
   exports: [ExploreStatsService],
 })
 export class ExploreStatsModuleGraph {}

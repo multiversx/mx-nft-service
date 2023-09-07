@@ -8,23 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class LowestAuctionForMarketplaceProvider extends BaseProvider<string> {
-  constructor(
-    lowestAuctionProviderRedisHandler: LowestAuctionForMarketplaceRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      lowestAuctionProviderRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(lowestAuctionProviderRedisHandler: LowestAuctionForMarketplaceRedisHandler, private persistenceService: PersistenceService) {
+    super(lowestAuctionProviderRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const auctions =
-      await this.persistenceService.getLowestAuctionForIdentifiersAndMarketplace(
-        identifiers,
-      );
-    return auctions?.groupBy(
-      (auction: { identifierKey: any }) => auction.identifierKey,
-    );
+    const auctions = await this.persistenceService.getLowestAuctionForIdentifiersAndMarketplace(identifiers);
+    return auctions?.groupBy((auction: { identifierKey: any }) => auction.identifierKey);
   }
 }

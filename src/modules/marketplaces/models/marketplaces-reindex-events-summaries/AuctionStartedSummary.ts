@@ -1,15 +1,8 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import {
-  AssetActionEnum,
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
-import {
-  AuctionTypeEnum,
-  ElrondSwapAuctionTypeEnum,
-} from 'src/modules/auctions/models';
+import { AssetActionEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
+import { AuctionTypeEnum, ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { AuctionTokenEvent } from 'src/modules/rabbitmq/entities/auction';
 import { ElrondSwapAuctionEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ListNftEvent } from 'src/modules/rabbitmq/entities/auction/listNft.event';
@@ -42,14 +35,9 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromAuctionTokenEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): AuctionStartedSummary {
+  static fromAuctionTokenEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): AuctionStartedSummary {
     const txTopics = tx?.data?.split('@');
-    const minBidDiff = txTopics?.[10]
-      ? BinaryUtils.hexToNumber(txTopics?.[10]).toString()
-      : '0';
+    const minBidDiff = txTopics?.[10] ? BinaryUtils.hexToNumber(txTopics?.[10]).toString() : '0';
 
     const address = event.data.eventData?.address ?? tx.receiver;
     const topics = this.getTopics(event);
@@ -76,17 +64,12 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
       endTime: topics.endTime ?? topics.deadline ?? 0,
       paymentToken: topics.paymentToken,
       paymentNonce: topics.paymentNonce ?? topics.paymentTokenNonce ?? 0,
-      auctionType:
-        Object.values(AuctionTypeEnum)[
-          BinaryUtils.hexToNumber(topics.auctionType)
-        ],
+      auctionType: Object.values(AuctionTypeEnum)[BinaryUtils.hexToNumber(topics.auctionType)],
     });
   }
 
   private static getTopics(event: MarketplaceEventsEntity): any {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (event.hasEventIdentifier(KroganSwapAuctionEventEnum.NftSwap)) {
       try {
@@ -100,9 +83,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
       }
     }
 
-    if (
-      event.hasEventIdentifier(ExternalAuctionEventEnum.ListNftOnMarketplace)
-    ) {
+    if (event.hasEventIdentifier(ExternalAuctionEventEnum.ListNftOnMarketplace)) {
       const topics = new ListNftEvent(genericEvent).getTopics();
       return {
         ...topics,

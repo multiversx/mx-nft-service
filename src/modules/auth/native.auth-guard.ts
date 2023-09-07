@@ -1,12 +1,6 @@
 import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
 import { CachingService } from '@multiversx/sdk-nestjs';
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ApiConfigService } from '../common/api-config/api.config.service';
 import { AuthUtils } from './auth.utils';
@@ -16,10 +10,7 @@ export class NativeAuthGuard implements CanActivate {
   private readonly logger: Logger;
   private readonly authServer: NativeAuthServer;
 
-  constructor(
-    apiConfigService: ApiConfigService,
-    private readonly cachingService: CachingService,
-  ) {
+  constructor(apiConfigService: ApiConfigService, private readonly cachingService: CachingService) {
     this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       apiUrl: apiConfigService.getApiUrl(),
@@ -34,11 +25,7 @@ export class NativeAuthGuard implements CanActivate {
           }
           return await this.cachingService.getCache<T>(key);
         },
-        setValue: async <T>(
-          key: string,
-          value: T,
-          ttl: number,
-        ): Promise<void> => {
+        setValue: async <T>(key: string, value: T, ttl: number): Promise<void> => {
           await this.cachingService.setCache(key, value, ttl);
         },
       },
@@ -67,11 +54,7 @@ export class NativeAuthGuard implements CanActivate {
     try {
       const userInfo = await this.authServer.validate(jwt);
 
-      if (
-        origin &&
-        origin !== userInfo.origin &&
-        origin !== 'https://' + userInfo.origin
-      ) {
+      if (origin && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
         this.logger.log('Unhandled auth origin: ', {
           origin,
           tokenOrigin: userInfo.origin,
@@ -80,10 +63,7 @@ export class NativeAuthGuard implements CanActivate {
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
-      request.res.set(
-        'X-Native-Auth-Timestamp',
-        Math.round(new Date().getTime() / 1000),
-      );
+      request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
 
       request.auth = userInfo;
 

@@ -11,16 +11,11 @@ export class CollectionDetailsRedisHandler extends RedisKeyValueDataloaderHandle
     super(redisCacheService, CacheInfo.CollectionDetails.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    collections: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], collections: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = collections[item.key]
-          ? CollectionsDetailsModel.fromApiCollection(collections[item.key][0])
-          : null;
+        item.value = collections[item.key] ? CollectionsDetailsModel.fromApiCollection(collections[item.key][0]) : null;
         redisValues.push(item);
       }
     }

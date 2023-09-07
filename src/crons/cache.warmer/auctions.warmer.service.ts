@@ -21,20 +21,12 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Featured collection auctions',
       async () => {
-        const collections =
-          await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
+        const collections = await this.marketplacesService.getAllCollectionsIdentifiersFromDb();
 
         for (const collection of collections) {
-          const auctionResult =
-            await this.auctionsGetterService.getAuctionsByCollection(
-              collection,
-            );
+          const auctionResult = await this.auctionsGetterService.getAuctionsByCollection(collection);
 
-          await this.invalidateKey(
-            `collectionAuctions:${collection}`,
-            auctionResult,
-            10 * Constants.oneMinute(),
-          );
+          await this.invalidateKey(`collectionAuctions:${collection}`, auctionResult, 10 * Constants.oneMinute());
         }
       },
       true,
@@ -46,20 +38,12 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Payment tokens auctions',
       async () => {
-        const paymentTokens =
-          await this.auctionsGetterService.getCurrentPaymentTokens();
+        const paymentTokens = await this.auctionsGetterService.getCurrentPaymentTokens();
 
         for (const paymentToken of paymentTokens) {
-          const auctionResult =
-            await this.auctionsGetterService.getAuctionsByPaymentToken(
-              paymentToken.identifier,
-            );
+          const auctionResult = await this.auctionsGetterService.getAuctionsByPaymentToken(paymentToken.identifier);
 
-          await this.invalidateKey(
-            `paymentTokenAuctions:${paymentToken.identifier}`,
-            auctionResult,
-            10 * Constants.oneMinute(),
-          );
+          await this.invalidateKey(`paymentTokenAuctions:${paymentToken.identifier}`, auctionResult, 10 * Constants.oneMinute());
         }
       },
       true,
@@ -71,14 +55,9 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Active auctions',
       async () => {
-        const auctionResult =
-          await this.auctionsGetterService.getActiveAuctions();
+        const auctionResult = await this.auctionsGetterService.getActiveAuctions();
 
-        await this.invalidateKey(
-          CacheInfo.ActiveAuctions.key,
-          auctionResult,
-          CacheInfo.ActiveAuctions.ttl,
-        );
+        await this.invalidateKey(CacheInfo.ActiveAuctions.key, auctionResult, CacheInfo.ActiveAuctions.ttl);
       },
       true,
     );
@@ -89,14 +68,9 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Buy now auctions',
       async () => {
-        const auctionResult =
-          await this.auctionsGetterService.getBuyNowAuctions();
+        const auctionResult = await this.auctionsGetterService.getBuyNowAuctions();
 
-        await this.invalidateKey(
-          CacheInfo.BuyNowAuctions.key,
-          auctionResult,
-          CacheInfo.BuyNowAuctions.ttl,
-        );
+        await this.invalidateKey(CacheInfo.BuyNowAuctions.key, auctionResult, CacheInfo.BuyNowAuctions.ttl);
       },
       true,
     );
@@ -107,14 +81,9 @@ export class AuctionsWarmerService {
     await Locker.lock(
       'Top auctions order by number of bids',
       async () => {
-        const result =
-          await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
+        const result = await this.auctionsGetterService.getTopAuctionsOrderByNoBids();
 
-        await this.invalidateKey(
-          CacheInfo.TopAuctionsOrderByNoBids.key,
-          result,
-          CacheInfo.TopAuctionsOrderByNoBids.ttl,
-        );
+        await this.invalidateKey(CacheInfo.TopAuctionsOrderByNoBids.key, result, CacheInfo.TopAuctionsOrderByNoBids.ttl);
       },
       true,
     );

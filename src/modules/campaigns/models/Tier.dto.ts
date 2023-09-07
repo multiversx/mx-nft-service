@@ -41,10 +41,7 @@ export class Tier {
             amount: tier.mintPrice,
             token: tier.mintToken,
           }),
-          status:
-            tier.availableNfts > 0
-              ? TierStatusEnum.Running
-              : TierStatusEnum.Sold,
+          status: tier.availableNfts > 0 ? TierStatusEnum.Running : TierStatusEnum.Sold,
         })
       : null;
   }

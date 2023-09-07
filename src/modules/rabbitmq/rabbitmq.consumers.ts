@@ -1,7 +1,4 @@
-import {
-  defaultNackErrorHandler,
-  RabbitSubscribe,
-} from '@golevelup/nestjs-rabbitmq';
+import { defaultNackErrorHandler, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { applyDecorators } from '@nestjs/common';
 import { RabbitConsumerConfig } from './rabbit-config';
 

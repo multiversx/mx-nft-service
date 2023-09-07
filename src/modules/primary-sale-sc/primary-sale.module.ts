@@ -7,11 +7,7 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
   providers: [PrimarySaleService, PrimarySaleResolver],
-  imports: [
-    forwardRef(() => MxCommunicationModule),
-    forwardRef(() => CommonModule),
-    forwardRef(() => AuthModule),
-  ],
+  imports: [forwardRef(() => MxCommunicationModule), forwardRef(() => CommonModule), forwardRef(() => AuthModule)],
   exports: [PrimarySaleService],
 })
 export class PrimarySaleModuleGraph {}

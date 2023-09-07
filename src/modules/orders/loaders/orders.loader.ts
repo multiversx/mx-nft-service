@@ -8,10 +8,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class OrdersProvider extends BaseProvider<number> {
-  constructor(
-    ordersRedisHandler: OrdersRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
+  constructor(ordersRedisHandler: OrdersRedisHandler, private persistenceService: PersistenceService) {
     super(
       ordersRedisHandler,
       new DataLoader(async (keys: number[]) => await this.batchLoad(keys), {
@@ -21,10 +18,7 @@ export class OrdersProvider extends BaseProvider<number> {
   }
 
   async getData(auctionIds: number[]) {
-    const orders =
-      await this.persistenceService.getOrdersByAuctionIdsOrderByPrice(
-        auctionIds,
-      );
+    const orders = await this.persistenceService.getOrdersByAuctionIdsOrderByPrice(auctionIds);
 
     return orders?.groupBy((auction) => auction.auctionId);
   }

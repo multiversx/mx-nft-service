@@ -10,11 +10,7 @@ import { OfferCreatedSummary } from '../models/marketplaces-reindex-events-summa
 export class ReindexOfferCreatedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: OfferCreatedSummary,
-    decimals: number,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: OfferCreatedSummary, decimals: number): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const offer = new OfferEntity({
       id: marketplaceReindexState.offers.length,
@@ -27,10 +23,7 @@ export class ReindexOfferCreatedHandler {
       priceToken: input.paymentToken,
       priceNonce: input.paymentNonce,
       priceAmount: input.price,
-      priceAmountDenominated: BigNumberUtils.denominateAmount(
-        input.price,
-        decimals,
-      ),
+      priceAmountDenominated: BigNumberUtils.denominateAmount(input.price, decimals),
       ownerAddress: input.address,
       endDate: input.endTime,
       boughtTokensNo: input.itemsCount,

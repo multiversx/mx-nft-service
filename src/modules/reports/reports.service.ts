@@ -6,25 +6,16 @@ import { ReportCollectionEntity } from 'src/db/reports/report-collection.entity'
 
 @Injectable()
 export class ReportsService {
-  constructor(
-    private persistenceService: PersistenceService,
-    private slackReport: SlackReportService,
-    private readonly logger: Logger,
-  ) {}
+  constructor(private persistenceService: PersistenceService, private slackReport: SlackReportService, private readonly logger: Logger) {}
 
   async addNftReport(identifier: string, address: string): Promise<boolean> {
     try {
-      const isReported = await this.persistenceService.isNftReportedBy(
-        identifier,
-        address,
-      );
+      const isReported = await this.persistenceService.isNftReportedBy(identifier, address);
       if (isReported) {
         return true;
       }
 
-      await this.persistenceService.addNftReport(
-        new ReportNftEntity({ identifier, address }),
-      );
+      await this.persistenceService.addNftReport(new ReportNftEntity({ identifier, address }));
       await this.sendNftReportMessage(identifier);
       return true;
     } catch (err) {
@@ -38,22 +29,14 @@ export class ReportsService {
     }
   }
 
-  async addCollectionReport(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<boolean> {
+  async addCollectionReport(collectionIdentifier: string, address: string): Promise<boolean> {
     try {
-      const isReported = await this.persistenceService.isCollectionReportedBy(
-        collectionIdentifier,
-        address,
-      );
+      const isReported = await this.persistenceService.isCollectionReportedBy(collectionIdentifier, address);
       if (isReported) {
         return true;
       }
 
-      await this.persistenceService.addCollectionReport(
-        new ReportCollectionEntity({ collectionIdentifier, address }),
-      );
+      await this.persistenceService.addCollectionReport(new ReportCollectionEntity({ collectionIdentifier, address }));
       await this.sendCollectionReportMessage(collectionIdentifier);
       return true;
     } catch (err) {
@@ -63,10 +46,7 @@ export class ReportsService {
         address,
         exception: err,
       });
-      return await this.persistenceService.isCollectionReportedBy(
-        collectionIdentifier,
-        address,
-      );
+      return await this.persistenceService.isCollectionReportedBy(collectionIdentifier, address);
     }
   }
 
@@ -74,14 +54,11 @@ export class ReportsService {
     try {
       return await this.persistenceService.clearNftReport(identifier);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while deleting nft reports for identifier.',
-        {
-          path: `${ReportsService.name}.${this.clearNftReport.name}`,
-          identifier,
-          exception: err,
-        },
-      );
+      this.logger.error('An error occurred while deleting nft reports for identifier.', {
+        path: `${ReportsService.name}.${this.clearNftReport.name}`,
+        identifier,
+        exception: err,
+      });
       return false;
     }
   }
@@ -90,31 +67,24 @@ export class ReportsService {
     try {
       return await this.persistenceService.clearCollectionReport(identifier);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while deleting collection reports for identifier.',
-        {
-          path: `${ReportsService.name}.${this.clearCollectionReport.name}`,
-          identifier,
-          exception: err,
-        },
-      );
+      this.logger.error('An error occurred while deleting collection reports for identifier.', {
+        path: `${ReportsService.name}.${this.clearCollectionReport.name}`,
+        identifier,
+        exception: err,
+      });
       return false;
     }
   }
 
   private async sendNftReportMessage(identifier: string) {
-    const reportCount = await this.persistenceService.getNftReportCount(
-      identifier,
-    );
+    const reportCount = await this.persistenceService.getNftReportCount(identifier);
     if (reportCount >= parseInt(process.env.REPORT_TRESHOLD)) {
       await this.slackReport.sendReport(identifier, reportCount);
     }
   }
 
   private async sendCollectionReportMessage(identifier: string) {
-    const reportCount = await this.persistenceService.getCollectionReportCount(
-      identifier,
-    );
+    const reportCount = await this.persistenceService.getCollectionReportCount(identifier);
     if (reportCount >= parseInt(process.env.REPORT_TRESHOLD)) {
       await this.slackReport.sendReport(identifier, reportCount, 'collections');
     }

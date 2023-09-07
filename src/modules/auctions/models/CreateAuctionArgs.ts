@@ -1,11 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
-import {
-  NFT_IDENTIFIER_ERROR,
-  NFT_IDENTIFIER_RGX,
-  NUMERIC_ERROR,
-  NUMERIC_RGX,
-} from 'src/utils/constants';
+import { NFT_IDENTIFIER_ERROR, NFT_IDENTIFIER_RGX, NUMERIC_ERROR, NUMERIC_RGX } from 'src/utils/constants';
 
 @InputType()
 export class CreateAuctionArgs {

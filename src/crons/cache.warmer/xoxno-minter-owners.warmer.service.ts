@@ -20,9 +20,7 @@ export class XoxnoArtistsWarmerService {
     await Locker.lock(
       'Xoxno Minter invalidations',
       async () => {
-        const scOwners = await this.getActualOwnerForXoxno(
-          XOXNO_MINTING_MANAGER,
-        );
+        const scOwners = await this.getActualOwnerForXoxno(XOXNO_MINTING_MANAGER);
         scOwners?.map(
           async (scOwner) =>
             await this.invalidateKey(
@@ -40,18 +38,13 @@ export class XoxnoArtistsWarmerService {
     const cachedScCount = await this.getCachedXoxnoScCount();
     const smartContractsCount = await this.getOrSetXoxnoScCount(address);
     if (cachedScCount || cachedScCount === smartContractsCount) return;
-    const smartContracts = await this.mxApiService.getAccountSmartContracts(
-      address,
-      smartContractsCount,
-    );
+    const smartContracts = await this.mxApiService.getAccountSmartContracts(address, smartContractsCount);
 
     const response = [];
     for (const contract of smartContracts) {
       const cachedArtist = await this.getArtistAddress(contract.address);
       if (cachedArtist) continue;
-      const transaction = await this.mxApiService.getTransactionByHash(
-        contract.deployTxHash,
-      );
+      const transaction = await this.mxApiService.getTransactionByHash(contract.deployTxHash);
       response.push({
         address: contract.address,
         owner: transaction.sender.bech32(),

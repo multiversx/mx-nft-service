@@ -9,33 +9,20 @@ import { UpdatePriceEvent } from 'src/modules/rabbitmq/entities/auction/updatePr
 
 @Injectable()
 export class UpdatePriceEventParser {
-  constructor(
-    private readonly marketplaceService: MarketplacesService,
-    private usdPriceService: UsdPriceService,
-  ) {}
+  constructor(private readonly marketplaceService: MarketplacesService, private usdPriceService: UsdPriceService) {}
 
   async handle(event: any, timestamp: number) {
     const updatePriceEvent = new UpdatePriceEvent(event);
     const topics = updatePriceEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByAddress(
-      updatePriceEvent.getAddress(),
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByAddress(updatePriceEvent.getAddress());
 
     if (!marketplace) return;
     const paymentToken = this.getPaymentToken(marketplace.key, event.topics);
-    const tokenData = await this.usdPriceService.getToken(
-      paymentToken ?? mxConfig.egld,
-    );
-    const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(
-      tokenData.identifier,
-      timestamp,
-    );
+    const tokenData = await this.usdPriceService.getToken(paymentToken ?? mxConfig.egld);
+    const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(tokenData.identifier, timestamp);
 
     const data = [];
-    let newPrice = BigNumberUtils.denominateAmount(
-      topics.newBid,
-      tokenData?.decimals ?? 18,
-    );
+    let newPrice = BigNumberUtils.denominateAmount(topics.newBid, tokenData?.decimals ?? 18);
 
     if (newPrice && newPrice < Math.pow(10, 128)) {
       data[topics.collection] = {
@@ -44,11 +31,7 @@ export class UpdatePriceEventParser {
         floorPriceUSD:
           topics.newBid === '0' || !tokenPrice
             ? '0'
-            : computeUsd(
-                tokenPrice?.toString() ?? '0',
-                topics.newBid,
-                tokenData?.decimals ?? 18,
-              ).toFixed(),
+            : computeUsd(tokenPrice?.toString() ?? '0', topics.newBid, tokenData?.decimals ?? 18).toFixed(),
         paymentToken: tokenData?.identifier,
         marketplaceKey: marketplace.key,
       };

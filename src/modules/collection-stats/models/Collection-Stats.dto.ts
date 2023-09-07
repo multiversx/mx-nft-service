@@ -25,32 +25,16 @@ export class CollectionStats {
     Object.assign(this, init);
   }
 
-  static fromEntity(
-    entity: CollectionStatsEntity,
-    decimals: number,
-    identifier: string,
-  ) {
+  static fromEntity(entity: CollectionStatsEntity, decimals: number, identifier: string) {
     return entity
       ? new CollectionStats({
           identifier: identifier,
           activeAuctions: entity?.activeAuctions || 0,
           auctionsEnded: entity?.auctionsEnded || 0,
-          maxPrice: BigNumberUtils.nominateAmount(
-            entity.maxPrice ? entity.maxPrice : '0',
-            decimals,
-          ),
-          minPrice: BigNumberUtils.nominateAmount(
-            entity.minPrice ? entity.minPrice : '0',
-            decimals,
-          ),
-          saleAverage: BigNumberUtils.nominateAmount(
-            entity.saleAverage ? entity.saleAverage : '0',
-            decimals,
-          ),
-          volumeTraded: BigNumberUtils.nominateAmount(
-            entity.volumeTraded ? entity.volumeTraded : '0',
-            decimals,
-          ),
+          maxPrice: BigNumberUtils.nominateAmount(entity.maxPrice ? entity.maxPrice : '0', decimals),
+          minPrice: BigNumberUtils.nominateAmount(entity.minPrice ? entity.minPrice : '0', decimals),
+          saleAverage: BigNumberUtils.nominateAmount(entity.saleAverage ? entity.saleAverage : '0', decimals),
+          volumeTraded: BigNumberUtils.nominateAmount(entity.volumeTraded ? entity.volumeTraded : '0', decimals),
         })
       : new CollectionStats();
   }

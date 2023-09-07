@@ -60,12 +60,6 @@ import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parse
     forwardRef(() => CollectionsModuleGraph),
     TimescaleDbModule,
   ],
-  exports: [
-    TrendingCollectionsService,
-    ElasticAnalyticsService,
-    AnalyticsService,
-    GeneralAnalyticsService,
-    CollectionsAnalyticsService,
-  ],
+  exports: [TrendingCollectionsService, ElasticAnalyticsService, AnalyticsService, GeneralAnalyticsService, CollectionsAnalyticsService],
 })
 export class AnalyticsModule {}

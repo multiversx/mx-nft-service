@@ -20,30 +20,17 @@ export class OrdersCachingService {
     private redisCacheService: RedisCacheService,
   ) {}
 
-  public async getOrSetOrders(
-    queryRequest: QueryRequest,
-    getOrders: () => any,
-  ): Promise<[Order[], number]> {
-    return this.redisCacheService.getOrSet(
-      this.getOrdersCacheKey(queryRequest),
-      () => getOrders(),
-      30 * Constants.oneSecond(),
-    );
+  public async getOrSetOrders(queryRequest: QueryRequest, getOrders: () => any): Promise<[Order[], number]> {
+    return this.redisCacheService.getOrSet(this.getOrdersCacheKey(queryRequest), () => getOrders(), 30 * Constants.oneSecond());
   }
 
-  public async invalidateCache(
-    auctionId: number = 0,
-    ownerAddress: string = '',
-    marketplaceKey: string = '',
-  ): Promise<void> {
+  public async invalidateCache(auctionId: number = 0, ownerAddress: string = '', marketplaceKey: string = ''): Promise<void> {
     await this.lastOrderRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKey(auctionId);
     await this.ordersRedisHandler.clearKeyByPattern(auctionId);
     await this.auctionAvailableTokens.clearKey(auctionId);
     await this.accountStatsCachingService.invalidateStats(ownerAddress);
-    await this.accountStatsCachingService.invalidateStats(
-      `${ownerAddress}_${marketplaceKey}`,
-    );
+    await this.accountStatsCachingService.invalidateStats(`${ownerAddress}_${marketplaceKey}`);
   }
 
   private getOrdersCacheKey(request: QueryRequest) {

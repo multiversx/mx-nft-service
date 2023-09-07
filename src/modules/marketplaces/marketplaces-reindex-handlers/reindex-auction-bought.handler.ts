@@ -12,12 +12,7 @@ import { AuctionBuySummary } from '../models/marketplaces-reindex-events-summari
 export class ReindexAuctionBoughtHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: AuctionBuySummary,
-    paymentToken: Token,
-    paymentNonce: number,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionBuySummary, paymentToken: Token, paymentNonce: number): void {
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
         ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
@@ -29,18 +24,9 @@ export class ReindexAuctionBoughtHandler {
 
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
-    marketplaceReindexState.setInactiveOrdersForAuction(
-      marketplaceReindexState.auctions[auctionIndex].id,
-      modifiedDate,
-    );
+    marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
 
-    const order = marketplaceReindexState.createOrder(
-      auctionIndex,
-      input,
-      OrderStatusEnum.Bought,
-      paymentToken,
-      paymentNonce,
-    );
+    const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
     marketplaceReindexState.orders.push(order);
 
     const totalBought = this.getTotalBoughtTokensForAuction(
@@ -48,33 +34,20 @@ export class ReindexAuctionBoughtHandler {
       marketplaceReindexState.orders,
     );
 
-    if (
-      marketplaceReindexState.auctions[auctionIndex].nrAuctionedTokens ===
-      totalBought
-    ) {
-      marketplaceReindexState.auctions[auctionIndex].status =
-        AuctionStatusEnum.Ended;
-      marketplaceReindexState.auctions[auctionIndex].modifiedDate =
-        modifiedDate;
+    if (marketplaceReindexState.auctions[auctionIndex].nrAuctionedTokens === totalBought) {
+      marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Ended;
+      marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
       marketplaceReindexState.auctions[auctionIndex].blockHash =
-        marketplaceReindexState.auctions[auctionIndex].blockHash ??
-        input.blockHash;
+        marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
     }
   }
 
-  private getTotalBoughtTokensForAuction(
-    auctionId: number,
-    orders: OrderEntity[],
-  ): number {
+  private getTotalBoughtTokensForAuction(auctionId: number, orders: OrderEntity[]): number {
     let totalBought = 0;
     orders
-      .filter(
-        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought,
-      )
+      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought)
       .forEach((o) => {
-        totalBought += parseInt(o.boughtTokensNo)
-          ? parseInt(o.boughtTokensNo)
-          : 1;
+        totalBought += parseInt(o.boughtTokensNo) ? parseInt(o.boughtTokensNo) : 1;
       });
     return totalBought;
   }

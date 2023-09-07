@@ -16,13 +16,8 @@ export class GlobalOfferAcceptedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromAcceptGlobalOfferEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): GlobalOfferAcceptedSummary {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  static fromAcceptGlobalOfferEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): GlobalOfferAcceptedSummary {
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
     const topics = new AcceptGlobalOfferEvent(genericEvent).getTopics();
 
     return new GlobalOfferAcceptedSummary({

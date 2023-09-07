@@ -9,20 +9,11 @@ import { Marketplace } from './models';
 export class MarketplacesCachingService {
   constructor(private cacheService: CachingService) {}
 
-  public async getAllMarketplaces(
-    getMarketplaces: () => any,
-  ): Promise<CollectionType<Marketplace>> {
-    return await this.cacheService.getOrSetCache(
-      CacheInfo.AllMarketplaces.key,
-      () => getMarketplaces(),
-      Constants.oneHour(),
-    );
+  public async getAllMarketplaces(getMarketplaces: () => any): Promise<CollectionType<Marketplace>> {
+    return await this.cacheService.getOrSetCache(CacheInfo.AllMarketplaces.key, () => getMarketplaces(), Constants.oneHour());
   }
 
-  public async getMarketplaceByAddressAndCollection(
-    getMarketplaceByAddress: () => any,
-    key: string,
-  ): Promise<Marketplace> {
+  public async getMarketplaceByAddressAndCollection(getMarketplaceByAddress: () => any, key: string): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
       `${CacheInfo.MarketplaceAddressCollection.key}_${key}`,
       () => getMarketplaceByAddress(),
@@ -30,10 +21,7 @@ export class MarketplacesCachingService {
     );
   }
 
-  public async getMarketplaceByCollection(
-    getMarketplaceByCollection: () => any,
-    key: string,
-  ): Promise<Marketplace> {
+  public async getMarketplaceByCollection(getMarketplaceByCollection: () => any, key: string): Promise<Marketplace> {
     return await this.cacheService.getOrSetCache(
       `${CacheInfo.MarketplaceCollection.key}_${key}`,
       () => getMarketplaceByCollection(),
@@ -41,10 +29,7 @@ export class MarketplacesCachingService {
     );
   }
 
-  public async getCollectionsByMarketplace(
-    getCollectionsByMarketplace: () => any,
-    key: string,
-  ): Promise<string[]> {
+  public async getCollectionsByMarketplace(getCollectionsByMarketplace: () => any, key: string): Promise<string[]> {
     return await this.cacheService.getOrSetCache(
       `${CacheInfo.CollectionsByMarketplace.key}_${key}`,
       () => getCollectionsByMarketplace(),
@@ -57,18 +42,12 @@ export class MarketplacesCachingService {
   }
 
   public async invalidateCollectionsByMarketplace(key: string) {
-    await this.cacheService.deleteInCache(
-      `${CacheInfo.CollectionsByMarketplace.key}_${key}`,
-    );
+    await this.cacheService.deleteInCache(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
   }
   public async invalidateMarketplaceByCollection(key: string) {
-    await this.cacheService.deleteInCache(
-      `${CacheInfo.MarketplaceCollection.key}_${key}`,
-    );
+    await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceCollection.key}_${key}`);
   }
   public async invalidateMarketplaceByAddressAndCollection(key: string) {
-    await this.cacheService.deleteInCache(
-      `${CacheInfo.MarketplaceAddressCollection.key}_${key}`,
-    );
+    await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceAddressCollection.key}_${key}`);
   }
 }

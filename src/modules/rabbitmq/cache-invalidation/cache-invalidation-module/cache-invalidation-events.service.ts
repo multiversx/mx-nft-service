@@ -25,35 +25,21 @@ export class CacheInvalidationEventsService {
 
   async invalidateAuction(payload: ChangedEvent) {
     await Promise.all([
-      await this.auctionsCachingService.invalidatePersistentCaching(
-        payload.id,
-        payload.address,
-        payload.extraInfo?.marketplaceKey,
-      ),
+      await this.auctionsCachingService.invalidatePersistentCaching(payload.id, payload.address, payload.extraInfo?.marketplaceKey),
       await this.availableTokensCount.clearKey(payload.id),
     ]);
   }
 
   async invalidateOrder(payload: ChangedEvent) {
-    await this.ordersCachingService.invalidateCache(
-      parseInt(payload.id),
-      payload.address,
-      payload.extraInfo?.marketplaceKey,
-    );
+    await this.ordersCachingService.invalidateCache(parseInt(payload.id), payload.address, payload.extraInfo?.marketplaceKey);
   }
 
   async invalidateNotifications(payload: ChangedEvent) {
-    this.notificationsCachingService.clearMultipleCache(
-      payload.id,
-      payload.extraInfo?.marketplaceKey,
-    );
+    this.notificationsCachingService.clearMultipleCache(payload.id, payload.extraInfo?.marketplaceKey);
   }
 
   async invalidateOneNotification(payload: ChangedEvent) {
-    this.notificationsCachingService.invalidateCache(
-      payload.id,
-      payload.extraInfo?.marketplaceKey,
-    );
+    this.notificationsCachingService.invalidateCache(payload.id, payload.extraInfo?.marketplaceKey);
   }
 
   async invalidateAssetLike(payload: ChangedEvent) {

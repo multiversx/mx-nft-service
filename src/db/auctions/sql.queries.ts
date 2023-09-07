@@ -7,16 +7,12 @@ export function getDefaultAuctionsForIdentifierQuery(
   offset: number = 0,
   status: string[] = ['Running', 'Claimable'],
 ) {
-  let supplementalFilters = new AuctionFilterBuilder(queryRequest)
-    .addIfExists('marketplaceKey')
-    .build();
+  let supplementalFilters = new AuctionFilterBuilder(queryRequest).addIfExists('marketplaceKey').build();
   return `SELECT a.*, o.priceAmountDenominated as price
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status in (${status.map(
-      (value) => `'${value}'`,
-    )}) AND a.identifier = '${identifier}' ${supplementalFilters}
+    WHERE a.status in (${status.map((value) => `'${value}'`)}) AND a.identifier = '${identifier}' ${supplementalFilters}
     order by if(price, price, minBidDenominated) ASC limit ${limit} offset ${offset}`;
 }
 
@@ -25,24 +21,18 @@ export function getDefaultAuctionsForIdentifierQueryCount(
   identifier: string,
   status: string[] = ['Running', 'Claimable'],
 ) {
-  let supplementalFilters = new AuctionFilterBuilder(queryRequest)
-    .addIfExists('marketplaceKey')
-    .build();
+  let supplementalFilters = new AuctionFilterBuilder(queryRequest).addIfExists('marketplaceKey').build();
   return `SELECT COUNT(1) as Count from (SELECT a.*, o.priceAmountDenominated as price
     FROM auctions a 
      LEFT JOIN LATERAL 
     			  (select * from orders WHERE auctionId= a.id ORDER by 1 DESC limit 1) as o ON 1=1 
-    WHERE a.status in (${status.map(
-      (value) => `'${value}'`,
-    )}) AND a.identifier = '${identifier}' ${supplementalFilters}
+    WHERE a.status in (${status.map((value) => `'${value}'`)}) AND a.identifier = '${identifier}' ${supplementalFilters}
     order by if(price, price, minBidDenominated) ASC) as temp`;
 }
 
 export function getOnSaleAssetsCountForCollection(collections: string[]) {
   return `SELECT COUNT(DISTINCT a.identifier) as Count, a.collection FROM auctions a
-    WHERE a.status = 'Running' AND a.collection IN (${collections.map(
-      (value) => `'${value}'`,
-    )})
+    WHERE a.status = 'Running' AND a.collection IN (${collections.map((value) => `'${value}'`)})
    GROUP BY a.collection`;
 }
 
@@ -77,10 +67,7 @@ export function getLowestAuctionForIdentifiers(identifiers: string[]) {
 `;
 }
 
-export function getLowestAuctionForIdentifiersAndMarketplace(
-  identifiers: string[],
-  marketplaceKey: string,
-) {
+export function getLowestAuctionForIdentifiersAndMarketplace(identifiers: string[], marketplaceKey: string) {
   return `
   SELECT a.*, o.priceAmountDenominated as price, CONCAT(a.identifier,"_",'${marketplaceKey}') AS identifierKey
   FROM auctions a 
@@ -93,11 +80,7 @@ export function getLowestAuctionForIdentifiersAndMarketplace(
 `;
 }
 
-export function getAuctionsForAsset(
-  identifiers: string[],
-  offset: number = 0,
-  limit: number = 2,
-) {
+export function getAuctionsForAsset(identifiers: string[], offset: number = 0, limit: number = 2) {
   return `
   SELECT temp.*, CONCAT(temp.identifier,"_",${offset},"_",${limit}) as batchKey from (
     SELECT temp.*,
@@ -113,11 +96,7 @@ export function getAuctionsForAsset(
   WHERE temp.seqnum > ${offset} and temp.seqnum <= ${offset + limit};`;
 }
 
-export function getOrdersForAuctions(
-  ids: string[],
-  offset: number = 0,
-  limit: number = 2,
-) {
+export function getOrdersForAuctions(ids: string[], offset: number = 0, limit: number = 2) {
   return `
   SELECT temp.*, CONCAT(temp.auctionId,"_",${offset},"_",${limit}) as batchKey from (
     SELECT temp.*,
@@ -192,11 +171,7 @@ WHERE
 	a.id = ${id}`;
 }
 
-export function getAuctionsForIdentifierSortByPrice(
-  identifier: string,
-  limit: number = 10,
-  offset: number = 0,
-) {
+export function getAuctionsForIdentifierSortByPrice(identifier: string, limit: number = 10, offset: number = 0) {
   return `SELECT a.*,o.priceAmountDenominated as price
   FROM auctions a 
   LEFT JOIN LATERAL 
@@ -222,16 +197,9 @@ export function getAuctionsOrderByNoBidsQuery() {
 		  ORDER BY COUNT(a.Id) DESC) as temp GROUP BY temp.id`;
 }
 
-export function getCurrentPaymentTokens(
-  marketplaceKey?: string,
-  collectionIdentifier?: string,
-) {
-  let filter = marketplaceKey
-    ? `AND a.marketplaceKey = '${marketplaceKey}'`
-    : '';
-  filter = `${filter} ${
-    collectionIdentifier ? `AND a.collection = '${collectionIdentifier}'` : ''
-  }`;
+export function getCurrentPaymentTokens(marketplaceKey?: string, collectionIdentifier?: string) {
+  let filter = marketplaceKey ? `AND a.marketplaceKey = '${marketplaceKey}'` : '';
+  filter = `${filter} ${collectionIdentifier ? `AND a.collection = '${collectionIdentifier}'` : ''}`;
   return `SELECT DISTINCT paymentToken, COUNT(a.paymentToken) AS count FROM auctions a 
   WHERE a.status = 'RUNNING' ${filter}  GROUP BY a.paymentToken ORDER by count DESC`;
 }

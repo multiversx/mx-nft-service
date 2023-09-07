@@ -6,17 +6,13 @@ import { AssetLikeEntity } from './assets-likes.entity';
 
 @Injectable()
 export class AssetsLikesRepository {
-
   constructor(
     @InjectRepository(AssetLikeEntity)
     private assetsLikeRepository: Repository<AssetLikeEntity>,
   ) {}
-  async getAssetsLiked(
-    limit: number = 20,
-    offset: number = 0,
-    address: string,
-  ): Promise<[AssetLikeEntity[], number]> {
-    const assetsLiked = await this.assetsLikeRepository.createQueryBuilder('assetsLiked')
+  async getAssetsLiked(limit: number = 20, offset: number = 0, address: string): Promise<[AssetLikeEntity[], number]> {
+    const assetsLiked = await this.assetsLikeRepository
+      .createQueryBuilder('assetsLiked')
       .where({
         address: address,
       })
@@ -55,7 +51,8 @@ export class AssetsLikesRepository {
   }
 
   async getBulkAssetLikesCount(identifiers: string[]): Promise<any> {
-    return await this.assetsLikeRepository.createQueryBuilder('al')
+    return await this.assetsLikeRepository
+      .createQueryBuilder('al')
       .select('al.identifier as identifier')
       .addSelect('COUNT(al.identifier) as likesCount')
       .where(`al.identifier IN(${identifiers.map((value) => `'${value}'`)})`, {
@@ -66,17 +63,13 @@ export class AssetsLikesRepository {
   }
 
   async getIsLikedAsset(identifiers: string[]): Promise<any> {
-    return await this.assetsLikeRepository.createQueryBuilder('al')
+    return await this.assetsLikeRepository
+      .createQueryBuilder('al')
       .select('CONCAT(al.identifier,"_",al.address) as identifier')
       .addSelect('true as liked')
-      .where(
-        `al.identifier IN(${identifiers.map(
-          (value) => `'${value.split('_')[0]}'`,
-        )})`,
-        {
-          identifiers: identifiers,
-        },
-      )
+      .where(`al.identifier IN(${identifiers.map((value) => `'${value.split('_')[0]}'`)})`, {
+        identifiers: identifiers,
+      })
       .andWhere(`al.address = '${identifiers[0].split('_')[1]}'`)
       .groupBy('al.identifier, al.address')
       .execute();
@@ -101,11 +94,9 @@ export class AssetsLikesRepository {
     });
   }
 
-  async getMostLikedAssetsIdentifiers(
-    offset?: number,
-    limit?: number,
-  ): Promise<AssetLikeEntity[]> {
-    return await this.assetsLikeRepository.createQueryBuilder('al')
+  async getMostLikedAssetsIdentifiers(offset?: number, limit?: number): Promise<AssetLikeEntity[]> {
+    return await this.assetsLikeRepository
+      .createQueryBuilder('al')
       .select('count(*) as cnt, al.identifier')
       .groupBy('al.identifier')
       .orderBy('cnt', 'DESC')

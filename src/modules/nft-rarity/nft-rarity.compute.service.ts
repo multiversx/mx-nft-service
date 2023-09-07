@@ -14,32 +14,22 @@ export class NftRarityComputeService {
     private readonly openRarityService: OpenRarityService,
   ) {}
 
-  async computeRarities(
-    collection: string,
-    collectionSize: number,
-    nfts: NftRarityData[],
-  ): Promise<NftRarityEntity[]> {
-    const jdRarities: { [key: string]: { [key: string]: number } } =
-      await this.jaccardDistancesService.computeJaccardDistancesRarities(nfts);
+  async computeRarities(collection: string, collectionSize: number, nfts: NftRarityData[]): Promise<NftRarityEntity[]> {
+    const jdRarities: { [key: string]: { [key: string]: number } } = await this.jaccardDistancesService.computeJaccardDistancesRarities(
+      nfts,
+    );
 
     const dnaSummary: {
       [key: string]: { [key: string]: { [key: string]: number } };
     } = this.computeDNASummary(nfts, collectionSize);
 
-    const openRarities = this.openRarityService.computeOpenRarities(
-      nfts,
-      dnaSummary,
-    );
+    const openRarities = this.openRarityService.computeOpenRarities(nfts, dnaSummary);
 
     const tsrRarities: { [key: string]: { [key: string]: number } } =
-      await this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(
-        nfts,
-        dnaSummary,
-        [
-          RarityAlgorithmsEnum.TraitRarity,
-          RarityAlgorithmsEnum.StatisticalRarity,
-        ],
-      );
+      await this.traitAndStatisticalRarityService.computeTraitAndStatisticalRarities(nfts, dnaSummary, [
+        RarityAlgorithmsEnum.TraitRarity,
+        RarityAlgorithmsEnum.StatisticalRarity,
+      ]);
 
     return nfts.map((nft) => {
       const nonce = nft.nonce;
@@ -53,9 +43,7 @@ export class NftRarityComputeService {
         rank_jaccardDistances: jdRarities[nonce].rank,
         score_trait: parseFloat(tsrRarities[nonce].traitScore.toFixed(3)),
         rank_trait: tsrRarities[nonce].traitRank,
-        score_statistical: parseFloat(
-          tsrRarities[nonce].statisticalScore.toFixed(18),
-        ),
+        score_statistical: parseFloat(tsrRarities[nonce].statisticalScore.toFixed(18)),
         rank_statistical: tsrRarities[nonce].statisticalRank,
       });
     });
@@ -95,19 +83,14 @@ export class NftRarityComputeService {
     }
 
     for (const [traitKey, traitProperties] of Object.entries(dnaSummary)) {
-      dnaSummary[traitKey].occurencesPercentage =
-        (dnaSummary[traitKey].occurences / collectionSize) * 100;
+      dnaSummary[traitKey].occurencesPercentage = (dnaSummary[traitKey].occurences / collectionSize) * 100;
 
       for (const [traitPropertyKey] of Object.entries(traitProperties)) {
         const attributeKey = parseInt(traitPropertyKey);
         if (Number.isInteger(attributeKey)) {
-          dnaSummary[traitKey][attributeKey].occurencesPercentage =
-            (dnaSummary[traitKey][attributeKey].occurences / collectionSize) *
-            100;
-          dnaSummary[traitKey][attributeKey].frequency =
-            dnaSummary[traitKey][attributeKey].occurences / collectionSize;
-          dnaSummary[traitKey][attributeKey].rarity =
-            collectionSize / dnaSummary[traitKey][attributeKey].occurences;
+          dnaSummary[traitKey][attributeKey].occurencesPercentage = (dnaSummary[traitKey][attributeKey].occurences / collectionSize) * 100;
+          dnaSummary[traitKey][attributeKey].frequency = dnaSummary[traitKey][attributeKey].occurences / collectionSize;
+          dnaSummary[traitKey][attributeKey].rarity = collectionSize / dnaSummary[traitKey][attributeKey].occurences;
         }
       }
     }

@@ -17,11 +17,7 @@ import { OffersModuleGraph } from '../offers/offers.module';
     MarketplacesService,
     MarketplacesCachingService,
   ],
-  imports: [
-    MxCommunicationModule,
-    forwardRef(() => CollectionsModuleGraph),
-    forwardRef(() => OffersModuleGraph),
-  ],
+  imports: [MxCommunicationModule, forwardRef(() => CollectionsModuleGraph), forwardRef(() => OffersModuleGraph)],
   exports: [AccountsStatsService],
 })
 export class AccountsStatsModuleGraph {}

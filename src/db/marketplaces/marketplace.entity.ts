@@ -24,10 +24,7 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ nullable: true })
   acceptedPaymentTokens: string;
 
-  @OneToMany(
-    () => MarketplaceCollectionEntity,
-    (collection) => collection.marketplace,
-  )
+  @OneToMany(() => MarketplaceCollectionEntity, (collection) => collection.marketplace)
   collections: MarketplaceCollectionEntity[];
 
   @Column({ nullable: true })

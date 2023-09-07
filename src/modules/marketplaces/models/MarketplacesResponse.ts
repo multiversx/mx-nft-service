@@ -3,6 +3,4 @@ import relayTypes from 'src/modules/common/Relay.types';
 import { Marketplace } from './Marketplace.dto';
 
 @ObjectType()
-export class MarketplacesResponse extends relayTypes<Marketplace>(
-  Marketplace,
-) {}
+export class MarketplacesResponse extends relayTypes<Marketplace>(Marketplace) {}

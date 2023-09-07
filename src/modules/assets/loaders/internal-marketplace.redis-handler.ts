@@ -10,16 +10,11 @@ export class InternalMarketplaceRedisHandler extends RedisKeyValueDataloaderHand
     super(redisCacheService, 'internal_marketplace');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    collectionIdentifiers: { [key: string]: Marketplace[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], collectionIdentifiers: { [key: string]: Marketplace[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = collectionIdentifiers[item.key]
-          ? collectionIdentifiers[item.key][0]
-          : {};
+        item.value = collectionIdentifiers[item.key] ? collectionIdentifiers[item.key][0] : {};
         redisValues.push(item);
       }
     }

@@ -1,13 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
-import {
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
@@ -33,47 +27,23 @@ export class BuyEventHandler {
     const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
     let auction: AuctionEntity;
 
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      buySftEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByType(buySftEvent.getAddress(), marketplaceType, topics.collection);
 
     if (!marketplace) return;
-    this.logger.log(
-      `${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${
-        marketplace?.name
-      }'`,
-    );
+    this.logger.log(`${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
     if (topics.auctionId) {
-      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topics.auctionId, 16),
-        marketplace.key,
-      );
+      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
     } else {
       const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-      auction =
-        await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(
-          auctionIdentifier,
-          marketplace.key,
-        );
+      auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
     }
     if (!auction) return;
 
-    const result = await this.auctionsGetterService.getAvailableTokens(
-      auction.id,
-    );
-    const totalRemaining = result
-      ? result[0]?.availableTokens - parseFloat(topics.boughtTokens)
-      : 0;
+    const result = await this.auctionsGetterService.getAvailableTokens(auction.id);
+    const totalRemaining = result ? result[0]?.availableTokens - parseFloat(topics.boughtTokens) : 0;
     if (totalRemaining === 0) {
-      this.auctionsService.updateAuctionStatus(
-        auction.id,
-        AuctionStatusEnum.Ended,
-        hash,
-        AuctionStatusEnum.Ended,
-      );
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionStatusEnum.Ended);
     }
     const orderSft = await this.ordersService.createOrderForSft(
       new CreateOrderArgs({
@@ -100,10 +70,7 @@ export class BuyEventHandler {
 
   private getEventAndTopics(event: any, hash: string) {
     if (event.identifier === KroganSwapAuctionEventEnum.Purchase) {
-      if (
-        Buffer.from(event.topics[0], 'base64').toString() ===
-        KroganSwapAuctionEventEnum.UpdateListing
-      ) {
+      if (Buffer.from(event.topics[0], 'base64').toString() === KroganSwapAuctionEventEnum.UpdateListing) {
         this.logger.log(
           `Update Listing event detected for hash '${hash}' at Purchase external marketplace ${event.address}, ignore it for the moment`,
         );

@@ -10,16 +10,11 @@ export class AuctionsRedisHandler extends RedisKeyValueDataloaderHandler<number>
     super(redisCacheService, 'auction');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
-  ) {
+  mapValues(returnValues: { key: number; value: any }[], auctionsIdentifiers: { [key: string]: AuctionEntity[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = auctionsIdentifiers[item.key]
-          ? auctionsIdentifiers[item.key][0]
-          : {};
+        item.value = auctionsIdentifiers[item.key] ? auctionsIdentifiers[item.key][0] : {};
         redisValues.push(item);
       }
     }

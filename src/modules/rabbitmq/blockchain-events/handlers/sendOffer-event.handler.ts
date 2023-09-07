@@ -24,28 +24,15 @@ export class SendOfferEventHandler {
     }
     const sendOffer = new SendOfferEvent(event);
     const topics = sendOffer.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      sendOffer.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByType(sendOffer.getAddress(), marketplaceType, topics.collection);
 
     if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
       return;
     }
 
-    this.logger.log(
-      `Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
+    this.logger.log(`Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
-    const offer = await this.offersService.saveOffer(
-      OfferEntity.fromEventTopics(
-        topics,
-        hash,
-        marketplace.key,
-        OfferStatusEnum.Active,
-      ),
-    );
+    const offer = await this.offersService.saveOffer(OfferEntity.fromEventTopics(topics, hash, marketplace.key, OfferStatusEnum.Active));
 
     if (!offer) return;
     await this.feedEventsSenderService.sendOfferEvent(offer);

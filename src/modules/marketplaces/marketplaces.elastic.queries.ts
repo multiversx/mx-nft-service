@@ -1,17 +1,8 @@
-import {
-  ElasticQuery,
-  QueryType,
-  RangeLowerThan,
-  RangeGreaterThan,
-  ElasticSortOrder,
-  QueryConditionOptions,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery, QueryType, RangeLowerThan, RangeGreaterThan, ElasticSortOrder, QueryConditionOptions } from '@multiversx/sdk-nestjs';
 import { constants } from 'src/config';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 
-export const getMarketplaceTransactionsElasticQuery = (
-  input: MarketplaceEventsIndexingRequest,
-): ElasticQuery => {
+export const getMarketplaceTransactionsElasticQuery = (input: MarketplaceEventsIndexingRequest): ElasticQuery => {
   return ElasticQuery.create()
     .withCondition(
       QueryConditionOptions.should,
@@ -23,30 +14,18 @@ export const getMarketplaceTransactionsElasticQuery = (
         ]),
       ]),
     )
-    .withRangeFilter(
-      'timestamp',
-      new RangeLowerThan(input.txTimestampDelimiter),
-    )
+    .withRangeFilter('timestamp', new RangeLowerThan(input.txTimestampDelimiter))
     .withRangeFilter('timestamp', new RangeLowerThan(input.beforeTimestamp))
     .withRangeFilter('timestamp', new RangeGreaterThan(input.afterTimestamp))
     .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
-    .withFields([
-      'sender',
-      'receiver',
-      'data',
-      'value',
-      'timestamp',
-      'miniBlockHash',
-    ])
+    .withFields(['sender', 'receiver', 'data', 'value', 'timestamp', 'miniBlockHash'])
     .withPagination({
       from: 0,
       size: constants.getLogsFromElasticBatchSize,
     });
 };
 
-export const getMarketplaceEventsElasticQuery = (
-  input: MarketplaceEventsIndexingRequest,
-): ElasticQuery => {
+export const getMarketplaceEventsElasticQuery = (input: MarketplaceEventsIndexingRequest): ElasticQuery => {
   return ElasticQuery.create()
     .withMustCondition(
       QueryType.Nested('events', {

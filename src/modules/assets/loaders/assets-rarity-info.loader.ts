@@ -8,19 +8,12 @@ import { MxApiService } from 'src/common';
   scope: Scope.REQUEST,
 })
 export class AssetRarityInfoProvider extends BaseProvider<string> {
-  constructor(
-    private assetRarityInfoRedisHandler: AssetRarityInfoRedisHandler,
-    private mxApiService: MxApiService,
-  ) {
-    super(
-      assetRarityInfoRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(private assetRarityInfoRedisHandler: AssetRarityInfoRedisHandler, private mxApiService: MxApiService) {
+    super(assetRarityInfoRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const nftRarities =
-      await this.mxApiService.getBulkNftRaritiesByIdentifiers(identifiers);
+    const nftRarities = await this.mxApiService.getBulkNftRaritiesByIdentifiers(identifiers);
     return nftRarities?.groupBy((nft) => nft.identifier);
   }
 

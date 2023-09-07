@@ -9,10 +9,7 @@ export class MarketplaceRedisHandler extends RedisKeyValueDataloaderHandler<stri
     super(redisCacheService, 'marketplace');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    marketplaceKeys: { [key: string]: any[] },
-  ): RedisValue[] {
+  mapValues(returnValues: { key: string; value: any }[], marketplaceKeys: { [key: string]: any[] }): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {

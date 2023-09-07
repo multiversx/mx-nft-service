@@ -14,11 +14,7 @@ export class ContentValidation {
   }
 
   public checkContentType(fileData): this {
-    if (
-      !Object.values(MediaMimeTypeEnum).includes(
-        fileData.mimetype as MediaMimeTypeEnum,
-      )
-    )
+    if (!Object.values(MediaMimeTypeEnum).includes(fileData.mimetype as MediaMimeTypeEnum))
       throw new UnsuportedMimetypeError('Unsupported media type');
     return this;
   }

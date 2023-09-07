@@ -1,8 +1,5 @@
 import { Test } from '@nestjs/testing';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import * as Transport from 'winston-transport';
 import { MxApiService } from 'src/common';
@@ -20,10 +17,7 @@ describe.skip('SearchService', () => {
 
   const logTransports: Transport[] = [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        nestWinstonModuleUtilities.format.nestLike(),
-      ),
+      format: winston.format.combine(winston.format.timestamp(), nestWinstonModuleUtilities.format.nestLike()),
     }),
   ];
   beforeAll(async () => {
@@ -50,13 +44,7 @@ describe.skip('SearchService', () => {
   describe('getTags', () => {
     it('should return the top tags order by count', async () => {
       const results = await service.getTags(10, 10, new TagsFilter());
-      const expectedResult = [
-        [
-          new Tag({ tag: 'tag1', count: 12 }),
-          new Tag({ tag: 'tag2', count: 10 }),
-        ],
-        2,
-      ];
+      const expectedResult = [[new Tag({ tag: 'tag1', count: 12 }), new Tag({ tag: 'tag2', count: 10 })], 2];
       expect(results).toStrictEqual(expectedResult);
     });
   });

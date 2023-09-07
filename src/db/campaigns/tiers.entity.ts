@@ -40,19 +40,13 @@ export class TierEntity extends BaseEntity {
     Object.assign(this, init);
   }
 
-  static fromTierAbi(
-    tier: TierInfoAbi,
-    decimals: number = mxConfig.decimals,
-  ) {
+  static fromTierAbi(tier: TierInfoAbi, decimals: number = mxConfig.decimals) {
     return tier
       ? new TierEntity({
           tierName: tier.tier.valueOf().toString(),
           mintToken: tier.mint_price.token_id.valueOf().toString(),
           mintPrice: tier.mint_price.amount.valueOf().toString(),
-          mintPriceDenominated: BigNumberUtils.denominateAmount(
-            tier.mint_price.amount.valueOf().toString(),
-            decimals,
-          ),
+          mintPriceDenominated: BigNumberUtils.denominateAmount(tier.mint_price.amount.valueOf().toString(), decimals),
           totalNfts: parseInt(tier.total_nfts.valueOf().toString()),
           availableNfts: parseInt(tier.available_nfts.valueOf().toString()),
           description: 'This is a default description for tier',

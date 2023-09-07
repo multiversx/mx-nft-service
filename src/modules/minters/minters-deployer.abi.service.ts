@@ -5,7 +5,7 @@ import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { mxConfig, gas } from 'src/config';
 import { MxProxyService } from 'src/common';
-import {ContractLoader} from '../auctions/contractLoader';
+import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class MintersDeployerAbiService {

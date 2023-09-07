@@ -27,10 +27,7 @@ export class Price {
   static fromEntity(entity: OrderEntity): Price {
     return entity
       ? new Price({
-          token:
-            entity?.priceToken === mxConfig.egld
-              ? mxConfig.egld
-              : entity?.priceToken,
+          token: entity?.priceToken === mxConfig.egld ? mxConfig.egld : entity?.priceToken,
           amount: entity?.priceAmount,
           nonce: entity?.priceNonce,
           timestamp: DateUtils.getTimestamp(entity.creationDate),

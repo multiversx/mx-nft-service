@@ -1,9 +1,4 @@
-import {
-  ConnectionArguments,
-  ConnectionCursor,
-  Edge,
-  fromGlobalId,
-} from 'graphql-relay';
+import { ConnectionArguments, ConnectionCursor, Edge, fromGlobalId } from 'graphql-relay';
 import { Field, Int, InputType } from '@nestjs/graphql';
 import { IsOptional, Max } from 'class-validator';
 
@@ -38,8 +33,7 @@ function checkPagingSanity(args: ConnectionArgs): PagingMeta {
     : { pagingType: 'none' };
 }
 
-const getId = (cursor: ConnectionCursor) =>
-  parseInt(fromGlobalId(cursor).id, 10);
+const getId = (cursor: ConnectionCursor) => parseInt(fromGlobalId(cursor).id, 10);
 const nextId = (cursor: ConnectionCursor) => getId(cursor) + 1;
 
 function getPagingParameters(args: ConnectionArgs) {

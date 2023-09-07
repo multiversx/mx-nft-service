@@ -1,10 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  Auction,
-  AuctionAbi,
-  AuctionStatusEnum,
-  ExternalAuctionAbi,
-} from './models';
+import { Auction, AuctionAbi, AuctionStatusEnum, ExternalAuctionAbi } from './models';
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -30,26 +25,16 @@ export class AuctionsSetterService {
     private readonly logger: Logger,
   ) {}
 
-  async saveAuction(
-    auctionId: number,
-    identifier: string,
-    marketplace: Marketplace,
-    hash: string,
-  ): Promise<AuctionEntity> {
+  async saveAuction(auctionId: number, identifier: string, marketplace: Marketplace, hash: string): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      const auctionData = await this.nftAbiService.getAuctionQuery(
-        auctionId,
-        marketplace,
-      );
+      const auctionData = await this.nftAbiService.getAuctionQuery(auctionId, marketplace);
       const asset = await this.assetByIdentifierService.getAsset(identifier);
       if (auctionData) {
         let auctionEntity: AuctionEntity;
         if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
           const externalAuction = auctionData as ExternalAuctionAbi;
-          const paymentToken = await this.usdPriceService.getToken(
-            externalAuction.payment_token_type.toString(),
-          );
+          const paymentToken = await this.usdPriceService.getToken(externalAuction.payment_token_type.toString());
           auctionEntity = AuctionEntity.fromExternalAuctionAbi(
             auctionId,
             externalAuction,
@@ -60,9 +45,7 @@ export class AuctionsSetterService {
           );
         } else {
           const internalAuction = auctionData as AuctionAbi;
-          const paymentToken = await this.usdPriceService.getToken(
-            internalAuction.payment_token.valueOf().toString(),
-          );
+          const paymentToken = await this.usdPriceService.getToken(internalAuction.payment_token.valueOf().toString());
           auctionEntity = AuctionEntity.fromAuctionAbi(
             auctionId,
             internalAuction,
@@ -73,17 +56,12 @@ export class AuctionsSetterService {
           );
         }
 
-        const savedAuction = await this.persistenceService.insertAuction(
-          auctionEntity,
-        );
+        const savedAuction = await this.persistenceService.insertAuction(auctionEntity);
 
         if (asset?.tags) {
           let tags: TagEntity[] = [];
           for (const tag of asset?.tags) {
-            tags = [
-              ...tags,
-              new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
-            ];
+            tags = [...tags, new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() })];
           }
 
           await this.persistenceService.saveTags(tags);
@@ -99,10 +77,7 @@ export class AuctionsSetterService {
       });
     } finally {
       profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        AuctionEventEnum.AuctionTokenEvent,
-        profiler.duration,
-      );
+      MetricsCollector.setAuctionEventsDuration(AuctionEventEnum.AuctionTokenEvent, profiler.duration);
     }
   }
 
@@ -110,23 +85,15 @@ export class AuctionsSetterService {
     return await this.persistenceService.saveBulkAuctions(auctions);
   }
 
-  async saveAuctionEntity(
-    auctionEntity: AuctionEntity,
-    assetTags: string[],
-  ): Promise<AuctionEntity> {
+  async saveAuctionEntity(auctionEntity: AuctionEntity, assetTags: string[]): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      const savedAuction = await this.persistenceService.insertAuction(
-        auctionEntity,
-      );
+      const savedAuction = await this.persistenceService.insertAuction(auctionEntity);
 
       if (assetTags) {
         let tags: TagEntity[] = [];
         for (const tag of assetTags) {
-          tags = [
-            ...tags,
-            new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() }),
-          ];
+          tags = [...tags, new TagEntity({ auctionId: savedAuction.id, tag: tag.trim() })];
         }
 
         await this.persistenceService.saveTags(tags);
@@ -140,18 +107,13 @@ export class AuctionsSetterService {
       });
     } finally {
       profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        AuctionEventEnum.AuctionTokenEvent,
-        profiler.duration,
-      );
+      MetricsCollector.setAuctionEventsDuration(AuctionEventEnum.AuctionTokenEvent, profiler.duration);
     }
   }
 
   async rollbackAuctionByHash(blockHash: string): Promise<boolean> {
     try {
-      return await this.persistenceService.rollbackAuctionAndOrdersByHash(
-        blockHash,
-      );
+      return await this.persistenceService.rollbackAuctionAndOrdersByHash(blockHash);
     } catch (error) {
       this.logger.error('An error occurred while rollback Auctions', {
         path: 'AuctionsService.rollbackAuctionByHash',
@@ -161,19 +123,10 @@ export class AuctionsSetterService {
     }
   }
 
-  async updateAuctionStatus(
-    id: number,
-    status: AuctionStatusEnum,
-    hash: string,
-    auctionEvent: string,
-  ): Promise<AuctionEntity> {
+  async updateAuctionStatus(id: number, status: AuctionStatusEnum, hash: string, auctionEvent: string): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.persistenceService.updateAuctionStatus(
-        id,
-        status,
-        hash,
-      );
+      return await this.persistenceService.updateAuctionStatus(id, status, hash);
     } catch (error) {
       this.logger.error('An error occurred while updating auction status', {
         path: 'AuctionsService.updateAuctionStatus',
@@ -182,34 +135,20 @@ export class AuctionsSetterService {
       });
     } finally {
       profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        auctionEvent,
-        profiler.duration,
-      );
+      MetricsCollector.setAuctionEventsDuration(auctionEvent, profiler.duration);
     }
   }
 
-  async updateAuction(
-    auction: AuctionEntity,
-    auctionEvent: string,
-  ): Promise<AuctionEntity> {
+  async updateAuction(auction: AuctionEntity, auctionEvent: string): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      const paymentToken = await this.usdPriceService.getToken(
-        auction.paymentToken,
-      );
+      const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
       const decimals = paymentToken?.decimals ?? mxConfig.decimals;
       return await this.persistenceService.updateAuction({
         ...auction,
         endDate: auction.endDate ?? 0,
-        maxBidDenominated: BigNumberUtils.denominateAmount(
-          auction.maxBid,
-          decimals,
-        ),
-        minBidDenominated: BigNumberUtils.denominateAmount(
-          auction.minBid,
-          decimals,
-        ),
+        maxBidDenominated: BigNumberUtils.denominateAmount(auction.maxBid, decimals),
+        minBidDenominated: BigNumberUtils.denominateAmount(auction.minBid, decimals),
       });
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
@@ -219,10 +158,7 @@ export class AuctionsSetterService {
       });
     } finally {
       profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        auctionEvent,
-        profiler.duration,
-      );
+      MetricsCollector.setAuctionEventsDuration(auctionEvent, profiler.duration);
     }
   }
 
@@ -235,12 +171,7 @@ export class AuctionsSetterService {
   ): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
-      return await this.persistenceService.updateAuctionByMarketplace(
-        id,
-        marketplaceKey,
-        status,
-        hash,
-      );
+      return await this.persistenceService.updateAuctionByMarketplace(id, marketplaceKey, status, hash);
     } catch (error) {
       this.logger.error('An error occurred while updating auction', {
         path: 'AuctionsService.updateAuctionByMarketplaceKey',
@@ -249,10 +180,7 @@ export class AuctionsSetterService {
       });
     } finally {
       profiler.stop();
-      MetricsCollector.setAuctionEventsDuration(
-        auctionEvent,
-        profiler.duration,
-      );
+      MetricsCollector.setAuctionEventsDuration(auctionEvent, profiler.duration);
     }
   }
 

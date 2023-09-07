@@ -9,20 +9,13 @@ import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-
 
 @Injectable()
 export class AssetByIdentifierService {
-  constructor(
-    private apiService: MxApiService,
-    private readonly logger: Logger,
-    private localRedisCacheService: LocalRedisCacheService,
-  ) {}
+  constructor(private apiService: MxApiService, private readonly logger: Logger, private localRedisCacheService: LocalRedisCacheService) {}
 
   public async getAsset(identifier: string): Promise<Asset> {
     try {
       const cacheKey = this.getAssetsCacheKey(identifier);
       const getAsset = () => this.getMappedAssetByIdentifier(identifier);
-      const asset = await this.localRedisCacheService.getOrSetWithDifferentTtl(
-        cacheKey,
-        getAsset,
-      );
+      const asset = await this.localRedisCacheService.getOrSetWithDifferentTtl(cacheKey, getAsset);
       return asset?.value ? asset?.value : null;
     } catch (error) {
       this.logger.error('An error occurred while get asset by identifier', {
@@ -33,9 +26,7 @@ export class AssetByIdentifierService {
     }
   }
 
-  async getMappedAssetByIdentifier(
-    identifier: string,
-  ): Promise<{ key: string; value: Asset; ttl: number }> {
+  async getMappedAssetByIdentifier(identifier: string): Promise<{ key: string; value: Asset; ttl: number }> {
     const nft = await this.apiService.getNftByIdentifierForQuery(identifier);
     if (nft && !NftTypeEnum[nft?.type])
       return {
@@ -47,10 +38,7 @@ export class AssetByIdentifierService {
     if (!nft) {
       ttl = 3 * Constants.oneSecond();
     }
-    if (
-      (nft?.media && nft?.media[0].thumbnailUrl.includes('default')) ||
-      (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner)
-    )
+    if ((nft?.media && nft?.media[0].thumbnailUrl.includes('default')) || (nft?.type === NftTypeEnum.NonFungibleESDT && !nft?.owner))
       ttl = Constants.oneMinute();
     return {
       key: identifier,

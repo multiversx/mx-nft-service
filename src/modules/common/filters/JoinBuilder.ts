@@ -5,20 +5,14 @@ import { FiltersExpression } from './filtersTypes';
 export default class JoinBuilder<Entity> {
   private joinedEntities = new Set<string>();
 
-  constructor(
-    private readonly queryBuilder: SelectQueryBuilder<Entity>,
-    private filtersExpression?: FiltersExpression,
-  ) {}
+  constructor(private readonly queryBuilder: SelectQueryBuilder<Entity>, private filtersExpression?: FiltersExpression) {}
 
   build() {
-    if (this.filtersExpression)
-      this.buildJoinEntitiesRec(this.filtersExpression);
+    if (this.filtersExpression) this.buildJoinEntitiesRec(this.filtersExpression);
   }
 
   private buildJoinEntitiesRec(fe: FiltersExpression) {
-    forEach(fe.filters, (filter: { field: string; relationField: string }) =>
-      this.addJoinEntity(filter.field, filter.relationField),
-    );
+    forEach(fe.filters, (filter: { field: string; relationField: string }) => this.addJoinEntity(filter.field, filter.relationField));
     forEach(fe.childExpressions, (child) => this.buildJoinEntitiesRec(child));
   }
 

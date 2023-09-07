@@ -19,35 +19,25 @@ export class CampaignsService {
     private cacheService: CachingService,
   ) {}
 
-  async getCampaigns(
-    limit: number = 10,
-    offset: number = 0,
-    filters?: CampaignsFilter,
-  ): Promise<CollectionType<Campaign>> {
+  async getCampaigns(limit: number = 10, offset: number = 0, filters?: CampaignsFilter): Promise<CollectionType<Campaign>> {
     let allCampaigns = await this.getAllCampaigns();
 
     if (filters?.campaignId && filters?.minterAddress) {
       const campaigns = allCampaigns?.items?.filter(
-        (c) =>
-          c.campaignId === filters.campaignId &&
-          c.minterAddress === filters.minterAddress,
+        (c) => c.campaignId === filters.campaignId && c.minterAddress === filters.minterAddress,
       );
       return new CollectionType({
         count: campaigns ? campaigns?.length : 0,
         items: campaigns,
       });
     } else if (filters?.campaignId) {
-      const campaigns = allCampaigns?.items?.filter(
-        (c) => c.campaignId === filters.campaignId,
-      );
+      const campaigns = allCampaigns?.items?.filter((c) => c.campaignId === filters.campaignId);
       return new CollectionType({
         count: campaigns ? campaigns?.length : 0,
         items: campaigns,
       });
     } else if (filters?.minterAddress) {
-      const campaigns = allCampaigns?.items?.filter(
-        (c) => c.minterAddress === filters.minterAddress,
-      );
+      const campaigns = allCampaigns?.items?.filter((c) => c.minterAddress === filters.minterAddress);
       return new CollectionType({
         count: campaigns ? campaigns?.length : 0,
         items: campaigns,
@@ -63,18 +53,12 @@ export class CampaignsService {
   }
 
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
-    const campaigns: BrandInfoViewResultType[] =
-      await this.nftMinterService.getCampaignsForScAddress(minterAddress);
-    const maxNftsPerTransaction: number =
-      await this.getOrSetNrOfTransactionOnSC(minterAddress);
-    const campaignsfromBlockchain = campaigns.map((c) =>
-      CampaignEntity.fromCampaignAbi(c, minterAddress, maxNftsPerTransaction),
-    );
+    const campaigns: BrandInfoViewResultType[] = await this.nftMinterService.getCampaignsForScAddress(minterAddress);
+    const maxNftsPerTransaction: number = await this.getOrSetNrOfTransactionOnSC(minterAddress);
+    const campaignsfromBlockchain = campaigns.map((c) => CampaignEntity.fromCampaignAbi(c, minterAddress, maxNftsPerTransaction));
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
-      const savedCampaign = await this.persistenceService.saveCampaign(
-        campaign,
-      );
+      const savedCampaign = await this.persistenceService.saveCampaign(campaign);
       const tiers = campaign.tiers.map((tier) => ({
         ...tier,
         campaignId: savedCampaign?.id,
@@ -87,16 +71,8 @@ export class CampaignsService {
     return savedCampaigns.map((campaign) => Campaign.fromEntity(campaign));
   }
 
-  public async updateTier(
-    address: string,
-    campaignId: string,
-    tier: string,
-    nftsBought: string,
-  ) {
-    const campaign = await this.persistenceService.getCampaign(
-      campaignId,
-      address,
-    );
+  public async updateTier(address: string, campaignId: string, tier: string, nftsBought: string) {
+    const campaign = await this.persistenceService.getCampaign(campaignId, address);
     const tierEntity = await this.persistenceService.getTier(campaign.id, tier);
     tierEntity.availableNfts -= nftsBought ? parseInt(nftsBought) : 1;
     return await this.persistenceService.saveTier(tierEntity);
@@ -104,11 +80,7 @@ export class CampaignsService {
 
   public async invalidateKey() {
     const campaigns = await this.getCampaignsFromDb();
-    await this.cacheService.setCache(
-      CacheInfo.Campaigns.key,
-      campaigns,
-      Constants.oneDay(),
-    );
+    await this.cacheService.setCache(CacheInfo.Campaigns.key, campaigns, Constants.oneDay());
     await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
   }
 
@@ -117,17 +89,11 @@ export class CampaignsService {
   }
 
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    const campaigns = await this.cacheService.getOrSetCache(
-      CacheInfo.Campaigns.key,
-      () => this.getCampaignsFromDb(),
-      Constants.oneHour(),
-    );
+    const campaigns = await this.cacheService.getOrSetCache(CacheInfo.Campaigns.key, () => this.getCampaignsFromDb(), Constants.oneHour());
     return campaigns;
   }
 
-  private async getOrSetNrOfTransactionOnSC(
-    scAddress: string,
-  ): Promise<number> {
+  private async getOrSetNrOfTransactionOnSC(scAddress: string): Promise<number> {
     const nfOfTransaction = await this.cacheService.getOrSetCache(
       `${CacheInfo.NrOfNftsOnTransaction.key}_${scAddress}`,
       () => this.nftMinterService.getMaxNftsPerTransaction(scAddress),
@@ -137,8 +103,7 @@ export class CampaignsService {
   }
 
   private async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
-    let [campaigns, count]: [CampaignEntity[], number] =
-      await this.persistenceService.getCampaigns();
+    let [campaigns, count]: [CampaignEntity[], number] = await this.persistenceService.getCampaigns();
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),

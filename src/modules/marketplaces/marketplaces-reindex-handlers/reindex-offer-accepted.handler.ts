@@ -10,31 +10,23 @@ import { OfferAcceptedSummary } from '../models/marketplaces-reindex-events-summ
 export class ReindexOfferAcceptedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: OfferAcceptedSummary,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: OfferAcceptedSummary): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(
-      input.offerId,
-    );
+    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(input.offerId);
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
         ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
         : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
 
     if (offerIndex !== -1) {
-      marketplaceReindexState.offers[offerIndex].status =
-        OfferStatusEnum.Accepted;
+      marketplaceReindexState.offers[offerIndex].status = OfferStatusEnum.Accepted;
       marketplaceReindexState.offers[offerIndex].modifiedDate = modifiedDate;
       return;
     }
 
     if (auctionIndex !== -1) {
-      marketplaceReindexState.auctions[auctionIndex].status =
-        AuctionStatusEnum.Closed;
-      marketplaceReindexState.auctions[auctionIndex].modifiedDate =
-        modifiedDate;
+      marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
+      marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
     }
   }
 }

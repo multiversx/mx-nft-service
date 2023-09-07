@@ -60,10 +60,6 @@ import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => OffersModuleGraph),
   ],
-  exports: [
-    MarketplacesService,
-    MarketplaceEventsIndexingService,
-    MarketplacesReindexService,
-  ],
+  exports: [MarketplacesService, MarketplaceEventsIndexingService, MarketplacesReindexService],
 })
 export class MarketplacesModuleGraph {}

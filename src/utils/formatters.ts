@@ -1,17 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { mxConfig } from 'src/config';
 
-function format(
-  big: string,
-  denomination: number,
-  decimals: number,
-  showLastNonZeroDecimal: boolean,
-  addCommas: boolean,
-) {
-  showLastNonZeroDecimal =
-    typeof showLastNonZeroDecimal !== 'undefined'
-      ? showLastNonZeroDecimal
-      : false;
+function format(big: string, denomination: number, decimals: number, showLastNonZeroDecimal: boolean, addCommas: boolean) {
+  showLastNonZeroDecimal = typeof showLastNonZeroDecimal !== 'undefined' ? showLastNonZeroDecimal : false;
   let array = big.toString().split('');
   if (denomination !== 0) {
     // make sure we have enough characters
@@ -44,9 +35,7 @@ function format(
   if (addCommas) {
     // add comas every 3 characters
     array = array.reverse();
-    const reference = denomination
-      ? array.length - array.indexOf('.') - 1
-      : array.length;
+    const reference = denomination ? array.length - array.indexOf('.') - 1 : array.length;
     const count = Math.floor(reference / 3);
     for (let i = 1; i <= count; i++) {
       const position = array.indexOf('.') + 3 * i + i;
@@ -57,9 +46,7 @@ function format(
     array = array.reverse();
   }
 
-  const allDecimalsZero = array
-    .slice(array.indexOf('.') + 1)
-    .every((digit) => digit.toString() === '0');
+  const allDecimalsZero = array.slice(array.indexOf('.') + 1).every((digit) => digit.toString() === '0');
 
   const string = array.join('');
 
@@ -91,13 +78,7 @@ export default function denominate({
   if (input === '' || input === '0' || input === undefined) {
     input = '0';
   }
-  return format(
-    input,
-    denomination,
-    decimals,
-    showLastNonZeroDecimal,
-    addCommas,
-  );
+  return format(input, denomination, decimals, showLastNonZeroDecimal, addCommas);
 }
 
 export function nominateVal(value: number): string {
@@ -115,7 +96,4 @@ export function nominateStringVal(value: string): string {
   return value;
 }
 
-export const nominateAmount = (tokenAmount: string): string =>
-  new BigNumber(tokenAmount)
-    .multipliedBy(`1e+${mxConfig.decimals}`)
-    .toFixed();
+export const nominateAmount = (tokenAmount: string): string => new BigNumber(tokenAmount).multipliedBy(`1e+${mxConfig.decimals}`).toFixed();

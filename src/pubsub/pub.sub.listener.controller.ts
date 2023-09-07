@@ -19,9 +19,7 @@ export class PubSubListenerController {
 
   @EventPattern('refreshCacheKey')
   async refreshCacheKey(@Payload() event: { key: string; ttl: number }) {
-    this.logger.log(
-      `Refreshing local cache key ${event.key} with ttl ${event.ttl}`,
-    );
+    this.logger.log(`Refreshing local cache key ${event.key} with ttl ${event.ttl}`);
     await this.cachingService.refreshCacheLocal(event.key, event.ttl);
   }
 }

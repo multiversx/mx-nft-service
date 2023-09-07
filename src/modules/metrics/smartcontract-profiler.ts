@@ -1,11 +1,4 @@
-import {
-  Address,
-  ContractFunction,
-  ITransactionValue,
-  Query,
-  SmartContract,
-  TypedValue,
-} from '@multiversx/sdk-core';
+import { Address, ContractFunction, ITransactionValue, Query, SmartContract, TypedValue } from '@multiversx/sdk-core';
 import { MetricsCollector } from './metrics.collector';
 import { PerformanceProfiler } from './performance.profiler';
 

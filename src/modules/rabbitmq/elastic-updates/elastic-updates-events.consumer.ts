@@ -5,9 +5,7 @@ import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 
 @Injectable()
 export class ElasiticUpdatesConsumer {
-  constructor(
-    private readonly elasticUpdateService: ElasticUpdatesEventsService,
-  ) {}
+  constructor(private readonly elasticUpdateService: ElasticUpdatesEventsService) {}
 
   @CompetingRabbitConsumer({
     connection: 'default',
@@ -17,34 +15,18 @@ export class ElasiticUpdatesConsumer {
   })
   async consumeMintBurnAndUpdateEvents(events: any) {
     if (events.events && process.env.ENABLE_ELASTIC_UPDATES === 'true') {
-      const mintNftEvents = events?.events?.filter(
-        (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTCreate,
-      );
+      const mintNftEvents = events?.events?.filter((e: { identifier: NftEventEnum }) => e.identifier === NftEventEnum.ESDTNFTCreate);
       const burnAndUpdateNftAttributesEvents = events?.events?.filter(
         (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTBurn ||
-          e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
+          e.identifier === NftEventEnum.ESDTNFTBurn || e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
       );
-      const mintBurnAndUpdateNftAttributesEvents = [
-        ...mintNftEvents,
-        ...burnAndUpdateNftAttributesEvents,
-      ];
+      const mintBurnAndUpdateNftAttributesEvents = [...mintNftEvents, ...burnAndUpdateNftAttributesEvents];
 
       await Promise.all([
-        this.elasticUpdateService.handleNftMintEvents(
-          mintNftEvents,
-          events.hash,
-        ),
-        this.elasticUpdateService.handleTraitsForNftMintBurnAndUpdateEvents(
-          mintBurnAndUpdateNftAttributesEvents,
-        ),
-        this.elasticUpdateService.handleRaritiesForNftMintBurnAndUpdateEvents(
-          mintBurnAndUpdateNftAttributesEvents,
-        ),
-        this.elasticUpdateService.handleScamInfoForNftMintBurnAndUpdateEvents(
-          mintBurnAndUpdateNftAttributesEvents,
-        ),
+        this.elasticUpdateService.handleNftMintEvents(mintNftEvents, events.hash),
+        this.elasticUpdateService.handleTraitsForNftMintBurnAndUpdateEvents(mintBurnAndUpdateNftAttributesEvents),
+        this.elasticUpdateService.handleRaritiesForNftMintBurnAndUpdateEvents(mintBurnAndUpdateNftAttributesEvents),
+        this.elasticUpdateService.handleScamInfoForNftMintBurnAndUpdateEvents(mintBurnAndUpdateNftAttributesEvents),
       ]);
     }
   }

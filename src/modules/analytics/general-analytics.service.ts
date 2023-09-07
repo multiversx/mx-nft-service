@@ -19,9 +19,7 @@ export class GeneralAnalyticsService {
     private marketplacesService: MarketplacesService,
   ) {}
 
-  public async getNftsCount(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getNftsCount(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`,
       () => this.toolsService.getNftsCount(input),
@@ -30,9 +28,7 @@ export class GeneralAnalyticsService {
     );
   }
 
-  public async getLast24HActive(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getLast24HActive(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`,
       () => this.toolsService.getLast24HActive(input),
@@ -40,9 +36,7 @@ export class GeneralAnalyticsService {
       CacheInfo.NftAnalytic24hCount.ttl / 2,
     );
   }
-  public async getActiveNftsStats(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getActiveNftsStats(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
       () => this.toolsService.getActiveNftsStats(input),

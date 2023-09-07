@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
@@ -33,34 +30,18 @@ export class BidEventHandler {
     let [bidEvent, topics] = [undefined, undefined];
     let marketplace: Marketplace;
     if (marketplaceType === MarketplaceTypeEnum.External) {
-      marketplace = await this.marketplaceService.getMarketplaceByAddress(
-        event.address,
-      );
+      marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
       [bidEvent, topics] = this.getEventAndTopics(event, marketplace.key);
     } else {
       [bidEvent, topics] = this.getEventAndTopics(event);
-      marketplace = await this.marketplaceService.getMarketplaceByType(
-        bidEvent.getAddress(),
-        marketplaceType,
-        topics.collection,
-      );
+      marketplace = await this.marketplaceService.getMarketplaceByType(bidEvent.getAddress(), marketplaceType, topics.collection);
     }
     if (!marketplace) return;
-    this.logger.log(
-      `${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
-        marketplace?.name
-      }'`,
-    );
-    const auction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topics.auctionId, 16),
-        marketplace.key,
-      );
+    this.logger.log(`${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+    const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
     if (!auction) return;
 
-    const activeOrder = await this.ordersService.getActiveOrderForAuction(
-      auction.id,
-    );
+    const activeOrder = await this.ordersService.getActiveOrderForAuction(auction.id);
     if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
       return;
     }
@@ -82,16 +63,8 @@ export class BidEventHandler {
     if (auction.maxBidDenominated === order.priceAmountDenominated) {
       this.notificationsService.updateNotificationStatus([auction?.id]);
       this.notificationsService.addNotifications(auction, order);
-      this.auctionsService.updateAuctionStatus(
-        auction.id,
-        AuctionStatusEnum.Ended,
-        hash,
-        event.identifier,
-      );
-      this.persistenceService.updateOrderWithStatus(
-        order,
-        OrderStatusEnum.Bought,
-      );
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, event.identifier);
+      this.persistenceService.updateOrderWithStatus(order, OrderStatusEnum.Bought);
     }
   }
 

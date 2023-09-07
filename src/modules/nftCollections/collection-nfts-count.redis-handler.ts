@@ -8,16 +8,10 @@ import { BaseCollectionsAssetsRedisHandler } from './base-collection-assets.redi
 @Injectable()
 export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedisHandler {
   protected redisCacheService: RedisCacheService;
-  constructor(
-    redisCacheService: RedisCacheService,
-    private apiService: MxApiService,
-  ) {
+  constructor(redisCacheService: RedisCacheService, private apiService: MxApiService) {
     super(redisCacheService, 'collectionAssetsCount');
   }
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    data: any,
-  ): RedisValue[] {
+  mapValues(returnValues: { key: string; value: any }[], data: any): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
@@ -30,10 +24,7 @@ export class CollectionsNftsCountRedisHandler extends BaseCollectionsAssetsRedis
 
   async getData(keys: string[]) {
     const getCountPromises = keys.map((identifier) =>
-      this.apiService.getNftsCountForCollection(
-        this.getQueryForCollection(identifier),
-        identifier,
-      ),
+      this.apiService.getNftsCountForCollection(this.getQueryForCollection(identifier), identifier),
     );
 
     const nftsCountResponse = await Promise.all(getCountPromises);

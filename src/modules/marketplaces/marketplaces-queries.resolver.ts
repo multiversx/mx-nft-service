@@ -32,13 +32,7 @@ export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
     const marketplaces = await this.marketplaceService.getMarketplaces(limit, offset, filters);
     // todo: investigate
     pagination.after = undefined;
-    return PageResponse.mapResponse<Marketplace>(
-      marketplaces?.items || [],
-      pagination,
-      marketplaces?.count || 0,
-      offset,
-      limit,
-    );
+    return PageResponse.mapResponse<Marketplace>(marketplaces?.items || [], pagination, marketplaces?.count || 0, offset, limit);
   }
 
   @ResolveField(() => String)
@@ -57,9 +51,7 @@ export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
   @ResolveField(() => [String])
   async acceptedCollectionIdentifiers(@Parent() contractInfo: Marketplace) {
     const { key, type } = contractInfo;
-    return key && type === MarketplaceTypeEnum.Internal
-      ? await this.marketplaceService.getCollectionsByMarketplace(key)
-      : null;
+    return key && type === MarketplaceTypeEnum.Internal ? await this.marketplaceService.getCollectionsByMarketplace(key) : null;
   }
 
   @ResolveField(() => [Token])

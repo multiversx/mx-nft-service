@@ -21,13 +21,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Collections tokens invalidations',
       async () => {
-        const tokens =
-          await this.collectionsGetterService.getFullCollectionsRaw();
-        await this.invalidateKey(
-          CacheInfo.AllCollections.key,
-          tokens,
-          CacheInfo.AllCollections.ttl,
-        );
+        const tokens = await this.collectionsGetterService.getFullCollectionsRaw();
+        await this.invalidateKey(CacheInfo.AllCollections.key, tokens, CacheInfo.AllCollections.ttl);
       },
       true,
     );
@@ -38,13 +33,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Collections Most Active tokens invalidations',
       async () => {
-        const tokens =
-          await this.collectionsGetterService.getMostActiveCollections();
-        await this.invalidateKey(
-          CacheInfo.CollectionsMostActive.key,
-          tokens,
-          CacheInfo.CollectionsMostActive.ttl,
-        );
+        const tokens = await this.collectionsGetterService.getMostActiveCollections();
+        await this.invalidateKey(CacheInfo.CollectionsMostActive.key, tokens, CacheInfo.CollectionsMostActive.ttl);
       },
       true,
     );
@@ -55,13 +45,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Collections Most Followed tokens invalidations',
       async () => {
-        const tokens =
-          await this.collectionsGetterService.getMostFollowedCollections();
-        await this.invalidateKey(
-          CacheInfo.CollectionsMostFollowed.key,
-          tokens,
-          CacheInfo.CollectionsMostFollowed.ttl,
-        );
+        const tokens = await this.collectionsGetterService.getMostFollowedCollections();
+        await this.invalidateKey(CacheInfo.CollectionsMostFollowed.key, tokens, CacheInfo.CollectionsMostFollowed.ttl);
       },
       true,
     );
@@ -72,13 +57,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Trending collections order by number of running auctions',
       async () => {
-        const result =
-          await this.collectionsGetterService.getAllTrendingCollections();
-        await this.invalidateKey(
-          CacheInfo.TrendingCollections.key,
-          result,
-          CacheInfo.TrendingCollections.ttl,
-        );
+        const result = await this.collectionsGetterService.getAllTrendingCollections();
+        await this.invalidateKey(CacheInfo.TrendingCollections.key, result, CacheInfo.TrendingCollections.ttl);
       },
       true,
     );
@@ -89,13 +69,8 @@ export class CollectionsWarmerService {
     await Locker.lock(
       'Active collections from last 30 days order by number auctions',
       async () => {
-        const result =
-          await this.collectionsGetterService.getActiveCollectionsFromLast30Days();
-        await this.invalidateKey(
-          CacheInfo.ActiveCollectionLast30Days.key,
-          result,
-          CacheInfo.ActiveCollectionLast30Days.ttl,
-        );
+        const result = await this.collectionsGetterService.getActiveCollectionsFromLast30Days();
+        await this.invalidateKey(CacheInfo.ActiveCollectionLast30Days.key, result, CacheInfo.ActiveCollectionLast30Days.ttl);
       },
       true,
     );

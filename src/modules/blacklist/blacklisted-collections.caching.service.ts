@@ -8,15 +8,9 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs';
 export class BlacklistedCollectionsCachingService {
   constructor(private readonly redisCacheService: RedisCacheService) {}
 
-  async getOrSetBlacklistedCollections(
-    getBlacklistedCollections: () => any,
-  ): Promise<[BlacklistedCollectionEntity[], number]> {
+  async getOrSetBlacklistedCollections(getBlacklistedCollections: () => any): Promise<[BlacklistedCollectionEntity[], number]> {
     const cacheKey = this.getBlacklistedCollectionsCacheKey();
-    return await this.redisCacheService.getOrSet(
-      cacheKey,
-      getBlacklistedCollections,
-      CacheInfo.BlacklistedCollections.ttl,
-    );
+    return await this.redisCacheService.getOrSet(cacheKey, getBlacklistedCollections, CacheInfo.BlacklistedCollections.ttl);
   }
 
   async invalidateBlacklistedCollectionsCache(): Promise<void> {

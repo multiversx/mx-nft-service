@@ -21,9 +21,7 @@ export class MarketplaceRepository {
     });
   }
 
-  async getMarketplacesByKeys(
-    marketplaceKeys: string[],
-  ): Promise<MarketplaceEntity[]> {
+  async getMarketplacesByKeys(marketplaceKeys: string[]): Promise<MarketplaceEntity[]> {
     return await this.marketplaceRepository
       .createQueryBuilder('marketplaces')
       .where('`key` IN(:...marketplaceKeys)', {
@@ -32,9 +30,7 @@ export class MarketplaceRepository {
       .getMany();
   }
 
-  async getMarketplacesByAddresses(
-    addresses: string[],
-  ): Promise<MarketplaceEntity[]> {
+  async getMarketplacesByAddresses(addresses: string[]): Promise<MarketplaceEntity[]> {
     return await this.marketplaceRepository
       .createQueryBuilder('fm')
       .select('fm.address as address')
@@ -47,13 +43,7 @@ export class MarketplaceRepository {
       .execute();
   }
 
-  async updateMarketplaceLastIndexTimestamp(
-    address: string,
-    lastIndexTimestamp: number,
-  ): Promise<void> {
-    await this.marketplaceRepository.update(
-      { address: address },
-      { lastIndexTimestamp: lastIndexTimestamp },
-    );
+  async updateMarketplaceLastIndexTimestamp(address: string, lastIndexTimestamp: number): Promise<void> {
+    await this.marketplaceRepository.update({ address: address }, { lastIndexTimestamp: lastIndexTimestamp });
   }
 }

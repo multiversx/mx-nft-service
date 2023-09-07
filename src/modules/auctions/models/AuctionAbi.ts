@@ -1,10 +1,4 @@
-import {
-  AddressValue,
-  BigUIntValue,
-  OptionValue,
-  TokenIdentifierValue,
-  U64Value,
-} from '@multiversx/sdk-core';
+import { AddressValue, BigUIntValue, OptionValue, TokenIdentifierValue, U64Value } from '@multiversx/sdk-core';
 import { AuctionStatusEnum } from '.';
 
 export interface GeneralAuctionAbi {

@@ -9,14 +9,8 @@ import { AssetsCollectionsRedisHandler } from './assets-collection.redis-handler
   scope: Scope.REQUEST,
 })
 export class AssetsCollectionsProvider extends BaseProvider<string> {
-  constructor(
-    assetsRedisHandler: AssetsCollectionsRedisHandler,
-    private apiService: MxApiService,
-  ) {
-    super(
-      assetsRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(assetsRedisHandler: AssetsCollectionsRedisHandler, private apiService: MxApiService) {
+    super(assetsRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {

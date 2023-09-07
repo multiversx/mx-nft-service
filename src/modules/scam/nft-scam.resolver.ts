@@ -12,13 +12,9 @@ export class NftScamResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async validateOrUpdateNftScamInfo(
-    @Args('identifier') identifier: string,
-  ): Promise<boolean> {
+  async validateOrUpdateNftScamInfo(@Args('identifier') identifier: string): Promise<boolean> {
     try {
-      return await this.nftScamService.validateNftScamInfoForIdentifier(
-        identifier,
-      );
+      return await this.nftScamService.validateNftScamInfoForIdentifier(identifier);
     } catch (error) {
       throw new ApolloError(error);
     }
@@ -33,11 +29,7 @@ export class NftScamResolver {
     @Args('info') info: string,
   ): Promise<boolean> {
     try {
-      return await this.nftScamService.manuallySetNftScamInfo(
-        identifier,
-        type,
-        info,
-      );
+      return await this.nftScamService.manuallySetNftScamInfo(identifier, type, info);
     } catch (error) {
       throw new ApolloError(error);
     }
@@ -45,9 +37,7 @@ export class NftScamResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async clearNftScamInfo(
-    @Args('identifier') identifier: string,
-  ): Promise<boolean> {
+  async clearNftScamInfo(@Args('identifier') identifier: string): Promise<boolean> {
     try {
       return await this.nftScamService.manuallyClearNftScamInfo(identifier);
     } catch (error) {

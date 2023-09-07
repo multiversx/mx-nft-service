@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { constants } from 'src/config';
-import { EntityRepository, LessThan, MoreThan, Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { MarketplaceEventsEntity } from './marketplace-events.entity';
 
 @Injectable()
@@ -10,20 +10,12 @@ export class MarketplaceEventsRepository {
     @InjectRepository(MarketplaceEventsEntity)
     private marketplaceCollectionRepository: Repository<MarketplaceEventsEntity>,
   ) {}
-  async saveOrIgnoreBulk(
-    marketplaceEvents: MarketplaceEventsEntity[],
-  ): Promise<number> {
+  async saveOrIgnoreBulk(marketplaceEvents: MarketplaceEventsEntity[]): Promise<number> {
     let savedRecordsCount = 0;
 
-    const totalBatches = Math.max(
-      marketplaceEvents.length / constants.dbBatch,
-      1,
-    );
+    const totalBatches = Math.max(marketplaceEvents.length / constants.dbBatch, 1);
     for (let i = 0; i < totalBatches; i++) {
-      const batch = marketplaceEvents.slice(
-        i * constants.dbBatch,
-        (i + 1) * constants.dbBatch,
-      );
+      const batch = marketplaceEvents.slice(i * constants.dbBatch, (i + 1) * constants.dbBatch);
       const res = await this.marketplaceCollectionRepository
         .createQueryBuilder()
         .insert()
@@ -31,9 +23,7 @@ export class MarketplaceEventsRepository {
         .values(batch)
         .orIgnore()
         .execute();
-      savedRecordsCount += res?.identifiers.filter(
-        (identifier) => identifier,
-      ).length;
+      savedRecordsCount += res?.identifiers.filter((identifier) => identifier).length;
     }
 
     return savedRecordsCount;
@@ -48,8 +38,7 @@ export class MarketplaceEventsRepository {
       marketplaceAddress,
     };
     if (afterTimestamp && beforeTimestamp) {
-      whereFilter['timestamp'] =
-        MoreThan(afterTimestamp) && LessThan(beforeTimestamp);
+      whereFilter['timestamp'] = MoreThan(afterTimestamp) && LessThan(beforeTimestamp);
     } else if (afterTimestamp) {
       whereFilter['timestamp'] = MoreThan(afterTimestamp);
     }

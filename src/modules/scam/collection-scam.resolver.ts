@@ -11,13 +11,9 @@ export class CollectionScamResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async setCollectionScamInfo(
-    @Args('collection') collection: string,
-  ): Promise<boolean> {
+  async setCollectionScamInfo(@Args('collection') collection: string): Promise<boolean> {
     try {
-      return await this.collectionScamService.manuallySetCollectionScamInfo(
-        collection,
-      );
+      return await this.collectionScamService.manuallySetCollectionScamInfo(collection);
     } catch (error) {
       throw new ApolloError(error);
     }
@@ -25,13 +21,9 @@ export class CollectionScamResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async clearCollectionScamInfo(
-    @Args('collection') collection: string,
-  ): Promise<boolean> {
+  async clearCollectionScamInfo(@Args('collection') collection: string): Promise<boolean> {
     try {
-      return await this.collectionScamService.manuallyClearCollectionScamInfo(
-        collection,
-      );
+      return await this.collectionScamService.manuallyClearCollectionScamInfo(collection);
     } catch (error) {
       throw new ApolloError(error);
     }

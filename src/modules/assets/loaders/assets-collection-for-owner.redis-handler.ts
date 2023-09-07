@@ -9,26 +9,18 @@ export class AssetsCollectionsForOwnerRedisHandler extends RedisKeyValueDataload
     super(redisCacheService, 'asset_collection_owner');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], assetsIdentifiers: { [key: string]: any[] }) {
     let response: RedisValue[] = [];
     const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key]
-          : null;
+        item.value = assetsIdentifiers[item.key] ? assetsIdentifiers[item.key] : null;
 
         finalNfts.push(item);
       }
     }
 
-    response = [
-      ...response,
-      new RedisValue({ values: finalNfts, ttl: 5 * Constants.oneMinute() }),
-    ];
+    response = [...response, new RedisValue({ values: finalNfts, ttl: 5 * Constants.oneMinute() })];
     return response;
   }
 }

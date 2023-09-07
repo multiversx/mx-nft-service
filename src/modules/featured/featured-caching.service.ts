@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import {
-  FeaturedCollectionEntity,
-  FeaturedNftEntity,
-} from 'src/db/featuredNfts';
+import { FeaturedCollectionEntity, FeaturedNftEntity } from 'src/db/featuredNfts';
 import { RedisCacheService } from '@multiversx/sdk-nestjs';
 
 @Injectable()
 export class FeaturedCollectionsCachingService {
-  constructor(private readonly redisCacheService: RedisCacheService) { }
+  constructor(private readonly redisCacheService: RedisCacheService) {}
 
   async getOrSetFeaturedCollections(
     getFeaturedCollections: () => any,
@@ -17,24 +14,12 @@ export class FeaturedCollectionsCachingService {
     _offset?: number,
   ): Promise<[FeaturedCollectionEntity[], number]> {
     const cacheKey = this.getFeaturedCollectionsCacheKey();
-    return await this.redisCacheService.getOrSet(
-      cacheKey,
-      getFeaturedCollections,
-      CacheInfo.FeaturedCollections.ttl,
-    );
+    return await this.redisCacheService.getOrSet(cacheKey, getFeaturedCollections, CacheInfo.FeaturedCollections.ttl);
   }
 
-  async getOrSetFeaturedNfts(
-    getFeaturedNfts: () => any,
-    limit?: number,
-    offset?: number,
-  ): Promise<[FeaturedNftEntity[], number]> {
+  async getOrSetFeaturedNfts(getFeaturedNfts: () => any, limit?: number, offset?: number): Promise<[FeaturedNftEntity[], number]> {
     const cacheKey = this.getFeaturedNftsCacheKey(limit, offset);
-    return await this.redisCacheService.getOrSet(
-      cacheKey,
-      getFeaturedNfts,
-      CacheInfo.FeaturedNfts.ttl,
-    );
+    return await this.redisCacheService.getOrSet(cacheKey, getFeaturedNfts, CacheInfo.FeaturedNfts.ttl);
   }
 
   async invalidateFeaturedCollectionsCache(): Promise<void> {
@@ -42,11 +27,7 @@ export class FeaturedCollectionsCachingService {
   }
 
   private getFeaturedNftsCacheKey(limit?: number, offset?: number) {
-    return generateCacheKeyFromParams(
-      CacheInfo.FeaturedNfts.key,
-      limit,
-      offset,
-    );
+    return generateCacheKeyFromParams(CacheInfo.FeaturedNfts.key, limit, offset);
   }
 
   private getFeaturedCollectionsCacheKey() {

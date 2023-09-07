@@ -1,11 +1,7 @@
 import { mxConfig } from 'src/config';
 import { getMarketplaceKeyFilter } from './sqlUtils';
 
-export function getCollectionStats(
-  identifier: string,
-  marketplaceKey: string = undefined,
-  paymentToken: string = mxConfig.egld,
-) {
+export function getCollectionStats(identifier: string, marketplaceKey: string = undefined, paymentToken: string = mxConfig.egld) {
   return `
   WITH
     endedAuctions AS (select  SUM(o.priceAmountDenominated) AS volumeTraded, 
@@ -15,10 +11,7 @@ export function getCollectionStats(
       a.collection AS endedIdentifier
     FROM orders o 
     LEFT JOIN auctions a ON o.auctionId = a.id 
-    WHERE a.collection  = '${identifier}' AND o.status = 'Bought' ${getMarketplaceKeyFilter(
-    'o',
-    marketplaceKey,
-  )}),
+    WHERE a.collection  = '${identifier}' AND o.status = 'Bought' ${getMarketplaceKeyFilter('o', marketplaceKey)}),
 
     activeAuctions AS (SELECT MIN(if(o.priceAmountDenominated, o.priceAmountDenominated , a.minBidDenominated)) AS minPrice, 
     COUNT(DISTINCT(a.id)) AS activeAuctions,
@@ -38,12 +31,7 @@ export function getCollectionStats(
   `;
 }
 
-
-export function getCollectionFloorPrice(
-  identifier: string,
-  marketplaceKey: string = undefined,
-  paymentToken: string = mxConfig.egld,
-) {
+export function getCollectionFloorPrice(identifier: string, marketplaceKey: string = undefined, paymentToken: string = mxConfig.egld) {
   return `
   SELECT MIN(if(o.priceAmountDenominated, o.priceAmountDenominated , a.minBidDenominated)) AS minPrice
     FROM auctions a

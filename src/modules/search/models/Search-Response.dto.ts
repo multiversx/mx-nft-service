@@ -1,8 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import {
-  SearchNftCollectionResponse,
-  SearchItemResponse,
-} from './SearchItemResponse';
+import { SearchNftCollectionResponse, SearchItemResponse } from './SearchItemResponse';
 
 @ObjectType()
 export class SearchResponse {

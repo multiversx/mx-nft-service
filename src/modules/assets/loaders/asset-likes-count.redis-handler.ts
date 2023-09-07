@@ -8,14 +8,7 @@ export class AssetLikesProviderRedisHandler extends RedisValueDataloaderHandler<
     super(redisCacheService, 'assetLikesCount');
   }
 
-  mapValues(
-    identifiers: string[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
-    return identifiers?.map((identifier) =>
-      assetsIdentifiers[identifier]
-        ? parseInt(assetsIdentifiers[identifier][0].likesCount)
-        : 0,
-    );
+  mapValues(identifiers: string[], assetsIdentifiers: { [key: string]: any[] }) {
+    return identifiers?.map((identifier) => (assetsIdentifiers[identifier] ? parseInt(assetsIdentifiers[identifier][0].likesCount) : 0));
   }
 }

@@ -8,10 +8,7 @@ import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 export class OffersCachingService {
   constructor(private redisCacheService: RedisCacheService) {}
 
-  public async getOrSetOffersForAddress(
-    address: string,
-    getOrSetOffersForAddress: () => any,
-  ): Promise<[OfferEntity[], number]> {
+  public async getOrSetOffersForAddress(address: string, getOrSetOffersForAddress: () => any): Promise<[OfferEntity[], number]> {
     return this.redisCacheService.getOrSet(
       this.getOffersForOwnerCacheKey(address),
       () => getOrSetOffersForAddress(),
@@ -19,10 +16,7 @@ export class OffersCachingService {
     );
   }
 
-  public async getOrSetOffersForCollection(
-    address: string,
-    getOrSetOffersForCollection: () => any,
-  ): Promise<[OfferEntity[], number]> {
+  public async getOrSetOffersForCollection(address: string, getOrSetOffersForCollection: () => any): Promise<[OfferEntity[], number]> {
     return this.redisCacheService.getOrSet(
       this.getOffersForCollectionCacheKey(address),
       () => getOrSetOffersForCollection(),
@@ -30,16 +24,9 @@ export class OffersCachingService {
     );
   }
 
-  public async invalidateCache(
-    collectionIdentifier?: string,
-    ownerAddress?: string,
-  ): Promise<void> {
-    await this.redisCacheService.delete(
-      this.getOffersForOwnerCacheKey(ownerAddress),
-    );
-    await this.redisCacheService.delete(
-      this.getOffersForCollectionCacheKey(collectionIdentifier),
-    );
+  public async invalidateCache(collectionIdentifier?: string, ownerAddress?: string): Promise<void> {
+    await this.redisCacheService.delete(this.getOffersForOwnerCacheKey(ownerAddress));
+    await this.redisCacheService.delete(this.getOffersForCollectionCacheKey(collectionIdentifier));
   }
 
   private getOffersForOwnerCacheKey(address: string): string {

@@ -17,16 +17,11 @@ export class OpenRarityService {
         sum: 0,
       };
       for (let traitIndex = 0; traitIndex < nft.DNA.length; traitIndex++) {
-        if (
-          !Number.isInteger(traitIndex) ||
-          !Number.isInteger(nft.DNA[traitIndex])
-        ) {
+        if (!Number.isInteger(traitIndex) || !Number.isInteger(nft.DNA[traitIndex])) {
           continue;
         }
 
-        const chanceOfTraitValue =
-          dnaSummary[traitIndex][nft.DNA[traitIndex]].occurencesPercentage /
-          100;
+        const chanceOfTraitValue = dnaSummary[traitIndex][nft.DNA[traitIndex]].occurencesPercentage / 100;
 
         rarities[nft.nonce].sum += -Math.log2(chanceOfTraitValue);
       }

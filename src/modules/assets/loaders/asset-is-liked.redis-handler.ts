@@ -9,16 +9,11 @@ export class IsAssetLikedRedisHandler extends RedisKeyValueDataloaderHandler<str
     super(redisCacheService, 'isAssetLiked');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], assetsIdentifiers: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key][0].liked
-          : 0;
+        item.value = assetsIdentifiers[item.key] ? assetsIdentifiers[item.key][0].liked : 0;
         redisValues.push(item);
       }
     }

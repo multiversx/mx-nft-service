@@ -10,10 +10,7 @@ export class MarketplaceCollectionsRepository {
     @InjectRepository(MarketplaceCollectionEntity)
     private marketplaceCollectionRepository: Repository<MarketplaceCollectionEntity>,
   ) {}
-  async getMarketplaceByAddressAndCollection(
-    collection: string,
-    address: string,
-  ): Promise<MarketplaceEntity[]> {
+  async getMarketplaceByAddressAndCollection(collection: string, address: string): Promise<MarketplaceEntity[]> {
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
@@ -24,9 +21,7 @@ export class MarketplaceCollectionsRepository {
       .addSelect('m.type as `type`')
       .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
       .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
-      .where(
-        `mc.collectionIdentifier = '${collection}' and m.address= '${address}'`,
-      )
+      .where(`mc.collectionIdentifier = '${collection}' and m.address= '${address}'`)
       .execute();
   }
 
@@ -34,9 +29,7 @@ export class MarketplaceCollectionsRepository {
     return await this.marketplaceCollectionRepository.find();
   }
 
-  async getMarketplaceByCollection(
-    collection: string,
-  ): Promise<MarketplaceEntity[]> {
+  async getMarketplaceByCollection(collection: string): Promise<MarketplaceEntity[]> {
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
@@ -51,9 +44,7 @@ export class MarketplaceCollectionsRepository {
       .execute();
   }
 
-  async getMarketplaceByCollections(
-    collectionIdentifiers: string[],
-  ): Promise<any[]> {
+  async getMarketplaceByCollections(collectionIdentifiers: string[]): Promise<any[]> {
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
@@ -70,9 +61,7 @@ export class MarketplaceCollectionsRepository {
       .execute();
   }
 
-  async getCollectionsByMarketplace(
-    marketplaceKey: string,
-  ): Promise<MarketplaceCollectionEntity[]> {
+  async getCollectionsByMarketplace(marketplaceKey: string): Promise<MarketplaceCollectionEntity[]> {
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
@@ -83,9 +72,7 @@ export class MarketplaceCollectionsRepository {
       .execute();
   }
 
-  async saveMarketplaceCollection(
-    entity: MarketplaceCollectionEntity,
-  ): Promise<MarketplaceCollectionEntity> {
+  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
     return await this.marketplaceCollectionRepository.save(entity);
   }
 }

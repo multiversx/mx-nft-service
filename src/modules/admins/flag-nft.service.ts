@@ -1,9 +1,4 @@
-import {
-  ElasticQuery,
-  Locker,
-  QueryOperator,
-  QueryType,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery, Locker, QueryOperator, QueryType } from '@multiversx/sdk-nestjs';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { MxElasticService, NftMedia } from 'src/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -13,10 +8,7 @@ import { AssetByIdentifierService } from '../assets';
 import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 type NsfwType = {
   identifier: string;
   nsfw: any;
@@ -66,50 +58,30 @@ export class FlagNftService {
     }
   }
 
-  public async updateCollectionNftsNSFWByAdmin(
-    collection: string,
-    value: number,
-  ) {
+  public async updateCollectionNftsNSFWByAdmin(collection: string, value: number) {
     try {
-      this.logger.log(
-        `Setting nsfw for collection '${collection}' with value ${value}`,
-      );
+      this.logger.log(`Setting nsfw for collection '${collection}' with value ${value}`);
       const query = ElasticQuery.create()
         .withMustExistCondition('identifier')
-        .withMustCondition(
-          QueryType.Match('token', collection, QueryOperator.AND),
-        )
-        .withMustMultiShouldCondition(
-          [NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT],
-          (type) => QueryType.Match('type', type),
-        )
-        .withMustCondition(
-          QueryType.Nested('data', { 'data.nonEmptyURIs': true }),
-        )
+        .withMustCondition(QueryType.Match('token', collection, QueryOperator.AND))
+        .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
+        .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
         .withPagination({ from: 0, size: 10000 });
-      await this.elasticUpdater.getScrollableList(
-        'tokens',
-        'identifier',
-        query,
-        async (items) => {
-          const nsfwItems = items.map((item) => ({
-            identifier: item.identifier,
-            nsfw: item.nft_nsfw_mark,
-          }));
+      await this.elasticUpdater.getScrollableList('tokens', 'identifier', query, async (items) => {
+        const nsfwItems = items.map((item) => ({
+          identifier: item.identifier,
+          nsfw: item.nft_nsfw_mark,
+        }));
 
-          await this.updateCollectionNfts(nsfwItems, value);
-        },
-      );
+        await this.updateCollectionNfts(nsfwItems, value);
+      });
       return true;
     } catch (error) {
-      this.logger.error(
-        'An error occurred while updating NSFW for collection',
-        {
-          identifier: collection,
-          path: 'FlagNftService.updateCollectionNftsNSFWByAdmin',
-          exception: error?.message,
-        },
-      );
+      this.logger.error('An error occurred while updating NSFW for collection', {
+        identifier: collection,
+        path: 'FlagNftService.updateCollectionNftsNSFWByAdmin',
+        exception: error?.message,
+      });
       return false;
     }
   }
@@ -127,19 +99,13 @@ export class FlagNftService {
 
   private async getNsfwValue(nftMedia: NftMedia, identifier: string) {
     try {
-      return await this.verifyContent.checkContentSensitivityForUrl(
-        nftMedia.url ?? nftMedia.originalUrl,
-        nftMedia.fileType,
-      );
+      return await this.verifyContent.checkContentSensitivityForUrl(nftMedia.url ?? nftMedia.originalUrl, nftMedia.fileType);
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calculating nsfw for url ${nftMedia.url} and type ${nftMedia.fileType}`,
-        {
-          path: 'FlagNftService.getNsfwValue',
-          identifier,
-          exception: error?.message,
-        },
-      );
+      this.logger.error(`An error occurred while calculating nsfw for url ${nftMedia.url} and type ${nftMedia.fileType}`, {
+        path: 'FlagNftService.getNsfwValue',
+        identifier,
+        exception: error?.message,
+      });
       return 0.01;
     }
   }
@@ -149,9 +115,7 @@ export class FlagNftService {
     if (savedValue === 0) {
       savedValue += 0.01;
     }
-    this.logger.log(
-      `Setting nsfw for '${identifier}' with value ${savedValue}`,
-    );
+    this.logger.log(`Setting nsfw for '${identifier}' with value ${savedValue}`);
     await this.persistenceService.addFlag(
       new NftFlagsEntity({
         identifier: identifier,
@@ -166,27 +130,19 @@ export class FlagNftService {
     );
   }
 
-  private async updateCollectionNfts(
-    items: NsfwType[],
-    value: number,
-  ): Promise<void> {
+  private async updateCollectionNfts(items: NsfwType[], value: number): Promise<void> {
     const size = 100;
     for (let i = 0; i < items.length; i += size) {
       let itemsToUpdate = items.slice(i, i + size);
       await this.persistenceService.upsertFlags(
-        itemsToUpdate.map(
-          (nft) =>
-            new NftFlagsEntity({ identifier: nft.identifier, nsfw: value }),
-        ),
+        itemsToUpdate.map((nft) => new NftFlagsEntity({ identifier: nft.identifier, nsfw: value })),
       );
       await this.nsfwUpdateService.bulkUpdate(
         itemsToUpdate.map((i) => {
           return { identifier: i.identifier, nsfw: value };
         }),
       );
-      await this.triggerMultipleInvalidation(
-        itemsToUpdate.map((nft) => nft.identifier),
-      );
+      await this.triggerMultipleInvalidation(itemsToUpdate.map((nft) => nft.identifier));
     }
   }
 
@@ -203,10 +159,7 @@ export class FlagNftService {
       await this.elasticUpdater.setCustomValue(
         'tokens',
         identifier,
-        this.elasticUpdater.buildUpdateBody<number>(
-          'nft_nsfw_mark',
-          value.toRounded(2),
-        ),
+        this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', value.toRounded(2)),
         '?retry_on_conflict=2',
       );
 
@@ -224,10 +177,7 @@ export class FlagNftService {
     }
   }
 
-  private async triggerCacheInvalidation(
-    identifier: string,
-    ownerAddress: string,
-  ) {
+  private async triggerCacheInvalidation(identifier: string, ownerAddress: string) {
     await this.cacheEventPublisherService.publish(
       new ChangedEvent({
         id: identifier,
@@ -254,10 +204,7 @@ export class FlagNftService {
     }
 
     const media = nft.media[0];
-    if (
-      media.url.includes('default') ||
-      media.originalUrl.includes('default')
-    ) {
+    if (media.url.includes('default') || media.originalUrl.includes('default')) {
       return undefined;
     }
 

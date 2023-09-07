@@ -8,40 +8,20 @@ import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
 export class NotificationsCachingService {
   constructor(private readonly redisCacheService: RedisCacheService) {}
 
-  async getAllNotifications(
-    address: string,
-    getNotifications: () => any,
-  ): Promise<[Notification[], number]> {
-    return this.redisCacheService.getOrSet(
-      this.getNotificationsCacheKey(address),
-      () => getNotifications(),
-      Constants.oneDay(),
-    );
+  async getAllNotifications(address: string, getNotifications: () => any): Promise<[Notification[], number]> {
+    return this.redisCacheService.getOrSet(this.getNotificationsCacheKey(address), () => getNotifications(), Constants.oneDay());
   }
 
   public clearMultipleCache(addresses: string[], marketplaceKey: string) {
-    this.redisCacheService.deleteMany(
-      addresses.map((a) => this.getNotificationsCacheKey(a)),
-    );
+    this.redisCacheService.deleteMany(addresses.map((a) => this.getNotificationsCacheKey(a)));
 
-    this.redisCacheService.deleteMany(
-      addresses.map((a) =>
-        this.getNotificationsCacheKey(`${a}_${marketplaceKey}`),
-      ),
-    );
+    this.redisCacheService.deleteMany(addresses.map((a) => this.getNotificationsCacheKey(`${a}_${marketplaceKey}`)));
   }
 
-  public async invalidateCache(
-    ownerAddress: string = '',
-    marketplaceKey: string = '',
-  ): Promise<void> {
+  public async invalidateCache(ownerAddress: string = '', marketplaceKey: string = ''): Promise<void> {
     await Promise.all([
-      this.redisCacheService.delete(
-        this.getNotificationsCacheKey(ownerAddress),
-      ),
-      this.redisCacheService.delete(
-        this.getNotificationsCacheKey(`${ownerAddress}_${marketplaceKey}`),
-      ),
+      this.redisCacheService.delete(this.getNotificationsCacheKey(ownerAddress)),
+      this.redisCacheService.delete(this.getNotificationsCacheKey(`${ownerAddress}_${marketplaceKey}`)),
     ]);
   }
 

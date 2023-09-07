@@ -10,16 +10,11 @@ export class OnSaleAssetsCountForCollectionRedisHandler extends RedisKeyValueDat
     super(redisCacheService, 'on_sale_assets_count');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], auctionsIdentifiers: { [key: string]: AuctionEntity[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = auctionsIdentifiers[item.key]
-          ? auctionsIdentifiers[item.key][0]
-          : 0;
+        item.value = auctionsIdentifiers[item.key] ? auctionsIdentifiers[item.key][0] : 0;
         redisValues.push(item);
       }
     }

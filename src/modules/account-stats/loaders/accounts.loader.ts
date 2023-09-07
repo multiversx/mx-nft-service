@@ -8,14 +8,8 @@ import { AccountsRedisHandler } from './accounts.redis-handler';
   scope: Scope.REQUEST,
 })
 export class AccountsProvider extends BaseProvider<string> {
-  constructor(
-    private accountsService: MxIdentityService,
-    accountsRedisHandler: AccountsRedisHandler,
-  ) {
-    super(
-      accountsRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(private accountsService: MxIdentityService, accountsRedisHandler: AccountsRedisHandler) {
+    super(accountsRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   getData = async (keys: string[]): Promise<any[]> => {
@@ -33,9 +27,7 @@ export class AccountsProvider extends BaseProvider<string> {
   }
 
   private async getSingleAccountQuery(keys: string[]): Promise<any[]> {
-    const accountResponse = await this.accountsService.getAccountsForAddresses(
-      keys,
-    );
+    const accountResponse = await this.accountsService.getAccountsForAddresses(keys);
     return accountResponse?.groupBy((item) => item.address);
   }
 }

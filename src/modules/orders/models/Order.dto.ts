@@ -55,10 +55,7 @@ export class Order {
           price: new Price({
             amount: order.priceAmount,
             nonce: order.priceNonce,
-            token:
-              order?.priceToken === mxConfig.egld
-                ? mxConfig.egld
-                : order?.priceToken,
+            token: order?.priceToken === mxConfig.egld ? mxConfig.egld : order?.priceToken,
             timestamp: DateUtils.getTimestamp(order.creationDate),
           }),
           status: order.status,

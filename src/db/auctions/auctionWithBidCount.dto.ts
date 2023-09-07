@@ -1,7 +1,4 @@
-import {
-  AuctionTypeEnum,
-  AuctionStatusEnum,
-} from 'src/modules/auctions/models';
+import { AuctionTypeEnum, AuctionStatusEnum } from 'src/modules/auctions/models';
 
 export class AuctionWithBidsCount {
   id: number;

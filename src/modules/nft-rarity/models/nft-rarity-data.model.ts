@@ -94,14 +94,8 @@ export class NftRarityData {
         continue;
       }
 
-      for (const [key, attribute] of Object.entries(
-        nft.temporaryMetadata.attributes,
-      )) {
-        if (
-          (attribute.trait_type === undefined &&
-            attribute.name === undefined) ||
-          attribute.value === undefined
-        ) {
+      for (const [key, attribute] of Object.entries(nft.temporaryMetadata.attributes)) {
+        if ((attribute.trait_type === undefined && attribute.name === undefined) || attribute.value === undefined) {
           continue;
         }
 
@@ -117,11 +111,7 @@ export class NftRarityData {
 
         traitIndex = this.getOrSetTraitIndex(traitTypeIndexes, traitType);
 
-        attributeIndex = this.getOrSetAttributeIndex(
-          attributeIndexes,
-          traitIndex,
-          traitValue,
-        );
+        attributeIndex = this.getOrSetAttributeIndex(attributeIndexes, traitIndex, traitValue);
 
         nft.DNA[traitIndex] = attributeIndex;
       }
@@ -132,10 +122,7 @@ export class NftRarityData {
     return [nftsWithDNA, traitTypeIndexes, attributeIndexes];
   }
 
-  static getOrSetTraitIndex(
-    traitTypeIndexes: number[],
-    traitType: string,
-  ): number {
+  static getOrSetTraitIndex(traitTypeIndexes: number[], traitType: string): number {
     if (traitTypeIndexes[traitType] === undefined) {
       traitTypeIndexes[traitType] = Object.entries(traitTypeIndexes).length;
     }
@@ -143,54 +130,39 @@ export class NftRarityData {
     return traitTypeIndexes[traitType];
   }
 
-  static getOrSetAttributeIndex(
-    attributeIndexes: number[][],
-    traitIndex: number,
-    traitValue: string,
-  ): number {
+  static getOrSetAttributeIndex(attributeIndexes: number[][], traitIndex: number, traitValue: string): number {
     if (attributeIndexes?.[traitIndex] === undefined) {
       attributeIndexes[traitIndex] = [];
     }
 
     if (attributeIndexes[traitIndex][traitValue] === undefined) {
-      attributeIndexes[traitIndex][traitValue] = Object.entries(
-        attributeIndexes[traitIndex],
-      ).length;
+      attributeIndexes[traitIndex][traitValue] = Object.entries(attributeIndexes[traitIndex]).length;
     }
 
     return attributeIndexes[traitIndex][traitValue];
   }
 
-  static areIdenticalRarities(
-    nftRarityData: NftRarityData,
-    nftRarityEntity: NftRarityEntity,
-  ): boolean {
+  static areIdenticalRarities(nftRarityData: NftRarityData, nftRarityEntity: NftRarityEntity): boolean {
     if (
-      Number(nftRarityData.rarities.openRarityScore) !==
-        Number(nftRarityEntity.score_openRarity) ||
+      Number(nftRarityData.rarities.openRarityScore) !== Number(nftRarityEntity.score_openRarity) ||
       nftRarityData.rarities.openRarityRank !== nftRarityEntity.rank_openRarity
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.rarities.jaccardDistancesScore) !==
-        Number(nftRarityEntity.score_jaccardDistances) ||
-      nftRarityData.rarities.jaccardDistancesRank !==
-        nftRarityEntity.rank_jaccardDistances
+      Number(nftRarityData.rarities.jaccardDistancesScore) !== Number(nftRarityEntity.score_jaccardDistances) ||
+      nftRarityData.rarities.jaccardDistancesRank !== nftRarityEntity.rank_jaccardDistances
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.rarities.statisticalScore) !==
-        Number(nftRarityEntity.score_statistical) ||
-      nftRarityData.rarities.statisticalRank !==
-        nftRarityEntity.rank_statistical
+      Number(nftRarityData.rarities.statisticalScore) !== Number(nftRarityEntity.score_statistical) ||
+      nftRarityData.rarities.statisticalRank !== nftRarityEntity.rank_statistical
     ) {
       return false;
     }
     if (
-      Number(nftRarityData.rarities.traitScore) !==
-        Number(nftRarityEntity.score_trait) ||
+      Number(nftRarityData.rarities.traitScore) !== Number(nftRarityEntity.score_trait) ||
       nftRarityData.rarities.traitRank !== nftRarityEntity.rank_trait
     ) {
       return false;
@@ -198,14 +170,9 @@ export class NftRarityData {
     return true;
   }
 
-  static setCustomRanks(
-    nfts: NftRarityData[],
-    customRanks: CustomRank[],
-  ): NftRarityData[] {
+  static setCustomRanks(nfts: NftRarityData[], customRanks: CustomRank[]): NftRarityData[] {
     for (let nft of nfts) {
-      const customRank = customRanks.find(
-        (cr) => cr.identifier === nft.identifier,
-      );
+      const customRank = customRanks.find((cr) => cr.identifier === nft.identifier);
       nft.rarities.customRank = customRank.rank;
     }
     return nfts;

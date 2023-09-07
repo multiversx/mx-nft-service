@@ -17,16 +17,7 @@ export class FeaturedNftsResolver extends BaseResolver(Asset) {
     pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [assets, count] = await this.featuredNftsService.getFeaturedNfts(
-      limit,
-      offset,
-    );
-    return PageResponse.mapResponse<Asset>(
-      assets || [],
-      pagination,
-      count || 0,
-      offset,
-      limit,
-    );
+    const [assets, count] = await this.featuredNftsService.getFeaturedNfts(limit, offset);
+    return PageResponse.mapResponse<Asset>(assets || [], pagination, count || 0, offset, limit);
   }
 }

@@ -70,27 +70,18 @@ export class CollectionTraitSummary {
 
     if (
       this.identifier !== traitSummary?.identifier ||
-      Object.entries(this.traitTypes).length !==
-        Object.entries(traitSummary?.traitTypes)?.length
+      Object.entries(this.traitTypes).length !== Object.entries(traitSummary?.traitTypes)?.length
     ) {
       return false;
     }
 
     for (const [traitName, trait] of Object.entries(this.traitTypes)) {
-      if (
-        Object.entries(trait).length !==
-        Object.entries(traitSummary.traitTypes?.[traitName])?.length
-      ) {
+      if (Object.entries(trait).length !== Object.entries(traitSummary.traitTypes?.[traitName])?.length) {
         return false;
       }
 
-      for (const [attributeName, attributeOccurrenceCount] of Object.entries(
-        this.traitTypes[traitName],
-      )) {
-        if (
-          attributeOccurrenceCount !==
-          traitSummary.traitTypes?.[traitName]?.[attributeName]
-        ) {
+      for (const [attributeName, attributeOccurrenceCount] of Object.entries(this.traitTypes[traitName])) {
+        if (attributeOccurrenceCount !== traitSummary.traitTypes?.[traitName]?.[attributeName]) {
           return false;
         }
       }
@@ -129,9 +120,7 @@ export class CollectionNftTrait {
     Object.assign(this, init);
   }
 
-  static fromCollectionTraits(traits: {
-    [key: string]: { [key: string]: number };
-  }): CollectionNftTrait[] | undefined {
+  static fromCollectionTraits(traits: { [key: string]: { [key: string]: number } }): CollectionNftTrait[] | undefined {
     if (!traits) {
       return undefined;
     }
@@ -162,9 +151,7 @@ export class CollectionNftTraitValues {
     Object.assign(this, init);
   }
 
-  static fromCollectionTrait(trait: {
-    [key: string]: number;
-  }): CollectionNftTraitValues[] {
+  static fromCollectionTrait(trait: { [key: string]: number }): CollectionNftTraitValues[] {
     let values: CollectionNftTraitValues[] = [];
     for (const [traitValue, occurrences] of Object.entries(trait)) {
       values.push(
@@ -178,9 +165,7 @@ export class CollectionNftTraitValues {
   }
 }
 
-export const CollectionTraitSummarySchema = SchemaFactory.createForClass(
-  CollectionTraitSummary,
-).index(
+export const CollectionTraitSummarySchema = SchemaFactory.createForClass(CollectionTraitSummary).index(
   {
     identifier: 1,
   },

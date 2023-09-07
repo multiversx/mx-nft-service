@@ -1,9 +1,4 @@
-import {
-    Injectable,
-    NestInterceptor,
-    ExecutionContext,
-    CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -12,26 +7,23 @@ import { PerformanceProfiler } from './performance.profiler';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        if (context.getType<GqlContextType>() === 'graphql') {
-            const gqlContext = GqlExecutionContext.create(context);
-            const info = gqlContext.getInfo();
-            const parentType = info.parentType.name;
-            const fieldName = info.fieldName;
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    if (context.getType<GqlContextType>() === 'graphql') {
+      const gqlContext = GqlExecutionContext.create(context);
+      const info = gqlContext.getInfo();
+      const parentType = info.parentType.name;
+      const fieldName = info.fieldName;
 
-            const profiler = new PerformanceProfiler();
-            return next.handle().pipe(
-                tap(() => {
-                    profiler.stop();
-                    if (parentType === 'Query') {
-                        MetricsCollector.setQueryDuration(
-                            fieldName,
-                            profiler.duration,
-                        );
-                    }
-                }),
-            );
-        }
-        return next.handle();
+      const profiler = new PerformanceProfiler();
+      return next.handle().pipe(
+        tap(() => {
+          profiler.stop();
+          if (parentType === 'Query') {
+            MetricsCollector.setQueryDuration(fieldName, profiler.duration);
+          }
+        }),
+      );
     }
+    return next.handle();
+  }
 }
