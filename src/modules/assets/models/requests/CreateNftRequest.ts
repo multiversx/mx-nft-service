@@ -13,7 +13,7 @@ export class CreateNftRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(nftArgs: CreateNftArgs, file: FileUpload) {
+  static fromArgs(nftArgs: CreateNftArgs, file: any) {
     return new CreateNftRequest({
       collection: nftArgs.collection,
       quantity: nftArgs.quantity,
@@ -45,7 +45,7 @@ export class CreateNftWithMultipleFilesRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(nftArgs: CreateNftArgs, files: FileUpload[]) {
+  static fromArgs(nftArgs: CreateNftArgs, files: any[]) {
     return new CreateNftWithMultipleFilesRequest({
       collection: nftArgs.collection,
       quantity: nftArgs.quantity,

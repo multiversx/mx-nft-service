@@ -117,7 +117,7 @@ async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
   });
-  app.use(graphqlUploadExpress({ headers: { 'Apollo-Require-Preflight': 'true' } }));
+  // app.use(graphqlUploadExpress({ headers: { 'Apollo-Require-Preflight': 'true' } }));
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 
