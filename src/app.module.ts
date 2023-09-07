@@ -33,7 +33,7 @@ import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
 import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { ScamModule } from './modules/scam/scam.module';
-// import { ComplexityPlugin } from './modules/common/complexity.plugin';
+import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
@@ -54,9 +54,8 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       autoSchemaFile: 'schema.gql',
       introspection: process.env.NODE_ENV !== 'production',
       playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      plugins: [ApolloServerPluginLandingPageLocalDefault(), new ComplexityPlugin()],
       sortSchema: true,
-      // plugins: [new ComplexityPlugin()],
       formatError: (error: GraphQLError) => {
         const graphQLFormattedError: GraphQLFormattedError = {
           ...error,
