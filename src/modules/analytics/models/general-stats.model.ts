@@ -20,3 +20,15 @@ export class GeneralAnalyticsModel {
     Object.assign(this, init);
   }
 }
+
+@ObjectType()
+export class HoldersCount {
+  @Field()
+  address: string;
+  @Field(() => Int)
+  count: number;
+
+  constructor(init?: Partial<HoldersCount>) {
+    Object.assign(this, init);
+  }
+}
