@@ -1,9 +1,6 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { AuctionEntity } from 'src/db/auctions/auction.entity';
-import {
-  AuctionWithBidsCount,
-  AuctionWithStartBid,
-} from 'src/db/auctions/auctionWithBidCount.dto';
+import { AuctionWithBidsCount, AuctionWithStartBid } from 'src/db/auctions/auctionWithBidCount.dto';
 import { Account } from 'src/modules/account-stats/models';
 import { Asset, Price } from 'src/modules/assets/models';
 import { Marketplace } from 'src/modules/marketplaces/models';
@@ -91,9 +88,7 @@ export class Auction {
     Object.assign(this, init);
   }
 
-  static fromEntity(
-    auction: AuctionEntity | AuctionWithBidsCount | AuctionWithStartBid,
-  ) {
+  static fromEntity(auction: AuctionEntity | AuctionWithBidsCount | AuctionWithStartBid) {
     return !auction || Object.entries(auction).length === 0
       ? null
       : new Auction({
@@ -105,10 +100,7 @@ export class Auction {
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,
-          endDate:
-            auction.endDate > DateUtils.getCurrentTimestampPlusYears(1)
-              ? 0
-              : auction.endDate,
+          endDate: auction.endDate > DateUtils.getCurrentTimestampPlusYears(1) ? 0 : auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: auction.paymentToken,
@@ -147,10 +139,7 @@ export class Auction {
           nonce: auction.nonce,
           identifier: auction.identifier,
           startDate: auction.startDate,
-          endDate:
-            auction.endDate > DateUtils.getCurrentTimestampPlusYears(1)
-              ? 0
-              : auction.endDate,
+          endDate: auction.endDate > DateUtils.getCurrentTimestampPlusYears(1) ? 0 : auction.endDate,
           nrAuctionedTokens: auction.nrAuctionedTokens || 1,
           minBid: new Price({
             token: auction.paymentToken,

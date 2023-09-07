@@ -1,24 +1,15 @@
 import { Global, Module } from '@nestjs/common';
 import { TraitRepositoryService } from 'src/document-db/repositories/traits.repository';
-import {
-  CollectionTraitSummary,
-  CollectionTraitSummarySchema,
-} from 'src/modules/nft-traits/models/collection-traits.model';
+import { CollectionTraitSummary, CollectionTraitSummarySchema } from 'src/modules/nft-traits/models/collection-traits.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModule } from 'src/common.module';
 
-import {
-  NftScamInfoModel,
-  NftScamInfoSchema,
-} from 'src/modules/scam/models/nft-scam-info.model';
+import { NftScamInfoModel, NftScamInfoSchema } from 'src/modules/scam/models/nft-scam-info.model';
 import { NftScamInfoRepositoryService } from 'src/document-db/repositories/nft-scam.repository';
 import { DocumentDbService } from './document-db.service';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { CollectionScamInfoRepositoryService } from './repositories/collection-scam.repository';
-import {
-  CollectionScamInfoModel,
-  CollectionScamInfoSchema,
-} from 'src/modules/scam/models/collection-scam-info.model';
+import { CollectionScamInfoModel, CollectionScamInfoSchema } from 'src/modules/scam/models/collection-scam-info.model';
 
 @Global()
 @Module({
@@ -53,12 +44,7 @@ import {
       },
     ]),
   ],
-  providers: [
-    DocumentDbService,
-    TraitRepositoryService,
-    NftScamInfoRepositoryService,
-    CollectionScamInfoRepositoryService,
-  ],
+  providers: [DocumentDbService, TraitRepositoryService, NftScamInfoRepositoryService, CollectionScamInfoRepositoryService],
   exports: [DocumentDbService],
 })
 export class DocumentDbModule {}

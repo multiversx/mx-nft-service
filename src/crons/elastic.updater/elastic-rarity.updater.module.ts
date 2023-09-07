@@ -7,11 +7,7 @@ import * as ormconfig from './../../ormconfig';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-    CommonModule,
-    NftRarityModuleGraph,
-  ],
+  imports: [TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }), CommonModule, NftRarityModuleGraph],
   providers: [Logger, ElasticRarityUpdaterService, RarityUpdaterService],
   exports: [ElasticRarityUpdaterService, RarityUpdaterService],
 })

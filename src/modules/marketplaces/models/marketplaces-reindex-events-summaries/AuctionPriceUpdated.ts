@@ -53,13 +53,8 @@ export class AuctionPriceUpdatedSummary extends ReindexGenericSummary {
     });
   }
 
-  private static getTopics(
-    event: MarketplaceEventsEntity,
-    marketplace: Marketplace,
-  ): any {
-    const genericEvent = event.data.eventData
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  private static getTopics(event: MarketplaceEventsEntity, marketplace: Marketplace): any {
+    const genericEvent = event.data.eventData ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (marketplace.key === DEADRARE_KEY) {
       return new UpdatePriceDeadrareEvent(genericEvent).getTopics();

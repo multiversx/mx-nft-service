@@ -10,16 +10,11 @@ export class LowestAuctionForMarketplaceRedisHandler extends RedisKeyValueDatalo
     super(redisCacheService, 'lowest_auctions_marketplace');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    auctionsIdentifiers: { [key: string]: AuctionEntity[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], auctionsIdentifiers: { [key: string]: AuctionEntity[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = auctionsIdentifiers[item.key]
-          ? auctionsIdentifiers[item.key][0]
-          : {};
+        item.value = auctionsIdentifiers[item.key] ? auctionsIdentifiers[item.key][0] : {};
         redisValues.push(item);
       }
     }

@@ -8,12 +8,7 @@ import { AcceptOfferFrameitEvent } from 'src/modules/rabbitmq/entities/auction/a
 import { AcceptOfferXoxnoEvent } from 'src/modules/rabbitmq/entities/auction/acceptOfferXoxno.event';
 import { ElrondSwapAcceptOfferEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-acceptOffer.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
-import {
-  DEADRARE_KEY,
-  ELRONDNFTSWAP_KEY,
-  FRAMEIT_KEY,
-  XOXNO_KEY,
-} from 'src/utils/constants';
+import { DEADRARE_KEY, ELRONDNFTSWAP_KEY, FRAMEIT_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { Marketplace } from '../Marketplace.dto';
 import { MarketplaceTransactionData } from '../marketplaceEventAndTxData.dto';
 import { ReindexGenericSummary } from './ReindexGenericSummary';
@@ -73,13 +68,8 @@ export class OfferAcceptedSummary extends ReindexGenericSummary {
     });
   }
 
-  private static getTopics(
-    event: MarketplaceEventsEntity,
-    marketplace: Marketplace,
-  ): any {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  private static getTopics(event: MarketplaceEventsEntity, marketplace: Marketplace): any {
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (marketplace.key === XOXNO_KEY) {
       return new AcceptOfferXoxnoEvent(genericEvent).getTopics();

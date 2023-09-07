@@ -1,11 +1,4 @@
-import {
-  Address,
-  BinaryCodec,
-  FieldDefinition,
-  StructType,
-  TokenIdentifierType,
-  U64Type,
-} from '@multiversx/sdk-core/out';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core/out';
 
 export class ElrondSwapAcceptOfferTopics {
   private offerId: number;
@@ -18,20 +11,12 @@ export class ElrondSwapAcceptOfferTopics {
   private paymentTokenNonce: string;
 
   constructor(rawTopics: string[]) {
-    this.offerId = parseInt(
-      Buffer.from(rawTopics[1], 'base64').toString('hex'),
-      16,
-    );
+    this.offerId = parseInt(Buffer.from(rawTopics[1], 'base64').toString('hex'), 16);
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.nrOfferTokens = parseInt(
-      Buffer.from(rawTopics[4], 'base64').toString('hex'),
-      16,
-    ).toString();
+    this.nrOfferTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16).toString();
     this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.paymentAmount = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.paymentAmount = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
     let token = decodeToken(Buffer.from(rawTopics[7], 'base64'));
     this.paymentToken = token.token_type;
     this.paymentTokenNonce = token.nonce;

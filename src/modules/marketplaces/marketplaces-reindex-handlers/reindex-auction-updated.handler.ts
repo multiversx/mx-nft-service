@@ -9,37 +9,25 @@ import { AuctionUpdatedSummary } from '../models/marketplaces-reindex-events-sum
 export class ReindexAuctionUpdatedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: AuctionUpdatedSummary,
-    decimals: number,
-  ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
-      input.auctionId,
-    );
+  handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionUpdatedSummary, decimals: number): void {
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
     if (auctionIndex === -1) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].blockHash =
-      marketplaceReindexState.auctions[auctionIndex].blockHash ??
-      input.blockHash;
+    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
 
     marketplaceReindexState.auctions[auctionIndex].minBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].minBidDenominated =
-      BigNumberUtils.denominateAmount(input.minBid, decimals);
+    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = BigNumberUtils.denominateAmount(input.minBid, decimals);
     marketplaceReindexState.auctions[auctionIndex].maxBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].maxBidDenominated =
-      marketplaceReindexState.auctions[auctionIndex].minBidDenominated;
+    marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = marketplaceReindexState.auctions[auctionIndex].minBidDenominated;
 
     if (input.paymentToken) {
-      marketplaceReindexState.auctions[auctionIndex].paymentToken =
-        input.paymentToken;
-      marketplaceReindexState.auctions[auctionIndex].paymentNonce =
-        BinaryUtils.hexToNumber(input.paymentNonce);
+      marketplaceReindexState.auctions[auctionIndex].paymentToken = input.paymentToken;
+      marketplaceReindexState.auctions[auctionIndex].paymentNonce = BinaryUtils.hexToNumber(input.paymentNonce);
     }
 
     if (input.deadline > 0) {

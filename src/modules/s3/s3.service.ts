@@ -11,24 +11,14 @@ export class S3Service {
     const readStream = await fileData.createReadStream();
 
     const bucketS3 = process.env.AWS_S3_BUCKET_NAME;
-    return await this.uploadS3(
-      readStream,
-      bucketS3,
-      filename,
-      fileData.mimetype,
-    );
+    return await this.uploadS3(readStream, bucketS3, filename, fileData.mimetype);
   }
 
   async uploadText(fileData, filename) {
     const readStream = new ReadableString(JSON.stringify(fileData));
 
     const bucketS3 = process.env.AWS_S3_BUCKET_NAME;
-    return await this.uploadS3(
-      readStream,
-      bucketS3,
-      filename,
-      'application/json',
-    );
+    return await this.uploadS3(readStream, bucketS3, filename, 'application/json');
   }
 
   private async uploadS3(file, bucket, name, mimetype) {

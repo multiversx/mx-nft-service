@@ -10,16 +10,11 @@ export class CollectionAssetsCountRedisHandler extends RedisKeyValueDataloaderHa
     super(redisCacheService, CacheInfo.CollectionAssetsCount.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ): RedisValue[] {
+  mapValues(returnValues: { key: string; value: any }[], assetsIdentifiers: { [key: string]: any[] }): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key][0]?.value
-          : 0;
+        item.value = assetsIdentifiers[item.key] ? assetsIdentifiers[item.key][0]?.value : 0;
         redisValues.push(item);
       }
     }

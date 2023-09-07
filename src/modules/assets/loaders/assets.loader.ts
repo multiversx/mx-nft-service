@@ -9,23 +9,15 @@ import { Injectable, Scope } from '@nestjs/common';
   scope: Scope.REQUEST,
 })
 export class AssetsProvider extends BaseProvider<string> {
-  constructor(
-    assetstRedisHandler: AssetsRedisHandler,
-    private assetScamLoader: AssetScamInfoProvider,
-    private apiService: MxApiService,
-  ) {
-    super(
-      assetstRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(assetstRedisHandler: AssetsRedisHandler, private assetScamLoader: AssetScamInfoProvider, private apiService: MxApiService) {
+    super(assetstRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
     const nfts = await this.apiService.getNftsByIdentifiers(identifiers, 0);
     const nftsGrouped = nfts?.groupBy((asset) => asset.identifier);
 
-    if (identifiers && identifiers.length > 0)
-      this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
+    if (identifiers && identifiers.length > 0) this.assetScamLoader.batchScamInfo(identifiers, nftsGrouped);
 
     return nftsGrouped;
   }

@@ -8,21 +8,15 @@ import { GlobalOfferAcceptedSummary } from '../models/marketplaces-reindex-event
 export class ReindexGlobalOfferAcceptedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: GlobalOfferAcceptedSummary,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: GlobalOfferAcceptedSummary): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
-      input.auctionId,
-    );
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
 
     if (auctionIndex === -1) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status =
-      AuctionStatusEnum.Closed;
+    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
   }
 }

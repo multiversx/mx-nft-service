@@ -18,16 +18,9 @@ export class TrendingCollectionsWarmerService {
     await Locker.lock(
       'Trending Collections invalidations',
       async () => {
-        const tokens =
-          await this.trendingCollectionsService.reindexTrendingCollections(
-            forTheLastHours,
-          );
+        const tokens = await this.trendingCollectionsService.reindexTrendingCollections(forTheLastHours);
 
-        await this.invalidateKey(
-          CacheInfo.TrendingByVolume.key,
-          tokens,
-          CacheInfo.TrendingByVolume.ttl,
-        );
+        await this.invalidateKey(CacheInfo.TrendingByVolume.key, tokens, CacheInfo.TrendingByVolume.ttl);
       },
       true,
     );

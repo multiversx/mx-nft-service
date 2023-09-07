@@ -8,10 +8,7 @@ import { NotificationTypeEnum } from '../notifications/models/Notification-type.
 import { NotificationStatusEnum } from '../notifications/models';
 import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { OrdersCachingService } from './caching/orders-caching.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -37,28 +34,14 @@ export class OrdersService {
 
   async createOrder(createOrderArgs: CreateOrderArgs): Promise<OrderEntity> {
     try {
-      const activeOrder =
-        await this.persistenceService.getActiveOrderForAuction(
-          createOrderArgs.auctionId,
-        );
-      await this.triggerCacheInvalidation(
-        createOrderArgs.auctionId,
-        createOrderArgs.ownerAddress,
-        createOrderArgs.marketplaceKey,
-      );
+      const activeOrder = await this.persistenceService.getActiveOrderForAuction(createOrderArgs.auctionId);
+      await this.triggerCacheInvalidation(createOrderArgs.auctionId, createOrderArgs.ownerAddress, createOrderArgs.marketplaceKey);
 
-      const paymentToken = await this.usdPriceService.getToken(
-        createOrderArgs.priceToken,
-      );
-      const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals),
-      );
+      const paymentToken = await this.usdPriceService.getToken(createOrderArgs.priceToken);
+      const orderEntity = await this.persistenceService.saveOrder(CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals));
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
-        await this.persistenceService.updateOrderWithStatus(
-          activeOrder,
-          OrderStatusEnum.Inactive,
-        );
+        await this.persistenceService.updateOrderWithStatus(activeOrder, OrderStatusEnum.Inactive);
       }
       return orderEntity;
     } catch (error) {
@@ -70,31 +53,16 @@ export class OrdersService {
     }
   }
 
-  async updateAuctionOrders(
-    createOrderArgs: CreateOrderArgs,
-    activeOrder: OrderEntity,
-  ): Promise<OrderEntity> {
+  async updateAuctionOrders(createOrderArgs: CreateOrderArgs, activeOrder: OrderEntity): Promise<OrderEntity> {
     try {
-      await this.triggerCacheInvalidation(
-        createOrderArgs.auctionId,
-        createOrderArgs.ownerAddress,
-        createOrderArgs.marketplaceKey,
-      );
-      const paymentToken = await this.usdPriceService.getToken(
-        createOrderArgs.priceToken,
-      );
+      await this.triggerCacheInvalidation(createOrderArgs.auctionId, createOrderArgs.ownerAddress, createOrderArgs.marketplaceKey);
+      const paymentToken = await this.usdPriceService.getToken(createOrderArgs.priceToken);
       const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(
-          createOrderArgs,
-          paymentToken?.decimals ?? mxConfig.decimals,
-        ),
+        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals ?? mxConfig.decimals),
       );
       if (orderEntity && activeOrder) {
         await this.handleNotifications(createOrderArgs, activeOrder);
-        await this.persistenceService.updateOrderWithStatus(
-          activeOrder,
-          OrderStatusEnum.Inactive,
-        );
+        await this.persistenceService.updateOrderWithStatus(activeOrder, OrderStatusEnum.Inactive);
       }
       return orderEntity;
     } catch (error) {
@@ -106,27 +74,14 @@ export class OrdersService {
     }
   }
 
-  private async handleNotifications(
-    createOrderArgs: CreateOrderArgs,
-    activeOrder: OrderEntity,
-  ) {
-    this.notificationsService.updateNotification(
-      createOrderArgs.auctionId,
-      createOrderArgs.ownerAddress,
-    );
+  private async handleNotifications(createOrderArgs: CreateOrderArgs, activeOrder: OrderEntity) {
+    this.notificationsService.updateNotification(createOrderArgs.auctionId, createOrderArgs.ownerAddress);
     await this.addNotification(createOrderArgs, activeOrder);
   }
 
-  private async addNotification(
-    createOrderArgs: CreateOrderArgs,
-    activeOrder: OrderEntity,
-  ) {
-    const auction = await this.persistenceService.getAuction(
-      createOrderArgs.auctionId,
-    );
-    const asset = await this.assetByIdentifierService.getAsset(
-      auction.identifier,
-    );
+  private async addNotification(createOrderArgs: CreateOrderArgs, activeOrder: OrderEntity) {
+    const auction = await this.persistenceService.getAuction(createOrderArgs.auctionId);
+    const asset = await this.assetByIdentifierService.getAsset(auction.identifier);
     const assetName = asset ? asset.name : '';
     await this.notificationsService.saveNotification(
       new NotificationEntity({
@@ -141,24 +96,13 @@ export class OrdersService {
     );
   }
 
-  async updateOrder(
-    auctionId: number,
-    status: OrderStatusEnum,
-  ): Promise<OrderEntity> {
+  async updateOrder(auctionId: number, status: OrderStatusEnum): Promise<OrderEntity> {
     try {
-      const activeOrder =
-        await this.persistenceService.getActiveOrderForAuction(auctionId);
+      const activeOrder = await this.persistenceService.getActiveOrderForAuction(auctionId);
 
       if (!activeOrder) return;
-      await this.triggerCacheInvalidation(
-        auctionId,
-        activeOrder.ownerAddress,
-        activeOrder.marketplaceKey,
-      );
-      const orderEntity = await this.persistenceService.updateOrderWithStatus(
-        activeOrder,
-        status,
-      );
+      await this.triggerCacheInvalidation(auctionId, activeOrder.ownerAddress, activeOrder.marketplaceKey);
+      const orderEntity = await this.persistenceService.updateOrderWithStatus(activeOrder, status);
 
       return orderEntity;
     } catch (error) {
@@ -172,18 +116,10 @@ export class OrdersService {
 
   async createOrderForSft(createOrderArgs: CreateOrderArgs): Promise<Order> {
     try {
-      await this.triggerCacheInvalidation(
-        createOrderArgs.auctionId,
-        createOrderArgs.ownerAddress,
-        createOrderArgs.marketplaceKey,
-      );
+      await this.triggerCacheInvalidation(createOrderArgs.auctionId, createOrderArgs.ownerAddress, createOrderArgs.marketplaceKey);
 
-      const paymentToken = await this.usdPriceService.getToken(
-        createOrderArgs.priceToken,
-      );
-      const orderEntity = await this.persistenceService.saveOrder(
-        CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals),
-      );
+      const paymentToken = await this.usdPriceService.getToken(createOrderArgs.priceToken);
+      const orderEntity = await this.persistenceService.saveOrder(CreateOrderArgs.toEntity(createOrderArgs, paymentToken?.decimals));
       return Order.fromEntity(orderEntity);
     } catch (error) {
       this.logger.error('An error occurred while creating an order', {
@@ -207,33 +143,23 @@ export class OrdersService {
   }
 
   async getOrders(queryRequest: QueryRequest): Promise<[Order[], number]> {
-    return this.ordersCachingService.getOrSetOrders(queryRequest, () =>
-      this.getMappedOrders(queryRequest),
-    );
+    return this.ordersCachingService.getOrSetOrders(queryRequest, () => this.getMappedOrders(queryRequest));
   }
 
   async getOrdersByAuctionIds(auctionIds: number[]): Promise<OrderEntity[]> {
     if (auctionIds?.length > 0) {
-      const orders = await this.persistenceService.getOrdersByAuctionIds(
-        auctionIds,
-      );
+      const orders = await this.persistenceService.getOrdersByAuctionIds(auctionIds);
       return orders;
     }
   }
 
   private async getMappedOrders(queryRequest: QueryRequest) {
-    const [ordersEntities, count] = await this.persistenceService.getOrders(
-      queryRequest,
-    );
+    const [ordersEntities, count] = await this.persistenceService.getOrders(queryRequest);
 
     return [ordersEntities.map((order) => Order.fromEntity(order)), count];
   }
 
-  private async triggerCacheInvalidation(
-    auctionId: number,
-    ownerAddress: string,
-    marketplaceKey: string,
-  ) {
+  private async triggerCacheInvalidation(auctionId: number, ownerAddress: string, marketplaceKey: string) {
     await this.rabbitPublisherService.publish(
       new ChangedEvent({
         id: auctionId.toString(),

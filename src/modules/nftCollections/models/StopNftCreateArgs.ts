@@ -1,11 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { Matches } from 'class-validator';
-import {
-  ADDRESS_ERROR,
-  ADDRESS_RGX,
-  COLLECTION_IDENTIFIER_ERROR,
-  COLLECTION_IDENTIFIER_RGX,
-} from 'src/utils/constants';
+import { ADDRESS_ERROR, ADDRESS_RGX, COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
 export class StopNftCreateArgs {

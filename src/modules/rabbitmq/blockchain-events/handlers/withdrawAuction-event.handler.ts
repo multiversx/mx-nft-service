@@ -1,14 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
-import {
-  AuctionEventEnum,
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
@@ -28,40 +21,20 @@ export class WithdrawAuctionEventHandler {
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
     const { withdraw, topics } = this.getEventAndTopics(event);
     let auction: AuctionEntity;
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      withdraw.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.getAddress(), marketplaceType, topics.collection);
     if (!marketplace) return;
 
-    this.logger.log(
-      `${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${
-        marketplace?.name
-      }'`,
-    );
+    this.logger.log(`${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
     if (topics.auctionId) {
-      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topics.auctionId, 16),
-        marketplace.key,
-      );
+      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
     } else {
       const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-      auction =
-        await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(
-          auctionIdentifier,
-          marketplace.key,
-        );
+      auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
     }
 
     if (!auction) return;
 
-    this.auctionsService.updateAuctionStatus(
-      auction.id,
-      AuctionStatusEnum.Closed,
-      hash,
-      AuctionEventEnum.WithdrawEvent,
-    );
+    this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Closed, hash, AuctionEventEnum.WithdrawEvent);
   }
 
   private getEventAndTopics(event: any) {

@@ -19,11 +19,7 @@ export class TokensWarmerService {
       'Tokens invalidations',
       async () => {
         const tokens = await this.mxApiService.getAllTokens();
-        await this.invalidateKey(
-          CacheInfo.AllTokens.key,
-          tokens,
-          CacheInfo.AllTokens.ttl,
-        );
+        await this.invalidateKey(CacheInfo.AllTokens.key, tokens, CacheInfo.AllTokens.ttl);
       },
       true,
     );
@@ -35,11 +31,7 @@ export class TokensWarmerService {
       'DEX Tokens invalidations',
       async () => {
         const tokens = await this.mxApiService.getAllDexTokens();
-        await this.invalidateKey(
-          CacheInfo.AllDexTokens.key,
-          tokens,
-          CacheInfo.AllDexTokens.ttl,
-        );
+        await this.invalidateKey(CacheInfo.AllDexTokens.key, tokens, CacheInfo.AllDexTokens.ttl);
       },
       true,
     );
@@ -51,11 +43,7 @@ export class TokensWarmerService {
       'Egld Token invalidation',
       async () => {
         const tokens = await this.mxApiService.getEgldPriceFromEconomics();
-        await this.invalidateKey(
-          CacheInfo.EgldToken.key,
-          tokens,
-          CacheInfo.EgldToken.ttl,
-        );
+        await this.invalidateKey(CacheInfo.EgldToken.key, tokens, CacheInfo.EgldToken.ttl);
       },
       true,
     );

@@ -9,12 +9,7 @@ import { FeaturedService } from './featured.service';
 
 @Module({
   imports: [CommonModule, PersistenceModule, CacheEventsPublisherModule],
-  providers: [
-    FeaturedService,
-    FeaturedNftsResolver,
-    FeaturedCollectionsResolver,
-    FeaturedCollectionsCachingService,
-  ],
-  exports: [FeaturedService]
+  providers: [FeaturedService, FeaturedNftsResolver, FeaturedCollectionsResolver, FeaturedCollectionsCachingService],
+  exports: [FeaturedService],
 })
-export class FeaturedModuleGraph { }
+export class FeaturedModuleGraph {}

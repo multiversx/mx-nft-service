@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { BlacklistedCollectionsCachingService } from './blacklisted-collections.caching.service';
 import { BlacklistedCollectionEntity } from 'src/db/blacklistedCollections';
 
@@ -23,35 +20,24 @@ export class BlacklistedCollectionsService {
   }
 
   async getBlacklistedCollectionIds(): Promise<string[]> {
-    const [blacklistedCollections] =
-      await this.getBlacklistedCollectionEntitiesAndCount();
+    const [blacklistedCollections] = await this.getBlacklistedCollectionEntitiesAndCount();
     return blacklistedCollections.map((c) => c.identifier);
   }
 
-  async getBlacklistedCollectionEntitiesAndCount(): Promise<
-    [BlacklistedCollectionEntity[], number]
-  > {
+  async getBlacklistedCollectionEntitiesAndCount(): Promise<[BlacklistedCollectionEntity[], number]> {
     try {
-      const getBlacklistedCollections = () =>
-        this.persistenceService.getBlacklistedCollections();
-      return await this.blacklistedCollectionsCachingService.getOrSetBlacklistedCollections(
-        getBlacklistedCollections,
-      );
+      const getBlacklistedCollections = () => this.persistenceService.getBlacklistedCollections();
+      return await this.blacklistedCollectionsCachingService.getOrSetBlacklistedCollections(getBlacklistedCollections);
     } catch (err) {
-      this.logger.error(
-        'An error occurred while loading blacklisted collections entities and count.',
-        {
-          path: `${BlacklistedCollectionsService.name}.${this.getBlacklistedCollectionEntitiesAndCount.name}`,
-          exception: err,
-        },
-      );
+      this.logger.error('An error occurred while loading blacklisted collections entities and count.', {
+        path: `${BlacklistedCollectionsService.name}.${this.getBlacklistedCollectionEntitiesAndCount.name}`,
+        exception: err,
+      });
     }
   }
 
   async addBlacklistedCollection(collection: string): Promise<boolean> {
-    const isAdded = await this.persistenceService.addBlacklistedCollection(
-      collection,
-    );
+    const isAdded = await this.persistenceService.addBlacklistedCollection(collection);
     if (isAdded) {
       await this.triggerBlacklistedCollectionsCacheInvalidation();
     }
@@ -59,9 +45,7 @@ export class BlacklistedCollectionsService {
   }
 
   async removeBlacklistedCollection(collection: string): Promise<boolean> {
-    const isRemoved = await this.persistenceService.removeBlacklistedCollection(
-      collection,
-    );
+    const isRemoved = await this.persistenceService.removeBlacklistedCollection(collection);
     if (isRemoved) {
       await this.triggerBlacklistedCollectionsCacheInvalidation();
     }

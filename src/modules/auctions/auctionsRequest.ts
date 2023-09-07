@@ -1,17 +1,8 @@
 import { QueryRequest } from '../common/filters/QueryRequest';
-import {
-  Filter,
-  FiltersExpression,
-  GroupBy,
-  Grouping,
-  Operation,
-  Operator,
-} from '../common/filters/filtersTypes';
+import { Filter, FiltersExpression, GroupBy, Grouping, Operation, Operator } from '../common/filters/filtersTypes';
 import { DateUtils } from 'src/utils/date-utils';
 
-export const auctionsByNoBidsRequest = (
-  startDateTimestamp: string,
-): QueryRequest =>
+export const auctionsByNoBidsRequest = (startDateTimestamp: string): QueryRequest =>
   new QueryRequest({
     customFilters: [],
     offset: 0,
@@ -42,10 +33,7 @@ export const auctionsByNoBidsRequest = (
     sorting: [],
   });
 
-export function getAuctionsForCollectionRequest(
-  collection: string,
-  startDate: string,
-) {
+export function getAuctionsForCollectionRequest(collection: string, startDate: string) {
   return new QueryRequest({
     customFilters: [],
     offset: 0,
@@ -82,10 +70,7 @@ export function getAuctionsForCollectionRequest(
   });
 }
 
-export function getAuctionsForPaymentTokenRequest(
-  paymentToken: string,
-  startDate: string,
-) {
+export function getAuctionsForPaymentTokenRequest(paymentToken: string, startDate: string) {
   return new QueryRequest({
     customFilters: [],
     offset: 0,
@@ -122,9 +107,7 @@ export function getAuctionsForPaymentTokenRequest(
   });
 }
 
-export const runningAuctionRequest = (
-  startDateTimestamp: string,
-): QueryRequest =>
+export const runningAuctionRequest = (startDateTimestamp: string): QueryRequest =>
   new QueryRequest({
     customFilters: [],
     offset: 0,
@@ -150,9 +133,7 @@ export const runningAuctionRequest = (
     sorting: [],
   });
 
-export const buyNowAuctionRequest = (
-  startDateTimestamp: string,
-): QueryRequest =>
+export const buyNowAuctionRequest = (startDateTimestamp: string): QueryRequest =>
   new QueryRequest({
     customFilters: [],
     offset: 0,

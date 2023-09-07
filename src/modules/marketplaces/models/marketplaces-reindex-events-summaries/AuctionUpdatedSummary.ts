@@ -1,10 +1,7 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import {
-  AssetActionEnum,
-  KroganSwapAuctionEventEnum,
-} from 'src/modules/assets/models';
+import { AssetActionEnum, KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
 import { ElrondSwapUpdateEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-updateAuction.event';
 import { UpdateListingEvent } from 'src/modules/rabbitmq/entities/auction/updateListing.event';
 import { GenericEvent } from 'src/modules/rabbitmq/entities/generic.event';
@@ -29,10 +26,7 @@ export class AuctionUpdatedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromUpdateListingEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): AuctionUpdatedSummary {
+  static fromUpdateListingEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): AuctionUpdatedSummary {
     const address = event.data.eventData?.address ?? tx.receiver;
     const topics = this.getTopics(event);
 
@@ -53,16 +47,9 @@ export class AuctionUpdatedSummary extends ReindexGenericSummary {
   }
 
   private static getTopics(event: MarketplaceEventsEntity): any {
-    const genericEvent = event.data.eventData
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+    const genericEvent = event.data.eventData ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
-    if (
-      event.hasOneOfEventIdentifiers([
-        KroganSwapAuctionEventEnum.NftSwapUpdate,
-        KroganSwapAuctionEventEnum.NftSwapExtend,
-      ])
-    ) {
+    if (event.hasOneOfEventIdentifiers([KroganSwapAuctionEventEnum.NftSwapUpdate, KroganSwapAuctionEventEnum.NftSwapExtend])) {
       return new ElrondSwapUpdateEvent(genericEvent).getTopics();
     }
 

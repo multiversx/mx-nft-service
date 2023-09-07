@@ -28,11 +28,7 @@ export class TagsRepository {
     return tags;
   }
 
-  async getTagsBySearchTerm(
-    searchTerm: string,
-    page: number = 0,
-    size: number = 10,
-  ): Promise<NftTag[]> {
+  async getTagsBySearchTerm(searchTerm: string, page: number = 0, size: number = 10): Promise<NftTag[]> {
     const tags: NftTag[] = await this.tagsRepository
       .createQueryBuilder('t')
       .select('count(a.id) as count, t.tag')

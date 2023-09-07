@@ -1,12 +1,6 @@
 import { U64Value } from '@multiversx/sdk-core';
 import { mxConfig } from 'src/config';
-import {
-  AuctionTypeEnum,
-  AuctionStatusEnum,
-  AuctionAbi,
-  ExternalAuctionAbi,
-  ElrondSwapAuctionTypeEnum,
-} from 'src/modules/auctions/models';
+import { AuctionTypeEnum, AuctionStatusEnum, AuctionAbi, ExternalAuctionAbi, ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { ENEFTOR_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
@@ -17,10 +11,7 @@ import { OrderEntity } from '../orders';
 import { TagEntity } from './tags.entity';
 
 @Entity('auctions')
-@Unique('AuctionEntity_UQ_Marketplace', [
-  'marketplaceAuctionId',
-  'marketplaceKey',
-])
+@Unique('AuctionEntity_UQ_Marketplace', ['marketplaceAuctionId', 'marketplaceKey'])
 export class AuctionEntity extends BaseEntity {
   @Column()
   marketplaceAuctionId: number;
@@ -113,15 +104,9 @@ export class AuctionEntity extends BaseEntity {
     }
     return new AuctionEntity({
       marketplaceAuctionId: auctionId,
-      collection: auction.auctioned_tokens.token_identifier
-        .valueOf()
-        .toString(),
-      nonce: parseInt(
-        auction.auctioned_tokens.token_nonce.valueOf().toString(),
-      ),
-      nrAuctionedTokens: parseInt(
-        auction.auctioned_tokens.amount.valueOf().toString(),
-      ),
+      collection: auction.auctioned_tokens.token_identifier.valueOf().toString(),
+      nonce: parseInt(auction.auctioned_tokens.token_nonce.valueOf().toString()),
+      nrAuctionedTokens: parseInt(auction.auctioned_tokens.amount.valueOf().toString()),
       status: AuctionStatusEnum.Running,
       type: AuctionTypeEnum[auction.auction_type.valueOf().name],
       paymentToken: auction.payment_token.valueOf().toString(),
@@ -129,20 +114,12 @@ export class AuctionEntity extends BaseEntity {
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
       minBidDiff: auction.min_bid_diff.valueOf().toString(),
-      minBidDenominated: BigNumberUtils.denominateAmount(
-        auction.min_bid.valueOf().toString(),
-        decimals,
-      ),
+      minBidDenominated: BigNumberUtils.denominateAmount(auction.min_bid.valueOf().toString(), decimals),
       maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: BigNumberUtils.denominateAmount(
-        auction.max_bid?.valueOf()?.toString() || '0',
-        decimals,
-      ),
+      maxBidDenominated: BigNumberUtils.denominateAmount(auction.max_bid?.valueOf()?.toString() || '0', decimals),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: AuctionEntity.getEndDate(auction.deadline),
-      identifier: `${auction.auctioned_tokens.token_identifier
-        .valueOf()
-        .toString()}-${nominateVal(
+      identifier: `${auction.auctioned_tokens.token_identifier.valueOf().toString()}-${nominateVal(
         parseInt(auction.auctioned_tokens.token_nonce.valueOf().toString()),
       )}`,
       tags: tags ? `,${tags},` : '',
@@ -164,29 +141,19 @@ export class AuctionEntity extends BaseEntity {
       marketplaceAuctionId: auctionId,
       collection: auction.auctioned_token_type.toString(),
       nonce: parseInt(auction.auctioned_token_nonce.valueOf().toString()),
-      nrAuctionedTokens: parseInt(
-        auction.nr_auctioned_tokens.valueOf().toString(),
-      ),
+      nrAuctionedTokens: parseInt(auction.nr_auctioned_tokens.valueOf().toString()),
       status: AuctionStatusEnum.Running,
       type: AuctionTypeEnum[auction.auction_type.valueOf().name],
       paymentToken: auction.payment_token_type.toString(),
       paymentNonce: parseInt(auction.payment_token_nonce.valueOf().toString()),
       ownerAddress: auction.original_owner.valueOf().toString(),
       minBid: auction.min_bid.valueOf().toString(),
-      minBidDenominated: BigNumberUtils.denominateAmount(
-        auction.min_bid.valueOf().toString(),
-        decimals,
-      ),
+      minBidDenominated: BigNumberUtils.denominateAmount(auction.min_bid.valueOf().toString(), decimals),
       maxBid: auction.max_bid?.valueOf()?.toString() || '0',
-      maxBidDenominated: BigNumberUtils.denominateAmount(
-        auction.max_bid?.valueOf()?.toString() || '0',
-        decimals,
-      ),
+      maxBidDenominated: BigNumberUtils.denominateAmount(auction.max_bid?.valueOf()?.toString() || '0', decimals),
       startDate: parseInt(auction.start_time.valueOf().toString()),
       endDate: AuctionEntity.getEndDate(auction.deadline),
-      identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(
-        parseInt(auction.auctioned_token_nonce.valueOf().toString()),
-      )}`,
+      identifier: `${auction.auctioned_token_type.toString()}-${nominateVal(parseInt(auction.auctioned_token_nonce.valueOf().toString()))}`,
       tags: tags ? `,${tags},` : '',
       blockHash: hash,
       marketplaceKey: marketplaceKey,
@@ -221,27 +188,20 @@ export class AuctionEntity extends BaseEntity {
       nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
       status: AuctionStatusEnum.Running,
       type:
-        topicsAuctionToken.auctionType === '' ||
-        parseInt(topicsAuctionToken.auctionType) ===
-          ElrondSwapAuctionTypeEnum.Auction
+        topicsAuctionToken.auctionType === '' || parseInt(topicsAuctionToken.auctionType) === ElrondSwapAuctionTypeEnum.Auction
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
       paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
-      minBidDenominated: BigNumberUtils.denominateAmount(
-        topicsAuctionToken.price,
-        decimals,
-      ),
+      minBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.price, decimals),
       maxBid:
-        parseInt(topicsAuctionToken.auctionType) ===
-          ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
+        parseInt(topicsAuctionToken.auctionType) === ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
           ? topicsAuctionToken.price
           : '0',
       maxBidDenominated: BigNumberUtils.denominateAmount(
-        parseInt(topicsAuctionToken.auctionType) ===
-          ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
+        parseInt(topicsAuctionToken.auctionType) === ElrondSwapAuctionTypeEnum.Buy || marketplaceKey === ENEFTOR_KEY
           ? topicsAuctionToken.price
           : '0',
         decimals,
@@ -256,10 +216,7 @@ export class AuctionEntity extends BaseEntity {
   }
 
   private static getEndDate(deadline: U64Value): number {
-    if (
-      parseInt(deadline.valueOf().toString()) >
-      DateUtils.getCurrentTimestampPlusYears(15)
-    ) {
+    if (parseInt(deadline.valueOf().toString()) > DateUtils.getCurrentTimestampPlusYears(15)) {
       return DateUtils.getCurrentTimestampPlusYears(15);
     }
     return parseInt(deadline.valueOf().toString());

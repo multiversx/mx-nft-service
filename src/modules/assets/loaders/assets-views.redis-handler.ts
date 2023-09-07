@@ -9,17 +9,11 @@ export class AssetsViewsRedisHandler extends RedisKeyValueDataloaderHandler<stri
     super(redisCacheService, 'asset_views');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], assetsIdentifiers: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value =
-          assetsIdentifiers && assetsIdentifiers[item.key]
-            ? assetsIdentifiers[item.key][0].viewsCount
-            : null;
+        item.value = assetsIdentifiers && assetsIdentifiers[item.key] ? assetsIdentifiers[item.key][0].viewsCount : null;
         redisValues.push(item);
       }
     }

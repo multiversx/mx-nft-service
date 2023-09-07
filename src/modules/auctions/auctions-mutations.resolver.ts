@@ -1,19 +1,10 @@
 import { Resolver, Args, Mutation, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import {
-  Auction,
-  CreateAuctionArgs,
-  BidActionArgs,
-  BuySftActionArgs,
-} from './models';
+import { Auction, CreateAuctionArgs, BidActionArgs, BuySftActionArgs } from './models';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
-import {
-  CreateAuctionRequest,
-  BidRequest,
-  BuySftRequest,
-} from './models/requests';
+import { CreateAuctionRequest, BidRequest, BuySftRequest } from './models/requests';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
 import { UserAuthResult } from '../auth/userAuthResult';

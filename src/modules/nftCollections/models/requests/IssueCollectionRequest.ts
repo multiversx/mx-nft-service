@@ -13,10 +13,7 @@ export class IssueCollectionRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(
-    issueCollectionArgs: IssueCollectionArgs,
-    collectionType: 'issueSemiFungible' | 'issueNonFungible',
-  ) {
+  static fromArgs(issueCollectionArgs: IssueCollectionArgs, collectionType: 'issueSemiFungible' | 'issueNonFungible') {
     return new IssueCollectionRequest({
       tokenName: issueCollectionArgs.tokenName,
       tokenTicker: issueCollectionArgs.tokenTicker,

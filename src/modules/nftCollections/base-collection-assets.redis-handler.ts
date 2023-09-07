@@ -11,33 +11,22 @@ export abstract class BaseCollectionsAssetsRedisHandler {
     this.cacheKeyName = cacheKeyName;
     this.redisCacheService = redisCacheService;
   }
-  protected abstract mapValues(
-    returnValues: { key: string; value: any }[],
-    dataKeys,
-  ): RedisValue[];
+  protected abstract mapValues(returnValues: { key: string; value: any }[], dataKeys): RedisValue[];
   protected abstract getData(keys: string[]): any;
 
   async batchLoad(keys: string[]) {
     if (!keys || keys.length === 0) return;
     const cacheKeys = this.getCacheKeys(keys);
-    const getDataFromRedis: { key: string; value: any }[] =
-      await this.redisCacheService.getMany(cacheKeys);
-    const returnValues: { key: string; value: any }[] = this.mapReturnValues(
-      keys,
-      getDataFromRedis,
-    );
-    const getNotCachedKeys = returnValues
-      .filter((item) => item.value === null)
-      .map((value) => value.key);
+    const getDataFromRedis: { key: string; value: any }[] = await this.redisCacheService.getMany(cacheKeys);
+    const returnValues: { key: string; value: any }[] = this.mapReturnValues(keys, getDataFromRedis);
+    const getNotCachedKeys = returnValues.filter((item) => item.value === null).map((value) => value.key);
 
     if (getNotCachedKeys?.length > 0) {
       let data = await this.getData(getNotCachedKeys);
 
       const redisValues = this.mapValues(returnValues, data);
       for (const val of redisValues) {
-        const cacheKeys = this.getCacheKeys(
-          val.values.map((value) => value.key),
-        );
+        const cacheKeys = this.getCacheKeys(val.values.map((value) => value.key));
         await this.redisCacheService.setMany(cacheKeys, val.values, val.ttl);
       }
       return returnValues;
@@ -45,10 +34,7 @@ export abstract class BaseCollectionsAssetsRedisHandler {
     return getDataFromRedis;
   }
 
-  private mapReturnValues(
-    keys: string[],
-    getDataFromRedis: { key: string; value: any }[],
-  ) {
+  private mapReturnValues(keys: string[], getDataFromRedis: { key: string; value: any }[]) {
     const returnValues: { key: string; value: any }[] = [];
     for (let index = 0; index < keys.length; index++) {
       if (getDataFromRedis[index]) {

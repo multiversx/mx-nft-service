@@ -13,24 +13,13 @@ import { computeUsd } from 'src/utils/helpers';
 
 @Injectable()
 export class AcceptOfferEventAnalyticsParser {
-  constructor(
-    private readonly marketplaceService: MarketplacesService,
-    private readonly usdPriceService: UsdPriceService,
-  ) {}
+  constructor(private readonly marketplaceService: MarketplacesService, private readonly usdPriceService: UsdPriceService) {}
 
   async handle(event: any, timestamp: number) {
-    const marketplace = await this.marketplaceService.getMarketplaceByAddress(
-      event.address,
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
     let acceptOfferEvent = undefined;
     let topics = undefined;
-    if (
-      marketplace.key === XOXNO_KEY &&
-      !(
-        Buffer.from(event.topics[0], 'base64').toString() ===
-        ExternalAuctionEventEnum.UserDeposit
-      )
-    ) {
+    if (marketplace.key === XOXNO_KEY && !(Buffer.from(event.topics[0], 'base64').toString() === ExternalAuctionEventEnum.UserDeposit)) {
       acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       topics = acceptOfferEvent.getTopics();
     }
@@ -49,27 +38,13 @@ export class AcceptOfferEventAnalyticsParser {
       topics = acceptOfferEvent.getTopics();
     }
     if (acceptOfferEvent && topics) {
-      const tokenData = await this.usdPriceService.getToken(
-        topics.paymentTokenIdentifier,
-      );
-      const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(
-        topics.paymentTokenIdentifier,
-        timestamp,
-      );
+      const tokenData = await this.usdPriceService.getToken(topics.paymentTokenIdentifier);
+      const tokenPrice = await this.usdPriceService.getTokenPriceFromDate(topics.paymentTokenIdentifier, timestamp);
       const data = [];
       data[topics.collection] = {
         usdPrice: tokenPrice,
-        volume: BigNumberUtils.denominateAmount(
-          topics.paymentAmount,
-          tokenData?.decimals,
-        ),
-        volumeUSD: !tokenData
-          ? '0'
-          : computeUsd(
-              tokenPrice.toString(),
-              topics.paymentAmount,
-              tokenData.decimals,
-            ).toFixed(),
+        volume: BigNumberUtils.denominateAmount(topics.paymentAmount, tokenData?.decimals),
+        volumeUSD: !tokenData ? '0' : computeUsd(tokenPrice.toString(), topics.paymentAmount, tokenData.decimals).toFixed(),
         paymentToken: tokenData?.identifier,
         marketplaceKey: marketplace.key,
       };

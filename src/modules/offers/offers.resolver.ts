@@ -1,19 +1,6 @@
-import {
-  Resolver,
-  Query,
-  Args,
-  ResolveField,
-  Parent,
-  Mutation,
-  Int,
-} from '@nestjs/graphql';
+import { Resolver, Query, Args, ResolveField, Parent, Mutation, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import {
-  CreateOfferArgs,
-  CreateOfferRequest,
-  Offer,
-  OffersResponse,
-} from './models';
+import { CreateOfferArgs, CreateOfferRequest, Offer, OffersResponse } from './models';
 import { connectionFromArraySlice } from 'graphql-relay';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { NftMarketplaceAbiService } from '../auctions';
@@ -54,11 +41,7 @@ export class OffersResolver extends BaseResolver(Offer) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [offers, count] = await this.offersService.getOffers(
-      filters,
-      offset,
-      limit,
-    );
+    const [offers, count] = await this.offersService.getOffers(filters, offset, limit);
     const page = connectionFromArraySlice(offers, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
@@ -99,15 +82,7 @@ export class OffersResolver extends BaseResolver(Offer) {
       asset = assetResponse?.value;
     }
 
-    return marketplaceValue?.length > 0
-      ? Marketplace.fromEntity(
-          marketplaceValue[0],
-          identifier,
-          null,
-          null,
-          asset?.type,
-        )
-      : null;
+    return marketplaceValue?.length > 0 ? Marketplace.fromEntity(marketplaceValue[0], identifier, null, null, asset?.type) : null;
   }
 
   @Mutation(() => TransactionNode)

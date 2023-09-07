@@ -21,13 +21,10 @@ export class Metadata {
     if (!metadata) {
       return null;
     }
-    const metadataBody =
-      typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
+    const metadataBody = typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
     return new Metadata({
       description: metadataBody?.description,
-      attributes: metadataBody?.attributes
-        ? AttributeType.fromMetadataAttributes(metadataBody.attributes)
-        : null,
+      attributes: metadataBody?.attributes ? AttributeType.fromMetadataAttributes(metadataBody.attributes) : null,
       interactiveUrl: Metadata.getInteractiveUrl(metadataBody.interactive_url),
     });
   }
@@ -36,12 +33,8 @@ export class Metadata {
     if (!url) return null;
     let isAcceptedUrl = false;
     isAcceptedUrl = isAcceptedUrl || url.startsWith(mxConfig.dwebLink);
-    isAcceptedUrl =
-      isAcceptedUrl ||
-      (url.includes(mxConfig.pinata) && url.startsWith('https://'));
-    isAcceptedUrl =
-      isAcceptedUrl ||
-      (url.includes(mxConfig.ipfs) && url.startsWith('https://'));
+    isAcceptedUrl = isAcceptedUrl || (url.includes(mxConfig.pinata) && url.startsWith('https://'));
+    isAcceptedUrl = isAcceptedUrl || (url.includes(mxConfig.ipfs) && url.startsWith('https://'));
 
     return isAcceptedUrl ? url : null;
   }
@@ -61,11 +54,7 @@ export class AttributeType {
       for (const attribute of attributes) {
         if (attribute === Object(attribute)) {
           let data: KeyValueType[] = [];
-          if (
-            (attribute['trait_type'] !== undefined ||
-              attribute['name'] !== undefined) &&
-            attribute['value'] !== undefined
-          ) {
+          if ((attribute['trait_type'] !== undefined || attribute['name'] !== undefined) && attribute['value'] !== undefined) {
             data.push(
               new KeyValueType({
                 key: 'trait_type',

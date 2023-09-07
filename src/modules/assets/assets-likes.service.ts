@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { AssetLikeEntity } from 'src/db/assets';
 import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
-import {
-  EventEnum,
-  Feed,
-} from 'src/common/services/mx-communication/models/feed.dto';
+import { EventEnum, Feed } from 'src/common/services/mx-communication/models/feed.dto';
 import { AssetByIdentifierService } from './asset-by-identifier.service';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { Asset } from './models';
@@ -14,10 +11,7 @@ import {
   CacheEventsPublisherService,
   NftLikePublisherService,
 } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { UserNftLikeEvent } from '../rabbitmq/cache-invalidation/events/userNftLike.event';
 
 @Injectable()
@@ -32,18 +26,10 @@ export class AssetsLikesService {
     private readonly logger: Logger,
   ) {}
 
-  getAssetLiked(
-    limit: number = 50,
-    offset: number,
-    address: string,
-  ): Promise<[AssetLikeEntity[], number]> {
+  getAssetLiked(limit: number = 50, offset: number, address: string): Promise<[AssetLikeEntity[], number]> {
     try {
-      const getAssetLiked = () =>
-        this.persistenceService.getAssetsLiked(limit, offset, address);
-      return this.assetsLikesCachingService.getAssetLiked(
-        address,
-        getAssetLiked,
-      );
+      const getAssetLiked = () => this.persistenceService.getAssetsLiked(limit, offset, address);
+      return this.assetsLikesCachingService.getAssetLiked(address, getAssetLiked);
     } catch (err) {
       this.logger.error("An error occurred while loading asset's liked.", {
         path: 'AssetsService.getAssetLiked',
@@ -53,16 +39,9 @@ export class AssetsLikesService {
     }
   }
 
-  async addLike(
-    identifier: string,
-    address: string,
-    authorization?: string,
-  ): Promise<boolean> {
+  async addLike(identifier: string, address: string, authorization?: string): Promise<boolean> {
     try {
-      const isLiked = await this.persistenceService.isAssetLiked(
-        identifier,
-        address,
-      );
+      const isLiked = await this.persistenceService.isAssetLiked(identifier, address);
       if (isLiked) {
         return true;
       } else {
@@ -70,12 +49,8 @@ export class AssetsLikesService {
         await this.saveAssetLikeEntity(identifier, address);
         await this.invalidateAssetLike(identifier, address);
         await this.accountFeedService.subscribe(identifier, authorization);
-        const nftData = await this.assetByIdentifierService.getAsset(
-          identifier,
-        );
-        await this.nftLikePublisherService.publish(
-          new UserNftLikeEvent({ address, nftIdentifier: identifier }),
-        );
+        const nftData = await this.assetByIdentifierService.getAsset(identifier);
+        await this.nftLikePublisherService.publish(new UserNftLikeEvent({ address, nftIdentifier: identifier }));
         await this.accountFeedService.addFeed(
           new Feed({
             actor: address,
@@ -100,16 +75,9 @@ export class AssetsLikesService {
     }
   }
 
-  async removeLike(
-    identifier: string,
-    address: string,
-    authorization?: string,
-  ): Promise<boolean> {
+  async removeLike(identifier: string, address: string, authorization?: string): Promise<boolean> {
     try {
-      const deleteResults = await this.persistenceService.removeLike(
-        identifier,
-        address,
-      );
+      const deleteResults = await this.persistenceService.removeLike(identifier, address);
       if (deleteResults.affected > 0) {
         await this.accountFeedService.unsubscribe(identifier, authorization);
         await this.decrementLikesCount(identifier);
@@ -132,9 +100,7 @@ export class AssetsLikesService {
     try {
       const followersCount = await this.loadLikesCount(identifier);
       if (followersCount > 0) {
-        return await this.assetsLikesCachingService.decrementLikesCount(
-          identifier,
-        );
+        return await this.assetsLikesCachingService.decrementLikesCount(identifier);
       }
       return 0;
     } catch (error) {
@@ -150,9 +116,7 @@ export class AssetsLikesService {
     // Make sure that Redis Key is generated from DB.
     try {
       const likes = await this.loadLikesCount(identifier);
-      return await this.assetsLikesCachingService.incremenLikesCount(
-        identifier,
-      );
+      return await this.assetsLikesCachingService.incremenLikesCount(identifier);
     } catch (error) {
       this.logger.error("An error occurred while incrementing asset's likes.", {
         path: 'AssetsService.incremenLikesCount',
@@ -164,12 +128,8 @@ export class AssetsLikesService {
 
   async loadLikesCount(identifier: string) {
     try {
-      const getAssetLikesCount = () =>
-        this.persistenceService.getAssetLikesCount(identifier);
-      return this.assetsLikesCachingService.loadLikesCount(
-        identifier,
-        getAssetLikesCount,
-      );
+      const getAssetLikesCount = () => this.persistenceService.getAssetLikesCount(identifier);
+      return this.assetsLikesCachingService.loadLikesCount(identifier, getAssetLikesCount);
     } catch (error) {
       this.logger.error("An error occurred while loading asset's likes.", {
         path: 'AssetsService.loadLikesCount',
@@ -181,24 +141,14 @@ export class AssetsLikesService {
 
   async getMostLikedAssets(): Promise<Asset[]> {
     const getMostLikedAssets = async () => {
-      const assetLikes =
-        await this.persistenceService.getMostLikedAssetsIdentifiers();
-      return await Promise.all(
-        assetLikes.map((assetLikes) =>
-          this.assetByIdentifierService.getAsset(assetLikes.identifier),
-        ),
-      );
+      const assetLikes = await this.persistenceService.getMostLikedAssetsIdentifiers();
+      return await Promise.all(assetLikes.map((assetLikes) => this.assetByIdentifierService.getAsset(assetLikes.identifier)));
     };
 
-    return await this.assetsLikesCachingService.getMostLikedAssets(
-      getMostLikedAssets,
-    );
+    return await this.assetsLikesCachingService.getMostLikedAssets(getMostLikedAssets);
   }
 
-  private async saveAssetLikeEntity(
-    identifier: string,
-    address: string,
-  ): Promise<any> {
+  private async saveAssetLikeEntity(identifier: string, address: string): Promise<any> {
     try {
       const assetLikeEntity = this.buildAssetLikeEntity(identifier, address);
       return await this.persistenceService.addLike(assetLikeEntity);
@@ -208,20 +158,14 @@ export class AssetsLikesService {
     }
   }
 
-  private buildAssetLikeEntity(
-    identifier: string,
-    address: string,
-  ): AssetLikeEntity {
+  private buildAssetLikeEntity(identifier: string, address: string): AssetLikeEntity {
     return new AssetLikeEntity({
       identifier,
       address,
     });
   }
 
-  private async invalidateAssetLike(
-    identifier: string,
-    address: string,
-  ): Promise<void> {
+  private async invalidateAssetLike(identifier: string, address: string): Promise<void> {
     await Promise.all([
       this.assetsLikesCachingService.invalidateCache(identifier, address),
       this.cacheEventsPublisherService.publish(

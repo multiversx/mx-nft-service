@@ -66,15 +66,9 @@ export class Campaign {
           whitelistExpire: campaign.whitelistExpireTimestamp,
           description: campaign.description,
           maxNftsPerTransaction: campaign.maxNftsPerTransaction,
-          totalNfts: campaign.tiers
-            .map((t) => t.totalNfts)
-            .reduce((partialSum, a) => partialSum + a, 0),
-          availableNfts: campaign.tiers
-            .map((t) => t.availableNfts)
-            .reduce((partialSum, a) => partialSum + a, 0),
-          tiers: campaign.tiers.map((t) =>
-            Tier.fromEntity(t, campaign.campaignId),
-          ),
+          totalNfts: campaign.tiers.map((t) => t.totalNfts).reduce((partialSum, a) => partialSum + a, 0),
+          availableNfts: campaign.tiers.map((t) => t.availableNfts).reduce((partialSum, a) => partialSum + a, 0),
+          tiers: campaign.tiers.map((t) => Tier.fromEntity(t, campaign.campaignId)),
         })
       : null;
   }

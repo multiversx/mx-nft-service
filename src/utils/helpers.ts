@@ -56,25 +56,13 @@ export const removeCredentialsFromUrl = (url: string): string => {
   return url;
 };
 
-export const computeUsdAmount = (
-  tokenPriceUsd: string,
-  tokenAmount: string,
-  tokenDecimals: number,
-): string => {
-  const amountUsd: BigNumber = new BigNumber(tokenAmount)
-    .multipliedBy(tokenPriceUsd)
-    .dividedBy(Math.pow(10, tokenDecimals));
+export const computeUsdAmount = (tokenPriceUsd: string, tokenAmount: string, tokenDecimals: number): string => {
+  const amountUsd: BigNumber = new BigNumber(tokenAmount).multipliedBy(tokenPriceUsd).dividedBy(Math.pow(10, tokenDecimals));
   return amountUsd.toString();
 };
 
-export const computeUsd = (
-  tokenPriceUsd: string,
-  tokenAmount: string,
-  tokenDecimals: number,
-): BigNumber => {
-  const amountUsd = new BigNumber(tokenAmount)
-    .multipliedBy(tokenPriceUsd)
-    .dividedBy(Math.pow(10, tokenDecimals));
+export const computeUsd = (tokenPriceUsd: string, tokenAmount: string, tokenDecimals: number): BigNumber => {
+  const amountUsd = new BigNumber(tokenAmount).multipliedBy(tokenPriceUsd).dividedBy(Math.pow(10, tokenDecimals));
   return amountUsd;
 };
 
@@ -92,8 +80,7 @@ export function timestampToEpochAndRound(
   milisecondsPerRound: number,
 ): [number, number] {
   const currentTimestamp = new Date();
-  const timeDiffInMs =
-    +currentTimestamp.getTime() - +new Date(timestamp).getTime() * 1000;
+  const timeDiffInMs = +currentTimestamp.getTime() - +new Date(timestamp).getTime() * 1000;
 
   const roundDiff = timeDiffInMs / milisecondsPerRound;
   const epochDiff = roundDiff / roundsPerEpoch;
@@ -109,8 +96,5 @@ export async function sleep(ms: number) {
 }
 
 export function getFilePathFromDist(filename: string): string {
-  return `${__dirname.substring(
-    0,
-    __dirname.lastIndexOf('dist/') + 5,
-  )}${filename}`;
+  return `${__dirname.substring(0, __dirname.lastIndexOf('dist/') + 5)}${filename}`;
 }

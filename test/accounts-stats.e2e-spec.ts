@@ -30,22 +30,18 @@ describe('AccountStatsResolver', () => {
     `;
 
     it('get stats for account', async () => {
-      const accountStatsService =
-        app.get<AccountsStatsService>(AccountsStatsService);
+      const accountStatsService = app.get<AccountsStatsService>(AccountsStatsService);
       jest.spyOn(accountStatsService, 'getStats').mockResolvedValue(
         new AccountStatsEntity({
           auctions: '2',
           orders: '0',
           biddingBalance: '0',
-          address:
-            'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+          address: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         }),
       );
       jest.spyOn(accountStatsService, 'getClaimableCount').mockResolvedValue(5);
       jest.spyOn(accountStatsService, 'getCollectedCount').mockResolvedValue(5);
-      jest
-        .spyOn(accountStatsService, 'getCollectionsCount')
-        .mockResolvedValue(5);
+      jest.spyOn(accountStatsService, 'getCollectionsCount').mockResolvedValue(5);
 
       return request(app.getHttpServer())
         .post('/graphql')
@@ -56,8 +52,7 @@ describe('AccountStatsResolver', () => {
           expect(res.body).toEqual({
             data: {
               accountStats: {
-                address:
-                  'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+                address: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
                 auctions: '2',
                 biddingBalance: '0',
                 claimable: '5',

@@ -25,14 +25,9 @@ export default class WhereBuilder<Entity> {
   }
 
   private buildExpressionRec(fe: FiltersExpression): string {
-    const availableFilters = fe.filters.filter(
-      (f) =>
-        f.values.length > 0 && f.values.every((element) => element !== null),
-    );
+    const availableFilters = fe.filters.filter((f) => f.values.length > 0 && f.values.every((element) => element !== null));
     const filters = map(availableFilters, (f) => this.buildFilter(f));
-    const children = map(fe.childExpressions, (child) =>
-      this.buildExpressionRec(child),
-    );
+    const children = map(fe.childExpressions, (child) => this.buildExpressionRec(child));
 
     const allSqlBlocks = [...filters, ...children];
     const sqLExpr = allSqlBlocks.join(` ${Operator[fe.operator]} `);
@@ -45,16 +40,9 @@ export default class WhereBuilder<Entity> {
     let filterValues = filter.values;
     if (['priceAmount', 'minBid', 'maxBid'].includes(filter.field)) {
       filterName = `${filter.field}Denominated`;
-      filterValues = filter.values.map((value) =>
-        BigNumberUtils.denominateAmount(
-          value,
-          mxConfig.decimals,
-        ).toString(),
-      );
+      filterValues = filter.values.map((value) => BigNumberUtils.denominateAmount(value, mxConfig.decimals).toString());
     }
-    const sqlParamName = this.queryBuilderName
-      ? `${this.queryBuilderName}.${filterName}`
-      : filterName;
+    const sqlParamName = this.queryBuilderName ? `${this.queryBuilderName}.${filterName}` : filterName;
 
     switch (filter.op) {
       case Operation.EQ:
@@ -87,9 +75,7 @@ export default class WhereBuilder<Entity> {
     let filterQuery = '';
     filter.values.forEach((element) => {
       filterQuery =
-        filterQuery === ''
-          ? `FIND_IN_SET('${element}', ${paramName}) `
-          : `${filterQuery} AND FIND_IN_SET('${element}', ${paramName}) `;
+        filterQuery === '' ? `FIND_IN_SET('${element}', ${paramName}) ` : `${filterQuery} AND FIND_IN_SET('${element}', ${paramName}) `;
     });
     return filterQuery;
   }

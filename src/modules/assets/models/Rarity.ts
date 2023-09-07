@@ -87,10 +87,7 @@ export class Rarity {
       : null;
   }
 
-  static areDifferentRarities(
-    actualRarity: Rarity,
-    expectedRarity: Rarity,
-  ): boolean {
+  static areDifferentRarities(actualRarity: Rarity, expectedRarity: Rarity): boolean {
     if (
       actualRarity.openRarityRank !== expectedRarity.openRarityRank ||
       actualRarity.openRarityScore !== expectedRarity.openRarityScore ||
@@ -98,10 +95,8 @@ export class Rarity {
       actualRarity.traitScore !== expectedRarity.traitScore ||
       actualRarity.statisticalRank !== expectedRarity.statisticalRank ||
       actualRarity.statisticalScore !== expectedRarity.statisticalScore ||
-      actualRarity.jaccardDistancesRank !==
-        expectedRarity.jaccardDistancesRank ||
-      actualRarity.jaccardDistancesScore !==
-        expectedRarity.jaccardDistancesScore
+      actualRarity.jaccardDistancesRank !== expectedRarity.jaccardDistancesRank ||
+      actualRarity.jaccardDistancesScore !== expectedRarity.jaccardDistancesScore
     ) {
       return true;
     }

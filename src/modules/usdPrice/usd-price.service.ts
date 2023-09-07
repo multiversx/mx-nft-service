@@ -36,14 +36,9 @@ export class UsdPriceService {
     );
   }
 
-  public async getTokenPriceFromDate(
-    token: string,
-    timestamp: number,
-  ): Promise<number> {
+  public async getTokenPriceFromDate(token: string, timestamp: number): Promise<number> {
     return await this.cacheService.getOrSetCache(
-      `${
-        CacheInfo.TokenHistoricalPrice.key
-      }_${token}_${DateUtils.timestampToIsoStringWithHour(timestamp)}`,
+      `${CacheInfo.TokenHistoricalPrice.key}_${token}_${DateUtils.timestampToIsoStringWithHour(timestamp)}`,
       async () => await this.getTokenHistoricalPrice(token, timestamp),
       CacheInfo.TokenHistoricalPrice.ttl,
     );
@@ -87,10 +82,7 @@ export class UsdPriceService {
   }
 
   private async setAllCachedTokens(): Promise<Token[]> {
-    let [apiTokens, egldPriceUSD] = await Promise.all([
-      this.getCachedApiTokens(),
-      this.getCurrentEgldPrice(),
-    ]);
+    let [apiTokens, egldPriceUSD] = await Promise.all([this.getCachedApiTokens(), this.getCurrentEgldPrice()]);
 
     const egldToken: Token = new Token({
       identifier: mxConfig.egld,
@@ -102,26 +94,15 @@ export class UsdPriceService {
     return apiTokens.concat([egldToken]);
   }
 
-  private async getTokenHistoricalPrice(
-    tokenId: string,
-    timestamp: number,
-  ): Promise<number> {
-    let [cexTokens, xExchangeTokens] = await Promise.all([
-      this.getCexTokens(),
-      this.getXexchangeTokens(),
-    ]);
+  private async getTokenHistoricalPrice(tokenId: string, timestamp: number): Promise<number> {
+    let [cexTokens, xExchangeTokens] = await Promise.all([this.getCexTokens(), this.getXexchangeTokens()]);
 
     if (cexTokens?.includes(tokenId)) {
       {
-        return await this.mxDataApi.getCexPrice(
-          DateUtils.timestampToIsoStringWithHour(timestamp),
-        );
+        return await this.mxDataApi.getCexPrice(DateUtils.timestampToIsoStringWithHour(timestamp));
       }
     } else if (xExchangeTokens.includes(tokenId)) {
-      return await this.mxDataApi.getXechangeTokenPrice(
-        tokenId,
-        DateUtils.timestampToIsoStringWithHour(timestamp),
-      );
+      return await this.mxDataApi.getXechangeTokenPrice(tokenId, DateUtils.timestampToIsoStringWithHour(timestamp));
     }
   }
 

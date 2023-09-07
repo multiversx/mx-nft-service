@@ -12,20 +12,13 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
     super(redisCacheService, CacheInfo.CollectionAssets.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    assetsIdentifiers: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], assetsIdentifiers: { [key: string]: any[] }) {
     let response: RedisValue[] = [];
     const defaultNfts = [];
     const finalNfts = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = assetsIdentifiers[item.key]
-          ? assetsIdentifiers[item.key].map((a) =>
-              CollectionAssetModel.fromNft(a),
-            )
-          : [];
+        item.value = assetsIdentifiers[item.key] ? assetsIdentifiers[item.key].map((a) => CollectionAssetModel.fromNft(a)) : [];
         if (this.hasDefaultThumbnailOrNoOwner(item)) {
           defaultNfts.push(item);
         } else {
@@ -47,12 +40,8 @@ export class CollectionAssetsRedisHandler extends RedisKeyValueDataloaderHandler
 
   private hasDefaultThumbnailOrNoOwner(item: { key: string; value: any }) {
     return (
-      (item.value &&
-        item.value.filter((i) => i.thumbnailUrl.includes('default')).length >
-          0) ||
-      (item.value &&
-        item.value.type === NftTypeEnum.NonFungibleESDT &&
-        !item.value.owner)
+      (item.value && item.value.filter((i) => i.thumbnailUrl.includes('default')).length > 0) ||
+      (item.value && item.value.type === NftTypeEnum.NonFungibleESDT && !item.value.owner)
     );
   }
 }

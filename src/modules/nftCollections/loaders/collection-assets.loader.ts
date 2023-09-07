@@ -9,14 +9,8 @@ import { AssetsQuery } from 'src/modules/assets/assets-query';
   scope: Scope.REQUEST,
 })
 export class CollectionAssetsProvider extends BaseProvider<string> {
-  constructor(
-    collectionAssetsHandler: CollectionAssetsRedisHandler,
-    private apiService: MxApiService,
-  ) {
-    super(
-      collectionAssetsHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(collectionAssetsHandler: CollectionAssetsRedisHandler, private apiService: MxApiService) {
+    super(collectionAssetsHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
@@ -31,9 +25,7 @@ export class CollectionAssetsProvider extends BaseProvider<string> {
 
     const getNftsResponse = await Promise.all(getNftsPromises);
 
-    const nftsGroupByCollection = getNftsResponse.map((nftArray) =>
-      nftArray.groupBy((nft) => nft.collection),
-    );
+    const nftsGroupByCollection = getNftsResponse.map((nftArray) => nftArray.groupBy((nft) => nft.collection));
     return this.mapKeyArrayObject(nftsGroupByCollection);
   }
 

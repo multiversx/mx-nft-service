@@ -13,18 +13,10 @@ export class AcceptOfferEventParser {
   constructor(private readonly marketplaceService: MarketplacesService) {}
 
   async handle(event: any) {
-    const marketplace = await this.marketplaceService.getMarketplaceByAddress(
-      event.address,
-    );
+    const marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
     let acceptOfferEvent = undefined;
     let topics = undefined;
-    if (
-      marketplace.key === XOXNO_KEY &&
-      !(
-        Buffer.from(event.topics[0], 'base64').toString() ===
-        ExternalAuctionEventEnum.UserDeposit
-      )
-    ) {
+    if (marketplace.key === XOXNO_KEY && !(Buffer.from(event.topics[0], 'base64').toString() === ExternalAuctionEventEnum.UserDeposit)) {
       acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
       topics = acceptOfferEvent.getTopics();
     }

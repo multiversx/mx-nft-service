@@ -7,9 +7,7 @@ export class AssetsHistoryAuctionService {
   constructor() {}
 
   mapAuctionEventLog(eventType: string, mainEvent: any): AssetHistoryLogInput {
-    const event = mainEvent.events.find(
-      (event) => event.identifier === eventType,
-    );
+    const event = mainEvent.events.find((event) => event.identifier === eventType);
     switch (eventType) {
       case AuctionEventEnum.AuctionTokenEvent: {
         return new AssetHistoryLogInput({

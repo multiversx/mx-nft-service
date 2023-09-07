@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ExternalAuctionEventEnum } from 'src/modules/assets/models';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
@@ -29,11 +26,7 @@ export class AcceptOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const generalMarketplace =
-      await this.marketplaceService.getMarketplaceByType(
-        event.address,
-        marketplaceType,
-      );
+    const generalMarketplace = await this.marketplaceService.getMarketplaceByType(event.address, marketplaceType);
 
     if (generalMarketplace?.type === MarketplaceTypeEnum.External) {
       let acceptOfferEvent = undefined;
@@ -49,25 +42,16 @@ export class AcceptOfferEventHandler {
       if (!acceptOfferEvent) return;
 
       this.logger.log(
-        `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${
-          generalMarketplace?.name
-        }'`,
+        `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${generalMarketplace?.name}'`,
       );
 
       if (topics.auctionId || topics.auctionId !== 0) {
-        let auction =
-          await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-            topics.auctionId,
-            generalMarketplace.key,
-          );
+        let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(topics.auctionId, generalMarketplace.key);
         if (!auction) return;
 
         auction.status = AuctionStatusEnum.Closed;
         auction.modifiedDate = new Date(new Date().toUTCString());
-        this.auctionsService.updateAuction(
-          auction,
-          ExternalAuctionEventEnum.AcceptOffer,
-        );
+        this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.AcceptOffer);
       }
       return;
     }
@@ -79,14 +63,9 @@ export class AcceptOfferEventHandler {
       marketplaceType,
       topics.collection,
     );
-    this.logger.log(
-      `Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
+    this.logger.log(`Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
-    const offer = await this.offersService.getOfferByIdAndMarketplace(
-      topics.offerId,
-      marketplace.key,
-    );
+    const offer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
 
     await this.offersService.saveOffer({
       ...offer,
@@ -94,12 +73,7 @@ export class AcceptOfferEventHandler {
       modifiedDate: new Date(new Date().toUTCString()),
     });
 
-    await this.feedEventsSenderService.sendAcceptOfferEvent(
-      topics.nftOwner,
-      offer,
-    );
-    await this.notificationsService.updateNotificationStatusForOffers([
-      offer.identifier,
-    ]);
+    await this.feedEventsSenderService.sendAcceptOfferEvent(topics.nftOwner, offer);
+    await this.notificationsService.updateNotificationStatusForOffers([offer.identifier]);
   }
 }

@@ -19,11 +19,7 @@ export class LikesWarmerService {
       'Most liked assets invalidation',
       async () => {
         const assets = await this.assetsLikesService.getMostLikedAssets();
-        await this.invalidateKey(
-          CacheInfo.MostLikedAssets.key,
-          assets,
-          CacheInfo.MostLikedAssets.ttl,
-        );
+        await this.invalidateKey(CacheInfo.MostLikedAssets.key, assets, CacheInfo.MostLikedAssets.ttl);
       },
       true,
     );

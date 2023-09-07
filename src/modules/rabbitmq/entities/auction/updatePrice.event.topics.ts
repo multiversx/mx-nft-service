@@ -9,9 +9,7 @@ export class UpdatePriceEventsTopics {
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
     this.auctionId = Buffer.from(rawTopics[3], 'base64').toString('hex');
 
-    this.newBid = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.newBid = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
   }
 
   toPlainObject() {

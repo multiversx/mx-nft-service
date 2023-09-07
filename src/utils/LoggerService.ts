@@ -2,10 +2,7 @@ import { LoggerService as LS } from '@nestjs/common';
 import * as winston from 'winston';
 const { combine, timestamp, printf } = winston.format;
 import * as Transport from 'winston-transport';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
+import { utilities as nestWinstonModuleUtilities, WinstonModule } from 'nest-winston';
 
 export class LoggerService implements LS {
   private logger: LS;
@@ -57,10 +54,7 @@ export class LoggerService implements LS {
     const logFile = process.env.LOG_FILE ?? false;
     const logLevel = !!process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'error';
 
-    const format = combine(
-      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      nestWinstonModuleUtilities.format.nestLike(),
-    );
+    const format = combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), nestWinstonModuleUtilities.format.nestLike());
 
     const logTransports: Transport[] = [
       new winston.transports.Console({
@@ -77,12 +71,7 @@ export class LoggerService implements LS {
           level: logLevel,
           format: combine(
             timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            printf(
-              (info) =>
-                `[${info.timestamp}] ${info.level}: ${
-                  info.message
-                } ${JSON.stringify(info)}`,
-            ),
+            printf((info) => `[${info.timestamp}] ${info.level}: ${info.message} ${JSON.stringify(info)}`),
           ),
         }),
       );

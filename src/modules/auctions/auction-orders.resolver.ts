@@ -27,9 +27,7 @@ export class AuctionOrdersResolver extends BaseResolver(Auction) {
     const orders = await this.ordersProvider.load(`${id}_${offset}_${limit}`);
     const ordersValue = orders?.value;
     return PageResponse.mapResponse<Order>(
-      ordersValue
-        ? ordersValue?.map((order: OrderEntity) => Order.fromEntity(order))
-        : [],
+      ordersValue ? ordersValue?.map((order: OrderEntity) => Order.fromEntity(order)) : [],
       pagination,
       ordersValue && ordersValue.length > 0 ? ordersValue[0].totalCount : 0,
       offset,

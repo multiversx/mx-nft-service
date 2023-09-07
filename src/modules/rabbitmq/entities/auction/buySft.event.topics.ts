@@ -15,13 +15,9 @@ export class BuySftEventsTopics {
     this.collection = Buffer.from(rawTopics[1], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
     this.auctionId = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.boughtTokens = Buffer.from(rawTopics[4], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.boughtTokens = Buffer.from(rawTopics[4], 'base64').toString('hex').hexBigNumberToString();
     this.currentWinner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.bid = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.bid = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
     this.paymentToken = BinaryUtils.base64Decode(rawTopics[8] ?? '');
   }
 

@@ -8,9 +8,7 @@ export class EnumUtils {
    * @param enumType the enum type
    */
   static getEnumKeys(enumObj: any, enumType: EnumType): any[] {
-    return EnumUtils.getEnumValues(enumObj, enumType).map(
-      (value) => enumObj[value],
-    );
+    return EnumUtils.getEnumValues(enumObj, enumType).map((value) => enumObj[value]);
   }
 
   /**
@@ -19,9 +17,7 @@ export class EnumUtils {
    * @param enumType the enum type
    */
   static getEnumValues(enumObj: any, enumType: EnumType): any[] {
-    return Object.keys(enumObj).filter(
-      (key) => typeof enumObj[key] === enumType,
-    );
+    return Object.keys(enumObj).filter((key) => typeof enumObj[key] === enumType);
   }
 }
 

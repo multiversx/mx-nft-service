@@ -2,13 +2,7 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import ConnectionArgs from './filters/ConnectionArgs';
 
 export default class PageResponse {
-  static mapResponse<T>(
-    returnList: T[],
-    args: ConnectionArgs,
-    count: number,
-    offset: number,
-    limit: number,
-  ) {
+  static mapResponse<T>(returnList: T[], args: ConnectionArgs, count: number, offset: number, limit: number) {
     const page = connectionFromArraySlice(returnList, args, {
       arrayLength: count,
       sliceStart: offset || 0,

@@ -30,7 +30,8 @@
     "typeormTimescale": "ts-node --require ts-node/register ./node_modules/typeorm/cli.js -d src/common/persistence/timescaledb/typeorm.config.ts",
     "generate-migration-timescale": "npm run typeormTimescale -- migration:generate src/common/persistence/timescaledb/migrations/$npm_config_name",
     "run-migrations-timescale": "npm run typeormTimescale migration:run --transaction=each",
-    "revert-migrations-timescale": "npm run typeormTimescale migration:revert"
+    "revert-migrations-timescale": "npm run typeormTimescale migration:revert",
+    "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.12.0",

@@ -1,12 +1,4 @@
-import {
-  Resolver,
-  Args,
-  Mutation,
-  Query,
-  ResolveField,
-  Parent,
-  Int,
-} from '@nestjs/graphql';
+import { Resolver, Args, Mutation, Query, ResolveField, Parent, Int } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { BuyTicketsArgs, ClaimTicketsArgs } from './models';
 import { PrimarySaleService } from './primary-sale.service';
@@ -41,10 +33,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     collectionIdentifier: string,
     @AuthUser() user: UserAuthResult,
   ): Promise<TicketInfo[]> {
-    return await this.primarySaleService.getMyTickets(
-      collectionIdentifier,
-      user.address,
-    );
+    return await this.primarySaleService.getMyTickets(collectionIdentifier, user.address);
   }
 
   @Query(() => Boolean)
@@ -54,26 +43,19 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
     collectionIdentifier: string,
     @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
-    return await this.primarySaleService.hasClaimedTickets(
-      collectionIdentifier,
-      user.address,
-    );
+    return await this.primarySaleService.hasClaimedTickets(collectionIdentifier, user.address);
   }
 
   @Query(() => WhitelistedInfo)
   @UseGuards(JwtOrNativeAuthGuard)
-  async isWhitelisted(
-    @AuthUser() user: UserAuthResult,
-  ): Promise<{ isWhitelisted: boolean; message?: string }> {
+  async isWhitelisted(@AuthUser() user: UserAuthResult): Promise<{ isWhitelisted: boolean; message?: string }> {
     return await this.primarySaleService.isWhitelisted(user.address);
   }
 
   @ResolveField('price', () => String)
   async price(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
-    const pricePerTicket = await this.primarySaleService.getPricePerTicket(
-      collectionIdentifier,
-    );
+    const pricePerTicket = await this.primarySaleService.getPricePerTicket(collectionIdentifier);
     return pricePerTicket || 0;
   }
 
@@ -81,9 +63,7 @@ export class PrimarySaleResolver extends BaseResolver(PrimarySale) {
   async maxUnitsPerWallet(@Parent() sale: PrimarySale) {
     const { collectionIdentifier } = sale;
 
-    const maxNftsPerWallet = await this.primarySaleService.getMaxNftPerWallet(
-      collectionIdentifier,
-    );
+    const maxNftsPerWallet = await this.primarySaleService.getMaxNftPerWallet(collectionIdentifier);
     return maxNftsPerWallet || 0;
   }
 

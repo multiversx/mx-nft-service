@@ -19,11 +19,7 @@ export class TagsWarmerService {
       'Tags invalidations',
       async () => {
         const tokens = await this.tagsService.getAuctionTagsFromDb();
-        await this.invalidateKey(
-          CacheInfo.AuctionTags.key,
-          tokens,
-          CacheInfo.AuctionTags.ttl,
-        );
+        await this.invalidateKey(CacheInfo.AuctionTags.key, tokens, CacheInfo.AuctionTags.ttl);
       },
       true,
     );

@@ -1,8 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import {
-  ApiToken,
-  DexToken,
-} from '../../common/services/mx-communication/models/api-token.model';
+import { ApiToken, DexToken } from '../../common/services/mx-communication/models/api-token.model';
 
 @ObjectType()
 export class Token {

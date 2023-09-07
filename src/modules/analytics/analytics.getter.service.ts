@@ -13,17 +13,8 @@ export class AnalyticsGetterService {
     private readonly analyticsQuery: AnalyticsDataGetterService,
   ) {}
 
-  async getVolumeDataForTimePeriod(
-    time: string,
-    series: string,
-    metric: string,
-  ): Promise<AnalyticsAggregateValue[]> {
-    const cacheKey = this.getAnalyticsCacheKey(
-      'volumeData',
-      time,
-      series,
-      metric,
-    );
+  async getVolumeDataForTimePeriod(time: string, series: string, metric: string): Promise<AnalyticsAggregateValue[]> {
+    const cacheKey = this.getAnalyticsCacheKey('volumeData', time, series, metric);
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
@@ -36,17 +27,8 @@ export class AnalyticsGetterService {
     );
   }
 
-  async getFloorPriceForTimePeriod(
-    time: string,
-    series: string,
-    metric: string,
-  ): Promise<AnalyticsAggregateValue[]> {
-    const cacheKey = this.getAnalyticsCacheKey(
-      'floorPriceData',
-      time,
-      series,
-      metric,
-    );
+  async getFloorPriceForTimePeriod(time: string, series: string, metric: string): Promise<AnalyticsAggregateValue[]> {
+    const cacheKey = this.getAnalyticsCacheKey('floorPriceData', time, series, metric);
     return await this.cachingService.getOrSetCache(
       cacheKey,
       () =>
@@ -64,21 +46,10 @@ export class AnalyticsGetterService {
     limit: number = 10,
     offset: number = 0,
   ): Promise<[AnalyticsAggregateValue[], number]> {
-    const cacheKey = this.getAnalyticsCacheKey(
-      'getTopCollectionsDaily',
-      metric,
-      limit,
-      offset,
-      series,
-    );
+    const cacheKey = this.getAnalyticsCacheKey('getTopCollectionsDaily', metric, limit, offset, series);
     return await this.cachingService.getOrSetCache(
       cacheKey,
-      () =>
-        this.analyticsQuery.getTopCollectionsDaily(
-          { metric, series },
-          limit,
-          offset,
-        ),
+      () => this.analyticsQuery.getTopCollectionsDaily({ metric, series }, limit, offset),
       Constants.oneMinute() * 2,
     );
   }

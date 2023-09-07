@@ -20,13 +20,8 @@ export class OfferClosedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromWithdrawOfferEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): OfferClosedSummary {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  static fromWithdrawOfferEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): OfferClosedSummary {
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
     const topics = new WithdrawOfferEvent(genericEvent).getTopics();
 
     return new OfferClosedSummary({

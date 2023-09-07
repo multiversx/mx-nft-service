@@ -8,20 +8,12 @@ import { MxStatsService } from 'src/common/services/mx-communication/mx-stats.se
   scope: Scope.REQUEST,
 })
 export class AssetsViewsLoader extends BaseProvider<string> {
-  constructor(
-    assetsViewsRedisHandler: AssetsViewsRedisHandler,
-    private statsService: MxStatsService,
-  ) {
-    super(
-      assetsViewsRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(assetsViewsRedisHandler: AssetsViewsRedisHandler, private statsService: MxStatsService) {
+    super(assetsViewsRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const getViewsCountPromises = identifiers.map((identifier) =>
-      this.statsService.getNftsViewsCount(identifier),
-    );
+    const getViewsCountPromises = identifiers.map((identifier) => this.statsService.getNftsViewsCount(identifier));
 
     const viewsCountResponse = await Promise.all(getViewsCountPromises);
     return viewsCountResponse?.groupBy((item) => item.identifier);

@@ -47,9 +47,7 @@ export class ApiConfigService {
   }
 
   isReindexMarketplaceEventsFlagActive(): boolean {
-    return (
-      this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true'
-    );
+    return this.getGenericConfig<string>('ENABLE_MARKETPLACE_EVENTS') === 'true';
   }
 
   getApiUrl(): string {
@@ -73,9 +71,7 @@ export class ApiConfigService {
   }
 
   getKeepAliveTimeoutDownstream(): number {
-    return parseInt(
-      this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'),
-    );
+    return parseInt(this.getGenericConfig<string>('KEEPALIVE_TIMEOUT_DOWNSTREAM'));
   }
 
   getSecurityAdmins(): string[] {
@@ -87,9 +83,7 @@ export class ApiConfigService {
   }
 
   getNativeAuthMaxExpirySeconds(): number {
-    const maxExpiry = this.configService.get<string>(
-      'NATIVE_AUTH_MAX_EXPIRY_SECONDS',
-    );
+    const maxExpiry = this.configService.get<string>('NATIVE_AUTH_MAX_EXPIRY_SECONDS');
     if (!maxExpiry) {
       throw new Error('No native auth max expiry in seconds present');
     }
@@ -97,9 +91,7 @@ export class ApiConfigService {
   }
 
   getNativeAuthAcceptedOrigins(): string[] {
-    const origins = this.configService.get<string>(
-      'NATIVE_AUTH_ACCEPTED_ORIGINS',
-    );
+    const origins = this.configService.get<string>('NATIVE_AUTH_ACCEPTED_ORIGINS');
     if (!origins) {
       throw new Error('No accepted origins present');
     }
@@ -120,9 +112,7 @@ export class ApiConfigService {
   }
 
   getAxiosTimeout(): number {
-    return (
-      this.getGenericConfig<number>('KEEPALIVE_TIMEOUT_DOWNSTREAM') ?? 61000
-    );
+    return this.getGenericConfig<number>('KEEPALIVE_TIMEOUT_DOWNSTREAM') ?? 61000;
   }
 
   getServerTimeout(): number {

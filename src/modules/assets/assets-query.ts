@@ -10,15 +10,9 @@ export class AssetsQuery {
     return this.addQuery(query);
   }
 
-  private addParamToQuery(
-    paramName: string,
-    paramValue: string | string[] | number | boolean,
-  ): this {
-    if (paramValue === undefined || paramValue === null || !paramName)
-      return this;
-    this.query += `${
-      this.query.length === 0 ? '?' : '&'
-    }${paramName}=${paramValue}`;
+  private addParamToQuery(paramName: string, paramValue: string | string[] | number | boolean): this {
+    if (paramValue === undefined || paramValue === null || !paramName) return this;
+    this.query += `${this.query.length === 0 ? '?' : '&'}${paramName}=${paramValue}`;
     return this;
   }
 
@@ -118,10 +112,7 @@ export class AssetsQuery {
 
   addSortByRank(sort?: Sort): this {
     if (sort !== undefined) {
-      return this.addParamToQuery('sort', 'rank').addParamToQuery(
-        'order',
-        sort === Sort.ASC ? 'asc' : 'desc',
-      );
+      return this.addParamToQuery('sort', 'rank').addParamToQuery('order', sort === Sort.ASC ? 'asc' : 'desc');
     }
     return this;
   }
@@ -131,8 +122,7 @@ export class AssetsQuery {
     // then uncomment where TODO(whiteListedStorage)
     // const defaultQuery = 'hasUris=true&isWhitelistedStorage=true';
     const defaultQuery = 'hasUris=true';
-    if (this.query.includes(defaultQuery) || !addDefaultQuery)
-      return this.query;
+    if (this.query.includes(defaultQuery) || !addDefaultQuery) return this.query;
     return this.addQuery(defaultQuery).build(false);
   }
 }

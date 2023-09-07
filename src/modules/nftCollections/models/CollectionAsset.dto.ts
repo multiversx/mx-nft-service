@@ -32,8 +32,7 @@ export class CollectionAssetModel {
   static fromNft(nft: Nft) {
     return nft
       ? new CollectionAssetModel({
-          thumbnailUrl:
-            nft.media?.length > 0 ? nft.media[0].thumbnailUrl : null,
+          thumbnailUrl: nft.media?.length > 0 ? nft.media[0].thumbnailUrl : null,
           identifier: nft.identifier,
           isNsfw: nft.isNsfw,
           scamInfo: ScamInfo.fromScamInfoApi(nft.scamInfo),

@@ -8,9 +8,7 @@ export class AcceptOfferEventsTopics {
   constructor(rawTopics: string[]) {
     this.collection = Buffer.from(rawTopics[1], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
-    this.auctionId = parseInt(
-      BinaryUtils.tryBase64ToBigInt(rawTopics[14])?.toString() ?? '0',
-    );
+    this.auctionId = parseInt(BinaryUtils.tryBase64ToBigInt(rawTopics[14])?.toString() ?? '0');
   }
 
   toPlainObject() {

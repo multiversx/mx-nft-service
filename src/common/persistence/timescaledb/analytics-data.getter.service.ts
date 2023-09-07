@@ -32,28 +32,15 @@ export class AnalyticsDataGetterService {
     if (series) {
       query.andWhere('series = :series', { series });
     }
-    const [response, count] = await Promise.all([
-      query.offset(offset).limit(limit).getRawMany(),
-      query.getCount(),
-    ]);
+    const [response, count] = await Promise.all([query.offset(offset).limit(limit).getRawMany(), query.getCount()]);
     if (series && count === 0) {
       return [[new AnalyticsAggregateValue({ value: 0, series: series })], 1];
     }
 
-    return [
-      response?.map((row) =>
-        AnalyticsAggregateValue.fromTimescaleObjext(row),
-      ) ?? [],
-      count ?? 0,
-    ];
+    return [response?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [], count ?? 0];
   }
 
-  async getVolumeData({
-    time,
-    series,
-    metric,
-    start,
-  }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
+  async getVolumeData({ time, series, metric, start }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.sumDaily
       .createQueryBuilder()
@@ -61,26 +48,15 @@ export class AnalyticsDataGetterService {
       .addSelect('sum(sum) as value')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
-      .andWhere(
-        endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
-        { startDate, endDate },
-      )
+      .andWhere(endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate', { startDate, endDate })
       .orderBy('timestamp', 'ASC')
       .groupBy('timestamp')
       .getRawMany();
 
-    return (
-      query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ??
-      []
-    );
+    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [];
   }
 
-  async getFloorPriceData({
-    time,
-    series,
-    metric,
-    start,
-  }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
+  async getFloorPriceData({ time, series, metric, start }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
     const query = await this.floorPriceDaily
       .createQueryBuilder()
@@ -88,17 +64,11 @@ export class AnalyticsDataGetterService {
       .addSelect('locf(min(min)) as value')
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
-      .andWhere(
-        endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate',
-        { startDate, endDate },
-      )
+      .andWhere(endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate', { startDate, endDate })
       .orderBy('timestamp', 'ASC')
       .groupBy('timestamp')
       .getRawMany();
 
-    return (
-      query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ??
-      []
-    );
+    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [];
   }
 }

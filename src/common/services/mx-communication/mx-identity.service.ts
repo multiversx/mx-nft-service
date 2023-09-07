@@ -6,10 +6,7 @@ import { AccountIdentity } from './models/account.identity';
 
 @Injectable()
 export class MxIdentityService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly apiService: ApiService,
-  ) {}
+  constructor(private readonly logger: Logger, private readonly apiService: ApiService) {}
 
   async getProfiles(addresses: string[]): Promise<AccountIdentity[]> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/users/multiple`;
@@ -26,16 +23,11 @@ export class MxIdentityService {
         return accounts[key];
       });
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getProfiles.name,
-          addresses: addresses,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(url)}`, {
+        path: this.getProfiles.name,
+        addresses: addresses,
+        exception: error,
+      });
       return;
     }
   }
@@ -56,39 +48,27 @@ export class MxIdentityService {
           privacy: Privacy.private,
         });
       }
-      this.logger.error(
-        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getProfile.name,
-          address: address,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(url)}`, {
+        path: this.getProfile.name,
+        address: address,
+        exception: error,
+      });
       return;
     }
   }
 
-  async getFollowersCount(
-    address: string,
-  ): Promise<{ address: string; count: number }> {
+  async getFollowersCount(address: string): Promise<{ address: string; count: number }> {
     const url = `${process.env.ELROND_IDENTITY}api/v1/followers/${address}/count`;
 
     try {
       let response = await this.apiService.get(url);
       return response?.data;
     } catch (error) {
-      this.logger.error(
-        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getFollowersCount.name,
-          address: address,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(url)}`, {
+        path: this.getFollowersCount.name,
+        address: address,
+        exception: error,
+      });
       return { address, count: 0 };
     }
   }
@@ -107,16 +87,11 @@ export class MxIdentityService {
           privacy: Privacy.private,
         });
       }
-      this.logger.error(
-        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getAcountsByHerotag.name,
-          address: searchTerm,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(url)}`, {
+        path: this.getAcountsByHerotag.name,
+        address: searchTerm,
+        exception: error,
+      });
       return;
     }
   }
@@ -138,25 +113,18 @@ export class MxIdentityService {
           privacy: Privacy.private,
         });
       }
-      this.logger.error(
-        `An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(
-          url,
-        )}`,
-        {
-          path: this.getAddressByHerotag.name,
-          herotag: herotag,
-          exception: error,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx identity service on url ${removeCredentialsFromUrl(url)}`, {
+        path: this.getAddressByHerotag.name,
+        herotag: herotag,
+        exception: error,
+      });
       return;
     }
   }
 
   async getAccountsForAddresses(keys: string[]): Promise<any[]> {
     const uniqueAddresses = [...new Set(keys)];
-    const accountsPromises = uniqueAddresses.map((address) =>
-      this.getProfile(address),
-    );
+    const accountsPromises = uniqueAddresses.map((address) => this.getProfile(address));
 
     const accountResponse = await Promise.all(accountsPromises);
     return accountResponse;

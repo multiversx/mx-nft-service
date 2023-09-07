@@ -39,9 +39,7 @@ export class OfferCreatedSummary extends ReindexGenericSummary {
       return;
     }
     const address = event.data.eventData?.address ?? tx.receiver;
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
     const topics = new SendOfferEvent(genericEvent).getTopics();
 
     return new OfferCreatedSummary({

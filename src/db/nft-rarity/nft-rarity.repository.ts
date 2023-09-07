@@ -43,11 +43,7 @@ export class NftRarityRepository {
   }
 
   async getCollectionIds(): Promise<string[]> {
-    const res = await this.nftRarityRepository
-      .createQueryBuilder()
-      .select('collection')
-      .distinct(true)
-      .execute();
+    const res = await this.nftRarityRepository.createQueryBuilder().select('collection').distinct(true).execute();
     return res.map((nft) => nft.collection);
   }
 
@@ -60,9 +56,7 @@ export class NftRarityRepository {
       .getMany();
   }
 
-  async findNftRarityByCollection(
-    collectionTicker: string,
-  ): Promise<NftRarityEntity[]> {
+  async findNftRarityByCollection(collectionTicker: string): Promise<NftRarityEntity[]> {
     return (
       await this.nftRarityRepository.find({
         where: { collection: collectionTicker },

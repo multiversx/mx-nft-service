@@ -3,10 +3,7 @@ export class MxApiServiceMock {
     return Promise.resolve(4);
   }
 
-  async getNftsCountForCollection(
-    _query: string = '',
-    _collection: string = '',
-  ): Promise<{ value: string; key: string }> {
+  async getNftsCountForCollection(_query: string = '', _collection: string = ''): Promise<{ value: string; key: string }> {
     return Promise.resolve({ key: 'identifier', value: '4' });
   }
 

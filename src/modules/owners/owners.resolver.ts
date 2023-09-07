@@ -8,10 +8,7 @@ import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Owner)
 export class OwnersResolver {
-  constructor(
-    private ownersService: OwnersService,
-    private accountsProvider: AccountsProvider,
-  ) {}
+  constructor(private ownersService: OwnersService, private accountsProvider: AccountsProvider) {}
 
   @Query(() => OwnerResponse)
   async owners(
@@ -21,18 +18,8 @@ export class OwnersResolver {
     pagination: ConnectionArgs,
   ): Promise<OwnerResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [owners, count] = await this.ownersService.getOwnersForIdentifier(
-      filters?.identifier,
-      offset,
-      limit,
-    );
-    return PageResponse.mapResponse<Owner>(
-      owners || [],
-      pagination,
-      count || 0,
-      offset,
-      limit,
-    );
+    const [owners, count] = await this.ownersService.getOwnersForIdentifier(filters?.identifier, offset, limit);
+    return PageResponse.mapResponse<Owner>(owners || [], pagination, count || 0, offset, limit);
   }
 
   @ResolveField(() => Account)

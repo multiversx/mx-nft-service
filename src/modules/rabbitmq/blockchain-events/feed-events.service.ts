@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CollectionApi } from 'src/common';
 import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
-import {
-  EventEnum,
-  Feed,
-} from 'src/common/services/mx-communication/models/feed.dto';
+import { EventEnum, Feed } from 'src/common/services/mx-communication/models/feed.dto';
 import { AuctionEntity } from 'src/db/auctions';
 import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
@@ -34,28 +31,16 @@ export class FeedEventsSenderService {
     startAuction: AuctionEntity,
     auctionTokenMarketplace: Marketplace,
   ) {
-    const nftData = await this.assetByIdentifierService.getAsset(
-      startAuction.identifier,
-    );
+    const nftData = await this.assetByIdentifierService.getAsset(startAuction.identifier);
 
     let minBidUsdAmount: String;
     let maxBidUsdAmount: String;
     let tokenData: Token;
-    if (
-      startAuction.paymentToken &&
-      startAuction.minBid &&
-      startAuction.maxBid
-    ) {
+    if (startAuction.paymentToken && startAuction.minBid && startAuction.maxBid) {
       [tokenData, minBidUsdAmount, maxBidUsdAmount] = await Promise.all([
         this.usdPriceService.getToken(startAuction.paymentToken),
-        this.usdPriceService.getUsdAmountDenom(
-          startAuction.paymentToken,
-          startAuction.minBid,
-        ),
-        this.usdPriceService.getUsdAmountDenom(
-          startAuction.paymentToken,
-          startAuction.maxBid,
-        ),
+        this.usdPriceService.getUsdAmountDenom(startAuction.paymentToken, startAuction.minBid),
+        this.usdPriceService.getUsdAmountDenom(startAuction.paymentToken, startAuction.maxBid),
       ]);
     }
 
@@ -100,19 +85,14 @@ export class FeedEventsSenderService {
     endAuction: AuctionEntity,
     endMarketplace: Marketplace,
   ) {
-    const endAuctionNftData = await this.assetByIdentifierService.getAsset(
-      endAuction.identifier,
-    );
+    const endAuctionNftData = await this.assetByIdentifierService.getAsset(endAuction.identifier);
 
     let usdAmount: String;
     let tokenData: Token;
     if (endAuction.paymentToken && topicsEndAuction.currentBid) {
       [tokenData, usdAmount] = await Promise.all([
         this.usdPriceService.getToken(endAuction.paymentToken),
-        this.usdPriceService.getUsdAmountDenom(
-          endAuction.paymentToken,
-          topicsEndAuction.currentBid,
-        ),
+        this.usdPriceService.getUsdAmountDenom(endAuction.paymentToken, topicsEndAuction.currentBid),
       ]);
     }
 
@@ -144,9 +124,7 @@ export class FeedEventsSenderService {
     buyAuction: AuctionEntity,
     buyMarketplace: Marketplace,
   ) {
-    const buySftNftData = await this.assetByIdentifierService.getAsset(
-      buyAuction.identifier,
-    );
+    const buySftNftData = await this.assetByIdentifierService.getAsset(buyAuction.identifier);
 
     let usdAmount: String;
     let tokenData: Token;
@@ -215,19 +193,14 @@ export class FeedEventsSenderService {
     },
     order: OrderEntity,
   ) {
-    const bidNftData = await this.assetByIdentifierService.getAsset(
-      auction.identifier,
-    );
+    const bidNftData = await this.assetByIdentifierService.getAsset(auction.identifier);
 
     let usdAmount: String;
     let tokenData: Token;
     if (auction.paymentToken && topics.currentBid) {
       [tokenData, usdAmount] = await Promise.all([
         this.usdPriceService.getToken(auction.paymentToken),
-        this.usdPriceService.getUsdAmountDenom(
-          auction.paymentToken,
-          topics.currentBid,
-        ),
+        this.usdPriceService.getUsdAmountDenom(auction.paymentToken, topics.currentBid),
       ]);
     }
 
@@ -256,10 +229,7 @@ export class FeedEventsSenderService {
     const nft = await this.assetByIdentifierService.getAsset(offer.identifier);
     const [tokenData, usdAmount] = await Promise.all([
       this.usdPriceService.getToken(offer.priceToken),
-      this.usdPriceService.getUsdAmountDenom(
-        offer.priceToken,
-        offer.priceAmount,
-      ),
+      this.usdPriceService.getUsdAmountDenom(offer.priceToken, offer.priceAmount),
     ]);
 
     await this.accountFeedService.addFeed(
@@ -286,10 +256,7 @@ export class FeedEventsSenderService {
     const nft = await this.assetByIdentifierService.getAsset(offer.identifier);
     const [tokenData, usdAmount] = await Promise.all([
       this.usdPriceService.getToken(offer.priceToken),
-      this.usdPriceService.getUsdAmountDenom(
-        offer.priceToken,
-        offer.priceAmount,
-      ),
+      this.usdPriceService.getUsdAmountDenom(offer.priceToken, offer.priceAmount),
     ]);
 
     await this.accountFeedService.addFeed(

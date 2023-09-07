@@ -1,12 +1,7 @@
 import { InputType, Field, registerEnumType } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
 import { NftTypeEnum } from 'src/modules/assets/models';
-import {
-  ADDRESS_RGX,
-  ADDRESS_ERROR,
-  COLLECTION_IDENTIFIER_RGX,
-  COLLECTION_IDENTIFIER_ERROR,
-} from 'src/utils/constants';
+import { ADDRESS_RGX, ADDRESS_ERROR, COLLECTION_IDENTIFIER_RGX, COLLECTION_IDENTIFIER_ERROR } from 'src/utils/constants';
 
 @InputType()
 export class CollectionsFilter {

@@ -9,17 +9,11 @@ export class AvailableTokensForAuctionRedisHandler extends RedisKeyValueDataload
     super(redisCacheService, 'auction_available_tokens');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    auctionsIds: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: number; value: any }[], auctionsIds: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value =
-          auctionsIds && auctionsIds[item.key]
-            ? auctionsIds[item.key][0]?.availableTokens
-            : null;
+        item.value = auctionsIds && auctionsIds[item.key] ? auctionsIds[item.key][0]?.availableTokens : null;
         redisValues.push(item);
       }
     }

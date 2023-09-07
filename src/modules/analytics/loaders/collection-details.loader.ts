@@ -8,20 +8,12 @@ import { CollectionsGetterService } from 'src/modules/nftCollections/collections
   scope: Scope.REQUEST,
 })
 export class CollectionDetailsProvider extends BaseProvider<string> {
-  constructor(
-    private collectionsService: CollectionsGetterService,
-    collectionDetailsRedisHandler: CollectionDetailsRedisHandler,
-  ) {
-    super(
-      collectionDetailsRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(private collectionsService: CollectionsGetterService, collectionDetailsRedisHandler: CollectionDetailsRedisHandler) {
+    super(collectionDetailsRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   getData = async (keys: string[]): Promise<any[]> => {
-    const response = await this.collectionsService.getCollectionsByIdentifiers(
-      keys,
-    );
+    const response = await this.collectionsService.getCollectionsByIdentifiers(keys);
     return response?.groupBy((item) => item.collection);
   };
 }

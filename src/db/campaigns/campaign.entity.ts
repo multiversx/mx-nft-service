@@ -68,25 +68,15 @@ export class CampaignEntity extends BaseEntity {
             .valueOf()
             .map((x) => String.fromCharCode(x))
             .join(''),
-          collectionName: campaign.brand_info.token_display_name
-            .valueOf()
-            .toString(),
+          collectionName: campaign.brand_info.token_display_name.valueOf().toString(),
           collectionTicker: campaign?.nft_token_id?.valueOf().toString(),
           mediaType: campaign.brand_info.media_type.valueOf().toString(),
           minterAddress: address,
-          startDate: parseInt(
-            campaign.brand_info.mint_period.start.valueOf().toString(),
-          ),
-          endDate: parseInt(
-            campaign.brand_info.mint_period.end.valueOf().toString(),
-          ),
-          whitelistExpireTimestamp: parseInt(
-            campaign.brand_info.whitelist_expire_timestamp.valueOf().toString(),
-          ),
+          startDate: parseInt(campaign.brand_info.mint_period.start.valueOf().toString()),
+          endDate: parseInt(campaign.brand_info.mint_period.end.valueOf().toString()),
+          whitelistExpireTimestamp: parseInt(campaign.brand_info.whitelist_expire_timestamp.valueOf().toString()),
           royalties: campaign.brand_info.royalties.valueOf().toString(),
-          tiers: campaign.tier_info_entries.map((t) =>
-            TierEntity.fromTierAbi(t, decimals),
-          ),
+          tiers: campaign.tier_info_entries.map((t) => TierEntity.fromTierAbi(t, decimals)),
           maxNftsPerTransaction: maxNftsPerTransaction,
           verified: 1,
           description: 'This is a default description for a campaign',

@@ -104,7 +104,7 @@ import { IsTicketRedisHandler } from './loaders/asset-is-ticket.redis-handler';
     NftTraitsService,
     NftTraitsElasticService,
     IsTicketProvider,
-    IsTicketRedisHandler
+    IsTicketRedisHandler,
   ],
   imports: [
     MxCommunicationModule,
@@ -131,7 +131,7 @@ import { IsTicketRedisHandler } from './loaders/asset-is-ticket.redis-handler';
     AssetsRedisHandler,
     AssetsProvider,
     IsTicketProvider,
-    IsTicketRedisHandler
+    IsTicketRedisHandler,
   ],
 })
-export class AssetsModuleGraph { }
+export class AssetsModuleGraph {}

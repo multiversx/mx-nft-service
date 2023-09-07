@@ -3,15 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 @Injectable()
 export class LocalRedisCacheService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly redisCacheService: RedisCacheService,
-  ) {}
+  constructor(private readonly logger: Logger, private readonly redisCacheService: RedisCacheService) {}
 
-  async getOrSetWithDifferentTtl(
-    key: string,
-    createValueFunc: () => any,
-  ): Promise<any> {
+  async getOrSetWithDifferentTtl(key: string, createValueFunc: () => any): Promise<any> {
     const cachedData = await this.redisCacheService.get(key);
     if (!isNil(cachedData)) {
       return cachedData;
@@ -22,10 +16,7 @@ export class LocalRedisCacheService {
     return value;
   }
 
-  private async buildInternalCreateValueFunc(
-    key: string,
-    createValueFunc: () => any,
-  ): Promise<any> {
+  private async buildInternalCreateValueFunc(key: string, createValueFunc: () => any): Promise<any> {
     try {
       let data = createValueFunc();
       if (data instanceof Promise) {

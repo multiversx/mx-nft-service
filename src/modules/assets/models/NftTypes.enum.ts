@@ -19,7 +19,6 @@ registerEnumType(ScamInfoTypeEnum, {
   name: 'ScamInfoTypeEnum',
 });
 
-
 export enum CustomFiltersEnum {
   Tickets = 'Tickets',
 }

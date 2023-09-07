@@ -10,16 +10,11 @@ export class ArtistAddressRedisHandler extends RedisKeyValueDataloaderHandler<st
     super(redisCacheService, CacheInfo.Artist.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    accountsAddresses: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], accountsAddresses: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = accountsAddresses[item.key]
-          ? accountsAddresses[item.key][0]
-          : null;
+        item.value = accountsAddresses[item.key] ? accountsAddresses[item.key][0] : null;
         redisValues.push(item);
       }
     }

@@ -9,22 +9,13 @@ import { CollectionAssetsCountRedisHandler } from './collection-assets-count.red
   scope: Scope.REQUEST,
 })
 export class CollectionAssetsCountProvider extends BaseProvider<string> {
-  constructor(
-    collectionAssetsHandler: CollectionAssetsCountRedisHandler,
-    private apiService: MxApiService,
-  ) {
-    super(
-      collectionAssetsHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(collectionAssetsHandler: CollectionAssetsCountRedisHandler, private apiService: MxApiService) {
+    super(collectionAssetsHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
     const getCountPromises = identifiers.map((identifier) =>
-      this.apiService.getNftsCountForCollection(
-        this.getQueryForCollection(identifier),
-        identifier,
-      ),
+      this.apiService.getNftsCountForCollection(this.getQueryForCollection(identifier), identifier),
     );
 
     const nftsCountResponse = await Promise.all(getCountPromises);

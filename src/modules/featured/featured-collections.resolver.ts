@@ -30,15 +30,8 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
     pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] =
-      await this.featuredService.getFeaturedCollections(filters, limit, offset,);
-    return PageResponse.mapResponse<Collection>(
-      collections || [],
-      pagination,
-      count || 0,
-      offset,
-      limit,
-    );
+    const [collections, count] = await this.featuredService.getFeaturedCollections(filters, limit, offset);
+    return PageResponse.mapResponse<Collection>(collections || [], pagination, count || 0, offset, limit);
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
@@ -47,10 +40,7 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
     @Args('input')
     input: FeaturedCollectionsArgs,
   ): Promise<boolean> {
-    return await this.featuredService.addFeaturedCollection(
-      input.collection,
-      input.type,
-    );
+    return await this.featuredService.addFeaturedCollection(input.collection, input.type);
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
@@ -59,9 +49,6 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
     @Args('input')
     input: FeaturedCollectionsArgs,
   ): Promise<boolean> {
-    return await this.featuredService.removeFeaturedCollection(
-      input.collection,
-      input.type,
-    );
+    return await this.featuredService.removeFeaturedCollection(input.collection, input.type);
   }
 }

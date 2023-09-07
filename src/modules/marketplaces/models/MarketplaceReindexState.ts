@@ -3,10 +3,7 @@ import BigNumber from 'bignumber.js';
 import { AuctionEntity } from 'src/db/auctions';
 import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
-import {
-  AuctionStatusEnum,
-  AuctionTypeEnum,
-} from 'src/modules/auctions/models';
+import { AuctionStatusEnum, AuctionTypeEnum } from 'src/modules/auctions/models';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { Token } from 'src/modules/usdPrice/Token.model';
@@ -36,23 +33,14 @@ export class MarketplaceReindexState {
   }
 
   getAuctionIndexByIdentifier(identifier: string): number {
-    return this.auctions.findIndex(
-      (a) =>
-        a.identifier === identifier && a.status === AuctionStatusEnum.Running,
-    );
+    return this.auctions.findIndex((a) => a.identifier === identifier && a.status === AuctionStatusEnum.Running);
   }
 
   getOfferIndexByOfferId(offerId: number): number {
     return this.offers.findIndex((o) => o.marketplaceOfferId === offerId);
   }
 
-  createOrder(
-    auctionIndex: number,
-    input: any,
-    status: OrderStatusEnum,
-    paymentToken: Token,
-    paymentNonce?: number,
-  ): OrderEntity {
+  createOrder(auctionIndex: number, input: any, status: OrderStatusEnum, paymentToken: Token, paymentNonce?: number): OrderEntity {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const price = input.price ?? input.currentBid;
     return new OrderEntity({
@@ -65,37 +53,23 @@ export class MarketplaceReindexState {
       priceNonce: paymentNonce ?? 0,
       priceAmount: price !== '0' ? price : this.auctions[auctionIndex].maxBid,
       priceAmountDenominated:
-        price !== '0'
-          ? BigNumberUtils.denominateAmount(price, paymentToken.decimals)
-          : this.auctions[auctionIndex].maxBidDenominated,
+        price !== '0' ? BigNumberUtils.denominateAmount(price, paymentToken.decimals) : this.auctions[auctionIndex].maxBidDenominated,
       blockHash: input.blockHash ?? '',
       marketplaceKey: this.marketplace.key,
-      boughtTokensNo:
-        this.auctions[auctionIndex].type === AuctionTypeEnum.Nft
-          ? null
-          : input.itemsCount,
+      boughtTokensNo: this.auctions[auctionIndex].type === AuctionTypeEnum.Nft ? null : input.itemsCount,
       status: status,
     });
   }
 
-  setAuctionOrderWinnerStatusAndReturnId(
-    auctionId: number,
-    status: OrderStatusEnum,
-    modifiedDate?: Date,
-  ): number {
+  setAuctionOrderWinnerStatusAndReturnId(auctionId: number, status: OrderStatusEnum, modifiedDate?: Date): number {
     const bids = this.orders
-      .filter(
-        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active,
-      )
+      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active)
       .map((o) => new BigNumber(o.priceAmount));
 
     if (bids.length) {
       const maxBid = BigNumber.max(...bids);
       const winnerOrderIndex = this.orders.findIndex(
-        (o) =>
-          o.auctionId === auctionId &&
-          o.status === OrderStatusEnum.Active &&
-          o.priceAmount === maxBid.toString(),
+        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.priceAmount === maxBid.toString(),
       );
       this.orders[winnerOrderIndex].status = status;
       if (modifiedDate) {
@@ -106,18 +80,9 @@ export class MarketplaceReindexState {
     return -1;
   }
 
-  setInactiveOrdersForAuction(
-    auctionId: number,
-    modifiedDate: Date,
-    exceptWinnerId?: number,
-  ): void {
+  setInactiveOrdersForAuction(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
     this.orders
-      ?.filter(
-        (o) =>
-          o.auctionId === auctionId &&
-          o.status === OrderStatusEnum.Active &&
-          o.id !== exceptWinnerId,
-      )
+      ?.filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
       ?.map((o) => {
         o.status = OrderStatusEnum.Inactive;
         o.modifiedDate = modifiedDate;
@@ -129,22 +94,12 @@ export class MarketplaceReindexState {
     this.setOffersToExpiredIfOlderThanTimestamp(timestamp);
   }
 
-  private setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(
-    timestamp: number,
-  ): void {
-    const runningAuctions = this.auctions?.filter(
-      (a) => a.status === AuctionStatusEnum.Running,
-    );
+  private setAuctionsAndOrdersToExpiredIfOlderThanTimestamp(timestamp: number): void {
+    const runningAuctions = this.auctions?.filter((a) => a.status === AuctionStatusEnum.Running);
     for (let i = 0; i < runningAuctions.length; i++) {
-      if (
-        runningAuctions[i].endDate > 0 &&
-        runningAuctions[i].endDate < timestamp
-      ) {
+      if (runningAuctions[i].endDate > 0 && runningAuctions[i].endDate < timestamp) {
         runningAuctions[i].status = AuctionStatusEnum.Claimable;
-        const winnerOrderId = this.setAuctionOrderWinnerStatusAndReturnId(
-          runningAuctions[i].id,
-          OrderStatusEnum.Active,
-        );
+        const winnerOrderId = this.setAuctionOrderWinnerStatusAndReturnId(runningAuctions[i].id, OrderStatusEnum.Active);
         this.setInactiveOrdersForAuction(
           runningAuctions[i].id,
           DateUtils.getUtcDateFromTimestamp(runningAuctions[i].endDate),
@@ -156,11 +111,7 @@ export class MarketplaceReindexState {
 
   private setOffersToExpiredIfOlderThanTimestamp(timestamp: number): void {
     for (let i = 0; i < this.offers.length; i++) {
-      if (
-        this.offers[i].status === OfferStatusEnum.Active &&
-        this.offers[i].endDate &&
-        this.offers[i].endDate < timestamp
-      ) {
+      if (this.offers[i].status === OfferStatusEnum.Active && this.offers[i].endDate && this.offers[i].endDate < timestamp) {
         this.offers[i].status = OfferStatusEnum.Expired;
       }
     }

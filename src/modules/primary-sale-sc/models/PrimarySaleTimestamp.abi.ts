@@ -1,9 +1,4 @@
-import {
-  AddressType,
-  BigUIntValue,
-  U32Type,
-  U64Type,
-} from '@multiversx/sdk-core';
+import { AddressType, BigUIntValue, U32Type, U64Type } from '@multiversx/sdk-core';
 
 export interface PrimarySaleTimeAbi {
   start_sale: U64Type;

@@ -12,50 +12,26 @@ import { IsAssetLikedRedisHandler } from './loaders/asset-is-liked.redis-handler
 export class AssetsLikesCachingService {
   private readonly ttl = 6 * Constants.oneHour();
 
-  constructor(
-    private isAssetLikedRedisHandler: IsAssetLikedRedisHandler,
-    private redisCacheService: RedisCacheService,
-  ) {}
+  constructor(private isAssetLikedRedisHandler: IsAssetLikedRedisHandler, private redisCacheService: RedisCacheService) {}
 
-  getAssetLiked(
-    address: string,
-    getAssetLiked: () => any,
-  ): Promise<[AssetLikeEntity[], number]> {
-    return this.redisCacheService.getOrSet(
-      this.getAssetLikedByCacheKey(address),
-      getAssetLiked,
-      this.ttl,
-    );
+  getAssetLiked(address: string, getAssetLiked: () => any): Promise<[AssetLikeEntity[], number]> {
+    return this.redisCacheService.getOrSet(this.getAssetLikedByCacheKey(address), getAssetLiked, this.ttl);
   }
 
   async decrementLikesCount(identifier: string): Promise<number> {
-    return await this.redisCacheService.decrement(
-      this.getAssetLikesCountCacheKey(identifier),
-      this.ttl,
-    );
+    return await this.redisCacheService.decrement(this.getAssetLikesCountCacheKey(identifier), this.ttl);
   }
 
   async incremenLikesCount(identifier: string): Promise<number> {
-    return await this.redisCacheService.increment(
-      this.getAssetLikesCountCacheKey(identifier),
-      this.ttl,
-    );
+    return await this.redisCacheService.increment(this.getAssetLikesCountCacheKey(identifier), this.ttl);
   }
 
   async loadLikesCount(identifier: string, loadLikesCountFunction: () => any) {
-    return await this.redisCacheService.getOrSet(
-      this.getAssetLikesCountCacheKey(identifier),
-      loadLikesCountFunction,
-      this.ttl,
-    );
+    return await this.redisCacheService.getOrSet(this.getAssetLikesCountCacheKey(identifier), loadLikesCountFunction, this.ttl);
   }
 
   async getMostLikedAssets(getMostLikedAssets: () => any): Promise<Asset[]> {
-    return await this.redisCacheService.getOrSet(
-      this.getMostLikedAssetsCacheKey(),
-      getMostLikedAssets,
-      CacheInfo.MostLikedAssets.ttl,
-    );
+    return await this.redisCacheService.getOrSet(this.getMostLikedAssetsCacheKey(), getMostLikedAssets, CacheInfo.MostLikedAssets.ttl);
   }
 
   async invalidateCache(identifier: string, address: string): Promise<void> {
@@ -69,10 +45,7 @@ export class AssetsLikesCachingService {
     return this.redisCacheService.delete(cacheKey);
   }
 
-  private invalidateAssetLikeCache(
-    identifier: string,
-    address: string,
-  ): Promise<void> {
+  private invalidateAssetLikeCache(identifier: string, address: string): Promise<void> {
     const cacheKey = this.getAssetLikedCacheKey(identifier, address);
     return this.redisCacheService.delete(cacheKey);
   }

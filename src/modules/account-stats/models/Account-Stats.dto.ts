@@ -34,11 +34,7 @@ export class AccountStats {
     Object.assign(this, init);
   }
 
-  static fromEntity(
-    account: AccountStatsEntity,
-    address: string = '',
-    marketplaceKey: string = null,
-  ) {
+  static fromEntity(account: AccountStatsEntity, address: string = '', marketplaceKey: string = null) {
     return account
       ? new AccountStats({
           address: address,

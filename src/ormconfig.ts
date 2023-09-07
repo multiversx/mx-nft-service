@@ -9,9 +9,7 @@ const db: MysqlConnectionCredentialsOptions = {
   database: process.env.DB_NAME,
 };
 
-const dbSlaves = process.env.DB_SLAVES
-  ? JSON.parse(process.env.DB_SLAVES)
-  : [db];
+const dbSlaves = process.env.DB_SLAVES ? JSON.parse(process.env.DB_SLAVES) : [db];
 
 const config: ConnectionOptions = {
   type: 'mysql',
@@ -21,10 +19,7 @@ const config: ConnectionOptions = {
     master: db,
     slaves: dbSlaves,
   },
-  entities:
-    process.env.NODE_ENV === 'test-e2e'
-      ? ['src/db/**/*.entity.js']
-      : ['dist/db/**/*.entity.js'],
+  entities: process.env.NODE_ENV === 'test-e2e' ? ['src/db/**/*.entity.js'] : ['dist/db/**/*.entity.js'],
   migrations: ['dist/db/migrations/*.js'],
   extra: {
     connectionLimit: process.env.DB_CONNECTION_LIMIT,

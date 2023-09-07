@@ -10,7 +10,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
     'prettier/@typescript-eslint',
-    'plugin:nestjs/recommended'
+    'plugin:nestjs/recommended',
   ],
   root: true,
   env: {
@@ -24,6 +24,6 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     'nestjs/use-dependency-injection': 'error',
     'nestjs/deprecated-api-modules': 'error',
-    '@typescript-eslint/quotes': ["warn", "single"]
+    '@typescript-eslint/quotes': ['warn', 'single'],
   },
 };

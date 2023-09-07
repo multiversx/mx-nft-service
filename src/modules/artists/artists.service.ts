@@ -15,11 +15,7 @@ export class ArtistsService {
     private collectionsGetterService: CollectionsGetterService,
   ) {}
 
-  async getArtists(
-    filters: ArtistFilters,
-    page: number = 0,
-    size: number = 25,
-  ): Promise<[Account[], number]> {
+  async getArtists(filters: ArtistFilters, page: number = 0, size: number = 25): Promise<[Account[], number]> {
     if (filters.sorting === ArtistSortingEnum.MostFollowed) {
       return await this.getMostFollowed(page, size);
     }
@@ -29,76 +25,40 @@ export class ArtistsService {
     return await this.getTrending(page, size);
   }
 
-  private async getMostFollowed(
-    page: number = 0,
-    size: number = 25,
-  ): Promise<[Account[], number]> {
-    const [collections, count] =
-      await this.collectionsGetterService.getOrSetMostFollowedCollections();
+  private async getMostFollowed(page: number = 0, size: number = 25): Promise<[Account[], number]> {
+    const [collections, count] = await this.collectionsGetterService.getOrSetMostFollowedCollections();
 
     const selectedCollections = collections?.slice(page, page + size);
-    const mappedAccounts = await this.getAccountsInfo(
-      selectedCollections.map((x: { artist: any }) => x.artist),
-    );
-    return [
-      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
-      count,
-    ];
+    const mappedAccounts = await this.getAccountsInfo(selectedCollections.map((x: { artist: any }) => x.artist));
+    return [mappedAccounts?.map((account) => Account.fromEntity(account?.value)), count];
   }
 
-  private async getMostActive(
-    page: number = 0,
-    size: number = 25,
-  ): Promise<[Account[], number]> {
-    const [collections, count] =
-      await this.collectionsGetterService.getOrSetMostActiveCollections();
+  private async getMostActive(page: number = 0, size: number = 25): Promise<[Account[], number]> {
+    const [collections, count] = await this.collectionsGetterService.getOrSetMostActiveCollections();
 
     const selectedCollections = collections?.slice(page, page + size);
-    const mappedAccounts = await this.getAccountsInfo(
-      selectedCollections.map((x: { artist: any }) => x.artist),
-    );
-    return [
-      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
-      count,
-    ];
+    const mappedAccounts = await this.getAccountsInfo(selectedCollections.map((x: { artist: any }) => x.artist));
+    return [mappedAccounts?.map((account) => Account.fromEntity(account?.value)), count];
   }
 
-  private async getTrending(
-    page: number = 0,
-    size: number = 25,
-  ): Promise<[Account[], number]> {
-    const [trendingCollections] =
-      await this.collectionsGetterService.getTrendingCollections();
-    const [mostActive] =
-      await this.collectionsGetterService.getOrSetMostActiveCollections();
+  private async getTrending(page: number = 0, size: number = 25): Promise<[Account[], number]> {
+    const [trendingCollections] = await this.collectionsGetterService.getTrendingCollections();
+    const [mostActive] = await this.collectionsGetterService.getOrSetMostActiveCollections();
 
-    const addressCreators = trendingCollections.map(
-      (x: { artistAddress: any }) => x.artistAddress,
-    );
+    const addressCreators = trendingCollections.map((x: { artistAddress: any }) => x.artistAddress);
 
-    const trendingCreators = mostActive.filter((x) =>
-      addressCreators.includes(x.artist),
-    );
+    const trendingCreators = mostActive.filter((x) => addressCreators.includes(x.artist));
 
-    const activeWithoutTrending = mostActive.filter(
-      (x) => !addressCreators.includes(x.artist),
-    );
+    const activeWithoutTrending = mostActive.filter((x) => !addressCreators.includes(x.artist));
     const response = [...trendingCreators, ...activeWithoutTrending];
     const count = response.length;
     const selectedCollections = response?.slice(page, page + size);
-    const mappedAccounts = await this.getAccountsInfo(
-      selectedCollections.map((x: { artist: any }) => x.artist),
-    );
-    return [
-      mappedAccounts?.map((account) => Account.fromEntity(account?.value)),
-      count,
-    ];
+    const mappedAccounts = await this.getAccountsInfo(selectedCollections.map((x: { artist: any }) => x.artist));
+    return [mappedAccounts?.map((account) => Account.fromEntity(account?.value)), count];
   }
 
   private async getAccountsInfo(addresses: string[]) {
-    const accountsPromises = addresses.map((address) =>
-      this.getOrSetAccount(address),
-    );
+    const accountsPromises = addresses.map((address) => this.getOrSetAccount(address));
     return await Promise.all(accountsPromises);
   }
 

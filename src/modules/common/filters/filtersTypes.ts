@@ -9,10 +9,7 @@ import {
   NFT_IDENTIFIER_ERROR,
   NFT_IDENTIFIER_RGX,
 } from 'src/utils/constants';
-import {
-  CustomFiltersEnum,
-  NftTypeEnum,
-} from '../../assets/models/NftTypes.enum';
+import { CustomFiltersEnum, NftTypeEnum } from '../../assets/models/NftTypes.enum';
 
 export enum Operator {
   AND,

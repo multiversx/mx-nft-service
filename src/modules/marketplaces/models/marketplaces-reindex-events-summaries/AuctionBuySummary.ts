@@ -1,11 +1,7 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import {
-  AssetActionEnum,
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
+import { AssetActionEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { BuySftEvent } from 'src/modules/rabbitmq/entities/auction';
 import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
 import { ElrondSwapBuyEvent } from 'src/modules/rabbitmq/entities/auction/elrondnftswap/elrondswap-buy.event';
@@ -31,17 +27,8 @@ export class AuctionBuySummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromBuySftEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-    marketplace: Marketplace,
-  ): AuctionBuySummary {
-    if (
-      event.hasOneOfEventTopicIdentifiers([
-        ExternalAuctionEventEnum.UpdateOffer,
-        KroganSwapAuctionEventEnum.UpdateListing,
-      ])
-    ) {
+  static fromBuySftEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData, marketplace: Marketplace): AuctionBuySummary {
+    if (event.hasOneOfEventTopicIdentifiers([ExternalAuctionEventEnum.UpdateOffer, KroganSwapAuctionEventEnum.UpdateListing])) {
       return;
     }
 
@@ -67,18 +54,10 @@ export class AuctionBuySummary extends ReindexGenericSummary {
     });
   }
 
-  private static getTopics(
-    event: MarketplaceEventsEntity,
-    marketplace: Marketplace,
-  ): any {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  private static getTopics(event: MarketplaceEventsEntity, marketplace: Marketplace): any {
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
     try {
-      if (
-        event.hasEventIdentifier(ExternalAuctionEventEnum.BuyNft) &&
-        marketplace.key !== DEADRARE_KEY
-      ) {
+      if (event.hasEventIdentifier(ExternalAuctionEventEnum.BuyNft) && marketplace.key !== DEADRARE_KEY) {
         return new ClaimEvent(genericEvent).getTopics();
       }
 

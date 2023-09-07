@@ -5,11 +5,7 @@ import { LocalRedisCacheService } from './local-redis-cache.service';
 
 @Global()
 @Module({
-  imports: [
-    forwardRef(() => CommonModule),
-    DynamicModuleUtils.getRedisModule(),
-    DynamicModuleUtils.getCachingModule(),
-  ],
+  imports: [forwardRef(() => CommonModule), DynamicModuleUtils.getRedisModule(), DynamicModuleUtils.getCachingModule()],
   providers: [LocalRedisCacheService],
   exports: [LocalRedisCacheService, DynamicModuleUtils.getRedisModule()],
 })

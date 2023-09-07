@@ -32,53 +32,32 @@ export class TrendingCollectionsService {
     return await this.cacheService.getCache(CacheInfo.TrendingByVolume.key);
   }
 
-  public async reindexTrendingCollections(
-    forTheLastHours: number = 24,
-  ): Promise<CollectionVolumeLast24[]> {
+  public async reindexTrendingCollections(forTheLastHours: number = 24): Promise<CollectionVolumeLast24[]> {
     try {
       const performanceProfiler = new PerformanceProfiler();
 
-      const startDateUtc = moment()
-        .add(-forTheLastHours, 'hours')
-        .format('YYYY-MM-DD HH:mm:ss');
+      const startDateUtc = moment().add(-forTheLastHours, 'hours').format('YYYY-MM-DD HH:mm:ss');
       const endDateUtc = moment().format('YYYY-MM-DD HH:mm:ss');
 
       await this.getFilterAddresses();
 
-      const tokens = await this.fetchLogsUsingScrollApi(
-        new Date(startDateUtc).getTime(),
-        new Date(endDateUtc).getTime(),
-      );
+      const tokens = await this.fetchLogsUsingScrollApi(new Date(startDateUtc).getTime(), new Date(endDateUtc).getTime());
 
       performanceProfiler.stop();
 
-      this.logger.log(
-        `Finish indexing analytics data. Elapsed time: ${moment(
-          performanceProfiler.duration,
-        ).format('HH:mm:ss')}`,
-      );
+      this.logger.log(`Finish indexing analytics data. Elapsed time: ${moment(performanceProfiler.duration).format('HH:mm:ss')}`);
       return tokens;
     } catch (error) {
       this.logger.log(error);
     }
   }
 
-  private async fetchLogsUsingScrollApi(
-    startDateUtc: number,
-    endDateUtc: number,
-  ): Promise<CollectionVolumeLast24[]> {
-    this.logger.log(
-      `Scroll logs between '${startDateUtc}' and '${endDateUtc}'`,
-    );
+  private async fetchLogsUsingScrollApi(startDateUtc: number, endDateUtc: number): Promise<CollectionVolumeLast24[]> {
+    this.logger.log(`Scroll logs between '${startDateUtc}' and '${endDateUtc}'`);
 
     let scrollPage = 0;
     let lastBlockLogs = [];
-    ({ scrollPage, lastBlockLogs } = await this.getParsedEvents(
-      startDateUtc,
-      endDateUtc,
-      scrollPage,
-      lastBlockLogs,
-    ));
+    ({ scrollPage, lastBlockLogs } = await this.getParsedEvents(startDateUtc, endDateUtc, scrollPage, lastBlockLogs));
 
     return await this.getTrendingCollections();
   }
@@ -92,18 +71,8 @@ export class TrendingCollectionsService {
 
       for (const token of collection.tokens) {
         const tokenDetails = tokensWithPrice[token.paymentToken];
-        if (
-          tokenDetails &&
-          tokenDetails.length > 0 &&
-          tokenDetails[0].usdPrice
-        ) {
-          priceUsd = priceUsd.plus(
-            computeUsd(
-              tokenDetails[0].usdPrice,
-              token.sum,
-              tokenDetails[0].decimals,
-            ),
-          );
+        if (tokenDetails && tokenDetails.length > 0 && tokenDetails[0].usdPrice) {
+          priceUsd = priceUsd.plus(computeUsd(tokenDetails[0].usdPrice, token.sum, tokenDetails[0].decimals));
         }
       }
       trending.push({
@@ -115,51 +84,33 @@ export class TrendingCollectionsService {
     return trending.sortedDescending((x) => parseFloat(x.volume));
   }
 
-  private async getParsedEvents(
-    startDateUtc: number,
-    endDateUtc: number,
-    scrollPage: number,
-    lastBlockLogs: any[],
-  ) {
-    await this.indexerService.getAllEvents(
-      startDateUtc,
-      endDateUtc,
-      analyticsEventsEnum,
-      this.filterAddresses,
-      async (logs: any[]) => {
-        this.logger.log(`Fetched ${logs.length} logs on page ${scrollPage}`);
-        scrollPage += 1;
+  private async getParsedEvents(startDateUtc: number, endDateUtc: number, scrollPage: number, lastBlockLogs: any[]) {
+    await this.indexerService.getAllEvents(startDateUtc, endDateUtc, analyticsEventsEnum, this.filterAddresses, async (logs: any[]) => {
+      this.logger.log(`Fetched ${logs.length} logs on page ${scrollPage}`);
+      scrollPage += 1;
 
-        const groupedLogs = logs.groupBy((log) => log.timestamp);
+      const groupedLogs = logs.groupBy((log) => log.timestamp);
 
-        const blockLogs = Array.from(Object.keys(groupedLogs).sort()).map(
-          (key) => groupedLogs[key],
-        );
+      const blockLogs = Array.from(Object.keys(groupedLogs).sort()).map((key) => groupedLogs[key]);
 
-        if (blockLogs.length > 0) {
-          blockLogs[0] = [...lastBlockLogs, ...blockLogs[0]];
-        } else {
-          blockLogs.push(lastBlockLogs);
-        }
+      if (blockLogs.length > 0) {
+        blockLogs[0] = [...lastBlockLogs, ...blockLogs[0]];
+      } else {
+        blockLogs.push(lastBlockLogs);
+      }
 
-        const blockLogsLength =
-          blockLogs.length === 0 ? blockLogs.length : blockLogs.length - 1;
-        for (let i = 0; i < blockLogsLength; i++) {
-          const eventsRaw = blockLogs[i]
-            .map((logs: { events: any }) => logs.events)
-            .flat();
-          const events = eventsRaw.filter((event: { identifier: string }) =>
-            analyticsEventsEnum.includes(event.identifier),
-          );
+      const blockLogsLength = blockLogs.length === 0 ? blockLogs.length : blockLogs.length - 1;
+      for (let i = 0; i < blockLogsLength; i++) {
+        const eventsRaw = blockLogs[i].map((logs: { events: any }) => logs.events).flat();
+        const events = eventsRaw.filter((event: { identifier: string }) => analyticsEventsEnum.includes(event.identifier));
 
-          await this.processEvents(events);
-        }
+        await this.processEvents(events);
+      }
 
-        if (blockLogs.length > 0) {
-          lastBlockLogs = blockLogs[blockLogs.length - 1];
-        }
-      },
-    );
+      if (blockLogs.length > 0) {
+        lastBlockLogs = blockLogs[blockLogs.length - 1];
+      }
+    });
     return { scrollPage, lastBlockLogs };
   }
 
@@ -172,9 +123,7 @@ export class TrendingCollectionsService {
           .groupBy((g: { paymentToken: any }) => g.paymentToken, true)
           .map((group: { key: any; values: any[] }) => ({
             paymentToken: group.key,
-            sum: group.values
-              .sumBigInt((x: { value: BigInt }) => BigInt(x.value.toString()))
-              .toString(),
+            sum: group.values.sumBigInt((x: { value: BigInt }) => BigInt(x.value.toString())).toString(),
           })),
       }));
   }
@@ -195,8 +144,7 @@ export class TrendingCollectionsService {
 
   async getFilterAddresses(): Promise<void> {
     this.filterAddresses = [];
-    this.filterAddresses =
-      await this.marketplacesService.getMarketplacesAddreses();
+    this.filterAddresses = await this.marketplacesService.getMarketplacesAddreses();
   }
 
   private async processEvents(rawEvents: any[]): Promise<void> {
@@ -204,9 +152,7 @@ export class TrendingCollectionsService {
 
     const events: any[] = rawEvents.filter(
       (rawEvent: { address: string; identifier: string }) =>
-        this.filterAddresses.find(
-          (filterAddress) => rawEvent.address === filterAddress,
-        ) !== undefined,
+        this.filterAddresses.find((filterAddress) => rawEvent.address === filterAddress) !== undefined,
     );
 
     if (events.length === 0) {

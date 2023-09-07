@@ -9,10 +9,7 @@ export class LastOrderRedisHandler extends RedisKeyValueDataloaderHandler<number
     super(redisCacheService, 'auction_active_orders');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    ordersAuctionsIds: { [key: string]: any[] },
-  ): RedisValue[] {
+  mapValues(returnValues: { key: number; value: any }[], ordersAuctionsIds: { [key: string]: any[] }): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {

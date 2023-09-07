@@ -30,23 +30,14 @@ export class XNftsAnalyticsEntity {
     Object.assign(this, init);
   }
 
-  public static fromObject(
-    timestamp: Date,
-    object: Record<string, Record<string, string>>,
-  ): XNftsAnalyticsEntity[] {
+  public static fromObject(timestamp: Date, object: Record<string, Record<string, string>>): XNftsAnalyticsEntity[] {
     const entities = Object.entries(object)
-      .map(([series, record]: [string, Record<string, string>]) =>
-        XNftsAnalyticsEntity.fromRecord(timestamp, record, series),
-      )
+      .map(([series, record]: [string, Record<string, string>]) => XNftsAnalyticsEntity.fromRecord(timestamp, record, series))
       .flat(1);
     return entities;
   }
 
-  private static fromRecord(
-    timestamp: Date,
-    record: Record<string, string>,
-    series?: string,
-  ): XNftsAnalyticsEntity[] {
+  private static fromRecord(timestamp: Date, record: Record<string, string>, series?: string): XNftsAnalyticsEntity[] {
     const entities = Object.entries(record).map(([key, value]) => {
       const entity = new XNftsAnalyticsEntity();
       entity.timestamp = timestamp;

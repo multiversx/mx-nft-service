@@ -29,21 +29,9 @@ export class AssetsHistoryService {
     private readonly assetsHistoryElasticService: AssetsHistoryElasticService,
   ) {}
 
-  async getOrSetHistoryLog(
-    collection: string,
-    nonce: string,
-    limit: number,
-    beforeTimestamp: number,
-  ): Promise<AssetHistoryLog[]> {
-    const getOrSetHistoryLog = async () =>
-      await this.getAndMapHistoryLog(collection, nonce, limit, beforeTimestamp);
-    return await this.assetsHistoryCachingService.getOrSetHistoryLog(
-      collection,
-      nonce,
-      limit,
-      beforeTimestamp,
-      getOrSetHistoryLog,
-    );
+  async getOrSetHistoryLog(collection: string, nonce: string, limit: number, beforeTimestamp: number): Promise<AssetHistoryLog[]> {
+    const getOrSetHistoryLog = async () => await this.getAndMapHistoryLog(collection, nonce, limit, beforeTimestamp);
+    return await this.assetsHistoryCachingService.getOrSetHistoryLog(collection, nonce, limit, beforeTimestamp, getOrSetHistoryLog);
   }
 
   private async getAndMapHistoryLog(
@@ -53,12 +41,7 @@ export class AssetsHistoryService {
     beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
-    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(
-      collection,
-      nonce,
-      limit,
-      beforeTimestamp,
-    );
+    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(collection, nonce, limit, beforeTimestamp);
 
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
@@ -71,12 +54,7 @@ export class AssetsHistoryService {
     return historyLog;
   }
 
-  private mapLogs(
-    nonce: string,
-    res: any,
-    index: number,
-    historyLog: AssetHistoryLog[],
-  ) {
+  private mapLogs(nonce: string, res: any, index: number, historyLog: AssetHistoryLog[]) {
     const [eventCategory, eventType, mainEvent] = this.getEventType(res, index);
 
     if (!eventCategory) {
@@ -85,81 +63,39 @@ export class AssetsHistoryService {
 
     switch (eventCategory) {
       case NftEventTypeEnum.NftEventEnum: {
-        this.addHistoryLog(
-          historyLog,
-          this.assetsHistoryNftEventService.mapNftEventLog(
-            nonce,
-            eventType,
-            mainEvent,
-          ),
-        );
+        this.addHistoryLog(historyLog, this.assetsHistoryNftEventService.mapNftEventLog(nonce, eventType, mainEvent));
         break;
       }
       case NftEventTypeEnum.AuctionEventEnum: {
-        this.addHistoryLog(
-          historyLog,
-          this.assetsHistoryAuctionService.mapAuctionEventLog(
-            eventType,
-            mainEvent,
-          ),
-        );
+        this.addHistoryLog(historyLog, this.assetsHistoryAuctionService.mapAuctionEventLog(eventType, mainEvent));
         break;
       }
       case NftEventTypeEnum.ExternalAuctionEventEnum: {
-        this.addHistoryLog(
-          historyLog,
-          this.assetsHistoryExternalAuctionService.mapExternalAuctionEventLog(
-            nonce,
-            eventType,
-            mainEvent,
-          ),
-        );
+        this.addHistoryLog(historyLog, this.assetsHistoryExternalAuctionService.mapExternalAuctionEventLog(nonce, eventType, mainEvent));
         break;
       }
       case NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum: {
-        this.addHistoryLog(
-          historyLog,
-          this.assetsHistoryElrondNftsSwapEventsService.mapElrondNftsSwapEventLog(
-            eventType,
-            mainEvent,
-          ),
-        );
+        this.addHistoryLog(historyLog, this.assetsHistoryElrondNftsSwapEventsService.mapElrondNftsSwapEventLog(eventType, mainEvent));
         break;
       }
     }
   }
 
-  private addHistoryLog(
-    historyLog: AssetHistoryLog[],
-    input: AssetHistoryInput,
-  ): void {
+  private addHistoryLog(historyLog: AssetHistoryLog[], input: AssetHistoryInput): void {
     if (!input) {
       return;
     }
 
-    const minPrice = input.price
-      ? Buffer.from(input.price, 'base64')
-          .toString('hex')
-          .hexBigNumberToString()
-      : undefined;
-    const itemCountString = input.itemsCount
-      ? Buffer.from(input.itemsCount, 'base64')
-          .toString('hex')
-          .hexBigNumberToString()
-      : undefined;
-    const totalPrice =
-      minPrice && itemCountString
-        ? new BigNumber(minPrice).multipliedBy(itemCountString)
-        : undefined;
+    const minPrice = input.price ? Buffer.from(input.price, 'base64').toString('hex').hexBigNumberToString() : undefined;
+    const itemCountString = input.itemsCount ? Buffer.from(input.itemsCount, 'base64').toString('hex').hexBigNumberToString() : undefined;
+    const totalPrice = minPrice && itemCountString ? new BigNumber(minPrice).multipliedBy(itemCountString) : undefined;
 
     historyLog.push(
       new AssetHistoryLog({
         action: input.action,
         address: input.address,
         senderAddress: input.sender,
-        transactionHash: input.event.originalTxHash
-          ? input.event.originalTxHash
-          : input.event.identifier,
+        transactionHash: input.event.originalTxHash ? input.event.originalTxHash : input.event.identifier,
         actionDate: input.event.timestamp || '',
         itemCount: itemCountString ? itemCountString.toString() : undefined,
         price: totalPrice
@@ -181,11 +117,7 @@ export class AssetsHistoryService {
 
     const eventId = res[index].identifier;
 
-    const relatedEvents = res.filter(
-      (eventObject) =>
-        eventObject.identifier === eventId ||
-        eventObject.originalTxHash === eventId,
-    );
+    const relatedEvents = res.filter((eventObject) => eventObject.identifier === eventId || eventObject.originalTxHash === eventId);
 
     for (let i = 0; i < relatedEvents?.length; i++) {
       const events = relatedEvents[i].events;
@@ -197,42 +129,20 @@ export class AssetsHistoryService {
           eventIdentifier !== NftEventEnum.MultiESDTNFTTransfer &&
           Object.values(NftEventEnum).includes(eventIdentifier)
         ) {
-          return [
-            NftEventTypeEnum.NftEventEnum,
-            eventIdentifier,
-            relatedEvents[i],
-          ];
+          return [NftEventTypeEnum.NftEventEnum, eventIdentifier, relatedEvents[i]];
         }
         if (Object.values(AuctionEventEnum).includes(eventIdentifier)) {
-          return [
-            NftEventTypeEnum.AuctionEventEnum,
-            eventIdentifier,
-            relatedEvents[i],
-          ];
+          return [NftEventTypeEnum.AuctionEventEnum, eventIdentifier, relatedEvents[i]];
         }
         if (Object.values(ExternalAuctionEventEnum).includes(eventIdentifier)) {
-          return [
-            NftEventTypeEnum.ExternalAuctionEventEnum,
-            eventIdentifier,
-            relatedEvents[i],
-          ];
+          return [NftEventTypeEnum.ExternalAuctionEventEnum, eventIdentifier, relatedEvents[i]];
         }
-        if (
-          Object.values(KroganSwapAuctionEventEnum).includes(eventIdentifier)
-        ) {
-          return [
-            NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum,
-            eventIdentifier,
-            relatedEvents[i],
-          ];
+        if (Object.values(KroganSwapAuctionEventEnum).includes(eventIdentifier)) {
+          return [NftEventTypeEnum.ElrondNftsSwapAuctionEventEnum, eventIdentifier, relatedEvents[i]];
         }
       }
     }
 
-    return [
-      NftEventTypeEnum.NftEventEnum,
-      res[index].events[0].identifier,
-      res[index],
-    ];
+    return [NftEventTypeEnum.NftEventEnum, res[index].events[0].identifier, res[index]];
   }
 }

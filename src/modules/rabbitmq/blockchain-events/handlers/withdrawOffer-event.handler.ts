@@ -30,14 +30,9 @@ export class WithdrawOfferEventHandler {
     if (!marketplace) {
       return;
     }
-    this.logger.log(
-      `Withdraw Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
+    this.logger.log(`Withdraw Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
-    const withdrawOffer = await this.offersService.getOfferByIdAndMarketplace(
-      topics.offerId,
-      marketplace.key,
-    );
+    const withdrawOffer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
 
     if (!withdrawOffer) return;
     const offer = await this.offersService.saveOffer({
@@ -46,8 +41,6 @@ export class WithdrawOfferEventHandler {
       modifiedDate: new Date(new Date().toUTCString()),
     });
 
-    this.notificationsService.updateNotificationStatusForOffers([
-      offer.identifier,
-    ]);
+    this.notificationsService.updateNotificationStatusForOffers([offer.identifier]);
   }
 }

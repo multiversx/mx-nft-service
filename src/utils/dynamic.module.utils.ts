@@ -10,11 +10,7 @@ import {
   RedisCacheModuleOptions,
 } from '@multiversx/sdk-nestjs';
 import { DynamicModule, Provider } from '@nestjs/common';
-import {
-  ClientOptions,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
+import { ClientOptions, ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { ApiConfigModule } from 'src/modules/common/api-config/api.config.module';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 

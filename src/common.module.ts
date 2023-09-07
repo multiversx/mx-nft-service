@@ -6,13 +6,7 @@ import { CacheModule } from './common/services/caching/caching.module';
 import { ApiConfigModule } from './modules/common/api-config/api.config.module';
 
 @Module({
-  imports: [
-    forwardRef(() => CacheModule),
-    ScheduleModule.forRoot(),
-    ConfigModule,
-    ApiConfigModule,
-    MxCommunicationModule,
-  ],
+  imports: [forwardRef(() => CacheModule), ScheduleModule.forRoot(), ConfigModule, ApiConfigModule, MxCommunicationModule],
   exports: [MxCommunicationModule, CacheModule, Logger, ApiConfigModule],
   providers: [Logger],
 })

@@ -3,10 +3,7 @@ import { DocumentDbService } from 'src/document-db/document-db.service';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { NftScamElasticService } from './nft-scam.elastic.service';
 import { NftScamService } from './nft-scam.service';
 
@@ -21,20 +18,9 @@ export class CollectionScamService {
 
   async manuallySetCollectionScamInfo(collection: string): Promise<boolean> {
     await Promise.all([
-      this.documentDbService.saveOrUpdateCollectionScamInfo(
-        collection,
-        'manual',
-        ScamInfo.scam(),
-      ),
-      this.nftScamElasticService.setNftScamInfoManuallyInElastic(
-        collection,
-        ScamInfo.scam(),
-      ),
-      await this.nftScamService.markAllNftsForCollection(
-        collection,
-        'manual',
-        ScamInfo.scam(),
-      ),
+      this.documentDbService.saveOrUpdateCollectionScamInfo(collection, 'manual', ScamInfo.scam()),
+      this.nftScamElasticService.setNftScamInfoManuallyInElastic(collection, ScamInfo.scam()),
+      await this.nftScamService.markAllNftsForCollection(collection, 'manual', ScamInfo.scam()),
     ]);
 
     await this.triggerCacheInvalidation(collection);
@@ -43,20 +29,9 @@ export class CollectionScamService {
 
   async manuallyClearCollectionScamInfo(collection: string): Promise<boolean> {
     await Promise.all([
-      this.documentDbService.saveOrUpdateCollectionScamInfo(
-        collection,
-        'manual',
-        ScamInfo.none(),
-      ),
-      this.nftScamElasticService.setCollectionScamInfoManuallyInElastic(
-        collection,
-        ScamInfo.none(),
-      ),
-      await this.nftScamService.markAllNftsForCollection(
-        collection,
-        'manual',
-        ScamInfo.none(),
-      ),
+      this.documentDbService.saveOrUpdateCollectionScamInfo(collection, 'manual', ScamInfo.none()),
+      this.nftScamElasticService.setCollectionScamInfoManuallyInElastic(collection, ScamInfo.none()),
+      await this.nftScamService.markAllNftsForCollection(collection, 'manual', ScamInfo.none()),
     ]);
     await this.triggerCacheInvalidation(collection);
     return true;

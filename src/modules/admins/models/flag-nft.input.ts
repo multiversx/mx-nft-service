@@ -1,11 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { Matches, Max, Min } from 'class-validator';
-import {
-  COLLECTION_IDENTIFIER_ERROR,
-  COLLECTION_IDENTIFIER_RGX,
-  NFT_IDENTIFIER_ERROR,
-  NFT_IDENTIFIER_RGX,
-} from 'src/utils/constants';
+import { COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX, NFT_IDENTIFIER_ERROR, NFT_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
 export class FlagNftInput {

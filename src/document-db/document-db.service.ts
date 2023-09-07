@@ -29,28 +29,15 @@ export class DocumentDbService {
   }
 
   async getTraitSummary(collection: string): Promise<CollectionTraitSummary> {
-    return await this.execute(
-      this.getTraitSummary.name,
-      this.traitRepositoryService.getTraitSummary(collection),
-    );
+    return await this.execute(this.getTraitSummary.name, this.traitRepositoryService.getTraitSummary(collection));
   }
 
-  async deleteTraitSummary(
-    collection: string,
-  ): Promise<CollectionTraitSummary> {
-    return await this.execute(
-      this.getTraitSummary.name,
-      this.traitRepositoryService.findOneAndDelete({ identifier: collection }),
-    );
+  async deleteTraitSummary(collection: string): Promise<CollectionTraitSummary> {
+    return await this.execute(this.getTraitSummary.name, this.traitRepositoryService.findOneAndDelete({ identifier: collection }));
   }
 
-  async saveOrUpdateTraitSummary(
-    traitSummary: CollectionTraitSummary,
-  ): Promise<void> {
-    return await this.execute(
-      this.saveOrUpdateTraitSummary.name,
-      this.traitRepositoryService.saveOrUpdateTraitSummary(traitSummary),
-    );
+  async saveOrUpdateTraitSummary(traitSummary: CollectionTraitSummary): Promise<void> {
+    return await this.execute(this.saveOrUpdateTraitSummary.name, this.traitRepositoryService.saveOrUpdateTraitSummary(traitSummary));
   }
 
   async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
@@ -60,89 +47,47 @@ export class DocumentDbService {
     );
   }
 
-  async saveOrUpdateNftScamInfo(
-    identifier: string,
-    version: string,
-    scamInfo?: ScamInfo,
-  ): Promise<void> {
+  async saveOrUpdateNftScamInfo(identifier: string, version: string, scamInfo?: ScamInfo): Promise<void> {
     return await this.execute(
       this.saveOrUpdateBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.saveOrUpdateNftScamInfo(
-        identifier,
-        version,
-        scamInfo,
-      ),
+      this.nftScamInfoRepositoryService.saveOrUpdateNftScamInfo(identifier, version, scamInfo),
     );
   }
 
-  async saveOrUpdateBulkNftScamInfo(
-    nfts: Asset[],
-    version: string,
-  ): Promise<void> {
+  async saveOrUpdateBulkNftScamInfo(nfts: Asset[], version: string): Promise<void> {
     return await this.execute(
       this.saveOrUpdateBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.saveOrUpdateBulkNftScamInfo(
-        nfts,
-        version,
-      ),
+      this.nftScamInfoRepositoryService.saveOrUpdateBulkNftScamInfo(nfts, version),
     );
   }
 
   async deleteNftScamInfo(identifier: string): Promise<void> {
-    return await this.execute(
-      this.deleteNftScamInfo.name,
-      this.nftScamInfoRepositoryService.deleteNftScamInfo(identifier),
-    );
+    return await this.execute(this.deleteNftScamInfo.name, this.nftScamInfoRepositoryService.deleteNftScamInfo(identifier));
   }
 
   async getBulkNftScamInfo(identifiers: string[]): Promise<NftScamInfoModel[]> {
-    return await this.execute(
-      this.getBulkNftScamInfo.name,
-      this.nftScamInfoRepositoryService.getBulkNftScamInfo(identifiers),
-    );
+    return await this.execute(this.getBulkNftScamInfo.name, this.nftScamInfoRepositoryService.getBulkNftScamInfo(identifiers));
   }
 
-  async getNftScamInfo(
-    identifier: string,
-  ): Promise<NftScamInfoModel | undefined> {
-    return await this.execute(
-      this.getNftScamInfo.name,
-      this.nftScamInfoRepositoryService.getNftScamInfo(identifier),
-    );
+  async getNftScamInfo(identifier: string): Promise<NftScamInfoModel | undefined> {
+    return await this.execute(this.getNftScamInfo.name, this.nftScamInfoRepositoryService.getNftScamInfo(identifier));
   }
 
-  async saveOrUpdateCollectionScamInfo(
-    collection: string,
-    version: string,
-    scamInfo?: ScamInfo,
-  ): Promise<void> {
+  async saveOrUpdateCollectionScamInfo(collection: string, version: string, scamInfo?: ScamInfo): Promise<void> {
     return await this.execute(
       this.saveOrUpdateCollectionScamInfo.name,
-      this.collectionScamInfoRepositoryService.saveOrUpdateCollectionScamInfo(
-        collection,
-        version,
-        scamInfo,
-      ),
+      this.collectionScamInfoRepositoryService.saveOrUpdateCollectionScamInfo(collection, version, scamInfo),
     );
   }
 
   async deleteCollectionScamInfo(collection: string): Promise<void> {
     return await this.execute(
       this.deleteCollectionScamInfo.name,
-      this.collectionScamInfoRepositoryService.deleteCollectionScamInfo(
-        collection,
-      ),
+      this.collectionScamInfoRepositoryService.deleteCollectionScamInfo(collection),
     );
   }
 
-  async getCollectionScamInfo(
-    collection: string,
-  ): Promise<CollectionScamInfoModel | undefined> {
-    return await this.execute(
-      this.getCollectionScamInfo.name,
-      this.collectionScamInfoRepositoryService.getCollectionScamInfo(
-        collection,
-      ),
-    );
+  async getCollectionScamInfo(collection: string): Promise<CollectionScamInfoModel | undefined> {
+    return await this.execute(this.getCollectionScamInfo.name, this.collectionScamInfoRepositoryService.getCollectionScamInfo(collection));
   }
 }
