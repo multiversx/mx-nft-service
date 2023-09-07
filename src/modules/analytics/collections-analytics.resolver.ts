@@ -8,20 +8,13 @@ import PageResponse from '../common/PageResponse';
 import ConnectionArgs from '../common/filters/ConnectionArgs';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionsDetailsModel } from './models/collections-details.model';
-import {
-  AnalyticsArgs,
-  CollectionAnalyticsArgs,
-} from './models/analytics-args.model';
+import { AnalyticsArgs, CollectionAnalyticsArgs } from './models/analytics-args.model';
 import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
+import { HoldersCount } from './models/general-stats.model';
 
 @Resolver(() => CollectionsAnalyticsModel)
-export class CollectionsAnalyticsResolver extends BaseResolver(
-  CollectionsAnalyticsModel,
-) {
-  constructor(
-    private generalAnalyticsService: CollectionsAnalyticsService,
-    private collectionsLoader: CollectionDetailsProvider,
-  ) {
+export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyticsModel) {
+  constructor(private generalAnalyticsService: CollectionsAnalyticsService, private collectionsLoader: CollectionDetailsProvider) {
     super();
   }
 
@@ -33,40 +26,23 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
     input: CollectionAnalyticsArgs,
   ): Promise<CollectionsAnalyticsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] =
-      await this.generalAnalyticsService.getCollectionsOrderByVolum(
-        limit,
-        offset,
-        input.series,
-      );
-    return PageResponse.mapResponse<CollectionsAnalyticsModel>(
-      collections || [],
-      pagination,
-      count || 0,
-      0,
-      limit,
-    );
+    const [collections, count] = await this.generalAnalyticsService.getCollectionsOrderByVolum(limit, offset, input.series);
+    return PageResponse.mapResponse<CollectionsAnalyticsModel>(collections || [], pagination, count || 0, 0, limit);
   }
 
   @ResolveField('holders', () => Int)
   async holders(@Parent() collection: CollectionsAnalyticsModel) {
-    return await this.generalAnalyticsService.getHolders(
-      collection.collectionIdentifier,
-    );
+    return await this.generalAnalyticsService.getHolders(collection.collectionIdentifier);
   }
 
   @ResolveField('floorPrice', () => Int)
   async floorPrice(@Parent() collection: CollectionsAnalyticsModel) {
-    return this.generalAnalyticsService.getCollectionFloorPrice(
-      collection.collectionIdentifier,
-    );
+    return this.generalAnalyticsService.getCollectionFloorPrice(collection.collectionIdentifier);
   }
 
   @ResolveField('details', () => CollectionsDetailsModel)
   async details(@Parent() collection: CollectionsAnalyticsModel) {
-    const collectionDetails = await this.collectionsLoader.load(
-      collection.collectionIdentifier,
-    );
+    const collectionDetails = await this.collectionsLoader.load(collection.collectionIdentifier);
     return collectionDetails?.value ?? null;
   }
 
@@ -76,11 +52,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
-    return await this.generalAnalyticsService.getVolumeForTimePeriod(
-      input.time,
-      collection.collectionIdentifier,
-      input.metric,
-    );
+    return await this.generalAnalyticsService.getVolumeForTimePeriod(input.time, collection.collectionIdentifier, input.metric);
   }
 
   @ResolveField('floorPriceData', () => [AnalyticsAggregateValue])
@@ -89,10 +61,11 @@ export class CollectionsAnalyticsResolver extends BaseResolver(
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
-    return await this.generalAnalyticsService.getFloorPriceVolumeForTimePeriod(
-      input.time,
-      collection.collectionIdentifier,
-      input.metric,
-    );
+    return await this.generalAnalyticsService.getFloorPriceVolumeForTimePeriod(input.time, collection.collectionIdentifier, input.metric);
+  }
+
+  @ResolveField('topHolders', () => [HoldersCount])
+  async topHolders(@Parent() collection: CollectionsAnalyticsModel) {
+    return await this.generalAnalyticsService.getTopHolders(collection.collectionIdentifier);
   }
 }

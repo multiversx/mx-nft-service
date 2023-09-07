@@ -577,6 +577,7 @@ type CollectionsAnalyticsModel {
   floorPrice: Float!
   floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
   holders: Int!
+  topHolders: [HoldersCount!]!
   volume24h: Float
   volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
 }
@@ -784,6 +785,11 @@ input HistoryPagination {
 
   """Timestamp from where to start"""
   timestamp: Int
+}
+
+type HoldersCount {
+  address: String!
+  count: Int!
 }
 
 input IssueCampaignArgs {

@@ -9,6 +9,7 @@ import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 import { CollectionsAnalyticsModel } from './models/collections-stats.model';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { AnalyticsGetterService } from './analytics.getter.service';
+import { HoldersCount } from './models/general-stats.model';
 
 @Injectable()
 export class CollectionsAnalyticsService {
@@ -20,9 +21,7 @@ export class CollectionsAnalyticsService {
     private readonly analyticsGetter: AnalyticsGetterService,
   ) {}
 
-  public async getNftsCount(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getNftsCount(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalyticsCount.key}_${hash(input)}`,
       () => this.toolsService.getNftsCount(input),
@@ -31,9 +30,7 @@ export class CollectionsAnalyticsService {
     );
   }
 
-  public async getLast24HActive(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getLast24HActive(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hCount.key}_${hash(input)}`,
       () => this.toolsService.getLast24HActive(input),
@@ -41,9 +38,7 @@ export class CollectionsAnalyticsService {
       CacheInfo.NftAnalytic24hCount.ttl / 2,
     );
   }
-  public async getActiveNftsStats(
-    input: AnalyticsInput,
-  ): Promise<AnalyticsAggregateValue[]> {
+  public async getActiveNftsStats(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
       () => this.toolsService.getActiveNftsStats(input),
@@ -55,8 +50,7 @@ export class CollectionsAnalyticsService {
   public async getHolders(collectionIdentifier: string): Promise<number> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.NftsHolders.key}_${collectionIdentifier}`,
-      () =>
-        this.elasticService.getHoldersCountForCollection(collectionIdentifier),
+      () => this.elasticService.getHoldersCountForCollection(collectionIdentifier),
       CacheInfo.NftsHolders.ttl,
       CacheInfo.NftsHolders.ttl / 2,
     );
@@ -67,52 +61,34 @@ export class CollectionsAnalyticsService {
     offset: number = 0,
     series: string = null,
   ): Promise<[CollectionsAnalyticsModel[], number]> {
-    const [collections, count] =
-      await this.analyticsGetter.getTopCollectionsDaily(
-        { metric: 'volumeUSD', series },
-        limit,
-        offset,
-      );
+    const [collections, count] = await this.analyticsGetter.getTopCollectionsDaily({ metric: 'volumeUSD', series }, limit, offset);
 
-    return [
-      collections.map((c) => CollectionsAnalyticsModel.fromTimescaleModel(c)),
-      count,
-    ];
+    return [collections.map((c) => CollectionsAnalyticsModel.fromTimescaleModel(c)), count];
   }
 
-  public async getVolumeForTimePeriod(
-    time: string,
-    series: string,
-    metric: string,
-  ): Promise<AnalyticsAggregateValue[]> {
-    return await this.analyticsGetter.getVolumeDataForTimePeriod(
-      time,
-      series,
-      metric,
-    );
+  public async getVolumeForTimePeriod(time: string, series: string, metric: string): Promise<AnalyticsAggregateValue[]> {
+    return await this.analyticsGetter.getVolumeDataForTimePeriod(time, series, metric);
   }
 
-  public async getFloorPriceVolumeForTimePeriod(
-    time: string,
-    series: string,
-    metric: string,
-  ): Promise<AnalyticsAggregateValue[]> {
-    return await this.analyticsGetter.getFloorPriceForTimePeriod(
-      time,
-      series,
-      metric,
-    );
+  public async getFloorPriceVolumeForTimePeriod(time: string, series: string, metric: string): Promise<AnalyticsAggregateValue[]> {
+    return await this.analyticsGetter.getFloorPriceForTimePeriod(time, series, metric);
   }
 
-  public async getCollectionFloorPrice(
-    collectionIdentifier: string,
-  ): Promise<number> {
+  public async getCollectionFloorPrice(collectionIdentifier: string): Promise<number> {
     return this.cacheService.getOrSetCache(
       `${CacheInfo.CollectionFloorPrice.key}_${collectionIdentifier}`,
-      () =>
-        this.persistenceService.getCollectionFloorPrice(collectionIdentifier),
+      () => this.persistenceService.getCollectionFloorPrice(collectionIdentifier),
       CacheInfo.CollectionFloorPrice.ttl,
       CacheInfo.CollectionFloorPrice.ttl / 2,
+    );
+  }
+
+  public async getTopHolders(collectionIdentifier: string): Promise<HoldersCount[]> {
+    return this.cacheService.getOrSetCache(
+      `${CacheInfo.CollectionTopHolders.key}_${collectionIdentifier}`,
+      () => this.elasticService.getTopHoldersCountForCollection(collectionIdentifier),
+      CacheInfo.CollectionTopHolders.ttl,
+      CacheInfo.CollectionTopHolders.ttl / 2,
     );
   }
 }
