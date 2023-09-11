@@ -12,7 +12,6 @@ import BigNumber from 'bignumber.js';
 import { TransactionNode } from '../common/transaction';
 import { UpdateQuantityRequest, CreateNftRequest, TransferNftRequest, CreateNftWithMultipleFilesRequest } from './models/requests';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { FileUpload } from 'graphql-upload';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Constants } from '@multiversx/sdk-nestjs-common';
@@ -143,7 +142,7 @@ export class AssetsTransactionService {
     return assetMetadata;
   }
 
-  private async uploadFileToPinata(fileUpload: FileUpload) {
+  private async uploadFileToPinata(fileUpload: any) {
     const file = await fileUpload;
     const fileData = await this.pinataService.uploadFile(file);
     await this.s3Service.upload(file, fileData.hash);

@@ -2,7 +2,6 @@ import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsTransactionService } from '.';
 import { Asset, CreateNftArgs, TransferNftArgs, HandleQuantityArgs, AddLikeArgs, RemoveLikeArgs } from './models';
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
 import { ContentValidation } from './content.validation.service';
