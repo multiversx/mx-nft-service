@@ -16,6 +16,7 @@ import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex
 import { ReportsService } from '../reports/reports.service';
 import { ClearReportCollectionInput, ClearReportInput } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -69,7 +70,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.updateCollectionRarities(collectionTicker);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
@@ -82,7 +83,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
@@ -95,7 +96,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateCollectionTraits(collectionTicker);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
@@ -114,7 +115,7 @@ export class AdminOperationsResolver {
       );
       return true;
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
@@ -127,7 +128,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 

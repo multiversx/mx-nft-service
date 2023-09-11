@@ -4,6 +4,7 @@ import { NftScamService } from './nft-scam.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => Boolean)
 export class NftScamResolver {
@@ -15,7 +16,7 @@ export class NftScamResolver {
     try {
       return await this.nftScamService.validateNftScamInfoForIdentifier(identifier);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
@@ -30,7 +31,7 @@ export class NftScamResolver {
     try {
       return await this.nftScamService.manuallySetNftScamInfo(identifier, type, info);
     } catch (error) {
-      throw error;
+      throw new GraphQLError(error);
     }
   }
 
