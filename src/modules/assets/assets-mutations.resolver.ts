@@ -30,7 +30,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    const request = CreateNftRequest.fromArgs(input, 'file');
+    const request = CreateNftRequest.fromArgs(input, file);
     return await this.assetsTransactionService.createNft(user.address, request);
   }
 
