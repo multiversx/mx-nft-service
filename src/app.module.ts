@@ -52,6 +52,7 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       driver: ApolloDriver,
       imports: [CommonModule],
       useFactory: async () => ({
+        csrfPrevention: false,
         autoSchemaFile: 'schema.gql',
         introspection: process.env.NODE_ENV !== 'production',
         playground: false,
