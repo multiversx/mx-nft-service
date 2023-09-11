@@ -15,6 +15,7 @@ import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-trai
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
 import { ports } from './config';
 import { LoggerService } from './utils/LoggerService';
+import { graphqlUploadExpress } from 'graphql-upload';
 import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
 import { ApiConfigModule } from './modules/common/api-config/api.config.module';
 import { ApiConfigService } from './modules/common/api-config/api.config.service';
@@ -116,7 +117,8 @@ async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
   });
-  // app.use(graphqlUploadExpress({ headers: { 'Apollo-Require-Preflight': 'true' } }));
+  app.enableCors();
+  app.use(graphqlUploadExpress());
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
 

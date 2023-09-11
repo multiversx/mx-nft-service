@@ -966,8 +966,8 @@ type Mutation {
   clearReportCollection(input: ClearReportCollectionInput!): Boolean!
   clearReportNft(input: ClearReportInput!): Boolean!
   createAuction(input: CreateAuctionArgs!): TransactionNode!
-  createNft(input: CreateNftArgs!): TransactionNode!
-  createNftWithMultipleFiles(input: CreateNftArgs!): TransactionNode!
+  createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
+  createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
   deployMinter(input: DeployMinterArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
@@ -1001,6 +1001,7 @@ type Mutation {
   upgradeNftRoyalties(input: UpgradeNftArgs!): TransactionNode!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
+  verifyContent(file: Upload!): Boolean!
   whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
   whitelistMinter(input: WhitelistMinterArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
@@ -1531,6 +1532,9 @@ input UpgradeNftArgs {
   """The smart contract address of the campaign"""
   minterAddress: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 input WhitelistCollectionArgs {
   collection: String!

@@ -2,6 +2,7 @@ import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { AssetsTransactionService } from '.';
 import { Asset, CreateNftArgs, TransferNftArgs, HandleQuantityArgs, AddLikeArgs, RemoveLikeArgs } from './models';
+import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
 import { ContentValidation } from './content.validation.service';
@@ -26,7 +27,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @UseGuards(JwtOrNativeAuthGuard)
   async createNft(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
-    // @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateNftRequest.fromArgs(input, 'file');
@@ -37,24 +38,24 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @UseGuards(JwtOrNativeAuthGuard)
   async createNftWithMultipleFiles(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
-    // @Args({ name: 'files', type: () => [GraphQLUpload] }) files: [FileUpload],
+    @Args({ name: 'files', type: () => [GraphQLUpload] }) files: [FileUpload],
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    const request = CreateNftWithMultipleFilesRequest.fromArgs(input, ['files']);
+    const request = CreateNftWithMultipleFilesRequest.fromArgs(input, files);
     return await this.assetsTransactionService.createNftWithMultipleFiles(user.address, request);
   }
 
-  // @Mutation(() => Boolean)
-  // @UseGuards(JwtOrNativeAuthGuard)
-  // async verifyContent(@Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload): Promise<Boolean> {
-  //   const fileData = await file;
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard)
+  async verifyContent(@Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload): Promise<Boolean> {
+    const fileData = await file;
 
-  //   const contentStatus = (await this.contentValidation.checkContentType(fileData).checkContentSensitivity(fileData)).getStatus();
-  //   if (contentStatus) {
-  //     return true;
-  //   }
-  //   throw Error('Invalid content');
-  // }
+    const contentStatus = (await this.contentValidation.checkContentType(fileData).checkContentSensitivity(fileData)).getStatus();
+    if (contentStatus) {
+      return true;
+    }
+    throw Error('Invalid content');
+  }
 
   @Mutation(() => TransactionNode)
   @UseGuards(JwtOrNativeAuthGuard)
