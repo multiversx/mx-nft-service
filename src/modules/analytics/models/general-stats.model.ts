@@ -1,5 +1,6 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { AnalyticsAggregateValue } from './analytics-aggregate-value';
+import { Account } from 'src/modules/account-stats/models';
 
 @ObjectType()
 export class GeneralAnalyticsModel {
@@ -27,6 +28,9 @@ export class HoldersCount {
   address: string;
   @Field(() => Int)
   count: number;
+
+  @Field(() => Account)
+  accountDetails: Account;
 
   constructor(init?: Partial<HoldersCount>) {
     Object.assign(this, init);
