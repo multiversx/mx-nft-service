@@ -788,6 +788,7 @@ input HistoryPagination {
 }
 
 type HoldersCount {
+  accountDetails: Account!
   address: String!
   count: Int!
 }
