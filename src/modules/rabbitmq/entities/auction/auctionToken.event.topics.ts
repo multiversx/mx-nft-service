@@ -1,5 +1,5 @@
 import { Address } from '@multiversx/sdk-core/out';
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 
 export class AuctionTokenEventsTopics {
   private collection: string;

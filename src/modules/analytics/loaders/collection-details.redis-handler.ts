@@ -1,4 +1,4 @@
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable } from '@nestjs/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';

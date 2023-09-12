@@ -3,7 +3,7 @@ import { MxApiService, MxIdentityService } from 'src/common';
 import { SearchService } from '../search.service';
 import { SearchItemResponse, SearchNftCollectionResponse } from '../models/SearchItemResponse';
 import { Logger } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CollectionsGetterService } from 'src/modules/nftCollections/collections-getter.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 

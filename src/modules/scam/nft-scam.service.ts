@@ -11,7 +11,7 @@ import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cach
 import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { getCollectionNftsQuery } from './nft-scam.queries';
 import { AssetByIdentifierService } from '../assets';
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { PluginService } from 'src/common/pluggins/plugin.service';
 
 @Injectable()

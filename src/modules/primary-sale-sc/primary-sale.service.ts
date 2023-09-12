@@ -22,7 +22,8 @@ import { PrimarySale, PrimarySaleStatusEnum } from './models/PrimarySale.dto';
 import { PrimarySaleTime } from './models/PrimarySaleTime';
 import { TicketInfo } from './models/TicketInfo';
 import { DateUtils } from 'src/utils/date-utils';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()

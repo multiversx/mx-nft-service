@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MxApiService } from 'src/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { Attribute, CreateNftRequest, TransferNftRequest, UpdateQuantityRequest } from '../models/requests';
 import { AssetsTransactionService } from '../assets-transaction.service';

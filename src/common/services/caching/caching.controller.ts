@@ -7,11 +7,11 @@ import { JwtOrNativeAuthGuard } from 'src/modules/auth/jwt.or.native.auth-guard'
 import { GqlAdminAuthGuard } from 'src/modules/auth/gql-admin.auth-guard';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { CacheEventTypeEnum, ChangedEvent } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Controller()
 export class CachingController {
-  constructor(private readonly cachingService: CachingService, private readonly cacheEventsPublisherService: CacheEventsPublisherService) {}
+  constructor(private readonly cacheService: CacheService, private readonly cacheEventsPublisherService: CacheEventsPublisherService) {}
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   @Get('/caching')
@@ -20,7 +20,7 @@ export class CachingController {
       let values: any[] = [];
 
       for (let i = 0; i < input.keys.length; i++) {
-        values.push(await this.cachingService.getCache<any>(input.keys[i]));
+        values.push(await this.cacheService.get<any>(input.keys[i]));
       }
       return res.status(200).send(values);
     } catch (error) {

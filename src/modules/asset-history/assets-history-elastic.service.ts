@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { ElasticQuery, ElasticSortOrder, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 
 @Injectable()

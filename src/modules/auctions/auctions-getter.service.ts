@@ -5,10 +5,10 @@ import { AuctionEntity } from 'src/db/auctions';
 import { QueryRequest } from '../common/filters/QueryRequest';
 import { GroupBy, Operation, Sort } from '../common/filters/filtersTypes';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { PriceRange } from 'src/db/auctions/price-range';
 import { AuctionsCachingService } from './caching/auctions-caching.service';
-import { Constants } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { mxConfig } from 'src/config';
 import { AuctionCustomEnum } from '../common/filters/AuctionCustomFilters';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
@@ -30,7 +30,7 @@ export class AuctionsGetterService {
   constructor(
     private persistenceService: PersistenceService,
     private auctionCachingService: AuctionsCachingService,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
     private readonly usdPriceService: UsdPriceService,
     private readonly logger: Logger,
   ) {}
@@ -54,7 +54,7 @@ export class AuctionsGetterService {
         return this.getMappedAuctionsOrderBids(queryRequest);
       }
 
-      const [allAuctions, count, priceRange] = await this.cacheService.getOrSetCache(
+      const [allAuctions, count, priceRange] = await this.cacheService.getOrSet(
         CacheInfo.TopAuctionsOrderByNoBids.key,
         async () => this.getTopAuctionsOrderByNoBids(),
         CacheInfo.TopAuctionsOrderByNoBids.ttl,
@@ -194,7 +194,7 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
     sort: { field: string; direction: Sort },
   ): Promise<[Auction[], number, PriceRange]> {
-    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSet(
       `collectionAuctions:${collectionFilter}`,
       async () => await this.getAuctionsByCollection(collectionFilter),
       Constants.oneMinute() * 10,
@@ -244,7 +244,7 @@ export class AuctionsGetterService {
     queryRequest: QueryRequest,
     sort: { field: string; direction: Sort },
   ): Promise<[Auction[], number, PriceRange]> {
-    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSet(
       `paymentTokenAuctions:${paymentTokenFilter}`,
       async () => await this.getAuctionsByPaymentToken(paymentTokenFilter),
       Constants.oneMinute() * 10,
@@ -322,7 +322,7 @@ export class AuctionsGetterService {
     sort: { field: string; direction: Sort },
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
-    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSet(
       CacheInfo.ActiveAuctions.key,
       async () => await this.getActiveAuctions(),
       CacheInfo.ActiveAuctions.ttl,
@@ -351,7 +351,7 @@ export class AuctionsGetterService {
     sort: { field: string; direction: Sort },
     queryRequest: QueryRequest,
   ): Promise<[Auction[], number, PriceRange]> {
-    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSetCache(
+    let [allAuctions, _totalCount, priceRange] = await this.cacheService.getOrSet(
       CacheInfo.BuyNowAuctions.key,
       async () => await this.getBuyNowAuctions(),
       CacheInfo.BuyNowAuctions.ttl,

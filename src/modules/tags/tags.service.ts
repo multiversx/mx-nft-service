@@ -5,11 +5,12 @@ import { TagTypeEnum } from './models/Tag-type.enum';
 import { TagsFilter } from './models/Tags.Filter';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { CachingService, Constants } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class TagsService {
-  constructor(private apiService: MxApiService, private persistenceService: PersistenceService, private cacheService: CachingService) {}
+  constructor(private apiService: MxApiService, private persistenceService: PersistenceService, private cacheService: CacheService) {}
 
   async getTags(offset: number = 0, limit: number = 10, filters: TagsFilter): Promise<[Tag[], number]> {
     if (filters.tagType === TagTypeEnum.Nft) {
@@ -37,7 +38,7 @@ export class TagsService {
   }
 
   private async getCachedNftTags(offset: number, limit: number, filters: TagsFilter): Promise<[NftTag[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `${CacheInfo.NftTags.key}_${limit}_${offset}`,
       async () =>
         Promise.all([this.apiService.getTags(offset, limit, filters.searchTerm), this.apiService.getTagsCount(filters.searchTerm)]),
@@ -49,7 +50,7 @@ export class TagsService {
     if (filters?.searchTerm) {
       return await this.getAuctionTagsWithSearch(filters, offset, limit);
     } else {
-      return await this.cacheService.getOrSetCache(
+      return await this.cacheService.getOrSet(
         CacheInfo.AuctionTags.key,
         async () => await this.getAuctionTagsFromDb(),
         CacheInfo.AuctionTags.ttl,

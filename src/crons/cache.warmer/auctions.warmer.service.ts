@@ -2,7 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
-import { CachingService, Constants, Locker } from '@multiversx/sdk-nestjs';
+import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 import { AuctionsGetterService } from 'src/modules/auctions';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
@@ -12,7 +13,7 @@ export class AuctionsWarmerService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private auctionsGetterService: AuctionsGetterService,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
     private marketplacesService: MarketplacesService,
   ) {}
 
@@ -90,7 +91,7 @@ export class AuctionsWarmerService {
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(key, data, ttl);
+    await this.cacheService.set(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 

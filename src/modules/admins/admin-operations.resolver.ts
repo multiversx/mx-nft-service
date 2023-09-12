@@ -3,7 +3,6 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
-import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { UpdateNftTraitsResponse } from '../nft-traits/models/update-nft-traits-response';
@@ -17,6 +16,7 @@ import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex
 import { ReportsService } from '../reports/reports.service';
 import { ClearReportCollectionInput, ClearReportInput } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -70,7 +70,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.updateCollectionRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -83,7 +83,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -96,7 +96,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateCollectionTraits(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -115,7 +115,7 @@ export class AdminOperationsResolver {
       );
       return true;
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -128,7 +128,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 

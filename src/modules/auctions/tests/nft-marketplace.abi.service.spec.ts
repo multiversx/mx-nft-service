@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NftMarketplaceAbiService } from '../nft-marketplace.abi.service';
 import { MxApiService, MxProxyService } from 'src/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Logger } from '@nestjs/common';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { AuctionsGetterService } from '../auctions-getter.service';

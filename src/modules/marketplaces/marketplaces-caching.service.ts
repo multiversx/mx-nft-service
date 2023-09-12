@@ -1,20 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
-import { CachingService, Constants } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Marketplace } from './models';
 
 @Injectable()
 export class MarketplacesCachingService {
-  constructor(private cacheService: CachingService) {}
+  constructor(private cacheService: CacheService) {}
 
   public async getAllMarketplaces(getMarketplaces: () => any): Promise<CollectionType<Marketplace>> {
-    return await this.cacheService.getOrSetCache(CacheInfo.AllMarketplaces.key, () => getMarketplaces(), Constants.oneHour());
+    return await this.cacheService.getOrSet(CacheInfo.AllMarketplaces.key, () => getMarketplaces(), Constants.oneHour());
   }
 
   public async getMarketplaceByAddressAndCollection(getMarketplaceByAddress: () => any, key: string): Promise<Marketplace> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `${CacheInfo.MarketplaceAddressCollection.key}_${key}`,
       () => getMarketplaceByAddress(),
       CacheInfo.MarketplaceAddressCollection.ttl,
@@ -22,7 +23,7 @@ export class MarketplacesCachingService {
   }
 
   public async getMarketplaceByCollection(getMarketplaceByCollection: () => any, key: string): Promise<Marketplace> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `${CacheInfo.MarketplaceCollection.key}_${key}`,
       () => getMarketplaceByCollection(),
       CacheInfo.MarketplaceCollection.ttl,
@@ -30,7 +31,7 @@ export class MarketplacesCachingService {
   }
 
   public async getCollectionsByMarketplace(getCollectionsByMarketplace: () => any, key: string): Promise<string[]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       `${CacheInfo.CollectionsByMarketplace.key}_${key}`,
       () => getCollectionsByMarketplace(),
       CacheInfo.CollectionsByMarketplace.ttl,

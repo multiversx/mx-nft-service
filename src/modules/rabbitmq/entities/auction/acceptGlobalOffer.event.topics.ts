@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 
 export class AcceptGlobalOfferEventsTopics {
   private auctionId: number;

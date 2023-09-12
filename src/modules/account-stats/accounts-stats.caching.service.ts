@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';

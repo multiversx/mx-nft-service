@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Field, InputType } from '@nestjs/graphql';
 import { Nft } from 'src/common';
 

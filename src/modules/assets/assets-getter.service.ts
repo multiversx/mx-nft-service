@@ -15,15 +15,9 @@ import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
-import {
-  Constants,
-  ElasticQuery,
-  ElasticSortOrder,
-  QueryConditionOptions,
-  QueryOperator,
-  QueryType,
-  RedisCacheService,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryConditionOptions, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 import { FeaturedService } from '../featured/featured.service';
 import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';

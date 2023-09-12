@@ -3,10 +3,10 @@ import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery } from '@multiversx/sdk-nestjs';
+import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticMetricType } from '@multiversx/sdk-nestjs-monitoring';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
-import { ElasticMetricType } from '@multiversx/sdk-nestjs/lib/src/common/metrics/entities/elastic.metric.type';
 import { HoldersCount } from 'src/modules/analytics/models/general-stats.model';
 export interface AddressTransactionCount {
   contractAddress: string;

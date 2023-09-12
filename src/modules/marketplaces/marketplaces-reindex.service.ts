@@ -25,7 +25,7 @@ import { MxApiService } from 'src/common';
 import { MarketplaceReindexDataArgs } from './models/MarketplaceReindexDataArgs';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { Token } from '../usdPrice/Token.model';

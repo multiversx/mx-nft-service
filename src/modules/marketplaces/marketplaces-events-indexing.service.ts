@@ -6,7 +6,9 @@ import { MxElasticService } from 'src/common';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
-import { BinaryUtils, ElasticQuery, Locker } from '@multiversx/sdk-nestjs';
+import { BinaryUtils, Locker } from '@multiversx/sdk-nestjs-common';
+import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
+
 import { getMarketplaceEventsElasticQuery, getMarketplaceTransactionsElasticQuery } from './marketplaces.elastic.queries';
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from '../assets/models';
 

@@ -6,13 +6,13 @@ import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AuctionsGetterService } from '../auctions';
 import { buyNowAuctionRequest, runningAuctionRequest } from '../auctions/auctionsRequest';
 import { OffersService } from '../offers/offers.service';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class ExploreStatsService {
   constructor(
-    private cachingService: CachingService,
+    private cacheService: CacheService,
     private collectionsService: CollectionsGetterService,
     private auctionsService: AuctionsGetterService,
     private apiService: MxApiService,
@@ -58,7 +58,7 @@ export class ExploreStatsService {
   }
 
   async getOrSetTotalNftsCount(): Promise<number> {
-    return await this.cachingService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.NftsCount.key,
       async () => await this.apiService.getNftsCount(),
       CacheInfo.NftsCount.ttl,

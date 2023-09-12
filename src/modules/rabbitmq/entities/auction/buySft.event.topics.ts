@@ -1,6 +1,6 @@
 import { Address } from '@multiversx/sdk-core';
 import '../../../../utils/extensions';
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 
 export class BuySftEventsTopics {
   private collection: string;

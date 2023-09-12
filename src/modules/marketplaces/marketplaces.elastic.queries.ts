@@ -1,4 +1,11 @@
-import { ElasticQuery, QueryType, RangeLowerThan, RangeGreaterThan, ElasticSortOrder, QueryConditionOptions } from '@multiversx/sdk-nestjs';
+import {
+  ElasticQuery,
+  QueryType,
+  RangeLowerThan,
+  RangeGreaterThan,
+  ElasticSortOrder,
+  QueryConditionOptions,
+} from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 

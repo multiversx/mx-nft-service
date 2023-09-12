@@ -1,5 +1,5 @@
 import { NativeAuthServer } from '@multiversx/sdk-native-auth-server';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable, CanActivate, ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ApiConfigService } from '../common/api-config/api.config.service';
@@ -10,7 +10,7 @@ export class NativeAuthGuard implements CanActivate {
   private readonly logger: Logger;
   private readonly authServer: NativeAuthServer;
 
-  constructor(apiConfigService: ApiConfigService, private readonly cachingService: CachingService) {
+  constructor(apiConfigService: ApiConfigService, private readonly cacheService: CacheService) {
     this.logger = new Logger(NativeAuthGuard.name);
     this.authServer = new NativeAuthServer({
       apiUrl: apiConfigService.getApiUrl(),
@@ -23,10 +23,10 @@ export class NativeAuthGuard implements CanActivate {
             // @ts-ignore
             return new Date().getTime() / 1000;
           }
-          return await this.cachingService.getCache<T>(key);
+          return await this.cacheService.get<T>(key);
         },
         setValue: async <T>(key: string, value: T, ttl: number): Promise<void> => {
-          await this.cachingService.setCache(key, value, ttl);
+          await this.cacheService.set(key, value, ttl);
         },
       },
       extraRequestHeaders: { origin: 'NftService' },

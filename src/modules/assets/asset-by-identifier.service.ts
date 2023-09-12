@@ -4,7 +4,7 @@ import '../../utils/extensions';
 import { Asset, NftTypeEnum } from './models';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
-import { Constants } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { LocalRedisCacheService } from 'src/common/services/caching/local-redis-cache.service';
 
 @Injectable()

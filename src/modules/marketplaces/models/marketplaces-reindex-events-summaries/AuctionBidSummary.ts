@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetActionEnum } from 'src/modules/assets/models';

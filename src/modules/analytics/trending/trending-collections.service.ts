@@ -11,7 +11,7 @@ import { computeUsd } from 'src/utils/helpers';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { AcceptOfferEventParser } from './acceptOffer-event.parser';
 import { CollectionVolumeLast24 } from '../models/collection-volume';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class TrendingCollectionsService {
@@ -22,14 +22,14 @@ export class TrendingCollectionsService {
     private readonly indexerService: ElasticAnalyticsService,
     private readonly marketplacesService: MarketplacesService,
     private readonly usdPriceService: UsdPriceService,
-    private readonly cacheService: CachingService,
+    private readonly cacheService: CacheService,
     private readonly logger: Logger,
     private readonly buyEventHandler: BuyEventParser,
     private readonly acceptEventParser: AcceptOfferEventParser,
   ) {}
 
   public async getTrendingByVolume(): Promise<CollectionVolumeLast24[]> {
-    return await this.cacheService.getCache(CacheInfo.TrendingByVolume.key);
+    return await this.cacheService.get(CacheInfo.TrendingByVolume.key);
   }
 
   public async reindexTrendingCollections(forTheLastHours: number = 24): Promise<CollectionVolumeLast24[]> {

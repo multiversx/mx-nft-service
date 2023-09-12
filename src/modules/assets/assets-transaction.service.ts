@@ -1,4 +1,4 @@
-import { Address, AddressValue, BytesValue, ContractFunction, TokenTransfer, U64Value } from '@multiversx/sdk-core';
+import { Address, AddressValue, BytesValue, ContractFunction, U64Value } from '@multiversx/sdk-core';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MxApiService, getSmartContract } from 'src/common';
 import { mxConfig, gas } from 'src/config';
@@ -14,7 +14,8 @@ import { UpdateQuantityRequest, CreateNftRequest, TransferNftRequest, CreateNftW
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { FileUpload } from 'graphql-upload';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { UploadToIpfsResult } from '../ipfs/ipfs.model';
 
 @Injectable()

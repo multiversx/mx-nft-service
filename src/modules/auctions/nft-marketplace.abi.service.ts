@@ -34,7 +34,8 @@ import { CreateOfferRequest } from '../offers/models';
 import { OffersService } from '../offers/offers.service';
 import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
 import { NftTypeEnum } from '../assets/models';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { ContractLoader } from './contractLoader';
 
 @Injectable()

@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { ElasticAnalyticsService } from './elastic.indexer.service';
 import { BuyEventAnalyticsParser } from './events-parsers/buy-event-analytics.parser';
 import { AcceptOfferEventAnalyticsParser } from './events-parsers/acceptOffer-event-analytics.parser';
-import { PerformanceProfiler } from '@multiversx/sdk-nestjs';
+import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { AnalyticsDataSetterService } from 'src/common/persistence/timescaledb/analytics-data.setter.service';
