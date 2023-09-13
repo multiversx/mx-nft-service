@@ -3,11 +3,12 @@ import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { ElasticMetricType } from '@multiversx/sdk-nestjs-monitoring';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
 import { HoldersCount } from 'src/modules/analytics/models/general-stats.model';
+import { NftTypeEnum } from 'src/modules/assets/models';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -276,32 +277,19 @@ export class MxElasticService {
   }
 
   async getHoldersCount(): Promise<number> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                type: 'NonFungibleESDT',
-              },
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withExtra({
+        aggs: {
+          unique_addresses: {
+            cardinality: {
+              field: 'address',
             },
-            {
-              match: {
-                type: 'SemiFungibleESDT',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        unique_addresses: {
-          cardinality: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
     const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
       timeout: 120000,
@@ -311,27 +299,20 @@ export class MxElasticService {
   }
 
   async getHoldersCountForCollection(collectionIdentifier: string): Promise<number> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                token: `${collectionIdentifier}`,
-              },
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withExtra({
+        aggs: {
+          unique_addresses: {
+            cardinality: {
+              field: 'address',
             },
-          ],
-        },
-      },
-      aggs: {
-        unique_addresses: {
-          cardinality: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
     const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
       timeout: 120000,
@@ -341,32 +322,19 @@ export class MxElasticService {
   }
 
   async getTopHoldersCountForCollections(): Promise<HoldersCount[]> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                type: 'NonFungibleESDT',
-              },
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withExtra({
+        aggs: {
+          first_by_address: {
+            terms: {
+              field: 'address',
             },
-            {
-              match: {
-                type: 'SemiFungibleESDT',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        first_by_address: {
-          terms: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
     const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
       timeout: 120000,
@@ -382,27 +350,20 @@ export class MxElasticService {
   }
 
   async getTopHoldersCountForCollection(collectionIdentifier: string): Promise<HoldersCount[]> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                token: `${collectionIdentifier}`,
-              },
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withExtra({
+        aggs: {
+          first_by_address: {
+            terms: {
+              field: 'address',
             },
-          ],
-        },
-      },
-      aggs: {
-        first_by_address: {
-          terms: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
     const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
       timeout: 120000,
