@@ -42,7 +42,7 @@ export class AssetsGetterService {
   ) {}
 
   async getAssetsForUser(address: string, query: string = '', countQuery: string = ''): Promise<CollectionType<Asset>> {
-    query = new AssetsQuery(query).addQuery('includeFlagged=true&source=elastic').build();
+    query = new AssetsQuery(query).addQuery('includeFlagged=true').build();
     countQuery = new AssetsQuery(countQuery).addQuery('includeFlagged=true').build();
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
@@ -273,6 +273,7 @@ export class AssetsGetterService {
       .addCollection(filters?.collection)
       .addCollections(filters?.collections)
       .addType(filters?.type)
+      .addSearchTerm(filters?.searchTerm)
       .withOwner()
       .withSupply()
       .addPageSize(offset, limit)
@@ -287,6 +288,7 @@ export class AssetsGetterService {
       .addCollection(filters?.collection)
       .addCollections(filters?.collections)
       .addType(filters?.type)
+      .addSearchTerm(filters?.searchTerm)
       .withSupply()
       .addPageSize(offset, limit)
       .build();
