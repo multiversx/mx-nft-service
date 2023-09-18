@@ -211,6 +211,7 @@ input AssetsFilter {
   identifiers: [String!]
   likedByAddress: String
   ownerAddress: String
+  searchTerm: String
   tags: [String!]
   traits: [NftTrait]
   type: NftTypeEnum
