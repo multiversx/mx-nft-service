@@ -24,6 +24,6 @@ export class AnalyticsArgs {
   metric: string;
   @IsOptional()
   @Field({ nullable: true })
-  @Matches(new RegExp('[1-60][s,m,h,d]'))
+  @Matches(new RegExp('^(?:[1-9]|[1-5][0-9]|60)[s,m,h,d]$'))
   time: string;
 }
