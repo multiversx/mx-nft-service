@@ -185,6 +185,7 @@ export class AssetsFilter {
   @Field(() => [NftTrait], { nullable: 'itemsAndList' })
   traits: NftTrait[];
 
+  @IsOptional()
   @Field(() => String, { nullable: true })
   @MinLength(3, {
     message: 'The search term should contain at least 3 characters',
