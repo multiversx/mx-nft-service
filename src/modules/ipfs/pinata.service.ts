@@ -29,17 +29,12 @@ export class PinataService {
       });
       return this.mapReturnType(response.data.IpfsHash);
     } catch (error) {
-      this.logger.error(
-        'An error occurred while trying to add file to pinata.',
-        {
-          path: 'PinataService.uploadFile',
-          exception: error,
-          cacheKey: file,
-        },
-      );
-      throw new PinataUploadError(
-        'An error has occoured while uploading in IPFS, please try again.',
-      );
+      this.logger.error('An error occurred while trying to add file to pinata.', {
+        path: 'PinataService.uploadFile',
+        exception: error,
+        cacheKey: file,
+      });
+      throw new PinataUploadError('An error has occoured while uploading in IPFS, please try again.');
     }
   }
 
@@ -54,17 +49,12 @@ export class PinataService {
 
       return this.mapReturnType(response.data.IpfsHash);
     } catch (error) {
-      this.logger.error(
-        'An error occurred while trying to add file to pinata.',
-        {
-          path: 'PinataService.uploadText',
-          exception: error,
-          cacheKey: fileMetadata,
-        },
-      );
-      throw new PinataUploadError(
-        'An error has occoured while uploading in IPFS, please try again.',
-      );
+      this.logger.error('An error occurred while trying to add file to pinata.', {
+        path: 'PinataService.uploadText',
+        exception: error,
+        cacheKey: fileMetadata,
+      });
+      throw new PinataUploadError('An error has occoured while uploading in IPFS, please try again.');
     }
   }
 
@@ -72,9 +62,7 @@ export class PinataService {
     return `${fileStorage.cdnUrl}${path}`;
   }
 
-  private mapReturnType(
-    path: any,
-  ): UploadToIpfsResult | PromiseLike<UploadToIpfsResult> {
+  private mapReturnType(path: any): UploadToIpfsResult | PromiseLike<UploadToIpfsResult> {
     return new UploadToIpfsResult({
       hash: path,
       url: this.getUrl(path),

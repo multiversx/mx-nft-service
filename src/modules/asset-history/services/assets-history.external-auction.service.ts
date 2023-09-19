@@ -1,28 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import {
-  AssetActionEnum,
-  ExternalAuctionEventEnum,
-  NftEventEnum,
-} from 'src/modules/assets/models';
+import { AssetActionEnum, ExternalAuctionEventEnum, NftEventEnum } from 'src/modules/assets/models';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
 @Injectable()
 export class AssetsHistoryExternalAuctionService {
   constructor() {}
 
-  mapExternalAuctionEventLog(
-    nonce: string,
-    eventType: string,
-    mainEvent: any,
-  ): AssetHistoryLogInput {
-    const event = mainEvent.events.find(
-      (event) => event.identifier === eventType,
-    );
+  mapExternalAuctionEventLog(nonce: string, eventType: string, mainEvent: any): AssetHistoryLogInput {
+    const event = mainEvent.events.find((event) => event.identifier === eventType);
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
     const transferEvent = mainEvent.events.find(
       (event) =>
-        (event.identifier === NftEventEnum.ESDTNFTTransfer ||
-          event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
+        (event.identifier === NftEventEnum.ESDTNFTTransfer || event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
         event.topics[1] === encodedNonce,
     );
 
@@ -38,10 +27,7 @@ export class AssetsHistoryExternalAuctionService {
       }
       case ExternalAuctionEventEnum.Buy: {
         const senderAddress = event.address;
-        const addresses = this.getAddressesFromTopics(
-          event.topics,
-          senderAddress,
-        );
+        const addresses = this.getAddressesFromTopics(event.topics, senderAddress);
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
@@ -52,12 +38,8 @@ export class AssetsHistoryExternalAuctionService {
       }
       case ExternalAuctionEventEnum.BuyNft: {
         const senderAddress = event.address;
-        const addresses = this.getAddressesFromTopics(
-          event.topics,
-          senderAddress,
-        );
-        const quantity =
-          event.topics.length === 7 ? event.topics[4] : event.topics[7];
+        const addresses = this.getAddressesFromTopics(event.topics, senderAddress);
+        const quantity = event.topics.length === 7 ? event.topics[4] : event.topics[7];
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
@@ -67,15 +49,9 @@ export class AssetsHistoryExternalAuctionService {
         });
       }
       case ExternalAuctionEventEnum.BulkBuy: {
-        const buyNftEvent = mainEvent.events.find(
-          (event) =>
-            event.identifier === eventType && event.topics[2] === encodedNonce,
-        );
+        const buyNftEvent = mainEvent.events.find((event) => event.identifier === eventType && event.topics[2] === encodedNonce);
         const senderAddress = buyNftEvent.address;
-        const addresses = this.getAddressesFromTopics(
-          buyNftEvent.topics,
-          senderAddress,
-        );
+        const addresses = this.getAddressesFromTopics(buyNftEvent.topics, senderAddress);
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
@@ -87,10 +63,7 @@ export class AssetsHistoryExternalAuctionService {
     }
   }
 
-  private getAddressesFromTopics(
-    topics: string[],
-    differentThanAddress?: string,
-  ): string[] {
+  private getAddressesFromTopics(topics: string[], differentThanAddress?: string): string[] {
     const addresses: string[] = [];
     const possibleAddresses = topics?.filter((topic) => topic.length === 44);
 

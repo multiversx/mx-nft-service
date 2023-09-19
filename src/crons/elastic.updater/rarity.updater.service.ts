@@ -3,7 +3,8 @@ import { MxElasticService } from 'src/common';
 import { NftRarityService } from 'src/modules/nft-rarity/nft-rarity.service';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
-import { Locker, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 
 @Injectable()
 export class RarityUpdaterService {
@@ -30,30 +31,17 @@ export class RarityUpdaterService {
         async () => {
           let collectionsToUpdate: string[] = [];
 
-          const query =
-            this.nftRarityElasticService.getAllNftsWhereRarityNotComputedFromElasticQuery();
+          const query = this.nftRarityElasticService.getAllNftsWhereRarityNotComputedFromElasticQuery();
 
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
-              collectionsToUpdate = collectionsToUpdate.concat(
-                collections.filter(
-                  (c) => collectionsToUpdate.indexOf(c) === -1,
-                ),
-              );
-              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
-                return false;
-              }
-            },
-          );
+          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+            const collections = [...new Set(items.map((i) => i.token))];
+            collectionsToUpdate = collectionsToUpdate.concat(collections.filter((c) => collectionsToUpdate.indexOf(c) === -1));
+            if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+              return false;
+            }
+          });
 
-          collectionsToUpdate = collectionsToUpdate.slice(
-            0,
-            maxCollectionsToUpdate,
-          );
+          collectionsToUpdate = collectionsToUpdate.slice(0, maxCollectionsToUpdate);
 
           await this.updateTokenRarities(collectionsToUpdate);
         },
@@ -114,13 +102,9 @@ export class RarityUpdaterService {
     await Locker.lock(
       'processTokenRarityQueue: Update rarities for all collections in the rarities queue',
       async () => {
-        const collectionsToUpdate: string[] = await this.redisCacheService.lpop(
-          this.getRarityQueueCacheKey(),
-        );
+        const collectionsToUpdate: string[] = await this.redisCacheService.lpop(this.getRarityQueueCacheKey());
 
-        const notUpdatedCollections: string[] = await this.updateTokenRarities(
-          collectionsToUpdate,
-        );
+        const notUpdatedCollections: string[] = await this.updateTokenRarities(collectionsToUpdate);
 
         await this.addCollectionsToRarityQueue(notUpdatedCollections);
       },
@@ -128,14 +112,9 @@ export class RarityUpdaterService {
     );
   }
 
-  async addCollectionsToRarityQueue(
-    collectionTickers: string[],
-  ): Promise<void> {
+  async addCollectionsToRarityQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.rpush(
-        this.getRarityQueueCacheKey(),
-        collectionTickers,
-      );
+      await this.redisCacheService.rpush(this.getRarityQueueCacheKey(), collectionTickers);
     }
   }
 

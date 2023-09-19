@@ -12,17 +12,11 @@ export class AvailableTokensForAuctionProvider extends BaseProvider<number> {
     availableTokensForAuctionRedisHandler: AvailableTokensForAuctionRedisHandler,
     private persistenceService: PersistenceService,
   ) {
-    super(
-      availableTokensForAuctionRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
-    );
+    super(availableTokensForAuctionRedisHandler, new DataLoader(async (keys: number[]) => await this.batchLoad(keys)));
   }
 
   async getData(auctionIds: number[]) {
-    const auctions =
-      await this.persistenceService.getAvailableTokensForAuctionIds(auctionIds);
-    return auctions?.groupBy(
-      (auction: { auctionId: any }) => auction.auctionId,
-    );
+    const auctions = await this.persistenceService.getAvailableTokensForAuctionIds(auctionIds);
+    return auctions?.groupBy((auction: { auctionId: any }) => auction.auctionId);
   }
 }

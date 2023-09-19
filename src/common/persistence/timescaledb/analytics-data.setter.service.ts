@@ -35,9 +35,7 @@ export class AnalyticsDataSetterService {
 
       this.pendingRecords = [];
     } catch (error) {
-      this.logger.error(
-        `Could not insert ${this.pendingRecords.length} records into TimescaleDb, ${error}, ${timestamp}`,
-      );
+      this.logger.error(`Could not insert ${this.pendingRecords.length} records into TimescaleDb, ${error}, ${timestamp}`);
       throw error;
     }
   }
@@ -55,9 +53,7 @@ export class AnalyticsDataSetterService {
 
       await query.execute();
     } catch (error) {
-      this.logger.error(
-        `Could not insert ${data} records into TimescaleDb, ${error}}`,
-      );
+      this.logger.error(`Could not insert ${data} records into TimescaleDb, ${error}}`);
       throw error;
     }
   }

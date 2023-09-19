@@ -8,20 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class LastOrdersProvider extends BaseProvider<number> {
-  constructor(
-    lastOrder: LastOrderRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      lastOrder,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
-    );
+  constructor(lastOrder: LastOrderRedisHandler, private persistenceService: PersistenceService) {
+    super(lastOrder, new DataLoader(async (keys: number[]) => await this.batchLoad(keys)));
   }
 
   async getData(auctionIds: number[]) {
-    const orders = await this.persistenceService.getLastOrdersByAuctionIds(
-      auctionIds,
-    );
+    const orders = await this.persistenceService.getLastOrdersByAuctionIds(auctionIds);
 
     return orders?.groupBy((asset) => asset.auctionId);
   }

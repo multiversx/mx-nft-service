@@ -8,12 +8,7 @@ import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { CommonModule } from 'src/common.module';
 
 @Module({
-  providers: [
-    ArtistsService,
-    ArtistsResolver,
-    MarketplacesService,
-    MarketplacesCachingService,
-  ],
+  providers: [ArtistsService, ArtistsResolver, MarketplacesService, MarketplacesCachingService],
   imports: [MxCommunicationModule, CollectionsModuleGraph, CommonModule],
   exports: [ArtistsService],
 })

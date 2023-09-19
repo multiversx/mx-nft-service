@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
@@ -10,16 +10,11 @@ export class ArtistAddressRedisHandler extends RedisKeyValueDataloaderHandler<st
     super(redisCacheService, CacheInfo.Artist.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    accountsAddresses: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], accountsAddresses: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = accountsAddresses[item.key]
-          ? accountsAddresses[item.key][0]
-          : null;
+        item.value = accountsAddresses[item.key] ? accountsAddresses[item.key][0] : null;
         redisValues.push(item);
       }
     }

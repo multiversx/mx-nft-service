@@ -14,11 +14,6 @@ export class RandomNftEvent extends GenericEvent {
   }
 
   getData() {
-    return this.data !== ''
-      ? parseInt(
-          Buffer.from(this.data, 'base64').toString('hex'),
-          16,
-        ).toString()
-      : '1';
+    return this.data !== '' ? parseInt(Buffer.from(this.data, 'base64').toString('hex'), 16).toString() : '1';
   }
 }

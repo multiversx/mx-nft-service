@@ -1,12 +1,5 @@
-import {
-  Address,
-  BinaryCodec,
-  FieldDefinition,
-  StructType,
-  TokenIdentifierType,
-  U64Type,
-} from '@multiversx/sdk-core';
-import { NumberUtils } from '@multiversx/sdk-nestjs';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core';
+import { NumberUtils } from '@multiversx/sdk-nestjs-common';
 
 export class ElrondSwapAuctionTopics {
   private auctionId: string;
@@ -25,14 +18,9 @@ export class ElrondSwapAuctionTopics {
     this.auctionId = Buffer.from(rawTopics[1], 'base64').toString('hex');
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.nrAuctionTokens = parseInt(
-      Buffer.from(rawTopics[4], 'base64').toString('hex'),
-      16,
-    ).toString();
+    this.nrAuctionTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16).toString();
     this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.price = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.price = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
     this.paymentToken = token.token_type;
     this.paymentTokenNonce = token.nonce;
     this.auctionType = Buffer.from(rawTopics[8], 'base64').toString('hex');

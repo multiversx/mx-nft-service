@@ -18,18 +18,8 @@ export class TagsResolver {
     pagination: ConnectionArgs,
   ): Promise<TagsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [tags, count] = await this.tagsService.getTags(
-      offset,
-      limit,
-      filters,
-    );
+    const [tags, count] = await this.tagsService.getTags(offset, limit, filters);
 
-    return PageResponse.mapResponse<Tag>(
-      tags || [],
-      pagination,
-      count || 0,
-      offset,
-      limit,
-    );
+    return PageResponse.mapResponse<Tag>(tags || [], pagination, count || 0, offset, limit);
   }
 }

@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Field, InputType } from '@nestjs/graphql';
 import { Nft } from 'src/common';
 
@@ -14,9 +14,7 @@ export class NftTrait {
   }
 
   static fromNftMetadataAttribute(attribute: { [key: string]: string }) {
-    return attribute &&
-      (attribute.trait_type !== undefined || attribute.name !== undefined) &&
-      attribute.value !== undefined
+    return attribute && (attribute.trait_type !== undefined || attribute.name !== undefined) && attribute.value !== undefined
       ? new NftTrait({
           name: attribute.trait_type ?? attribute.name,
           value: attribute.value,
@@ -64,11 +62,7 @@ export class NftTraits {
 
     if (nft?.metadata?.attributes) {
       for (const [key, attribute] of Object.entries(nft.metadata.attributes)) {
-        if (
-          (attribute.trait_type === undefined &&
-            attribute.name === undefined) ||
-          attribute.value === undefined
-        ) {
+        if ((attribute.trait_type === undefined && attribute.name === undefined) || attribute.value === undefined) {
           continue;
         }
         const traitName = String(attribute.trait_type ?? attribute.name);
@@ -85,24 +79,17 @@ export class NftTraits {
     return newNft;
   }
 
-  isIdenticalTo(
-    encodedNftValues2: EncodedNftValues,
-  ): [boolean, EncodedNftValues] {
+  isIdenticalTo(encodedNftValues2: EncodedNftValues): [boolean, EncodedNftValues] {
     const encodedNftValues1 = new EncodedNftValues({
       identifier: this.identifier,
-      encodedValues: this.traits?.map((trait) =>
-        EncodedNftValues.encode(trait),
-      ),
+      encodedValues: this.traits?.map((trait) => EncodedNftValues.encode(trait)),
     });
 
     if (!encodedNftValues2 && encodedNftValues1.encodedValues.length === 0) {
       return [true, encodedNftValues1];
     }
 
-    if (
-      encodedNftValues1.encodedValues.length !==
-      encodedNftValues2?.encodedValues?.length
-    ) {
+    if (encodedNftValues1.encodedValues.length !== encodedNftValues2?.encodedValues?.length) {
       return [false, encodedNftValues1];
     }
 

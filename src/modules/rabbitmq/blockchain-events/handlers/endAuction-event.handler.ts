@@ -1,9 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AuctionEventEnum } from 'src/modules/assets/models';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
@@ -36,29 +33,14 @@ export class EndAuctionEventHandler {
     );
 
     if (!marketplace) return;
-    this.logger.log(
-      `End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
-    const auction =
-      await this.auctionsGetterService.getAuctionByIdAndMarketplace(
-        parseInt(topics.auctionId, 16),
-        marketplace.key,
-      );
+    this.logger.log(`End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+    const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
     if (!auction) return;
 
-    this.auctionsService.updateAuctionStatus(
-      auction.id,
-      AuctionStatusEnum.Ended,
-      hash,
-      AuctionEventEnum.EndAuctionEvent,
-    );
+    this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionEventEnum.EndAuctionEvent);
     this.notificationsService.updateNotificationStatus([auction.id]);
     this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
-    await this.feedEventsSenderService.sendWonAuctionEvent(
-      topics,
-      auction,
-      marketplace,
-    );
+    await this.feedEventsSenderService.sendWonAuctionEvent(topics, auction, marketplace);
   }
 }

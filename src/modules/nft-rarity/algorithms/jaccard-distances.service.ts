@@ -6,9 +6,7 @@ import { NftRarityData } from '../models/nft-rarity-data.model';
 
 @Injectable()
 export class JaccardDistancesRarityService {
-  async computeJaccardDistancesRarities(
-    nfts: NftRarityData[],
-  ): Promise<{ [key: string]: { [key: string]: number } }> {
+  async computeJaccardDistancesRarities(nfts: NftRarityData[]): Promise<{ [key: string]: { [key: string]: number } }> {
     if (nfts.length === 1) {
       return {
         [nfts[0].nonce]: {
@@ -35,25 +33,16 @@ export class JaccardDistancesRarityService {
     return rarities;
   }
 
-  private async computeAvgUsingJaccardDistances(
-    nfts: NftRarityData[],
-  ): Promise<number[]> {
+  private async computeAvgUsingJaccardDistances(nfts: NftRarityData[]): Promise<number[]> {
     let avg: number[] = [];
 
     let jdSumArray: number[] = [];
 
     for (let i = 0; i < nfts.length; i++) {
       for (let j = 0; j < i; j++) {
-        const commonTraitsCount = this.getCommonTraitsCountFromDna(
-          nfts[i].DNA,
-          nfts[j].DNA,
-        );
+        const commonTraitsCount = this.getCommonTraitsCountFromDna(nfts[i].DNA, nfts[j].DNA);
 
-        const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(
-          nfts[i].DNA,
-          nfts[j].DNA,
-          commonTraitsCount,
-        );
+        const uniqueTraitsCount = this.getUniqueTraitsCountFromDna(nfts[i].DNA, nfts[j].DNA, commonTraitsCount);
 
         const jaccardIndex = commonTraitsCount / uniqueTraitsCount;
 
@@ -93,22 +82,14 @@ export class JaccardDistancesRarityService {
     const avgDiff: number = avgMax - avgMin;
 
     for (let i = 0; i < avg.length; i++) {
-      scores[i] = this.isUniqueByAvg(avg[i], avgDiff)
-        ? 100
-        : ((avg[i] - avgMin) / avgDiff) * 100;
+      scores[i] = this.isUniqueByAvg(avg[i], avgDiff) ? 100 : ((avg[i] - avgMin) / avgDiff) * 100;
     }
 
     return scores;
   }
 
   private isUniqueByAvg(avg: number, avgDiff: number): boolean {
-    return (
-      avg === undefined ||
-      avg === null ||
-      Number(avg) === 0 ||
-      Number(avgDiff) === 0 ||
-      !isFinite(Number(avgDiff))
-    );
+    return avg === undefined || avg === null || Number(avg) === 0 || Number(avgDiff) === 0 || !isFinite(Number(avgDiff));
   }
 
   private markScoreAsUsed(scoreArray: number[], scoreIndex: number): number[] {
@@ -124,15 +105,7 @@ export class JaccardDistancesRarityService {
     return count;
   }
 
-  private getUniqueTraitsCountFromDna(
-    dna1: number[],
-    dna2: number[],
-    commonTraitsCount: number,
-  ): number {
-    return (
-      dna1.filter((dna) => Number.isInteger(dna)).length +
-      dna2.filter((dna) => Number.isInteger(dna)).length -
-      commonTraitsCount
-    );
+  private getUniqueTraitsCountFromDna(dna1: number[], dna2: number[], commonTraitsCount: number): number {
+    return dna1.filter((dna) => Number.isInteger(dna)).length + dna2.filter((dna) => Number.isInteger(dna)).length - commonTraitsCount;
   }
 }

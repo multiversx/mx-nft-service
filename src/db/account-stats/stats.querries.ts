@@ -1,9 +1,6 @@
 import { getMarketplaceKeyFilter } from '../collection-stats/sqlUtils';
 
-export function getPublicAccountStatsQuery(
-  address: string,
-  marketplaceKey: string,
-) {
+export function getPublicAccountStatsQuery(address: string, marketplaceKey: string) {
   return `
   WITH 
   auctionsStats AS (SELECT COUNT(*) auctions,	a.ownerAddress AS address FROM	auctions a
@@ -35,10 +32,7 @@ FROM
   `;
 }
 
-export function getBiddingBalanceQuery(
-  address: string,
-  marketplaceKey: string,
-) {
+export function getBiddingBalanceQuery(address: string, marketplaceKey: string) {
   return `
   SELECT SUM(o.priceAmountDenominated) AS biddingBalance, o.ownerAddress AS orderAddress, o.priceToken
       FROM orders o WHERE o.ownerAddress = '${address}' AND o.status ='Active' 
@@ -47,10 +41,7 @@ export function getBiddingBalanceQuery(
   `;
 }
 
-export function getOwnerAccountStatsQuery(
-  address: string,
-  marketplaceKey: string,
-) {
+export function getOwnerAccountStatsQuery(address: string, marketplaceKey: string) {
   return `
   WITH 
   auctionsStats AS (SELECT COUNT(*) auctions,	a.ownerAddress AS address FROM	auctions a

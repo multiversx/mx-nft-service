@@ -1,4 +1,4 @@
-import { Constants } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 
 export class CacheInfo {
   key: string = '';
@@ -109,6 +109,11 @@ export class CacheInfo {
     ttl: Constants.oneHour(),
   };
 
+  static NrOfNftsOnTransaction: CacheInfo = {
+    key: 'NrOfNftsOnTransaction',
+    ttl: Constants.oneHour(),
+  };
+
   static AuctionTags: CacheInfo = {
     key: 'auctionTags',
     ttl: 5 * Constants.oneHour(),
@@ -199,6 +204,11 @@ export class CacheInfo {
     ttl: Constants.oneDay(),
   };
 
+  static CollectionStats: CacheInfo = {
+    key: 'collection_stats',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
   static CollectionNfts: CacheInfo = {
     key: 'collectionNfts',
     ttl: Constants.oneDay(),
@@ -224,6 +234,11 @@ export class CacheInfo {
     ttl: 30 * Constants.oneMinute(),
   };
 
+  static CollectionTopHolders: CacheInfo = {
+    key: 'collectionTopHolders',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
   static NftAnalyticsCount: CacheInfo = {
     key: 'nftAnalyticsCount',
     ttl: 10 * Constants.oneMinute(),
@@ -242,5 +257,50 @@ export class CacheInfo {
   static Minters: CacheInfo = {
     key: 'minters',
     ttl: Constants.oneHour(),
+  };
+
+  static SearchCollection: CacheInfo = {
+    key: 'search_collection',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchNfts: CacheInfo = {
+    key: 'search_nfts',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchAccount: CacheInfo = {
+    key: 'search_account',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static SearchTag: CacheInfo = {
+    key: 'search_tag',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static AccountStats: CacheInfo = {
+    key: 'account_stats',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
+  static AccountBidding: CacheInfo = {
+    key: 'account_bidding',
+    ttl: 5 * Constants.oneMinute(),
+  };
+
+  static AccountCollected: CacheInfo = {
+    key: 'account_collected',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static AccountClaimableCount: CacheInfo = {
+    key: 'account_claimable_count',
+    ttl: 5 * Constants.oneSecond(),
+  };
+
+  static AccountLikesCount: CacheInfo = {
+    key: 'account_likes_count',
+    ttl: 5 * Constants.oneSecond(),
   };
 }

@@ -61,11 +61,7 @@ export class ApiService {
     };
   }
 
-  async get(
-    url: string,
-    settings: ApiSettings = new ApiSettings(),
-    errorHandler?: (error: any) => Promise<boolean>,
-  ): Promise<any> {
+  async get(url: string, settings: ApiSettings = new ApiSettings(), errorHandler?: (error: any) => Promise<boolean>): Promise<any> {
     try {
       return await axios.get(url, this.getConfig(settings));
     } catch (error: any) {
@@ -122,10 +118,7 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      MetricsCollector.setExternalCall(
-        this.getHostname(url),
-        profiler.duration,
-      );
+      MetricsCollector.setExternalCall(this.getHostname(url), profiler.duration);
     }
   }
 
@@ -161,10 +154,7 @@ export class ApiService {
       }
     } finally {
       profiler.stop();
-      MetricsCollector.setExternalCall(
-        this.getHostname(url),
-        profiler.duration,
-      );
+      MetricsCollector.setExternalCall(this.getHostname(url), profiler.duration);
     }
   }
 

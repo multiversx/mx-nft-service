@@ -10,10 +10,7 @@ export class ReportCollectionsRepository {
     @InjectRepository(ReportCollectionEntity)
     private reportCollectionRepository: Repository<ReportCollectionEntity>,
   ) {}
-  async isReportedBy(
-    collectionIdentifier: string,
-    address: string,
-  ): Promise<boolean> {
+  async isReportedBy(collectionIdentifier: string, address: string): Promise<boolean> {
     const count = await this.reportCollectionRepository.count({
       where: {
         collectionIdentifier,
@@ -24,9 +21,7 @@ export class ReportCollectionsRepository {
     return count > 0;
   }
 
-  async addReport(
-    reportEntity: ReportCollectionEntity,
-  ): Promise<ReportCollectionEntity> {
+  async addReport(reportEntity: ReportCollectionEntity): Promise<ReportCollectionEntity> {
     try {
       return await this.reportCollectionRepository.save(reportEntity);
     } catch (err) {

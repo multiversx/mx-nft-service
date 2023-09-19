@@ -11,13 +11,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 
 @Module({
-  providers: [
-    Logger,
-    NotificationsService,
-    NotificationsCachingService,
-    NotificationsResolver,
-    AssetByIdentifierService,
-  ],
+  providers: [Logger, NotificationsService, NotificationsCachingService, NotificationsResolver, AssetByIdentifierService],
   imports: [
     MxCommunicationModule,
     CacheEventsPublisherModule,
@@ -26,10 +20,6 @@ import { AuctionsModuleGraph } from '../auctions/auctions.module';
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => AuthModule),
   ],
-  exports: [
-    NotificationsService,
-    AssetByIdentifierService,
-    NotificationsCachingService,
-  ],
+  exports: [NotificationsService, AssetByIdentifierService, NotificationsCachingService],
 })
 export class NotificationsModuleGraph {}

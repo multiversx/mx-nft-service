@@ -2,14 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import {
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
@@ -45,54 +39,26 @@ export class StartAuctionEventHandler {
 
     if (!marketplace) return;
     this.logger.log(
-      `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${
-        marketplace?.name
-      }'`,
+      `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
     );
     const auction = await this.saveAuction(topics, marketplace, hash);
 
     if (!auction) return;
 
-    await this.feedEventsSenderService.sendStartAuctionEvent(
-      topics,
-      auction,
-      marketplace,
-    );
+    await this.feedEventsSenderService.sendStartAuctionEvent(topics, auction, marketplace);
   }
 
-  private async saveAuction(
-    topics: any,
-    marketplace: Marketplace,
-    hash: string,
-  ) {
+  private async saveAuction(topics: any, marketplace: Marketplace, hash: string) {
     const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-    if (
-      marketplace.key === ELRONDNFTSWAP_KEY ||
-      marketplace.key === ENEFTOR_KEY
-    ) {
+    if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY) {
       if (topics.auctionId === '0') {
-        let auctionId =
-          await this.auctionsGetterService.getLastAuctionIdForMarketplace(
-            marketplace.key,
-          );
-        topics.auctionId = (
-          auctionId && auctionId > 0 ? auctionId + 1 : 1
-        ).toString(16);
+        let auctionId = await this.auctionsGetterService.getLastAuctionIdForMarketplace(marketplace.key);
+        topics.auctionId = (auctionId && auctionId > 0 ? auctionId + 1 : 1).toString(16);
       }
-      return await this.handleSaveAuctionFromTopics(
-        auctionIdentifier,
-        topics,
-        hash,
-        marketplace,
-      );
+      return await this.handleSaveAuctionFromTopics(auctionIdentifier, topics, hash, marketplace);
     }
 
-    return await this.auctionsSetterService.saveAuction(
-      parseInt(topics.auctionId, 16),
-      auctionIdentifier,
-      marketplace,
-      hash,
-    );
+    return await this.auctionsSetterService.saveAuction(parseInt(topics.auctionId, 16), auctionIdentifier, marketplace, hash);
   }
 
   private async handleSaveAuctionFromTopics(
@@ -102,23 +68,13 @@ export class StartAuctionEventHandler {
     auctionTokenEventMarketplace: Marketplace,
   ) {
     let decimals = mxConfig.decimals;
-    const asset = await this.assetByIdentifierService.getAsset(
-      auctionIdentifier,
-    );
+    const asset = await this.assetByIdentifierService.getAsset(auctionIdentifier);
     if (topics.paymentToken !== mxConfig.egld) {
-      const paymentToken = await this.usdPriceService.getToken(
-        topics.paymentToken,
-      );
+      const paymentToken = await this.usdPriceService.getToken(topics.paymentToken);
       decimals = paymentToken.decimals;
     }
     return await this.auctionsSetterService.saveAuctionEntity(
-      AuctionEntity.fromWithdrawTopics(
-        topics,
-        asset.tags?.toString(),
-        hash,
-        auctionTokenEventMarketplace.key,
-        decimals,
-      ),
+      AuctionEntity.fromWithdrawTopics(topics, asset.tags?.toString(), hash, auctionTokenEventMarketplace.key, decimals),
       asset.tags,
     );
   }

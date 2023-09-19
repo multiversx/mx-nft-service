@@ -8,14 +8,9 @@ import { OfferClosedSummary } from '../models/marketplaces-reindex-events-summar
 export class ReindexOfferClosedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: OfferClosedSummary,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: OfferClosedSummary): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(
-      input.offerId,
-    );
+    const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(input.offerId);
     if (offerIndex === -1) {
       return;
     }

@@ -86,9 +86,7 @@ export class MetricsCollector {
 
   static setExternalCall(system: string, duration: number, func: string = '') {
     MetricsCollector.ensureIsInitialized();
-    MetricsCollector.externalCallsHistogram
-      .labels(system, func)
-      .observe(duration);
+    MetricsCollector.externalCallsHistogram.labels(system, func).observe(duration);
   }
 
   static setRedisDuration(action: string, duration: number) {
@@ -103,23 +101,15 @@ export class MetricsCollector {
 
   static setAuctionEventsDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
-    MetricsCollector.auctionsEventsDurationHistogram
-      .labels(action)
-      .observe(duration);
+    MetricsCollector.auctionsEventsDurationHistogram.labels(action).observe(duration);
   }
 
   static setPersistenceDuration(action: string, duration: number) {
     MetricsCollector.ensureIsInitialized();
-    MetricsCollector.persistenceDurationHistogram
-      .labels(action)
-      .observe(duration);
+    MetricsCollector.persistenceDurationHistogram.labels(action).observe(duration);
   }
 
-  static setJobResult(
-    job: string,
-    result: 'success' | 'error',
-    duration: number,
-  ) {
+  static setJobResult(job: string, result: 'success' | 'error', duration: number) {
     MetricsCollector.ensureIsInitialized();
     MetricsCollector.jobsHistogram.labels(job, result).observe(duration);
   }

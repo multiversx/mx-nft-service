@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
@@ -12,26 +12,16 @@ import { AuctionStartedSummary } from '../models/marketplaces-reindex-events-sum
 export class ReindexAuctionStartedHandler {
   constructor() {}
 
-  handle(
-    input: AuctionStartedSummary,
-    marketplaceReindexState: MarketplaceReindexState,
-    paymentToken: Token,
-    paymentNonce: number,
-  ): void {
+  handle(input: AuctionStartedSummary, marketplaceReindexState: MarketplaceReindexState, paymentToken: Token, paymentNonce: number): void {
     const nonce = BinaryUtils.hexToNumber(input.nonce);
     const itemsCount = parseInt(input.itemsCount);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const startTime = Number.isNaN(input.startTime)
-      ? input.timestamp
-      : input.startTime;
+    const startTime = Number.isNaN(input.startTime) ? input.timestamp : input.startTime;
     const auction = new AuctionEntity({
       creationDate: modifiedDate,
       modifiedDate,
       id: marketplaceReindexState.auctions.length,
-      marketplaceAuctionId:
-        input.auctionId !== 0
-          ? input.auctionId
-          : marketplaceReindexState.auctions.length + 1,
+      marketplaceAuctionId: input.auctionId !== 0 ? input.auctionId : marketplaceReindexState.auctions.length + 1,
       identifier: input.identifier,
       collection: input.collection,
       nonce: nonce,
@@ -43,14 +33,8 @@ export class ReindexAuctionStartedHandler {
       ownerAddress: input.sender,
       minBid: input.minBid,
       maxBid: input.maxBid !== 'NaN' ? input.maxBid : '0',
-      minBidDenominated: BigNumberUtils.denominateAmount(
-        input.minBid,
-        paymentToken.decimals,
-      ),
-      maxBidDenominated: BigNumberUtils.denominateAmount(
-        input.maxBid !== 'NaN' ? input.maxBid : '0',
-        paymentToken.decimals,
-      ),
+      minBidDenominated: BigNumberUtils.denominateAmount(input.minBid, paymentToken.decimals),
+      maxBidDenominated: BigNumberUtils.denominateAmount(input.maxBid !== 'NaN' ? input.maxBid : '0', paymentToken.decimals),
       minBidDiff: input.minBidDiff ?? '0',
       startDate: startTime,
       endDate: input.endTime > 0 ? input.endTime : 0,

@@ -3,10 +3,12 @@ import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery } from '@multiversx/sdk-nestjs';
+import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticMetricType } from '@multiversx/sdk-nestjs-monitoring';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
-import { ElasticMetricType } from '@multiversx/sdk-nestjs/lib/src/common/metrics/entities/elastic.metric.type';
+import { HoldersCount } from 'src/modules/analytics/models/general-stats.model';
+import { NftTypeEnum } from 'src/modules/assets/models';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -15,10 +17,7 @@ export interface AddressTransactionCount {
 @Injectable()
 export class MxElasticService {
   private readonly url = process.env.ELROND_ELASTICSEARCH;
-  constructor(
-    private readonly apiService: ApiService,
-    private readonly logger: Logger,
-  ) {}
+  constructor(private readonly apiService: ApiService, private readonly logger: Logger) {}
 
   async getNftHistory(
     collection: string,
@@ -90,11 +89,7 @@ export class MxElasticService {
           }
         }
       });
-      return [
-        responseMap,
-        data?.hits?.total.value,
-        data?.hits?.hits[data?.hits?.hits?.length - 1]?._source.timestamp,
-      ];
+      return [responseMap, data?.hits?.total.value, data?.hits?.hits[data?.hits?.hits?.length - 1]?._source.timestamp];
     } catch (e) {
       this.logger.error('Fail to get logs', {
         path: `${MxElasticService.name}.${this.getNftHistory.name}`,
@@ -105,32 +100,18 @@ export class MxElasticService {
     }
   }
 
-  async setCustomValue<T>(
-    collection: string,
-    identifier: string,
-    body: any,
-    urlParams: string = null,
-  ): Promise<void> {
+  async setCustomValue<T>(collection: string, identifier: string, body: any, urlParams: string = null): Promise<void> {
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
     const profiler = new PerformanceProfiler();
-    const promises = uris.map((uri) =>
-      this.apiService.post(
-        `${uri}/${collection}/_update/${identifier}${urlParams}`,
-        body,
-      ),
-    );
+    const promises = uris.map((uri) => this.apiService.post(`${uri}/${collection}/_update/${identifier}${urlParams}`, body));
     await Promise.all(promises);
 
     profiler.stop();
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  async bulkRequest<T>(
-    collection: string,
-    updates: string[],
-    urlParams: string = '',
-  ): Promise<void> {
+  async bulkRequest<T>(collection: string, updates: string[], urlParams: string = ''): Promise<void> {
     const batchSize = constants.bulkUpdateElasticBatchSize;
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
 
@@ -168,11 +149,7 @@ export class MxElasticService {
     MetricsCollector.setElasticDuration(collection, profiler.duration);
   }
 
-  async putMappings(
-    collection: string,
-    body: string,
-    urlParams: string = '',
-  ): Promise<any> {
+  async putMappings(collection: string, body: string, urlParams: string = ''): Promise<any> {
     const profiler = new PerformanceProfiler();
     try {
       const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
@@ -203,14 +180,8 @@ export class MxElasticService {
     }
   }
 
-  async getCustomValue(
-    collection: string,
-    identifier: string,
-    attribute: string,
-  ): Promise<any> {
-    const url = `${this.url}/${collection}/_search?q=_id:${encodeURIComponent(
-      identifier,
-    )}`;
+  async getCustomValue(collection: string, identifier: string, attribute: string): Promise<any> {
+    const url = `${this.url}/${collection}/_search?q=_id:${encodeURIComponent(identifier)}`;
     const profiler = new PerformanceProfiler();
     const fullAttribute = 'nft_' + attribute;
 
@@ -254,9 +225,7 @@ export class MxElasticService {
     const scrollId = result.data._scroll_id;
     let totalResults: number = 0;
 
-    let actionResult = await action(
-      documents.map((document: any) => this.formatItem(document, key)),
-    );
+    let actionResult = await action(documents.map((document: any) => this.formatItem(document, key)));
 
     while (true && actionResult !== false) {
       const scrollProfiler = new PerformanceProfiler();
@@ -266,13 +235,10 @@ export class MxElasticService {
       let tries = 3;
       while (tries > 0) {
         try {
-          scrollResult = await this.apiService.post(
-            `${this.url}/_search/scroll`,
-            {
-              scroll: '20m',
-              scroll_id: scrollId,
-            },
-          );
+          scrollResult = await this.apiService.post(`${this.url}/_search/scroll`, {
+            scroll: '20m',
+            scroll_id: scrollId,
+          });
           break;
         } catch (error) {
           tries--;
@@ -294,9 +260,7 @@ export class MxElasticService {
         break;
       }
 
-      actionResult = await action(
-        scrollDocuments.map((document: any) => this.formatItem(document, key)),
-      );
+      actionResult = await action(scrollDocuments.map((document: any) => this.formatItem(document, key)));
     }
 
     await this.clearScrollableList(scrollId);
@@ -313,78 +277,105 @@ export class MxElasticService {
   }
 
   async getHoldersCount(): Promise<number> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                type: 'NonFungibleESDT',
-              },
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withExtra({
+        aggs: {
+          unique_addresses: {
+            cardinality: {
+              field: 'address',
             },
-            {
-              match: {
-                type: 'SemiFungibleESDT',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        unique_addresses: {
-          cardinality: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
-    const resultRaw = await this.apiService.post(
-      `${this.url}/accountsesdt/_search`,
-      query,
-      {
-        timeout: 120000,
-      },
-    );
+    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
+      timeout: 120000,
+    });
     const result = resultRaw?.data?.aggregations?.unique_addresses?.value;
     return result as number;
   }
 
-  async getHoldersCountForCollection(
-    collectionIdentifier: string,
-  ): Promise<number> {
-    const query = {
-      size: 0,
-      query: {
-        bool: {
-          should: [
-            {
-              match: {
-                token: `${collectionIdentifier}`,
-              },
+  async getHoldersCountForCollection(collectionIdentifier: string): Promise<number> {
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withExtra({
+        aggs: {
+          unique_addresses: {
+            cardinality: {
+              field: 'address',
             },
-          ],
-        },
-      },
-      aggs: {
-        unique_addresses: {
-          cardinality: {
-            field: 'address',
           },
         },
-      },
-    };
+      })
+      .toJson();
 
-    const resultRaw = await this.apiService.post(
-      `${this.url}/accountsesdt/_search`,
-      query,
-      {
-        timeout: 120000,
-      },
-    );
+    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
+      timeout: 120000,
+    });
     const result = resultRaw?.data?.aggregations?.unique_addresses?.value;
     return result as number;
+  }
+
+  async getTopHoldersCountForCollections(): Promise<HoldersCount[]> {
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withExtra({
+        aggs: {
+          first_by_address: {
+            terms: {
+              field: 'address',
+            },
+          },
+        },
+      })
+      .toJson();
+
+    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
+      timeout: 120000,
+    });
+    const result = resultRaw?.data?.aggregations?.first_by_address?.buckets.map(
+      (x: { doc_count: any; key: any }) =>
+        new HoldersCount({
+          count: x.doc_count,
+          address: x.key,
+        }),
+    );
+    return result;
+  }
+
+  async getTopHoldersCountForCollection(collectionIdentifier: string): Promise<HoldersCount[]> {
+    const query = ElasticQuery.create()
+      .withPagination({ from: 0, size: 0 })
+      .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
+      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withExtra({
+        aggs: {
+          first_by_address: {
+            terms: {
+              field: 'address',
+            },
+          },
+        },
+      })
+      .toJson();
+
+    const resultRaw = await this.apiService.post(`${this.url}/accountsesdt/_search`, query, {
+      timeout: 120000,
+    });
+    const result = resultRaw?.data?.aggregations?.first_by_address?.buckets.map(
+      (x: { doc_count: any; key: any }) =>
+        new HoldersCount({
+          count: x.doc_count,
+          address: x.key,
+        }),
+    );
+    return result;
   }
 
   buildUpdateBody<T>(fieldName: string, fieldValue: T): any {
@@ -395,12 +386,7 @@ export class MxElasticService {
     };
   }
 
-  buildBulkUpdate<T>(
-    collection: string,
-    identifier: string,
-    fieldName: string,
-    fieldValue: T,
-  ): string {
+  buildBulkUpdate<T>(collection: string, identifier: string, fieldName: string, fieldValue: T): string {
     return (
       JSON.stringify({
         update: {
@@ -428,9 +414,7 @@ export class MxElasticService {
     });
   }
 
-  buildPutMultipleMappingsBody<T>(
-    mappings: { key: string; value: any }[],
-  ): string {
+  buildPutMultipleMappingsBody<T>(mappings: { key: string; value: any }[]): string {
     let properties = {};
     for (const mapping of mappings) {
       properties[mapping.key] = {
@@ -442,11 +426,7 @@ export class MxElasticService {
     });
   }
 
-  async getList(
-    collection: string,
-    key: string,
-    elasticQuery: ElasticQuery,
-  ): Promise<any[]> {
+  async getList(collection: string, key: string, elasticQuery: ElasticQuery): Promise<any[]> {
     const url = `${this.url}/${collection}/_search`;
 
     const profiler = new PerformanceProfiler();
@@ -454,10 +434,7 @@ export class MxElasticService {
 
     profiler.stop();
 
-    MetricsCollector.setElasticDuration(
-      ElasticMetricType.list,
-      profiler.duration,
-    );
+    MetricsCollector.setElasticDuration(ElasticMetricType.list, profiler.duration);
 
     const documents = result.data.hits.hits;
     return documents.map((document: any) => this.formatItem(document, key));

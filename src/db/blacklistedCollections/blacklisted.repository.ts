@@ -9,9 +9,7 @@ export class BlacklistedCollectionsRepository {
     @InjectRepository(BlacklistedCollectionEntity)
     private blacklistedCollectionsRepository: Repository<BlacklistedCollectionEntity>,
   ) {}
-  async getBlacklistedCollections(): Promise<
-    [BlacklistedCollectionEntity[], number]
-  > {
+  async getBlacklistedCollections(): Promise<[BlacklistedCollectionEntity[], number]> {
     const blacklistedCollections = await this.blacklistedCollectionsRepository
       .createQueryBuilder('blacklistedCollections')
       .getManyAndCount();
@@ -19,9 +17,7 @@ export class BlacklistedCollectionsRepository {
   }
 
   async addBlacklistedCollection(collection: string): Promise<boolean> {
-    const res = await this.blacklistedCollectionsRepository.save(
-      new BlacklistedCollectionEntity({ identifier: collection }),
-    );
+    const res = await this.blacklistedCollectionsRepository.save(new BlacklistedCollectionEntity({ identifier: collection }));
     return !!res.id;
   }
 

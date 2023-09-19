@@ -15,15 +15,9 @@ import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { NftTrait } from '../nft-traits/models/nft-traits.model';
 import { CollectionsGetterService } from '../nftCollections/collections-getter.service';
-import {
-  Constants,
-  ElasticQuery,
-  ElasticSortOrder,
-  QueryConditionOptions,
-  QueryOperator,
-  QueryType,
-  RedisCacheService,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryConditionOptions, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
 import { FeaturedService } from '../featured/featured.service';
 import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';
@@ -45,19 +39,11 @@ export class AssetsGetterService {
     private nftTraitsService: NftTraitsService,
     private readonly logger: Logger,
     private redisCacheService: RedisCacheService,
-  ) { }
+  ) {}
 
-  async getAssetsForUser(
-    address: string,
-    query: string = '',
-    countQuery: string = '',
-  ): Promise<CollectionType<Asset>> {
-    query = new AssetsQuery(query)
-      .addQuery('includeFlagged=true&source=elastic')
-      .build();
-    countQuery = new AssetsQuery(countQuery)
-      .addQuery('includeFlagged=true')
-      .build();
+  async getAssetsForUser(address: string, query: string = '', countQuery: string = ''): Promise<CollectionType<Asset>> {
+    query = new AssetsQuery(query).addQuery('includeFlagged=true').build();
+    countQuery = new AssetsQuery(countQuery).addQuery('includeFlagged=true').build();
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
       this.apiService.getNftsForUserCount(address, countQuery),
@@ -79,10 +65,12 @@ export class AssetsGetterService {
     const apiCountQuery = this.getApiQueryForCount(filters);
 
     if (filters.ownerAddress && filters.customFilters) {
-      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }))
-      if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>()
+      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(
+        new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }),
+      );
+      if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>();
 
-      const ticketCollectionIdentifiers = ticketsCollections.map(x => x.collection).toString();
+      const ticketCollectionIdentifiers = ticketsCollections.map((x) => x.collection).toString();
       return await this.getAssetsForUser(
         filters.ownerAddress,
         `?collections=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
@@ -98,12 +86,7 @@ export class AssetsGetterService {
       });
     }
 
-    if (
-      filters?.collection &&
-      (filters?.traits ||
-        sorting === AssetsSortingEnum.RankAsc ||
-        sorting === AssetsSortingEnum.RankDesc)
-    ) {
+    if (filters?.collection && (filters?.traits || sorting === AssetsSortingEnum.RankAsc || sorting === AssetsSortingEnum.RankDesc)) {
       const response = await this.getCollectionAssetsByTraitsAndRanks(
         filters.collection,
         filters.traits,
@@ -116,31 +99,19 @@ export class AssetsGetterService {
     }
 
     if (filters?.likedByAddress) {
-      const response = await this.getlikedByAssets(
-        filters.likedByAddress,
-        limit,
-        offset,
-      );
+      const response = await this.getlikedByAssets(filters.likedByAddress, limit, offset);
       this.addToCache(response);
       return response;
     }
 
     if (filters?.artistAddress) {
-      const response = await this.getAssetsByArtistAddress(
-        filters.artistAddress,
-        limit,
-        offset,
-      );
+      const response = await this.getAssetsByArtistAddress(filters.artistAddress, limit, offset);
       this.addToCache(response);
       return response;
     }
 
     if (filters?.ownerAddress) {
-      const response = await this.getAssetsByOwnerAddress(
-        filters,
-        apiQuery,
-        apiCountQuery,
-      );
+      const response = await this.getAssetsByOwnerAddress(filters, apiQuery, apiCountQuery);
       await this.addToCache(response);
       return new CollectionType({
         count: response?.count,
@@ -150,35 +121,19 @@ export class AssetsGetterService {
       });
     }
 
-    const response = await this.getAssetsWithoutOwner(
-      filters,
-      apiQuery,
-      apiCountQuery,
-    );
+    const response = await this.getAssetsWithoutOwner(filters, apiQuery, apiCountQuery);
     this.addToCache(response);
     return response;
   }
 
-  async getAssetsForCollection(
-    filters: AssetsFilter,
-    limit: number = 4,
-  ): Promise<[any[], number]> {
-    const apiQuery = new AssetsQuery()
-      .addCollection(filters?.collection)
-      .addPageSize(0, limit)
-      .build();
+  async getAssetsForCollection(filters: AssetsFilter, limit: number = 4): Promise<[any[], number]> {
+    const apiQuery = new AssetsQuery().addCollection(filters?.collection).addPageSize(0, limit).build();
 
     return await this.getCollectionAssets(apiQuery);
   }
 
-  async getAssetByIdentifierAndAddress(
-    ownerAddress: string,
-    identifier: string,
-  ): Promise<Asset> {
-    const nft = await this.apiService.getNftByIdentifierAndAddress(
-      ownerAddress,
-      identifier,
-    );
+  async getAssetByIdentifierAndAddress(ownerAddress: string, identifier: string): Promise<Asset> {
+    const nft = await this.apiService.getNftByIdentifierAndAddress(ownerAddress, identifier);
     return Asset.fromNft(nft, ownerAddress);
   }
 
@@ -187,27 +142,16 @@ export class AssetsGetterService {
     return nfts?.map((nft) => Asset.fromNft(nft));
   }
 
-  private async getCollectionAssets(
-    query: string = '',
-  ): Promise<[any[], number]> {
+  private async getCollectionAssets(query: string = ''): Promise<[any[], number]> {
     query = new AssetsQuery(query).addFields(['media', 'identifier']).build();
-    const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(query),
-      this.apiService.getNftsCount(query),
-    ]);
+    const [nfts, count] = await Promise.all([this.apiService.getAllNfts(query), this.apiService.getNftsCount(query)]);
     return [nfts, count];
   }
 
-  private async getAllAssets(
-    query: string = '',
-    countQuery: string = '',
-  ): Promise<CollectionType<Asset>> {
+  private async getAllAssets(query: string = '', countQuery: string = ''): Promise<CollectionType<Asset>> {
     query = new AssetsQuery(query).build();
     countQuery = new AssetsQuery(countQuery).build();
-    const [nfts, count] = await Promise.all([
-      this.apiService.getAllNfts(query),
-      this.apiService.getNftsCount(countQuery),
-    ]);
+    const [nfts, count] = await Promise.all([this.apiService.getAllNfts(query), this.apiService.getNftsCount(countQuery)]);
     if (!nfts || !count) {
       return null;
     }
@@ -216,34 +160,19 @@ export class AssetsGetterService {
     return new CollectionType({ count, items: assets });
   }
 
-  private async getAssetsWithoutOwner(
-    filters: AssetsFilter,
-    query: string = '',
-    countQuery: string = '',
-  ): Promise<CollectionType<Asset>> {
+  private async getAssetsWithoutOwner(filters: AssetsFilter, query: string = '', countQuery: string = ''): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
-      const asset = await this.assetByIdentifierService.getAsset(
-        filters?.identifier,
-      );
-      return asset
-        ? new CollectionType({ items: [asset], count: asset ? 1 : 0 })
-        : null;
+      const asset = await this.assetByIdentifierService.getAsset(filters?.identifier);
+      return asset ? new CollectionType({ items: [asset], count: asset ? 1 : 0 }) : null;
     } else {
       return await this.getOrSetAssets(query, countQuery);
     }
   }
 
-  private async getOrSetAssets(
-    query: string,
-    countQuery: string = '',
-  ): Promise<CollectionType<Asset>> {
+  private async getOrSetAssets(query: string, countQuery: string = ''): Promise<CollectionType<Asset>> {
     try {
       const cacheKey = this.getAssetsQueryCacheKey(query);
-      return this.redisCacheService.getOrSet(
-        cacheKey,
-        () => this.getAllAssets(query, countQuery),
-        5 * Constants.oneSecond(),
-      );
+      return this.redisCacheService.getOrSet(cacheKey, () => this.getAllAssets(query, countQuery), 5 * Constants.oneSecond());
     } catch (error) {
       this.logger.error('An error occurred while get assets', {
         path: 'AssetsService.getAssets',
@@ -259,38 +188,19 @@ export class AssetsGetterService {
     countQuery: string = '',
   ): Promise<CollectionType<Asset>> {
     if (filters?.identifier) {
-      const asset = await this.getAssetByIdentifierAndAddress(
-        filters.ownerAddress,
-        filters.identifier,
-      );
-      return asset
-        ? new CollectionType({ count: asset ? 1 : 0, items: [asset] })
-        : null;
+      const asset = await this.getAssetByIdentifierAndAddress(filters.ownerAddress, filters.identifier);
+      return asset ? new CollectionType({ count: asset ? 1 : 0, items: [asset] }) : null;
     } else {
-      return await this.getAssetsForUser(
-        filters.ownerAddress,
-        query,
-        countQuery,
-      );
+      return await this.getAssetsForUser(filters.ownerAddress, query, countQuery);
     }
   }
 
-  private async getAssetsByArtistAddress(
-    address: string,
-    size: number = 25,
-    offset: number = 0,
-  ): Promise<CollectionType<Asset>> {
-    const artistCollections = await this.collectionsService.getArtistCreations(
-      address,
-    );
+  private async getAssetsByArtistAddress(address: string, size: number = 25, offset: number = 0): Promise<CollectionType<Asset>> {
+    const artistCollections = await this.collectionsService.getArtistCreations(address);
     if (artistCollections) {
       const batch = artistCollections?.collections?.slice(0, 100);
       let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
-      let elasticNfts = await this.elasticService.getList(
-        'tokens',
-        'identifier',
-        elasticQuery,
-      );
+      let elasticNfts = await this.elasticService.getList('tokens', 'identifier', elasticQuery);
 
       const returnAssets = await this.mapElasticNfts(elasticNfts);
       return new CollectionType({
@@ -305,9 +215,7 @@ export class AssetsGetterService {
   }
 
   private async mapElasticNfts(elasticNfts: any[]) {
-    const assets = await this.getAssetsForIdentifiers(
-      elasticNfts?.map((e) => e.identifier),
-    );
+    const assets = await this.getAssetsForIdentifiers(elasticNfts?.map((e) => e.identifier));
     const returnAssets = [];
     for (const asset of elasticNfts) {
       returnAssets.push(assets.find((a) => a.identifier === asset.identifier));
@@ -316,20 +224,10 @@ export class AssetsGetterService {
     return returnAssets;
   }
 
-  private getCollectionsElasticQuery(
-    collections: string[],
-    offset: number,
-    size: number,
-  ) {
+  private getCollectionsElasticQuery(collections: string[], offset: number, size: number) {
     return ElasticQuery.create()
       .withCondition(QueryConditionOptions.must, QueryType.Exists('identifier'))
-      .withMustCondition(
-        QueryType.Should(
-          collections.map((collection) =>
-            QueryType.Match('token', collection, QueryOperator.AND),
-          ),
-        ),
-      )
+      .withMustCondition(QueryType.Should(collections.map((collection) => QueryType.Match('token', collection, QueryOperator.AND))))
       .withPagination(new QueryPagination({ from: offset, size: size }))
       .withSort([
         { name: 'timestamp', order: ElasticSortOrder.descending },
@@ -345,40 +243,20 @@ export class AssetsGetterService {
     sortByRank?: Sort,
   ): Promise<CollectionType<Asset>> {
     for (let i = 0; i < traits?.length; i++) {
-      const multipleAttributesPerTraitFilter = traits.find(
-        (t) => t.name === traits[i].name && t.value !== traits[i].value,
-      );
+      const multipleAttributesPerTraitFilter = traits.find((t) => t.name === traits[i].name && t.value !== traits[i].value);
       if (multipleAttributesPerTraitFilter) {
         return new CollectionType({ items: [], count: 0 });
       }
     }
 
-    const [nfts, count] =
-      await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(
-        collection,
-        traits,
-        limit,
-        offset,
-        sortByRank,
-      );
+    const [nfts, count] = await this.nftTraitsService.getCollectionNftsByTraitsAndRanks(collection, traits, limit, offset, sortByRank);
     const assets = nfts?.map((nft) => Asset.fromNft(nft));
     return new CollectionType({ items: assets, count: count });
   }
 
-  private async getlikedByAssets(
-    likedByAddress: string,
-    limit: number,
-    offset: number,
-  ): Promise<CollectionType<Asset>> {
-    const [assetsLiked, assetsCount] =
-      await this.assetsLikedService.getAssetLiked(
-        limit,
-        offset,
-        likedByAddress,
-      );
-    const assets = await this.getAssetsForIdentifiers(
-      assetsLiked?.map((e) => e.identifier),
-    );
+  private async getlikedByAssets(likedByAddress: string, limit: number, offset: number): Promise<CollectionType<Asset>> {
+    const [assetsLiked, assetsCount] = await this.assetsLikedService.getAssetLiked(limit, offset, likedByAddress);
+    const assets = await this.getAssetsForIdentifiers(assetsLiked?.map((e) => e.identifier));
 
     const returnAssets = [];
     for (const asset of assetsLiked) {
@@ -395,17 +273,14 @@ export class AssetsGetterService {
       .addCollection(filters?.collection)
       .addCollections(filters?.collections)
       .addType(filters?.type)
+      .addSearchTerm(filters?.searchTerm)
       .withOwner()
       .withSupply()
       .addPageSize(offset, limit)
       .build();
   }
 
-  private getApiQueryWithoutOwnerFlag(
-    filters: AssetsFilter,
-    offset: number,
-    limit: number,
-  ) {
+  private getApiQueryWithoutOwnerFlag(filters: AssetsFilter, offset: number, limit: number) {
     return new AssetsQuery()
       .addCreator(filters?.creatorAddress)
       .addTags(filters?.tags)
@@ -413,6 +288,7 @@ export class AssetsGetterService {
       .addCollection(filters?.collection)
       .addCollections(filters?.collections)
       .addType(filters?.type)
+      .addSearchTerm(filters?.searchTerm)
       .withSupply()
       .addPageSize(offset, limit)
       .build();

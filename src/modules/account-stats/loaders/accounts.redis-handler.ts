@@ -1,4 +1,4 @@
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable } from '@nestjs/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
@@ -10,16 +10,11 @@ export class AccountsRedisHandler extends RedisKeyValueDataloaderHandler<string>
     super(redisCacheService, CacheInfo.Account.key);
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    accountsAddreses: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], accountsAddreses: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = accountsAddreses[item.key]
-          ? accountsAddreses[item.key][0]
-          : null;
+        item.value = accountsAddreses[item.key] ? accountsAddreses[item.key][0] : null;
         redisValues.push(item);
       }
     }

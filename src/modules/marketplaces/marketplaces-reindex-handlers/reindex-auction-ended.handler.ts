@@ -10,47 +10,28 @@ import { AuctionEndedSummary } from '../models/marketplaces-reindex-events-summa
 export class ReindexAuctionEndedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: AuctionEndedSummary,
-    paymentToken: Token,
-  ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
-      input.auctionId,
-    );
+  handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionEndedSummary, paymentToken: Token): void {
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
     if (auctionIndex === -1) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status =
-      AuctionStatusEnum.Ended;
-    marketplaceReindexState.auctions[auctionIndex].blockHash =
-      marketplaceReindexState.auctions[auctionIndex].blockHash ??
-      input.blockHash;
+    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Ended;
+    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
 
-    const winnerOrderId =
-      marketplaceReindexState.setAuctionOrderWinnerStatusAndReturnId(
-        marketplaceReindexState.auctions[auctionIndex].id,
-        OrderStatusEnum.Bought,
-        modifiedDate,
-      );
+    const winnerOrderId = marketplaceReindexState.setAuctionOrderWinnerStatusAndReturnId(
+      marketplaceReindexState.auctions[auctionIndex].id,
+      OrderStatusEnum.Bought,
+      modifiedDate,
+    );
 
     if (winnerOrderId !== -1) {
-      marketplaceReindexState.setInactiveOrdersForAuction(
-        marketplaceReindexState.auctions[auctionIndex].id,
-        modifiedDate,
-        winnerOrderId,
-      );
+      marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate, winnerOrderId);
     } else if (input.currentBid !== '0') {
-      const order = marketplaceReindexState.createOrder(
-        auctionIndex,
-        input,
-        OrderStatusEnum.Bought,
-        paymentToken,
-      );
+      const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken);
       marketplaceReindexState.orders.push(order);
     }
   }

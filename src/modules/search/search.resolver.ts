@@ -4,10 +4,7 @@ import { SearchService } from './search.service';
 import { SearchFilter } from './models/Search.Filter';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { isValidAddress } from 'src/utils/helpers';
-import {
-  SearchNftCollectionResponse,
-  SearchItemResponse,
-} from './models/SearchItemResponse';
+import { SearchNftCollectionResponse, SearchItemResponse } from './models/SearchItemResponse';
 
 @Resolver(() => SearchResponse)
 export class SearchResolver {
@@ -15,9 +12,7 @@ export class SearchResolver {
 
   @Query(() => SearchResponse)
   @UsePipes(new ValidationPipe())
-  async search(
-    @Args('filters', { type: () => SearchFilter }) filters: SearchFilter,
-  ): Promise<SearchResponse> {
+  async search(@Args('filters', { type: () => SearchFilter }) filters: SearchFilter): Promise<SearchResponse> {
     return new SearchResponse({ searchTerm: filters.searchTerm });
   }
 

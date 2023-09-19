@@ -1,625 +1,611 @@
 {
-    "buildInfo": {
-        "rustc": {
-            "version": "1.64.0-nightly",
-            "commitHash": "23e21bdd25026e2839ebe946c2a937c1904887d2",
-            "commitDate": "2022-07-15",
-            "channel": "Nightly",
-            "short": "rustc 1.64.0-nightly (23e21bdd2 2022-07-15)"
-        },
-        "contractCrate": {
-            "name": "nft-swap",
-            "version": "0.0.0"
-        },
-        "framework": {
-            "name": "elrond-wasm",
-            "version": "0.29.3"
-        }
+  "buildInfo": {
+    "rustc": {
+      "version": "1.64.0-nightly",
+      "commitHash": "23e21bdd25026e2839ebe946c2a937c1904887d2",
+      "commitDate": "2022-07-15",
+      "channel": "Nightly",
+      "short": "rustc 1.64.0-nightly (23e21bdd2 2022-07-15)"
     },
-    "name": "NftSwap",
-    "constructor": {
-        "inputs": [
-            {
-                "name": "bid_cut_percentage",
-                "type": "u64"
-            },
-            {
-                "name": "swap_price",
-                "type": "BigUint"
-            }
-        ],
-        "outputs": []
+    "contractCrate": {
+      "name": "nft-swap",
+      "version": "0.0.0"
     },
-    "endpoints": [
-        {
-            "name": "nftSwap",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "price",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "auction",
-                    "type": "bool"
-                },
-                {
-                    "name": "deadline",
-                    "type": "u64"
-                },
-                {
-                    "name": "opt_payment_token",
-                    "type": "optional<TokenIdentifier>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "nftSwapUpdate",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "min_bid",
-                    "type": "BigUint"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "nftSwapExtend",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "deadline",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "withdrawProfits",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "opt_payment_token",
-                    "type": "optional<TokenIdentifier>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "emergencyWithdraw",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "amount",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "opt_payment_token",
-                    "type": "optional<TokenIdentifier>",
-                    "multi_arg": true
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setSwapCutAmount",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "new_cut",
-                    "type": "BigUint"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setCutPercentage",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "new_cut_percentage",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "setNoCommissionToken",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "token_id",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "active",
-                    "type": "bool"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "pause",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "resume",
-            "onlyOwner": true,
-            "mutability": "mutable",
-            "inputs": [],
-            "outputs": []
-        },
-        {
-            "name": "getActiveOffer",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "bool"
-                }
-            ]
-        },
-        {
-            "name": "getState",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "State"
-                }
-            ]
-        },
-        {
-            "name": "getMarketplaceCutPercentage",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getMarketplaceSwapCut",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getLastValidSwapId",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "u64"
-                }
-            ]
-        },
-        {
-            "name": "getSwapById",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "Swap"
-                }
-            ]
-        },
-        {
-            "name": "getOffersByAddress",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<Offer>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getOfferAddressesById",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<Address>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getActiveOfferOfAddress",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "variadic<u64>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "getCommissionAmount",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "token_id",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "token_nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "getClaimableAmount",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "address",
-                    "type": "Address"
-                },
-                {
-                    "name": "token_id",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "token_nonce",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "doesSwapExist",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "bool"
-                }
-            ]
-        },
-        {
-            "name": "getAuctionToken",
-            "mutability": "readonly",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": [
-                {
-                    "type": "optional<multi<TokenIdentifier,u64,BigUint,Address>>",
-                    "multi_result": true
-                }
-            ]
-        },
-        {
-            "name": "totalCommission",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "BigUint"
-                }
-            ]
-        },
-        {
-            "name": "addOffer",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "addMultiOffer",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "activateOffer",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "EGLD"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "bid",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "purchase",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "amount",
-                    "type": "BigUint"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "acceptBid",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "acceptBidAsWinner",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "acceptOffer",
-            "mutability": "mutable",
-            "payableInTokens": [
-                "EGLD"
-            ],
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                },
-                {
-                    "name": "from_address",
-                    "type": "Address"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "withdrawOffer",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        },
-        {
-            "name": "withdrawSwap",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "swap_id",
-                    "type": "u64"
-                }
-            ],
-            "outputs": []
-        }
-    ],
-    "hasCallback": false,
-    "types": {
-        "EsdtToken": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "token_type",
-                    "type": "TokenIdentifier"
-                },
-                {
-                    "name": "nonce",
-                    "type": "u64"
-                }
-            ]
-        },
-        "Offer": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "token",
-                    "type": "EsdtToken"
-                },
-                {
-                    "name": "nr_tokens",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "original_owner",
-                    "type": "Address"
-                }
-            ]
-        },
-        "State": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "Inactive",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Active",
-                    "discriminant": 1
-                }
-            ]
-        },
-        "Swap": {
-            "type": "struct",
-            "fields": [
-                {
-                    "name": "token",
-                    "type": "EsdtToken"
-                },
-                {
-                    "name": "nr_tokens",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "min_bid",
-                    "type": "BigUint"
-                },
-                {
-                    "name": "swap_type",
-                    "type": "SwapType"
-                },
-                {
-                    "name": "deadline",
-                    "type": "u64"
-                },
-                {
-                    "name": "payment_token",
-                    "type": "EsdtToken"
-                },
-                {
-                    "name": "original_owner",
-                    "type": "Address"
-                },
-                {
-                    "name": "creator_royalties_percentage",
-                    "type": "BigUint"
-                }
-            ]
-        },
-        "SwapType": {
-            "type": "enum",
-            "variants": [
-                {
-                    "name": "Auction",
-                    "discriminant": 0
-                },
-                {
-                    "name": "Swap",
-                    "discriminant": 1
-                },
-                {
-                    "name": "Buy",
-                    "discriminant": 2
-                }
-            ]
-        }
+    "framework": {
+      "name": "elrond-wasm",
+      "version": "0.29.3"
     }
+  },
+  "name": "NftSwap",
+  "constructor": {
+    "inputs": [
+      {
+        "name": "bid_cut_percentage",
+        "type": "u64"
+      },
+      {
+        "name": "swap_price",
+        "type": "BigUint"
+      }
+    ],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "nftSwap",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "price",
+          "type": "BigUint"
+        },
+        {
+          "name": "auction",
+          "type": "bool"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "opt_payment_token",
+          "type": "optional<TokenIdentifier>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "nftSwapUpdate",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "min_bid",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "nftSwapExtend",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdrawProfits",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "opt_payment_token",
+          "type": "optional<TokenIdentifier>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "emergencyWithdraw",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "BigUint"
+        },
+        {
+          "name": "opt_payment_token",
+          "type": "optional<TokenIdentifier>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setSwapCutAmount",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "new_cut",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setCutPercentage",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "new_cut_percentage",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setNoCommissionToken",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "active",
+          "type": "bool"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "pause",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "resume",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "getActiveOffer",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "getState",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "State"
+        }
+      ]
+    },
+    {
+      "name": "getMarketplaceCutPercentage",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getMarketplaceSwapCut",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getLastValidSwapId",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getSwapById",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Swap"
+        }
+      ]
+    },
+    {
+      "name": "getOffersByAddress",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Offer>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getOfferAddressesById",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getActiveOfferOfAddress",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<u64>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getCommissionAmount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "getClaimableAmount",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        },
+        {
+          "name": "token_id",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "token_nonce",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "doesSwapExist",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "getAuctionToken",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "optional<multi<TokenIdentifier,u64,BigUint,Address>>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "totalCommission",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "BigUint"
+        }
+      ]
+    },
+    {
+      "name": "addOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addMultiOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "activateOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["EGLD"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "bid",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "purchase",
+      "mutability": "mutable",
+      "payableInTokens": ["*"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "BigUint"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "acceptBid",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "acceptBidAsWinner",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "acceptOffer",
+      "mutability": "mutable",
+      "payableInTokens": ["EGLD"],
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        },
+        {
+          "name": "from_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdrawOffer",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "withdrawSwap",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "swap_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    }
+  ],
+  "hasCallback": false,
+  "types": {
+    "EsdtToken": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token_type",
+          "type": "TokenIdentifier"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    },
+    "Offer": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token",
+          "type": "EsdtToken"
+        },
+        {
+          "name": "nr_tokens",
+          "type": "BigUint"
+        },
+        {
+          "name": "original_owner",
+          "type": "Address"
+        }
+      ]
+    },
+    "State": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "Inactive",
+          "discriminant": 0
+        },
+        {
+          "name": "Active",
+          "discriminant": 1
+        }
+      ]
+    },
+    "Swap": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "token",
+          "type": "EsdtToken"
+        },
+        {
+          "name": "nr_tokens",
+          "type": "BigUint"
+        },
+        {
+          "name": "min_bid",
+          "type": "BigUint"
+        },
+        {
+          "name": "swap_type",
+          "type": "SwapType"
+        },
+        {
+          "name": "deadline",
+          "type": "u64"
+        },
+        {
+          "name": "payment_token",
+          "type": "EsdtToken"
+        },
+        {
+          "name": "original_owner",
+          "type": "Address"
+        },
+        {
+          "name": "creator_royalties_percentage",
+          "type": "BigUint"
+        }
+      ]
+    },
+    "SwapType": {
+      "type": "enum",
+      "variants": [
+        {
+          "name": "Auction",
+          "discriminant": 0
+        },
+        {
+          "name": "Swap",
+          "discriminant": 1
+        },
+        {
+          "name": "Buy",
+          "discriminant": 2
+        }
+      ]
+    }
+  }
 }

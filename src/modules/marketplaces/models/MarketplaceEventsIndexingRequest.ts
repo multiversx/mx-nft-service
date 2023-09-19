@@ -8,9 +8,7 @@ export class MarketplaceEventsIndexingRequest {
   marketplaceLastIndexTimestamp?: number;
   txTimestampDelimiter?: number;
 
-  static fromMarketplaceEventsIndexingArgs(
-    input: MarketplaceEventsIndexingArgs,
-  ): MarketplaceEventsIndexingRequest {
+  static fromMarketplaceEventsIndexingArgs(input: MarketplaceEventsIndexingArgs): MarketplaceEventsIndexingRequest {
     return new MarketplaceEventsIndexingRequest({
       marketplaceAddress: input.marketplaceAddress,
       beforeTimestamp: input.beforeTimestamp,

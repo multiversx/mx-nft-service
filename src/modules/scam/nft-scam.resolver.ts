@@ -1,10 +1,10 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { NftScamService } from './nft-scam.service';
-import { ApolloError } from 'apollo-server-express';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { ScamInfoTypeEnum } from '../assets/models';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => Boolean)
 export class NftScamResolver {
@@ -12,15 +12,11 @@ export class NftScamResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async validateOrUpdateNftScamInfo(
-    @Args('identifier') identifier: string,
-  ): Promise<boolean> {
+  async validateOrUpdateNftScamInfo(@Args('identifier') identifier: string): Promise<boolean> {
     try {
-      return await this.nftScamService.validateNftScamInfoForIdentifier(
-        identifier,
-      );
+      return await this.nftScamService.validateNftScamInfoForIdentifier(identifier);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -33,25 +29,19 @@ export class NftScamResolver {
     @Args('info') info: string,
   ): Promise<boolean> {
     try {
-      return await this.nftScamService.manuallySetNftScamInfo(
-        identifier,
-        type,
-        info,
-      );
+      return await this.nftScamService.manuallySetNftScamInfo(identifier, type, info);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async clearNftScamInfo(
-    @Args('identifier') identifier: string,
-  ): Promise<boolean> {
+  async clearNftScamInfo(@Args('identifier') identifier: string): Promise<boolean> {
     try {
       return await this.nftScamService.manuallyClearNftScamInfo(identifier);
     } catch (error) {
-      throw new ApolloError(error);
+      throw error;
     }
   }
 }

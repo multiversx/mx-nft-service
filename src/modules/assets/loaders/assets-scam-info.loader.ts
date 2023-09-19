@@ -10,20 +10,12 @@ import { ScamInfo } from '../models/ScamInfo.dto';
   scope: Scope.REQUEST,
 })
 export class AssetScamInfoProvider extends BaseProvider<string> {
-  constructor(
-    private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
-    private documentDbService: DocumentDbService,
-  ) {
-    super(
-      assetScamInfoRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(private assetScamInfoRedisHandler: AssetScamInfoRedisHandler, private documentDbService: DocumentDbService) {
+    super(assetScamInfoRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const bulkNftScamInfo = await this.documentDbService.getBulkNftScamInfo(
-      identifiers,
-    );
+    const bulkNftScamInfo = await this.documentDbService.getBulkNftScamInfo(identifiers);
     const nfts: Asset[] = bulkNftScamInfo.map(
       (nft) =>
         new Asset({

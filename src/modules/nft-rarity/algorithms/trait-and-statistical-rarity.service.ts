@@ -28,13 +28,11 @@ export class TraitAndStatisticalRarityService {
         }
 
         if (algorithms.includes(RarityAlgorithmsEnum.TraitRarity)) {
-          rarities[nft.nonce].traitScore +=
-            dnaSummary[traitKey][attributeKey].rarity;
+          rarities[nft.nonce].traitScore += dnaSummary[traitKey][attributeKey].rarity;
         }
 
         if (algorithms.includes(RarityAlgorithmsEnum.StatisticalRarity)) {
-          rarities[nft.nonce].statisticalScore *=
-            dnaSummary[traitKey][attributeKey].frequency;
+          rarities[nft.nonce].statisticalScore *= dnaSummary[traitKey][attributeKey].frequency;
         }
       }
     }
@@ -48,8 +46,7 @@ export class TraitAndStatisticalRarityService {
       for (let i = 0; i < nfts.length; i++) {
         const nonce = nfts[i].nonce;
         raritiesObj[nonce] = { ...rarities[nonce], ...raritiesObj[nonce] };
-        raritiesObj[nonce].traitRank =
-          nfts.length - raritiesSortAsc.indexOf(rarities[nonce]);
+        raritiesObj[nonce].traitRank = nfts.length - raritiesSortAsc.indexOf(rarities[nonce]);
       }
     }
 
@@ -60,8 +57,7 @@ export class TraitAndStatisticalRarityService {
       for (let i = 0; i < nfts.length; i++) {
         const nonce = nfts[i].nonce;
         raritiesObj[nonce] = { ...rarities[nonce], ...raritiesObj[nonce] };
-        raritiesObj[nonce].statisticalRank =
-          nfts.length - raritiesSortAsc.indexOf(rarities[nonce]);
+        raritiesObj[nonce].statisticalRank = nfts.length - raritiesSortAsc.indexOf(rarities[nonce]);
       }
     }
 

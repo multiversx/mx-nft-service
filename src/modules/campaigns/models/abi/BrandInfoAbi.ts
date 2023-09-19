@@ -1,9 +1,4 @@
-import {
-  ArrayVec,
-  BigUIntValue,
-  BytesValue,
-  U64Value,
-} from '@multiversx/sdk-core';
+import { ArrayVec, BigUIntValue, BytesValue, U64Value } from '@multiversx/sdk-core';
 import { TimePeriod } from './MintPeriodAbi';
 
 export interface BrandInfo {

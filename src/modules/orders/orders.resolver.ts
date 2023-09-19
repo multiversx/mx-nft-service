@@ -13,11 +13,7 @@ import { QueryRequest } from '../common/filters/QueryRequest';
 
 @Resolver(() => Order)
 export class OrdersResolver extends BaseResolver(Order) {
-  constructor(
-    private ordersService: OrdersService,
-    private accountsProvider: AccountsProvider,
-    private auctionProvider: AuctionProvider,
-  ) {
+  constructor(private ordersService: OrdersService, private accountsProvider: AccountsProvider, private auctionProvider: AuctionProvider) {
     super();
   }
 
@@ -31,9 +27,7 @@ export class OrdersResolver extends BaseResolver(Order) {
     pagination: ConnectionArgs,
   ) {
     const { limit, offset } = pagination.pagingParams();
-    const [orders, count] = await this.ordersService.getOrders(
-      new QueryRequest({ limit, offset, filters, sorting }),
-    );
+    const [orders, count] = await this.ordersService.getOrders(new QueryRequest({ limit, offset, filters, sorting }));
     const page = connectionFromArraySlice(orders, pagination, {
       arrayLength: count,
       sliceStart: offset || 0,
@@ -58,8 +52,6 @@ export class OrdersResolver extends BaseResolver(Order) {
   async auction(@Parent() order: Order) {
     const { auctionId } = order;
     const auctions = await this.auctionProvider.load(auctionId);
-    return auctions?.value !== undefined
-      ? Auction.fromEntity(auctions.value)
-      : null;
+    return auctions?.value !== undefined ? Auction.fromEntity(auctions.value) : null;
   }
 }

@@ -1,4 +1,4 @@
-import { RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable, Logger } from '@nestjs/common';
 import { UnableToLoadError } from 'src/common/models/errors/unable-to-load-error';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
@@ -21,9 +21,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
   }
 
   async clearMultipleKeys(keys: T[]): Promise<any> {
-    await this.redisCacheService.deleteMany(
-      keys.map((key) => this.getCacheKey(key)),
-    );
+    await this.redisCacheService.deleteMany(keys.map((key) => this.getCacheKey(key)));
   }
 
   async clearKeyByPattern(key: T): Promise<any> {
@@ -34,29 +32,17 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     try {
       if (!keys || keys.length === 0) return;
       const cacheKeys = this.getCacheKeys(keys);
-      const getDataFromRedis: { key: T; value: any }[] =
-        await this.redisCacheService.getMany(cacheKeys);
-      const returnValues: { key: T; value: any }[] = this.mapReturnValues<T>(
-        keys,
-        getDataFromRedis,
-      );
-      const getNotCachedKeys = returnValues
-        .filter((item) => item.value === null)
-        .map((value) => value.key);
+      const getDataFromRedis: { key: T; value: any }[] = await this.redisCacheService.getMany(cacheKeys);
+      const returnValues: { key: T; value: any }[] = this.mapReturnValues<T>(keys, getDataFromRedis);
+      const getNotCachedKeys = returnValues.filter((item) => item.value === null).map((value) => value.key);
       if (getNotCachedKeys?.length > 0) {
         let data = await createValueFunc();
         const redisValues = this.mapValues(returnValues, data);
 
         for (const val of redisValues) {
           if (val.values?.length > 0) {
-            const cacheKeys = this.getCacheKeys(
-              val.values.map((value) => value.key),
-            );
-            await this.redisCacheService.setMany(
-              cacheKeys,
-              val.values,
-              val.ttl,
-            );
+            const cacheKeys = this.getCacheKeys(val.values.map((value) => value.key));
+            await this.redisCacheService.setMany(cacheKeys, val.values, val.ttl);
           }
         }
         return returnValues;
@@ -84,10 +70,7 @@ export abstract class RedisKeyValueDataloaderHandler<T> {
     return generateCacheKeyFromParams(this.cacheKeyName, key);
   }
 
-  protected mapReturnValues<T>(
-    keys: T[],
-    getDataFromRedis: { key: T; value: any }[],
-  ) {
+  protected mapReturnValues<T>(keys: T[], getDataFromRedis: { key: T; value: any }[]) {
     const returnValues: { key: T; value: any }[] = [];
     for (let index = 0; index < keys.length; index++) {
       if (getDataFromRedis[index]) {

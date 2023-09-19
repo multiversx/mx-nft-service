@@ -4,32 +4,21 @@ import { elasticDictionary } from 'src/config';
 import { Asset } from '../assets/models';
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 import { NftScamInfoModel } from './models/nft-scam-info.model';
-import {
-  getAllCollectionsFromElasticQuery,
-  getNftWithScamInfoFromElasticQuery,
-} from './nft-scam.queries';
+import { getAllCollectionsFromElasticQuery, getNftWithScamInfoFromElasticQuery } from './nft-scam.queries';
 
 @Injectable()
 export class NftScamElasticService {
-  constructor(
-    private mxService: MxElasticService,
-    private readonly logger: Logger,
-  ) {}
+  constructor(private mxService: MxElasticService, private readonly logger: Logger) {}
 
   async getNftWithScamInfoFromElastic(identifier: string): Promise<any> {
     let nft: any;
     try {
       const query = getNftWithScamInfoFromElasticQuery(identifier);
 
-      await this.mxService.getScrollableList(
-        'tokens',
-        'identifier',
-        query,
-        async (items) => {
-          nft = items[0];
-          return undefined;
-        },
-      );
+      await this.mxService.getScrollableList('tokens', 'identifier', query, async (items) => {
+        nft = items[0];
+        return undefined;
+      });
     } catch (error) {
       this.logger.error(`Error when getting NFT scamInfo values from Elastic`, {
         path: `${NftScamElasticService.name}.${this.getNftWithScamInfoFromElastic.name}`,
@@ -40,16 +29,10 @@ export class NftScamElasticService {
     return nft;
   }
 
-  async setBulkNftScamInfoInElastic(
-    nfts: Asset[],
-    clearScamInfoIfEmpty?: boolean,
-  ): Promise<void> {
+  async setBulkNftScamInfoInElastic(nfts: Asset[], clearScamInfoIfEmpty?: boolean): Promise<void> {
     if (nfts.length > 0) {
       try {
-        await this.mxService.bulkRequest(
-          'tokens',
-          this.buildNftScamInfoBulkUpdate(nfts, clearScamInfoIfEmpty),
-        );
+        await this.mxService.bulkRequest('tokens', this.buildNftScamInfoBulkUpdate(nfts, clearScamInfoIfEmpty));
       } catch (error) {
         this.logger.error('Error when bulk updating nft scam info in Elastic', {
           path: `${NftScamElasticService.name}.${this.setBulkNftScamInfoInElastic.name}`,
@@ -72,81 +55,42 @@ export class NftScamElasticService {
     }
   }
 
-  async setNftScamInfoManuallyInElastic(
-    identifier: string,
-    scamInfo: ScamInfo,
-  ): Promise<void> {
+  async setNftScamInfoManuallyInElastic(identifier: string, scamInfo: ScamInfo): Promise<void> {
     try {
       const updates = [
-        this.mxService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          elasticDictionary.scamInfo.typeKey,
-          scamInfo?.type ?? null,
-        ),
-        this.mxService.buildBulkUpdate<string>(
-          'tokens',
-          identifier,
-          elasticDictionary.scamInfo.infoKey,
-          scamInfo?.info ?? null,
-        ),
+        this.mxService.buildBulkUpdate<string>('tokens', identifier, elasticDictionary.scamInfo.typeKey, scamInfo?.type ?? null),
+        this.mxService.buildBulkUpdate<string>('tokens', identifier, elasticDictionary.scamInfo.infoKey, scamInfo?.info ?? null),
       ];
       await this.mxService.bulkRequest('tokens', updates);
     } catch (error) {
-      this.logger.error(
-        'Error when manually setting nft scam info in Elastic',
-        {
-          path: `${NftScamElasticService.name}.${this.setNftScamInfoManuallyInElastic.name}`,
-          exception: error?.message,
-        },
-      );
+      this.logger.error('Error when manually setting nft scam info in Elastic', {
+        path: `${NftScamElasticService.name}.${this.setNftScamInfoManuallyInElastic.name}`,
+        exception: error?.message,
+      });
     }
   }
 
-  async setCollectionScamInfoManuallyInElastic(
-    collection: string,
-    scamInfo: ScamInfo,
-  ): Promise<void> {
+  async setCollectionScamInfoManuallyInElastic(collection: string, scamInfo: ScamInfo): Promise<void> {
     try {
       const updates = [
-        this.mxService.buildBulkUpdate<string>(
-          'tokens',
-          collection,
-          elasticDictionary.scamInfo.typeKey,
-          scamInfo?.type ?? null,
-        ),
-        this.mxService.buildBulkUpdate<string>(
-          'tokens',
-          collection,
-          elasticDictionary.scamInfo.infoKey,
-          scamInfo?.info ?? null,
-        ),
+        this.mxService.buildBulkUpdate<string>('tokens', collection, elasticDictionary.scamInfo.typeKey, scamInfo?.type ?? null),
+        this.mxService.buildBulkUpdate<string>('tokens', collection, elasticDictionary.scamInfo.infoKey, scamInfo?.info ?? null),
       ];
       await this.mxService.bulkRequest('tokens', updates);
     } catch (error) {
-      this.logger.error(
-        'Error when manually setting collection scam info in Elastic',
-        {
-          path: `${NftScamElasticService.name}.${this.setCollectionScamInfoManuallyInElastic.name}`,
-          exception: error?.message,
-        },
-      );
+      this.logger.error('Error when manually setting collection scam info in Elastic', {
+        path: `${NftScamElasticService.name}.${this.setCollectionScamInfoManuallyInElastic.name}`,
+        exception: error?.message,
+      });
     }
   }
 
   async getAllCollectionsFromElastic(): Promise<string[]> {
     const query = getAllCollectionsFromElasticQuery();
     let collections: string[] = [];
-    await this.mxService.getScrollableList(
-      'tokens',
-      'token',
-      query,
-      async (items) => {
-        collections = collections.concat([
-          ...new Set(items.map((i) => i.token)),
-        ]);
-      },
-    );
+    await this.mxService.getScrollableList('tokens', 'token', query, async (items) => {
+      collections = collections.concat([...new Set(items.map((i) => i.token))]);
+    });
     return collections;
   }
 
@@ -155,72 +99,26 @@ export class NftScamElasticService {
     for (const nft of nfts) {
       if (nft.scamInfo) {
         updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            elasticDictionary.scamInfo.typeKey,
-            nft.scamInfo.type,
-          ),
+          this.mxService.buildBulkUpdate<string>('tokens', nft.identifier, elasticDictionary.scamInfo.typeKey, nft.scamInfo.type),
         );
         updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            elasticDictionary.scamInfo.infoKey,
-            nft.scamInfo.info,
-          ),
+          this.mxService.buildBulkUpdate<string>('tokens', nft.identifier, elasticDictionary.scamInfo.infoKey, nft.scamInfo.info),
         );
       } else if (clearScamInfo) {
-        updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            elasticDictionary.scamInfo.typeKey,
-            null,
-          ),
-        );
-        updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nft.identifier,
-            elasticDictionary.scamInfo.infoKey,
-            null,
-          ),
-        );
+        updates.push(this.mxService.buildBulkUpdate<string>('tokens', nft.identifier, elasticDictionary.scamInfo.typeKey, null));
+        updates.push(this.mxService.buildBulkUpdate<string>('tokens', nft.identifier, elasticDictionary.scamInfo.infoKey, null));
       }
     }
     return updates;
   }
 
-  buildNftScamInfoDbToElasticMigrationBulkUpdate(
-    nftsFromDb: NftScamInfoModel[],
-    nftsFromElastic: any,
-  ): string[] {
+  buildNftScamInfoDbToElasticMigrationBulkUpdate(nftsFromDb: NftScamInfoModel[], nftsFromElastic: any): string[] {
     let updates: string[] = [];
     for (let i = 0; i < nftsFromDb.length; i++) {
-      const nftFromElastic = nftsFromElastic.find(
-        (nft) => nft.identifier === nftsFromDb[i].identifier,
-      );
-      if (
-        !nftsFromDb[i] &&
-        nftFromElastic?.[elasticDictionary.scamInfo.typeKey]
-      ) {
-        updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nftsFromDb[i].identifier,
-            elasticDictionary.scamInfo.typeKey,
-            null,
-          ),
-        );
-        updates.push(
-          this.mxService.buildBulkUpdate<string>(
-            'tokens',
-            nftsFromDb[i].identifier,
-            elasticDictionary.scamInfo.infoKey,
-            null,
-          ),
-        );
+      const nftFromElastic = nftsFromElastic.find((nft) => nft.identifier === nftsFromDb[i].identifier);
+      if (!nftsFromDb[i] && nftFromElastic?.[elasticDictionary.scamInfo.typeKey]) {
+        updates.push(this.mxService.buildBulkUpdate<string>('tokens', nftsFromDb[i].identifier, elasticDictionary.scamInfo.typeKey, null));
+        updates.push(this.mxService.buildBulkUpdate<string>('tokens', nftsFromDb[i].identifier, elasticDictionary.scamInfo.infoKey, null));
       } else {
         updates.push(
           this.mxService.buildBulkUpdate<string>(

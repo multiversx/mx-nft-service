@@ -19,9 +19,7 @@ export class CollectionScamInfoModel {
   }
 }
 
-export const CollectionScamInfoSchema = SchemaFactory.createForClass(
-  CollectionScamInfoModel,
-).index(
+export const CollectionScamInfoSchema = SchemaFactory.createForClass(CollectionScamInfoModel).index(
   {
     collectionIdentifier: 1,
   },

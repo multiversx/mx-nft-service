@@ -15,6 +15,7 @@ export class CustomRank {
     if (hash === this.generateHash(customRanks)) {
       return true;
     }
+
     return false;
   }
 }

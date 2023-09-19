@@ -3,10 +3,7 @@ import { OfferEntity } from '.';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersFiltersForDb } from './offers.filter';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DateUtils } from 'src/utils/date-utils';
@@ -20,11 +17,7 @@ export class OffersRepository {
     private offersRepository: Repository<OfferEntity>,
   ) {}
 
-  async getActiveOffers(
-    filters?: OffersFiltersForDb,
-    offset: number = 0,
-    limit: number = 10,
-  ): Promise<[OfferEntity[], number]> {
+  async getActiveOffers(filters?: OffersFiltersForDb, offset: number = 0, limit: number = 10): Promise<[OfferEntity[], number]> {
     return await this.offersRepository
       .createQueryBuilder('offers')
       .where(this.getOffersFilterForSingleValues(filters))
@@ -44,17 +37,12 @@ export class OffersRepository {
     return await this.offersRepository
       .createQueryBuilder('a')
       .where({ status: OfferStatusEnum.Active })
-      .andWhere(
-        `a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`,
-      )
+      .andWhere(`a.endDate > 0 AND a.endDate <= ${DateUtils.getCurrentTimestamp()}`)
       .limit(1000)
       .getMany();
   }
 
-  async getOfferByIdAndMarketplaceKey(
-    marketplaceOfferId: number,
-    marketplaceKey: string,
-  ): Promise<OfferEntity> {
+  async getOfferByIdAndMarketplaceKey(marketplaceOfferId: number, marketplaceKey: string): Promise<OfferEntity> {
     return await this.offersRepository.findOne({
       where: [
         {
@@ -91,18 +79,12 @@ export class OffersRepository {
     return updatedOffers;
   }
 
-  async getBulkOffersByOfferIdsAndMarketplace(
-    offerIds: number[],
-    marketplaceKey: string,
-  ): Promise<OfferEntity[]> {
+  async getBulkOffersByOfferIdsAndMarketplace(offerIds: number[], marketplaceKey: string): Promise<OfferEntity[]> {
     return await this.offersRepository
       .createQueryBuilder('offers')
-      .where(
-        `marketplaceOfferId IN(:...offerIds) and marketplaceKey='${marketplaceKey}'`,
-        {
-          offerIds: offerIds,
-        },
-      )
+      .where(`marketplaceOfferId IN(:...offerIds) and marketplaceKey='${marketplaceKey}'`, {
+        offerIds: offerIds,
+      })
       .getMany();
   }
 
@@ -112,29 +94,21 @@ export class OffersRepository {
       return true;
     }
     for (let order of offersByHash) {
-      const [offers, count] = await this.getActiveOffers(
-        new OffersFiltersForDb({ identifier: order.identifier }),
-      );
+      const [offers, count] = await this.getActiveOffers(new OffersFiltersForDb({ identifier: order.identifier }));
       if (count === 1) {
         return this.offersRepository.delete(offers[0].id);
       }
       const indexOf = offers.findIndex((o) => o.id === order.id);
       if (indexOf === count - 1) {
         await this.offersRepository.delete(offers[indexOf].id);
-        await this.updateOfferWithStatus(
-          offers[indexOf - 1],
-          OfferStatusEnum.Active,
-        );
+        await this.updateOfferWithStatus(offers[indexOf - 1], OfferStatusEnum.Active);
       } else {
         await this.offersRepository.delete(offers[indexOf].id);
       }
     }
   }
 
-  private async triggerCacheInvalidation(
-    identifier: string,
-    ownerAddress: string,
-  ) {
+  private async triggerCacheInvalidation(identifier: string, ownerAddress: string) {
     await this.cacheEventsPublisherService.publish(
       new ChangedEvent({
         id: identifier,
@@ -167,10 +141,7 @@ export class OffersRepository {
   }
 
   private getOffersByBlockHash(blockHash: string): Promise<OfferEntity[]> {
-    return this.offersRepository
-      .createQueryBuilder()
-      .where({ blockHash: blockHash })
-      .getMany();
+    return this.offersRepository.createQueryBuilder().where({ blockHash: blockHash }).getMany();
   }
 }
 
@@ -198,9 +169,7 @@ export class InFilterBuilder {
       this.queryFilter =
         this.queryFilter === ''
           ? `${filterName} IN(${filterValue.map((value) => `'${value}'`)})`
-          : `${this.queryFilter} AND ${filterName} IN(${filterValue.map(
-              (value) => `'${value}'`,
-            )})`;
+          : `${this.queryFilter} AND ${filterName} IN(${filterValue.map((value) => `'${value}'`)})`;
     }
 
     return this;

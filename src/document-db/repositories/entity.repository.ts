@@ -8,10 +8,7 @@ export abstract class EntityRepository<T extends Document> {
     return entity.save({ checkKeys: false });
   }
 
-  async findOne(
-    entityFilterQuery: FilterQuery<T>,
-    projection?: Record<string, unknown>,
-  ): Promise<T | null> {
+  async findOne(entityFilterQuery: FilterQuery<T>, projection?: Record<string, unknown>): Promise<T | null> {
     return this.entityModel
       .findOne(entityFilterQuery, {
         _id: 0,
@@ -21,10 +18,7 @@ export abstract class EntityRepository<T extends Document> {
       .exec();
   }
 
-  async find(
-    entityFilterQuery: FilterQuery<T>,
-    projection?: Record<string, unknown>,
-  ): Promise<T[] | null> {
+  async find(entityFilterQuery: FilterQuery<T>, projection?: Record<string, unknown>): Promise<T[] | null> {
     return this.entityModel.find(entityFilterQuery, {
       _id: 0,
       __v: 0,
@@ -37,18 +31,14 @@ export abstract class EntityRepository<T extends Document> {
     updateEntityData: UpdateQuery<any>,
     projection?: Record<string, unknown>,
   ): Promise<T | null> {
-    return this.entityModel.findOneAndUpdate(
-      entityFilterQuery,
-      updateEntityData,
-      {
-        new: true,
-        projection: {
-          _id: 0,
-          __v: 0,
-          ...projection,
-        },
+    return this.entityModel.findOneAndUpdate(entityFilterQuery, updateEntityData, {
+      new: true,
+      projection: {
+        _id: 0,
+        __v: 0,
+        ...projection,
       },
-    );
+    });
   }
 
   async findOneAndReplace(
@@ -56,18 +46,14 @@ export abstract class EntityRepository<T extends Document> {
     replaceEntityData: UpdateQuery<any>,
     projection?: Record<string, unknown>,
   ): Promise<T | null> {
-    return this.entityModel.findOneAndReplace(
-      entityFilterQuery,
-      replaceEntityData,
-      {
-        new: true,
-        projection: {
-          _id: 0,
-          __v: 0,
-          ...projection,
-        },
+    return this.entityModel.findOneAndReplace(entityFilterQuery, replaceEntityData, {
+      new: true,
+      projection: {
+        _id: 0,
+        __v: 0,
+        ...projection,
       },
-    );
+    });
   }
 
   async findOneAndDelete(entityFilterQuery: FilterQuery<T>): Promise<T | null> {

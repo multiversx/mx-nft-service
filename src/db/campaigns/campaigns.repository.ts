@@ -10,10 +10,7 @@ export class CampaignsRepository {
     @InjectRepository(CampaignEntity)
     private campaignsRepository: Repository<CampaignEntity>,
   ) {}
-  async getCampaign(
-    campaignId: string,
-    minterAddress: string,
-  ): Promise<CampaignEntity> {
+  async getCampaign(campaignId: string, minterAddress: string): Promise<CampaignEntity> {
     const campaign = await this.campaignsRepository.findOne({
       where: {
         campaignId,
@@ -24,9 +21,7 @@ export class CampaignsRepository {
     return campaign;
   }
 
-  async getCampaignByCollectionTicker(
-    collectionTicker: string,
-  ): Promise<CampaignEntity> {
+  async getCampaignByCollectionTicker(collectionTicker: string): Promise<CampaignEntity> {
     const campaign = await this.campaignsRepository.findOne({
       where: {
         collectionTicker,
@@ -36,9 +31,7 @@ export class CampaignsRepository {
     return campaign;
   }
 
-  async getCampaignByMinterAddress(
-    minterAddress: string,
-  ): Promise<CampaignEntity[]> {
+  async getCampaignByMinterAddress(minterAddress: string): Promise<CampaignEntity[]> {
     const campaigns = await this.campaignsRepository.find({
       where: {
         minterAddress,

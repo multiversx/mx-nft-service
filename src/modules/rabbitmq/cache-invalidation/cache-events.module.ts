@@ -12,6 +12,7 @@ import { CacheAdminEventsModule } from './cache-admin-module/cache-admin.module'
 import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-scam-info.redis-handler';
 import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets-collection.redis-handler';
 import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
+import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loader
     AssetScamInfoRedisHandler,
     AssetsCollectionsRedisHandler,
     AssetsCollectionsForOwnerRedisHandler,
+    MintersCachingService,
   ],
   exports: [],
 })

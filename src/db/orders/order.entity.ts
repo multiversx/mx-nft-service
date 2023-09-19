@@ -4,10 +4,7 @@ import { AuctionEntity } from '../auctions';
 import { BaseEntity } from '../base-entity';
 
 @Entity('orders')
-@Index('orders_price_token_amount_denominated', [
-  'priceAmount',
-  'priceAmountDenominated',
-])
+@Index('orders_price_token_amount_denominated', ['priceAmount', 'priceAmountDenominated'])
 export class OrderEntity extends BaseEntity {
   @Column({ length: 20 })
   @Index('orders_price_token')

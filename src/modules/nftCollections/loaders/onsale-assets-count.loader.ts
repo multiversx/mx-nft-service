@@ -8,21 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class OnSaleAssetsCountForCollectionProvider extends BaseProvider<string> {
-  constructor(
-    auctionsForAssetRedisHandler: OnSaleAssetsCountForCollectionRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      auctionsForAssetRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(auctionsForAssetRedisHandler: OnSaleAssetsCountForCollectionRedisHandler, private persistenceService: PersistenceService) {
+    super(auctionsForAssetRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const auctions =
-      await this.persistenceService.getOnSaleAssetCountForCollections(
-        identifiers,
-      );
+    const auctions = await this.persistenceService.getOnSaleAssetCountForCollections(identifiers);
     return auctions?.groupBy((auction) => auction.collection);
   }
 }

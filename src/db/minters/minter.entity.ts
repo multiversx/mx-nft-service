@@ -7,29 +7,13 @@ export class MinterEntity extends BaseEntity {
   @Column({ length: 62 })
   address: string;
 
-  @Column({ length: 20 })
-  name: string;
-
-  @Column()
-  description: string;
-
   @Column({ length: 62 })
-  royaltiesClaimAddress: string;
-
-  @Column({ length: 62 })
-  mintClaimAddress: string;
-
-  @Column()
-  maxNftsPerTransaction: number;
+  adminAddress: string;
 
   static fromRequest(args: WhitelistMinterRequest) {
     return new MinterEntity({
       address: args.address,
-      name: args.name,
-      description: args.description,
-      royaltiesClaimAddress: args.royaltiesClaimAddress,
-      mintClaimAddress: args.mintClaimAddress,
-      maxNftsPerTransaction: args.maxNftsPerTransaction,
+      adminAddress: args.adminAddress,
     });
   }
 

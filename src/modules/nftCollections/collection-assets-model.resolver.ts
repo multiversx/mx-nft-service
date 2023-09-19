@@ -5,9 +5,7 @@ import { AssetScamInfoProvider } from '../assets/loaders/assets-scam-info.loader
 import { ScamInfo } from '../assets/models/ScamInfo.dto';
 
 @Resolver(() => CollectionAssetModel)
-export class CollectionAssetsModelResolver extends BaseResolver(
-  CollectionAssetModel,
-) {
+export class CollectionAssetsModelResolver extends BaseResolver(CollectionAssetModel) {
   constructor(private assetScamProvider: AssetScamInfoProvider) {
     super();
   }
@@ -21,10 +19,6 @@ export class CollectionAssetsModelResolver extends BaseResolver(
     const scamInfo = await this.assetScamProvider.load(identifier);
     const scamInfoValue = scamInfo.value;
 
-    return scamInfoValue &&
-      Object.keys(scamInfoValue).length > 1 &&
-      ScamInfo.isScam(scamInfoValue)
-      ? scamInfoValue
-      : null;
+    return scamInfoValue && Object.keys(scamInfoValue).length > 1 && ScamInfo.isScam(scamInfoValue) ? scamInfoValue : null;
   }
 }

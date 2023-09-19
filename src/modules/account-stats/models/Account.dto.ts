@@ -33,9 +33,7 @@ export class Account {
           cover: account?.cover?.url,
           herotag: account?.herotag,
           privacy: account.privacy,
-          socialLinks: account?.socialLinks?.map(
-            (elem) => new SocialLink({ type: elem?.type, url: elem?.url }),
-          ),
+          socialLinks: account?.socialLinks?.map((elem) => new SocialLink({ type: elem?.type, url: elem?.url })),
         })
       : new Account({ address: address });
   }

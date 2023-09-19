@@ -3,7 +3,6 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { FlagNftService } from './flag-nft.service';
 import { FlagCollectionInput, FlagNftInput } from './models/flag-nft.input';
-import { ApolloError } from 'apollo-server-express';
 import { NftRarityService } from '../nft-rarity/nft-rarity.service';
 import { NftTraitsService } from '../nft-traits/nft-traits.service';
 import { UpdateNftTraitsResponse } from '../nft-traits/models/update-nft-traits-response';
@@ -12,17 +11,12 @@ import { MarketplaceEventsIndexingArgs } from '../marketplaces/models/Marketplac
 import { MarketplaceEventsIndexingRequest } from '../marketplaces/models/MarketplaceEventsIndexingRequest';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import {
-  CacheEventTypeEnum,
-  ChangedEvent,
-} from '../rabbitmq/cache-invalidation/events/changed.event';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { MarketplacesReindexService } from '../marketplaces/marketplaces-reindex.service';
 import { ReportsService } from '../reports/reports.service';
-import {
-  ClearReportCollectionInput,
-  ClearReportInput,
-} from './models/clear-report.input';
+import { ClearReportCollectionInput, ClearReportInput } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -39,20 +33,13 @@ export class AdminOperationsResolver {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  flagNft(
-    @Args('input', { type: () => FlagNftInput }) input: FlagNftInput,
-  ): Promise<boolean> {
-    return this.flagService.updateNftNSFWByAdmin(
-      input.identifier,
-      input.nsfwFlag,
-    );
+  flagNft(@Args('input', { type: () => FlagNftInput }) input: FlagNftInput): Promise<boolean> {
+    return this.flagService.updateNftNSFWByAdmin(input.identifier, input.nsfwFlag);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  clearReportNft(
-    @Args('input', { type: () => ClearReportInput }) input: ClearReportInput,
-  ): Promise<boolean> {
+  clearReportNft(@Args('input', { type: () => ClearReportInput }) input: ClearReportInput): Promise<boolean> {
     return this.reportNfts.clearNftReport(input.identifier);
   }
 
@@ -71,10 +58,7 @@ export class AdminOperationsResolver {
     @Args('input', { type: () => FlagCollectionInput })
     input: FlagCollectionInput,
   ): Promise<boolean> {
-    return this.flagService.updateCollectionNftsNSFWByAdmin(
-      input.collection,
-      input.nsfwFlag,
-    );
+    return this.flagService.updateCollectionNftsNSFWByAdmin(input.collection, input.nsfwFlag);
   }
 
   @Mutation(() => Boolean)
@@ -84,11 +68,9 @@ export class AdminOperationsResolver {
     collectionTicker: string,
   ): Promise<boolean> {
     try {
-      return await this.nftRarityService.updateCollectionRarities(
-        collectionTicker,
-      );
+      return await this.nftRarityService.updateCollectionRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -101,7 +83,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftRarityService.validateRarities(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -112,11 +94,9 @@ export class AdminOperationsResolver {
     collectionTicker: string,
   ): Promise<boolean> {
     try {
-      return await this.nftTraitService.updateCollectionTraits(
-        collectionTicker,
-      );
+      return await this.nftTraitService.updateCollectionTraits(collectionTicker);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -135,7 +115,7 @@ export class AdminOperationsResolver {
       );
       return true;
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -148,7 +128,7 @@ export class AdminOperationsResolver {
     try {
       return await this.nftTraitService.updateNftTraits(identifier);
     } catch (error) {
-      throw new ApolloError(error);
+      throw new GraphQLError(error);
     }
   }
 
@@ -159,11 +139,7 @@ export class AdminOperationsResolver {
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {
     this.marketplaceEventsIndexingService
-      .reindexMarketplaceEvents(
-        MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(
-          input,
-        ),
-      )
+      .reindexMarketplaceEvents(MarketplaceEventsIndexingRequest.fromMarketplaceEventsIndexingArgs(input))
       .catch((error) => {
         this.logger.error(error);
       });
@@ -176,11 +152,9 @@ export class AdminOperationsResolver {
     @Args('input')
     input: MarketplaceReindexDataArgs,
   ): Promise<boolean> {
-    this.marketplacesReindexService
-      .reindexMarketplaceData(input)
-      .catch((error) => {
-        this.logger.error(error);
-      });
+    this.marketplacesReindexService.reindexMarketplaceData(input).catch((error) => {
+      this.logger.error(error);
+    });
     return true;
   }
 }

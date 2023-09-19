@@ -9,14 +9,8 @@ import { AssetsCollectionsForOwnerRedisHandler } from './assets-collection-for-o
   scope: Scope.REQUEST,
 })
 export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
-  constructor(
-    assetsRedisHandler: AssetsCollectionsForOwnerRedisHandler,
-    private apiService: MxApiService,
-  ) {
-    super(
-      assetsRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(assetsRedisHandler: AssetsCollectionsForOwnerRedisHandler, private apiService: MxApiService) {
+    super(assetsRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
@@ -24,10 +18,7 @@ export class AssetsCollectionsForOwnerProvider extends BaseProvider<string> {
     const nftsPromises = identifiers.map((identifier) =>
       this.apiService.getNftsAndCountForAccount(
         ownerAddress,
-        new AssetsQuery()
-          .addCollection(identifier.split('_')[0])
-          .addPageSize(0, 10)
-          .build(),
+        new AssetsQuery().addCollection(identifier.split('_')[0]).addPageSize(0, 10).build(),
         new AssetsQuery().addCollection(identifier.split('_')[0]).build(),
       ),
     );

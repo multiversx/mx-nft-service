@@ -1,11 +1,11 @@
 import { Controller, Logger } from '@nestjs/common';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
 @Controller()
 export class PubSubListenerController {
   private logger: Logger;
-  constructor(private readonly cachingService: CachingService) {
+  constructor(private readonly cacheService: CacheService) {
     this.logger = new Logger(PubSubListenerController.name);
   }
 
@@ -13,15 +13,13 @@ export class PubSubListenerController {
   async deleteCacheKey(keys: string[]) {
     for (const key of keys) {
       this.logger.log(`Deleting local cache key ${key}`);
-      await this.cachingService.deleteInCacheLocal(key);
+      await this.cacheService.deleteInCache(key);
     }
   }
 
   @EventPattern('refreshCacheKey')
   async refreshCacheKey(@Payload() event: { key: string; ttl: number }) {
-    this.logger.log(
-      `Refreshing local cache key ${event.key} with ttl ${event.ttl}`,
-    );
-    await this.cachingService.refreshCacheLocal(event.key, event.ttl);
+    this.logger.log(`Refreshing local cache key ${event.key} with ttl ${event.ttl}`);
+    await this.cacheService.refreshLocal(event.key, event.ttl);
   }
 }

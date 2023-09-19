@@ -37,9 +37,6 @@ export class ReportsResolver extends BaseResolver(ReportNft) {
     input: ReportCollectionInput,
     @AuthUser() user: UserAuthResult,
   ): Promise<boolean> {
-    return this.reportNfts.addCollectionReport(
-      input.collectionIdentifier,
-      user.address,
-    );
+    return this.reportNfts.addCollectionReport(input.collectionIdentifier, user.address);
   }
 }

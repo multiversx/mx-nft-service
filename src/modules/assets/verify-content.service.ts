@@ -6,22 +6,14 @@ import * as resources from '../../../node_modules/clarifai-nodejs-grpc/proto/cla
 import { InapropriateContentError } from 'src/common/models/errors/inapropriate-content.error';
 
 export class VerifyContentService {
-  async checkContentSensitivityForUrl(
-    fileUrl: string,
-    mimeType: string,
-  ): Promise<number> {
+  async checkContentSensitivityForUrl(fileUrl: string, mimeType: string): Promise<number> {
     const client = this.getClarifaiClient();
     const metadata = new grpc.Metadata();
     metadata.set('authorization', `Key ${process.env.CLARIFAI_APP_KEY}`);
 
     const request = await this.getRequestForUrl(fileUrl, mimeType);
     if (request) {
-      return await this.getPredictionsForUrl(
-        client,
-        request,
-        metadata,
-        mimeType,
-      );
+      return await this.getPredictionsForUrl(client, request, metadata, mimeType);
     }
   }
 
@@ -37,10 +29,7 @@ export class VerifyContentService {
   }
 
   private getClarifaiClient() {
-    return new clarifai.V2Client(
-      process.env.CLARIFAI_API_DOMAIN,
-      grpc.ChannelCredentials.createSsl(),
-    );
+    return new clarifai.V2Client(process.env.CLARIFAI_API_DOMAIN, grpc.ChannelCredentials.createSsl());
   }
 
   private async getRequest(file): Promise<service.PostWorkflowResultsRequest> {
@@ -49,18 +38,14 @@ export class VerifyContentService {
     const imageBytes = Uint8Array.from(fileBuffer);
     const request = new service.PostWorkflowResultsRequest();
     request.setWorkflowId(process.env.CLARIFAI_WORKFLOW_ID);
-    if (file.mimetype.includes('image'))
-      return this.addImageInput(request, imageBytes);
+    if (file.mimetype.includes('image')) return this.addImageInput(request, imageBytes);
     if (file.mimetype.includes('video')) {
       return this.addVideoInput(request, imageBytes);
     }
     return;
   }
 
-  private async getRequestForUrl(
-    url: string,
-    mimetype: string,
-  ): Promise<service.PostWorkflowResultsRequest> {
+  private async getRequestForUrl(url: string, mimetype: string): Promise<service.PostWorkflowResultsRequest> {
     const request = new service.PostWorkflowResultsRequest();
     request.setWorkflowId(process.env.CLARIFAI_WORKFLOW_ID);
     if (mimetype.includes('image')) {
@@ -74,12 +59,7 @@ export class VerifyContentService {
     return;
   }
 
-  private getPredictions(
-    client: clarifai.V2Client,
-    request: service.PostWorkflowResultsRequest,
-    metadata: grpc.Metadata,
-    file: any,
-  ) {
+  private getPredictions(client: clarifai.V2Client, request: service.PostWorkflowResultsRequest, metadata: grpc.Metadata, file: any) {
     return new Promise((resolve, reject) => {
       client.postWorkflowResults(request, metadata, (err, response) => {
         if (err) {
@@ -95,11 +75,7 @@ export class VerifyContentService {
           let customError = {
             method: 'VerifyContentService.checkContentSensitivity',
             status: response?.getStatus()?.getDetails(),
-            message:
-              'Received failed status: ' +
-              response?.getStatus()?.getDescription() +
-              '\n' +
-              response?.getStatus()?.getDetails(),
+            message: 'Received failed status: ' + response?.getStatus()?.getDescription() + '\n' + response?.getStatus()?.getDetails(),
             name: 'ContentSensitivityError',
           };
           return reject(customError);
@@ -138,11 +114,7 @@ export class VerifyContentService {
           let customError = {
             method: 'VerifyContentService.checkContentSensitivity',
             status: response?.getStatus()?.getDetails(),
-            message:
-              'Received failed status: ' +
-              response?.getStatus()?.getDescription() +
-              '\n' +
-              response?.getStatus()?.getDetails(),
+            message: 'Received failed status: ' + response?.getStatus()?.getDescription() + '\n' + response?.getStatus()?.getDetails(),
             name: 'ContentSensitivityError',
           };
           return reject(customError);
@@ -160,78 +132,38 @@ export class VerifyContentService {
     });
   }
 
-  private addImageInput(
-    request: service.PostWorkflowResultsRequest,
-    imageBytes: Uint8Array,
-  ) {
-    request.addInputs(
-      new resources.Input().setData(
-        new resources.Data().setImage(
-          new resources.Image().setBase64(imageBytes),
-        ),
-      ),
-    );
+  private addImageInput(request: service.PostWorkflowResultsRequest, imageBytes: Uint8Array) {
+    request.addInputs(new resources.Input().setData(new resources.Data().setImage(new resources.Image().setBase64(imageBytes))));
     return request;
   }
 
-  private addImageInputUrl(
-    request: service.PostWorkflowResultsRequest,
-    url: string,
-  ) {
-    request.addInputs(
-      new resources.Input().setData(
-        new resources.Data().setImage(new resources.Image().setUrl(url)),
-      ),
-    );
+  private addImageInputUrl(request: service.PostWorkflowResultsRequest, url: string) {
+    request.addInputs(new resources.Input().setData(new resources.Data().setImage(new resources.Image().setUrl(url))));
     return request;
   }
 
-  private addVideoInput(
-    request: service.PostWorkflowResultsRequest,
-    imageBytes: Uint8Array,
-  ) {
-    request.addInputs(
-      new resources.Input().setData(
-        new resources.Data().setVideo(
-          new resources.Video().setBase64(imageBytes),
-        ),
-      ),
-    );
+  private addVideoInput(request: service.PostWorkflowResultsRequest, imageBytes: Uint8Array) {
+    request.addInputs(new resources.Input().setData(new resources.Data().setVideo(new resources.Video().setBase64(imageBytes))));
     return request;
   }
 
-  private addVideoInputForUrl(
-    request: service.PostWorkflowResultsRequest,
-    url: string,
-  ) {
-    request.addInputs(
-      new resources.Input().setData(
-        new resources.Data().setVideo(new resources.Video().setUrl(url)),
-      ),
-    );
+  private addVideoInputForUrl(request: service.PostWorkflowResultsRequest, url: string) {
+    request.addInputs(new resources.Input().setData(new resources.Data().setVideo(new resources.Video().setUrl(url))));
     return request;
   }
 
-  private processImagePredictions(
-    response: service.PostWorkflowResultsResponse,
-    reject: (reason?: any) => void,
-  ) {
+  private processImagePredictions(response: service.PostWorkflowResultsResponse, reject: (reason?: any) => void) {
     const results = response.getResultsList()[0];
     this.processImageNsfwModel(results.getOutputsList()[0], reject);
     this.processImageLogoModel(results.getOutputsList()[1], reject);
   }
 
-  private processImagePredictionsForUrl(
-    response: service.PostWorkflowResultsResponse,
-  ) {
+  private processImagePredictionsForUrl(response: service.PostWorkflowResultsResponse) {
     const results = response.getResultsList()[0];
     return this.processImageNsfwModelUrl(results.getOutputsList()[0]);
   }
 
-  private processImageNsfwModel(
-    output: resources.Output,
-    reject: (reason?: any) => void,
-  ) {
+  private processImageNsfwModel(output: resources.Output, reject: (reason?: any) => void) {
     const concepts = output.getData().getConceptsList();
     for (const concept of concepts) {
       this.checkNsfw(concept, reject);
@@ -248,10 +180,7 @@ export class VerifyContentService {
     return 0.01;
   }
 
-  private processImageLogoModel(
-    output: resources.Output,
-    reject: (reason?: any) => void,
-  ) {
+  private processImageLogoModel(output: resources.Output, reject: (reason?: any) => void) {
     for (const region of output.getData().getRegionsList()) {
       for (const concept of region.getData().getConceptsList()) {
         this.checkLogo(concept, reject);
@@ -259,18 +188,13 @@ export class VerifyContentService {
     }
   }
 
-  private processVideoPredictions(
-    response: service.PostWorkflowResultsResponse,
-    reject: (reason?: any) => void,
-  ) {
+  private processVideoPredictions(response: service.PostWorkflowResultsResponse, reject: (reason?: any) => void) {
     const results = response.getResultsList()[0];
     this.processNsfwVideoPredictions(results.getOutputsList()[0], reject);
     this.processLogoVideoPredictions(results.getOutputsList()[1], reject);
   }
 
-  private processVideoPredictionsUrl(
-    response: service.PostWorkflowResultsResponse,
-  ): number {
+  private processVideoPredictionsUrl(response: service.PostWorkflowResultsResponse): number {
     const results = response.getResultsList()[0];
     return this.processNsfwVideoPredictionsUrl(results.getOutputsList()[0]);
   }
@@ -291,10 +215,7 @@ export class VerifyContentService {
     }
     return 0.01;
   }
-  private processNsfwVideoPredictions(
-    output: resources.Output,
-    reject: (reason?: any) => void,
-  ) {
+  private processNsfwVideoPredictions(output: resources.Output, reject: (reason?: any) => void) {
     const frames = output.getData().getFramesList();
     for (const frame of frames) {
       const concepts = frame.getData().getConceptsList();
@@ -304,10 +225,7 @@ export class VerifyContentService {
     }
   }
 
-  private processLogoVideoPredictions(
-    output: resources.Output,
-    reject: (reason?: any) => void,
-  ) {
+  private processLogoVideoPredictions(output: resources.Output, reject: (reason?: any) => void) {
     for (const frame of output.getData().getFramesList()) {
       for (const region of frame.getData().getRegionsList()) {
         const concepts = region.getData().getConceptsList();
@@ -318,24 +236,13 @@ export class VerifyContentService {
     }
   }
 
-  private checkNsfw(
-    concept: resources.Concept,
-    reject: (reason?: any) => void,
-  ) {
-    if (
-      concept.getName() === 'nsfw' &&
-      concept.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)
-    ) {
-      reject(
-        new InapropriateContentError('Seems to contain inappropriate content'),
-      );
+  private checkNsfw(concept: resources.Concept, reject: (reason?: any) => void) {
+    if (concept.getName() === 'nsfw' && concept.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)) {
+      reject(new InapropriateContentError('Seems to contain inappropriate content'));
     }
   }
 
-  private checkLogo(
-    concept: resources.Concept,
-    reject: (reason?: any) => void,
-  ) {
+  private checkLogo(concept: resources.Concept, reject: (reason?: any) => void) {
     if (concept.getValue() >= parseFloat(process.env.CLARIFAI_TRESHOLD)) {
       reject(new InapropriateContentError('Seems to contain brand names'));
     }

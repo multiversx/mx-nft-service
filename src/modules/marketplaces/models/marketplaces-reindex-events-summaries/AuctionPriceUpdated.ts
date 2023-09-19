@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetActionEnum } from 'src/modules/assets/models';
@@ -53,13 +53,8 @@ export class AuctionPriceUpdatedSummary extends ReindexGenericSummary {
     });
   }
 
-  private static getTopics(
-    event: MarketplaceEventsEntity,
-    marketplace: Marketplace,
-  ): any {
-    const genericEvent = event.data.eventData
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  private static getTopics(event: MarketplaceEventsEntity, marketplace: Marketplace): any {
+    const genericEvent = event.data.eventData ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (marketplace.key === DEADRARE_KEY) {
       return new UpdatePriceDeadrareEvent(genericEvent).getTopics();

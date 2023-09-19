@@ -9,18 +9,8 @@ import { CommonModule } from 'src/common.module';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  providers: [
-    CampaignsMutationsResolver,
-    CampaignsQueriesResolver,
-    NftMinterAbiService,
-    CampaignsService,
-  ],
-  imports: [
-    PubSubListenerModule,
-    MxCommunicationModule,
-    CommonModule,
-    forwardRef(() => AuthModule),
-  ],
+  providers: [CampaignsMutationsResolver, CampaignsQueriesResolver, NftMinterAbiService, CampaignsService],
+  imports: [PubSubListenerModule, MxCommunicationModule, CommonModule, forwardRef(() => AuthModule)],
   exports: [CampaignsService],
 })
 export class CampaignsModuleGraph {}

@@ -22,9 +22,7 @@ export class PerformanceProfiler {
     if (log) {
       const logger = new Logger(PerformanceProfiler.name);
 
-      logger.log(
-        `${description ?? this.description}: ${this.duration.toFixed(3)}ms`,
-      );
+      logger.log(`${description ?? this.description}: ${this.duration.toFixed(3)}ms`);
     }
   }
 }

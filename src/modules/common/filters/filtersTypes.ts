@@ -1,5 +1,5 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
-import { IsOptional, Matches } from 'class-validator';
+import { IsOptional, Matches, MinLength } from 'class-validator';
 import { NftTrait } from 'src/modules/nft-traits/models/nft-traits.model';
 import {
   ADDRESS_ERROR,
@@ -185,6 +185,13 @@ export class AssetsFilter {
   @Field(() => [NftTrait], { nullable: 'itemsAndList' })
   traits: NftTrait[];
 
+  @IsOptional()
+  @Field(() => String, { nullable: true })
+  @MinLength(3, {
+    message: 'The search term should contain at least 3 characters',
+  })
+  searchTerm: string;
+
   constructor(init?: Partial<AssetsFilter>) {
     Object.assign(this, init);
   }
@@ -199,6 +206,10 @@ export class CampaignsFilter {
   @IsOptional()
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   minterAddress: string;
+
+  constructor(init?: Partial<CampaignsFilter>) {
+    Object.assign(this, init);
+  }
 }
 
 @InputType()

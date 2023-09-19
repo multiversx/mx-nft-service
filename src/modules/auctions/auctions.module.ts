@@ -69,12 +69,6 @@ import { OffersModuleGraph } from '../offers/offers.module';
     forwardRef(() => AuthModule),
     forwardRef(() => OffersModuleGraph),
   ],
-  exports: [
-    AuctionsSetterService,
-    AuctionsGetterService,
-    NftMarketplaceAbiService,
-    AuctionsForAssetProvider,
-    LastOrderRedisHandler,
-  ],
+  exports: [AuctionsSetterService, AuctionsGetterService, NftMarketplaceAbiService, AuctionsForAssetProvider, LastOrderRedisHandler],
 })
 export class AuctionsModuleGraph {}

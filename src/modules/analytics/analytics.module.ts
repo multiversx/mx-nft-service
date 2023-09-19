@@ -26,6 +26,9 @@ import { CollectionDetailsRedisHandler } from './loaders/collection-details.redi
 import { ListingAuctionAnalyticsHandler } from './events-parsers/listing-event-analytics.parser';
 import { UpdateListingEventParser } from './events-parsers/updateListing-event.parser';
 import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parser';
+import { HoldersResolver } from './holders.resolver';
+import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
+import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
   providers: [
@@ -48,6 +51,9 @@ import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parse
     CollectionDetailsRedisHandler,
     UpdatePriceEventParser,
     UpdateListingEventParser,
+    AccountsProvider,
+    AccountsRedisHandler,
+    HoldersResolver,
   ],
   imports: [
     ConfigModule.forRoot({
@@ -60,12 +66,6 @@ import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parse
     forwardRef(() => CollectionsModuleGraph),
     TimescaleDbModule,
   ],
-  exports: [
-    TrendingCollectionsService,
-    ElasticAnalyticsService,
-    AnalyticsService,
-    GeneralAnalyticsService,
-    CollectionsAnalyticsService,
-  ],
+  exports: [TrendingCollectionsService, ElasticAnalyticsService, AnalyticsService, GeneralAnalyticsService, CollectionsAnalyticsService],
 })
 export class AnalyticsModule {}

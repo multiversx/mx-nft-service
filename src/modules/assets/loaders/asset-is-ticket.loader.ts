@@ -8,21 +8,12 @@ import { IsTicketRedisHandler } from './asset-is-ticket.redis-handler';
   scope: Scope.REQUEST,
 })
 export class IsTicketProvider extends BaseProvider<string> {
-  constructor(
-    isTicketRedisHandler: IsTicketRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      isTicketRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(isTicketRedisHandler: IsTicketRedisHandler, private persistenceService: PersistenceService) {
+    super(isTicketRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(identifiers: string[]) {
-    const assetTickets =
-      await this.persistenceService.getTicketCollectionsByIdentifiers(
-        identifiers,
-      );
+    const assetTickets = await this.persistenceService.getTicketCollectionsByIdentifiers(identifiers);
     return assetTickets?.groupBy((collection) => collection.identifier);
   }
 }

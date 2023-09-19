@@ -1,10 +1,6 @@
 import { Query, Resolver } from '@nestjs/graphql';
 import { ExploreStatsService } from './explore-stats.service';
-import {
-  ExploreCollectionsStats,
-  ExploreNftsStats,
-  ExploreStats,
-} from './models/Explore-Stats.dto';
+import { ExploreCollectionsStats, ExploreNftsStats, ExploreStats } from './models/Explore-Stats.dto';
 
 @Resolver(() => ExploreStats)
 export class ExploreStatsResolver {

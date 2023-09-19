@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 
@@ -9,10 +10,7 @@ export class LastOrderRedisHandler extends RedisKeyValueDataloaderHandler<number
     super(redisCacheService, 'auction_active_orders');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    ordersAuctionsIds: { [key: string]: any[] },
-  ): RedisValue[] {
+  mapValues(returnValues: { key: number; value: any }[], ordersAuctionsIds: { [key: string]: any[] }): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {

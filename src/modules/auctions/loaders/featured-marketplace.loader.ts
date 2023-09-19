@@ -8,19 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class FeaturedMarketplaceProvider extends BaseProvider<string> {
-  constructor(
-    featuredMarketplaceRedisHandler: FeaturedMarketplaceRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      featuredMarketplaceRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(featuredMarketplaceRedisHandler: FeaturedMarketplaceRedisHandler, private persistenceService: PersistenceService) {
+    super(featuredMarketplaceRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(addresses: string[]) {
-    const featuredMarketplace =
-      await this.persistenceService.getMarketplacesByAddresses(addresses);
+    const featuredMarketplace = await this.persistenceService.getMarketplacesByAddresses(addresses);
     return featuredMarketplace?.groupBy((asset) => asset.address);
   }
 }

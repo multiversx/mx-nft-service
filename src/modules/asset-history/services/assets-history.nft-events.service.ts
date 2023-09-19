@@ -7,19 +7,12 @@ import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-histo
 export class AssetsHistoryNftEventService {
   constructor() {}
 
-  mapNftEventLog(
-    nonce: string,
-    eventType: string,
-    mainEvent: any,
-  ): AssetHistoryLogInput {
-    const event = mainEvent.events.find(
-      (event) => event.identifier === eventType,
-    );
+  mapNftEventLog(nonce: string, eventType: string, mainEvent: any): AssetHistoryLogInput {
+    const event = mainEvent.events.find((event) => event.identifier === eventType);
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
     const transferEvent = mainEvent.events.find(
       (event) =>
-        (event.identifier === NftEventEnum.ESDTNFTTransfer ||
-          event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
+        (event.identifier === NftEventEnum.ESDTNFTTransfer || event.identifier === NftEventEnum.MultiESDTNFTTransfer) &&
         event.topics[1] === encodedNonce,
     );
 
@@ -44,8 +37,7 @@ export class AssetsHistoryNftEventService {
       case NftEventEnum.ESDTNFTTransfer: {
         if (
           mainEvent.address === mainEvent?.events[0].address &&
-          transferEvent.topics[3].base64ToBech32() !==
-            mxConfig.nftMarketplaceAddress
+          transferEvent.topics[3].base64ToBech32() !== mxConfig.nftMarketplaceAddress
         ) {
           return new AssetHistoryLogInput({
             event: mainEvent,

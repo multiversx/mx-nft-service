@@ -87,11 +87,7 @@ export class Collection {
     Object.assign(this, init);
   }
 
-  static fromCollectionApi(
-    collectionApi: CollectionApi,
-    artistAddress?: string,
-    followersCount?: number,
-  ) {
+  static fromCollectionApi(collectionApi: CollectionApi, artistAddress?: string, followersCount?: number) {
     if (!collectionApi) return null;
     return new Collection({
       collection: collectionApi.collection,
@@ -108,9 +104,7 @@ export class Collection {
       canWipe: collectionApi.canWipe,
       canAddQuantity: collectionApi.canAddQuantity,
       canCreate: collectionApi.canCreate,
-      roles: collectionApi.roles?.map((role) =>
-        CollectionRole.fromRoleApi(role),
-      ),
+      roles: collectionApi.roles?.map((role) => CollectionRole.fromRoleApi(role)),
       verified: !!collectionApi.assets ?? false,
       description: collectionApi.assets?.description,
       website: collectionApi.assets?.website,

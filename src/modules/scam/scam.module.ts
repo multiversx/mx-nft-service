@@ -12,13 +12,7 @@ import { NftScamResolver } from './nft-scam.resolver';
 import { NftScamService } from './nft-scam.service';
 
 @Module({
-  imports: [
-    CommonModule,
-    DocumentDbModule,
-    AuthModule,
-    CacheEventsPublisherModule,
-    PluginModule,
-  ],
+  imports: [CommonModule, DocumentDbModule, AuthModule, CacheEventsPublisherModule, PluginModule],
   providers: [
     Logger,
     NftScamService,

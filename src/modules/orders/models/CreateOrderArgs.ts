@@ -23,10 +23,7 @@ export class CreateOrderArgs {
       ownerAddress: args.ownerAddress,
       priceToken: args.priceToken,
       priceAmount: args.priceAmount,
-      priceAmountDenominated: BigNumberUtils.denominateAmount(
-        args.priceAmount,
-        decimals,
-      ),
+      priceAmountDenominated: BigNumberUtils.denominateAmount(args.priceAmount, decimals),
       priceNonce: args.priceNonce,
       boughtTokensNo: args.boughtTokens,
       blockHash: args.blockHash,

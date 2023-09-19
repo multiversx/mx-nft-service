@@ -19,39 +19,28 @@ export class MxPrivateApiService {
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
 
-    this.privateApiProvider = new ApiNetworkProvider(
-      process.env.ELROND_PRIVATE_API,
-      {
-        timeout: mxConfig.proxyTimeout,
-        httpAgent: mxConfig.keepAlive ? httpAgent : null,
-        httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
-        headers: {
-          origin: 'NftService',
-        },
+    this.privateApiProvider = new ApiNetworkProvider(process.env.ELROND_PRIVATE_API, {
+      timeout: mxConfig.proxyTimeout,
+      httpAgent: mxConfig.keepAlive ? httpAgent : null,
+      httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
+      headers: {
+        origin: 'NftService',
       },
-    );
+    });
   }
 
   getPrivateService(): ApiNetworkProvider {
     return this.privateApiProvider;
   }
 
-  async doPostGeneric(
-    name: string,
-    resourceUrl: string,
-    payload: any,
-  ): Promise<any> {
+  async doPostGeneric(name: string, resourceUrl: string, payload: any): Promise<any> {
     try {
       const profiler = new PerformanceProfiler(`${name} ${resourceUrl}`);
       const service = this.getPrivateService();
       const response = await service.doPostGeneric(resourceUrl, payload);
       profiler.stop();
 
-      MetricsCollector.setExternalCall(
-        MxPrivateApiService.name,
-        profiler.duration,
-        name,
-      );
+      MetricsCollector.setExternalCall(MxPrivateApiService.name, profiler.duration, name);
 
       return response;
     } catch (error) {
@@ -66,13 +55,10 @@ export class MxPrivateApiService {
         message: error.message,
         name: error.name,
       };
-      this.logger.error(
-        `An error occurred while calling the mx private-api service on url ${resourceUrl}`,
-        {
-          path: `${MxPrivateApiService.name}.${this.doPostGeneric.name}`,
-          error: customError,
-        },
-      );
+      this.logger.error(`An error occurred while calling the mx private-api service on url ${resourceUrl}`, {
+        path: `${MxPrivateApiService.name}.${this.doPostGeneric.name}`,
+        error: customError,
+      });
     }
   }
 }

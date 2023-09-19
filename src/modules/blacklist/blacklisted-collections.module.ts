@@ -8,11 +8,7 @@ import { BlacklistedCollectionsService } from './blacklisted-collections.service
 
 @Module({
   imports: [CommonModule, PersistenceModule, CacheEventsPublisherModule],
-  providers: [
-    BlacklistedCollectionsService,
-    BlacklistedCollectionsCachingService,
-    BlacklistedCollectionsResolver,
-  ],
+  providers: [BlacklistedCollectionsService, BlacklistedCollectionsCachingService, BlacklistedCollectionsResolver],
   exports: [BlacklistedCollectionsService],
 })
 export class BlacklistedCollectionsModule {}

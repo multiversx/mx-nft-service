@@ -37,8 +37,6 @@ export class CollectionQuery {
   }
 
   build(): string {
-    return this.query
-      ? this.query + '&type=NonFungibleESDT,SemiFungibleESDT'
-      : '?type=NonFungibleESDT,SemiFungibleESDT';
+    return this.query ? this.query + '&type=NonFungibleESDT,SemiFungibleESDT' : '?type=NonFungibleESDT,SemiFungibleESDT';
   }
 }

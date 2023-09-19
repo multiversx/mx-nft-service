@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 
@@ -9,17 +10,11 @@ export class AvailableTokensForAuctionRedisHandler extends RedisKeyValueDataload
     super(redisCacheService, 'auction_available_tokens');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    auctionsIds: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: number; value: any }[], auctionsIds: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value =
-          auctionsIds && auctionsIds[item.key]
-            ? auctionsIds[item.key][0]?.availableTokens
-            : null;
+        item.value = auctionsIds && auctionsIds[item.key] ? auctionsIds[item.key][0]?.availableTokens : null;
         redisValues.push(item);
       }
     }

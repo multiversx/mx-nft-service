@@ -1,10 +1,5 @@
-import { CachingService } from '@multiversx/sdk-nestjs';
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  Logger,
-} from '@nestjs/common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
+import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common';
 import { ApiConfigService } from '../common/api-config/api.config.service';
 import { JwtAuthenticateGuard } from './jwt.auth-guard';
 import { NativeAuthGuard } from './native.auth-guard';
@@ -13,16 +8,13 @@ import { NativeAuthGuard } from './native.auth-guard';
 export class JwtOrNativeAuthGuard implements CanActivate {
   constructor(
     private readonly apiConfigService: ApiConfigService,
-    private readonly cachingService: CachingService,
+    private readonly cacheService: CacheService,
     private readonly logger: Logger,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const jwtGuard = new JwtAuthenticateGuard(this.apiConfigService);
-    const nativeAuthGuard = new NativeAuthGuard(
-      this.apiConfigService,
-      this.cachingService,
-    );
+    const nativeAuthGuard = new NativeAuthGuard(this.apiConfigService, this.cacheService);
 
     const guards = [jwtGuard, nativeAuthGuard];
 
@@ -37,10 +29,7 @@ export class JwtOrNativeAuthGuard implements CanActivate {
       }),
     );
 
-    const canActivate = canActivateResponses.reduce(
-      (result, value) => result || value,
-      false,
-    );
+    const canActivate = canActivateResponses.reduce((result, value) => result || value, false);
     return canActivate;
   }
 }

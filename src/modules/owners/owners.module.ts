@@ -6,12 +6,7 @@ import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 
 @Module({
-  providers: [
-    OwnersService,
-    OwnersResolver,
-    AccountsRedisHandler,
-    AccountsProvider,
-  ],
+  providers: [OwnersService, OwnersResolver, AccountsRedisHandler, AccountsProvider],
   imports: [MxCommunicationModule],
   exports: [OwnersService, AccountsRedisHandler, AccountsProvider],
 })

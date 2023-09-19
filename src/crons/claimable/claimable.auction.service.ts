@@ -1,10 +1,7 @@
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import {
-  AuctionsGetterService,
-  AuctionsSetterService,
-} from 'src/modules/auctions';
+import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 
@@ -21,8 +18,7 @@ export class ClaimableAuctionsService {
     await Locker.lock(
       'Update expired auctions to claimable',
       async () => {
-        const endedAuctions =
-          await this.auctionGetterService.getAuctionsThatReachedDeadline();
+        const endedAuctions = await this.auctionGetterService.getAuctionsThatReachedDeadline();
         if (!endedAuctions || endedAuctions?.length === 0) return;
         await this.notificationsService.generateNotifications(endedAuctions);
         await this.auctionSetterService.updateAuctions(

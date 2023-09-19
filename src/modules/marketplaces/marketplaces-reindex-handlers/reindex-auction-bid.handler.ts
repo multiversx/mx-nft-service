@@ -10,15 +10,8 @@ import { AuctionBidSummary } from '../models/marketplaces-reindex-events-summari
 export class ReindexAuctionBidHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: AuctionBidSummary,
-    paymentToken: Token,
-    paymentNonce: number,
-  ): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(
-      input.auctionId,
-    );
+  handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionBidSummary, paymentToken: Token, paymentNonce: number): void {
+    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
 
     if (auctionIndex === -1) {
       return;
@@ -26,28 +19,14 @@ export class ReindexAuctionBidHandler {
 
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
-    marketplaceReindexState.setInactiveOrdersForAuction(
-      marketplaceReindexState.auctions[auctionIndex].id,
-      modifiedDate,
-    );
+    marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
 
-    let order = marketplaceReindexState.createOrder(
-      auctionIndex,
-      input,
-      OrderStatusEnum.Active,
-      paymentToken,
-      paymentNonce,
-    );
+    let order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Active, paymentToken, paymentNonce);
 
-    if (
-      order.priceAmount ===
-      marketplaceReindexState.auctions[auctionIndex].maxBid
-    ) {
+    if (order.priceAmount === marketplaceReindexState.auctions[auctionIndex].maxBid) {
       order.status = OrderStatusEnum.Bought;
-      marketplaceReindexState.auctions[auctionIndex].status =
-        AuctionStatusEnum.Ended;
-      marketplaceReindexState.auctions[auctionIndex].modifiedDate =
-        modifiedDate;
+      marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Ended;
+      marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
     }
 
     marketplaceReindexState.orders.push(order);

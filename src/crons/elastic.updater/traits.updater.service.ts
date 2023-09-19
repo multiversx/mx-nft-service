@@ -1,14 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-
 import { NftTraitsService } from 'src/modules/nft-traits/nft-traits.service';
-import {
-  Constants,
-  ElasticQuery,
-  Locker,
-  RedisCacheService,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
+import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
@@ -29,38 +25,23 @@ export class TraitsUpdaterService {
       await Locker.lock(
         `handleValidateTokenTraits`,
         async () => {
-          const query: ElasticQuery =
-            getCollectionsWithTraitSummaryFromElasticQuery(
-              maxCollectionsToValidate,
-            );
+          const query: ElasticQuery = getCollectionsWithTraitSummaryFromElasticQuery(maxCollectionsToValidate);
 
           const lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
 
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              collections = collections.concat([
-                ...new Set(items.map((i) => i.token)),
-              ]);
-              if (collections.length > lastIndex + maxCollectionsToValidate) {
-                return undefined;
-              }
-            },
-          );
+          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+            collections = collections.concat([...new Set(items.map((i) => i.token))]);
+            if (collections.length > lastIndex + maxCollectionsToValidate) {
+              return undefined;
+            }
+          });
 
-          const collectionsToValidate = collections.slice(
-            lastIndex,
-            lastIndex + maxCollectionsToValidate,
-          );
+          const collectionsToValidate = collections.slice(lastIndex, lastIndex + maxCollectionsToValidate);
 
           if (collectionsToValidate.length !== 0) {
             await this.updateCollectionTraits(collectionsToValidate);
-            await this.setLastValidatedCollectionIndex(
-              lastIndex + collectionsToValidate.length,
-            );
+            await this.setLastValidatedCollectionIndex(lastIndex + collectionsToValidate.length);
           } else {
             await this.setLastValidatedCollectionIndex(0);
           }
@@ -82,26 +63,15 @@ export class TraitsUpdaterService {
         async () => {
           let collectionsToUpdate: string[] = [];
 
-          const query = getCollectionsWhereTraitsFlagNotSetFromElasticQuery(
-            maxCollectionsToUpdate,
-          );
+          const query = getCollectionsWhereTraitsFlagNotSetFromElasticQuery(maxCollectionsToUpdate);
 
-          await this.elasticService.getScrollableList(
-            'tokens',
-            'token',
-            query,
-            async (items) => {
-              const collections = [...new Set(items.map((i) => i.token))];
-              collectionsToUpdate = collectionsToUpdate.concat(
-                collections.filter(
-                  (c) => collectionsToUpdate.indexOf(c) === -1,
-                ),
-              );
-              if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
-                return undefined;
-              }
-            },
-          );
+          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+            const collections = [...new Set(items.map((i) => i.token))];
+            collectionsToUpdate = collectionsToUpdate.concat(collections.filter((c) => collectionsToUpdate.indexOf(c) === -1));
+            if (collectionsToUpdate.length >= maxCollectionsToUpdate) {
+              return undefined;
+            }
+          });
 
           await this.updateCollectionTraits(collectionsToUpdate);
         },
@@ -169,12 +139,8 @@ export class TraitsUpdaterService {
     await Locker.lock(
       'processTokenTraitsQueue: Update traits for all collections/NFTs in the traits queue',
       async () => {
-        const tokensToUpdate: string[] = await this.redisCacheService.lpop(
-          this.getTraitsQueueCacheKey(),
-        );
-        const notUpdatedNfts: string[] = await this.updateTokenTraits(
-          tokensToUpdate,
-        );
+        const tokensToUpdate: string[] = await this.redisCacheService.lpop(this.getTraitsQueueCacheKey());
+        const notUpdatedNfts: string[] = await this.updateTokenTraits(tokensToUpdate);
 
         await this.addNftsToTraitQueue(notUpdatedNfts);
       },
@@ -184,29 +150,16 @@ export class TraitsUpdaterService {
 
   async addNftsToTraitQueue(collectionTickers: string[]): Promise<void> {
     if (collectionTickers?.length > 0) {
-      await this.redisCacheService.rpush(
-        this.getTraitsQueueCacheKey(),
-        collectionTickers,
-      );
+      await this.redisCacheService.rpush(this.getTraitsQueueCacheKey(), collectionTickers);
     }
   }
 
   private async getLastValidatedCollectionIndex(): Promise<number> {
-    return (
-      Number.parseInt(
-        await this.redisCacheService.get(
-          this.getTraitsValidatorCounterCacheKey(),
-        ),
-      ) || 0
-    );
+    return Number.parseInt(await this.redisCacheService.get(this.getTraitsValidatorCounterCacheKey())) || 0;
   }
 
   private async setLastValidatedCollectionIndex(index: number): Promise<void> {
-    await this.redisCacheService.set(
-      this.getTraitsValidatorCounterCacheKey(),
-      index.toString(),
-      90 * Constants.oneMinute(),
-    );
+    await this.redisCacheService.set(this.getTraitsValidatorCounterCacheKey(), index.toString(), 90 * Constants.oneMinute());
   }
 
   private getTraitsQueueCacheKey() {

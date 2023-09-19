@@ -3,13 +3,14 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { ClientProxy } from '@nestjs/microservices';
 import { MxApiService } from 'src/common';
-import { CachingService, Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 @Injectable()
 export class TokensWarmerService {
   constructor(
     @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
     private mxApiService: MxApiService,
   ) {}
 
@@ -19,11 +20,7 @@ export class TokensWarmerService {
       'Tokens invalidations',
       async () => {
         const tokens = await this.mxApiService.getAllTokens();
-        await this.invalidateKey(
-          CacheInfo.AllTokens.key,
-          tokens,
-          CacheInfo.AllTokens.ttl,
-        );
+        await this.invalidateKey(CacheInfo.AllTokens.key, tokens, CacheInfo.AllTokens.ttl);
       },
       true,
     );
@@ -35,11 +32,7 @@ export class TokensWarmerService {
       'DEX Tokens invalidations',
       async () => {
         const tokens = await this.mxApiService.getAllDexTokens();
-        await this.invalidateKey(
-          CacheInfo.AllDexTokens.key,
-          tokens,
-          CacheInfo.AllDexTokens.ttl,
-        );
+        await this.invalidateKey(CacheInfo.AllDexTokens.key, tokens, CacheInfo.AllDexTokens.ttl);
       },
       true,
     );
@@ -51,18 +44,14 @@ export class TokensWarmerService {
       'Egld Token invalidation',
       async () => {
         const tokens = await this.mxApiService.getEgldPriceFromEconomics();
-        await this.invalidateKey(
-          CacheInfo.EgldToken.key,
-          tokens,
-          CacheInfo.EgldToken.ttl,
-        );
+        await this.invalidateKey(CacheInfo.EgldToken.key, tokens, CacheInfo.EgldToken.ttl);
       },
       true,
     );
   }
 
   private async invalidateKey(key: string, data: any, ttl: number) {
-    await this.cacheService.setCache(key, data, ttl);
+    await this.cacheService.set(key, data, ttl);
     await this.refreshCacheKey(key, ttl);
   }
 

@@ -1,11 +1,4 @@
-import {
-  Address,
-  BinaryCodec,
-  FieldDefinition,
-  StructType,
-  TokenIdentifierType,
-  U64Type,
-} from '@multiversx/sdk-core/out';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core/out';
 export class ElrondSwapUpdateTopics {
   private auctionId: string;
   private collection: string;
@@ -21,18 +14,10 @@ export class ElrondSwapUpdateTopics {
     this.auctionId = Buffer.from(rawTopics[1], 'base64').toString('hex');
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.nrAuctionTokens = parseInt(
-      Buffer.from(rawTopics[4], 'base64').toString('hex'),
-      16,
-    );
+    this.nrAuctionTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16);
     this.seller = new Address(Buffer.from(rawTopics[5], 'base64'));
-    this.price = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
-    this.deadline = parseInt(
-      Buffer.from(rawTopics[9], 'base64').toString('hex'),
-      16,
-    );
+    this.price = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
+    this.deadline = parseInt(Buffer.from(rawTopics[9], 'base64').toString('hex'), 16);
     let token = decodeToken(Buffer.from(rawTopics[7], 'base64'));
     this.paymentToken = token.token_type;
     this.paymentTokenNonce = token.nonce;

@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetActionEnum } from 'src/modules/assets/models';
@@ -26,14 +26,9 @@ export class AuctionEndedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromEndAuctionEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): AuctionEndedSummary {
+  static fromEndAuctionEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): AuctionEndedSummary {
     const address = event.data.eventData?.address ?? tx.receiver;
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
     const topics = new EndAuctionEvent(genericEvent).getTopics();
 
     return new AuctionEndedSummary({

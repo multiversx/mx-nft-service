@@ -1,9 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { IsOptional, Matches } from 'class-validator';
-import {
-  COLLECTION_IDENTIFIER_ERROR,
-  COLLECTION_IDENTIFIER_RGX,
-} from 'src/utils/constants';
+import { COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
 export class CollectionAnalyticsArgs {
@@ -27,6 +24,6 @@ export class AnalyticsArgs {
   metric: string;
   @IsOptional()
   @Field({ nullable: true })
-  @Matches(new RegExp('[1-60][s,m,h,d]'))
+  @Matches(new RegExp('^(?:[1-9]|[1-5][0-9]|60)[s,m,h,d]$'))
   time: string;
 }

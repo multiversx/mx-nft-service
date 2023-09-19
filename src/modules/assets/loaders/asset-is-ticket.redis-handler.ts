@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants } from '@multiversx/sdk-nestjs-common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 
@@ -9,16 +10,11 @@ export class IsTicketRedisHandler extends RedisKeyValueDataloaderHandler<string>
     super(redisCacheService, 'isTicket');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    collectionIdentifiers: { [key: string]: any[] },
-  ) {
+  mapValues(returnValues: { key: string; value: any }[], collectionIdentifiers: { [key: string]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value = collectionIdentifiers[item.key]
-          ? true
-          : false;
+        item.value = collectionIdentifiers[item.key] ? true : false;
         redisValues.push(item);
       }
     }

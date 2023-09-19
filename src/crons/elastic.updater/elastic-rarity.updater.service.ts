@@ -19,9 +19,7 @@ export class ElasticRarityUpdaterService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async handleUpdateTokenRaritiesWhereNotSetCronJob() {
-    await this.rarityUpdaterService.handleUpdateTokenRaritiesWhereNotSet(
-      cronJobs.rarity.colectionRaritiesToUpdateEvery10s,
-    );
+    await this.rarityUpdaterService.handleUpdateTokenRaritiesWhereNotSet(cronJobs.rarity.colectionRaritiesToUpdateEvery10s);
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)

@@ -1,17 +1,14 @@
 import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql';
 import { Matches, MaxLength, MinLength } from 'class-validator';
 import { mxConfig } from 'src/config';
-import {
-  ADDRESS_ERROR,
-  ADDRESS_RGX,
-  NFT_IDENTIFIER_ERROR,
-  NFT_IDENTIFIER_RGX,
-  NUMERIC_ERROR,
-  NUMERIC_RGX,
-} from 'src/utils/constants';
+import { ADDRESS_ERROR, ADDRESS_RGX, NFT_IDENTIFIER_ERROR, NFT_IDENTIFIER_RGX, NUMERIC_ERROR, NUMERIC_RGX } from 'src/utils/constants';
 
 @InputType()
 export class IssueCampaignArgs {
+  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
+  @Field()
+  ownerAddress: string;
+
   @Field()
   collectionIpfsHash: string;
 
@@ -56,8 +53,7 @@ export class IssueCampaignArgs {
     message: 'The token ticker should have at most 10 caracters',
   })
   @Matches(RegExp('^[A-Z][A-Z0-9]{2,9}$'), {
-    message:
-      'The token ticker should have only alphanumeric UPPERCASE characters',
+    message: 'The token ticker should have only alphanumeric UPPERCASE characters',
   })
   @Field()
   collectionTicker: string;
@@ -95,8 +91,7 @@ export class BuyRandomNftActionArgs {
   tier: string;
 
   @Field(() => String, {
-    description:
-      'The total price the user needs to pay in order to buy the number of nfts selected',
+    description: 'The total price the user needs to pay in order to buy the number of nfts selected',
   })
   @Matches(RegExp(NUMERIC_RGX), { message: `Price ${NUMERIC_ERROR}` })
   price: string;
@@ -121,10 +116,6 @@ export class UpgradeNftArgs {
     description: 'The campaign id where the user wants to buy the nft/s',
   })
   campaignId: string;
-  @Field(() => String, {
-    description: 'The tier name on which the user wants to buy the nft',
-  })
-  tier: string;
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field(() => String, {
     description: 'The smart contract address of the campaign',

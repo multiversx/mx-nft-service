@@ -23,23 +23,14 @@ export class ScamInfo {
       : undefined;
   }
 
-  static areApiAndElasticScamInfoDifferent(
-    nftFromApi: Asset,
-    nftFromElastic: any,
-  ): boolean {
+  static areApiAndElasticScamInfoDifferent(nftFromApi: Asset, nftFromElastic: any): boolean {
     return (
-      nftFromApi.scamInfo.type !==
-        nftFromElastic?.[elasticDictionary.scamInfo.typeKey] ||
-      nftFromApi.scamInfo.info !==
-        nftFromElastic?.[elasticDictionary.scamInfo.infoKey]
+      nftFromApi.scamInfo.type !== nftFromElastic?.[elasticDictionary.scamInfo.typeKey] ||
+      nftFromApi.scamInfo.info !== nftFromElastic?.[elasticDictionary.scamInfo.infoKey]
     );
   }
 
-  static areApiAndDbScamInfoDifferent(
-    nftFromApi: Asset,
-    nftFromDb: NftScamInfoModel,
-    version: string,
-  ): boolean {
+  static areApiAndDbScamInfoDifferent(nftFromApi: Asset, nftFromDb: NftScamInfoModel, version: string): boolean {
     return (
       !nftFromDb ||
       version !== nftFromDb.version ||
@@ -48,13 +39,9 @@ export class ScamInfo {
     );
   }
 
-  static areElasticAndDbScamInfoDifferent(
-    nftFromElastic: any,
-    nftFromDb: NftScamInfoModel,
-  ): boolean {
+  static areElasticAndDbScamInfoDifferent(nftFromElastic: any, nftFromDb: NftScamInfoModel): boolean {
     return (
-      nftFromDb?.type !==
-        nftFromElastic?.[elasticDictionary.scamInfo.typeKey] ||
+      nftFromDb?.type !== nftFromElastic?.[elasticDictionary.scamInfo.typeKey] ||
       (!nftFromDb.type && nftFromElastic?.[elasticDictionary.scamInfo.typeKey])
     );
   }

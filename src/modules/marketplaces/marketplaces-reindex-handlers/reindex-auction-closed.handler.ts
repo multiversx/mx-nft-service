@@ -9,10 +9,7 @@ import { ReindexAuctionClosedSummary } from '../models/marketplaces-reindex-even
 export class ReindexAuctionClosedHandler {
   constructor() {}
 
-  handle(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: ReindexAuctionClosedSummary,
-  ): void {
+  handle(marketplaceReindexState: MarketplaceReindexState, input: ReindexAuctionClosedSummary): void {
     const auctionIndex =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
         ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
@@ -23,16 +20,10 @@ export class ReindexAuctionClosedHandler {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status =
-      AuctionStatusEnum.Closed;
-    marketplaceReindexState.auctions[auctionIndex].blockHash =
-      marketplaceReindexState.auctions[auctionIndex].blockHash ??
-      input.blockHash;
+    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
+    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
 
-    marketplaceReindexState.setInactiveOrdersForAuction(
-      marketplaceReindexState.auctions[auctionIndex].id,
-      modifiedDate,
-    );
+    marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
   }
 }

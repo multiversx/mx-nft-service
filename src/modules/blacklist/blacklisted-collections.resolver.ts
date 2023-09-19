@@ -8,9 +8,7 @@ import { BlacklistedCollectionsService } from './blacklisted-collections.service
 
 @Resolver(() => Collection)
 export class BlacklistedCollectionsResolver extends BaseResolver(Collection) {
-  constructor(
-    private blacklistedCollectionsService: BlacklistedCollectionsService,
-  ) {
+  constructor(private blacklistedCollectionsService: BlacklistedCollectionsService) {
     super();
   }
 
@@ -20,9 +18,7 @@ export class BlacklistedCollectionsResolver extends BaseResolver(Collection) {
     @Args('collection')
     collection: string,
   ): Promise<boolean> {
-    return await this.blacklistedCollectionsService.addBlacklistedCollection(
-      collection,
-    );
+    return await this.blacklistedCollectionsService.addBlacklistedCollection(collection);
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
@@ -31,9 +27,7 @@ export class BlacklistedCollectionsResolver extends BaseResolver(Collection) {
     @Args('collection')
     collection: string,
   ): Promise<boolean> {
-    return await this.blacklistedCollectionsService.removeBlacklistedCollection(
-      collection,
-    );
+    return await this.blacklistedCollectionsService.removeBlacklistedCollection(collection);
   }
 
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)

@@ -11,10 +11,7 @@ export class FeaturedNftsRepository {
     @InjectRepository(FeaturedNftEntity)
     private featuredNftsRepository: Repository<FeaturedNftEntity>,
   ) {}
-  async getFeaturedNfts(
-    limit: number = 20,
-    offset: number = 0,
-  ): Promise<[FeaturedNftEntity[], number]> {
+  async getFeaturedNfts(limit: number = 20, offset: number = 0): Promise<[FeaturedNftEntity[], number]> {
     return await this.featuredNftsRepository
       .createQueryBuilder('featuredNfts')
       .innerJoin('auctions', 'a', 'featuredNfts.identifier=a.identifier')
@@ -35,10 +32,7 @@ export class FeaturedCollectionsRepository {
     private featuredCollectionsRepository: Repository<FeaturedCollectionEntity>,
   ) {}
 
-  async getFeaturedCollections(
-    limit: number = 20,
-    offset: number = 0,
-  ): Promise<[FeaturedCollectionEntity[], number]> {
+  async getFeaturedCollections(limit: number = 20, offset: number = 0): Promise<[FeaturedCollectionEntity[], number]> {
     return await this.featuredCollectionsRepository
       .createQueryBuilder('featuredCollections')
       .orderBy('featuredCollections.id', 'DESC')
@@ -47,10 +41,7 @@ export class FeaturedCollectionsRepository {
       .getManyAndCount();
   }
 
-  async removeFeaturedCollection(
-    collection: string,
-    type: FeaturedCollectionTypeEnum,
-  ): Promise<boolean> {
+  async removeFeaturedCollection(collection: string, type: FeaturedCollectionTypeEnum): Promise<boolean> {
     const res = await this.featuredCollectionsRepository.delete({
       identifier: collection,
       type: type,
@@ -58,20 +49,13 @@ export class FeaturedCollectionsRepository {
     return res.affected === 1;
   }
 
-  async addFeaturedCollection(
-    collection: string,
-    type: FeaturedCollectionTypeEnum,
-  ): Promise<boolean> {
+  async addFeaturedCollection(collection: string, type: FeaturedCollectionTypeEnum): Promise<boolean> {
     if (!collection) return false;
-    const res = await this.featuredCollectionsRepository.save(
-      new FeaturedCollectionEntity({ identifier: collection, type }),
-    );
+    const res = await this.featuredCollectionsRepository.save(new FeaturedCollectionEntity({ identifier: collection, type }));
     return !!res.id;
   }
 
-  async getFeaturedCollectionsByIdentifiers(
-    identifiers: string[],
-  ): Promise<FeaturedCollectionEntity[]> {
+  async getFeaturedCollectionsByIdentifiers(identifiers: string[]): Promise<FeaturedCollectionEntity[]> {
     return await this.featuredCollectionsRepository
       .createQueryBuilder('featuredCollections')
       .where('identifier IN(:...identifiers)', {
@@ -80,9 +64,7 @@ export class FeaturedCollectionsRepository {
       .getMany();
   }
 
-  async getTicketCollectionsByIdentifiers(
-    identifiers: string[],
-  ): Promise<FeaturedCollectionEntity[]> {
+  async getTicketCollectionsByIdentifiers(identifiers: string[]): Promise<FeaturedCollectionEntity[]> {
     return await this.featuredCollectionsRepository
       .createQueryBuilder('featuredCollections')
       .where('identifier IN(:...identifiers)', {

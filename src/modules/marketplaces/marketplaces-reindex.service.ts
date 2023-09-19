@@ -25,7 +25,7 @@ import { MxApiService } from 'src/common';
 import { MarketplaceReindexDataArgs } from './models/MarketplaceReindexDataArgs';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
-import { Locker } from '@multiversx/sdk-nestjs';
+import { Locker } from '@multiversx/sdk-nestjs-common';
 import { TagEntity } from 'src/db/auctions/tags.entity';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { Token } from '../usdPrice/Token.model';
@@ -53,25 +53,17 @@ export class MarketplacesReindexService {
     private readonly logger: Logger,
   ) {}
 
-  async reindexMarketplaceData(
-    input: MarketplaceReindexDataArgs,
-  ): Promise<void> {
+  async reindexMarketplaceData(input: MarketplaceReindexDataArgs): Promise<void> {
     await Locker.lock(
       `Reindex marketplace data/state for ${input.marketplaceAddress}`,
       async () => {
         try {
-          let marketplaceReindexStates: MarketplaceReindexState[] =
-            await this.getInitialMarketplaceReindexStates(input);
+          let marketplaceReindexStates: MarketplaceReindexState[] = await this.getInitialMarketplaceReindexStates(input);
 
-          await this.processMarketplaceEventsInBatches(
-            marketplaceReindexStates,
-            input,
-          );
+          await this.processMarketplaceEventsInBatches(marketplaceReindexStates, input);
 
           marketplaceReindexStates.map((s) =>
-            s.setStateItemsToExpiredIfOlderThanTimestamp(
-              input.beforeTimestamp ?? DateUtils.getCurrentTimestamp(),
-            ),
+            s.setStateItemsToExpiredIfOlderThanTimestamp(input.beforeTimestamp ?? DateUtils.getCurrentTimestamp()),
           );
 
           for (let state of marketplaceReindexStates) {
@@ -79,32 +71,23 @@ export class MarketplacesReindexService {
             await this.addMarketplaceStateToDb(state);
           }
 
-          this.logger.log(
-            `Reindexing marketplace data/state for ${input.marketplaceAddress} ended`,
-          );
+          this.logger.log(`Reindexing marketplace data/state for ${input.marketplaceAddress} ended`);
         } catch (error) {
-          this.logger.error(
-            'An error occurred while reindexing marketplace data',
-            {
-              path: `${MarketplacesReindexService.name}.${this.reindexMarketplaceData.name}`,
-              marketplaceAddress: input.marketplaceAddress,
-              exception: error,
-            },
-          );
+          this.logger.error('An error occurred while reindexing marketplace data', {
+            path: `${MarketplacesReindexService.name}.${this.reindexMarketplaceData.name}`,
+            marketplaceAddress: input.marketplaceAddress,
+            exception: error,
+          });
         }
       },
       true,
     );
   }
 
-  private async getInitialMarketplaceReindexStates(
-    input: MarketplaceReindexDataArgs,
-  ): Promise<MarketplaceReindexState[]> {
+  private async getInitialMarketplaceReindexStates(input: MarketplaceReindexDataArgs): Promise<MarketplaceReindexState[]> {
     let marketplaceReindexStates: MarketplaceReindexState[] = [];
 
-    const marketplace = await this.marketplacesService.getMarketplaceByAddress(
-      input.marketplaceAddress,
-    );
+    const marketplace = await this.marketplacesService.getMarketplaceByAddress(input.marketplaceAddress);
 
     if (marketplace.type === MarketplaceTypeEnum.External) {
       return [
@@ -115,16 +98,10 @@ export class MarketplacesReindexService {
       ];
     }
 
-    const internalMarketplaces =
-      await this.marketplacesService.getInternalMarketplacesByAddress(
-        marketplace.address,
-      );
+    const internalMarketplaces = await this.marketplacesService.getInternalMarketplacesByAddress(marketplace.address);
 
     for (let i = 0; i < internalMarketplaces.length; i++) {
-      const marketplaceCollections =
-        await this.marketplacesService.getCollectionsByMarketplace(
-          internalMarketplaces[i].key,
-        );
+      const marketplaceCollections = await this.marketplacesService.getCollectionsByMarketplace(internalMarketplaces[i].key);
 
       marketplaceReindexStates.push(
         new MarketplaceReindexState({
@@ -146,43 +123,29 @@ export class MarketplacesReindexService {
     let processInNextBatch: MarketplaceEventsEntity[] = [];
     let nextBatchPromise: Promise<MarketplaceEventsEntity[]>;
 
-    nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
-      marketplaceReindexStates[0].marketplace.address,
-      afterTimestamp,
-    );
+    nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(marketplaceReindexStates[0].marketplace.address, afterTimestamp);
 
     do {
       let batch = await nextBatchPromise;
       if (!batch || batch.length === 0) {
         break;
       }
-      [batch, afterTimestamp] =
-        this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(
-          batch,
-          input.beforeTimestamp,
-        );
+      [batch, afterTimestamp] = this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch, input.beforeTimestamp);
 
-      nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(
-        marketplaceReindexStates[0].marketplace.address,
-        afterTimestamp,
+      nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(marketplaceReindexStates[0].marketplace.address, afterTimestamp);
+
+      processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
+        marketplaceReindexStates,
+        processInNextBatch.concat(batch),
       );
-
-      processInNextBatch =
-        await this.processEventsBatchAndReturnUnprocessedEvents(
-          marketplaceReindexStates,
-          processInNextBatch.concat(batch),
-        );
-    } while (
-      input.beforeTimestamp ? afterTimestamp < input.beforeTimestamp : true
-    );
+    } while (input.beforeTimestamp ? afterTimestamp < input.beforeTimestamp : true);
 
     const isFinalBatch = true;
-    processInNextBatch =
-      await this.processEventsBatchAndReturnUnprocessedEvents(
-        marketplaceReindexStates,
-        processInNextBatch,
-        isFinalBatch,
-      );
+    processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
+      marketplaceReindexStates,
+      processInNextBatch,
+      isFinalBatch,
+    );
 
     if (processInNextBatch.length > 0) {
       this.logger.warn(`Could not handle ${processInNextBatch.length} events`);
@@ -205,10 +168,7 @@ export class MarketplacesReindexService {
     }
 
     if (newestTimestamp > beforeTimestamp) {
-      return [
-        eventsBatch.filter((e) => e.timestamp < beforeTimestamp),
-        beforeTimestamp,
-      ];
+      return [eventsBatch.filter((e) => e.timestamp < beforeTimestamp), beforeTimestamp];
     }
 
     return [eventsBatch, newestTimestamp];
@@ -224,25 +184,15 @@ export class MarketplacesReindexService {
     while (unprocessedEvents.length > 0) {
       const txHash = unprocessedEvents[0].txHash;
 
-      const eventOrdersAndTx = unprocessedEvents.filter(
-        (event) => event.txHash === txHash || event.originalTxHash === txHash,
-      );
+      const eventOrdersAndTx = unprocessedEvents.filter((event) => event.txHash === txHash || event.originalTxHash === txHash);
 
-      const isAnotherEventsSetInBatch = unprocessedEvents.find(
-        (e) => e.timestamp > unprocessedEvents[0].timestamp,
-      );
+      const isAnotherEventsSetInBatch = unprocessedEvents.find((e) => e.timestamp > unprocessedEvents[0].timestamp);
 
-      if (
-        !isFinalBatch &&
-        (eventOrdersAndTx.length === unprocessedEvents.length ||
-          !isAnotherEventsSetInBatch)
-      ) {
+      if (!isFinalBatch && (eventOrdersAndTx.length === unprocessedEvents.length || !isAnotherEventsSetInBatch)) {
         return unprocessedEvents;
       }
 
-      unprocessedEvents = unprocessedEvents.filter(
-        (event) => event.txHash !== txHash && event.originalTxHash !== txHash,
-      );
+      unprocessedEvents = unprocessedEvents.filter((event) => event.txHash !== txHash && event.originalTxHash !== txHash);
 
       await this.processEventsSet(marketplaceReindexStates, eventOrdersAndTx);
     }
@@ -254,11 +204,10 @@ export class MarketplacesReindexService {
     marketplaceReindexStates: MarketplaceReindexState[],
     eventOrdersAndTx: MarketplaceEventsEntity[],
   ): Promise<void> {
-    const eventsSetSummaries =
-      this.marketplacesReindexEventsSummaryService.getEventsSetSummaries(
-        marketplaceReindexStates[0].marketplace,
-        eventOrdersAndTx,
-      );
+    const eventsSetSummaries = this.marketplacesReindexEventsSummaryService.getEventsSetSummaries(
+      marketplaceReindexStates[0].marketplace,
+      eventOrdersAndTx,
+    );
 
     if (!marketplaceReindexStates[0].isReindexFromTheBeginning) {
       await Promise.all(
@@ -273,81 +222,56 @@ export class MarketplacesReindexService {
     for (let i = 0; i < eventsSetSummaries?.length; i++) {
       try {
         if (!areMultipleMarketplaces) {
-          await this.processEvent(
-            marketplaceReindexStates[0],
-            eventsSetSummaries[i],
-          );
+          await this.processEvent(marketplaceReindexStates[0], eventsSetSummaries[i]);
           continue;
         }
 
-        const stateIndex = marketplaceReindexStates.findIndex((s) =>
-          s.isCollectionListed(eventsSetSummaries[i].collection),
-        );
+        const stateIndex = marketplaceReindexStates.findIndex((s) => s.isCollectionListed(eventsSetSummaries[i].collection));
         if (stateIndex !== -1) {
-          await this.processEvent(
-            marketplaceReindexStates[stateIndex],
-            eventsSetSummaries[i],
-          );
+          await this.processEvent(marketplaceReindexStates[stateIndex], eventsSetSummaries[i]);
         }
       } catch (error) {
-        this.logger.warn(
-          `Error reprocessing marketplace event ${JSON.stringify(
-            eventsSetSummaries[i],
-          )} - ${JSON.stringify(error)}`,
-        );
+        this.logger.warn(`Error reprocessing marketplace event ${JSON.stringify(eventsSetSummaries[i])} - ${JSON.stringify(error)}`);
       }
     }
   }
 
-  private async getStateFromDbIfMissing(
-    marketplaceReindexState: MarketplaceReindexState,
-    eventsSetSummaries: any[],
-  ): Promise<void> {
-    const [missingAuctionIds, missingOfferIds, missingStateForIdentifiers] =
-      this.getMissingStateIds(marketplaceReindexState, eventsSetSummaries);
+  private async getStateFromDbIfMissing(marketplaceReindexState: MarketplaceReindexState, eventsSetSummaries: any[]): Promise<void> {
+    const [missingAuctionIds, missingOfferIds, missingStateForIdentifiers] = this.getMissingStateIds(
+      marketplaceReindexState,
+      eventsSetSummaries,
+    );
 
     let auctions: AuctionEntity[];
     if (missingAuctionIds.length > 0) {
-      auctions =
-        await this.persistenceService.getBulkAuctionsByAuctionIdsAndMarketplace(
-          missingAuctionIds,
-          marketplaceReindexState.marketplace.key,
-        );
+      auctions = await this.persistenceService.getBulkAuctionsByAuctionIdsAndMarketplace(
+        missingAuctionIds,
+        marketplaceReindexState.marketplace.key,
+      );
     } else if (missingStateForIdentifiers.length > 0) {
-      auctions =
-        await this.persistenceService.getBulkAuctionsByIdentifierAndMarketplace(
-          missingStateForIdentifiers,
-          marketplaceReindexState.marketplace.key,
-        );
+      auctions = await this.persistenceService.getBulkAuctionsByIdentifierAndMarketplace(
+        missingStateForIdentifiers,
+        marketplaceReindexState.marketplace.key,
+      );
     }
 
     const auctionIds = auctions?.map((a) => a.id);
     const [orders, offers] = await Promise.all([
-      auctionIds?.length > 0
-        ? this.persistenceService.getOrdersByAuctionIds(auctionIds)
-        : [],
+      auctionIds?.length > 0 ? this.persistenceService.getOrdersByAuctionIds(auctionIds) : [],
       missingOfferIds?.length > 0
-        ? this.persistenceService.getBulkOffersByOfferIdsAndMarketplace(
-            missingOfferIds,
-            marketplaceReindexState.marketplace.key,
-          )
+        ? this.persistenceService.getBulkOffersByOfferIdsAndMarketplace(missingOfferIds, marketplaceReindexState.marketplace.key)
         : [],
     ]);
 
     if (orders?.length > 0) {
-      marketplaceReindexState.orders =
-        marketplaceReindexState.orders.concat(orders);
+      marketplaceReindexState.orders = marketplaceReindexState.orders.concat(orders);
     }
     if (offers?.length > 0) {
-      marketplaceReindexState.offers =
-        marketplaceReindexState.offers.concat(offers);
+      marketplaceReindexState.offers = marketplaceReindexState.offers.concat(offers);
     }
   }
 
-  private getMissingStateIds(
-    marketplaceReindexState: MarketplaceReindexState,
-    eventsSetSummaries: any[],
-  ): [number[], number[], string[]] {
+  private getMissingStateIds(marketplaceReindexState: MarketplaceReindexState, eventsSetSummaries: any[]): [number[], number[], string[]] {
     let missingAuctionIds: number[] = [];
     let missingOfferIds: number[] = [];
     let missingStateForIdentifiers: string[] = [];
@@ -357,18 +281,11 @@ export class MarketplacesReindexService {
         continue;
       }
 
-      if (
-        eventsSetSummaries[i].auctionId &&
-        eventsSetSummaries[i].action !== AssetActionEnum.StartedAuction
-      ) {
+      if (eventsSetSummaries[i].auctionId && eventsSetSummaries[i].action !== AssetActionEnum.StartedAuction) {
         const auctionIndex =
           marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-            ? marketplaceReindexState.getAuctionIndexByAuctionId(
-                eventsSetSummaries[i].auctionId,
-              )
-            : marketplaceReindexState.getAuctionIndexByIdentifier(
-                eventsSetSummaries[i].identifier,
-              );
+            ? marketplaceReindexState.getAuctionIndexByAuctionId(eventsSetSummaries[i].auctionId)
+            : marketplaceReindexState.getAuctionIndexByIdentifier(eventsSetSummaries[i].identifier);
         if (auctionIndex === -1) {
           marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
             ? missingAuctionIds.push(eventsSetSummaries[i].auctionId)
@@ -376,146 +293,71 @@ export class MarketplacesReindexService {
         }
       }
 
-      if (
-        eventsSetSummaries[i].offerId &&
-        eventsSetSummaries[i].action !== AssetOfferEnum.Created
-      ) {
-        const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(
-          eventsSetSummaries[i].offerId,
-        );
+      if (eventsSetSummaries[i].offerId && eventsSetSummaries[i].action !== AssetOfferEnum.Created) {
+        const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(eventsSetSummaries[i].offerId);
         if (offerIndex === -1) {
           missingOfferIds.push(eventsSetSummaries[i].offerId);
         }
       }
     }
 
-    return [
-      [...new Set(missingAuctionIds)],
-      [...new Set(missingOfferIds)],
-      [...new Set(missingStateForIdentifiers)],
-    ];
+    return [[...new Set(missingAuctionIds)], [...new Set(missingOfferIds)], [...new Set(missingStateForIdentifiers)]];
   }
 
-  private async processEvent(
-    marketplaceReindexState: MarketplaceReindexState,
-    eventsSetSummary: any,
-  ): Promise<void> {
+  private async processEvent(marketplaceReindexState: MarketplaceReindexState, eventsSetSummary: any): Promise<void> {
     if (!eventsSetSummary) {
       return;
     }
     switch (eventsSetSummary.action) {
       case AssetActionEnum.StartedAuction: {
-        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexAuctionStartedHandler.handle(
-          eventsSetSummary,
-          marketplaceReindexState,
-          paymentToken,
-          paymentNonce,
-        );
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexAuctionStartedHandler.handle(eventsSetSummary, marketplaceReindexState, paymentToken, paymentNonce);
         break;
       }
       case AssetActionEnum.Bid: {
-        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexAuctionBidHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken,
-          paymentNonce,
-        );
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexAuctionBidHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken, paymentNonce);
         break;
       }
       case AssetActionEnum.Bought: {
-        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexAuctionBoughtHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken,
-          paymentNonce,
-        );
+        const [paymentToken, paymentNonce] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexAuctionBoughtHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken, paymentNonce);
         break;
       }
       case AssetActionEnum.EndedAuction: {
-        const [paymentToken] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexAuctionEndedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken,
-        );
+        const [paymentToken] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexAuctionEndedHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken);
         break;
       }
       case AssetActionEnum.ClosedAuction: {
-        this.reindexAuctionClosedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
+        this.reindexAuctionClosedHandler.handle(marketplaceReindexState, eventsSetSummary);
         break;
       }
       case AssetActionEnum.PriceUpdated: {
-        const [paymentToken] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexAuctionPriceUpdatedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken.decimals,
-        );
+        const [paymentToken] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexAuctionPriceUpdatedHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken.decimals);
         break;
       }
       case AssetActionEnum.Updated: {
-        const paymentToken = await this.usdPriceService.getToken(
-          eventsSetSummary.paymentToken,
-        );
-        this.reindexAuctionUpdatedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken.decimals,
-        );
+        const paymentToken = await this.usdPriceService.getToken(eventsSetSummary.paymentToken);
+        this.reindexAuctionUpdatedHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken.decimals);
         break;
       }
       case AssetOfferEnum.Created: {
-        const [paymentToken] = await this.getPaymentTokenAndNonce(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
-        this.reindexOfferCreatedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-          paymentToken.decimals,
-        );
+        const [paymentToken] = await this.getPaymentTokenAndNonce(marketplaceReindexState, eventsSetSummary);
+        this.reindexOfferCreatedHandler.handle(marketplaceReindexState, eventsSetSummary, paymentToken.decimals);
         break;
       }
       case AssetOfferEnum.Accepted: {
-        this.reindexOfferAcceptedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
+        this.reindexOfferAcceptedHandler.handle(marketplaceReindexState, eventsSetSummary);
         break;
       }
       case AssetOfferEnum.GloballyAccepted: {
-        this.reindexGlobalOfferAcceptedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
+        this.reindexGlobalOfferAcceptedHandler.handle(marketplaceReindexState, eventsSetSummary);
         break;
       }
       case AssetOfferEnum.Closed: {
-        this.reindexOfferClosedHandler.handle(
-          marketplaceReindexState,
-          eventsSetSummary,
-        );
+        this.reindexOfferClosedHandler.handle(marketplaceReindexState, eventsSetSummary);
         break;
       }
       default: {
@@ -526,26 +368,15 @@ export class MarketplacesReindexService {
     }
   }
 
-  private async getPaymentTokenAndNonce(
-    marketplaceReindexState: MarketplaceReindexState,
-    input: any,
-  ): Promise<[Token, number]> {
+  private async getPaymentTokenAndNonce(marketplaceReindexState: MarketplaceReindexState, input: any): Promise<[Token, number]> {
     try {
       const auctionIndex =
         marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
           ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
-          : marketplaceReindexState.getAuctionIndexByIdentifier(
-              input.identifier,
-            );
-      const paymentNonceValue =
-        input.paymentNonce ??
-        marketplaceReindexState.auctions[auctionIndex]?.paymentNonce;
-      const paymentNonce = !Number.isNaN(paymentNonceValue)
-        ? paymentNonceValue
-        : 0;
-      const paymentTokenIdentifier =
-        input.paymentToken ??
-        marketplaceReindexState.auctions[auctionIndex]?.paymentToken;
+          : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
+      const paymentNonceValue = input.paymentNonce ?? marketplaceReindexState.auctions[auctionIndex]?.paymentNonce;
+      const paymentNonce = !Number.isNaN(paymentNonceValue) ? paymentNonceValue : 0;
+      const paymentTokenIdentifier = input.paymentToken ?? marketplaceReindexState.auctions[auctionIndex]?.paymentToken;
       if (paymentTokenIdentifier === mxConfig.egld) {
         return [
           new Token({
@@ -555,9 +386,7 @@ export class MarketplacesReindexService {
           0,
         ];
       }
-      const paymentToken = await this.usdPriceService.getToken(
-        paymentTokenIdentifier,
-      );
+      const paymentToken = await this.usdPriceService.getToken(paymentTokenIdentifier);
       if (!paymentToken) {
         return [
           new Token({
@@ -573,9 +402,7 @@ export class MarketplacesReindexService {
     }
   }
 
-  private async addMarketplaceStateToDb(
-    marketplaceReindexState: MarketplaceReindexState,
-  ): Promise<void> {
+  private async addMarketplaceStateToDb(marketplaceReindexState: MarketplaceReindexState): Promise<void> {
     marketplaceReindexState.auctions.map((a) => {
       delete a.id;
       if (a.startDate > constants.dbMaxTimestamp) {
@@ -588,19 +415,11 @@ export class MarketplacesReindexService {
     marketplaceReindexState.orders.map((o) => delete o.id);
     marketplaceReindexState.offers.map((o) => delete o.id);
 
-    await this.auctionSetterService.saveBulkAuctions(
-      marketplaceReindexState.auctions,
-    );
+    await this.auctionSetterService.saveBulkAuctions(marketplaceReindexState.auctions);
 
     for (let i = 0; i < marketplaceReindexState.orders.length; i++) {
-      marketplaceReindexState.orders[i].auction =
-        marketplaceReindexState.auctions[
-          marketplaceReindexState.orders[i].auctionId
-        ];
-      marketplaceReindexState.orders[i].auctionId =
-        marketplaceReindexState.auctions[
-          marketplaceReindexState.orders[i].auctionId
-        ].id;
+      marketplaceReindexState.orders[i].auction = marketplaceReindexState.auctions[marketplaceReindexState.orders[i].auctionId];
+      marketplaceReindexState.orders[i].auctionId = marketplaceReindexState.auctions[marketplaceReindexState.orders[i].auctionId].id;
     }
 
     let tags: TagEntity[] = [];
@@ -620,17 +439,11 @@ export class MarketplacesReindexService {
     });
 
     await this.persistenceService.saveTags(tags);
-    await this.persistenceService.saveBulkOrders(
-      marketplaceReindexState.orders,
-    );
-    await this.persistenceService.saveBulkOffers(
-      marketplaceReindexState.offers,
-    );
+    await this.persistenceService.saveBulkOrders(marketplaceReindexState.orders);
+    await this.persistenceService.saveBulkOffers(marketplaceReindexState.offers);
   }
 
-  private async populateAuctionAssetTags(
-    auctions: AuctionEntity[],
-  ): Promise<void> {
+  private async populateAuctionAssetTags(auctions: AuctionEntity[]): Promise<void> {
     const batchSize = constants.getNftsFromApiBatchSize;
     for (let i = 0; i < auctions.length; i += batchSize) {
       const assetsWithNoTagsIdentifiers = [
@@ -641,16 +454,10 @@ export class MarketplacesReindexService {
             .map((a) => a.identifier),
         ),
       ];
-      const assets = await this.mxApiService.getNftsByIdentifiers(
-        assetsWithNoTagsIdentifiers,
-        0,
-        'fields=identifier,tags',
-      );
+      const assets = await this.mxApiService.getNftsByIdentifiers(assetsWithNoTagsIdentifiers, 0, 'fields=identifier,tags');
       const tags = assets.filter((a) => a.tags);
       for (let j = 0; j < assets?.length; j++) {
-        auctions
-          .filter((a) => a.identifier === assets[j].identifier)
-          .map((a) => (a.tags = assets[j]?.tags?.join(',') ?? ''));
+        auctions.filter((a) => a.identifier === assets[j].identifier).map((a) => (a.tags = assets[j]?.tags?.join(',') ?? ''));
       }
     }
   }

@@ -8,22 +8,12 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
   scope: Scope.REQUEST,
 })
 export class InternalMarketplaceProvider extends BaseProvider<string> {
-  constructor(
-    subdomainRedisHandler: InternalMarketplaceRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      subdomainRedisHandler,
-      new DataLoader(async (keys: string[]) => await this.batchLoad(keys)),
-    );
+  constructor(subdomainRedisHandler: InternalMarketplaceRedisHandler, private persistenceService: PersistenceService) {
+    super(subdomainRedisHandler, new DataLoader(async (keys: string[]) => await this.batchLoad(keys)));
   }
 
   async getData(collections: string[]) {
-    const marketplace =
-      await this.persistenceService.getMarketplaceByCollections(collections);
-    return marketplace?.groupBy(
-      (subdomainCollection: { collectionIdentifier: any }) =>
-        subdomainCollection.collectionIdentifier,
-    );
+    const marketplace = await this.persistenceService.getMarketplaceByCollections(collections);
+    return marketplace?.groupBy((subdomainCollection: { collectionIdentifier: any }) => subdomainCollection.collectionIdentifier);
   }
 }

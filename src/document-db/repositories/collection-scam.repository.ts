@@ -3,25 +3,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EntityRepository } from './entity.repository';
 import { ScamInfo } from 'src/modules/assets/models/ScamInfo.dto';
-import {
-  CollectionScamInfoDocument,
-  CollectionScamInfoModel,
-} from 'src/modules/scam/models/collection-scam-info.model';
+import { CollectionScamInfoDocument, CollectionScamInfoModel } from 'src/modules/scam/models/collection-scam-info.model';
 
 @Injectable()
 export class CollectionScamInfoRepositoryService extends EntityRepository<CollectionScamInfoDocument> {
   constructor(
     @InjectModel(CollectionScamInfoModel.name)
-    private readonly collectionScamInfoModel: Model<CollectionScamInfoDocument>,
+    readonly collectionScamInfoModel: Model<CollectionScamInfoDocument>,
   ) {
     super(collectionScamInfoModel);
   }
 
-  async saveOrUpdateCollectionScamInfo(
-    collection: string,
-    version: string,
-    scamInfo?: ScamInfo,
-  ): Promise<void> {
+  async saveOrUpdateCollectionScamInfo(collection: string, version: string, scamInfo?: ScamInfo): Promise<void> {
     let doc: CollectionScamInfoModel = {
       collectionIdentifier: collection,
       version: version,
@@ -46,9 +39,7 @@ export class CollectionScamInfoRepositoryService extends EntityRepository<Collec
     });
   }
 
-  async getCollectionScamInfo(
-    collection: string,
-  ): Promise<CollectionScamInfoModel | undefined> {
+  async getCollectionScamInfo(collection: string): Promise<CollectionScamInfoModel | undefined> {
     return await this.findOne({
       collectionIdentifier: collection,
     });

@@ -1,11 +1,7 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import {
-  AssetActionEnum,
-  KroganSwapAuctionEventEnum,
-  ExternalAuctionEventEnum,
-} from 'src/modules/assets/models';
+import { AssetActionEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionTypeEnum } from 'src/modules/auctions/models';
 import { WithdrawEvent } from 'src/modules/rabbitmq/entities/auction';
 import { ClaimEvent } from 'src/modules/rabbitmq/entities/auction/claim.event';
@@ -29,10 +25,7 @@ export class ReindexAuctionClosedSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromWithdrawAuctionEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-  ): ReindexAuctionClosedSummary {
+  static fromWithdrawAuctionEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData): ReindexAuctionClosedSummary {
     if (event.hasEventTopicIdentifier(ExternalAuctionEventEnum.UpdateOffer)) {
       return;
     }
@@ -55,9 +48,7 @@ export class ReindexAuctionClosedSummary extends ReindexGenericSummary {
   }
 
   private static getTopics(event: MarketplaceEventsEntity): any {
-    const genericEvent = event.data
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+    const genericEvent = event.data ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (event.hasEventIdentifier(ExternalAuctionEventEnum.ClaimBackNft)) {
       return new ClaimEvent(genericEvent).getTopics();

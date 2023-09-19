@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ConfigModule } from '@nestjs/config/dist';
 import { GraphQLModule } from '@nestjs/graphql';
 import 'reflect-metadata';
@@ -34,9 +35,9 @@ import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.m
 import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/date.extensions';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/array.extensions';
-import '@multiversx/sdk-nestjs/lib/src/utils/extensions/number.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/date.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
+import '@multiversx/sdk-nestjs-common/lib/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 import { MintersModuleGraph } from './modules/minters/minters.module';
 
@@ -47,25 +48,28 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      introspection: process.env.NODE_ENV !== 'production',
-      playground: true,
-      sortSchema: true,
-      plugins: [new ComplexityPlugin()],
-      formatError: (error: GraphQLError) => {
-        const graphQLFormattedError: GraphQLFormattedError = {
-          ...error,
-          message: error.message,
-        };
-        console.error(graphQLFormattedError);
+      imports: [CommonModule],
+      useFactory: async () => ({
+        autoSchemaFile: 'schema.gql',
+        introspection: process.env.NODE_ENV !== 'production',
+        playground: false,
+        plugins: [ApolloServerPluginLandingPageLocalDefault(), new ComplexityPlugin()],
+        sortSchema: true,
+        formatError: (error: GraphQLError) => {
+          const graphQLFormattedError: GraphQLFormattedError = {
+            ...error,
+            message: error.message,
+          };
+          console.error(graphQLFormattedError);
 
-        return {
-          ...graphQLFormattedError,
-          extensions: { ...graphQLFormattedError.extensions, exception: null },
-        };
-      },
+          return {
+            ...graphQLFormattedError,
+            extensions: { ...graphQLFormattedError.extensions, exception: null },
+          };
+        },
+      }),
     }),
     CommonModule,
     CollectionsModuleGraph,

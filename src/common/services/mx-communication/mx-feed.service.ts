@@ -7,10 +7,7 @@ import { SubscriptionFeed } from './models/subscription-feed.dto';
 
 @Injectable()
 export class MxFeedService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly apiService: ApiService,
-  ) {}
+  constructor(private readonly logger: Logger, private readonly apiService: ApiService) {}
 
   async subscribe(identifier: string, authKey?: string): Promise<boolean> {
     if (process.env.ENABLE_FEED_EVENTS === 'true') {
@@ -28,16 +25,11 @@ export class MxFeedService {
         );
         return response.data;
       } catch (error) {
-        this.logger.error(
-          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
-            url,
-          )}`,
-          {
-            path: `${MxFeedService.name}.${this.subscribe.name}`,
-            identifier,
-            exception: error,
-          },
-        );
+        this.logger.error(`An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(url)}`, {
+          path: `${MxFeedService.name}.${this.subscribe.name}`,
+          identifier,
+          exception: error,
+        });
         return;
       }
     }
@@ -61,16 +53,11 @@ export class MxFeedService {
         );
         return response.data;
       } catch (error) {
-        this.logger.error(
-          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
-            url,
-          )}`,
-          {
-            path: `${MxFeedService.name}.${this.unsubscribe.name}`,
-            reference,
-            exception: error,
-          },
-        );
+        this.logger.error(`An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(url)}`, {
+          path: `${MxFeedService.name}.${this.unsubscribe.name}`,
+          reference,
+          exception: error,
+        });
         return;
       }
     }
@@ -82,23 +69,14 @@ export class MxFeedService {
       const url = `${process.env.ELROND_FEED}v1/feed/item`;
 
       try {
-        const response = await this.apiService.post(
-          url,
-          feed,
-          new ApiSettings({ apiKey: process.env.ELROND_FEED_API_KEY }),
-        );
+        const response = await this.apiService.post(url, feed, new ApiSettings({ apiKey: process.env.ELROND_FEED_API_KEY }));
         return response.data;
       } catch (error) {
-        this.logger.error(
-          `An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(
-            url,
-          )}`,
-          {
-            path: `${MxFeedService.name}.${this.addFeed.name}`,
-            feed: feed,
-            exception: error,
-          },
-        );
+        this.logger.error(`An error occurred while calling the mx feed api on url ${removeCredentialsFromUrl(url)}`, {
+          path: `${MxFeedService.name}.${this.addFeed.name}`,
+          feed: feed,
+          exception: error,
+        });
         return;
       }
     }

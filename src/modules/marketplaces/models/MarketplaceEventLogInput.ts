@@ -37,19 +37,11 @@ export class MarketplaceEventLogInput {
     Object.assign(this, init);
   }
 
-  static fromInternalMarketplaceEventAndTx(
-    events: MarketplaceEventsEntity[],
-    eventType: string,
-    index: number,
-  ): MarketplaceEventLogInput {
+  static fromInternalMarketplaceEventAndTx(events: MarketplaceEventsEntity[], eventType: string, index: number): MarketplaceEventLogInput {
     throw new Error('Not implemented yet');
   }
 
-  static fromExternalMarketplaceEventAndTx(
-    events: MarketplaceEventsEntity[],
-    eventType: string,
-    index: number,
-  ): MarketplaceEventLogInput {
+  static fromExternalMarketplaceEventAndTx(events: MarketplaceEventsEntity[], eventType: string, index: number): MarketplaceEventLogInput {
     throw new Error('Not implemented yet');
   }
 

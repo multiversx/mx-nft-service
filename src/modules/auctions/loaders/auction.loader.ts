@@ -8,14 +8,8 @@ import { AuctionsRedisHandler } from './auctions.redis-handler';
   scope: Scope.REQUEST,
 })
 export class AuctionProvider extends BaseProvider<number> {
-  constructor(
-    auctionsRedisHandler: AuctionsRedisHandler,
-    private persistenceService: PersistenceService,
-  ) {
-    super(
-      auctionsRedisHandler,
-      new DataLoader(async (keys: number[]) => await this.batchLoad(keys)),
-    );
+  constructor(auctionsRedisHandler: AuctionsRedisHandler, private persistenceService: PersistenceService) {
+    super(auctionsRedisHandler, new DataLoader(async (keys: number[]) => await this.batchLoad(keys)));
   }
 
   async getData(auctionsIds: number[]) {

@@ -39,10 +39,7 @@ async function bootstrap() {
 
   if (process.env.ENABLE_PRIVATE_API === 'true') {
     const privateApp = await NestFactory.create(PrivateAppModule);
-    await privateApp.listen(
-      parseInt(process.env.PRIVATE_PORT),
-      process.env.PRIVATE_LISTEN_ADDRESS,
-    );
+    await privateApp.listen(parseInt(process.env.PRIVATE_PORT), process.env.PRIVATE_LISTEN_ADDRESS);
   }
 
   if (process.env.ENABLE_CACHE_INVALIDATION === 'true') {
@@ -85,54 +82,33 @@ async function bootstrap() {
     await processorApp.listen(ports.scamInfo);
   }
   if (process.env.ENABLE_CACHE_INVALIDATION !== 'true') {
-    const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(
-      PubSubListenerModule,
-      {
-        transport: Transport.REDIS,
-        options: {
-          host: apiConfigService.getRedisUrl(),
-          port: apiConfigService.getRedisPort(),
-          retryAttempts: 100,
-          retryDelay: 1000,
-          retryStrategy: () => 1000,
-        },
+    const pubSubApp = await NestFactory.createMicroservice<MicroserviceOptions>(PubSubListenerModule, {
+      transport: Transport.REDIS,
+      options: {
+        host: apiConfigService.getRedisUrl(),
+        port: apiConfigService.getRedisPort(),
+        retryAttempts: 100,
+        retryDelay: 1000,
+        retryStrategy: () => 1000,
       },
-    );
+    });
     pubSubApp.listen();
   }
 
   logger.log(`Public API active: ${process.env.ENABLE_PUBLIC_API}`);
   logger.log(`Private API active: ${process.env.ENABLE_PRIVATE_API}`);
-  logger.log(
-    `Claimable job is active: ${process.env.ENABLE_CLAIMABLE_AUCTIONS}`,
-  );
+  logger.log(`Claimable job is active: ${process.env.ENABLE_CLAIMABLE_AUCTIONS}`);
   logger.log(`Cache warmer active: ${process.env.ENABLE_CACHE_WARMER}`);
   logger.log(`Rabbit is active: ${process.env.ENABLE_RABBITMQ}`);
-  logger.log(
-    `Cache invalidation is active: ${process.env.ENABLE_CACHE_INVALIDATION}`,
-  );
-  logger.log(
-    `Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`,
-  );
+  logger.log(`Cache invalidation is active: ${process.env.ENABLE_CACHE_INVALIDATION}`);
+  logger.log(`Account batch get is active: ${process.env.ENABLE_BATCH_ACCOUNT_GET}`);
   logger.log(`NSFW cron job is active: ${process.env.ENABLE_NSFW_CRONJOBS}`);
-  logger.log(
-    `Elastic updates are active: ${process.env.ENABLE_ELASTIC_UPDATES}`,
-  );
-  logger.log(
-    `Elastic nft traits are active: ${process.env.ENABLE_TRAITS_CRONJOBS}`,
-  );
-  logger.log(
-    `Elastic nft rarities are active: ${process.env.ENABLE_RARITY_CRONJOBS}`,
-  );
-  logger.log(
-    `Elastic nft scams are active: ${process.env.ENABLE_SCAM_CRONJOBS}`,
-  );
-  logger.log(
-    `Marketplace events indexing is active: ${process.env.ENABLE_MARKETPLACE_EVENTS}`,
-  );
-  logger.log(
-    `Trending by volume is active: ${process.env.ENABLE_TRENDING_BY_VOLUME}`,
-  );
+  logger.log(`Elastic updates are active: ${process.env.ENABLE_ELASTIC_UPDATES}`);
+  logger.log(`Elastic nft traits are active: ${process.env.ENABLE_TRAITS_CRONJOBS}`);
+  logger.log(`Elastic nft rarities are active: ${process.env.ENABLE_RARITY_CRONJOBS}`);
+  logger.log(`Elastic nft scams are active: ${process.env.ENABLE_SCAM_CRONJOBS}`);
+  logger.log(`Marketplace events indexing is active: ${process.env.ENABLE_MARKETPLACE_EVENTS}`);
+  logger.log(`Trending by volume is active: ${process.env.ENABLE_TRENDING_BY_VOLUME}`);
 }
 
 bootstrap();
@@ -141,6 +117,7 @@ async function startPublicApp() {
   const app = await NestFactory.create(AppModule, {
     logger: new LoggerService(),
   });
+  app.enableCors();
   app.use(graphqlUploadExpress());
 
   const httpAdapterHostService = app.get<HttpAdapterHost>(HttpAdapterHost);
@@ -158,9 +135,7 @@ async function startPublicApp() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   const httpServer = httpAdapterHostService.httpAdapter.getHttpServer();
-  httpServer.keepAliveTimeout = parseInt(
-    process.env.KEEPALIVE_TIMEOUT_UPSTREAM,
-  );
+  httpServer.keepAliveTimeout = parseInt(process.env.KEEPALIVE_TIMEOUT_UPSTREAM);
 
   await app.listen(process.env.PORT);
 }

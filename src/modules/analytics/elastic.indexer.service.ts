@@ -1,8 +1,4 @@
-import {
-  ElasticQuery,
-  ElasticSortOrder,
-  QueryType,
-} from '@multiversx/sdk-nestjs';
+import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 
@@ -42,39 +38,22 @@ export class ElasticAnalyticsService {
       )
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
-    await this.elasticService.getScrollableList(
-      'logs',
-      '_id',
-      elasticQuery,
-      action,
-    );
+    await this.elasticService.getScrollableList('logs', '_id', elasticQuery, action);
   }
 
-  public async getEventsOrderedByTimestamp(
-    gte: number,
-    lte: number,
-    eventNames: string[],
-  ): Promise<any> {
+  public async getEventsOrderedByTimestamp(gte: number, lte: number, eventNames: string[]): Promise<any> {
     let eventGroups = [];
     for (const eventName of eventNames) {
       const newGroups = await this.getTransactionsLogs(eventName, gte, lte);
       eventGroups = eventGroups.concat(newGroups);
     }
 
-    eventGroups.sort(
-      (a, b) =>
-        new Date(a._source?.timestamp).getTime() -
-        new Date(b._source?.timestamp).getTime(),
-    );
+    eventGroups.sort((a, b) => new Date(a._source?.timestamp).getTime() - new Date(b._source?.timestamp).getTime());
 
     return eventGroups;
   }
 
-  private async getTransactionsLogs(
-    eventName: string,
-    gte: number,
-    lte: number,
-  ): Promise<any[]> {
+  private async getTransactionsLogs(eventName: string, gte: number, lte: number): Promise<any[]> {
     const elasticQuery = ElasticQuery.create()
       .withMustCondition(
         QueryType.Should(

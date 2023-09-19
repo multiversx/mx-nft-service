@@ -1,4 +1,5 @@
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable } from '@nestjs/common';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
@@ -11,17 +12,11 @@ export class UsdPriceRedisHandler extends RedisKeyValueDataloaderHandler<number>
     super(redisCacheService, 'priceUSD');
   }
 
-  mapValues(
-    returnValues: { key: number; value: any }[],
-    assetsIdentifiers: { [key: number]: any[] },
-  ) {
+  mapValues(returnValues: { key: number; value: any }[], assetsIdentifiers: { [key: number]: any[] }) {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {
-        item.value =
-          assetsIdentifiers && assetsIdentifiers[item.key]
-            ? assetsIdentifiers[item.key][0]
-            : null;
+        item.value = assetsIdentifiers && assetsIdentifiers[item.key] ? assetsIdentifiers[item.key][0] : null;
         redisValues.push(item);
       }
     }
@@ -30,9 +25,6 @@ export class UsdPriceRedisHandler extends RedisKeyValueDataloaderHandler<number>
   }
 
   getCacheKey(key: number) {
-    return generateCacheKeyFromParams(
-      'priceUSD',
-      DateUtils.getDateFromTimestampWithoutTime(key),
-    );
+    return generateCacheKeyFromParams('priceUSD', DateUtils.getDateFromTimestampWithoutTime(key));
   }
 }

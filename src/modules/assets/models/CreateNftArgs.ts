@@ -1,11 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { Matches } from 'class-validator';
-import {
-  COLLECTION_IDENTIFIER_ERROR,
-  COLLECTION_IDENTIFIER_RGX,
-  NUMERIC_ERROR,
-  NUMERIC_RGX,
-} from 'src/utils/constants';
+import { COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX, NUMERIC_ERROR, NUMERIC_RGX } from 'src/utils/constants';
 
 @InputType()
 export class AttributeInput {

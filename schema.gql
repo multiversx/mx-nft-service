@@ -211,6 +211,7 @@ input AssetsFilter {
   identifiers: [String!]
   likedByAddress: String
   ownerAddress: String
+  searchTerm: String
   tags: [String!]
   traits: [NftTrait]
   type: NftTypeEnum
@@ -577,6 +578,7 @@ type CollectionsAnalyticsModel {
   floorPrice: Float!
   floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
   holders: Int!
+  topHolders: [HoldersCount!]!
   volume24h: Float
   volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
 }
@@ -692,6 +694,13 @@ enum CustomFiltersEnum {
   Tickets
 }
 
+input DeployMinterArgs {
+  maxNftsPerTransaction: Int!
+  mintClaimAddress: String!
+  ownerAddress: String!
+  royaltiesClaimAddress: String!
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -779,6 +788,12 @@ input HistoryPagination {
   timestamp: Int
 }
 
+type HoldersCount {
+  accountDetails: Account!
+  address: String!
+  count: Int!
+}
+
 input IssueCampaignArgs {
   campaignId: String!
   collectionIpfsHash: String!
@@ -789,6 +804,7 @@ input IssueCampaignArgs {
   mintPriceToken: String! = "EGLD"
   mintStartTime: Int!
   minterAddress: String!
+  ownerAddress: String!
   royalties: String!
   tags: [String!]!
   tiers: [TierArgs!]!
@@ -904,8 +920,30 @@ type MintPrice {
 
 type Minter {
   address: ID!
-  description: String
-  name: String!
+  adminAddress: ID!
+}
+
+type MinterEdge {
+  cursor: String
+  node: Minter
+}
+
+input MinterFilters {
+  minterAddress: String!
+  minterAdminAddress: String!
+}
+
+type MinterPageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type MintersResponse {
+  edges: [MinterEdge!]
+  pageData: PageData
+  pageInfo: MinterPageInfo
 }
 
 type Mutation {
@@ -931,6 +969,7 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
+  deployMinter(input: DeployMinterArgs!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
@@ -938,6 +977,8 @@ type Mutation {
   issueCampaign(input: IssueCampaignArgs!): TransactionNode!
   issueNftCollection(input: IssueCollectionArgs!): TransactionNode!
   issueSftCollection(input: IssueCollectionArgs!): TransactionNode!
+  minters(filters: MinterFilters!, pagination: ConnectionArgs): MintersResponse!
+  pauseMinter(input: UpgradeMinterArgs!): TransactionNode!
   reindexMarketplaceData(input: MarketplaceReindexDataArgs!): Boolean!
   reindexMarketplaceEvents(input: MarketplaceEventsIndexingArgs!): Boolean!
   removeBlacklistedCollection(collection: String!): Boolean!
@@ -947,6 +988,7 @@ type Mutation {
     """This endpoint can be used to report a Collection"""
     input: ReportCollectionInput!
   ): Boolean!
+  resumeMinter(input: UpgradeMinterArgs!): TransactionNode!
   sendOffer(input: CreateOfferArgs!): TransactionNode!
   setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
@@ -962,7 +1004,7 @@ type Mutation {
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
-  whitelistMinter(input: WhitelistMinterArgs!): Minter!
+  whitelistMinter(input: WhitelistMinterArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
 }
@@ -1477,6 +1519,10 @@ enum UpdateNftTraitsResponse {
   NftTraitsValid
 }
 
+input UpgradeMinterArgs {
+  minterAddress: String!
+}
+
 input UpgradeNftArgs {
   """The campaign id where the user wants to buy the nft/s"""
   campaignId: String!
@@ -1486,9 +1532,6 @@ input UpgradeNftArgs {
 
   """The smart contract address of the campaign"""
   minterAddress: String!
-
-  """The tier name on which the user wants to buy the nft"""
-  tier: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -1501,11 +1544,7 @@ input WhitelistCollectionArgs {
 
 input WhitelistMinterArgs {
   address: String!
-  description: String!
-  maxNftsPerTransaction: Int!
-  mintClaimAddress: String!
-  name: String!
-  royaltiesClaimAddress: String!
+  adminAddress: String!
 }
 
 type WhitelistedInfo {

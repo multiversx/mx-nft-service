@@ -1,4 +1,4 @@
-import { BinaryUtils } from '@multiversx/sdk-nestjs';
+import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { ObjectType } from '@nestjs/graphql';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { AssetActionEnum } from 'src/modules/assets/models';
@@ -25,11 +25,7 @@ export class AuctionBidSummary extends ReindexGenericSummary {
     Object.assign(this, init);
   }
 
-  static fromBidEventAndTx(
-    event: MarketplaceEventsEntity,
-    tx: MarketplaceTransactionData,
-    marketplaceKey: string,
-  ): AuctionBidSummary {
+  static fromBidEventAndTx(event: MarketplaceEventsEntity, tx: MarketplaceTransactionData, marketplaceKey: string): AuctionBidSummary {
     if (!event || event.hasEventTopicIdentifier('end_auction_event')) {
       return;
     }
@@ -52,13 +48,8 @@ export class AuctionBidSummary extends ReindexGenericSummary {
     });
   }
 
-  private static getTopics(
-    event: MarketplaceEventsEntity,
-    marketplaceKey: string,
-  ): any {
-    const genericEvent = event.data.eventData
-      ? GenericEvent.fromEventResponse(event.data.eventData)
-      : undefined;
+  private static getTopics(event: MarketplaceEventsEntity, marketplaceKey: string): any {
+    const genericEvent = event.data.eventData ? GenericEvent.fromEventResponse(event.data.eventData) : undefined;
 
     if (marketplaceKey === ELRONDNFTSWAP_KEY) {
       return new ElrondSwapBidEvent(genericEvent).getTopics();

@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EntityRepository } from './entity.repository';
-import {
-  CollectionTraitSummary,
-  CollectionTraitSummaryDocument,
-} from 'src/modules/nft-traits/models/collection-traits.model';
+import { CollectionTraitSummary, CollectionTraitSummaryDocument } from 'src/modules/nft-traits/models/collection-traits.model';
 
 @Injectable()
 export class TraitRepositoryService extends EntityRepository<CollectionTraitSummaryDocument> {
@@ -24,9 +21,7 @@ export class TraitRepositoryService extends EntityRepository<CollectionTraitSumm
     );
   }
 
-  async saveOrUpdateTraitSummary(
-    traitSummary: CollectionTraitSummary,
-  ): Promise<void> {
+  async saveOrUpdateTraitSummary(traitSummary: CollectionTraitSummary): Promise<void> {
     traitSummary = traitSummary.updateTimestamp();
     const res = await this.findOneAndUpdate(
       {
@@ -40,10 +35,7 @@ export class TraitRepositoryService extends EntityRepository<CollectionTraitSumm
   }
 
   async updateTraitSummaryLastUpdated(collection: string): Promise<void> {
-    const res = await this.findOneAndUpdate(
-      { identifier: collection },
-      { lastUpdated: new Date().getTime() },
-    );
+    const res = await this.findOneAndUpdate({ identifier: collection }, { lastUpdated: new Date().getTime() });
     if (!res) {
       await this.create(
         new CollectionTraitSummary({

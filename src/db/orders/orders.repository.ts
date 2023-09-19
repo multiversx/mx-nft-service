@@ -33,9 +33,7 @@ export class OrdersRepository {
       .getMany();
   }
 
-  async getOrdersByAuctionIdsOrderByPrice(
-    auctionIds: number[],
-  ): Promise<OrderEntity[]> {
+  async getOrdersByAuctionIdsOrderByPrice(auctionIds: number[]): Promise<OrderEntity[]> {
     return await this.ordersRepository
       .createQueryBuilder('orders')
       .orderBy('priceAmountDenominated', 'DESC')
@@ -59,12 +57,9 @@ export class OrdersRepository {
     return await this.ordersRepository
       .createQueryBuilder('orders')
       .orderBy('priceAmountDenominated', 'DESC')
-      .where(
-        `auctionId IN(:...auctionIds) and status in ('active', 'bought')`,
-        {
-          auctionIds: auctionIds,
-        },
-      )
+      .where(`auctionId IN(:...auctionIds) and status in ('active', 'bought')`, {
+        auctionIds: auctionIds,
+      })
       .getMany();
   }
 
@@ -79,15 +74,9 @@ export class OrdersRepository {
     return orders?.groupBy((asset) => asset.auctionId);
   }
 
-  async getOrders(
-    queryRequest: QueryRequest,
-  ): Promise<[OrderEntity[], number]> {
-    const filterQueryBuilder = new FilterQueryBuilder<OrderEntity>(
-      this.ordersRepository,
-      queryRequest.filters,
-    );
-    const queryBuilder: SelectQueryBuilder<OrderEntity> =
-      filterQueryBuilder.build();
+  async getOrders(queryRequest: QueryRequest): Promise<[OrderEntity[], number]> {
+    const filterQueryBuilder = new FilterQueryBuilder<OrderEntity>(this.ordersRepository, queryRequest.filters);
+    const queryBuilder: SelectQueryBuilder<OrderEntity> = filterQueryBuilder.build();
     queryBuilder.offset(queryRequest.offset);
     queryBuilder.limit(queryRequest.limit);
     this.addOrderBy(queryRequest.sorting, queryBuilder);
@@ -124,10 +113,7 @@ export class OrdersRepository {
       const indexOf = orders.findIndex((o) => o.id === order.id);
       if (indexOf === orders.length - 1) {
         await this.ordersRepository.delete(orders[indexOf].id);
-        await this.updateOrderWithStatus(
-          orders[indexOf - 1],
-          OrderStatusEnum.Active,
-        );
+        await this.updateOrderWithStatus(orders[indexOf - 1], OrderStatusEnum.Active);
       } else {
         await this.ordersRepository.delete(orders[indexOf].id);
       }
@@ -144,10 +130,7 @@ export class OrdersRepository {
   }
 
   private getOrdersByBlockHash(blockHash: string): Promise<OrderEntity[]> {
-    return this.ordersRepository
-      .createQueryBuilder()
-      .where({ blockHash: blockHash })
-      .getMany();
+    return this.ordersRepository.createQueryBuilder().where({ blockHash: blockHash }).getMany();
   }
 
   private getOrdersForAuction(auctionId: number): Promise<OrderEntity[]> {
@@ -159,17 +142,9 @@ export class OrdersRepository {
       .getMany();
   }
 
-  private addOrderBy(
-    sorting: Sorting[],
-    queryBuilder: SelectQueryBuilder<OrderEntity>,
-  ) {
+  private addOrderBy(sorting: Sorting[], queryBuilder: SelectQueryBuilder<OrderEntity>) {
     if (sorting) {
-      sorting?.forEach((sort) =>
-        queryBuilder.addOrderBy(
-          sort.field,
-          Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC',
-        ),
-      );
+      sorting?.forEach((sort) => queryBuilder.addOrderBy(sort.field, Sort[sort.direction] === 'ASC' ? 'ASC' : 'DESC'));
       if (!sorting.find((sort) => sort.field === 'id')) {
         queryBuilder.addOrderBy('id', 'DESC');
       }

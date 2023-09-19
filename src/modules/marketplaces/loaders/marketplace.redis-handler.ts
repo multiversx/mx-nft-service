@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants, RedisCacheService } from '@multiversx/sdk-nestjs';
+import { Constants } from '@multiversx/sdk-nestjs-common';
+import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { RedisKeyValueDataloaderHandler } from 'src/modules/common/redis-key-value-dataloader.handler';
 import { RedisValue } from 'src/modules/common/redis-value.dto';
 
@@ -9,10 +10,7 @@ export class MarketplaceRedisHandler extends RedisKeyValueDataloaderHandler<stri
     super(redisCacheService, 'marketplace');
   }
 
-  mapValues(
-    returnValues: { key: string; value: any }[],
-    marketplaceKeys: { [key: string]: any[] },
-  ): RedisValue[] {
+  mapValues(returnValues: { key: string; value: any }[], marketplaceKeys: { [key: string]: any[] }): RedisValue[] {
     const redisValues = [];
     for (const item of returnValues) {
       if (item.value === null) {

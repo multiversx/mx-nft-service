@@ -13,13 +13,8 @@ export class ElrondSwapBuyTopics {
     this.auctionId = Buffer.from(rawTopics[1], 'base64').toString('hex');
     this.collection = Buffer.from(rawTopics[2], 'base64').toString();
     this.nonce = Buffer.from(rawTopics[3], 'base64').toString('hex');
-    this.boughtTokens = parseInt(
-      Buffer.from(rawTopics[4], 'base64').toString('hex'),
-      16,
-    ).toString();
-    this.bid = Buffer.from(rawTopics[6], 'base64')
-      .toString('hex')
-      .hexBigNumberToString();
+    this.boughtTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16).toString();
+    this.bid = Buffer.from(rawTopics[6], 'base64').toString('hex').hexBigNumberToString();
     this.currentWinner = new Address(Buffer.from(rawTopics[9], 'base64'));
   }
 

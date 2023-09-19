@@ -1,22 +1,13 @@
 export class MxApiServiceMock {
-  async getNftsForUserCount(
-    _address: string,
-    _query: string = '',
-  ): Promise<number> {
+  async getNftsForUserCount(_address: string, _query: string = ''): Promise<number> {
     return Promise.resolve(4);
   }
 
-  async getNftsCountForCollection(
-    _query: string = '',
-    _collection: string = '',
-  ): Promise<number> {
-    return Promise.resolve(4);
+  async getNftsCountForCollection(_query: string = '', _collection: string = ''): Promise<{ value: string; key: string }> {
+    return Promise.resolve({ key: 'identifier', value: '4' });
   }
 
-  async getCollectionsForAddressCount(
-    _address: string = '',
-    _query: string = '',
-  ): Promise<number> {
+  async getCollectionsForAddressCount(_address: string = '', _query: string = ''): Promise<number> {
     return Promise.resolve(2);
   }
 

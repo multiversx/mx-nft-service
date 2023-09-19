@@ -6,18 +6,12 @@ import { Owner } from './models';
 export class OwnersService {
   constructor(private apiService: MxApiService) {}
 
-  async getOwnersForIdentifier(
-    identifier: string,
-    offset: number,
-    limit: number,
-  ): Promise<[Owner[], number]> {
+  async getOwnersForIdentifier(identifier: string, offset: number, limit: number): Promise<[Owner[], number]> {
     const [nfts, count] = await Promise.all([
       this.apiService.getOwnersForIdentifier(identifier, offset, limit),
       this.apiService.getOwnersForIdentifierCount(identifier),
     ]);
-    const assets = nfts?.map((element) =>
-      Owner.fromApiOwner(element, identifier),
-    );
+    const assets = nfts?.map((element) => Owner.fromApiOwner(element, identifier));
     return [assets, count];
   }
 }

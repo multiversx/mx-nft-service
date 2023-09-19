@@ -19,9 +19,7 @@ export class NftScamInfoModel {
   }
 }
 
-export const NftScamInfoSchema = SchemaFactory.createForClass(
-  NftScamInfoModel,
-).index(
+export const NftScamInfoSchema = SchemaFactory.createForClass(NftScamInfoModel).index(
   {
     identifier: 1,
   },

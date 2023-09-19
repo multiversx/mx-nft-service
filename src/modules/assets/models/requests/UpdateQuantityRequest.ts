@@ -9,10 +9,7 @@ export class UpdateQuantityRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(
-    updateQuantityArgs: HandleQuantityArgs,
-    functionName: 'ESDTNFTAddQuantity' | 'ESDTNFTBurn',
-  ) {
+  static fromArgs(updateQuantityArgs: HandleQuantityArgs, functionName: 'ESDTNFTAddQuantity' | 'ESDTNFTBurn') {
     return new UpdateQuantityRequest({
       updateQuantityRoleAddress: updateQuantityArgs.addOrBurnRoleAddress,
       identifier: updateQuantityArgs.identifier,

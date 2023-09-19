@@ -8,13 +8,10 @@ import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { CachingService } from '@multiversx/sdk-nestjs';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
-import {
-  CollectionsFilter,
-  CollectionsSortingEnum,
-} from './models/Collections-Filters';
+import { CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
 import { randomBetween } from 'src/utils/helpers';
 import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { DocumentDbService } from 'src/document-db/document-db.service';
@@ -30,7 +27,7 @@ export class CollectionsGetterService {
     private persistenceService: PersistenceService,
     private collectionNftsCountRedis: CollectionsNftsCountRedisHandler,
     private collectionNftsRedis: CollectionsNftsRedisHandler,
-    private cacheService: CachingService,
+    private cacheService: CacheService,
     private analyticsService: TrendingCollectionsService,
     private documentDbService: DocumentDbService,
     private blacklistedCollectionsService: BlacklistedCollectionsService,
@@ -43,13 +40,8 @@ export class CollectionsGetterService {
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
     if (filters?.collection) {
-      const collection = await this.apiService.getCollectionForIdentifier(
-        filters.collection,
-      );
-      return [
-        [Collection.fromCollectionApi(collection)],
-        Collection.fromCollectionApi(collection) ? 1 : 0,
-      ];
+      const collection = await this.apiService.getCollectionForIdentifier(filters.collection);
+      return [[Collection.fromCollectionApi(collection)], Collection.fromCollectionApi(collection) ? 1 : 0];
     }
 
     if (sorting === CollectionsSortingEnum.Trending) {
@@ -65,71 +57,38 @@ export class CollectionsGetterService {
     }
 
     if (filters?.activeLast30Days) {
-      return await this.getFilteredActiveCollectionsFromLast30Days(
-        offset,
-        limit,
-        filters,
-        sorting,
-      );
+      return await this.getFilteredActiveCollectionsFromLast30Days(offset, limit, filters, sorting);
     }
 
     return await this.getFilteredCollections(offset, limit, filters, sorting);
   }
 
-  async getCollectionsByIdentifiers(
-    identifiers: string[],
-  ): Promise<Collection[]> {
+  async getCollectionsByIdentifiers(identifiers: string[]): Promise<Collection[]> {
     const [collections] = await this.getOrSetFullCollections();
 
-    return collections?.filter(
-      (x) => identifiers.includes(x.collection) === true,
-    );
+    return collections?.filter((x) => identifiers.includes(x.collection) === true);
   }
 
-  async getTrendingCollections(
-    offset: number = 0,
-    limit: number = 10,
-    filters?: CollectionsFilter,
-  ): Promise<[Collection[], number]> {
+  async getTrendingCollections(offset: number = 0, limit: number = 10, filters?: CollectionsFilter): Promise<[Collection[], number]> {
     let trendingCollections = [];
     const [collections] = await this.getOrSetFullCollections();
     if (process.env.ENABLE_TRENDING_BY_VOLUME === 'true') {
-      const trendingByVolume =
-        await this.analyticsService.getTrendingByVolume();
+      const trendingByVolume = await this.analyticsService.getTrendingByVolume();
       if (trendingByVolume) {
-        [trendingCollections] = await this.addCollectionsDetails(
-          trendingByVolume,
-          collections,
-        );
+        [trendingCollections] = await this.addCollectionsDetails(trendingByVolume, collections);
       }
     } else {
-      [trendingCollections] =
-        await this.getOrSetTrendingByAuctionsCollections();
+      [trendingCollections] = await this.getOrSetTrendingByAuctionsCollections();
     }
-    const blacklistedCollections =
-      await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
-    const collectionIdentifiers = new Set(
-      trendingCollections.map((x: { collection: any }) => x.collection),
-    );
+    const blacklistedCollections = await this.blacklistedCollectionsService.getBlacklistedCollectionIds();
+    const collectionIdentifiers = new Set(trendingCollections.map((x: { collection: any }) => x.collection));
     let activeWithoutTrending = collections.filter(
-      (x) =>
-        !collectionIdentifiers.has(x.collection) &&
-        !blacklistedCollections.includes(x.collection),
+      (x) => !collectionIdentifiers.has(x.collection) && !blacklistedCollections.includes(x.collection),
     );
 
-    trendingCollections = trendingCollections?.filter(
-      (x) => !blacklistedCollections.includes(x.collection),
-    );
-    activeWithoutTrending = orderBy(
-      activeWithoutTrending,
-      ['verified'],
-      ['desc'],
-    );
-    trendingCollections = orderBy(
-      trendingCollections,
-      ['verified', 'last24Volume'],
-      ['desc', 'desc'],
-    );
+    trendingCollections = trendingCollections?.filter((x) => !blacklistedCollections.includes(x.collection));
+    activeWithoutTrending = orderBy(activeWithoutTrending, ['verified'], ['desc']);
+    trendingCollections = orderBy(trendingCollections, ['verified', 'last24Volume'], ['desc', 'desc']);
 
     trendingCollections = [...trendingCollections, ...activeWithoutTrending];
     trendingCollections = this.applyFilters(filters, trendingCollections);
@@ -138,10 +97,8 @@ export class CollectionsGetterService {
     return [trendingCollections, count];
   }
 
-  async getOrSetTrendingByAuctionsCollections(): Promise<
-    [Collection[], number]
-  > {
-    return await this.cacheService.getOrSetCache(
+  async getOrSetTrendingByAuctionsCollections(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSet(
       CacheInfo.TrendingCollections.key,
       async () => await this.getAllTrendingCollections(),
       CacheInfo.TrendingCollections.ttl,
@@ -156,18 +113,13 @@ export class CollectionsGetterService {
     return await this.addCollectionsDetails(trendingCollections);
   }
 
-  private async addCollectionsDetails(
-    trendingCollections: any[],
-    collections?: Collection[],
-  ): Promise<[Collection[], number]> {
+  private async addCollectionsDetails(trendingCollections: any[], collections?: Collection[]): Promise<[Collection[], number]> {
     const mappedCollections: Collection[] = [];
     if (!collections) {
       [collections] = await this.getOrSetFullCollections();
     }
     for (const trendingCollection of trendingCollections) {
-      const mappedCollection = collections.find(
-        (c) => c.collection === trendingCollection.collection,
-      );
+      const mappedCollection = collections.find((c) => c.collection === trendingCollection.collection);
       if (mappedCollection)
         mappedCollections.push({
           ...mappedCollection,
@@ -186,18 +138,14 @@ export class CollectionsGetterService {
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of trendingCollections) {
-      const mappedCollection = collections.find(
-        (c) => c.collection === trendingCollection.collection,
-      );
+      const mappedCollection = collections.find((c) => c.collection === trendingCollection.collection);
       if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
   }
 
-  async getOrSetActiveCollectionsFromLast30Days(): Promise<
-    [Collection[], number]
-  > {
-    return await this.cacheService.getOrSetCache(
+  async getOrSetActiveCollectionsFromLast30Days(): Promise<[Collection[], number]> {
+    return await this.cacheService.getOrSet(
       CacheInfo.ActiveCollectionLast30Days.key,
       async () => await this.getActiveCollectionsFromLast30Days(),
       CacheInfo.ActiveCollectionLast30Days.ttl,
@@ -212,9 +160,7 @@ export class CollectionsGetterService {
     const mappedCollections = [];
     const [collections] = await this.getOrSetFullCollections();
     for (const trendingCollection of activeCollections) {
-      const mappedCollection = collections.find(
-        (c) => c.collection === trendingCollection.collection,
-      );
+      const mappedCollection = collections.find((c) => c.collection === trendingCollection.collection);
       if (mappedCollection) mappedCollections.push(mappedCollection);
     }
     return [mappedCollections, mappedCollections.length];
@@ -226,16 +172,11 @@ export class CollectionsGetterService {
     filters?: CollectionsFilter,
     sorting?: CollectionsSortingEnum,
   ): Promise<[Collection[], number]> {
-    let [activeCollections, count] =
-      await this.getOrSetActiveCollectionsFromLast30Days();
+    let [activeCollections, count] = await this.getOrSetActiveCollectionsFromLast30Days();
     activeCollections = this.applyFilters(filters, activeCollections);
 
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
-      activeCollections = orderBy(
-        activeCollections,
-        ['creationDate', 'verified'],
-        ['desc', 'desc'],
-      );
+      activeCollections = orderBy(activeCollections, ['creationDate', 'verified'], ['desc', 'desc']);
     }
     count = activeCollections.length;
     activeCollections = activeCollections?.slice(offset, offset + limit);
@@ -244,21 +185,15 @@ export class CollectionsGetterService {
 
   private applyFilters(filters: CollectionsFilter, collections: Collection[]) {
     if (this.hasVerifiedFilter(filters)) {
-      collections = collections?.filter(
-        (token) => token.verified === filters?.verified,
-      );
+      collections = collections?.filter((token) => token.verified === filters?.verified);
     }
 
     if (filters?.creatorAddress) {
-      collections = collections?.filter(
-        (token) => token.artistAddress === filters?.creatorAddress,
-      );
+      collections = collections?.filter((token) => token.artistAddress === filters?.creatorAddress);
     }
 
     if (filters?.type) {
-      collections = collections?.filter(
-        (token) => token.type === filters?.type,
-      );
+      collections = collections?.filter((token) => token.type === filters?.type);
     }
     return collections;
   }
@@ -273,11 +208,7 @@ export class CollectionsGetterService {
 
     collections = this.applyFilters(filters, collections);
     if (sorting && sorting === CollectionsSortingEnum.Newest) {
-      collections = orderBy(
-        collections,
-        ['creationDate', 'verified'],
-        ['desc', 'desc'],
-      );
+      collections = orderBy(collections, ['creationDate', 'verified'], ['desc', 'desc']);
     }
     count = collections.length;
     collections = collections?.slice(offset, offset + limit);
@@ -289,7 +220,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetFullCollections(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.AllCollections.key,
       async () => await this.getFullCollectionsRaw(),
       CacheInfo.AllCollections.ttl,
@@ -300,9 +231,7 @@ export class CollectionsGetterService {
     const size = 25;
     let from = 0;
 
-    const totalCount = await this.apiService.getCollectionsCount(
-      '?type=NonFungibleESDT,SemiFungibleESDT',
-    );
+    const totalCount = await this.apiService.getCollectionsCount('?type=NonFungibleESDT,SemiFungibleESDT');
     let collectionsResponse: Collection[] = [];
     do {
       let mappedCollections = await this.getMappedCollections(from, size);
@@ -315,41 +244,27 @@ export class CollectionsGetterService {
 
       from = from + size;
     } while (from < totalCount && from <= 9975);
-    let uniqueCollections = [
-      ...new Map(
-        collectionsResponse.map((item) => [item.collection, item]),
-      ).values(),
-    ];
-    uniqueCollections = orderBy(
-      uniqueCollections,
-      ['verified', 'creationDate'],
-      ['desc', 'desc'],
-    );
+    let uniqueCollections = [...new Map(collectionsResponse.map((item) => [item.collection, item])).values()];
+    uniqueCollections = orderBy(uniqueCollections, ['verified', 'creationDate'], ['desc', 'desc']);
 
     return [uniqueCollections, uniqueCollections?.length];
   }
 
-  async getOrSetMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number; collections: string[] }[], number]
-  > {
-    return await this.cacheService.getOrSetCache(
+  async getOrSetMostActiveCollections(): Promise<[{ artist: string; nfts: number; collections: string[] }[], number]> {
+    return await this.cacheService.getOrSet(
       CacheInfo.CollectionsMostActive.key,
       async () => await this.getMostActiveCollections(),
       CacheInfo.CollectionsMostActive.ttl,
     );
   }
 
-  async getArtistCreations(
-    address: string,
-  ): Promise<{ artist: string; nfts: number; collections: string[] }> {
+  async getArtistCreations(address: string): Promise<{ artist: string; nfts: number; collections: string[] }> {
     const [collections] = await this.getOrSetMostActiveCollections();
     const response = collections.find((x) => x.artist === address);
     return response;
   }
 
-  public async getMostActiveCollections(): Promise<
-    [{ artist: string; nfts: number; collections: string[] }[], number]
-  > {
+  public async getMostActiveCollections(): Promise<[{ artist: string; nfts: number; collections: string[] }[], number]> {
     const [collections] = await this.getOrSetFullCollections();
     let groupedCollections = collections
       .groupBy((x) => x.artistAddress, true)
@@ -364,7 +279,7 @@ export class CollectionsGetterService {
   }
 
   async getOrSetMostFollowedCollections(): Promise<[Collection[], number]> {
-    return await this.cacheService.getOrSetCache(
+    return await this.cacheService.getOrSet(
       CacheInfo.CollectionsMostFollowed.key,
       async () => await this.getMostFollowedCollections(),
       CacheInfo.CollectionsMostFollowed.ttl,
@@ -384,49 +299,25 @@ export class CollectionsGetterService {
     return [groupedCollections, groupedCollections.length];
   }
 
-  private async getMappedCollections(
-    page: number,
-    size: number,
-  ): Promise<Collection[]> {
-    const collections = await this.apiService.getCollections(
-      new CollectionQuery().addPageSize(page, size).build(),
-    );
-    const promisesCollections = collections?.map(
-      (collection): Promise<Collection> => this.mapCollection(collection),
-    );
+  private async getMappedCollections(page: number, size: number): Promise<Collection[]> {
+    const collections = await this.apiService.getCollections(new CollectionQuery().addPageSize(page, size).build());
+    const promisesCollections = collections?.map((collection): Promise<Collection> => this.mapCollection(collection));
     return await Promise.all(promisesCollections);
   }
 
   private async mapCollection(collection: CollectionApi): Promise<Collection> {
     const ownerAddress = new Address(collection.owner);
     if (ownerAddress.isContractAddress()) {
-      const artist =
-        await this.smartContractArtistService.getOrSetArtistForScAddress(
-          collection.owner,
-        );
-      const followersCount = await this.idService.getFollowersCount(
-        artist?.value?.owner,
-      );
-      return Collection.fromCollectionApi(
-        collection,
-        artist?.value?.owner,
-        followersCount?.count,
-      );
+      const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.owner);
+      const followersCount = await this.idService.getFollowersCount(artist?.value?.owner);
+      return Collection.fromCollectionApi(collection, artist?.value?.owner, followersCount?.count);
     }
-    const followersCount = await this.idService.getFollowersCount(
-      collection.owner,
-    );
-    return Collection.fromCollectionApi(
-      collection,
-      collection.owner,
-      followersCount?.count,
-    );
+    const followersCount = await this.idService.getFollowersCount(collection.owner);
+    return Collection.fromCollectionApi(collection, collection.owner, followersCount?.count);
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
-    let nftsGroupByCollection = await this.collectionNftsRedis.batchLoad(
-      localCollections?.map((item) => item.collection),
-    );
+    let nftsGroupByCollection = await this.collectionNftsRedis.batchLoad(localCollections?.map((item) => item.collection));
 
     for (const collection of localCollections) {
       for (const groupByCollection of nftsGroupByCollection) {
@@ -443,9 +334,7 @@ export class CollectionsGetterService {
   }
 
   private async mapCollectionNftsCount(localCollections: Collection[]) {
-    const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(
-      localCollections.map((collection) => collection.collection),
-    );
+    const nftsCountResponse = await this.collectionNftsCountRedis.batchLoad(localCollections.map((collection) => collection.collection));
 
     for (const collectionNftsCount of nftsCountResponse) {
       for (const collection of localCollections) {
@@ -474,44 +363,22 @@ export class CollectionsGetterService {
       .addPageSize(offset, limit)
       .build();
     if (filters?.collection) {
-      const collection =
-        await this.apiService.getCollectionForOwnerAndIdentifier(
-          filters.ownerAddress,
-          filters.collection,
-        );
+      const collection = await this.apiService.getCollectionForOwnerAndIdentifier(filters.ownerAddress, filters.collection);
       return [[Collection.fromCollectionApi(collection)], collection ? 1 : 0];
     }
 
     if (filters?.withNfts) {
       const [collectionsApi, count] = await Promise.all([
-        this.apiService.getCollectionsForAddressWithNfts(
-          filters.ownerAddress,
-          query,
-        ),
-        this.apiService.getCollectionsForAddressWithNftsCount(
-          filters.ownerAddress,
-          query,
-        ),
+        this.apiService.getCollectionsForAddressWithNfts(filters.ownerAddress, query),
+        this.apiService.getCollectionsForAddressWithNftsCount(filters.ownerAddress, query),
       ]);
-      return [
-        collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
-        count,
-      ];
+      return [collectionsApi?.map((element) => Collection.fromCollectionApi(element)), count];
     }
     const [collectionsApi, count] = await Promise.all([
-      this.apiService.getCollectionsForAddressWithRoles(
-        filters.ownerAddress,
-        query,
-      ),
-      this.apiService.getCollectionsForAddressWithRolesCount(
-        filters.ownerAddress,
-        query,
-      ),
+      this.apiService.getCollectionsForAddressWithRoles(filters.ownerAddress, query),
+      this.apiService.getCollectionsForAddressWithRolesCount(filters.ownerAddress, query),
     ]);
-    return [
-      collectionsApi?.map((element) => Collection.fromCollectionApi(element)),
-      count,
-    ];
+    return [collectionsApi?.map((element) => Collection.fromCollectionApi(element)), count];
   }
 
   private async getCollectionsByArtist(
@@ -519,42 +386,26 @@ export class CollectionsGetterService {
     limit: number = 100,
     filters?: CollectionsFilter,
   ): Promise<[Collection[], number]> {
-    const artistCollections = await this.getArtistCreations(
-      filters.artistAddress,
-    );
-    let collectionIdentifiers = artistCollections?.collections?.slice(
-      offset,
-      limit,
-    );
+    const artistCollections = await this.getArtistCreations(filters.artistAddress);
+    let collectionIdentifiers = artistCollections?.collections?.slice(offset, limit);
     if (!collectionIdentifiers) {
       return [[], 0];
     }
     let [collections] = await this.getOrSetFullCollections();
-    const filteredCollection = collections.filter((c) =>
-      collectionIdentifiers?.includes(c.collection),
-    );
+    const filteredCollection = collections.filter((c) => collectionIdentifiers?.includes(c.collection));
     return [filteredCollection, artistCollections?.nfts];
   }
 
   async getRandomCollectionDescription(node: Collection): Promise<string> {
-    const size =
-      node.nftsCount ??
-      (await this.apiService.getCollectionNftsCount(node.collection));
+    const size = node.nftsCount ?? (await this.apiService.getCollectionNftsCount(node.collection));
 
-    const descriptions =
-      size > 100
-        ? genericDescriptions.forBigCollections
-        : genericDescriptions.forSmallCollections;
+    const descriptions = size > 100 ? genericDescriptions.forBigCollections : genericDescriptions.forSmallCollections;
     const randomIdx = randomBetween(0, descriptions.length);
     return descriptions[randomIdx].replace('{size}', size.toString());
   }
 
-  async getCollectionTraits(
-    collection: string,
-  ): Promise<CollectionNftTrait[] | undefined> {
-    const traitSummary = await this.documentDbService.getTraitSummary(
-      collection,
-    );
+  async getCollectionTraits(collection: string): Promise<CollectionNftTrait[] | undefined> {
+    const traitSummary = await this.documentDbService.getTraitSummary(collection);
     if (!traitSummary || !traitSummary?.traitTypes) {
       return undefined;
     }
