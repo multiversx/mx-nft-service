@@ -35,16 +35,16 @@ export class SumDaily {
   expression: `
     SELECT
       time_bucket('1 day', timestamp) AS time, series, key,
-      (select SUM(CASE WHEN "marketplaceKey" ='frameit' THEN value ELSE 0 END)) as frameit,
-      (select SUM(CASE WHEN "marketplaceKey" ='xoxno' THEN value ELSE 0 END)) as xoxno,
-      (select SUM(CASE WHEN "marketplaceKey" ='elrondapes' THEN value ELSE 0 END)) as elrondapes,
-      (select SUM(CASE WHEN "marketplaceKey" ='deadrare' THEN value ELSE 0 END)) as deadrare,
-      (select SUM(CASE WHEN "marketplaceKey" ='hoghomies' THEN value ELSE 0 END)) as hoghomies,
-      (select SUM(CASE WHEN "marketplaceKey" ='elrondnftswap' THEN value ELSE 0 END)) as elrondnftswap,
-      (select SUM(CASE WHEN "marketplaceKey" ='aquaverse' THEN value ELSE 0 END)) as aquaverse,
-      (select SUM(CASE WHEN "marketplaceKey" ='holoride' THEN value ELSE 0 END)) as holoride,
-      (select SUM(CASE WHEN "marketplaceKey" ='eneftor' THEN value ELSE 0 END)) as eneftor,
-      (select SUM(CASE WHEN "marketplaceKey" ='ici' THEN value ELSE 0 END)) as ici,
+      SUM(CASE WHEN "marketplaceKey" ='frameit' THEN value ELSE 0 END) as frameit,
+      SUM(CASE WHEN "marketplaceKey" ='xoxno' THEN value ELSE 0 END) as xoxno,
+      SUM(CASE WHEN "marketplaceKey" ='elrondapes' THEN value ELSE 0 END) as elrondapes,
+      SUM(CASE WHEN "marketplaceKey" ='deadrare' THEN value ELSE 0 END) as deadrare,
+      SUM(CASE WHEN "marketplaceKey" ='hoghomies' THEN value ELSE 0 END) as hoghomies,
+      SUM(CASE WHEN "marketplaceKey" ='elrondnftswap' THEN value ELSE 0 END) as elrondnftswap,
+      SUM(CASE WHEN "marketplaceKey" ='aquaverse' THEN value ELSE 0 END) as aquaverse,
+      SUM(CASE WHEN "marketplaceKey" ='holoride' THEN value ELSE 0 END) as holoride,
+      SUM(CASE WHEN "marketplaceKey" ='eneftor' THEN value ELSE 0 END) as eneftor,
+      SUM(CASE WHEN "marketplaceKey" ='ici' THEN value ELSE 0 END) as ici,
       sum(value) AS sum
     FROM "hyper_nfts_analytics"
     WHERE key = 'volumeUSD'
