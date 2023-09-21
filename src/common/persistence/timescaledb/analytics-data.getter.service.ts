@@ -48,12 +48,14 @@ export class AnalyticsDataGetterService {
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as timestamp")
       .addSelect('sum(sum) as value')
-      .addSelect('xoxno, frameit, elrondapes, deadrare, hoghomies, elrondnftswap, aquaverse, holoride, eneftor, ici')
+      .addSelect(
+        'sum(sum) as value, sum(xoxno) as xoxno, sum(frameit) as frameit, sum(elrondapes) as elrondapes, sum(deadrare) as deadrare, sum(hoghomies) as hoghomies, sum(elrondnftswap) as elrondnftswap, sum(aquaverse) as aquaverse, sum(holoride) as holoride, sum(eneftor) as eneftor,sum(ici) as ici  ',
+      )
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate', { startDate, endDate })
       .orderBy('timestamp', 'ASC')
-      .groupBy('timestamp,xoxno, frameit, elrondapes, deadrare, hoghomies, elrondnftswap, aquaverse, holoride, eneftor, ici')
+      .groupBy('timestamp')
       .getRawMany();
 
     return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjectWithMarketplaces(row)) ?? [];
