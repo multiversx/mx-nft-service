@@ -57,6 +57,7 @@ input AddLikeArgs {
 type AnalyticsAggregateValue {
   avg: Float
   count: Float
+  marketplacesData: [KeyValueType]
   max: Float
   min: Float
   series: String
