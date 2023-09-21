@@ -53,7 +53,7 @@ export class AnalyticsDataGetterService {
       .andWhere('series = :series', { series })
       .andWhere(endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate', { startDate, endDate })
       .orderBy('timestamp', 'ASC')
-      .groupBy('timestamp')
+      .groupBy('timestamp,xoxno, frameit, elrondapes, deadrare, hoghomies, elrondnftswap, aquaverse, holoride, eneftor, ici')
       .getRawMany();
 
     return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjectWithMarketplaces(row)) ?? [];
