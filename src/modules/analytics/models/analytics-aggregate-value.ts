@@ -1,6 +1,5 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import * as moment from 'moment';
-import { KeyValueType } from 'src/modules/assets/models';
 
 @ObjectType()
 export class AnalyticsAggregateValue {

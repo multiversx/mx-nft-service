@@ -78,7 +78,7 @@ export class AttributeType {
 export class KeyValueType {
   @Field()
   key: String;
-  @Field({ nullable: true })
+  @Field()
   value: String;
   constructor(init?: Partial<KeyValueType>) {
     Object.assign(this, init);
