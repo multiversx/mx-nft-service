@@ -1,4 +1,4 @@
-import { Field, Float, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import * as moment from 'moment';
 import { KeyValueType } from 'src/modules/assets/models';
 
@@ -24,8 +24,8 @@ export class AnalyticsAggregateValue {
 
   @Field(() => Float, { nullable: true })
   avg?: number;
-  @Field(() => [KeyValueType], { nullable: 'itemsAndList' })
-  marketplacesData: KeyValueType[];
+  @Field(() => [MarketplaceData], { nullable: 'itemsAndList' })
+  marketplacesData: MarketplaceData[];
 
   constructor(init?: Partial<AnalyticsAggregateValue>) {
     Object.assign(this, init);
@@ -58,18 +58,29 @@ export class AnalyticsAggregateValue {
       time: moment.utc(row.timestamp ?? row.time).format('yyyy-MM-DD HH:mm:ss'),
       value: row.value ?? 0,
       marketplacesData: [
-        new KeyValueType({ key: rowProperties.xoxno, value: row.xoxno }),
-        new KeyValueType({ key: rowProperties.frameit, value: row.frameit }),
-        new KeyValueType({ key: rowProperties.deadrare, value: row.deadrare }),
-        new KeyValueType({ key: rowProperties.elrondapes, value: row.elrondapes }),
-        new KeyValueType({ key: rowProperties.elrondnftswap, value: row.elrondnftswap }),
-        new KeyValueType({ key: rowProperties.eneftor, value: row.eneftor }),
-        new KeyValueType({ key: rowProperties.hoghomies, value: row.hoghomies }),
-        new KeyValueType({ key: rowProperties.holoride, value: row.holoride }),
-        new KeyValueType({ key: rowProperties.aquaverse, value: row.aquaverse }),
-        new KeyValueType({ key: rowProperties.ici, value: row.ici }),
+        new MarketplaceData({ key: rowProperties.xoxno, value: row.xoxno }),
+        new MarketplaceData({ key: rowProperties.frameit, value: row.frameit }),
+        new MarketplaceData({ key: rowProperties.deadrare, value: row.deadrare }),
+        new MarketplaceData({ key: rowProperties.elrondapes, value: row.elrondapes }),
+        new MarketplaceData({ key: rowProperties.elrondnftswap, value: row.elrondnftswap }),
+        new MarketplaceData({ key: rowProperties.eneftor, value: row.eneftor }),
+        new MarketplaceData({ key: rowProperties.hoghomies, value: row.hoghomies }),
+        new MarketplaceData({ key: rowProperties.holoride, value: row.holoride }),
+        new MarketplaceData({ key: rowProperties.aquaverse, value: row.aquaverse }),
+        new MarketplaceData({ key: rowProperties.ici, value: row.ici }),
       ],
     });
+  }
+}
+
+@ObjectType()
+export class MarketplaceData {
+  @Field()
+  key: String;
+  @Field(() => Float, { nullable: true })
+  value: number;
+  constructor(init?: Partial<MarketplaceData>) {
+    Object.assign(this, init);
   }
 }
 

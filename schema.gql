@@ -57,7 +57,7 @@ input AddLikeArgs {
 type AnalyticsAggregateValue {
   avg: Float
   count: Float
-  marketplacesData: [KeyValueType]
+  marketplacesData: [MarketplaceData]
   max: Float
   min: Float
   series: String
@@ -823,7 +823,7 @@ input IssueCollectionArgs {
 }
 
 type KeyValueType {
-  key: String
+  key: String!
   value: String
 }
 
@@ -838,6 +838,11 @@ type Marketplace {
   name: String!
   type: MarketplaceTypeEnum!
   url: String!
+}
+
+type MarketplaceData {
+  key: String!
+  value: Float
 }
 
 type MarketplaceEdge {

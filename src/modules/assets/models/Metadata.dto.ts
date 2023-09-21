@@ -76,7 +76,7 @@ export class AttributeType {
 
 @ObjectType()
 export class KeyValueType {
-  @Field({ nullable: true })
+  @Field()
   key: String;
   @Field({ nullable: true })
   value: String;
