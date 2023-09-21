@@ -51,22 +51,35 @@ export class AnalyticsAggregateValue {
   }
 
   static fromTimescaleObjectWithMarketplaces(row: any) {
+    const rowProperties = proxiedPropertiesOf(row);
+
     return new AnalyticsAggregateValue({
       series: row.series,
       time: moment.utc(row.timestamp ?? row.time).format('yyyy-MM-DD HH:mm:ss'),
       value: row.value ?? 0,
       marketplacesData: [
-        new KeyValueType({ key: row.xoxno.name, value: row.xoxno }),
-        new KeyValueType({ key: row.frameit.name, value: row.frameit }),
-        new KeyValueType({ key: row.frameit.name, value: row.deadrare }),
-        new KeyValueType({ key: row.frameit.name, value: row.elrondapes }),
-        new KeyValueType({ key: row.frameit.name, value: row.elrondnftswap }),
-        new KeyValueType({ key: row.frameit.name, value: row.eneftor }),
-        new KeyValueType({ key: row.frameit.name, value: row.hoghomies }),
-        new KeyValueType({ key: row.frameit.name, value: row.holoride }),
-        new KeyValueType({ key: row.frameit.name, value: row.aquaverse }),
-        new KeyValueType({ key: row.frameit.name, value: row.ici }),
+        new KeyValueType({ key: rowProperties.xoxno, value: row.xoxno }),
+        new KeyValueType({ key: rowProperties.frameit, value: row.frameit }),
+        new KeyValueType({ key: rowProperties.deadrare, value: row.deadrare }),
+        new KeyValueType({ key: rowProperties.elrondapes, value: row.elrondapes }),
+        new KeyValueType({ key: rowProperties.elrondnftswap, value: row.elrondnftswap }),
+        new KeyValueType({ key: rowProperties.eneftor, value: row.eneftor }),
+        new KeyValueType({ key: rowProperties.hoghomies, value: row.hoghomies }),
+        new KeyValueType({ key: rowProperties.holoride, value: row.holoride }),
+        new KeyValueType({ key: rowProperties.aquaverse, value: row.aquaverse }),
+        new KeyValueType({ key: rowProperties.ici, value: row.ici }),
       ],
     });
   }
+}
+
+export function proxiedPropertiesOf<TObj>(obj?: TObj) {
+  return new Proxy(
+    {},
+    {
+      get: (_, prop) => prop,
+    },
+  ) as {
+    [P in keyof TObj]?: P;
+  };
 }

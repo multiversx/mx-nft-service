@@ -823,8 +823,8 @@ input IssueCollectionArgs {
 }
 
 type KeyValueType {
-  key: String!
-  value: String!
+  key: String
+  value: String
 }
 
 type Marketplace {
