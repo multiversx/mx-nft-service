@@ -309,6 +309,7 @@ enum AuctionStatusEnum {
 }
 
 enum AuctionTypeEnum {
+  FixedPrice
   Nft
   NftBid
   None
