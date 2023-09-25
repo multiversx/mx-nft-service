@@ -190,7 +190,7 @@ describe('Analytics Data Getter Service', () => {
         orderBy,
         groupBy,
       }));
-      const result = await service.getVolumeData({
+      const result = await service.getVolumeDataWithMarketplaces({
         time: '10d',
         metric: 'test',
         series: 'test',
@@ -222,7 +222,7 @@ describe('Analytics Data Getter Service', () => {
         groupBy,
       }));
 
-      const response = await service.getVolumeData({
+      const response = await service.getVolumeDataWithMarketplaces({
         time: '10d',
         metric: 'test',
         series: 'test',
