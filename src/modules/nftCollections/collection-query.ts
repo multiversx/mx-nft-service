@@ -24,6 +24,13 @@ export class CollectionQuery {
     return this;
   }
 
+  addSearchTerm(searchTerm: string): this {
+    if (searchTerm === undefined) return this;
+    if (this.query === '') this.query = `?search=${encodeURIComponent(searchTerm)}`;
+    else this.query = `${this.query}&search=${encodeURIComponent(searchTerm)}`;
+    return this;
+  }
+
   addPageSize(from: number, size: number): this {
     if ((!from && from < 0) || !size) {
       return this;
