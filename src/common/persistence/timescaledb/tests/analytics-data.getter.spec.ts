@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsDataGetterService } from '../analytics-data.getter.service';
-import { FloorPriceDaily, SumDaily } from '../entities/sum-daily.entity';
+import { FloorPriceDaily, SumDaily, SumMarketplaceDaily } from '../entities/sum-daily.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
 
@@ -24,6 +24,11 @@ describe('Analytics Data Getter Service', () => {
           provide: getRepositoryToken(SumDaily, 'timescaledb'),
           useFactory: () => ({}),
         },
+        {
+          provide: getRepositoryToken(SumMarketplaceDaily, 'timescaledb'),
+          useFactory: () => ({}),
+        },
+
         {
           provide: getRepositoryToken(FloorPriceDaily, 'timescaledb'),
           useFactory: () => ({}),
@@ -175,10 +180,10 @@ describe('Analytics Data Getter Service', () => {
     });
   });
 
-  describe('getVolumeData', () => {
+  describe('getVolumeDataWithMarketplaces', () => {
     it('returns empty list when no data for specific collection', async () => {
       const getRawMany = jest.fn().mockReturnValueOnce([]);
-      const sumDailyRepository = module.get(getRepositoryToken(SumDaily, 'timescaledb'));
+      const sumDailyRepository = module.get(getRepositoryToken(SumMarketplaceDaily, 'timescaledb'));
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
@@ -209,7 +214,7 @@ describe('Analytics Data Getter Service', () => {
         new AnalyticsAggregateValue({ value: 2, series: 'test' }),
         new AnalyticsAggregateValue({ value: 121, series: 'test' }),
       ];
-      const sumDailyRepository = module.get(getRepositoryToken(SumDaily, 'timescaledb'));
+      const sumDailyRepository = module.get(getRepositoryToken(SumMarketplaceDaily, 'timescaledb'));
       sumDailyRepository.createQueryBuilder = jest.fn(() => ({
         select,
         offset,
