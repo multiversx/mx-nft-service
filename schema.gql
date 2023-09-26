@@ -652,7 +652,7 @@ input ConnectionArgs {
   before: String
 
   """Paginate first"""
-  first: Int = 10
+  first: Int
 
   """Paginate last"""
   last: Int

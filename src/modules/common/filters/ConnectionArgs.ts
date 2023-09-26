@@ -74,7 +74,7 @@ export default class ConnectionArgs implements ConnectionArguments {
   @IsOptional()
   @Max(100)
   @Field(() => Int, { nullable: true, description: 'Paginate first' })
-  public first?: number = 10;
+  public first?: number;
 
   @IsOptional()
   @Max(100)
