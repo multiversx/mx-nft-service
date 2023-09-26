@@ -23,11 +23,19 @@ export class SmartContractArtistsService {
   }
 
   public async getArtistForScAddress(scAddress: string): Promise<{ address: string; owner: string }> {
-    const account = await this.mxApiService.getSmartContractOwner(scAddress);
-    if (account.owner === XOXNO_MINTING_MANAGER) {
-      return await this.getXoxnoMinterOwner(scAddress);
+    try {
+      const account = await this.mxApiService.getSmartContractOwner(scAddress);
+      if (account.owner === XOXNO_MINTING_MANAGER) {
+        return await this.getXoxnoMinterOwner(scAddress);
+      }
+      return account;
+    } catch (error) {
+      this.logger.error('There was an error while getting the smartcontract owner', scAddress, error);
+      return {
+        address: scAddress,
+        owner: scAddress,
+      };
     }
-    return account;
   }
 
   private async getXoxnoMinterOwner(scAddress: string): Promise<{ address: string; owner: string }> {

@@ -628,6 +628,7 @@ input CollectionsFilter {
 
   """The owner of the collection"""
   ownerAddress: String
+  searchTerm: String
   type: NftTypeEnum
 
   """Flag for verified collections"""
