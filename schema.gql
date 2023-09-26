@@ -581,6 +581,7 @@ type CollectionsAnalyticsModel {
   floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
   holders: Int!
   topHolders: [HoldersCount!]!
+  transactionsCount(input: AnalyticsInput): [AnalyticsAggregateValue!]!
   volume24h: Float
   volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
 }

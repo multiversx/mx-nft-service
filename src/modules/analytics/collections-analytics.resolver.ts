@@ -11,10 +11,11 @@ import { CollectionsDetailsModel } from './models/collections-details.model';
 import { AnalyticsArgs, CollectionAnalyticsArgs } from './models/analytics-args.model';
 import { AnalyticsAggregateValue } from './models/analytics-aggregate-value';
 import { HoldersCount } from './models/general-stats.model';
+import { AnalyticsInput } from './models/analytics-input.model';
 
 @Resolver(() => CollectionsAnalyticsModel)
 export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyticsModel) {
-  constructor(private generalAnalyticsService: CollectionsAnalyticsService, private collectionsLoader: CollectionDetailsProvider) {
+  constructor(private collectionsAnalyticsService: CollectionsAnalyticsService, private collectionsLoader: CollectionDetailsProvider) {
     super();
   }
 
@@ -26,18 +27,18 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
     input: CollectionAnalyticsArgs,
   ): Promise<CollectionsAnalyticsResponse> {
     const { limit, offset } = pagination.pagingParams();
-    const [collections, count] = await this.generalAnalyticsService.getCollectionsOrderByVolum(limit, offset, input.series);
+    const [collections, count] = await this.collectionsAnalyticsService.getCollectionsOrderByVolum(limit, offset, input.series);
     return PageResponse.mapResponse<CollectionsAnalyticsModel>(collections || [], pagination, count || 0, 0, limit);
   }
 
   @ResolveField('holders', () => Int)
   async holders(@Parent() collection: CollectionsAnalyticsModel) {
-    return await this.generalAnalyticsService.getHolders(collection.collectionIdentifier);
+    return await this.collectionsAnalyticsService.getHolders(collection.collectionIdentifier);
   }
 
   @ResolveField('floorPrice', () => Int)
   async floorPrice(@Parent() collection: CollectionsAnalyticsModel) {
-    return this.generalAnalyticsService.getCollectionFloorPrice(collection.collectionIdentifier);
+    return this.collectionsAnalyticsService.getCollectionFloorPrice(collection.collectionIdentifier);
   }
 
   @ResolveField('details', () => CollectionsDetailsModel)
@@ -52,7 +53,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
-    return await this.generalAnalyticsService.getVolumeForTimePeriod(input.time, collection.collectionIdentifier, input.metric);
+    return await this.collectionsAnalyticsService.getVolumeForTimePeriod(input.time, collection.collectionIdentifier, input.metric);
   }
 
   @ResolveField('floorPriceData', () => [AnalyticsAggregateValue])
@@ -61,11 +62,24 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
-    return await this.generalAnalyticsService.getFloorPriceVolumeForTimePeriod(input.time, collection.collectionIdentifier, input.metric);
+    return await this.collectionsAnalyticsService.getFloorPriceVolumeForTimePeriod(
+      input.time,
+      collection.collectionIdentifier,
+      input.metric,
+    );
   }
 
   @ResolveField('topHolders', () => [HoldersCount])
   async topHolders(@Parent() collection: CollectionsAnalyticsModel) {
-    return await this.generalAnalyticsService.getTopHolders(collection.collectionIdentifier);
+    return await this.collectionsAnalyticsService.getTopHolders(collection.collectionIdentifier);
+  }
+
+  @ResolveField('transactionsCount', () => [AnalyticsAggregateValue])
+  async transactionsCount(
+    @Parent() collection: CollectionsAnalyticsModel,
+    @Args('input', { type: () => AnalyticsInput, nullable: true })
+    input: AnalyticsInput,
+  ) {
+    return await this.collectionsAnalyticsService.getNftsTransactionsCount(collection.collectionIdentifier, input);
   }
 }
