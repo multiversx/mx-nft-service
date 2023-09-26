@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { computeTimeInterval } from 'src/utils/analytics.utils';
 import { AnalyticsArgs } from './entities/analytics.query';
-import { FloorPriceDaily, SumDaily } from './entities/sum-daily.entity';
+import { FloorPriceDaily, SumDaily, SumMarketplaceDaily } from './entities/sum-daily.entity';
 import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
 
 @Injectable()
@@ -11,6 +11,8 @@ export class AnalyticsDataGetterService {
   constructor(
     @InjectRepository(SumDaily, 'timescaledb')
     private readonly sumDaily: Repository<SumDaily>,
+    @InjectRepository(SumMarketplaceDaily, 'timescaledb')
+    private readonly sumMarketplaceDaily: Repository<SumMarketplaceDaily>,
     @InjectRepository(FloorPriceDaily, 'timescaledb')
     private readonly floorPriceDaily: Repository<FloorPriceDaily>,
   ) {}
@@ -37,15 +39,18 @@ export class AnalyticsDataGetterService {
       return [[new AnalyticsAggregateValue({ value: 0, series: series })], 1];
     }
 
-    return [response?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [], count ?? 0];
+    return [response?.map((row) => AnalyticsAggregateValue.fromTimescaleObject(row)) ?? [], count ?? 0];
   }
 
-  async getVolumeData({ time, series, metric, start }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
+  async getVolumeDataWithMarketplaces({ time, series, metric, start }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
     const [startDate, endDate] = computeTimeInterval(time, start);
-    const query = await this.sumDaily
+    const query = await this.sumMarketplaceDaily
       .createQueryBuilder()
       .select("time_bucket_gapfill('1 day', time) as timestamp")
       .addSelect('sum(sum) as value')
+      .addSelect(
+        'sum(sum) as value, sum(xoxno) as xoxno, sum(frameit) as frameit, sum(elrondapes) as elrondapes, sum(deadrare) as deadrare, sum(hoghomies) as hoghomies, sum(elrondnftswap) as elrondnftswap, sum(aquaverse) as aquaverse, sum(holoride) as holoride, sum(eneftor) as eneftor,sum(ici) as ici  ',
+      )
       .where('key = :metric', { metric })
       .andWhere('series = :series', { series })
       .andWhere(endDate ? 'time BETWEEN :startDate AND :endDate' : 'time >= :startDate', { startDate, endDate })
@@ -53,7 +58,7 @@ export class AnalyticsDataGetterService {
       .groupBy('timestamp')
       .getRawMany();
 
-    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [];
+    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjectWithMarketplaces(row)) ?? [];
   }
 
   async getFloorPriceData({ time, series, metric, start }: AnalyticsArgs): Promise<AnalyticsAggregateValue[]> {
@@ -69,6 +74,6 @@ export class AnalyticsDataGetterService {
       .groupBy('timestamp')
       .getRawMany();
 
-    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObjext(row)) ?? [];
+    return query?.map((row) => AnalyticsAggregateValue.fromTimescaleObject(row)) ?? [];
   }
 }
