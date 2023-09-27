@@ -7,7 +7,7 @@ import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { AnalyticsInput } from 'src/modules/analytics/models/analytics-input.model';
 import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
-import moment from 'moment';
+import * as moment from 'moment';
 
 @Injectable()
 export class MxToolsService {
@@ -76,12 +76,11 @@ export class MxToolsService {
     try {
       const query = this.getNftsTransfersCountQuery(identifier, input);
       const res = await this.doPost(this.getNftTransactionsCount.name, query);
-      console.log({ res: JSON.stringify(res) });
       return res.data?.nfts?.transfers?.map(
         (x) =>
           new AnalyticsAggregateValue({
             series: x.series,
-            time: moment.utc(x.timestamp ?? x.time).format('yyyy-MM-DD HH:mm:ss'),
+            time: moment.utc(x?.timestamp ?? x?.time).format('yyyy-MM-DD HH:mm:ss'),
             value: x.last ?? 0,
           }),
       );
