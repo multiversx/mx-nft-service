@@ -82,10 +82,11 @@ export class MxToolsService {
           new AnalyticsAggregateValue({
             series: x.series,
             time: moment.utc(x.timestamp ?? x.time).format('yyyy-MM-DD HH:mm:ss'),
-            value: x.sum ?? 0,
+            value: x.last ?? 0,
           }),
       );
     } catch (error) {
+      console.log({ error });
       this.logger.error(`An error occurred while mapping data api response`, {
         path: this.getNftTransactionsCount.name,
         input,
