@@ -76,7 +76,7 @@ export class MxToolsService {
     try {
       const query = this.getNftsTransfersCountQuery(identifier, input);
       const res = await this.doPost(this.getNftTransactionsCount.name, query);
-      console.log({ res });
+      console.log({ res: JSON.stringify(res) });
       return res.data?.nfts?.transfers?.map(
         (x) =>
           new AnalyticsAggregateValue({
