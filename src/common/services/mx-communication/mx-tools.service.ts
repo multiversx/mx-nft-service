@@ -120,6 +120,7 @@ export class MxToolsService {
           max
           min
           sum
+          last
         }
       }
     }`;
