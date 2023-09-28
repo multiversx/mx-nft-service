@@ -38,12 +38,22 @@ export class CollectionsAnalyticsService {
       CacheInfo.NftAnalytic24hCount.ttl / 2,
     );
   }
+
   public async getActiveNftsStats(input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
     return this.cacheService.getOrSet(
       `${CacheInfo.NftAnalytic24hListing.key}_${hash(input)}`,
       () => this.toolsService.getActiveNftsStats(input),
       CacheInfo.NftAnalytic24hListing.ttl,
       CacheInfo.NftAnalytic24hListing.ttl / 2,
+    );
+  }
+
+  public async getNftsTransactionsCount(identifier: string, input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
+    return this.cacheService.getOrSet(
+      `${CacheInfo.NftTransactionsCount.key}_${identifier}_${hash(input)}`,
+      () => this.toolsService.getNftTransactionsCount(identifier, input),
+      CacheInfo.NftTransactionsCount.ttl,
+      CacheInfo.NftTransactionsCount.ttl / 2,
     );
   }
 

@@ -578,11 +578,12 @@ type CollectionsAnalyticsModel {
   collectionIdentifier: String!
   details: CollectionsDetailsModel!
   floorPrice: Float!
-  floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+  floorPriceData(input: AnalyticsArgs!): [AnalyticsAggregateValue!]!
   holders: Int!
   topHolders: [HoldersCount!]!
+  transactionsCount(input: AnalyticsInput): [AnalyticsAggregateValue!]!
   volume24h: Float
-  volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+  volumeData(input: AnalyticsArgs!): [AnalyticsAggregateValue!]!
 }
 
 type CollectionsAnalyticsModelEdge {

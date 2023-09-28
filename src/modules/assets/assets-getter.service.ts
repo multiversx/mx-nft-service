@@ -42,7 +42,7 @@ export class AssetsGetterService {
   ) {}
 
   async getAssetsForUser(address: string, query: string = '', countQuery: string = ''): Promise<CollectionType<Asset>> {
-    query = new AssetsQuery(query).addQuery('includeFlagged=true').build();
+    query = new AssetsQuery(query).addQuery('includeFlagged=true&source=elastic').build();
     countQuery = new AssetsQuery(countQuery).addQuery('includeFlagged=true').build();
     const [nfts, count] = await Promise.all([
       this.apiService.getNftsForUser(address, query),
