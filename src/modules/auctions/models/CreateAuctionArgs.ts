@@ -41,4 +41,7 @@ export class CreateAuctionArgs {
 
   @Field(() => Boolean, { nullable: true })
   maxOneSftPerPayment: boolean;
+
+  @Field()
+  marketplaceKey: string;
 }

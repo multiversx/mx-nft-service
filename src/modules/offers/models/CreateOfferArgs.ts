@@ -30,4 +30,7 @@ export class CreateOfferArgs {
 
   @Field(() => Int, { nullable: true })
   auctionId: number;
+
+  @Field()
+  marketplaceKey: string;
 }

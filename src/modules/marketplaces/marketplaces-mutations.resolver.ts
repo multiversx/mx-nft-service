@@ -19,4 +19,10 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   async whitelistCollectionOnMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
     return await this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
   }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async whitelistMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
+    return await this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
+  }
 }

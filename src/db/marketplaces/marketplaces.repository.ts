@@ -30,6 +30,10 @@ export class MarketplaceRepository {
       .getMany();
   }
 
+  async getMarketplaceByKey(marketplaceKey: string): Promise<MarketplaceEntity> {
+    return await this.marketplaceRepository.findOne({ where: { key: marketplaceKey } });
+  }
+
   async getMarketplacesByAddresses(addresses: string[]): Promise<MarketplaceEntity[]> {
     return await this.marketplaceRepository
       .createQueryBuilder('fm')
