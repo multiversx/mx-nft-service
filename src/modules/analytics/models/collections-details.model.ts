@@ -18,6 +18,7 @@ export class CollectionsDetailsModel {
 
   static fromApiCollection(collection: Collection) {
     return new CollectionsDetailsModel({
+      collectionIdentifier: collection.collection,
       collectionName: collection.name,
       items: collection.nftsCount,
       owner: collection.artistAddress ?? collection.ownerAddress,
