@@ -113,7 +113,7 @@ export class MxToolsService {
   private getNftsTransfersCountQuery(identifier: string, input: AnalyticsInput): string {
     return `{
       nfts {
-        transfers(identifier: "${identifier}", query: { range: ${input.range}, resolution:  ${input.resolution} }) {
+        transfers(identifier: "${identifier}", query: { range: ${input.range}, resolution:  ${input.resolution}, fill_data_gaps_skip_null_values: true }) {
           time
           avg
           count
