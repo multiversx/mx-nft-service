@@ -278,6 +278,10 @@ export class PersistenceService {
     );
   }
 
+  async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {
+    return await this.execute(this.saveMarketplace.name, this.marketplaceRepository.saveMarketplace(entity));
+  }
+
   async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
     return await this.execute(this.getMarketplaces.name, this.marketplaceRepository.getMarketplaces());
   }

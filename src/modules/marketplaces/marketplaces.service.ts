@@ -7,8 +7,9 @@ import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketpla
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { WhitelistCollectionRequest } from './models/requests/whitelistMinterRequest';
+import { WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
+import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketplaceRequest';
 
 @Injectable()
 export class MarketplacesService {
@@ -170,6 +171,38 @@ export class MarketplacesService {
       this.logger.error('An error has occured while whitelisting collection', {
         path: this.whitelistCollectionOnMarketplace.name,
         collection: request?.collection,
+        marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async whitelistMarketplace(request: WhitelistMarketplaceRequest): Promise<Boolean> {
+    const marketplace = await this.persistenceService.getMarketplaceByKey(request.marketplaceKey);
+    if (marketplace) {
+      throw new BadRequestError('Marketplace available for this key, choose another key if this is not your marketplace');
+    }
+    try {
+      let savedMarketplace = await this.persistenceService.saveMarketplace(
+        new MarketplaceEntity({
+          key: request.marketplaceKey,
+          address: request.marketplaceScAddress,
+          name: request.marketplaceName,
+          url: request.marketplaceUrl,
+          type: MarketplaceTypeEnum.Internal,
+        }),
+      );
+
+      if (savedMarketplace) {
+        // TODO: invalidate caching corectly, send event
+        this.cacheService.invalidateMarketplacesCache();
+        this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
+      }
+      return savedMarketplace ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while whitelisting marketplace', {
+        path: this.whitelistCollectionOnMarketplace.name,
         marketplace: request?.marketplaceKey,
         exception: error,
       });

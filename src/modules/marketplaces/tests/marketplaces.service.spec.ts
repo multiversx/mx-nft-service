@@ -7,7 +7,7 @@ import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketpla
 import { MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
 import { MarketplaceFilters } from '../models/Marketplace.Filter';
 import { Marketplace } from '../models';
-import { WhitelistCollectionRequest } from '../models/requests/whitelistMinterRequest';
+import { WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { Logger } from '@nestjs/common';
 

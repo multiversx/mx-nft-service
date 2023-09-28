@@ -1015,7 +1015,7 @@ type Mutation {
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
-  whitelistMarketplace(input: WhitelistCollectionArgs!): Boolean!
+  whitelistMarketplace(input: WhitelistMarketplaceArgs!): Boolean!
   whitelistMinter(input: WhitelistMinterArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
@@ -1552,6 +1552,20 @@ scalar Upload
 input WhitelistCollectionArgs {
   collection: String!
   marketplaceKey: String!
+}
+
+input WhitelistMarketplaceArgs {
+  """This should de a unique key, so choose wisely!"""
+  marketplaceKey: String!
+
+  """This field will be shown on external apps like xSpothlight, xPortal!"""
+  marketplaceName: String!
+
+  """Smart Contract Address, if not sent the default one will be used"""
+  marketplaceScAddress: String
+
+  """This will be used to redirect from external apps!"""
+  marketplaceUrl: String!
 }
 
 input WhitelistMinterArgs {
