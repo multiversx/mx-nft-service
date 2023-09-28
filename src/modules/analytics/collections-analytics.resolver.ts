@@ -49,7 +49,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
 
   @ResolveField('volumeData', () => [AnalyticsAggregateValue])
   async volumeData(
-    @Args('input', { type: () => AnalyticsArgs, nullable: true })
+    @Args('input', { type: () => AnalyticsArgs })
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
@@ -58,7 +58,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
 
   @ResolveField('floorPriceData', () => [AnalyticsAggregateValue])
   async floorPriceData(
-    @Args('input', { type: () => AnalyticsArgs, nullable: true })
+    @Args('input', { type: () => AnalyticsArgs })
     input: AnalyticsArgs,
     @Parent() collection: CollectionsAnalyticsModel,
   ) {
