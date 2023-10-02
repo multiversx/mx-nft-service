@@ -48,7 +48,12 @@ export class MarketplaceRepository {
   }
 
   async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {
-    return await this.marketplaceRepository.save(entity);
+    return this.marketplaceRepository.save(entity);
+  }
+
+  async updateMarketplace(entity: MarketplaceEntity): Promise<boolean> {
+    const result = await this.marketplaceRepository.update({ key: entity.key }, entity);
+    return result?.affected === 1;
   }
 
   async updateMarketplaceLastIndexTimestamp(address: string, lastIndexTimestamp: number): Promise<void> {

@@ -10,6 +10,7 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketplaceRequest';
+import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
 
 @Injectable()
 export class MarketplacesService {
@@ -200,6 +201,38 @@ export class MarketplacesService {
         this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
       }
       return savedMarketplace ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while whitelisting marketplace', {
+        path: this.whitelistCollectionOnMarketplace.name,
+        marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async updateMarketplace(request: UpdateMarketplaceRequest): Promise<Boolean> {
+    const marketplace = await this.persistenceService.getMarketplaceByKey(request.marketplaceKey);
+    if (marketplace) {
+      throw new BadRequestError('No marketplace available for this key');
+    }
+    try {
+      let updatedMarketplace = await this.persistenceService.updateMarketplace(
+        new MarketplaceEntity({
+          key: request.marketplaceKey,
+          address: marketplace.address ?? request.marketplaceScAddress,
+          name: marketplace.name ?? request.marketplaceName,
+          url: marketplace.url ?? request.marketplaceUrl,
+          type: marketplace.type ?? MarketplaceTypeEnum.Internal,
+        }),
+      );
+
+      if (updatedMarketplace) {
+        // TODO: invalidate caching corectly, send event
+        this.cacheService.invalidateMarketplacesCache();
+        this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
+      }
+      return updatedMarketplace;
     } catch (error) {
       this.logger.error('An error has occured while whitelisting marketplace', {
         path: this.whitelistCollectionOnMarketplace.name,

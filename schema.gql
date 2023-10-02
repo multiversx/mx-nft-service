@@ -1009,6 +1009,7 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
+  updateMarketplace(input: UpdateMarketplaceArgs!): Boolean!
   updateNftTraits(identifier: String!): UpdateNftTraitsResponse!
   upgradeNftRoyalties(input: UpgradeNftArgs!): TransactionNode!
   validateCollectionRarities(collectionTicker: String!): Boolean!
@@ -1523,6 +1524,20 @@ input TransferNftCreateRoleArgs {
   addressToTransferList: [String!]!
   collection: String!
   ownerAddress: String!
+}
+
+input UpdateMarketplaceArgs {
+  """This should de a unique key, so choose wisely!"""
+  marketplaceKey: String!
+
+  """This field will be shown on external apps like xSpothlight, xPortal!"""
+  marketplaceName: String
+
+  """Smart Contract Address, if not sent the default one will be used"""
+  marketplaceScAddress: String
+
+  """This will be used to redirect from external apps!"""
+  marketplaceUrl: String
 }
 
 enum UpdateNftTraitsResponse {

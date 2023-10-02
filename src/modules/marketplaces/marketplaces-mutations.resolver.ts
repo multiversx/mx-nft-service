@@ -9,6 +9,8 @@ import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketpl
 import { UseGuards } from '@nestjs/common';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
+import { UpdateMarketplaceArgs } from './models/UpdateMarketplaceArgs';
+import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
 
 @Resolver(() => Marketplace)
 export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
@@ -20,6 +22,12 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistCollectionOnMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
     return await this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async updateMarketplace(@Args('input') input: UpdateMarketplaceArgs): Promise<Boolean> {
+    return await this.marketplaceService.updateMarketplace(UpdateMarketplaceRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)
