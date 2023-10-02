@@ -21,18 +21,18 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistCollectionOnMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
-    return await this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
+    return this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async updateMarketplace(@Args('input') input: UpdateMarketplaceArgs): Promise<Boolean> {
-    return await this.marketplaceService.updateMarketplace(UpdateMarketplaceRequest.fromArgs(input));
+    return this.marketplaceService.updateMarketplace(UpdateMarketplaceRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistMarketplace(@Args('input') input: WhitelistMarketplaceArgs): Promise<Boolean> {
-    return await this.marketplaceService.whitelistMarketplace(WhitelistMarketplaceRequest.fromArgs(input));
+    return this.marketplaceService.whitelistMarketplace(WhitelistMarketplaceRequest.fromArgs(input));
   }
 }

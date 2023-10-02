@@ -126,13 +126,13 @@ export class MarketplacesService {
   }
 
   private async getInternalMarketplaces(): Promise<Marketplace[]> {
-    let allMarketplaces = await this.getAllMarketplaces();
+    const allMarketplaces = await this.getAllMarketplaces();
     const internalMarketplaces = allMarketplaces?.items?.filter((m) => m.type === MarketplaceTypeEnum.Internal);
     return internalMarketplaces;
   }
 
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
-    let [campaigns, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
+    const [campaigns, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
@@ -140,12 +140,12 @@ export class MarketplacesService {
   }
 
   async getMarketplaceByAddressAndCollectionFromDb(collection: string, address: string): Promise<Marketplace> {
-    let marketplace: MarketplaceEntity[] = await this.persistenceService.getMarketplaceByAddressAndCollection(collection, address);
+    const marketplace: MarketplaceEntity[] = await this.persistenceService.getMarketplaceByAddressAndCollection(collection, address);
     return marketplace?.length > 0 ? Marketplace.fromEntity(marketplace[0]) : null;
   }
 
   async getMarketplaceByAddress(address: string): Promise<Marketplace> {
-    let marketplace: MarketplaceEntity = await this.persistenceService.getMarketplaceByAddress(address);
+    const marketplace: MarketplaceEntity = await this.persistenceService.getMarketplaceByAddress(address);
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
   }
 
@@ -155,7 +155,7 @@ export class MarketplacesService {
       throw new BadRequestError('No marketplace available for this key');
     }
     try {
-      let savedCollection = await this.persistenceService.saveMarketplaceCollection(
+      const savedCollection = await this.persistenceService.saveMarketplaceCollection(
         new MarketplaceCollectionEntity({
           collectionIdentifier: request.collection,
           marketplaces: [marketplace],
@@ -185,7 +185,7 @@ export class MarketplacesService {
       throw new BadRequestError('Marketplace available for this key, choose another key if this is not your marketplace');
     }
     try {
-      let savedMarketplace = await this.persistenceService.saveMarketplace(
+      const savedMarketplace = await this.persistenceService.saveMarketplace(
         new MarketplaceEntity({
           key: request.marketplaceKey,
           address: request.marketplaceScAddress,
@@ -217,7 +217,7 @@ export class MarketplacesService {
       throw new BadRequestError('No marketplace available for this key');
     }
     try {
-      let updatedMarketplace = await this.persistenceService.updateMarketplace(
+      const updatedMarketplace = await this.persistenceService.updateMarketplace(
         new MarketplaceEntity({
           key: request.marketplaceKey,
           address: request.marketplaceScAddress ?? marketplace.address,
@@ -249,7 +249,7 @@ export class MarketplacesService {
   }
 
   async updateMarketplaceLastIndexTimestampByAddress(address: string, lastIndexTimestamp: number): Promise<void> {
-    await this.persistenceService.updateMarketplaceLastIndexTimestampByAddress(address, lastIndexTimestamp);
+    this.persistenceService.updateMarketplaceLastIndexTimestampByAddress(address, lastIndexTimestamp);
   }
 
   private async getCollectionsByMarketplaceFromDb(marketplaceKey: string): Promise<string[]> {
