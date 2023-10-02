@@ -792,7 +792,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.invalidateMarketplacesCache = jest.fn();
       cacheService.invalidateCollectionsByMarketplace = jest.fn();
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
       persistenceService.updateMarketplace = jest.fn().mockReturnValueOnce(true);
       const expectedResult = await service.updateMarketplace(new UpdateMarketplaceRequest({ marketplaceKey: 'xoxno' }));
