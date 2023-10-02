@@ -670,9 +670,10 @@ describe('Marketplaces Service', () => {
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaceId: 2,
         }),
       );
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
 
       await expect(service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest())).rejects.toThrowError(BadRequestError);
     });
@@ -687,6 +688,7 @@ describe('Marketplaces Service', () => {
           count: inputCount,
         }),
       );
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
       persistenceService.saveMarketplaceCollection = jest.fn(() => {
         throw new Error();
       });
@@ -709,11 +711,12 @@ describe('Marketplaces Service', () => {
       cacheService.invalidateMarketplacesCache = jest.fn();
       cacheService.invalidateMarketplaceByCollection = jest.fn();
       cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaceId: 2,
+          marketplaces: [inputMarketplace[0]],
         }),
       );
       const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
