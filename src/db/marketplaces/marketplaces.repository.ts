@@ -10,32 +10,26 @@ export class MarketplaceRepository {
     private marketplaceRepository: Repository<MarketplaceEntity>,
   ) {}
   async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
-    return await this.marketplaceRepository.findAndCount();
+    return this.marketplaceRepository.findAndCount();
   }
 
   async getMarketplaceByAddress(address: string): Promise<MarketplaceEntity> {
-    return await this.marketplaceRepository.findOne({
-      where: {
-        address,
-      },
-    });
+    return this.marketplaceRepository.findOne({ where: { address } });
   }
 
   async getMarketplacesByKeys(marketplaceKeys: string[]): Promise<MarketplaceEntity[]> {
-    return await this.marketplaceRepository
+    return this.marketplaceRepository
       .createQueryBuilder('marketplaces')
-      .where('`key` IN(:...marketplaceKeys)', {
-        marketplaceKeys: marketplaceKeys,
-      })
+      .where('`key` IN(:...marketplaceKeys)', { marketplaceKeys: marketplaceKeys })
       .getMany();
   }
 
   async getMarketplaceByKey(marketplaceKey: string): Promise<MarketplaceEntity> {
-    return await this.marketplaceRepository.findOne({ where: { key: marketplaceKey } });
+    return this.marketplaceRepository.findOne({ where: { key: marketplaceKey } });
   }
 
   async getMarketplacesByAddresses(addresses: string[]): Promise<MarketplaceEntity[]> {
-    return await this.marketplaceRepository
+    return this.marketplaceRepository
       .createQueryBuilder('fm')
       .select('fm.address as address')
       .addSelect('fm.url as url')

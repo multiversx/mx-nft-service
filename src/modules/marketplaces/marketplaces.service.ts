@@ -213,16 +213,16 @@ export class MarketplacesService {
 
   async updateMarketplace(request: UpdateMarketplaceRequest): Promise<Boolean> {
     const marketplace = await this.persistenceService.getMarketplaceByKey(request.marketplaceKey);
-    if (marketplace) {
+    if (!marketplace) {
       throw new BadRequestError('No marketplace available for this key');
     }
     try {
       let updatedMarketplace = await this.persistenceService.updateMarketplace(
         new MarketplaceEntity({
           key: request.marketplaceKey,
-          address: marketplace.address ?? request.marketplaceScAddress,
-          name: marketplace.name ?? request.marketplaceName,
-          url: marketplace.url ?? request.marketplaceUrl,
+          address: request.marketplaceScAddress ?? marketplace.address,
+          name: request.marketplaceName ?? marketplace.name,
+          url: request.marketplaceUrl ?? marketplace.url,
           type: marketplace.type ?? MarketplaceTypeEnum.Internal,
         }),
       );
