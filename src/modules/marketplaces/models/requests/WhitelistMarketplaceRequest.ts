@@ -1,10 +1,11 @@
 import { WhitelistMarketplaceArgs } from '../WhitelistMarketplaceArgs';
+import { mxConfig } from 'src/config';
 
 export class WhitelistMarketplaceRequest {
   marketplaceName: string;
   marketplaceKey: string;
   marketplaceUrl: string;
-  marketplaceScAddress: string;
+  marketplaceScAddress: string = mxConfig.nftMarketplaceAddress;
 
   constructor(init?: Partial<WhitelistMarketplaceRequest>) {
     Object.assign(this, init);
