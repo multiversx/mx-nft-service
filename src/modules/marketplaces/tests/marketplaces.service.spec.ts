@@ -7,9 +7,11 @@ import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketpla
 import { MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
 import { MarketplaceFilters } from '../models/Marketplace.Filter';
 import { Marketplace } from '../models';
-import { WhitelistCollectionRequest } from '../models/requests/whitelistMinterRequest';
+import { WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { Logger } from '@nestjs/common';
+import { WhitelistMarketplaceRequest } from '../models/requests/WhitelistMarketplaceRequest';
+import { UpdateMarketplaceRequest } from '../models/requests/UpdateMarketplaceRequest';
 
 describe('Marketplaces Service', () => {
   let service: MarketplacesService;
@@ -670,9 +672,10 @@ describe('Marketplaces Service', () => {
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaceId: 2,
         }),
       );
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
 
       await expect(service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest())).rejects.toThrowError(BadRequestError);
     });
@@ -687,6 +690,7 @@ describe('Marketplaces Service', () => {
           count: inputCount,
         }),
       );
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
       persistenceService.saveMarketplaceCollection = jest.fn(() => {
         throw new Error();
       });
@@ -709,14 +713,89 @@ describe('Marketplaces Service', () => {
       cacheService.invalidateMarketplacesCache = jest.fn();
       cacheService.invalidateMarketplaceByCollection = jest.fn();
       cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaceId: 2,
+          marketplaces: [inputMarketplace[0]],
         }),
       );
       const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('whitelistMarketplace', () => {
+    it('when marketplace key exists throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+
+      await expect(service.whitelistMarketplace(new WhitelistMarketplaceRequest())).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when marketplace key does not exists and save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
+      persistenceService.saveMarketplace = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.whitelistMarketplace(new WhitelistMarketplaceRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace key does not exists and save is succesfull returns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+
+      cacheService.invalidateMarketplacesCache = jest.fn();
+      cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
+
+      persistenceService.saveMarketplace = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      const expectedResult = await service.whitelistMarketplace(new WhitelistMarketplaceRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('updateMarketplace', () => {
+    it('when marketplace does not exist throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
+
+      await expect(service.updateMarketplace(new WhitelistMarketplaceRequest())).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when marketplace exists and save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.updateMarketplace = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.updateMarketplace(new UpdateMarketplaceRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace does exists and update is succesfull returns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+
+      cacheService.invalidateMarketplacesCache = jest.fn();
+      cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+
+      persistenceService.updateMarketplace = jest.fn().mockReturnValueOnce(true);
+      const expectedResult = await service.updateMarketplace(new UpdateMarketplaceRequest({ marketplaceKey: 'xoxno' }));
 
       expect(expectedResult).toBeTruthy();
     });

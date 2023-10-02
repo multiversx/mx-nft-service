@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { MarketplaceEntity } from '.';
 
@@ -11,12 +11,8 @@ export class MarketplaceCollectionEntity extends BaseEntity {
   @Column({ length: 20 })
   collectionName: string;
 
-  @Column()
-  marketplaceId: number;
-
-  @ManyToOne(() => MarketplaceEntity, (marketplace) => marketplace.collections)
-  @JoinColumn({ name: 'marketplaceId', referencedColumnName: 'id' })
-  marketplace: MarketplaceEntity;
+  @ManyToMany(() => MarketplaceEntity, (marketplace) => marketplace.collections)
+  marketplaces: MarketplaceEntity[];
 
   constructor(init?: Partial<MarketplaceCollectionEntity>) {
     super();

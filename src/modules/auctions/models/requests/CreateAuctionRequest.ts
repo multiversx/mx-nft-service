@@ -10,6 +10,7 @@ export class CreateAuctionRequest {
   paymentToken: string;
   paymentTokenNonce: number;
   maxOneSftPerPayment: boolean;
+  marketplaceKey: string;
 
   constructor(init?: Partial<CreateAuctionRequest>) {
     Object.assign(this, init);
@@ -26,6 +27,7 @@ export class CreateAuctionRequest {
       paymentToken: auctionArgs.paymentToken,
       paymentTokenNonce: auctionArgs.paymentTokenNonce,
       maxOneSftPerPayment: auctionArgs.maxOneSftPerPayment,
+      marketplaceKey: auctionArgs.marketplaceKey,
     });
   }
 }

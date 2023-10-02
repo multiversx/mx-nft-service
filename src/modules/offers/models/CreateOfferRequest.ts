@@ -10,6 +10,7 @@ export class CreateOfferRequest {
   paymentTokenNonce: number;
   quantity: string;
   auctionId: number;
+  marketplaceKey: string;
 
   constructor(init?: Partial<CreateOfferRequest>) {
     Object.assign(this, init);
@@ -25,6 +26,7 @@ export class CreateOfferRequest {
       paymentAmount: args.paymentAmount,
       quantity: args.quantity,
       auctionId: args.auctionId,
+      marketplaceKey: args.marketplaceKey,
     });
   }
 }
