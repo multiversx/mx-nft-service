@@ -166,17 +166,17 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.ScamUpdate:
         const profileScamUpdate = new CpuProfiler();
-        this.assetScamInfoRedisHandler.clearKey(event.id);
+        await this.assetScamInfoRedisHandler.clearKey(event.id);
         profileScamUpdate.stop('ScamUpdate');
         break;
       case CacheEventTypeEnum.Minters:
         const profileMinters = new CpuProfiler();
-        this.cacheMintersService.invalidateMinters();
+        await this.cacheMintersService.invalidateMinters();
         profileMinters.stop('Minters');
         break;
       case CacheEventTypeEnum.Marketplaces:
         const profileMarketplaces = new CpuProfiler();
-        this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
+        await this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
         profileMarketplaces.stop('Marketplaces');
         break;
 
