@@ -38,9 +38,9 @@ export class MarketplacesCachingService {
     );
   }
 
-  public async invalidateCache(key: string, collection?: string, address?: string) {
+  public async invalidateCache(key: string, collection: string, address: string) {
     await this.invalidateMarketplacesCache();
-    await this.invalidateCollectionsByMarketplace(key);
+    if (key) await this.invalidateCollectionsByMarketplace(key);
     if (collection) {
       await this.invalidateMarketplaceByCollection(collection);
       await this.invalidateMarketplaceByAddressAndCollection(`${collection}_${address}`);
