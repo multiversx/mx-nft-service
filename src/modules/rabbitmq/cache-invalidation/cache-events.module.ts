@@ -14,6 +14,7 @@ import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets
 import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
+import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching.service';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplace
     AssetsCollectionsForOwnerRedisHandler,
     MintersCachingService,
     MarketplacesCachingService,
+    CampaignsCachingService,
   ],
   exports: [],
 })
