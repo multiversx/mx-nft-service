@@ -14,6 +14,7 @@ import { CacheSetterAdminService } from './cache-admin-module/cache-admin-setter
 import { CacheInvalidationEventsService } from './cache-invalidation-module/cache-invalidation-events.service';
 import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
+import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -28,6 +29,7 @@ export class CacheEventsConsumer {
     private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private cacheMintersService: MintersCachingService,
+    private cacheMarketplacesService: MarketplacesCachingService,
     private logger: Logger,
   ) {}
 
@@ -171,6 +173,11 @@ export class CacheEventsConsumer {
         const profileMinters = new CpuProfiler();
         this.cacheMintersService.invalidateMinters();
         profileMinters.stop('Minters');
+        break;
+      case CacheEventTypeEnum.Marketplaces:
+        const profileMarketplaces = new CpuProfiler();
+        this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
+        profileMarketplaces.stop('Marketplaces');
         break;
 
       // case CacheEventTypeEnum.RefreshTrending:
