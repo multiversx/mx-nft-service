@@ -13,6 +13,7 @@ import { AssetScamInfoRedisHandler } from 'src/modules/assets/loaders/assets-sca
 import { AssetsCollectionsRedisHandler } from 'src/modules/assets/loaders/assets-collection.redis-handler';
 import { AssetsCollectionsForOwnerRedisHandler } from 'src/modules/assets/loaders/assets-collection-for-owner.redis-handler';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
+import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { MintersCachingService } from 'src/modules/minters/minters-caching.servi
     AssetsCollectionsRedisHandler,
     AssetsCollectionsForOwnerRedisHandler,
     MintersCachingService,
+    MarketplacesCachingService,
   ],
   exports: [],
 })

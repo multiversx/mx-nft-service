@@ -12,6 +12,7 @@ import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { Logger } from '@nestjs/common';
 import { WhitelistMarketplaceRequest } from '../models/requests/WhitelistMarketplaceRequest';
 import { UpdateMarketplaceRequest } from '../models/requests/UpdateMarketplaceRequest';
+import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 
 describe('Marketplaces Service', () => {
   let service: MarketplacesService;
@@ -50,6 +51,10 @@ describe('Marketplaces Service', () => {
         },
         {
           provide: PersistenceService,
+          useFactory: () => ({}),
+        },
+        {
+          provide: CacheEventsPublisherService,
           useFactory: () => ({}),
         },
       ],
@@ -703,6 +708,7 @@ describe('Marketplaces Service', () => {
     it('when marketplace exists and save is succesfull returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
@@ -710,9 +716,7 @@ describe('Marketplaces Service', () => {
           count: inputCount,
         }),
       );
-      cacheService.invalidateMarketplacesCache = jest.fn();
-      cacheService.invalidateMarketplaceByCollection = jest.fn();
-      cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
@@ -751,10 +755,9 @@ describe('Marketplaces Service', () => {
 
     it('when marketplace key does not exists and save is succesfull returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      cacheService.invalidateMarketplacesCache = jest.fn();
-      cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
 
       persistenceService.saveMarketplace = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
@@ -788,10 +791,9 @@ describe('Marketplaces Service', () => {
 
     it('when marketplace does exists and update is succesfull returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      cacheService.invalidateMarketplacesCache = jest.fn();
-      cacheService.invalidateCollectionsByMarketplace = jest.fn();
+      eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
       persistenceService.updateMarketplace = jest.fn().mockReturnValueOnce(true);

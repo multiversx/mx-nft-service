@@ -11,12 +11,15 @@ import { WhitelistCollectionRequest } from './models/requests/WhitelistCollectio
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketplaceRequest';
 import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class MarketplacesService {
   constructor(
-    private persistenceService: PersistenceService,
-    private cacheService: MarketplacesCachingService,
+    private readonly persistenceService: PersistenceService,
+    private readonly cacheService: MarketplacesCachingService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
     private readonly logger: Logger,
   ) {}
 
@@ -163,9 +166,7 @@ export class MarketplacesService {
       );
 
       if (savedCollection) {
-        this.cacheService.invalidateMarketplacesCache();
-        this.cacheService.invalidateMarketplaceByCollection(request.collection);
-        this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
+        this.triggerCacheInvalidation(request.marketplaceKey, request.collection, marketplace.address);
       }
       return savedCollection ? true : false;
     } catch (error) {
@@ -196,9 +197,7 @@ export class MarketplacesService {
       );
 
       if (savedMarketplace) {
-        // TODO: invalidate caching corectly, send event
-        this.cacheService.invalidateMarketplacesCache();
-        this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
+        this.triggerCacheInvalidation(request.marketplaceKey);
       }
       return savedMarketplace ? true : false;
     } catch (error) {
@@ -228,9 +227,7 @@ export class MarketplacesService {
       );
 
       if (updatedMarketplace) {
-        // TODO: invalidate caching corectly, send event
-        this.cacheService.invalidateMarketplacesCache();
-        this.cacheService.invalidateCollectionsByMarketplace(request.marketplaceKey);
+        this.triggerCacheInvalidation(request.marketplaceKey);
       }
       return updatedMarketplace;
     } catch (error) {
@@ -255,5 +252,16 @@ export class MarketplacesService {
   private async getCollectionsByMarketplaceFromDb(marketplaceKey: string): Promise<string[]> {
     const collections = await this.persistenceService.getCollectionsByMarketplace(marketplaceKey);
     return collections.map((c) => c.collectionIdentifier);
+  }
+
+  private async triggerCacheInvalidation(marketplaceKey: string, collection?: string, address?: string): Promise<void> {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.Marketplaces,
+        id: marketplaceKey,
+        address: address,
+        extraInfo: { collection: collection },
+      }),
+    );
   }
 }

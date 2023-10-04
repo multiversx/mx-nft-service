@@ -4,13 +4,14 @@ import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
 import { MxElasticService } from 'src/common';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
-import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 import { BinaryUtils, Locker } from '@multiversx/sdk-nestjs-common';
 import { ElasticQuery } from '@multiversx/sdk-nestjs-elastic';
 
 import { getMarketplaceEventsElasticQuery, getMarketplaceTransactionsElasticQuery } from './marketplaces.elastic.queries';
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from '../assets/models';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -18,8 +19,8 @@ export class MarketplaceEventsIndexingService {
     private readonly logger: Logger,
     private readonly persistenceService: PersistenceService,
     private readonly marketplaceService: MarketplacesService,
-    private readonly marketplacesCachingService: MarketplacesCachingService,
     private readonly mxElasticService: MxElasticService,
+    private readonly cacheEventsPublisher: CacheEventsPublisherService,
   ) {}
 
   async reindexAllMarketplaceEvents(stopIfDuplicates: boolean = true, beforeTimestamp?: number, afterTimestamp?: number): Promise<void> {
@@ -79,7 +80,7 @@ export class MarketplaceEventsIndexingService {
 
           if (newestTimestamp && (!input.marketplaceLastIndexTimestamp || newestTimestamp > input.marketplaceLastIndexTimestamp)) {
             await this.marketplaceService.updateMarketplaceLastIndexTimestampByAddress(input.marketplaceAddress, newestTimestamp);
-            await this.marketplacesCachingService.invalidateMarketplacesCache();
+            await this.triggerCacheInvalidation();
           }
 
           this.logger.log(`Reindexing marketplace events for ${input.marketplaceAddress} ended`);
@@ -209,6 +210,14 @@ export class MarketplaceEventsIndexingService {
       !Object.values(AuctionEventEnum).includes(eventIdentifier) &&
       !Object.values(ExternalAuctionEventEnum).includes(eventIdentifier) &&
       !Object.values(KroganSwapAuctionEventEnum).includes(eventIdentifier)
+    );
+  }
+
+  private async triggerCacheInvalidation(): Promise<void> {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.Marketplaces,
+      }),
     );
   }
 }

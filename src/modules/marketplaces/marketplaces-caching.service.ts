@@ -38,17 +38,28 @@ export class MarketplacesCachingService {
     );
   }
 
-  public async invalidateMarketplacesCache() {
+  public async invalidateCache(key: string, collection: string, address: string) {
+    await this.invalidateMarketplacesCache();
+    if (key) await this.invalidateCollectionsByMarketplace(key);
+    if (collection) {
+      await this.invalidateMarketplaceByCollection(collection);
+      await this.invalidateMarketplaceByAddressAndCollection(`${collection}_${address}`);
+    }
+  }
+
+  private async invalidateMarketplacesCache() {
     await this.cacheService.deleteInCache(CacheInfo.AllMarketplaces.key);
   }
 
-  public async invalidateCollectionsByMarketplace(key: string) {
+  private async invalidateCollectionsByMarketplace(key: string) {
     await this.cacheService.deleteInCache(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
   }
-  public async invalidateMarketplaceByCollection(key: string) {
+
+  private async invalidateMarketplaceByCollection(key: string) {
     await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceCollection.key}_${key}`);
   }
-  public async invalidateMarketplaceByAddressAndCollection(key: string) {
+
+  private async invalidateMarketplaceByAddressAndCollection(key: string) {
     await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceAddressCollection.key}_${key}`);
   }
 }
