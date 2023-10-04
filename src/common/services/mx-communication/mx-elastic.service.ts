@@ -302,7 +302,7 @@ export class MxElasticService {
     const query = ElasticQuery.create()
       .withPagination({ from: 0, size: 0 })
       .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
-      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withMustCondition(QueryType.Match('token', collectionIdentifier))
       .withExtra({
         aggs: {
           unique_addresses: {
@@ -353,7 +353,7 @@ export class MxElasticService {
     const query = ElasticQuery.create()
       .withPagination({ from: 0, size: 0 })
       .withShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT].map((type) => QueryType.Match('type', type)))
-      .withShouldCondition(QueryType.Match('token', collectionIdentifier))
+      .withMustCondition(QueryType.Match('token', collectionIdentifier))
       .withExtra({
         aggs: {
           first_by_address: {
