@@ -47,7 +47,7 @@ export class MarketplacesCachingService {
     }
   }
 
-  public async invalidateMarketplacesCache() {
+  private async invalidateMarketplacesCache() {
     await this.cacheService.deleteInCache(CacheInfo.AllMarketplaces.key);
   }
 
