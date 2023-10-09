@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, Matches, Max } from 'class-validator';
+import { IsOptional, Matches, MaxLength } from 'class-validator';
 import { ADDRESS_RGX, ADDRESS_ERROR } from 'src/utils/constants';
 
 @InputType()
@@ -7,7 +7,7 @@ export class WhitelistMarketplaceArgs {
   @Field({ description: 'This field will be shown on external apps like xSpothlight, xPortal!' })
   marketplaceName: string;
 
-  @Max(62)
+  @MaxLength(62)
   @Field({ description: 'This should de a unique key, so choose wisely!' })
   marketplaceKey: string;
 

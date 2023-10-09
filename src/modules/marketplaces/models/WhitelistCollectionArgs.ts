@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { Matches, Max } from 'class-validator';
+import { Matches, MaxLength } from 'class-validator';
 import { COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
@@ -10,7 +10,7 @@ export class WhitelistCollectionArgs {
   @Field()
   collection: string;
 
-  @Max(62)
+  @MaxLength(62)
   @Field()
   marketplaceKey: string;
 }

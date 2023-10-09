@@ -1,10 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, Matches, Max } from 'class-validator';
+import { IsOptional, Matches, Max, MaxLength } from 'class-validator';
 import { ADDRESS_RGX, ADDRESS_ERROR } from 'src/utils/constants';
 
 @InputType()
 export class UpdateMarketplaceArgs {
-  @Max(62)
+  @IsOptional()
+  @MaxLength(62)
   @Field({ description: 'This field will be shown on external apps like xSpothlight, xPortal!', nullable: true })
   marketplaceName: string;
 
