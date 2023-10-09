@@ -15,6 +15,7 @@ import { CacheInvalidationEventsService } from './cache-invalidation-module/cach
 import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
+import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching.service';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -30,6 +31,7 @@ export class CacheEventsConsumer {
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private cacheMintersService: MintersCachingService,
     private cacheMarketplacesService: MarketplacesCachingService,
+    private cacheCampaignsService: CampaignsCachingService,
     private logger: Logger,
   ) {}
 
@@ -169,17 +171,24 @@ export class CacheEventsConsumer {
         await this.assetScamInfoRedisHandler.clearKey(event.id);
         profileScamUpdate.stop('ScamUpdate');
         break;
+
       case CacheEventTypeEnum.Minters:
         const profileMinters = new CpuProfiler();
         await this.cacheMintersService.invalidateMinters();
         profileMinters.stop('Minters');
         break;
+
       case CacheEventTypeEnum.Marketplaces:
         const profileMarketplaces = new CpuProfiler();
         await this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
         profileMarketplaces.stop('Marketplaces');
         break;
 
+      case CacheEventTypeEnum.Campaigns:
+        const profileCampaigns = new CpuProfiler();
+        this.cacheCampaignsService.invalidateCache();
+        profileCampaigns.stop('Campaigns');
+        break;
       // case CacheEventTypeEnum.RefreshTrending:
       //   await this.cacheInvalidationEventsService.invalidateTrendingAuctions(
       //     event,
