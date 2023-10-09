@@ -5,17 +5,12 @@ import { CampaignEntity } from 'src/db/campaigns';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
-import { Constants } from '@multiversx/sdk-nestjs-common';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { ClientProxy } from '@nestjs/microservices';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { CampaignsCachingService } from './campaigns-caching.service';
 
 @Injectable()
 export class CampaignsService {
   constructor(
-    @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
     private persistenceService: PersistenceService,
     private cacheService: CampaignsCachingService,
