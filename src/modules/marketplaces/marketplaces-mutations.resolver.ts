@@ -19,21 +19,21 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistCollectionOnMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
     console.log('trigger cache invalidation for whitelistCollectionOnMarketplace', input);
     return this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async updateMarketplace(@Args('input') input: UpdateMarketplaceArgs): Promise<Boolean> {
     console.log('trigger cache invalidation for updateMarketplace', input);
     return this.marketplaceService.updateMarketplace(UpdateMarketplaceRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistMarketplace(@Args('input') input: WhitelistMarketplaceArgs): Promise<Boolean> {
     console.log('trigger cache invalidation for whitelistMarketplace', input);
     return this.marketplaceService.whitelistMarketplace(WhitelistMarketplaceRequest.fromArgs(input));
