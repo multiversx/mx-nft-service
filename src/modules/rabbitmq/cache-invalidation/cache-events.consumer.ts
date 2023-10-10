@@ -16,6 +16,7 @@ import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
 import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
 import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching.service';
+import { MarketplaceRedisHandler } from 'src/modules/marketplaces/loaders/marketplace.redis-handler';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -31,6 +32,7 @@ export class CacheEventsConsumer {
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private cacheMintersService: MintersCachingService,
     private cacheMarketplacesService: MarketplacesCachingService,
+    private marketplaceRedisHandler: MarketplaceRedisHandler,
     private cacheCampaignsService: CampaignsCachingService,
     private logger: Logger,
   ) {}
@@ -180,6 +182,7 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.Marketplaces:
         const profileMarketplaces = new CpuProfiler();
+        if (event.id) await this.marketplaceRedisHandler.clearKey(event.id);
         await this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
         profileMarketplaces.stop('Marketplaces');
         break;
