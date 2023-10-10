@@ -13,6 +13,7 @@ import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketpl
 import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { mxConfig } from 'src/config';
 
 @Injectable()
 export class MarketplacesService {
@@ -189,7 +190,7 @@ export class MarketplacesService {
       const savedMarketplace = await this.persistenceService.saveMarketplace(
         new MarketplaceEntity({
           key: request.marketplaceKey,
-          address: request.marketplaceScAddress,
+          address: request.marketplaceScAddress ?? mxConfig.nftMarketplaceAddress,
           name: request.marketplaceName,
           url: request.marketplaceUrl,
           type: MarketplaceTypeEnum.Internal,
