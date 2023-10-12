@@ -720,7 +720,7 @@ describe('Marketplaces Service', () => {
       expect(expectedResult).toBeTruthy();
     });
 
-    it('when marketplace and collection already whitelistedreturns true', async () => {
+    it('when marketplace and collection already whitelisted returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
