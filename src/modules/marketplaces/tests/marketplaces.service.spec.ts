@@ -687,9 +687,8 @@ describe('Marketplaces Service', () => {
 
     it('when marketplace exists and save fails returns false', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
 
-      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(null);
+      persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
       persistenceService.saveMarketplaceCollection = jest.fn(() => {
         throw new Error();
@@ -702,10 +701,9 @@ describe('Marketplaces Service', () => {
 
     it('when marketplace exists and save is succesfull returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(null);
+      persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
       eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
@@ -722,15 +720,9 @@ describe('Marketplaces Service', () => {
 
     it('when marketplace and collection already whitelisted returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
-      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(
-        new CollectionType({
-          items: inputMarketplace,
-          count: inputCount,
-        }),
-      );
+      persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(inputMarketplace);
       eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
 
