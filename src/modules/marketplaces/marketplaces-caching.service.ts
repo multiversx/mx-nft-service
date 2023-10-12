@@ -48,19 +48,19 @@ export class MarketplacesCachingService {
   }
 
   private async invalidateMarketplacesCache() {
-    await this.cacheService.deleteInCache(CacheInfo.AllMarketplaces.key);
+    await this.cacheService.delete(CacheInfo.AllMarketplaces.key);
   }
 
   private async invalidateCollectionsByMarketplace(key: string) {
     console.log({ key: `${CacheInfo.CollectionsByMarketplace.key}_${key}` });
-    await this.cacheService.deleteInCache(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
+    await this.cacheService.delete(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
   }
 
   private async invalidateMarketplaceByCollection(key: string) {
-    await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceCollection.key}_${key}`);
+    await this.cacheService.delete(`${CacheInfo.MarketplaceCollection.key}_${key}`);
   }
 
   private async invalidateMarketplaceByAddressAndCollection(key: string) {
-    await this.cacheService.deleteInCache(`${CacheInfo.MarketplaceAddressCollection.key}_${key}`);
+    await this.cacheService.delete(`${CacheInfo.MarketplaceAddressCollection.key}_${key}`);
   }
 }
