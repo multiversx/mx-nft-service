@@ -689,12 +689,7 @@ describe('Marketplaces Service', () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
 
-      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
-        new CollectionType({
-          items: inputMarketplace,
-          count: inputCount,
-        }),
-      );
+      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(null);
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
       persistenceService.saveMarketplaceCollection = jest.fn(() => {
         throw new Error();
@@ -710,7 +705,27 @@ describe('Marketplaces Service', () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
+      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(null);
+      eventPublisher.publish = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+
+      persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
+        new MarketplaceCollectionEntity({
+          collectionIdentifier: 'collection',
+          marketplaces: [inputMarketplace[0]],
+        }),
+      );
+      const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeTruthy();
+    });
+
+    it('when marketplace and collection already whitelistedreturns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
+
+      cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(
         new CollectionType({
           items: inputMarketplace,
           count: inputCount,
