@@ -253,6 +253,12 @@ export class PersistenceService {
     );
   }
 
+  async getMarketplaceByKeyAndCollection(collection: string, key: string): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      this.getMarketplaceByKeyAndCollection.name,
+      this.marketplaceCollectionsRepository.getMarketplaceByKeyAndCollection(collection, key),
+    );
+  }
   async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(this.getAllMarketplaceCollections.name, this.marketplaceCollectionsRepository.getAllCollections());
   }
