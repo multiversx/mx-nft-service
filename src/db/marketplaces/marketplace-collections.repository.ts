@@ -26,6 +26,7 @@ export class MarketplaceCollectionsRepository {
   }
 
   async getMarketplaceByKeyAndCollection(collection: string, key: string): Promise<MarketplaceEntity[]> {
+    console.log({ collection, key });
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
