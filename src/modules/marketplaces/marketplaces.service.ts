@@ -158,6 +158,12 @@ export class MarketplacesService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this key');
     }
+
+    const savedCollection = await this.getMarketplaceByCollectionAndAddress(request.collection, marketplace.address);
+    if (savedCollection) {
+      return true;
+    }
+
     try {
       const savedCollection = await this.persistenceService.saveMarketplaceCollection(
         new MarketplaceCollectionEntity({
