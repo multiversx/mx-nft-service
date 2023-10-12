@@ -165,8 +165,7 @@ export class MarketplacesService {
     }
 
     const savedCollection = await this.persistenceService.getMarketplaceByKeyAndCollection(request.collection, request.marketplaceKey);
-    if (savedCollection) {
-      console.log('collection already whitelited');
+    if (savedCollection?.length) {
       return true;
     }
 
