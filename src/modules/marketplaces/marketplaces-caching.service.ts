@@ -52,6 +52,7 @@ export class MarketplacesCachingService {
   }
 
   private async invalidateCollectionsByMarketplace(key: string) {
+    console.log({ key: `${CacheInfo.CollectionsByMarketplace.key}_${key}` });
     await this.cacheService.deleteInCache(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
   }
 
