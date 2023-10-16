@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import '../../utils/extensions';
 import { Constants } from '@multiversx/sdk-nestjs-common';
-import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CollectionType } from '../assets/models/Collection.type';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { Marketplace } from './models';
 
 @Injectable()
 export class MarketplacesCachingService {
-  constructor(private cacheService: RedisCacheService) {}
+  constructor(private cacheService: CacheService) {}
 
   public async getAllMarketplaces(getMarketplaces: () => any): Promise<CollectionType<Marketplace>> {
     return await this.cacheService.getOrSet(CacheInfo.AllMarketplaces.key, () => getMarketplaces(), Constants.oneHour());
