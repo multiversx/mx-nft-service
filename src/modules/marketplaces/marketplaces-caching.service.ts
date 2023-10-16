@@ -52,17 +52,14 @@ export class MarketplacesCachingService {
   }
 
   private async invalidateCollectionsByMarketplace(key: string) {
-    console.log({ key: `${CacheInfo.CollectionsByMarketplace.key}_${key}` });
     await this.cacheService.delete(`${CacheInfo.CollectionsByMarketplace.key}_${key}`);
   }
 
   private async invalidateMarketplaceByCollection(key: string) {
-    console.log({ key: `${CacheInfo.MarketplaceCollection.key}_${key}` });
     await this.cacheService.delete(`${CacheInfo.MarketplaceCollection.key}_${key}`);
   }
 
   private async invalidateMarketplaceByAddressAndCollection(key: string) {
-    console.log({ key: `${CacheInfo.MarketplaceCollection.key}_${key}` });
     await this.cacheService.delete(`${CacheInfo.MarketplaceAddressCollection.key}_${key}`);
   }
 }
