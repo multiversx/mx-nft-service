@@ -25,6 +25,21 @@ export class MarketplaceCollectionsRepository {
       .execute();
   }
 
+  async getMarketplaceByKeyAndCollection(collection: string, key: string): Promise<MarketplaceEntity[]> {
+    return await this.marketplaceCollectionRepository
+      .createQueryBuilder('mc')
+      .select('mc.collectionIdentifier as collectionIdentifier')
+      .addSelect('m.name as name')
+      .addSelect('m.url as url')
+      .addSelect('m.address as address')
+      .addSelect('m.key as `key`')
+      .addSelect('m.type as `type`')
+      .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
+      .where(`mc.collectionIdentifier = '${collection}' and m.key= '${key}'`)
+      .execute();
+  }
+
   async getAllCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.marketplaceCollectionRepository.find();
   }

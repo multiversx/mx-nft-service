@@ -148,6 +148,11 @@ export class MarketplacesService {
     return marketplace?.length > 0 ? Marketplace.fromEntity(marketplace[0]) : null;
   }
 
+  async getMarketplaceByKeyAndCollectionFromDb(collection: string, address: string): Promise<Marketplace> {
+    const marketplace: MarketplaceEntity[] = await this.persistenceService.getMarketplaceByKeyAndCollection(collection, address);
+    return marketplace?.length > 0 ? Marketplace.fromEntity(marketplace[0]) : null;
+  }
+
   async getMarketplaceByAddress(address: string): Promise<Marketplace> {
     const marketplace: MarketplaceEntity = await this.persistenceService.getMarketplaceByAddress(address);
     return marketplace ? Marketplace.fromEntity(marketplace) : null;
@@ -158,6 +163,12 @@ export class MarketplacesService {
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this key');
     }
+
+    const savedCollection = await this.persistenceService.getMarketplaceByKeyAndCollection(request.collection, request.marketplaceKey);
+    if (savedCollection?.length) {
+      return true;
+    }
+
     try {
       const savedCollection = await this.persistenceService.saveMarketplaceCollection(
         new MarketplaceCollectionEntity({

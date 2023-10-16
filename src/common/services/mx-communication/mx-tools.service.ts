@@ -85,7 +85,6 @@ export class MxToolsService {
           }),
       );
     } catch (error) {
-      console.log({ error });
       this.logger.error(`An error occurred while mapping data api response`, {
         path: this.getNftTransactionsCount.name,
         input,
