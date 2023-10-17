@@ -26,7 +26,7 @@ export class NotificationEntity extends BaseEntity {
   @Index('auction_id')
   auctionId: number;
 
-  @Column({ length: 20 })
+  @Column({ length: 62 })
   @Index('notification_marketplace_key')
   marketplaceKey: string;
 
