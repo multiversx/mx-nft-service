@@ -111,14 +111,14 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const result = await service.createAuction(ownerAddress, createAuctionRequestWithEgld);
       expect(result).toMatchObject(expectedResult);
     });
 
     it('when no whitelisted marketplace throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const result = service.createAuction(ownerAddress, createAuctionRequestWithEgld);
 
       await expect(result).rejects.toThrowError(new BadRequestError('No marketplace available for this collection'));
@@ -126,7 +126,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('when invalid payment token throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplaceWithESDTPaymentTokens);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplaceWithESDTPaymentTokens);
       const result = service.createAuction(ownerAddress, createAuctionRequestWithEgld);
 
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
@@ -134,7 +134,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with accepted payment identifier returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
 
       const expectedResult = {
         chainID: 'T',
@@ -284,7 +284,7 @@ describe('Nft Marketplace Abi Service', () => {
     });
     it('when no whitelisted marketplace throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
 
@@ -295,7 +295,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('when invalid payment token throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplaceWithESDTPaymentTokens);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplaceWithESDTPaymentTokens);
       const result = service.createOffer(ownerAddress, createOfferRequest);
 
       await expect(result).rejects.toThrowError(new BadRequestError('Unaccepted payment token'));
@@ -303,7 +303,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with EGLD payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
 
@@ -328,7 +328,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with ESDT payment token returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
 
@@ -365,7 +365,7 @@ describe('Nft Marketplace Abi Service', () => {
   describe('withdrawOffer', () => {
     it('when no whitelisted marketplace throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const offersService = module.get<OffersService>(OffersService);
       jest.spyOn(offersService, 'getOfferById').mockResolvedValueOnce(new OfferEntity({ collection: 'GEN-8984e7', marketplaceOfferId: 1 }));
 
@@ -376,7 +376,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
 
       const offersService = module.get<OffersService>(OffersService);
       jest.spyOn(offersService, 'getOfferById').mockResolvedValueOnce(new OfferEntity({ collection: 'GEN-8984e7', marketplaceOfferId: 1 }));
@@ -412,7 +412,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('without active auction and no whitelisted marketplace throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const apiService = module.get<MxApiService>(MxApiService);
       apiService.getNftByIdentifierAndAddress = jest.fn().mockReturnValueOnce({
         type: NftTypeEnum.SemiFungibleESDT,
@@ -429,7 +429,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('without active auction and user not owner of nft throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const apiService = module.get<MxApiService>(MxApiService);
       apiService.getNftByIdentifierAndAddress = jest.fn().mockReturnValueOnce(null);
       const offersService = module.get<OffersService>(OffersService);
@@ -442,7 +442,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('without active auction and not enouth balance throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const apiService = module.get<MxApiService>(MxApiService);
       apiService.getNftByIdentifierAndAddress = jest
         .fn()
@@ -456,7 +456,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('without active auction returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
 
       const apiService = module.get<MxApiService>(MxApiService);
       apiService.getNftByIdentifierAndAddress = jest.fn().mockReturnValueOnce({
@@ -489,7 +489,7 @@ describe('Nft Marketplace Abi Service', () => {
     const acceptOfferWithAuctionId = new AcceptOfferRequest({ offerId: 2, auctionId: 1 });
     it('with active auction and no whitelisted marketplace throw expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
       const offersService = module.get<OffersService>(OffersService);
@@ -502,7 +502,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with active auction but no offer found throws expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(null);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
       const offersService = module.get<OffersService>(OffersService);
@@ -518,7 +518,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with auction id param but no auction found throws expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(null);
       const offersService = module.get<OffersService>(OffersService);
@@ -531,7 +531,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with active auction but not owner throws expected error', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
       const offersService = module.get<OffersService>(OffersService);
@@ -543,7 +543,7 @@ describe('Nft Marketplace Abi Service', () => {
 
     it('with active auction returns built transaction with right arguments', async () => {
       const marketplaceService = module.get<MarketplacesService>(MarketplacesService);
-      marketplaceService.getMarketplaceByCollection = jest.fn().mockReturnValueOnce(marketplace);
+      marketplaceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(marketplace);
       const auctionsService = module.get<AuctionsGetterService>(AuctionsGetterService);
       auctionsService.getAuctionById = jest.fn().mockReturnValueOnce(auctionWithEGLDPaymentToken);
       const offersService = module.get<OffersService>(OffersService);

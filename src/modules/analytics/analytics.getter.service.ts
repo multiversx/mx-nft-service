@@ -19,7 +19,7 @@ export class AnalyticsGetterService {
     return await this.cacheService.getOrSet(
       cacheKey,
       () =>
-        this.analyticsQuery.getVolumeData({
+        this.analyticsQuery.getVolumeDataWithMarketplaces({
           series,
           metric,
           time,

@@ -77,7 +77,7 @@ export class AuctionEntity extends BaseEntity {
   @Column({ length: 64 })
   blockHash: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 62 })
   @Index('auction_marketplace_key')
   marketplaceKey: string;
 

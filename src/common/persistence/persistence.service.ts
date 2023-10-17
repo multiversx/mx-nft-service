@@ -253,20 +253,19 @@ export class PersistenceService {
     );
   }
 
+  async getMarketplaceByKeyAndCollection(collection: string, key: string): Promise<MarketplaceEntity[]> {
+    return await this.execute(
+      this.getMarketplaceByKeyAndCollection.name,
+      this.marketplaceCollectionsRepository.getMarketplaceByKeyAndCollection(collection, key),
+    );
+  }
   async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(this.getAllMarketplaceCollections.name, this.marketplaceCollectionsRepository.getAllCollections());
   }
 
-  async getMarketplaceByCollection(collection: string): Promise<MarketplaceEntity[]> {
-    return await this.execute(
-      this.getMarketplaceByCollection.name,
-      this.marketplaceCollectionsRepository.getMarketplaceByCollection(collection),
-    );
-  }
-
   async getMarketplaceByCollections(collectionIdentifiers: string[]): Promise<any[]> {
     return await this.execute(
-      this.getMarketplaceByCollection.name,
+      this.getMarketplaceByCollections.name,
       this.marketplaceCollectionsRepository.getMarketplaceByCollections(collectionIdentifiers),
     );
   }
@@ -285,6 +284,14 @@ export class PersistenceService {
     );
   }
 
+  async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {
+    return await this.execute(this.saveMarketplace.name, this.marketplaceRepository.saveMarketplace(entity));
+  }
+
+  async updateMarketplace(entity: MarketplaceEntity): Promise<boolean> {
+    return await this.execute(this.updateMarketplace.name, this.marketplaceRepository.updateMarketplace(entity));
+  }
+
   async getMarketplaces(): Promise<[MarketplaceEntity[], number]> {
     return await this.execute(this.getMarketplaces.name, this.marketplaceRepository.getMarketplaces());
   }
@@ -295,6 +302,10 @@ export class PersistenceService {
 
   async getMarketplacesByKeys(marketplaceKeys: string[]): Promise<MarketplaceEntity[]> {
     return await this.execute(this.getMarketplacesByKeys.name, this.marketplaceRepository.getMarketplacesByKeys(marketplaceKeys));
+  }
+
+  async getMarketplaceByKey(marketplaceKey: string): Promise<MarketplaceEntity> {
+    return await this.execute(this.getMarketplaceByKey.name, this.marketplaceRepository.getMarketplaceByKey(marketplaceKey));
   }
 
   async getMarketplacesByAddresses(addresses: string[]): Promise<MarketplaceEntity[]> {

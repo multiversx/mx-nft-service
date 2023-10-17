@@ -7,6 +7,7 @@ import { getFilePathFromDist } from 'src/utils/helpers';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { AnalyticsInput } from 'src/modules/analytics/models/analytics-input.model';
 import { AnalyticsAggregateValue } from 'src/modules/analytics/models/analytics-aggregate-value';
+import * as moment from 'moment';
 
 @Injectable()
 export class MxToolsService {
@@ -71,6 +72,28 @@ export class MxToolsService {
     }
   }
 
+  async getNftTransactionsCount(identifier: string, input: AnalyticsInput): Promise<AnalyticsAggregateValue[]> {
+    try {
+      const query = this.getNftsTransfersCountQuery(identifier, input);
+      const res = await this.doPost(this.getNftTransactionsCount.name, query);
+      return res.data?.nfts?.transfers?.map(
+        (x) =>
+          new AnalyticsAggregateValue({
+            series: x.series,
+            time: moment.utc(x?.timestamp ?? x?.time).format('yyyy-MM-DD HH:mm:ss'),
+            value: x.last ?? 0,
+          }),
+      );
+    } catch (error) {
+      this.logger.error(`An error occurred while mapping data api response`, {
+        path: this.getNftTransactionsCount.name,
+        input,
+        exception: error,
+      });
+      return;
+    }
+  }
+
   private getNftsCountQuery(input: AnalyticsInput): string {
     return `{
       nfts {
@@ -81,6 +104,22 @@ export class MxToolsService {
           max
           min
           sum
+        }
+      }
+    }`;
+  }
+
+  private getNftsTransfersCountQuery(identifier: string, input: AnalyticsInput): string {
+    return `{
+      nfts {
+        transfers(identifier: "${identifier}", query: { range: ${input.range}, resolution:  ${input.resolution}, fill_data_gaps_skip_null_values: true }) {
+          time
+          avg
+          count
+          max
+          min
+          sum
+          last
         }
       }
     }`;

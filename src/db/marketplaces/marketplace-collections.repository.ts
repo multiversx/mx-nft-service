@@ -20,8 +20,23 @@ export class MarketplaceCollectionsRepository {
       .addSelect('m.key as `key`')
       .addSelect('m.type as `type`')
       .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
-      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
       .where(`mc.collectionIdentifier = '${collection}' and m.address= '${address}'`)
+      .execute();
+  }
+
+  async getMarketplaceByKeyAndCollection(collection: string, key: string): Promise<MarketplaceEntity[]> {
+    return await this.marketplaceCollectionRepository
+      .createQueryBuilder('mc')
+      .select('mc.collectionIdentifier as collectionIdentifier')
+      .addSelect('m.name as name')
+      .addSelect('m.url as url')
+      .addSelect('m.address as address')
+      .addSelect('m.key as `key`')
+      .addSelect('m.type as `type`')
+      .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
+      .where(`mc.collectionIdentifier = '${collection}' and m.key= '${key}'`)
       .execute();
   }
 
@@ -39,7 +54,7 @@ export class MarketplaceCollectionsRepository {
       .addSelect('m.key as `key`')
       .addSelect('m.type as `type`')
       .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
-      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
       .where(`mc.collectionIdentifier = '${collection}'`)
       .execute();
   }
@@ -54,7 +69,7 @@ export class MarketplaceCollectionsRepository {
       .addSelect('m.key as `key`')
       .addSelect('m.type as `type`')
       .addSelect('m.acceptedPaymentTokens as acceptedPaymentTokens')
-      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
       .where('mc.collectionIdentifier IN(:...collectionIdentifiers)', {
         collectionIdentifiers: collectionIdentifiers,
       })
@@ -65,7 +80,7 @@ export class MarketplaceCollectionsRepository {
     return await this.marketplaceCollectionRepository
       .createQueryBuilder('mc')
       .select('mc.collectionIdentifier as collectionIdentifier')
-      .innerJoin('marketplaces', 'm', 'm.id=mc.marketplaceId')
+      .leftJoinAndSelect('mc.marketplaces', 'm')
       .where(`m.key = :marketplaceKey`, {
         marketplaceKey: marketplaceKey,
       })

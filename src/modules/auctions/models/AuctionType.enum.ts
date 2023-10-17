@@ -4,6 +4,7 @@ export enum AuctionTypeEnum {
   None = 'None',
   Nft = 'Nft',
   NftBid = 'NftBid',
+  FixedPrice = 'FixedPrice',
   SftAll = 'SftAll',
   SftOnePerPayment = 'SftOnePerPayment',
 }

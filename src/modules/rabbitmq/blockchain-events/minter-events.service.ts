@@ -3,10 +3,12 @@ import { MinterEventEnum } from '../../assets/models/AuctionEvent.enum';
 import { CampaignsService } from '../../campaigns/campaigns.service';
 import { BrandCreatedEvent } from '../entities/auction/brandCreated.event';
 import { RandomNftEvent } from '../entities/auction/randomNft.event';
+import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { ChangedEvent, CacheEventTypeEnum } from '../cache-invalidation/events/changed.event';
 
 @Injectable()
 export class MinterEventsService {
-  constructor(private campaignService: CampaignsService) {}
+  constructor(private campaignService: CampaignsService, private readonly cacheEventsPublisher: CacheEventsPublisherService) {}
 
   public async handleNftMinterEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
@@ -18,7 +20,7 @@ export class MinterEventsService {
             const address = brandEvent.getAddress();
             await this.campaignService.saveCampaign(address);
           }
-          await this.campaignService.invalidateKey();
+          await this.triggerCacheInvalidation();
 
           break;
 
@@ -33,11 +35,19 @@ export class MinterEventsService {
             randomNftEvent.getData(),
           );
           if (tier) {
-            await this.campaignService.invalidateKey();
+            await this.triggerCacheInvalidation();
           }
 
           break;
       }
     }
+  }
+
+  private async triggerCacheInvalidation(): Promise<void> {
+    await this.cacheEventsPublisher.publish(
+      new ChangedEvent({
+        type: CacheEventTypeEnum.Campaigns,
+      }),
+    );
   }
 }

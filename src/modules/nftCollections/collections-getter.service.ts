@@ -195,6 +195,16 @@ export class CollectionsGetterService {
     if (filters?.type) {
       collections = collections?.filter((token) => token.type === filters?.type);
     }
+    if (filters?.searchTerm) {
+      collections = collections.filter(
+        (x) =>
+          x.verified &&
+          (x.name?.toLowerCase()?.includes(filters.searchTerm.toLowerCase()) ||
+            x.collection?.toLowerCase()?.includes(filters.searchTerm.toLowerCase())),
+      );
+      collections = collections?.filter((token) => token.type === filters?.type);
+    }
+
     return collections;
   }
 
@@ -360,6 +370,7 @@ export class CollectionsGetterService {
       .addCreator(filters?.creatorAddress)
       .addType(filters?.type)
       .addCanCreate(filters?.canCreate)
+      .addSearchTerm(filters?.searchTerm)
       .addPageSize(offset, limit)
       .build();
     if (filters?.collection) {

@@ -1,5 +1,5 @@
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { MarketplaceCollectionEntity } from './marketplace-collection.entity';
 
@@ -12,7 +12,7 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ length: 62 })
   name: string;
 
-  @Column({ length: 20, unique: true })
+  @Column({ length: 62, unique: true })
   key: string;
 
   @Column()
@@ -24,7 +24,8 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ nullable: true })
   acceptedPaymentTokens: string;
 
-  @OneToMany(() => MarketplaceCollectionEntity, (collection) => collection.marketplace)
+  @ManyToMany(() => MarketplaceCollectionEntity, (collection) => collection.marketplaces)
+  @JoinTable()
   collections: MarketplaceCollectionEntity[];
 
   @Column({ nullable: true })

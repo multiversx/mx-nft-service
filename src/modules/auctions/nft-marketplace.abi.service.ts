@@ -57,7 +57,7 @@ export class NftMarketplaceAbiService {
 
   async createAuction(ownerAddress: string, args: CreateAuctionRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(args.identifier);
-    const marketplace = await this.marketplaceService.getMarketplaceByCollection(collection);
+    const marketplace = await this.marketplaceService.getMarketplaceByKey(args.marketplaceKey);
 
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
@@ -100,7 +100,7 @@ export class NftMarketplaceAbiService {
 
   async createOffer(ownerAddress: string, request: CreateOfferRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
-    const marketplace = await this.marketplaceService.getMarketplaceByCollection(collection);
+    const marketplace = await this.marketplaceService.getMarketplaceByKey(request.marketplaceKey);
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
     }
@@ -140,7 +140,7 @@ export class NftMarketplaceAbiService {
 
   async withdrawOffer(ownerAddress: string, offerId: number): Promise<TransactionNode> {
     const offer = await this.offersService.getOfferById(offerId);
-    const marketplace = await this.marketplaceService.getMarketplaceByCollection(offer?.collection);
+    const marketplace = await this.marketplaceService.getMarketplaceByKey(offer?.marketplaceKey);
 
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
@@ -170,7 +170,7 @@ export class NftMarketplaceAbiService {
       return;
     }
 
-    const marketplace = await this.marketplaceService.getMarketplaceByCollection(offer.collection);
+    const marketplace = await this.marketplaceService.getMarketplaceByKey(offer.collection);
 
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
@@ -210,7 +210,7 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No offer/auction available');
     }
 
-    const marketplace = await this.marketplaceService.getMarketplaceByCollection(offer.collection);
+    const marketplace = await this.marketplaceService.getMarketplaceByKey(offer.collection);
 
     if (!marketplace) {
       throw new BadRequestError('No marketplace available for this collection');
@@ -376,7 +376,7 @@ export class NftMarketplaceAbiService {
       return [
         ...returnArgs,
         new OptionalValue(new BooleanType(), new BooleanValue(args.maxOneSftPerPayment)),
-        new OptionalValue(new U64Type(), new U64Value(new BigNumber(args.paymentTokenNonce))),
+        new OptionalValue(new U64Type(), new U64Value(new BigNumber(args.paymentTokenNonce ?? 0))),
         new OptionalValue(new U64Type(), new U64Value(new BigNumber(args.startDate))),
       ];
     }

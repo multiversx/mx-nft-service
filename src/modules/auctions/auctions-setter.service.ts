@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Auction, AuctionAbi, AuctionStatusEnum, ExternalAuctionAbi } from './models';
+import { Auction, AuctionAbi, AuctionStatusEnum, AuctionTypeEnum, ExternalAuctionAbi } from './models';
 import '../../utils/extensions';
 import { AuctionEntity } from 'src/db/auctions';
 import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
@@ -54,6 +54,14 @@ export class AuctionsSetterService {
             marketplace.key,
             paymentToken.decimals,
           );
+        }
+
+        if (
+          auctionEntity.maxBidDenominated === auctionEntity.minBidDenominated &&
+          auctionEntity.type !== AuctionTypeEnum.SftAll &&
+          auctionEntity.type !== AuctionTypeEnum.SftOnePerPayment
+        ) {
+          auctionEntity.type = AuctionTypeEnum.FixedPrice;
         }
 
         const savedAuction = await this.persistenceService.insertAuction(auctionEntity);

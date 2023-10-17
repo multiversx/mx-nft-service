@@ -14,6 +14,10 @@ import { CacheSetterAdminService } from './cache-admin-module/cache-admin-setter
 import { CacheInvalidationEventsService } from './cache-invalidation-module/cache-invalidation-events.service';
 import { CacheEventTypeEnum, ChangedEvent } from './events/changed.event';
 import { MintersCachingService } from 'src/modules/minters/minters-caching.service';
+import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplaces-caching.service';
+import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching.service';
+import { MarketplaceRedisHandler } from 'src/modules/marketplaces/loaders/marketplace.redis-handler';
+import { AssetsSupplyRedisHandler } from 'src/modules/assets/loaders/assets-supply.redis-handler';
 
 @Injectable()
 export class CacheEventsConsumer {
@@ -21,6 +25,7 @@ export class CacheEventsConsumer {
     private cacheSetterAdminService: CacheSetterAdminService,
     private cacheInvalidationAdminService: CacheInvalidationAdminService,
     private assetsRedisHandler: AssetsRedisHandler,
+    private assetsSuplyRedisHandler: AssetsSupplyRedisHandler,
     private collectionAssetsCount: CollectionAssetsCountRedisHandler,
     private collectionAssets: CollectionAssetsRedisHandler,
     private assetScamInfoRedisHandler: AssetScamInfoRedisHandler,
@@ -28,6 +33,9 @@ export class CacheEventsConsumer {
     private collectionAssetsRedisHandler: AssetsCollectionsRedisHandler,
     private collectionAssetsForOwnerRedisHandler: AssetsCollectionsForOwnerRedisHandler,
     private cacheMintersService: MintersCachingService,
+    private cacheMarketplacesService: MarketplacesCachingService,
+    private marketplaceRedisHandler: MarketplaceRedisHandler,
+    private cacheCampaignsService: CampaignsCachingService,
     private logger: Logger,
   ) {}
 
@@ -75,6 +83,7 @@ export class CacheEventsConsumer {
           : this.collectionAssetsForOwnerRedisHandler.clearKeyByPattern(collection);
         await Promise.all([
           this.assetsRedisHandler.clearKey(event.id),
+          this.assetsSuplyRedisHandler.clearKey(event.id),
           this.collectionAssets.clearKey(collection),
           this.collectionAssetsRedisHandler.clearKey(collection),
           collectionsAssetForOnwerPromise,
@@ -164,15 +173,28 @@ export class CacheEventsConsumer {
 
       case CacheEventTypeEnum.ScamUpdate:
         const profileScamUpdate = new CpuProfiler();
-        this.assetScamInfoRedisHandler.clearKey(event.id);
+        await this.assetScamInfoRedisHandler.clearKey(event.id);
         profileScamUpdate.stop('ScamUpdate');
         break;
+
       case CacheEventTypeEnum.Minters:
         const profileMinters = new CpuProfiler();
-        this.cacheMintersService.invalidateMinters();
+        await this.cacheMintersService.invalidateMinters();
         profileMinters.stop('Minters');
         break;
 
+      case CacheEventTypeEnum.Marketplaces:
+        const profileMarketplaces = new CpuProfiler();
+        if (event.id) await this.marketplaceRedisHandler.clearKey(event.id);
+        await this.cacheMarketplacesService.invalidateCache(event.id, event.extraInfo?.collection, event.address);
+        profileMarketplaces.stop('Marketplaces');
+        break;
+
+      case CacheEventTypeEnum.Campaigns:
+        const profileCampaigns = new CpuProfiler();
+        this.cacheCampaignsService.invalidateCache();
+        profileCampaigns.stop('Campaigns');
+        break;
       // case CacheEventTypeEnum.RefreshTrending:
       //   await this.cacheInvalidationEventsService.invalidateTrendingAuctions(
       //     event,

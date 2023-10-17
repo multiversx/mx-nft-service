@@ -57,6 +57,7 @@ input AddLikeArgs {
 type AnalyticsAggregateValue {
   avg: Float
   count: Float
+  marketplacesData: [MarketplaceData]
   max: Float
   min: Float
   series: String
@@ -309,6 +310,7 @@ enum AuctionStatusEnum {
 }
 
 enum AuctionTypeEnum {
+  FixedPrice
   Nft
   NftBid
   None
@@ -576,11 +578,12 @@ type CollectionsAnalyticsModel {
   collectionIdentifier: String!
   details: CollectionsDetailsModel!
   floorPrice: Float!
-  floorPriceData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+  floorPriceData(input: AnalyticsArgs!): [AnalyticsAggregateValue!]!
   holders: Int!
   topHolders: [HoldersCount!]!
+  transactionsCount(input: AnalyticsInput): [AnalyticsAggregateValue!]!
   volume24h: Float
-  volumeData(input: AnalyticsArgs): [AnalyticsAggregateValue!]!
+  volumeData(input: AnalyticsArgs!): [AnalyticsAggregateValue!]!
 }
 
 type CollectionsAnalyticsModelEdge {
@@ -626,6 +629,7 @@ input CollectionsFilter {
 
   """The owner of the collection"""
   ownerAddress: String
+  searchTerm: String
   type: NftTypeEnum
 
   """Flag for verified collections"""
@@ -649,7 +653,7 @@ input ConnectionArgs {
   before: String
 
   """Paginate first"""
-  first: Int = 10
+  first: Int
 
   """Paginate last"""
   last: Int
@@ -658,6 +662,7 @@ input ConnectionArgs {
 input CreateAuctionArgs {
   deadline: String!
   identifier: String!
+  marketplaceKey: String!
   maxBid: String
   maxOneSftPerPayment: Boolean
   minBid: String!
@@ -679,6 +684,7 @@ input CreateOfferArgs {
   auctionId: Int
   deadline: String!
   identifier: String!
+  marketplaceKey: String!
   paymentAmount: String!
   paymentToken: String!
   paymentTokenNonce: Int! = 0
@@ -836,6 +842,11 @@ type Marketplace {
   name: String!
   type: MarketplaceTypeEnum!
   url: String!
+}
+
+type MarketplaceData {
+  key: String!
+  value: Float
 }
 
 type MarketplaceEdge {
@@ -998,12 +1009,14 @@ type Mutation {
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
+  updateMarketplace(input: UpdateMarketplaceArgs!): Boolean!
   updateNftTraits(identifier: String!): UpdateNftTraitsResponse!
   upgradeNftRoyalties(input: UpgradeNftArgs!): TransactionNode!
   validateCollectionRarities(collectionTicker: String!): Boolean!
   validateOrUpdateNftScamInfo(identifier: String!): Boolean!
   verifyContent(file: Upload!): Boolean!
   whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
+  whitelistMarketplace(input: WhitelistMarketplaceArgs!): Boolean!
   whitelistMinter(input: WhitelistMinterArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
@@ -1513,6 +1526,20 @@ input TransferNftCreateRoleArgs {
   ownerAddress: String!
 }
 
+input UpdateMarketplaceArgs {
+  """This should de a unique key, so choose wisely!"""
+  marketplaceKey: String!
+
+  """This field will be shown on external apps like xSpothlight, xPortal!"""
+  marketplaceName: String
+
+  """Smart Contract Address, if not sent the default one will be used"""
+  marketplaceScAddress: String
+
+  """This will be used to redirect from external apps!"""
+  marketplaceUrl: String
+}
+
 enum UpdateNftTraitsResponse {
   CollectionTraitsUpdated
   NftTraitsUpdated
@@ -1540,6 +1567,20 @@ scalar Upload
 input WhitelistCollectionArgs {
   collection: String!
   marketplaceKey: String!
+}
+
+input WhitelistMarketplaceArgs {
+  """This should de a unique key, so choose wisely!"""
+  marketplaceKey: String!
+
+  """This field will be shown on external apps like xSpothlight, xPortal!"""
+  marketplaceName: String!
+
+  """Smart Contract Address, if not sent the default one will be used"""
+  marketplaceScAddress: String
+
+  """This will be used to redirect from external apps!"""
+  marketplaceUrl: String!
 }
 
 input WhitelistMinterArgs {

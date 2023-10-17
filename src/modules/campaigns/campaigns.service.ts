@@ -5,19 +5,15 @@ import { CampaignEntity } from 'src/db/campaigns';
 import { NftMinterAbiService } from './nft-minter.abi.service';
 import { CampaignsFilter } from '../common/filters/filtersTypes';
 import { CollectionType } from '../assets/models/Collection.type';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
-import { Constants } from '@multiversx/sdk-nestjs-common';
-import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { ClientProxy } from '@nestjs/microservices';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { CampaignsCachingService } from './campaigns-caching.service';
 
 @Injectable()
 export class CampaignsService {
   constructor(
-    @Inject('PUBSUB_SERVICE') private clientProxy: ClientProxy,
     private nftMinterService: NftMinterAbiService,
     private persistenceService: PersistenceService,
-    private cacheService: CacheService,
+    private cacheService: CampaignsCachingService,
   ) {}
 
   async getCampaigns(limit: number = 10, offset: number = 0, filters?: CampaignsFilter): Promise<CollectionType<Campaign>> {
@@ -55,7 +51,10 @@ export class CampaignsService {
 
   async saveCampaign(minterAddress: string): Promise<Campaign[]> {
     const campaigns: BrandInfoViewResultType[] = await this.nftMinterService.getCampaignsForScAddress(minterAddress);
-    const maxNftsPerTransaction: number = await this.getOrSetNrOfTransactionOnSC(minterAddress);
+    const maxNftsPerTransaction = await this.cacheService.getOrSetNrOfTransactionOnSC(
+      () => this.nftMinterService.getMaxNftsPerTransaction(minterAddress),
+      minterAddress,
+    );
     const campaignsfromBlockchain = campaigns.map((c) => CampaignEntity.fromCampaignAbi(c, minterAddress, maxNftsPerTransaction));
     let savedCampaigns = [];
     for (const campaign of campaignsfromBlockchain) {
@@ -79,28 +78,8 @@ export class CampaignsService {
     return await this.persistenceService.saveTier(tierEntity);
   }
 
-  public async invalidateKey() {
-    const campaigns = await this.getCampaignsFromDb();
-    await this.cacheService.set(CacheInfo.Campaigns.key, campaigns, Constants.oneDay());
-    await this.refreshCacheKey(CacheInfo.Campaigns.key, Constants.oneDay());
-  }
-
-  public async invalidateCache() {
-    await this.cacheService.deleteInCache(CacheInfo.Campaigns.key);
-  }
-
   private async getAllCampaigns(): Promise<CollectionType<Campaign>> {
-    const campaigns = await this.cacheService.getOrSet(CacheInfo.Campaigns.key, () => this.getCampaignsFromDb(), Constants.oneHour());
-    return campaigns;
-  }
-
-  private async getOrSetNrOfTransactionOnSC(scAddress: string): Promise<number> {
-    const nfOfTransaction = await this.cacheService.getOrSet(
-      `${CacheInfo.NrOfNftsOnTransaction.key}_${scAddress}`,
-      () => this.nftMinterService.getMaxNftsPerTransaction(scAddress),
-      Constants.oneHour(),
-    );
-    return nfOfTransaction;
+    return await this.cacheService.getAllMarketplaces(() => this.getCampaignsFromDb());
   }
 
   private async getCampaignsFromDb(): Promise<CollectionType<Campaign>> {
@@ -108,13 +87,6 @@ export class CampaignsService {
     return new CollectionType({
       count: count,
       items: campaigns.map((campaign) => Campaign.fromEntity(campaign)),
-    });
-  }
-
-  private async refreshCacheKey(key: string, ttl: number) {
-    this.clientProxy.emit('refreshCacheKey', {
-      key,
-      ttl,
     });
   }
 }

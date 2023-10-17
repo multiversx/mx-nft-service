@@ -73,8 +73,8 @@ export class AssetsGetterService {
       const ticketCollectionIdentifiers = ticketsCollections.map((x) => x.collection).toString();
       return await this.getAssetsForUser(
         filters.ownerAddress,
-        `?collections=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
-        `?collections=${ticketCollectionIdentifiers}`,
+        `?identifiers=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
+        `?identifiers=${ticketCollectionIdentifiers}`,
       );
     }
 

@@ -6,7 +6,7 @@ import { ApiConfigService } from 'src/modules/common/api-config/api.config.servi
 import { AnalyticsDataGetterService } from './analytics-data.getter.service';
 import { AnalyticsDataSetterService } from './analytics-data.setter.service';
 import { XNftsAnalyticsEntity } from './entities/analytics.entity';
-import { FloorPriceDaily, SumDaily } from './entities/sum-daily.entity';
+import { FloorPriceDaily, SumDaily, SumMarketplaceDaily } from './entities/sum-daily.entity';
 import { SumWeekly } from './entities/sum-weekly.entity';
 
 @Module({
@@ -34,7 +34,7 @@ import { SumWeekly } from './entities/sum-weekly.entity';
       }),
       inject: [ApiConfigService],
     }),
-    TypeOrmModule.forFeature([XNftsAnalyticsEntity, SumDaily, SumWeekly, FloorPriceDaily], 'timescaledb'),
+    TypeOrmModule.forFeature([XNftsAnalyticsEntity, SumDaily, SumMarketplaceDaily, SumWeekly, FloorPriceDaily], 'timescaledb'),
   ],
   providers: [AnalyticsDataGetterService, AnalyticsDataSetterService],
   exports: [AnalyticsDataGetterService, AnalyticsDataSetterService],

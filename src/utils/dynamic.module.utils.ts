@@ -44,7 +44,7 @@ export class DynamicModuleUtils {
         inject: [ApiConfigService],
       },
       {
-        skipItemsSerialization: true,
+        skipItemsSerialization: false,
       },
     );
   }

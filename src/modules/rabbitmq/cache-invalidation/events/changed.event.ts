@@ -27,4 +27,6 @@ export enum CacheEventTypeEnum {
   RefreshTrending = 'RefreshTrending',
   MarkCollection = 'MarkCollection',
   Minters = 'Minters',
+  Marketplaces = 'Marketplaces',
+  Campaigns = 'Campaigns',
 }
