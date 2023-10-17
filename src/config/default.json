@@ -2,7 +2,7 @@
   "multiversX": {
     "chainID": "D",
     "esdtNftAddress": "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u",
-    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqs8gtvhtt6k7h6khkmudzd6y4z0r08rx4u00svnnxt2",
+    "nftMarketplaceAddress": "erd1qqqqqqqqqqqqqpgqz8q2ggskllzh9dp5988uz42jn95pqeghu00s0mlgca",
     "issueNftCost": 50000000000000000,
     "pricePerByte": 1500,
     "transferMinCost": 750000,
