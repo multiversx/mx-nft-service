@@ -59,6 +59,7 @@ function getPagingParameters(args: ConnectionArgs) {
       return { offset, limit };
     }
     default:
+      args.first = 10;
       return { offset: 0, limit: 10 };
   }
 }
