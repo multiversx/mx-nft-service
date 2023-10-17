@@ -45,7 +45,7 @@ export class OfferEntity extends BaseEntity {
   @Column({ length: 64 })
   blockHash: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 62 })
   @Index('offer_marketplace_key')
   marketplaceKey: string;
 
