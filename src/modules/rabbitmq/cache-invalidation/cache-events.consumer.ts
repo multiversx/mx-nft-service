@@ -105,6 +105,7 @@ export class CacheEventsConsumer {
         const profilerMint = new CpuProfiler();
         await this.collectionAssets.clearKey(event.id);
         await this.collectionAssetsCount.clearKey(event.id);
+        await this.collectionAssetsCount.clearKey(`${event.id}_undefined`);
         profilerMint.stop('Mint');
         break;
 
