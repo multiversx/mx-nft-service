@@ -57,7 +57,10 @@ export class CollectionsStatsService {
   }
 
   private getCollectionNftsCacheKey(key: string, marketplaceKey: string = undefined) {
-    return generateCacheKeyFromParams(CacheInfo.CollectionAssetsCount.key, key, marketplaceKey);
+    if (marketplaceKey) {
+      return generateCacheKeyFromParams(CacheInfo.CollectionAssetsCount.key, key, marketplaceKey);
+    }
+    return generateCacheKeyFromParams(CacheInfo.CollectionAssetsCount.key, key);
   }
 
   private getQueryForCollection(identifier: string): string {

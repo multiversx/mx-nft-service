@@ -69,7 +69,7 @@ describe('CollectionsStatsService', () => {
       const stub = jest.spyOn(redisCacheService, 'getOrSet').mockImplementation(() => Promise.resolve({ key: 'identifier', value: '4' }));
 
       const results = await service.getItemsCount('identifier');
-      const expectedCacheKey = `${CacheInfo.CollectionAssetsCount.key}_identifier_undefined`;
+      const expectedCacheKey = `${CacheInfo.CollectionAssetsCount.key}_identifier`;
       expect(stub).toHaveBeenCalled();
       expect(stub).toBeCalledWith(expectedCacheKey, expect.anything(), CacheInfo.CollectionAssetsCount.ttl);
       expect(results).toMatchObject({ key: 'identifier', value: '4' });
