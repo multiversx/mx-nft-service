@@ -995,6 +995,7 @@ type Mutation {
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  removeWhitelistCollection(input: RemoveWhitelistCollectionArgs!): Boolean!
   reportCollection(
     """This endpoint can be used to report a Collection"""
     input: ReportCollectionInput!
@@ -1339,6 +1340,11 @@ type Rarity {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+input RemoveWhitelistCollectionArgs {
+  collection: String!
+  marketplaceKey: String!
 }
 
 input ReportCollectionInput {
