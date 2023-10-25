@@ -207,7 +207,6 @@ export class MarketplacesService {
       }
       return removedCollection ? true : false;
     } catch (error) {
-      console.log({ error });
       this.logger.error('An error has occured while remove whitelist for collection', {
         path: this.whitelistCollectionOnMarketplace.name,
         collection: request?.collection,

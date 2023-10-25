@@ -7,7 +7,7 @@ import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketpla
 import { MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
 import { MarketplaceFilters } from '../models/Marketplace.Filter';
 import { Marketplace } from '../models';
-import { WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
+import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { Logger } from '@nestjs/common';
 import { WhitelistMarketplaceRequest } from '../models/requests/WhitelistMarketplaceRequest';
@@ -733,6 +733,64 @@ describe('Marketplaces Service', () => {
         }),
       );
       const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
+
+      expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('removeWhitelistCollection', () => {
+    it('when marketplace not found throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
+      persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(new MarketplaceCollectionEntity());
+
+      await expect(service.removeWhitelistCollection(new RemoveWhitelistCollectionRequest())).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when collection not found throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
+
+      await expect(service.removeWhitelistCollection(new RemoveWhitelistCollectionRequest())).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when marketplace exists and delete fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(new MarketplaceCollectionEntity());
+
+      persistenceService.deleteMarketplaceCollection = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.removeWhitelistCollection(
+        new RemoveWhitelistCollectionRequest({ marketplaceKey: 'xoxno', collection: 'identifier' }),
+      );
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace exists and save is succesfull returns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
+
+      eventPublisher.publish = jest.fn();
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(new MarketplaceCollectionEntity());
+
+      persistenceService.deleteMarketplaceCollection = jest.fn().mockReturnValueOnce(
+        new MarketplaceCollectionEntity({
+          collectionIdentifier: 'collection',
+          marketplaces: [inputMarketplace[0]],
+        }),
+      );
+      const expectedResult = await service.removeWhitelistCollection(
+        new RemoveWhitelistCollectionRequest({ marketplaceKey: 'xoxno', collection: 'identifier' }),
+      );
 
       expect(expectedResult).toBeTruthy();
     });
