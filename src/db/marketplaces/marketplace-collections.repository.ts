@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { MarketplaceCollectionEntity } from './marketplace-collection.entity';
 import { MarketplaceEntity } from './marketplace.entity';
 
@@ -87,7 +87,27 @@ export class MarketplaceCollectionsRepository {
       .execute();
   }
 
-  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
-    return await this.marketplaceCollectionRepository.save(entity);
+  async getCollectionByIdentifier(collectionIdentifier: string): Promise<MarketplaceCollectionEntity> {
+    return this.marketplaceCollectionRepository.findOne({
+      where: [{ collectionIdentifier: collectionIdentifier }],
+    });
+  }
+
+  async getCollectionByKeyAndCollection(collection: string, key: string): Promise<MarketplaceCollectionEntity> {
+    return this.marketplaceCollectionRepository
+      .createQueryBuilder('mc')
+      .select('mc.*')
+      .leftJoin('mc.marketplaces', 'm')
+      .where(`collectionIdentifier = '${collection}' and m.key= '${key}'`)
+      .execute();
+  }
+
+  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<boolean> {
+    const result = await this.marketplaceCollectionRepository.save(entity);
+    return result ? true : false;
+  }
+
+  async deleteMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
+    return await this.marketplaceCollectionRepository.remove(entity);
   }
 }

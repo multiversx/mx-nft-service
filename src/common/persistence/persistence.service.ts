@@ -259,6 +259,13 @@ export class PersistenceService {
       this.marketplaceCollectionsRepository.getMarketplaceByKeyAndCollection(collection, key),
     );
   }
+
+  async getCollectionByKeyAndCollection(collection: string, key: string): Promise<MarketplaceCollectionEntity> {
+    return await this.execute(
+      this.getCollectionByKeyAndCollection.name,
+      this.marketplaceCollectionsRepository.getCollectionByKeyAndCollection(collection, key),
+    );
+  }
   async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(this.getAllMarketplaceCollections.name, this.marketplaceCollectionsRepository.getAllCollections());
   }
@@ -277,11 +284,12 @@ export class PersistenceService {
     );
   }
 
-  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
-    return await this.execute(
-      this.getCollectionsByMarketplace.name,
-      this.marketplaceCollectionsRepository.saveMarketplaceCollection(entity),
-    );
+  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<boolean> {
+    return await this.execute(this.saveMarketplaceCollection.name, this.marketplaceCollectionsRepository.saveMarketplaceCollection(entity));
+  }
+
+  async deleteMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
+    return this.execute(this.deleteMarketplaceCollection.name, this.marketplaceCollectionsRepository.deleteMarketplaceCollection(entity));
   }
 
   async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {
