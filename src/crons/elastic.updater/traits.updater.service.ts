@@ -10,6 +10,7 @@ import {
   getCollectionsWhereTraitsFlagNotSetFromElasticQuery,
   getCollectionsWithTraitSummaryFromElasticQuery,
 } from 'src/modules/nft-traits/nft-traits.elastic.queries';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class TraitsUpdaterService {
@@ -30,7 +31,7 @@ export class TraitsUpdaterService {
           const lastIndex = await this.getLastValidatedCollectionIndex();
           let collections: string[] = [];
 
-          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+          await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
             collections = collections.concat([...new Set(items.map((i) => i.token))]);
             if (collections.length > lastIndex + maxCollectionsToValidate) {
               return undefined;
@@ -65,7 +66,7 @@ export class TraitsUpdaterService {
 
           const query = getCollectionsWhereTraitsFlagNotSetFromElasticQuery(maxCollectionsToUpdate);
 
-          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+          await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
             const collections = [...new Set(items.map((i) => i.token))];
             collectionsToUpdate = collectionsToUpdate.concat(collections.filter((c) => collectionsToUpdate.indexOf(c) === -1));
             if (collectionsToUpdate.length >= maxCollectionsToUpdate) {

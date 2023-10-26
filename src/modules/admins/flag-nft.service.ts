@@ -10,6 +10,7 @@ import { Asset, NftTypeEnum } from '../assets/models';
 import { VerifyContentService } from '../assets/verify-content.service';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { ELASTIC_NFT_NSFW, ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 type NsfwType = {
   identifier: string;
   nsfw: any;
@@ -68,7 +69,7 @@ export class FlagNftService {
         .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
         .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
         .withPagination({ from: 0, size: 10000 });
-      await this.elasticUpdater.getScrollableList('tokens', 'identifier', query, async (items) => {
+      await this.elasticUpdater.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         const nsfwItems = items.map((item) => ({
           identifier: item.identifier,
           nsfw: item.nft_nsfw_mark,
@@ -124,9 +125,9 @@ export class FlagNftService {
       }),
     );
     await this.elasticUpdater.setCustomValue(
-      'tokens',
+      ELASTIC_TOKENS_INDEX,
       identifier,
-      this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', savedValue),
+      this.elasticUpdater.buildUpdateBody<number>(ELASTIC_NFT_NSFW, savedValue),
       '?retry_on_conflict=2',
     );
   }
@@ -158,9 +159,9 @@ export class FlagNftService {
         }),
       );
       await this.elasticUpdater.setCustomValue(
-        'tokens',
+        ELASTIC_TOKENS_INDEX,
         identifier,
-        this.elasticUpdater.buildUpdateBody<number>('nft_nsfw_mark', value.toRounded(2)),
+        this.elasticUpdater.buildUpdateBody<number>(ELASTIC_NFT_NSFW, value.toRounded(2)),
         '?retry_on_conflict=2',
       );
 
@@ -219,10 +220,10 @@ export class FlagNftService {
         async () => {
           try {
             await this.elasticUpdater.putMappings(
-              'tokens',
+              ELASTIC_TOKENS_INDEX,
               this.elasticUpdater.buildPutMultipleMappingsBody([
                 {
-                  key: 'nft_nsfw_mark',
+                  key: ELASTIC_NFT_NSFW,
                   value: 'float',
                 },
               ]),

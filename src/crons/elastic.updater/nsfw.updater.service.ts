@@ -7,6 +7,7 @@ import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalida
 import { ChangedEvent, CacheEventTypeEnum } from 'src/modules/rabbitmq/cache-invalidation/events/changed.event';
 import { getNsfwMarkedQuery, getNsfwNotMarkedQuery } from './nsfw-queries';
 import { constants } from 'src/config';
+import { ELASTIC_NFT_NSFW, ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 type NsfwType = {
   identifier: string;
@@ -24,7 +25,7 @@ export class NsfwUpdaterService {
   ) {}
 
   public async cleanReindexing() {
-    await this.elasticService.getScrollableList('tokens', 'identifier', getNsfwNotMarkedQuery, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', getNsfwNotMarkedQuery, async (items) => {
       const nsfwItems = items.map((item) => ({
         identifier: item.identifier,
         nsfw: item.nft_nsfw_mark,
@@ -35,7 +36,7 @@ export class NsfwUpdaterService {
   }
 
   public async validateNsfwFlags() {
-    await this.elasticService.getScrollableList('tokens', 'identifier', getNsfwMarkedQuery, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', getNsfwMarkedQuery, async (items) => {
       const nsfwItems = items.map((item) => ({
         identifier: item.identifier,
         nsfw: item.nft_nsfw_mark,
@@ -46,7 +47,7 @@ export class NsfwUpdaterService {
   }
 
   public async updateNsfwWhereNone() {
-    await this.elasticService.getScrollableList('tokens', 'identifier', getNsfwNotMarkedQuery, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', getNsfwNotMarkedQuery, async (items) => {
       const nsfwItems = items.map((item) => ({
         identifier: item.identifier,
         nsfw: item.nft_nsfw_mark,
@@ -118,9 +119,9 @@ export class NsfwUpdaterService {
     try {
       this.logger.log(`Setting nsfw for '${identifier}' with value ${nsfw}`);
       await this.elasticService.setCustomValue(
-        'tokens',
+        ELASTIC_TOKENS_INDEX,
         identifier,
-        this.elasticService.buildUpdateBody<number>('nft_nsfw_mark', nsfw),
+        this.elasticService.buildUpdateBody<number>(ELASTIC_NFT_NSFW, nsfw),
         '?retry_on_conflict=2',
       );
     } catch (error) {
@@ -136,7 +137,7 @@ export class NsfwUpdaterService {
     try {
       if (items && items.length > 0) {
         this.logger.log(`Updating NSFW flag`);
-        await this.elasticService.bulkRequest('tokens', this.buildNsfwBulkUpdate(items));
+        await this.elasticService.bulkRequest(ELASTIC_TOKENS_INDEX, this.buildNsfwBulkUpdate(items));
       }
     } catch (error) {
       this.logger.error('Unexpected error when updating nsfw with bulk request', {
@@ -149,7 +150,7 @@ export class NsfwUpdaterService {
   private buildNsfwBulkUpdate(items: { identifier: string; nsfw: number }[]): string[] {
     let updates: string[] = [];
     items.forEach((r) => {
-      updates.push(this.buildBulkUpdate('tokens', r.identifier, 'nft_nsfw_mark', parseFloat(r.nsfw.toString())));
+      updates.push(this.buildBulkUpdate(ELASTIC_TOKENS_INDEX, r.identifier, ELASTIC_NFT_NSFW, parseFloat(r.nsfw.toString())));
     });
     return updates;
   }

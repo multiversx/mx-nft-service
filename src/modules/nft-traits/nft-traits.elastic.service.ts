@@ -9,6 +9,7 @@ import {
   getAllEncodedNftValuesFromElasticQuery,
   getNftWithTraitValuesFromElasticQuery,
 } from './nft-traits.elastic.queries';
+import { ELASTIC_NFT_HASTRAITSUMMARY, ELASTIC_NFT_TRAITS, ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class NftTraitsElasticService {
@@ -17,7 +18,7 @@ export class NftTraitsElasticService {
   async setNftsTraitsInElastic(nfts: NftTraits[]): Promise<void> {
     if (nfts.length > 0) {
       try {
-        await this.elasticService.bulkRequest('tokens', this.buildNftTraitsBulkUpdate(nfts), '?timeout=1m');
+        await this.elasticService.bulkRequest(ELASTIC_TOKENS_INDEX, this.buildNftTraitsBulkUpdate(nfts), '?timeout=1m');
       } catch (error) {
         this.logger.error('Error when bulk updating nft traits in Elastic', {
           path: `${NftTraitsElasticService.name}.${this.setNftsTraitsInElastic.name}`,
@@ -30,7 +31,7 @@ export class NftTraitsElasticService {
   async setNftsValuesInElastic(encodedNftValues: EncodedNftValues[]): Promise<void> {
     if (encodedNftValues.length > 0) {
       try {
-        await this.elasticService.bulkRequest('tokens', this.buildNftEncodedValuesBulkUpdate(encodedNftValues), '?timeout=1m');
+        await this.elasticService.bulkRequest(ELASTIC_TOKENS_INDEX, this.buildNftEncodedValuesBulkUpdate(encodedNftValues), '?timeout=1m');
       } catch (error) {
         this.logger.error('Error when bulk updating nft traits in Elastic', {
           path: `${NftTraitsElasticService.name}.${this.setNftsValuesInElastic.name}`,
@@ -46,7 +47,7 @@ export class NftTraitsElasticService {
     try {
       const query = getNftWithTraitValuesFromElasticQuery(identifier);
 
-      await this.elasticService.getScrollableList('tokens', 'identifier', query, async (items) => {
+      await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         nftValues = items[0]?.nft_traitValues ?? [];
         return undefined;
       });
@@ -70,7 +71,7 @@ export class NftTraitsElasticService {
       let maxNonce: number = 0;
       let minNonce: number = Number.POSITIVE_INFINITY;
 
-      await this.elasticService.getScrollableList('tokens', 'identifier', query, async (items) => {
+      await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         const nonces: number[] = items.map((nft) => Number(nft.nonce));
         maxNonce = Math.max(...nonces.concat([maxNonce]));
         minNonce = Math.min(...nonces.concat([maxNonce]));
@@ -100,8 +101,8 @@ export class NftTraitsElasticService {
   async setCollectionTraitsFlagInElastic(collection: string): Promise<void> {
     try {
       let updates: string[] = [];
-      updates.push(this.elasticService.buildBulkUpdate<boolean>('tokens', collection, 'nft_hasTraitSummary', true));
-      await this.elasticService.bulkRequest('tokens', updates, '?timeout=1m');
+      updates.push(this.elasticService.buildBulkUpdate<boolean>(ELASTIC_TOKENS_INDEX, collection, ELASTIC_NFT_HASTRAITSUMMARY, true));
+      await this.elasticService.bulkRequest(ELASTIC_TOKENS_INDEX, updates, '?timeout=1m');
     } catch (error) {
       this.logger.error('Error when setting collection traits flag', {
         path: `${NftTraitsElasticService.name}.${this.setCollectionTraitsFlagInElastic.name}`,
@@ -117,7 +118,7 @@ export class NftTraitsElasticService {
       const query = getAllEncodedNftValuesFromElasticBeforeTimestampQuery(beforeTimestamp);
 
       await this.elasticService.getScrollableList(
-        'tokens',
+        ELASTIC_TOKENS_INDEX,
         'identifier',
         query,
         async (items) => {
@@ -137,7 +138,7 @@ export class NftTraitsElasticService {
   async getAllCollectionsFromElastic(): Promise<string[]> {
     const query = getAllCollectionsFromElasticQuery();
     let collections: string[] = [];
-    await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
       collections = collections.concat([...new Set(items.map((i) => i.token))]);
     });
     return collections;
@@ -146,7 +147,7 @@ export class NftTraitsElasticService {
   async getAllCollectionsWithTraitsFlagFromElastic(): Promise<CollectionWithTraitsFlag[]> {
     const query = getAllCollectionsWithTraitsFlagFromElasticQuery();
     let collections: CollectionWithTraitsFlag[] = [];
-    await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
       collections = collections.concat([
         ...new Set(
           items.map(
@@ -166,9 +167,9 @@ export class NftTraitsElasticService {
     let updates: string[] = [];
     nfts.forEach((nft) => {
       const payload = this.elasticService.buildBulkUpdate<string[]>(
-        'tokens',
+        ELASTIC_TOKENS_INDEX,
         nft.identifier,
-        'nft_traitValues',
+        ELASTIC_NFT_TRAITS,
         nft.traits.map((t) => EncodedNftValues.encode(t)),
       );
       updates.push(payload);
@@ -179,7 +180,12 @@ export class NftTraitsElasticService {
   private buildNftEncodedValuesBulkUpdate(encodedNftValues: EncodedNftValues[]): string[] {
     let updates: string[] = [];
     encodedNftValues.forEach((nft) => {
-      const payload = this.elasticService.buildBulkUpdate<string[]>('tokens', nft.identifier, 'nft_traitValues', nft.encodedValues ?? []);
+      const payload = this.elasticService.buildBulkUpdate<string[]>(
+        ELASTIC_TOKENS_INDEX,
+        nft.identifier,
+        ELASTIC_NFT_TRAITS,
+        nft.encodedValues ?? [],
+      );
       updates.push(payload);
     });
     return updates;
