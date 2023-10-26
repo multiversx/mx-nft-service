@@ -8,6 +8,20 @@ import { constants } from 'src/config';
 import { CustomRank } from './models/custom-rank.model';
 import { CollectionFromElastic } from './models/collection-from-elastic.model';
 import { Rarity } from '../assets/models/Rarity';
+import {
+  ELASTIC_NFT_HASRARITY,
+  ELASTIC_NFT_RANK_CUSTOM,
+  ELASTIC_NFT_RANK_HASH,
+  ELASTIC_NFT_RANK_JACCARD,
+  ELASTIC_NFT_RANK_OPENRARITY,
+  ELASTIC_NFT_RANK_STATISTICAL,
+  ELASTIC_NFT_RANK_TRAIT,
+  ELASTIC_NFT_SCORE_JACCARD,
+  ELASTIC_NFT_SCORE_OPENRARITY,
+  ELASTIC_NFT_SCORE_STATISTICAL,
+  ELASTIC_NFT_SCORE_TRAIT,
+  ELASTIC_TOKENS_INDEX,
+} from 'src/utils/constants';
 
 @Injectable()
 export class NftRarityElasticService {
@@ -20,7 +34,7 @@ export class NftRarityElasticService {
 
     try {
       const updateBody = this.elasticService.buildUpdateBody<boolean>('nft_hasRarities', hasRarities);
-      await this.elasticService.setCustomValue('tokens', collection, updateBody, '?retry_on_conflict=2&timeout=1m');
+      await this.elasticService.setCustomValue(ELASTIC_TOKENS_INDEX, collection, updateBody, '?retry_on_conflict=2&timeout=1m');
     } catch (error) {
       this.logger.error('Error when setting collection rarity flag', {
         path: 'NftRarityService.updateRarities',
@@ -49,7 +63,11 @@ export class NftRarityElasticService {
     }
 
     try {
-      await this.elasticService.bulkRequest('tokens', this.buildNftRaritiesBulkUpdate(outdatedNfts, hasRarities), '?timeout=1m');
+      await this.elasticService.bulkRequest(
+        ELASTIC_TOKENS_INDEX,
+        this.buildNftRaritiesBulkUpdate(outdatedNfts, hasRarities),
+        '?timeout=1m',
+      );
     } catch (error) {
       this.logger.error('Error when bulk updating nft rarities Elastic', {
         path: 'NftRarityService.setNftRaritiesInElastic',
@@ -73,7 +91,11 @@ export class NftRarityElasticService {
 
     if (customRanks.length > 0) {
       try {
-        await this.elasticService.bulkRequest('tokens', this.buildNftCustomRanksBulkUpdate(collection, outdatedRanks), '?timeout=1m');
+        await this.elasticService.bulkRequest(
+          ELASTIC_TOKENS_INDEX,
+          this.buildNftCustomRanksBulkUpdate(collection, outdatedRanks),
+          '?timeout=1m',
+        );
       } catch (error) {
         this.logger.error('Error when bulk updating nft custom ranks inElastic', {
           path: 'NftRarityService.setNftCustomRanksInElastic',
@@ -91,13 +113,13 @@ export class NftRarityElasticService {
         .withMustExistCondition('token')
         .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
         .withMustCondition(QueryType.Match('token', collectionTicker, QueryOperator.AND))
-        .withFields(['nft_custom_ranks_hash'])
+        .withFields([ELASTIC_NFT_RANK_HASH])
         .withPagination({
           from: 0,
           size: 1,
         });
 
-      await this.elasticService.getScrollableList('tokens', 'identifier', query, async (items) => {
+      await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         hash = items[0].nft_custom_ranks_hash;
         return undefined;
       });
@@ -126,7 +148,7 @@ export class NftRarityElasticService {
           size: 1,
         });
 
-      await this.elasticService.getScrollableList('tokens', 'identifier', query, async (items) => {
+      await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         hasRarities = items.length === 1 ? items[0].nft_hasRarities || false : undefined;
         return undefined;
       });
@@ -156,16 +178,16 @@ export class NftRarityElasticService {
         // )
         .withFields([
           'nonce',
-          'nft_hasRarity',
-          'nft_rank_custom',
-          'nft_score_openRarity',
-          'nft_rank_openRarity',
-          'nft_score_jaccardDistances',
-          'nft_rank_jaccardDistances',
-          'nft_score_trait',
-          'nft_rank_trait',
-          'nft_score_statistical',
-          'nft_rank_statistical',
+          ELASTIC_NFT_HASRARITY,
+          ELASTIC_NFT_RANK_CUSTOM,
+          ELASTIC_NFT_SCORE_OPENRARITY,
+          ELASTIC_NFT_RANK_OPENRARITY,
+          ELASTIC_NFT_SCORE_JACCARD,
+          ELASTIC_NFT_RANK_JACCARD,
+          ELASTIC_NFT_SCORE_TRAIT,
+          ELASTIC_NFT_RANK_TRAIT,
+          ELASTIC_NFT_SCORE_STATISTICAL,
+          ELASTIC_NFT_RANK_STATISTICAL,
         ])
         .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
         .withSort([{ name: 'nonce', order: ElasticSortOrder.descending }])
@@ -174,7 +196,7 @@ export class NftRarityElasticService {
           size: constants.getNftsFromElasticBatchSize,
         });
 
-      await this.elasticService.getScrollableList('tokens', 'identifier', query, async (newNfts) => {
+      await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (newNfts) => {
         nfts = nfts.concat(NftRarityData.fromElasticNfts(newNfts));
         return undefined;
       });
@@ -197,46 +219,46 @@ export class NftRarityElasticService {
         async () => {
           try {
             await this.elasticService.putMappings(
-              'tokens',
+              ELASTIC_TOKENS_INDEX,
               this.elasticService.buildPutMultipleMappingsBody([
                 {
-                  key: 'nft_rank_custom',
+                  key: ELASTIC_NFT_RANK_CUSTOM,
                   value: 'long',
                 },
                 {
-                  key: 'nft_custom_ranks_hash',
+                  key: ELASTIC_NFT_RANK_HASH,
                   value: 'text',
                 },
                 {
-                  key: 'nft_score_openRarity',
+                  key: ELASTIC_NFT_SCORE_OPENRARITY,
                   value: 'float',
                 },
                 {
-                  key: 'nft_rank_openRarity',
+                  key: ELASTIC_NFT_RANK_OPENRARITY,
                   value: 'long',
                 },
                 {
-                  key: 'nft_score_jaccardDistances',
+                  key: ELASTIC_NFT_SCORE_JACCARD,
                   value: 'float',
                 },
                 {
-                  key: 'nft_rank_jaccardDistances',
+                  key: ELASTIC_NFT_RANK_JACCARD,
                   value: 'long',
                 },
                 {
-                  key: 'nft_score_trait',
+                  key: ELASTIC_NFT_SCORE_TRAIT,
                   value: 'float',
                 },
                 {
-                  key: 'nft_rank_trait',
+                  key: ELASTIC_NFT_RANK_TRAIT,
                   value: 'long',
                 },
                 {
-                  key: 'nft_score_statistical',
+                  key: ELASTIC_NFT_SCORE_STATISTICAL,
                   value: 'float',
                 },
                 {
-                  key: 'nft_rank_statistical',
+                  key: ELASTIC_NFT_RANK_STATISTICAL,
                   value: 'long',
                 },
               ]),
@@ -255,7 +277,7 @@ export class NftRarityElasticService {
   async getAllCollectionsFromElastic(): Promise<string[]> {
     const query = this.getAllCollectionsFromElasticQuery();
     let collections: string[] = [];
-    await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
       collections = collections.concat([...new Set(items.map((i) => i.token))]);
     });
     return collections;
@@ -264,7 +286,7 @@ export class NftRarityElasticService {
   async getAllCollectionsWithRarityFlagsFromElastic(): Promise<CollectionFromElastic[]> {
     const query = this.getAllCollectionsWithRarityFlagsFromElasticQuery();
     let collections: CollectionFromElastic[] = [];
-    await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
       const collectionsWithRarityFlags = items.map((collection) => CollectionFromElastic.fromElastic(collection));
       collections = collections.concat([...new Set(collectionsWithRarityFlags)]);
     });
@@ -276,33 +298,66 @@ export class NftRarityElasticService {
     nfts.forEach((r) => {
       if (hasRarities) {
         if (r.rarities.customRank) {
-          updates.push(this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_rank_custom', r.rarities.customRank));
+          updates.push(
+            this.elasticService.buildBulkUpdate<number>(ELASTIC_TOKENS_INDEX, r.identifier, ELASTIC_NFT_RANK_CUSTOM, r.rarities.customRank),
+          );
         }
         updates.push(
-          this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_score_openRarity', r.rarities.openRarityScore),
+          this.elasticService.buildBulkUpdate<number>(
+            ELASTIC_TOKENS_INDEX,
+            r.identifier,
+            ELASTIC_NFT_SCORE_OPENRARITY,
+            r.rarities.openRarityScore,
+          ),
         );
-        updates.push(this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_rank_openRarity', r.rarities.openRarityRank));
         updates.push(
           this.elasticService.buildBulkUpdate<number>(
-            'tokens',
+            ELASTIC_TOKENS_INDEX,
             r.identifier,
-            'nft_score_jaccardDistances',
+            ELASTIC_NFT_RANK_OPENRARITY,
+            r.rarities.openRarityRank,
+          ),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<number>(
+            ELASTIC_TOKENS_INDEX,
+            r.identifier,
+            ELASTIC_NFT_SCORE_JACCARD,
             r.rarities.jaccardDistancesScore,
           ),
         );
         updates.push(
-          this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_rank_jaccardDistances', r.rarities.jaccardDistancesRank),
+          this.elasticService.buildBulkUpdate<number>(
+            ELASTIC_TOKENS_INDEX,
+            r.identifier,
+            ELASTIC_NFT_RANK_JACCARD,
+            r.rarities.jaccardDistancesRank,
+          ),
         );
-        updates.push(this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_score_trait', r.rarities.traitScore));
-        updates.push(this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_rank_trait', r.rarities.traitRank));
         updates.push(
-          this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_score_statistical', r.rarities.statisticalScore),
+          this.elasticService.buildBulkUpdate<number>(ELASTIC_TOKENS_INDEX, r.identifier, ELASTIC_NFT_SCORE_TRAIT, r.rarities.traitScore),
         );
         updates.push(
-          this.elasticService.buildBulkUpdate<number>('tokens', r.identifier, 'nft_rank_statistical', r.rarities.statisticalRank),
+          this.elasticService.buildBulkUpdate<number>(ELASTIC_TOKENS_INDEX, r.identifier, ELASTIC_NFT_RANK_TRAIT, r.rarities.traitRank),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<number>(
+            ELASTIC_TOKENS_INDEX,
+            r.identifier,
+            ELASTIC_NFT_SCORE_STATISTICAL,
+            r.rarities.statisticalScore,
+          ),
+        );
+        updates.push(
+          this.elasticService.buildBulkUpdate<number>(
+            ELASTIC_TOKENS_INDEX,
+            r.identifier,
+            ELASTIC_NFT_RANK_STATISTICAL,
+            r.rarities.statisticalRank,
+          ),
         );
       }
-      updates.push(this.elasticService.buildBulkUpdate<boolean>('tokens', r.identifier, 'nft_hasRarity', hasRarities));
+      updates.push(this.elasticService.buildBulkUpdate<boolean>(ELASTIC_TOKENS_INDEX, r.identifier, ELASTIC_NFT_HASRARITY, hasRarities));
     });
     return updates;
   }
@@ -310,10 +365,15 @@ export class NftRarityElasticService {
   buildNftCustomRanksBulkUpdate(collection, customRanks: CustomRank[]): string[] {
     let updates: string[] = [];
     customRanks.forEach((cr) => {
-      updates.push(this.elasticService.buildBulkUpdate<number>('tokens', cr.identifier, 'nft_rank_custom', cr.rank));
+      updates.push(this.elasticService.buildBulkUpdate<number>(ELASTIC_TOKENS_INDEX, cr.identifier, ELASTIC_NFT_RANK_CUSTOM, cr.rank));
     });
     updates.push(
-      this.elasticService.buildBulkUpdate<string>('tokens', collection, 'nft_custom_ranks_hash', CustomRank.generateHash(customRanks)),
+      this.elasticService.buildBulkUpdate<string>(
+        ELASTIC_TOKENS_INDEX,
+        collection,
+        ELASTIC_NFT_RANK_HASH,
+        CustomRank.generateHash(customRanks),
+      ),
     );
     return updates;
   }
@@ -345,7 +405,7 @@ export class NftRarityElasticService {
   getAllNftsWhereRarityNotComputedFromElasticQuery(): ElasticQuery {
     return ElasticQuery.create()
       .withMustExistCondition('nonce')
-      .withMustNotCondition(QueryType.Exists('nft_hasRarity'))
+      .withMustNotCondition(QueryType.Exists(ELASTIC_NFT_HASRARITY))
       .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
       .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
       .withFields(['token'])

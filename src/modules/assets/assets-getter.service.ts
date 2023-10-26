@@ -23,6 +23,7 @@ import { FeaturedService } from '../featured/featured.service';
 import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';
 import { FeaturedCollectionTypeEnum } from '../featured/FeatureCollectionType.enum';
 import { constants } from 'src/config';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class AssetsGetterService {
@@ -200,7 +201,7 @@ export class AssetsGetterService {
     if (artistCollections) {
       const batch = artistCollections?.collections?.slice(0, 100);
       let elasticQuery = this.getCollectionsElasticQuery(batch, offset, size);
-      let elasticNfts = await this.elasticService.getList('tokens', 'identifier', elasticQuery);
+      let elasticNfts = await this.elasticService.getList(ELASTIC_TOKENS_INDEX, 'identifier', elasticQuery);
 
       const returnAssets = await this.mapElasticNfts(elasticNfts);
       return new CollectionType({

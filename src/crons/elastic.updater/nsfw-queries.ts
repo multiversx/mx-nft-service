@@ -1,16 +1,17 @@
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
+import { ELASTIC_NFT_NSFW } from 'src/utils/constants';
 
 export const getNsfwNotMarkedQuery = ElasticQuery.create()
-  .withMustNotExistCondition('nft_nsfw_mark')
+  .withMustNotExistCondition(ELASTIC_NFT_NSFW)
   .withMustExistCondition('identifier')
   .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
   .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
   .withPagination({ from: 0, size: constants.elasticMaxBatch });
 
 export const getNsfwMarkedQuery = ElasticQuery.create()
-  .withFields(['nft_nsfw_mark'])
+  .withFields([ELASTIC_NFT_NSFW])
   .withMustExistCondition('identifier')
   .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
   .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
