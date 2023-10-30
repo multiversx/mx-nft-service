@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { S3 } from 'aws-sdk';
+import { S3Client } from '@aws-sdk/client-s3';
+const { Upload } = require('@aws-sdk/lib-storage');
 import { Readable } from 'stream';
 
 @Injectable()
@@ -30,9 +31,13 @@ export class S3Service {
       ContentType: mimetype,
     };
 
-    const s3 = this.getS3();
+    const s3Client = this.getS3();
+    const parallelUploads3 = new Upload({
+      client: s3Client,
+      params,
+    });
     try {
-      await s3.upload(params).promise();
+      await parallelUploads3.done();
       return true;
     } catch (e) {
       this.logger.error('An error occurred while trying to upload file to s3', {
@@ -44,9 +49,11 @@ export class S3Service {
   }
 
   getS3() {
-    return new S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    return new S3Client({
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
     });
   }
 }
