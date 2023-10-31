@@ -17,9 +17,11 @@ import { MarketplacesCachingService } from 'src/modules/marketplaces/marketplace
 import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching.service';
 import { MarketplaceRedisHandler } from 'src/modules/marketplaces/loaders/marketplace.redis-handler';
 import { AssetsSupplyRedisHandler } from 'src/modules/assets/loaders/assets-supply.redis-handler';
+import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 
 @Module({
   imports: [
+    PubSubListenerModule,
     CommonModule,
     CacheInvalidationEventsModule,
     CacheAdminEventsModule,
