@@ -39,6 +39,7 @@ import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 import { MintersModuleGraph } from './modules/minters/minters.module';
+import { PersistenceModule } from './common/persistence/persistence.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       }),
     }),
     CommonModule,
+    PersistenceModule,
     CollectionsModuleGraph,
     AssetsModuleGraph,
     AssetHistoryModuleGraph,

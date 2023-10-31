@@ -29,6 +29,7 @@ import { UpdatePriceEventParser } from './events-parsers/updatePrice-event.parse
 import { HoldersResolver } from './holders.resolver';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
+import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 
 @Module({
   providers: [
@@ -56,6 +57,7 @@ import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-ha
     HoldersResolver,
   ],
   imports: [
+    PubSubListenerModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

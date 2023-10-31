@@ -1,5 +1,5 @@
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
@@ -63,6 +63,7 @@ export class PersistenceService {
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
+    @Inject(forwardRef(() => AuctionsRepository))
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
     private readonly offersRepository: OffersRepository,

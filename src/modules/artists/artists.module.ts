@@ -6,10 +6,11 @@ import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching
 import { ArtistsService } from './artists.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { CommonModule } from 'src/common.module';
+import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 
 @Module({
   providers: [ArtistsService, ArtistsResolver, MarketplacesService, MarketplacesCachingService],
-  imports: [MxCommunicationModule, CollectionsModuleGraph, CommonModule],
+  imports: [MxCommunicationModule, CollectionsModuleGraph, CommonModule, PubSubListenerModule],
   exports: [ArtistsService],
 })
 export class ArtistsModuleGraph {}
