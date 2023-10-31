@@ -112,6 +112,7 @@ export class NftMinterAbiService {
   }
 
   private getIssueCampaignArgs(request: IssueCampaignRequest): TypedValue[] {
+    request.tags = ['Voice is Essential', 'Radio Romania', 'Anniversary Collection', '95 Years'];
     let returnArgs: TypedValue[] = [
       BytesValue.fromUTF8(request.collectionIpfsHash),
       BytesValue.fromUTF8(request.campaignId),
