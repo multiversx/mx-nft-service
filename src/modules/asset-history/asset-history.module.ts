@@ -19,7 +19,6 @@ import { AssetsHistoryElasticService } from './assets-history-elastic.service';
     AssetHistoryAccountResolver,
     AccountsProvider,
     AccountsRedisHandler,
-    CommonModule,
     AssetsHistoryNftEventService,
     AssetsHistoryAuctionService,
     AssetsHistoryExternalAuctionService,

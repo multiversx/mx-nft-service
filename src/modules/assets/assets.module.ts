@@ -43,7 +43,6 @@ import { InternalMarketplaceProvider } from './loaders/internal-marketplace.load
 import { InternalMarketplaceRedisHandler } from './loaders/internal-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceRedisHandler } from '../auctions/loaders/lowest-auctions-for-marketplace.redis-handler';
 import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
-import { PersistenceModule } from 'src/common/persistence/persistence.module';
 import { ArtistAddressProvider } from '../artists/artists.loader';
 import { ArtistAddressRedisHandler } from '../artists/artists.redis-handler';
 import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
@@ -114,7 +113,6 @@ import { IsTicketRedisHandler } from './loaders/asset-is-ticket.redis-handler';
     forwardRef(() => FeaturedModuleGraph),
     forwardRef(() => AuthModule),
     IpfsModule,
-    PersistenceModule,
   ],
   exports: [
     AssetsTransactionService,
