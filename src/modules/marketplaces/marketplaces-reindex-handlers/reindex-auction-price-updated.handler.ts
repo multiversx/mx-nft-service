@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { constants } from 'src/config';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
@@ -19,11 +20,17 @@ export class ReindexAuctionPriceUpdatedHandler {
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
 
     marketplaceReindexState.auctions[auctionIndex].minBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = BigNumberUtils.denominateAmount(input.minBid, decimals);
+    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = Math.min(
+      BigNumberUtils.denominateAmount(input.minBid, decimals),
+      constants.dbMaxDenominatedValue,
+    );
 
     if (input.maxBid) {
       marketplaceReindexState.auctions[auctionIndex].maxBid = input.maxBid;
-      marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = BigNumberUtils.denominateAmount(input.maxBid, decimals);
+      marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = Math.min(
+        BigNumberUtils.denominateAmount(input.maxBid, decimals),
+        constants.dbMaxDenominatedValue,
+      );
     } else {
       marketplaceReindexState.auctions[auctionIndex].maxBid = input.minBid;
       marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = marketplaceReindexState.auctions[auctionIndex].minBidDenominated;
