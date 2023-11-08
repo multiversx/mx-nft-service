@@ -352,12 +352,6 @@ input BuySftActionArgs {
   quantity: String
 }
 
-input BuyTicketsArgs {
-  collectionIdentifier: String!
-  price: String!
-  ticketsNumber: Int!
-}
-
 type Campaign {
   availableNfts: Int!
   campaignId: ID!
@@ -424,10 +418,6 @@ input ChildFilter {
   op: Operation!
   relationField: String
   values: [String!]!
-}
-
-input ClaimTicketsArgs {
-  collectionIdentifier: String!
 }
 
 input ClearReportCollectionInput {
@@ -971,8 +961,6 @@ type Mutation {
   burnQuantity(input: HandleQuantityArgs!): TransactionNode!
   buyRandomNft(input: BuyRandomNftActionArgs!): TransactionNode!
   buySft(input: BuySftActionArgs!): TransactionNode!
-  buyTickets(input: BuyTicketsArgs!): TransactionNode!
-  claimTicket(input: ClaimTicketsArgs!): TransactionNode!
   clearCollectionScamInfo(collection: String!): Boolean!
   clearNftScamInfo(identifier: String!): Boolean!
   clearReportCollection(input: ClearReportCollectionInput!): Boolean!
@@ -995,6 +983,7 @@ type Mutation {
   removeBlacklistedCollection(collection: String!): Boolean!
   removeFeaturedCollection(input: FeaturedCollectionsArgs!): Boolean!
   removeLike(input: RemoveLikeArgs!): Boolean!
+  removeWhitelistCollection(input: RemoveWhitelistCollectionArgs!): Boolean!
   reportCollection(
     """This endpoint can be used to report a Collection"""
     input: ReportCollectionInput!
@@ -1239,36 +1228,6 @@ type PriceRange {
   minBid: Price!
 }
 
-type PrimarySale {
-  collectionIdentifier: ID
-  frozen: Boolean
-  maxUnitsPerWallet: Int!
-  paymentToken: String!
-  price: String
-  saleTime: PrimarySaleTime!
-  status: PrimarySaleStatusEnum!
-}
-
-input PrimarySaleFilter {
-  collectionName: String!
-}
-
-enum PrimarySaleStatusEnum {
-  BetweenPeriod
-  ClaimPeriod
-  EndedPeriod
-  NonePeriod
-  NotStarted
-  SalePeriod
-}
-
-type PrimarySaleTime {
-  endClaim: Int
-  endSale: Int!
-  startClaim: Int
-  startSale: Int!
-}
-
 enum Privacy {
   private
   public
@@ -1307,17 +1266,13 @@ type Query {
   featuredCollections(filters: FeaturedCollectionsFilter, pagination: ConnectionArgs): CollectionResponse!
   featuredNfts(pagination: ConnectionArgs): AssetsResponse!
   generalAnalytics(input: AnalyticsInput): GeneralAnalyticsModel!
-  hasClaimedTickets(collectionIdentifier: String!): Boolean!
-  isWhitelisted: WhitelistedInfo!
   marketplaces(filters: MarketplaceFilters, pagination: ConnectionArgs): MarketplacesResponse!
   myClaimableAuctions(filters: MyClaimableAuctionsFilters, pagination: ConnectionArgs): AuctionResponse!
-  myTickets(collectionIdentifier: String!): [TicketInfo!]!
   notifications(filters: NotificationsFilters, pagination: ConnectionArgs): NotificationsResponse!
   offers(filters: OffersFilters, pagination: ConnectionArgs): OffersResponse!
   orders(filters: FiltersExpression, pagination: ConnectionArgs, sorting: [Sorting!]): OrdersResponse!
   owners(filters: OwnersFilters!, pagination: ConnectionArgs): OwnerResponse!
   priceRange(filters: TokenFilter): PriceRange!
-  primarySale(filters: PrimarySaleFilter!): PrimarySale!
   search(filters: SearchFilter!): SearchResponse!
   tags(filters: TagsFilter!, pagination: ConnectionArgs): TagsResponse!
   trendingAssets: [Asset!]!
@@ -1339,6 +1294,11 @@ type Rarity {
 
 input RemoveLikeArgs {
   identifier: String!
+}
+
+input RemoveWhitelistCollectionArgs {
+  collection: String!
+  marketplaceKey: String!
 }
 
 input ReportCollectionInput {
@@ -1440,12 +1400,6 @@ type TagsResponse {
   edges: [TagEdge!]
   pageData: PageData
   pageInfo: TagPageInfo
-}
-
-type TicketInfo {
-  buyer: String!
-  ticketNumber: Int!
-  winningNonce: String!
 }
 
 type Tier {
@@ -1586,9 +1540,4 @@ input WhitelistMarketplaceArgs {
 input WhitelistMinterArgs {
   address: String!
   adminAddress: String!
-}
-
-type WhitelistedInfo {
-  isWhitelisted: Boolean!
-  message: String
 }

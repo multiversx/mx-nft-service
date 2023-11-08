@@ -14,3 +14,16 @@ export class WhitelistCollectionArgs {
   @Field()
   marketplaceKey: string;
 }
+
+@InputType()
+export class RemoveWhitelistCollectionArgs {
+  @Matches(RegExp(COLLECTION_IDENTIFIER_RGX), {
+    message: COLLECTION_IDENTIFIER_ERROR,
+  })
+  @Field()
+  collection: string;
+
+  @MaxLength(62)
+  @Field()
+  marketplaceKey: string;
+}

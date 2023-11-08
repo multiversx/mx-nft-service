@@ -5,6 +5,7 @@ import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 import { NftRarityElasticService } from 'src/modules/nft-rarity/nft-rarity.elastic.service';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Locker } from '@multiversx/sdk-nestjs-common';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class RarityUpdaterService {
@@ -33,7 +34,7 @@ export class RarityUpdaterService {
 
           const query = this.nftRarityElasticService.getAllNftsWhereRarityNotComputedFromElasticQuery();
 
-          await this.elasticService.getScrollableList('tokens', 'token', query, async (items) => {
+          await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
             const collections = [...new Set(items.map((i) => i.token))];
             collectionsToUpdate = collectionsToUpdate.concat(collections.filter((c) => collectionsToUpdate.indexOf(c) === -1));
             if (collectionsToUpdate.length >= maxCollectionsToUpdate) {

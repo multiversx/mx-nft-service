@@ -2,8 +2,8 @@ import { Resolver, Args, Mutation } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Marketplace } from './models';
 import { MarketplacesService } from './marketplaces.service';
-import { WhitelistCollectionArgs } from './models/WhitelistCollectionArgs';
-import { WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
+import { RemoveWhitelistCollectionArgs, WhitelistCollectionArgs } from './models/WhitelistCollectionArgs';
+import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { WhitelistMarketplaceArgs } from './models/WhitelistMarketplaceArgs';
 import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketplaceRequest';
 import { UseGuards } from '@nestjs/common';
@@ -22,6 +22,12 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistCollectionOnMarketplace(@Args('input') input: WhitelistCollectionArgs): Promise<Boolean> {
     return this.marketplaceService.whitelistCollectionOnMarketplace(WhitelistCollectionRequest.fromArgs(input));
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async removeWhitelistCollection(@Args('input') input: RemoveWhitelistCollectionArgs): Promise<Boolean> {
+    return this.marketplaceService.removeWhitelistCollection(RemoveWhitelistCollectionRequest.fromArgs(input));
   }
 
   @Mutation(() => Boolean)

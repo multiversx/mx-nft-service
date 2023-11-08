@@ -7,6 +7,7 @@ import { MarketplacesService } from '../marketplaces/marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
 import { CollectionsModuleGraph } from '../nftCollections/collections.module';
 import { OffersModuleGraph } from '../offers/offers.module';
+import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
 
 @Module({
   providers: [
@@ -17,7 +18,7 @@ import { OffersModuleGraph } from '../offers/offers.module';
     MarketplacesService,
     MarketplacesCachingService,
   ],
-  imports: [MxCommunicationModule, forwardRef(() => CollectionsModuleGraph), forwardRef(() => OffersModuleGraph)],
+  imports: [MxCommunicationModule, forwardRef(() => CollectionsModuleGraph), forwardRef(() => OffersModuleGraph), PubSubListenerModule],
   exports: [AccountsStatsService],
 })
 export class AccountsStatsModuleGraph {}

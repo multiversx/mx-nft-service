@@ -7,7 +7,7 @@ import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketpla
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
+import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { WhitelistMarketplaceRequest } from './models/requests/WhitelistMarketplaceRequest';
 import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
@@ -180,9 +180,34 @@ export class MarketplacesService {
       if (savedCollection) {
         this.triggerCacheInvalidation(request.marketplaceKey, request.collection, marketplace.address);
       }
-      return savedCollection ? true : false;
+      return savedCollection;
     } catch (error) {
       this.logger.error('An error has occured while whitelisting collection', {
+        path: this.whitelistCollectionOnMarketplace.name,
+        collection: request?.collection,
+        marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async removeWhitelistCollection(request: RemoveWhitelistCollectionRequest): Promise<Boolean> {
+    const collection = await this.persistenceService.getCollectionByKeyAndCollection(request.collection, request.marketplaceKey);
+    const marketplace = await this.persistenceService.getMarketplaceByKey(request.marketplaceKey);
+
+    if (!collection || !marketplace) {
+      throw new BadRequestError('Marketplace not available for this key, choose another key if this is not your marketplace');
+    }
+    try {
+      const removedCollection = await this.persistenceService.deleteMarketplaceCollection(collection);
+
+      if (removedCollection) {
+        this.triggerCacheInvalidation(request.marketplaceKey, request.collection, marketplace.address);
+      }
+      return removedCollection ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while remove whitelist for collection', {
         path: this.whitelistCollectionOnMarketplace.name,
         collection: request?.collection,
         marketplace: request?.marketplaceKey,

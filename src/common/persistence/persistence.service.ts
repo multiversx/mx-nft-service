@@ -1,5 +1,5 @@
 import { PerformanceProfiler } from '@multiversx/sdk-nestjs-monitoring';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AccountStatsEntity } from 'src/db/account-stats/account-stats';
 import { AccountStatsRepository } from 'src/db/account-stats/account-stats.repository';
@@ -63,6 +63,7 @@ export class PersistenceService {
     private readonly nftRarityRepository: NftRarityRepository,
     private readonly notificationRepository: NotificationsRepository,
     private readonly ordersRepository: OrdersRepository,
+    @Inject(forwardRef(() => AuctionsRepository))
     private readonly auctionsRepository: AuctionsRepository,
     private readonly marketplaceEventsRepository: MarketplaceEventsRepository,
     private readonly offersRepository: OffersRepository,
@@ -259,6 +260,13 @@ export class PersistenceService {
       this.marketplaceCollectionsRepository.getMarketplaceByKeyAndCollection(collection, key),
     );
   }
+
+  async getCollectionByKeyAndCollection(collection: string, key: string): Promise<MarketplaceCollectionEntity> {
+    return await this.execute(
+      this.getCollectionByKeyAndCollection.name,
+      this.marketplaceCollectionsRepository.getCollectionByKeyAndCollection(collection, key),
+    );
+  }
   async getAllMarketplaceCollections(): Promise<MarketplaceCollectionEntity[]> {
     return await this.execute(this.getAllMarketplaceCollections.name, this.marketplaceCollectionsRepository.getAllCollections());
   }
@@ -277,11 +285,12 @@ export class PersistenceService {
     );
   }
 
-  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
-    return await this.execute(
-      this.getCollectionsByMarketplace.name,
-      this.marketplaceCollectionsRepository.saveMarketplaceCollection(entity),
-    );
+  async saveMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<boolean> {
+    return await this.execute(this.saveMarketplaceCollection.name, this.marketplaceCollectionsRepository.saveMarketplaceCollection(entity));
+  }
+
+  async deleteMarketplaceCollection(entity: MarketplaceCollectionEntity): Promise<MarketplaceCollectionEntity> {
+    return this.execute(this.deleteMarketplaceCollection.name, this.marketplaceCollectionsRepository.deleteMarketplaceCollection(entity));
   }
 
   async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {

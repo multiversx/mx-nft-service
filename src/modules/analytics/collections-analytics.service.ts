@@ -80,7 +80,11 @@ export class CollectionsAnalyticsService {
     return await this.analyticsGetter.getVolumeDataForTimePeriod(time, series, metric);
   }
 
-  public async getFloorPriceVolumeForTimePeriod(time: string, series: string, metric: string): Promise<AnalyticsAggregateValue[]> {
+  public async getFloorPriceVolumeForTimePeriod(
+    time: string,
+    series: string,
+    metric: string = 'floorPriceUSD',
+  ): Promise<AnalyticsAggregateValue[]> {
     return await this.analyticsGetter.getFloorPriceForTimePeriod(time, series, metric);
   }
 

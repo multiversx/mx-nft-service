@@ -13,6 +13,7 @@ import { getCollectionNftsQuery } from './nft-scam.queries';
 import { AssetByIdentifierService } from '../assets';
 import { Locker } from '@multiversx/sdk-nestjs-common';
 import { PluginService } from 'src/common/pluggins/plugin.service';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class NftScamService {
@@ -73,7 +74,7 @@ export class NftScamService {
   async validateOrUpdateAllNftsScamInfoForCollection(collection: string, scamEngineVersion: string): Promise<void> {
     this.logger.log(`Processing scamInfo for ${collection}...`);
     const nftsQuery = getCollectionNftsQuery(collection);
-    await this.mxElasticService.getScrollableList('tokens', 'identifier', nftsQuery, async (nftsBatch) => {
+    await this.mxElasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', nftsQuery, async (nftsBatch) => {
       await this.validateOrUpdateNftsScamInfoBatch(nftsBatch, scamEngineVersion);
     });
   }
@@ -81,7 +82,7 @@ export class NftScamService {
   async markAllNftsForCollection(collection: string, scamEngineVersion: string, scamInfo: ScamInfo): Promise<void> {
     this.logger.log(`Processing scamInfo for ${collection}...`);
     const nftsQuery = getCollectionNftsQuery(collection);
-    await this.mxElasticService.getScrollableList('tokens', 'identifier', nftsQuery, async (nftsBatch) => {
+    await this.mxElasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', nftsQuery, async (nftsBatch) => {
       await this.markNftsScamInfoBatch(nftsBatch, scamEngineVersion, scamInfo);
     });
   }

@@ -31,7 +31,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketplacesModuleGraph } from './modules/marketplaces/marketplaces.module';
 import { ArtistsModuleGraph } from './modules/artists/artists.module';
 import { ExploreStatsModuleGraph } from './modules/explore-stats/explore-stats.module';
-import { PrimarySaleModuleGraph } from './modules/primary-sale-sc/primary-sale.module';
 import { ScamModule } from './modules/scam/scam.module';
 import { ComplexityPlugin } from './modules/common/complexity.plugin';
 import { BlacklistedCollectionsModule } from './modules/blacklist/blacklisted-collections.module';
@@ -40,6 +39,7 @@ import '@multiversx/sdk-nestjs-common/lib/utils/extensions/array.extensions';
 import '@multiversx/sdk-nestjs-common/lib/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 import { MintersModuleGraph } from './modules/minters/minters.module';
+import { PersistenceModule } from './common/persistence/persistence.module';
 
 @Module({
   imports: [
@@ -72,6 +72,7 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
       }),
     }),
     CommonModule,
+    PersistenceModule,
     CollectionsModuleGraph,
     AssetsModuleGraph,
     AssetHistoryModuleGraph,
@@ -96,7 +97,6 @@ import { MintersModuleGraph } from './modules/minters/minters.module';
     MarketplacesModuleGraph,
     ArtistsModuleGraph,
     ExploreStatsModuleGraph,
-    PrimarySaleModuleGraph,
     TimescaleDbModule,
     MintersModuleGraph,
   ],
