@@ -56,6 +56,7 @@ export class MarketplacesReindexService {
   ) {}
 
   async reindexMarketplaceData(input: MarketplaceReindexDataArgs): Promise<void> {
+    this.logger.log(`Reindexing marketplace data/state for ${input.marketplaceAddress} started`);
     await Locker.lock(
       `Reindex marketplace data/state for ${input.marketplaceAddress}`,
       async () => {
@@ -120,17 +121,13 @@ export class MarketplacesReindexService {
 
     do {
       let batch = await nextBatchPromise;
+      console.log({ batch: batch.length, afterTimestamp });
       if (!batch || batch.length === 0) {
         break;
       }
       [batch, afterTimestamp] = this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch, input.beforeTimestamp);
 
       nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(marketplaceReindexStates[0].marketplace.address, afterTimestamp);
-
-      processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
-        marketplaceReindexStates,
-        processInNextBatch.concat(batch),
-      );
 
       processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
         marketplaceReindexStates,
@@ -181,14 +178,20 @@ export class MarketplacesReindexService {
     batch: MarketplaceEventsEntity[],
     isFinalBatch?: boolean,
   ): Promise<MarketplaceEventsEntity[]> {
+    const eventsMap: Map<string, MarketplaceEventsEntity[]> = new Map();
+
+    batch.forEach((event) => {
+      const txHash = event.txHash || event.originalTxHash || ''; // Adjust accordingly
+      if (!eventsMap.has(txHash)) {
+        eventsMap.set(txHash, []);
+      }
+      eventsMap.get(txHash).push(event);
+    });
+
     let unprocessedEvents: MarketplaceEventsEntity[] = [...batch];
 
-    while (unprocessedEvents.length > 0) {
-      const txHash = unprocessedEvents[0].txHash;
-
-      const eventOrdersAndTx = unprocessedEvents.filter((event) => event.txHash === txHash || event.originalTxHash === txHash);
-
-      const isAnotherEventsSetInBatch = unprocessedEvents.find((e) => e.timestamp > unprocessedEvents[0].timestamp);
+    for (const [txHash, eventOrdersAndTx] of eventsMap) {
+      const isAnotherEventsSetInBatch = unprocessedEvents.find((e) => e.timestamp > eventOrdersAndTx[0].timestamp);
 
       if (!isFinalBatch && (eventOrdersAndTx.length === unprocessedEvents.length || !isAnotherEventsSetInBatch)) {
         return unprocessedEvents;

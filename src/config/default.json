@@ -69,7 +69,7 @@
     "updateAllNftTraitsBatchSize": 10000,
     "getNftsForScamInfoBatchSize": 100,
     "elasticMaxBatch": 10000,
-    "dbBatch": 1000,
+    "dbBatch": 10000,
     "complexityLevel": 200,
     "getLogsFromElasticBatchSize": 1000,
     "dbMaxTimestamp": 2147483647,

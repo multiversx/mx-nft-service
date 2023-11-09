@@ -34,21 +34,18 @@ export class MarketplacesReindexEventsSummaryService {
     });
   }
 
-  private getEventsAndTxData(eventsSet: MarketplaceEventsEntity[]): [MarketplaceEventsEntity[], MarketplaceTransactionData] {
-    const eventsOrderedByOrderAsc = eventsSet.sort((a, b) => {
-      return a.eventOrder - b.eventOrder;
-    });
-    const tx = eventsSet[0].isTx ? eventsSet[0] : undefined;
+  private getEventsAndTxData(
+    eventsSet: MarketplaceEventsEntity[],
+  ): [MarketplaceEventsEntity[] | undefined, MarketplaceTransactionData | undefined] {
+    const tx = eventsSet.find((event) => event.isTx);
 
-    const eventsStartIdx = tx ? 1 : 0;
-
-    const txData = tx?.data?.txData;
-
-    if (eventsOrderedByOrderAsc.length === 1 && tx) {
-      return [undefined, txData];
+    if (eventsSet.length === 1 && tx) {
+      return [undefined, tx.data?.txData];
     }
 
-    return [eventsOrderedByOrderAsc.slice(eventsStartIdx), txData];
+    const eventsWithoutTx = eventsSet.filter((event) => !event.isTx);
+
+    return [eventsWithoutTx.length > 0 ? eventsWithoutTx : undefined, tx?.data?.txData];
   }
 
   private getEventSummary(event: MarketplaceEventsEntity, txData: MarketplaceTransactionData, marketplace: Marketplace): any {
@@ -116,7 +113,7 @@ export class MarketplacesReindexEventsSummaryService {
         }
       }
       default: {
-        throw new Error(`Unhandled marketplace event - ${event.data.eventData.identifier}`);
+        throw new Error(`Unhandled marketplace event - ${event?.data?.eventData?.identifier}`);
       }
     }
   }
