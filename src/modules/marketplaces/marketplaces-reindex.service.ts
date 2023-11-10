@@ -133,8 +133,12 @@ export class MarketplacesReindexService {
         marketplaceReindexStates,
         processInNextBatch.concat(batch),
       );
-
-      await this.addInactiveStateItemsToDb(marketplaceReindexStates);
+      console.log({
+        auctions: marketplaceReindexStates[0].auctions.length,
+        orders: marketplaceReindexStates[0].orders.length,
+        offers: marketplaceReindexStates[0].offers.length,
+      });
+      // await this.addInactiveStateItemsToDb(marketplaceReindexStates);
     } while (input.beforeTimestamp ? afterTimestamp < input.beforeTimestamp : true);
 
     const isFinalBatch = true;
@@ -402,6 +406,15 @@ export class MarketplacesReindexService {
           0,
         ];
       }
+      if (!paymentTokenIdentifier) {
+        return [
+          new Token({
+            identifier: mxConfig.egld,
+            decimals: mxConfig.decimals,
+          }),
+          paymentNonce,
+        ];
+      }
       const paymentToken = await this.usdPriceService.getToken(paymentTokenIdentifier);
       if (!paymentToken) {
         return [
@@ -420,12 +433,19 @@ export class MarketplacesReindexService {
 
   private async addInactiveStateItemsToDb(marketplaceReindexStates: MarketplaceReindexState[], isFinalBatch?: boolean): Promise<void> {
     try {
+      console.log('save to db');
       for (const marketplaceReindexState of marketplaceReindexStates) {
         marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
 
         let [inactiveAuctions, inactiveOrders, inactiveOffers] = isFinalBatch
           ? marketplaceReindexState.popAllItems()
           : marketplaceReindexState.popInactiveItems();
+
+        console.log({
+          inactiveOrders: inactiveOrders.length,
+          inactiveAuctions: inactiveAuctions.length,
+          inactiveOffers: inactiveOffers.length,
+        });
 
         if (inactiveAuctions.length === 0 && inactiveOffers.length === 0) {
           continue;
@@ -497,6 +517,7 @@ export class MarketplacesReindexService {
             delete o.id;
           }
         });
+        console.log({ orders: inactiveOrders.length, auctions: inactiveAuctions.length, offers: inactiveOffers.length });
 
         await Promise.all([
           saveTagsPromise,
