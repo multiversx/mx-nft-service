@@ -480,21 +480,21 @@ export class MarketplacesReindexService {
 
         await this.auctionSetterService.saveBulkAuctionsOrUpdateAndFillId(inactiveAuctions);
 
-        let tags: TagEntity[] = [];
-        inactiveAuctions.map((auction) => {
-          const assetTags = auction.tags.split(',');
-          assetTags.map((assetTag) => {
-            if (assetTag !== '') {
-              tags.push(
-                new TagEntity({
-                  auctionId: auction.id,
-                  tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
-                  auction: auction,
-                }),
-              );
-            }
-          });
-        });
+        // let tags: TagEntity[] = [];
+        // inactiveAuctions.map((auction) => {
+        //   const assetTags = auction.tags.split(',');
+        //   assetTags.map((assetTag) => {
+        //     if (assetTag !== '') {
+        //       tags.push(
+        //         new TagEntity({
+        //           auctionId: auction.id,
+        //           tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
+        //           auction: auction,
+        //         }),
+        //       );
+        //     }
+        //   });
+        // });
 
         // const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
 
