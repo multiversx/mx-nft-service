@@ -455,7 +455,7 @@ export class MarketplacesReindexService {
 
         marketplaceReindexState.isFullStateInMemory = false;
 
-        await this.populateAuctionMissingAssetTags(inactiveAuctions);
+        // await this.populateAuctionMissingAssetTags(inactiveAuctions);
 
         for (let i = 0; i < inactiveOrders.length; i++) {
           if (inactiveOrders[i].auctionId < 0) {
@@ -496,7 +496,7 @@ export class MarketplacesReindexService {
           });
         });
 
-        const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
+        // const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
 
         // for (let i = 0; i < inactiveOrders.length; i++) {
         //   if (inactiveOrders[i].auctionId < 0) {
@@ -522,8 +522,8 @@ export class MarketplacesReindexService {
         console.log({ orders: inactiveOrders.length, auctions: inactiveAuctions.length, offers: inactiveOffers.length });
 
         await Promise.all([
-          saveTagsPromise,
-          this.persistenceService.saveBulkOrdersOrUpdateAndFillId(inactiveOrders),
+          // saveTagsPromise,
+          // this.persistenceService.saveBulkOrdersOrUpdateAndFillId(inactiveOrders),
           this.persistenceService.saveBulkOffersOrUpdateAndFillId(inactiveOffers),
         ]);
       }
@@ -544,7 +544,6 @@ export class MarketplacesReindexService {
         ),
       ];
       const assets = await this.mxApiService.getNftsByIdentifiers(assetsWithNoTagsIdentifiers, 0, 'fields=identifier,tags');
-      const tags = assets.filter((a) => a.tags);
       for (let j = 0; j < assets?.length; j++) {
         auctions.filter((a) => a.identifier === assets[j].identifier).map((a) => (a.tags = assets[j]?.tags?.join(',') ?? ''));
       }
