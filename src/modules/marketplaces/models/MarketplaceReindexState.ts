@@ -49,6 +49,10 @@ export class MarketplaceReindexState {
     return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
   }
 
+  getAuctionByAuctionId(auctionId: number): number {
+    return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
+  }
+
   getAuctionIndexByIdentifier(identifier: string): number {
     return this.auctions.findIndex((a) => a.identifier === identifier && a.status === AuctionStatusEnum.Running);
   }
@@ -97,8 +101,36 @@ export class MarketplaceReindexState {
     return -1;
   }
 
+  setAuctionOrderWinnerStatusAndeturnId(auctionId: number, status: OrderStatusEnum, modifiedDate?: Date): number {
+    const bids = this.orders
+      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active)
+      .map((o) => new BigNumber(o.priceAmount));
+
+    if (bids.length) {
+      const maxBid = BigNumber.max(...bids);
+      const winnerOrderIndex = this.orders.findIndex(
+        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.priceAmount === maxBid.toString(),
+      );
+      this.orders[winnerOrderIndex].status = status;
+      if (modifiedDate) {
+        this.orders[winnerOrderIndex].modifiedDate = modifiedDate;
+      }
+      return this.orders[winnerOrderIndex].id;
+    }
+    return -1;
+  }
+
   setInactiveOrdersForAuction(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
     this.orders
+      ?.filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
+      ?.map((o) => {
+        o.status = OrderStatusEnum.Inactive;
+        o.modifiedDate = modifiedDate;
+      });
+  }
+
+  setInactiveOrdersForAuctionNew(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
+    this.auctions[auctionId]?.orders
       ?.filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
       ?.map((o) => {
         o.status = OrderStatusEnum.Inactive;
@@ -128,21 +160,6 @@ export class MarketplaceReindexState {
     let inactiveAuctions = [];
     let inactiveOrders = [];
     let inactiveOffers = [];
-
-    // if (this.marketplace.key === 'elrondapes')
-    //   console.log(
-    //     `state`,
-    //     JSON.stringify(this.auctions),
-    //     JSON.stringify(this.orders),
-    //     JSON.stringify(this.offers),
-    //   );
-    // if (this.marketplace.key === 'elrondapes')
-    //   console.log(
-    //     `inactive`,
-    //     JSON.stringify(inactiveAuctions),
-    //     JSON.stringify(inactiveOrders),
-    //     JSON.stringify(inactiveOffers),
-    //   );
 
     if (this.marketplace.key === 'elrondapes') {
       console.log(
@@ -183,6 +200,21 @@ export class MarketplaceReindexState {
     }
 
     return [inactiveAuctions, inactiveOrders, inactiveOffers];
+  }
+
+  public updateOrderListForAuction(auctionIndex: number, order: OrderEntity) {
+    this.auctions[auctionIndex].orders = this.auctions[auctionIndex].orders
+      ? [...this.auctions[auctionIndex].orders?.map((order) => ({ ...order, status: OrderStatusEnum.Inactive })), order]
+      : [order];
+  }
+
+  public updateAuctionStatus(auctionIndex: number, blockHash: string, status: AuctionStatusEnum, timestamp: number) {
+    this.auctions[auctionIndex] = {
+      ...this.auctions[auctionIndex],
+      status: status,
+      blockHash: this.auctions[auctionIndex].blockHash ?? blockHash,
+      modifiedDate: DateUtils.getUtcDateFromTimestamp(timestamp),
+    };
   }
 
   deleteAuctionIfDuplicates(marketplaceAuctionId: number) {

@@ -18,9 +18,7 @@ export class ReindexAuctionEndedHandler {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Ended;
-    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
-    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
 
     const winnerOrderId = marketplaceReindexState.setAuctionOrderWinnerStatusAndReturnId(
       marketplaceReindexState.auctions[auctionIndex].id,

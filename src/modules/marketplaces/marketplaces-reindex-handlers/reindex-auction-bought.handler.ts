@@ -4,7 +4,6 @@ import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { OrderStatusEnum } from 'src/modules/orders/models';
 import { Token } from 'src/modules/usdPrice/Token.model';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
-import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
 import { AuctionBuySummary } from '../models/marketplaces-reindex-events-summaries/AuctionBuySummary';
 
@@ -22,10 +21,6 @@ export class ReindexAuctionBoughtHandler {
       return;
     }
 
-    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-
-    marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
-
     const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
     marketplaceReindexState.orders.push(order);
 
@@ -35,11 +30,10 @@ export class ReindexAuctionBoughtHandler {
     );
 
     if (marketplaceReindexState.auctions[auctionIndex].nrAuctionedTokens === totalBought) {
-      marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Ended;
-      marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
-      marketplaceReindexState.auctions[auctionIndex].blockHash =
-        marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
+      marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
     }
+
+    marketplaceReindexState.updateOrderListForAuction(auctionIndex, order);
   }
 
   private getTotalBoughtTokensForAuction(auctionId: number, orders: OrderEntity[]): number {

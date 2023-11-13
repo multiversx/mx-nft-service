@@ -20,10 +20,9 @@ export class ReindexAuctionClosedHandler {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
-    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
-    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Closed, input.timestamp);
 
     marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
+    marketplaceReindexState.setInactiveOrdersForAuctionNew(auctionIndex, modifiedDate);
   }
 }

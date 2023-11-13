@@ -236,6 +236,7 @@ export class MarketplacesReindexService {
           await this.processEvent(marketplaceReindexStates[stateIndex], eventsSetSummaries[i]);
         }
       } catch (error) {
+        console.log({ error });
         this.logger.warn(`Error reprocessing marketplace event ${JSON.stringify(eventsSetSummaries[i])} - ${JSON.stringify(error)}`);
       }
     }
@@ -435,7 +436,7 @@ export class MarketplacesReindexService {
     try {
       console.log('save to db');
       for (const marketplaceReindexState of marketplaceReindexStates) {
-        marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
+        // marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
 
         let [inactiveAuctions, inactiveOrders, inactiveOffers] = isFinalBatch
           ? marketplaceReindexState.popAllItems()
@@ -444,6 +445,7 @@ export class MarketplacesReindexService {
         console.log({
           inactiveOrders: inactiveOrders.length,
           inactiveAuctions: inactiveAuctions.length,
+          inactiveordersONAc: inactiveAuctions.sum((au) => au.orders?.length ?? 0),
           inactiveOffers: inactiveOffers.length,
         });
 
@@ -496,21 +498,21 @@ export class MarketplacesReindexService {
 
         const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
 
-        for (let i = 0; i < inactiveOrders.length; i++) {
-          if (inactiveOrders[i].auctionId < 0) {
-            const auctionIndex = inactiveAuctions.findIndex((a) => a.marketplaceAuctionId === -inactiveOrders[i].auctionId);
-            if (auctionIndex === -1) {
-              this.logger.warn(
-                `Auction for ${marketplaceReindexState.marketplace.key} with marketplaceAuctionId ${-inactiveOrders[i]
-                  .auctionId} was not found`,
-              );
-              inactiveOrders.splice(i--, 1);
-              continue;
-            }
-            inactiveOrders[i].auction = inactiveAuctions[auctionIndex];
-            inactiveOrders[i].auctionId = inactiveAuctions[auctionIndex].id;
-          }
-        }
+        // for (let i = 0; i < inactiveOrders.length; i++) {
+        //   if (inactiveOrders[i].auctionId < 0) {
+        //     const auctionIndex = inactiveAuctions.findIndex((a) => a.marketplaceAuctionId === -inactiveOrders[i].auctionId);
+        //     if (auctionIndex === -1) {
+        //       this.logger.warn(
+        //         `Auction for ${marketplaceReindexState.marketplace.key} with marketplaceAuctionId ${-inactiveOrders[i]
+        //           .auctionId} was not found`,
+        //       );
+        //       inactiveOrders.splice(i--, 1);
+        //       continue;
+        //     }
+        //     inactiveOrders[i].auction = inactiveAuctions[auctionIndex];
+        //     inactiveOrders[i].auctionId = inactiveAuctions[auctionIndex].id;
+        //   }
+        // }
 
         inactiveOffers.map((o) => {
           if (o.id < 0) {
