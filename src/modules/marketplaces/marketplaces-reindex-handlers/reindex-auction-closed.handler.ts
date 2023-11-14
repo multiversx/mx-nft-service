@@ -22,7 +22,6 @@ export class ReindexAuctionClosedHandler {
 
     marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Closed, input.timestamp);
 
-    marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate);
-    marketplaceReindexState.setInactiveOrdersForAuctionNew(auctionIndex, modifiedDate);
+    marketplaceReindexState.setInactiveOrdersForAuction(auctionIndex, modifiedDate);
   }
 }

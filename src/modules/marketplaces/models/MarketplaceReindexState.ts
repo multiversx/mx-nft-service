@@ -83,55 +83,33 @@ export class MarketplaceReindexState {
   }
 
   setAuctionOrderWinnerStatusAndReturnId(auctionId: number, status: OrderStatusEnum, modifiedDate?: Date): number {
-    const bids = this.orders
-      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active)
-      .map((o) => new BigNumber(o.priceAmount));
-
-    if (bids.length) {
-      const maxBid = BigNumber.max(...bids);
-      const winnerOrderIndex = this.orders.findIndex(
-        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.priceAmount === maxBid.toString(),
-      );
-      this.orders[winnerOrderIndex].status = status;
-      if (modifiedDate) {
-        this.orders[winnerOrderIndex].modifiedDate = modifiedDate;
-      }
-      return this.orders[winnerOrderIndex].id;
+    const selectedAuction = this.auctions[auctionId];
+    if (!selectedAuction) {
+      return -1;
     }
-    return -1;
-  }
 
-  setAuctionOrderWinnerStatusAndeturnId(auctionId: number, status: OrderStatusEnum, modifiedDate?: Date): number {
-    const bids = this.orders
-      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active)
-      .map((o) => new BigNumber(o.priceAmount));
-
-    if (bids.length) {
-      const maxBid = BigNumber.max(...bids);
-      const winnerOrderIndex = this.orders.findIndex(
-        (o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.priceAmount === maxBid.toString(),
-      );
-      this.orders[winnerOrderIndex].status = status;
-      if (modifiedDate) {
-        this.orders[winnerOrderIndex].modifiedDate = modifiedDate;
-      }
-      return this.orders[winnerOrderIndex].id;
+    const activeOrders = selectedAuction.orders.filter((o) => o.status === OrderStatusEnum.Active);
+    if (activeOrders.length === 0) {
+      return -1;
     }
-    return -1;
+
+    const maxBid = BigNumber.max(...activeOrders.map((o) => new BigNumber(o.priceAmount)));
+    const winnerOrder = activeOrders.find((o) => new BigNumber(o.priceAmount).isEqualTo(maxBid));
+    if (!winnerOrder) {
+      return -1;
+    }
+
+    winnerOrder.status = status;
+    if (modifiedDate) {
+      winnerOrder.modifiedDate = modifiedDate;
+    }
+
+    return winnerOrder.id;
   }
 
   setInactiveOrdersForAuction(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
-    this.orders
-      ?.filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
-      ?.map((o) => {
-        o.status = OrderStatusEnum.Inactive;
-        o.modifiedDate = modifiedDate;
-      });
-  }
-
-  setInactiveOrdersForAuctionNew(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
     this.auctions[auctionId]?.orders
-      ?.filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
+      ?.filter((o) => o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
       ?.map((o) => {
         o.status = OrderStatusEnum.Inactive;
         o.modifiedDate = modifiedDate;

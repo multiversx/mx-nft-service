@@ -4,6 +4,7 @@ import { Column, Entity, Index, Unique } from 'typeorm';
 
 @Entity('marketplace_events')
 @Unique('MarketplaceEventsEntity_UQ_EVENT', ['txHash', 'eventOrder', 'isTx'])
+@Index('idx_marketplaceAddress_timestamp', ['marketplaceAddress', 'timestamp'])
 export class MarketplaceEventsEntity extends BaseEntity {
   @Column({ length: 64 })
   txHash: string;

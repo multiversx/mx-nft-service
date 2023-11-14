@@ -17,14 +17,11 @@ export class ReindexAuctionBidHandler {
     }
 
     let order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Active, paymentToken, paymentNonce);
-
     if (order.priceAmount === marketplaceReindexState.auctions[auctionIndex].maxBid) {
       order.status = OrderStatusEnum.Bought;
       marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
     }
 
     marketplaceReindexState.updateOrderListForAuction(auctionIndex, order);
-
-    marketplaceReindexState.orders.push(order);
   }
 }

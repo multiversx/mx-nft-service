@@ -19,18 +19,23 @@ export class ReindexAuctionEndedHandler {
     }
 
     marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
+    const selectedAuction = marketplaceReindexState.auctions[auctionIndex];
 
     const winnerOrderId = marketplaceReindexState.setAuctionOrderWinnerStatusAndReturnId(
-      marketplaceReindexState.auctions[auctionIndex].id,
+      selectedAuction.id,
       OrderStatusEnum.Bought,
       modifiedDate,
     );
 
     if (winnerOrderId !== -1) {
-      marketplaceReindexState.setInactiveOrdersForAuction(marketplaceReindexState.auctions[auctionIndex].id, modifiedDate, winnerOrderId);
+      marketplaceReindexState.setInactiveOrdersForAuction(selectedAuction.id, modifiedDate, winnerOrderId);
     } else if (input.currentBid !== '0') {
       const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken);
-      marketplaceReindexState.orders.push(order);
+      if (marketplaceReindexState.auctions[auctionIndex].orders) {
+        marketplaceReindexState.auctions[auctionIndex].orders.push(order);
+      } else {
+        marketplaceReindexState.auctions[auctionIndex].orders = [order];
+      }
     }
   }
 }

@@ -22,14 +22,11 @@ export class ReindexAuctionBoughtHandler {
     }
 
     const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
-    marketplaceReindexState.orders.push(order);
+    const auction = marketplaceReindexState.auctions[auctionIndex];
 
-    const totalBought = this.getTotalBoughtTokensForAuction(
-      marketplaceReindexState.auctions[auctionIndex].id,
-      marketplaceReindexState.orders,
-    );
+    const totalBought = this.getTotalBoughtTokensForAuction(auction.id, auction.orders);
 
-    if (marketplaceReindexState.auctions[auctionIndex].nrAuctionedTokens === totalBought) {
+    if (auction.nrAuctionedTokens === totalBought) {
       marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
     }
 
@@ -38,11 +35,14 @@ export class ReindexAuctionBoughtHandler {
 
   private getTotalBoughtTokensForAuction(auctionId: number, orders: OrderEntity[]): number {
     let totalBought = 0;
-    orders
-      .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought)
-      .forEach((o) => {
-        totalBought += parseInt(o.boughtTokensNo) ? parseInt(o.boughtTokensNo) : 1;
-      });
-    return totalBought;
+    if (orders?.length) {
+      orders
+        .filter((o) => o.auctionId === auctionId && o.status === OrderStatusEnum.Bought)
+        .forEach((o) => {
+          totalBought += parseInt(o.boughtTokensNo) ? parseInt(o.boughtTokensNo) : 1;
+        });
+      return totalBought;
+    }
+    return 0;
   }
 }

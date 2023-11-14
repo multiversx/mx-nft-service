@@ -24,12 +24,11 @@ import { MarketplaceReindexState } from './models/MarketplaceReindexState';
 import { MxApiService } from 'src/common';
 import { MarketplaceReindexDataArgs } from './models/MarketplaceReindexDataArgs';
 import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
-import { DateUtils } from 'src/utils/date-utils';
 import { Locker } from '@multiversx/sdk-nestjs-common';
-import { TagEntity } from 'src/db/auctions/tags.entity';
 import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { OrdersService } from '../orders/order.service';
 import { Token } from '../usdPrice/Token.model';
+import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -120,13 +119,18 @@ export class MarketplacesReindexService {
     nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(marketplaceReindexStates[0].marketplace.address, afterTimestamp);
 
     do {
+      const cpu = new CpuProfiler();
       let batch = await nextBatchPromise;
       console.log({ batch: batch.length, afterTimestamp });
       if (!batch || batch.length === 0) {
         break;
       }
+      cpu.stop('batch');
+
+      const getSlicedBatchAndNewestTimestampIfPartialEventsSet = new CpuProfiler();
       [batch, afterTimestamp] = this.getSlicedBatchAndNewestTimestampIfPartialEventsSet(batch, input.beforeTimestamp);
 
+      getSlicedBatchAndNewestTimestampIfPartialEventsSet.stop('getSlicedBatchAndNewestTimestampIfPartialEventsSet');
       nextBatchPromise = this.persistenceService.getMarketplaceEventsAsc(marketplaceReindexStates[0].marketplace.address, afterTimestamp);
 
       processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
