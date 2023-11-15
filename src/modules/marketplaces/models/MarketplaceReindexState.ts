@@ -46,11 +46,12 @@ export class MarketplaceReindexState {
   }
 
   getAuctionIndexByAuctionId(auctionId: number): number {
-    return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
-  }
-
-  getAuctionByAuctionId(auctionId: number): number {
-    return this.auctions.findIndex((a) => a.marketplaceAuctionId === auctionId);
+    for (let i = 0; i < this.auctions.length; i++) {
+      if (this.auctions[i].marketplaceAuctionId === auctionId) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   getAuctionIndexByIdentifier(identifier: string): number {
@@ -108,12 +109,16 @@ export class MarketplaceReindexState {
   }
 
   setInactiveOrdersForAuction(auctionId: number, modifiedDate: Date, exceptWinnerId?: number): void {
-    this.auctions[auctionId]?.orders
-      ?.filter((o) => o.status === OrderStatusEnum.Active && o.id !== exceptWinnerId)
-      ?.map((o) => {
-        o.status = OrderStatusEnum.Inactive;
-        o.modifiedDate = modifiedDate;
-      });
+    const auction = this.auctions[auctionId];
+
+    if (auction && auction.orders) {
+      for (const order of auction.orders) {
+        if (order.status === OrderStatusEnum.Active && order.id !== exceptWinnerId) {
+          order.status = OrderStatusEnum.Inactive;
+          order.modifiedDate = modifiedDate;
+        }
+      }
+    }
   }
 
   setStateItemsToExpiredIfOlderThanTimestamp(timestamp: number): void {
@@ -181,18 +186,26 @@ export class MarketplaceReindexState {
   }
 
   public updateOrderListForAuction(auctionIndex: number, order: OrderEntity) {
-    this.auctions[auctionIndex].orders = this.auctions[auctionIndex].orders
-      ? [...this.auctions[auctionIndex].orders?.map((order) => ({ ...order, status: OrderStatusEnum.Inactive })), order]
-      : [order];
-  }
+    const existingOrders = this.auctions[auctionIndex].orders || [];
 
-  public updateAuctionStatus(auctionIndex: number, blockHash: string, status: AuctionStatusEnum, timestamp: number) {
-    this.auctions[auctionIndex] = {
-      ...this.auctions[auctionIndex],
-      status: status,
-      blockHash: this.auctions[auctionIndex].blockHash ?? blockHash,
-      modifiedDate: DateUtils.getUtcDateFromTimestamp(timestamp),
-    };
+    this.auctions[auctionIndex].orders = [
+      ...existingOrders.map((existingOrder) => ({ ...existingOrder, status: OrderStatusEnum.Inactive })),
+      order,
+    ];
+  }
+  public updateAuctionStatus(auctionIndex: number, blockHash: string, status: AuctionStatusEnum, timestamp: number): void {
+    const currentAuction = this.auctions[auctionIndex];
+
+    if (currentAuction) {
+      const updatedAuction = {
+        ...currentAuction,
+        status,
+        blockHash: currentAuction.blockHash ?? blockHash,
+        modifiedDate: DateUtils.getUtcDateFromTimestamp(timestamp),
+      };
+
+      this.auctions[auctionIndex] = updatedAuction;
+    }
   }
 
   deleteAuctionIfDuplicates(marketplaceAuctionId: number) {
@@ -201,10 +214,9 @@ export class MarketplaceReindexState {
     }
 
     let index;
-    do {
-      index = this.auctions.findIndex((a) => a.marketplaceAuctionId === marketplaceAuctionId);
+    while ((index = this.auctions.findIndex((a) => a.marketplaceAuctionId === marketplaceAuctionId)) !== -1) {
       this.auctions.splice(index, 1);
-    } while (index !== -1);
+    }
   }
 
   deleteOfferIfDuplicates(marketplaceOfferId: number) {

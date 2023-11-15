@@ -11,37 +11,33 @@ export class ReindexAuctionPriceUpdatedHandler {
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionPriceUpdatedSummary, decimals: number): void {
     const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
-    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+
     if (auctionIndex === -1) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
-    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+    const auction = marketplaceReindexState.auctions[auctionIndex];
 
-    marketplaceReindexState.auctions[auctionIndex].minBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = Math.min(
-      BigNumberUtils.denominateAmount(input.minBid, decimals),
-      constants.dbMaxDenominatedValue,
-    );
+    auction.blockHash = auction.blockHash ?? input.blockHash;
+    auction.modifiedDate = modifiedDate;
+    auction.minBid = input.minBid;
+    auction.minBidDenominated = Math.min(BigNumberUtils.denominateAmount(input.minBid, decimals), constants.dbMaxDenominatedValue);
 
     if (input.maxBid) {
-      marketplaceReindexState.auctions[auctionIndex].maxBid = input.maxBid;
-      marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = Math.min(
-        BigNumberUtils.denominateAmount(input.maxBid, decimals),
-        constants.dbMaxDenominatedValue,
-      );
+      auction.maxBid = input.maxBid;
+      auction.maxBidDenominated = Math.min(BigNumberUtils.denominateAmount(input.maxBid, decimals), constants.dbMaxDenominatedValue);
     } else {
-      marketplaceReindexState.auctions[auctionIndex].maxBid = input.minBid;
-      marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = marketplaceReindexState.auctions[auctionIndex].minBidDenominated;
+      auction.maxBid = auction.minBid;
+      auction.maxBidDenominated = auction.minBidDenominated;
     }
 
     if (input.paymentToken) {
-      marketplaceReindexState.auctions[auctionIndex].paymentToken = input.paymentToken;
+      auction.paymentToken = input.paymentToken;
     }
 
     if (input.itemsCount) {
-      marketplaceReindexState.auctions[auctionIndex].nrAuctionedTokens = input.itemsCount;
+      auction.nrAuctionedTokens = input.itemsCount;
     }
   }
 }

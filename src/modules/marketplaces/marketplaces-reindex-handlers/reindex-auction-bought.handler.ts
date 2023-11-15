@@ -24,10 +24,12 @@ export class ReindexAuctionBoughtHandler {
     const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
     const auction = marketplaceReindexState.auctions[auctionIndex];
 
-    const totalBought = this.getTotalBoughtTokensForAuction(auction.id, auction.orders);
+    if (auction.nrAuctionedTokens > 1) {
+      const totalBought = this.getTotalBoughtTokensForAuction(auction.id, auction.orders);
 
-    if (auction.nrAuctionedTokens === totalBought) {
-      marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
+      if (auction.nrAuctionedTokens === totalBought) {
+        marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
+      }
     }
 
     marketplaceReindexState.updateOrderListForAuction(auctionIndex, order);
