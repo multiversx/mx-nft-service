@@ -27,8 +27,10 @@ export class ContractLoader {
     try {
       const jsonContent: string = await fs.promises.readFile(this.abiPath, { encoding: 'utf8' });
       const json = JSON.parse(jsonContent);
+      console.log({ json: JSON.stringify(json) });
 
       const abiRegistry = AbiRegistry.create(json);
+      console.log(abiRegistry.getEndpoint('contractDeploy'));
 
       return abiRegistry;
     } catch (error) {

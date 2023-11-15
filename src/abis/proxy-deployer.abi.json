@@ -1,0 +1,150 @@
+{
+  "buildInfo": {
+    "rustc": {
+      "version": "1.71.0-nightly",
+      "commitHash": "7f94b314cead7059a71a265a8b64905ef2511796",
+      "commitDate": "2023-04-23",
+      "channel": "Nightly",
+      "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
+    },
+    "contractCrate": {
+      "name": "proxy-deployer",
+      "version": "0.0.0"
+    },
+    "framework": {
+      "name": "multiversx-sc",
+      "version": "0.43.4"
+    }
+  },
+  "name": "ProxyDeployer",
+  "constructor": {
+    "inputs": [],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "upgrade",
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "contractDeploy",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "template_address_id",
+          "type": "u64"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "contractUpgrade",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "contract_address",
+          "type": "Address"
+        },
+        {
+          "name": "template_address_id",
+          "type": "u64"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "callContractEndpoint",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "contract_address",
+          "type": "Address"
+        },
+        {
+          "name": "function_name",
+          "type": "bytes"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "addContractTemplate",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "template_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "removeContractTemplate",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address_id",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getAllDeployers",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getDeployerContractAddresses",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "deployer_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "hasCallback": false,
+  "types": {}
+}

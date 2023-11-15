@@ -697,6 +697,13 @@ input DeployMinterArgs {
   royaltiesClaimAddress: String!
 }
 
+input DeployMinterArgsP {
+  maxNftsPerTransaction: Int!
+  mintClaimAddress: String!
+  ownerAddress: String!
+  royaltiesClaimAddress: String!
+}
+
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -977,6 +984,7 @@ type Mutation {
   deployMinter(input: DeployMinterArgs!): TransactionNode!
   disableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   enableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
+  deployMinterP(input: DeployMinterArgsP!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
