@@ -32,6 +32,8 @@ import {
   getLowestAuctionForIdentifiersAndMarketplace,
   getOnSaleAssetsCountForCollection,
 } from './sql.queries';
+import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
+import { OrderEntity } from '../orders';
 
 @Injectable()
 export class AuctionsRepository {
@@ -434,58 +436,78 @@ export class AuctionsRepository {
   }
 
   async saveBulkAuctionsOrUpdateAndFillId(auctions: AuctionEntity[]): Promise<void> {
+    const batchSize = 1000;
     if (auctions.length === 0) {
       return;
     }
-    const response = await this.auctionsRepository.upsert(auctions, { conflictPaths: ['marketplaceAuctionId', 'marketplaceKey'] });
 
-    // const saveOrUpdateResponse = await this.auctionsRepository
-    //   .createQueryBuilder()
-    //   .insert()
-    //   .into('auctions')
-    //   .values(auctions)
-    //   .orUpdate({
-    //     overwrite: [
-    //       'creationDate',
-    //       'modifiedDate',
-    //       'collection',
-    //       'nrAuctionedTokens',
-    //       'identifier',
-    //       'nonce',
-    //       'status',
-    //       'type',
-    //       'paymentToken',
-    //       'paymentNonce',
-    //       'ownerAddress',
-    //       'minBidDiff',
-    //       'minBid',
-    //       'minBidDenominated',
-    //       'maxBid',
-    //       'maxBidDenominated',
-    //       'startDate',
-    //       'endDate',
-    //       'tags',
-    //       'blockHash',
-    //     ],
-    //     conflict_target: ['marketplaceAuctionId', 'marketplaceKey'],
-    //   })
-    //   .updateEntity(false)
-    //   .execute();
-    // if (saveOrUpdateResponse.identifiers.length === 0 || auctions.findIndex((a) => a.id === undefined) !== -1) {
-    //   const dbAuctions = await this.getBulkAuctionsByMarketplaceAndAuctionIds(
-    //     auctions?.[0]?.marketplaceKey,
-    //     auctions?.map((a) => a.marketplaceAuctionId),
-    //   );
-    //   for (let i = 0; i < dbAuctions.length; i++) {
-    //     const auctionIndex = auctions.findIndex((a) => a.marketplaceAuctionId === dbAuctions[i].marketplaceAuctionId);
-    //     auctions[auctionIndex].id = dbAuctions[i].id;
-    //   }
-    // }
-    // if (auctions.findIndex((a) => a.id === undefined) !== -1) {
-    //   const wtf = auctions.filter((a) => a.id === undefined).map((a) => a.marketplaceAuctionId);
-    //   const duplicate = auctions.filter((a) => a.marketplaceAuctionId === 31434);
-    //   throw new Error(`oooppps ${JSON.stringify(duplicate)}`);
-    // }
+    const connection = this.auctionsRepository.manager.connection;
+
+    await connection.transaction(async (transactionalEntityManager) => {
+      const queryBuilder = transactionalEntityManager.createQueryBuilder().from(AuctionEntity, 'auction');
+
+      for (let i = 0; i < auctions.length; i += batchSize) {
+        const currentQueryBuilder = queryBuilder.clone();
+        const batch = auctions.slice(i, i + batchSize);
+        console.log('Processing batch number', i);
+
+        const cpu = new CpuProfiler();
+        for (const item of batch) {
+          currentQueryBuilder.insert().values(item).onConflict(`("marketplaceKey", "marketplaceAuctionId") DO UPDATE SET
+              "collection" = EXCLUDED."collection",
+              "nrAuctionedTokens" = EXCLUDED."nrAuctionedTokens",
+              "identifier" = EXCLUDED."identifier",
+              "nonce" = EXCLUDED."nonce",
+              "status" = EXCLUDED."status",
+              "type" = EXCLUDED."type",
+              "paymentToken" = EXCLUDED."paymentToken",
+              "paymentNonce" = EXCLUDED."paymentNonce",
+              "ownerAddress" = EXCLUDED."ownerAddress",
+              "minBidDiff" = EXCLUDED."minBidDiff",
+              "minBid" = EXCLUDED."minBid",
+              "minBidDenominated" = EXCLUDED."minBidDenominated",
+              "maxBid" = EXCLUDED."maxBid",
+              "maxBidDenominated" = EXCLUDED."maxBidDenominated",
+              "startDate" = EXCLUDED."startDate",
+              "endDate" = EXCLUDED."endDate",
+              "tags" = EXCLUDED."tags",
+              "blockHash" = EXCLUDED."blockHash"
+            `);
+
+          // Include related orders
+          if (item.orders && item.orders.length > 0) {
+            for (const order of item.orders) {
+              currentQueryBuilder.insert().into(OrderEntity).values({
+                priceToken: order.priceToken,
+                priceAmount: order.priceAmount,
+                priceAmountDenominated: order.priceAmountDenominated,
+                priceNonce: order.priceNonce,
+                status: order.status,
+                ownerAddress: order.ownerAddress,
+                boughtTokensNo: order.boughtTokensNo,
+                auctionId: order.auctionId,
+                blockHash: order.blockHash,
+                marketplaceKey: order.marketplaceKey,
+              }).onConflict(`("auctionId", "marketplaceKey") DO UPDATE SET
+                "priceToken" = EXCLUDED."priceToken",
+                "priceAmount" = EXCLUDED."priceAmount",
+                "priceAmountDenominated" = EXCLUDED."priceAmountDenominated",
+                "priceNonce" = EXCLUDED."priceNonce",
+                "status" = EXCLUDED."status",
+                "ownerAddress" = EXCLUDED."ownerAddress",
+                "boughtTokensNo" = EXCLUDED."boughtTokensNo",
+                "blockHash" = EXCLUDED."blockHash"
+              `);
+            }
+          }
+        }
+
+        await currentQueryBuilder.execute();
+        cpu.stop(`batch ${i}`);
+      }
+
+      console.log('Bulk insert or update completed successfully.');
+    });
   }
 
   async rollbackAuctionAndOrdersByHash(blockHash: string): Promise<any> {

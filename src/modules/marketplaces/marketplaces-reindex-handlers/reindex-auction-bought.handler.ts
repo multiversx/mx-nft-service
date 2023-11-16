@@ -12,27 +12,26 @@ export class ReindexAuctionBoughtHandler {
   constructor() {}
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionBuySummary, paymentToken: Token, paymentNonce: number): void {
-    const auctionIndex =
+    const auction =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-        ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
-        : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
+        ? marketplaceReindexState.auctionMap.get(input.auctionId)
+        : marketplaceReindexState.auctionMap.get(input.auctionId); //de scris
 
-    if (auctionIndex === -1) {
+    if (!auction) {
       return;
     }
 
-    const order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
-    const auction = marketplaceReindexState.auctions[auctionIndex];
+    const order = marketplaceReindexState.createOrder(auction, input, OrderStatusEnum.Bought, paymentToken, paymentNonce);
 
     if (auction.nrAuctionedTokens > 1) {
       const totalBought = this.getTotalBoughtTokensForAuction(auction.id, auction.orders);
 
       if (auction.nrAuctionedTokens === totalBought) {
-        marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
+        marketplaceReindexState.updateAuctionStatus(auction, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
       }
     }
 
-    marketplaceReindexState.updateOrderListForAuction(auctionIndex, order);
+    marketplaceReindexState.updateOrderListForAuction(auction, order);
   }
 
   private getTotalBoughtTokensForAuction(auctionId: number, orders: OrderEntity[]): number {

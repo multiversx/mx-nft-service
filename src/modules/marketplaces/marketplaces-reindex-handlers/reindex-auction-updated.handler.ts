@@ -11,34 +11,28 @@ export class ReindexAuctionUpdatedHandler {
   constructor() {}
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionUpdatedSummary, decimals: number): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
+    const auction = marketplaceReindexState.auctionMap.get(input.auctionId);
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
 
-    if (auctionIndex === -1) {
+    if (!auction) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].blockHash = marketplaceReindexState.auctions[auctionIndex].blockHash ?? input.blockHash;
-    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    auction.blockHash = auction.blockHash ?? input.blockHash;
+    auction.modifiedDate = modifiedDate;
 
-    marketplaceReindexState.auctions[auctionIndex].minBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = Math.min(
-      BigNumberUtils.denominateAmount(input.minBid, decimals),
-      constants.dbMaxDenominatedValue,
-    );
-    marketplaceReindexState.auctions[auctionIndex].maxBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = Math.min(
-      marketplaceReindexState.auctions[auctionIndex].minBidDenominated,
-      constants.dbMaxDenominatedValue,
-    );
+    auction.minBid = input.minBid;
+    auction.minBidDenominated = Math.min(BigNumberUtils.denominateAmount(input.minBid, decimals), constants.dbMaxDenominatedValue);
+    auction.maxBid = input.minBid;
+    auction.maxBidDenominated = Math.min(auction.minBidDenominated, constants.dbMaxDenominatedValue);
 
     if (input.paymentToken) {
-      marketplaceReindexState.auctions[auctionIndex].paymentToken = input.paymentToken;
-      marketplaceReindexState.auctions[auctionIndex].paymentNonce = BinaryUtils.hexToNumber(input.paymentNonce);
+      auction.paymentToken = input.paymentToken;
+      auction.paymentNonce = BinaryUtils.hexToNumber(input.paymentNonce);
     }
 
     if (input.deadline > 0) {
-      marketplaceReindexState.auctions[auctionIndex].endDate = input.deadline;
+      auction.endDate = input.deadline;
     }
   }
 }

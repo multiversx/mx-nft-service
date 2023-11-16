@@ -23,13 +23,11 @@ export class ReindexAuctionStartedHandler {
     const minBidDenominated = BigNumberUtils.denominateAmount(input.minBid, paymentToken.decimals);
     const maxBidDenominated = BigNumberUtils.denominateAmount(input.maxBid !== 'NaN' ? input.maxBid : '0', paymentToken.decimals);
 
-    marketplaceReindexState.deleteAuctionIfDuplicates(input.auctionId);
-
     const auction = new AuctionEntity({
       creationDate: modifiedDate,
       modifiedDate,
       id: marketplaceReindexState.getNewAuctionId(),
-      marketplaceAuctionId: input.auctionId !== 0 ? input.auctionId : marketplaceReindexState.auctions.length + 1,
+      marketplaceAuctionId: input.auctionId !== 0 ? input.auctionId : marketplaceReindexState.auctionMap.size + 1,
       identifier: input.identifier,
       collection: input.collection,
       nonce: nonce,
@@ -51,6 +49,6 @@ export class ReindexAuctionStartedHandler {
       marketplaceKey: marketplaceReindexState.marketplace.key,
     });
 
-    marketplaceReindexState.auctions.push(auction);
+    marketplaceReindexState.auctionMap.set(auction.marketplaceAuctionId, auction);
   }
 }

@@ -10,13 +10,13 @@ export class ReindexGlobalOfferAcceptedHandler {
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: GlobalOfferAcceptedSummary): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
+    const auction = marketplaceReindexState.auctionMap.get(input.auctionId);
 
-    if (auctionIndex === -1) {
+    if (!auction) {
       return;
     }
 
-    marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
-    marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    auction.status = AuctionStatusEnum.Closed;
+    auction.modifiedDate = modifiedDate;
   }
 }

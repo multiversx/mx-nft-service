@@ -13,10 +13,10 @@ export class ReindexOfferAcceptedHandler {
   handle(marketplaceReindexState: MarketplaceReindexState, input: OfferAcceptedSummary): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const offerIndex = marketplaceReindexState.getOfferIndexByOfferId(input.offerId);
-    const auctionIndex =
+    const auction =
       marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-        ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
-        : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
+        ? marketplaceReindexState.auctionMap.get(input.auctionId)
+        : marketplaceReindexState.auctionMap.get(input.auctionId); //de scris
 
     if (offerIndex !== -1) {
       marketplaceReindexState.offers[offerIndex].status = OfferStatusEnum.Accepted;
@@ -24,9 +24,9 @@ export class ReindexOfferAcceptedHandler {
       return;
     }
 
-    if (auctionIndex !== -1) {
-      marketplaceReindexState.auctions[auctionIndex].status = AuctionStatusEnum.Closed;
-      marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
+    if (auction) {
+      auction.status = AuctionStatusEnum.Closed;
+      auction.modifiedDate = modifiedDate;
     }
   }
 }

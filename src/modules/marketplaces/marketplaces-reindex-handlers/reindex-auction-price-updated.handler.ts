@@ -10,14 +10,13 @@ export class ReindexAuctionPriceUpdatedHandler {
   constructor() {}
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionPriceUpdatedSummary, decimals: number): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
+    const auction = marketplaceReindexState.auctionMap.get(input.auctionId);
 
-    if (auctionIndex === -1) {
+    if (!auction) {
       return;
     }
 
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
-    const auction = marketplaceReindexState.auctions[auctionIndex];
 
     auction.blockHash = auction.blockHash ?? input.blockHash;
     auction.modifiedDate = modifiedDate;

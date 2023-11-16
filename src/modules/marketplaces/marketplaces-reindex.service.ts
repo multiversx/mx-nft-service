@@ -29,6 +29,7 @@ import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { OrdersService } from '../orders/order.service';
 import { Token } from '../usdPrice/Token.model';
 import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
+import { TagEntity } from 'src/db/auctions/tags.entity';
 
 @Injectable()
 export class MarketplacesReindexService {
@@ -66,6 +67,7 @@ export class MarketplacesReindexService {
 
           this.logger.log(`Reindexing marketplace data/state for ${input.marketplaceAddress} ended`);
         } catch (error) {
+          console.log(error);
           this.logger.error('An error occurred while reindexing marketplace data', {
             path: `${MarketplacesReindexService.name}.${this.reindexMarketplaceData.name}`,
             marketplaceAddress: input.marketplaceAddress,
@@ -138,8 +140,7 @@ export class MarketplacesReindexService {
         processInNextBatch.concat(batch),
       );
       console.log({
-        auctions: marketplaceReindexStates[0].auctions.length,
-        orders: marketplaceReindexStates[0].orders.length,
+        auctions: marketplaceReindexStates[0].auctionMap.size,
         offers: marketplaceReindexStates[0].offers.length,
       });
       // await this.addInactiveStateItemsToDb(marketplaceReindexStates);
@@ -281,12 +282,6 @@ export class MarketplacesReindexService {
         : [],
     ]);
 
-    if (auctions?.length > 0) {
-      marketplaceReindexState.auctions = marketplaceReindexState.auctions.concat(auctions);
-    }
-    if (orders?.length > 0) {
-      marketplaceReindexState.orders = marketplaceReindexState.orders.concat(orders);
-    }
     if (offers?.length > 0) {
       marketplaceReindexState.offers = marketplaceReindexState.offers.concat(offers);
     }
@@ -309,9 +304,9 @@ export class MarketplacesReindexService {
       ) {
         const auctionIndex =
           marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-            ? marketplaceReindexState.getAuctionIndexByAuctionId(eventsSetSummaries[i].auctionId)
-            : marketplaceReindexState.getAuctionIndexByIdentifier(eventsSetSummaries[i].identifier);
-        if (auctionIndex === -1) {
+            ? marketplaceReindexState.auctionMap.get(eventsSetSummaries[i].auctionId)
+            : marketplaceReindexState.auctionMap.get(eventsSetSummaries[i].identifier);
+        if (!auctionIndex) {
           marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
             ? missingAuctionIds.push(eventsSetSummaries[i].auctionId)
             : missingStateForIdentifiers.push(eventsSetSummaries[i].identifier);
@@ -395,13 +390,13 @@ export class MarketplacesReindexService {
 
   private async getPaymentTokenAndNonce(marketplaceReindexState: MarketplaceReindexState, input: any): Promise<[Token, number]> {
     try {
-      const auctionIndex =
+      const auction =
         marketplaceReindexState.marketplace.key !== ELRONDNFTSWAP_KEY
-          ? marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId)
-          : marketplaceReindexState.getAuctionIndexByIdentifier(input.identifier);
-      const paymentNonceValue = input.paymentNonce ?? marketplaceReindexState.auctions[auctionIndex]?.paymentNonce;
+          ? marketplaceReindexState.auctionMap.get(input.auctionId)
+          : marketplaceReindexState.auctionMap.get(input.auctionId);
+      const paymentNonceValue = input.paymentNonce ?? auction?.paymentNonce;
       const paymentNonce = !Number.isNaN(paymentNonceValue) ? paymentNonceValue : 0;
-      const paymentTokenIdentifier = input.paymentToken ?? marketplaceReindexState.auctions[auctionIndex]?.paymentToken;
+      const paymentTokenIdentifier = input.paymentToken ?? auction?.paymentToken;
       if (paymentTokenIdentifier === mxConfig.egld) {
         return [
           new Token({
@@ -442,15 +437,12 @@ export class MarketplacesReindexService {
       for (const marketplaceReindexState of marketplaceReindexStates) {
         // marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
 
-        let [inactiveAuctions, inactiveOrders, inactiveOffers] = isFinalBatch
-          ? marketplaceReindexState.popAllItems()
-          : marketplaceReindexState.popInactiveItems();
+        let [inactiveAuctions, inactiveOffers] = marketplaceReindexState.popAllItems();
 
         console.log({
-          inactiveOrders: inactiveOrders.length,
           inactiveAuctions: inactiveAuctions.length,
           inactiveordersONAc: inactiveAuctions.sum((au) => au.orders?.length ?? 0),
-          inactiveOffers: inactiveOffers.length,
+          inactiveOffers: inactiveOffers?.length,
         });
 
         if (inactiveAuctions.length === 0 && inactiveOffers.length === 0) {
@@ -461,44 +453,29 @@ export class MarketplacesReindexService {
 
         // await this.populateAuctionMissingAssetTags(inactiveAuctions);
 
-        for (let i = 0; i < inactiveOrders.length; i++) {
-          if (inactiveOrders[i].auctionId < 0) {
-            const auctionIndex = inactiveAuctions.findIndex((a) => a.id === inactiveOrders[i].auctionId);
-            if (auctionIndex !== -1) {
-              inactiveOrders[i].auctionId = -inactiveAuctions[auctionIndex].marketplaceAuctionId;
-            } else {
-              this.logger.warn(`Corresponding auction not found`);
-            }
-          }
-
-          if (inactiveOrders[i].id < 0) {
-            delete inactiveOrders[i].id;
-          }
-        }
-
-        for (let i = 0; i < inactiveAuctions.length; i++) {
-          if (inactiveAuctions[i].id < 0) {
-            delete inactiveAuctions[i].id;
-          }
-        }
+        // for (let i = 0; i < inactiveAuctions.length; i++) {
+        //   if (inactiveAuctions[i].id < 0) {
+        //     delete inactiveAuctions[i].id;
+        //   }
+        // }
 
         await this.auctionSetterService.saveBulkAuctionsOrUpdateAndFillId(inactiveAuctions);
 
-        // let tags: TagEntity[] = [];
-        // inactiveAuctions.map((auction) => {
-        //   const assetTags = auction.tags.split(',');
-        //   assetTags.map((assetTag) => {
-        //     if (assetTag !== '') {
-        //       tags.push(
-        //         new TagEntity({
-        //           auctionId: auction.id,
-        //           tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
-        //           auction: auction,
-        //         }),
-        //       );
-        //     }
-        //   });
-        // });
+        let tags: TagEntity[] = [];
+        inactiveAuctions.map((auction) => {
+          const assetTags = auction.tags.split(',');
+          assetTags.map((assetTag) => {
+            if (assetTag !== '') {
+              tags.push(
+                new TagEntity({
+                  auctionId: auction.id,
+                  tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
+                  auction: auction,
+                }),
+              );
+            }
+          });
+        });
 
         // const saveTagsPromise = this.persistenceService.saveTagsOrIgnore(tags);
 
@@ -523,7 +500,7 @@ export class MarketplacesReindexService {
             delete o.id;
           }
         });
-        console.log({ orders: inactiveOrders.length, auctions: inactiveAuctions.length, offers: inactiveOffers.length });
+        console.log({ auctions: inactiveAuctions.length, offers: inactiveOffers.length });
 
         await Promise.all([
           // saveTagsPromise,

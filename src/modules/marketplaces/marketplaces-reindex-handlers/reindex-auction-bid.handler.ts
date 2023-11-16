@@ -10,18 +10,18 @@ export class ReindexAuctionBidHandler {
   constructor() {}
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: AuctionBidSummary, paymentToken: Token, paymentNonce: number): void {
-    const auctionIndex = marketplaceReindexState.getAuctionIndexByAuctionId(input.auctionId);
+    const auction = marketplaceReindexState.auctionMap.get(input.auctionId);
 
-    if (auctionIndex === -1) {
+    if (!auction) {
       return;
     }
 
-    let order = marketplaceReindexState.createOrder(auctionIndex, input, OrderStatusEnum.Active, paymentToken, paymentNonce);
-    if (order.priceAmount === marketplaceReindexState.auctions[auctionIndex].maxBid) {
+    let order = marketplaceReindexState.createOrder(auction, input, OrderStatusEnum.Active, paymentToken, paymentNonce);
+    if (order.priceAmount === auction.maxBid) {
       order.status = OrderStatusEnum.Bought;
-      marketplaceReindexState.updateAuctionStatus(auctionIndex, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
+      marketplaceReindexState.updateAuctionStatus(auction, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
     }
 
-    marketplaceReindexState.updateOrderListForAuction(auctionIndex, order);
+    marketplaceReindexState.updateOrderListForAuction(auction, order);
   }
 }
