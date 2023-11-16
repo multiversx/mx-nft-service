@@ -444,10 +444,8 @@ export class AuctionsRepository {
     const connection = this.auctionsRepository.manager.connection;
 
     await connection.transaction(async (transactionalEntityManager) => {
-      const queryBuilder = transactionalEntityManager.createQueryBuilder().from(AuctionEntity, 'auction');
-
       for (let i = 0; i < auctions.length; i += batchSize) {
-        const currentQueryBuilder = queryBuilder.clone();
+        const currentQueryBuilder = transactionalEntityManager.createQueryBuilder().from(AuctionEntity, 'auction');
         const batch = auctions.slice(i, i + batchSize);
         console.log('Processing batch number', i);
 
@@ -500,9 +498,10 @@ export class AuctionsRepository {
               `);
             }
           }
+
+          await currentQueryBuilder.execute();
         }
 
-        await currentQueryBuilder.execute();
         cpu.stop(`batch ${i}`);
       }
 
