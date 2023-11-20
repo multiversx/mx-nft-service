@@ -118,14 +118,9 @@ export class MarketplaceReindexState {
   }
 
   public updateAuctionStatus(auction: AuctionEntity, blockHash: string, status: AuctionStatusEnum, timestamp: number): void {
-    const updatedAuction = {
-      ...auction,
-      status,
-      blockHash: auction.blockHash ?? blockHash,
-      modifiedDate: DateUtils.getUtcDateFromTimestamp(timestamp),
-    };
-
-    this.auctionMap[auction.marketplaceAuctionId] = updatedAuction;
+    auction.status = status;
+    auction.blockHash = auction.blockHash ?? blockHash;
+    auction.modifiedDate = DateUtils.getUtcDateFromTimestamp(timestamp);
   }
 
   deleteOfferIfDuplicates(marketplaceOfferId: number) {
