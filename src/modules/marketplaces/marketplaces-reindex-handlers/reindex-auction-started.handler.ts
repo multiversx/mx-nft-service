@@ -26,7 +26,6 @@ export class ReindexAuctionStartedHandler {
     const auction = new AuctionEntity({
       creationDate: modifiedDate,
       modifiedDate,
-      id: marketplaceReindexState.getNewAuctionId(),
       marketplaceAuctionId: input.auctionId !== 0 ? input.auctionId : marketplaceReindexState.auctionMap.size + 1,
       identifier: input.identifier,
       collection: input.collection,

@@ -52,7 +52,6 @@ export class MarketplaceReindexState {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const price = input.price ?? input.currentBid;
     return new OrderEntity({
-      id: this.getNewOrderId(),
       creationDate: modifiedDate,
       modifiedDate,
       ownerAddress: input.address,

@@ -34,6 +34,7 @@ import {
 } from './sql.queries';
 import { CpuProfiler } from '@multiversx/sdk-nestjs-monitoring';
 import { OrderEntity } from '../orders';
+import { TagEntity } from './tags.entity';
 
 @Injectable()
 export class AuctionsRepository {
@@ -435,6 +436,67 @@ export class AuctionsRepository {
       .execute();
   }
 
+  // async saveBulkAuctions(auctions: AuctionEntity[]): Promise<void> {
+  //   await this.auctionsRepository.save(auctions, {
+  //     chunk: 1000,
+  //   });
+  // }
+
+  // async saveBulkAuctionsOrUpdateAndFillId(auctions: AuctionEntity[]): Promise<void> {
+  //   const batchSize = 1000;
+  //   if (auctions.length === 0) {
+  //     return;
+  //   }
+
+  //   const connection = this.auctionsRepository.manager.connection;
+
+  //   await connection.transaction(async (transactionalEntityManager) => {
+  //     for (let i = 0; i < auctions.length; i += batchSize) {
+  //       const batch = auctions.slice(i, i + batchSize);
+  //       console.log('Processing batch number', i);
+
+  //       const cpu = new CpuProfiler();
+  //       // for (const item of batch) {
+  //       const currentQueryBuilder = transactionalEntityManager
+  //         .createQueryBuilder()
+  //         .from(AuctionEntity, 'auction')
+  //         .insert()
+  //         .values(batch)
+  //         .orUpdate({
+  //           conflict_target: ['marketplaceKey', 'marketplaceAuctionId'],
+  //           overwrite: [
+  //             'collection',
+  //             'nrAuctionedTokens',
+  //             'identifier',
+  //             'nonce',
+  //             'status',
+  //             'type',
+  //             'paymentToken',
+  //             'paymentNonce',
+  //             'ownerAddress',
+  //             'minBidDiff',
+  //             'minBid',
+  //             'minBidDenominated',
+  //             'maxBid',
+  //             'maxBidDenominated',
+  //             'startDate',
+  //             'tags',
+  //             'blockHash',
+  //           ],
+  //         });
+  //       console.log(currentQueryBuilder.getQueryAndParameters());
+  //       // Include related orders
+
+  //       await currentQueryBuilder.execute();
+  //       // }
+
+  //       cpu.stop(`batch ${i}`);
+  //     }
+
+  //     console.log('Bulk insert or update completed successfully.');
+  //   });
+  // }
+
   async saveBulkAuctionsOrUpdateAndFillId(auctions: AuctionEntity[]): Promise<void> {
     const batchSize = 1000;
     if (auctions.length === 0) {
@@ -445,61 +507,47 @@ export class AuctionsRepository {
 
     await connection.transaction(async (transactionalEntityManager) => {
       for (let i = 0; i < auctions.length; i += batchSize) {
-        const currentQueryBuilder = transactionalEntityManager.createQueryBuilder().from(AuctionEntity, 'auction');
         const batch = auctions.slice(i, i + batchSize);
         console.log('Processing batch number', i);
 
         const cpu = new CpuProfiler();
+        const response = await transactionalEntityManager
+          .createQueryBuilder()
+          .from(AuctionEntity, 'auction')
+          .insert()
+          .into(AuctionEntity)
+          .values(batch)
+          .execute();
+        console.log({ auctions: response?.identifiers?.length });
+
+        let orders = [];
+        let tags = [];
         for (const item of batch) {
-          currentQueryBuilder.insert().values(item).onConflict(`("marketplaceKey", "marketplaceAuctionId") DO UPDATE SET
-              "collection" = EXCLUDED."collection",
-              "nrAuctionedTokens" = EXCLUDED."nrAuctionedTokens",
-              "identifier" = EXCLUDED."identifier",
-              "nonce" = EXCLUDED."nonce",
-              "status" = EXCLUDED."status",
-              "type" = EXCLUDED."type",
-              "paymentToken" = EXCLUDED."paymentToken",
-              "paymentNonce" = EXCLUDED."paymentNonce",
-              "ownerAddress" = EXCLUDED."ownerAddress",
-              "minBidDiff" = EXCLUDED."minBidDiff",
-              "minBid" = EXCLUDED."minBid",
-              "minBidDenominated" = EXCLUDED."minBidDenominated",
-              "maxBid" = EXCLUDED."maxBid",
-              "maxBidDenominated" = EXCLUDED."maxBidDenominated",
-              "startDate" = EXCLUDED."startDate",
-              "endDate" = EXCLUDED."endDate",
-              "tags" = EXCLUDED."tags",
-              "blockHash" = EXCLUDED."blockHash"
-            `);
-
-          // Include related orders
-          if (item.orders && item.orders.length > 0) {
-            for (const order of item.orders) {
-              currentQueryBuilder.insert().into(OrderEntity).values({
-                priceToken: order.priceToken,
-                priceAmount: order.priceAmount,
-                priceAmountDenominated: order.priceAmountDenominated,
-                priceNonce: order.priceNonce,
-                status: order.status,
-                ownerAddress: order.ownerAddress,
-                boughtTokensNo: order.boughtTokensNo,
-                auctionId: order.auctionId,
-                blockHash: order.blockHash,
-                marketplaceKey: order.marketplaceKey,
-              }).onConflict(`("auctionId", "marketplaceKey") DO UPDATE SET
-                "priceToken" = EXCLUDED."priceToken",
-                "priceAmount" = EXCLUDED."priceAmount",
-                "priceAmountDenominated" = EXCLUDED."priceAmountDenominated",
-                "priceNonce" = EXCLUDED."priceNonce",
-                "status" = EXCLUDED."status",
-                "ownerAddress" = EXCLUDED."ownerAddress",
-                "boughtTokensNo" = EXCLUDED."boughtTokensNo",
-                "blockHash" = EXCLUDED."blockHash"
-              `);
-            }
+          if (item.orders) {
+            item.orders.forEach((i) => {
+              i.auction = item;
+            });
+            orders.push(...item.orders);
           }
+          if (item.tagEntities && item.tagEntities.length > 0) {
+            console.log(item.tagEntities);
+            item.tagEntities.forEach((i) => {
+              i.auction = item;
+            });
 
-          await currentQueryBuilder.execute();
+            tags.push(...item.tagEntities);
+          }
+        }
+        if (orders.length) {
+          const res = await transactionalEntityManager.createQueryBuilder().insert().into(OrderEntity).values(orders).execute();
+
+          console.log({ orders: res?.identifiers?.length });
+        }
+
+        if (tags.length) {
+          const res = await transactionalEntityManager.createQueryBuilder().insert().into(TagEntity).values(tags).execute();
+
+          console.log({ orders: res?.identifiers?.length });
         }
 
         cpu.stop(`batch ${i}`);
