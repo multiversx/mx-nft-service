@@ -17,11 +17,15 @@ export class ReindexAuctionStartedHandler {
   handle(input: AuctionStartedSummary, marketplaceReindexState: MarketplaceReindexState, paymentToken: Token, paymentNonce: number): void {
     const nonce = BinaryUtils.hexToNumber(input.nonce);
     const itemsCount = parseInt(input.itemsCount);
+    let status = AuctionStatusEnum.Running;
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
     const startTime = Number.isNaN(input.startTime) ? input.timestamp : input.startTime;
     const endTime = input.endTime > 0 ? input.endTime : 0;
     const minBidDenominated = BigNumberUtils.denominateAmount(input.minBid, paymentToken.decimals);
     const maxBidDenominated = BigNumberUtils.denominateAmount(input.maxBid !== 'NaN' ? input.maxBid : '0', paymentToken.decimals);
+    if (endTime > 0 && endTime <= DateUtils.getCurrentTimestamp()) {
+      status = AuctionStatusEnum.Claimable;
+    }
 
     const auction = new AuctionEntity({
       creationDate: modifiedDate,
@@ -31,7 +35,7 @@ export class ReindexAuctionStartedHandler {
       collection: input.collection,
       nonce: nonce,
       nrAuctionedTokens: itemsCount,
-      status: AuctionStatusEnum.Running,
+      status: status,
       type: input.auctionType,
       paymentToken: paymentToken.identifier,
       paymentNonce,
