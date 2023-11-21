@@ -105,7 +105,8 @@ export class MarketplacesReindexEventsSummaryService {
       case AuctionEventEnum.WithdrawOffer: {
         return OfferClosedSummary.fromWithdrawOfferEventAndTx(event, txData);
       }
-      case AuctionEventEnum.WithdrawAuctionAndAcceptOffer: {
+      case AuctionEventEnum.WithdrawAuctionAndAcceptOffer:
+      case ExternalAuctionEventEnum.AcceptOfferFromAuction: {
         if (event.hasEventTopicIdentifier(AuctionEventEnum.Accept_offer_token_event)) {
           return OfferAcceptedSummary.fromAcceptOfferEventAndTx(event, txData, marketplace);
         } else {
