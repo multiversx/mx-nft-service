@@ -29,8 +29,9 @@ export class ReindexAuctionBoughtHandler {
       if (auction.nrAuctionedTokens === totalBought) {
         marketplaceReindexState.updateAuctionStatus(auction, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
       }
+    } else {
+      marketplaceReindexState.updateAuctionStatus(auction, input.blockHash, AuctionStatusEnum.Ended, input.timestamp);
     }
-
     marketplaceReindexState.updateOrderListForAuction(auction, order);
   }
 
