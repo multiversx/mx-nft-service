@@ -118,6 +118,9 @@ export class MarketplaceReindexState {
   }
 
   public updateAuctionStatus(auction: AuctionEntity, blockHash: string, status: AuctionStatusEnum, timestamp: number): void {
+    if (auction.endDate > 0 && auction.endDate <= DateUtils.getCurrentTimestamp()) {
+      status = AuctionStatusEnum.Claimable;
+    }
     auction.status = status;
     auction.blockHash = auction.blockHash ?? blockHash;
     auction.modifiedDate = DateUtils.getUtcDateFromTimestamp(timestamp);
