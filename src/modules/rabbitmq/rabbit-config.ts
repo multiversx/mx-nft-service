@@ -14,6 +14,7 @@ export interface RabbitModuleConfig {
 export const rabbitExchanges = {
   CACHE_INVALIDATION: 'nft-cache-invalidation',
   NFT_LIKE: 'x_portal_gamification_nft_likes_exchange',
+  DISABLE_MARKETPLACE_EVENTS: 'marketplace',
 };
 
 export const rabbitQueues = {

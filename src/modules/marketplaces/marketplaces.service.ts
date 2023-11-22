@@ -4,7 +4,7 @@ import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketplaces';
-import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
@@ -75,11 +75,20 @@ export class MarketplacesService {
   async getExternalMarketplacesAddreses(): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const externalMarketplaces = allMarketplaces?.items?.filter((m) => m.type === MarketplaceTypeEnum.External);
+    const externalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.External && m.state === MarketplaceState.Enable,
+    );
 
     return externalMarketplaces.map((m) => m.address);
   }
 
+  async getDisableMarketplacesAddreses(): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const externalMarketplaces = allMarketplaces?.items?.filter((m) => m.state === MarketplaceState.Disable);
+
+    return externalMarketplaces.map((m) => m.address);
+  }
   async getMarketplacesAddreses(): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 
@@ -131,15 +140,17 @@ export class MarketplacesService {
 
   private async getInternalMarketplaces(): Promise<Marketplace[]> {
     const allMarketplaces = await this.getAllMarketplaces();
-    const internalMarketplaces = allMarketplaces?.items?.filter((m) => m.type === MarketplaceTypeEnum.Internal);
+    const internalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.Internal && m.state === MarketplaceState.Enable,
+    );
     return internalMarketplaces;
   }
 
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
-    const [campaigns, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
+    const [marketplaces, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
     return new CollectionType({
       count: count,
-      items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
+      items: marketplaces.map((marketplace) => Marketplace.fromEntity(marketplace)),
     });
   }
 

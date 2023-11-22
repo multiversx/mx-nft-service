@@ -45,6 +45,7 @@ import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
+import { DisabledMarketplaceEventsService } from './disable-marketplace-events.service';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { MintersModuleGraph } from 'src/modules/minters/minters.module';
     FeedEventsSenderService,
     UsdPriceService,
     AnalyticsEventsService,
+    DisabledMarketplaceEventsService,
   ],
   exports: [NftEventsService],
 })
