@@ -12,7 +12,7 @@ export class MarketplaceEntity extends BaseEntity {
   @Column({ length: 62 })
   name: string;
 
-  @Column({ type: 'tinyint' })
+  @Column({ length: 10 })
   state: MarketplaceState;
 
   @Column({ length: 62, unique: true })

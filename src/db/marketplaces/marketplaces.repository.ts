@@ -35,7 +35,7 @@ export class MarketplaceRepository {
       .addSelect('fm.url as url')
       .addSelect('fm.name as name')
       .addSelect('fm.key as `key`')
-      .addSelect('fm.state as state')
+      .addSelect('fm.state as `state`')
       .where('fm.address IN(:...addresses)', {
         addresses: addresses,
       })
