@@ -830,6 +830,7 @@ type Marketplace {
   key: ID!
   marketplaceCutPercentage: String
   name: String!
+  state: MarketplaceState!
   type: MarketplaceTypeEnum!
   url: String!
 }
@@ -868,6 +869,11 @@ input MarketplaceReindexDataArgs {
   afterTimestamp: Float
   beforeTimestamp: Float
   marketplaceAddress: String!
+}
+
+enum MarketplaceState {
+  Disable
+  Enable
 }
 
 enum MarketplaceTypeEnum {
