@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MarketplaceDisablePublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { MarketplaceDisablePublisherService } from 'src/modules/marketplaces/change-events-publisher.service';
 
 @Injectable()
 export class DisabledMarketplaceEventsService {

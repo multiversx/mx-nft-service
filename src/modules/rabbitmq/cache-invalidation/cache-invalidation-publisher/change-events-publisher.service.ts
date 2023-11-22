@@ -21,12 +21,3 @@ export class NftLikePublisherService {
     await this.rabbitPublisherService.publish(rabbitExchanges.NFT_LIKE, payload);
   }
 }
-
-@Injectable()
-export class MarketplaceDisablePublisherService {
-  constructor(private readonly rabbitPublisherService: RabbitPublisherService) {}
-
-  async publish(payload: any) {
-    await this.rabbitPublisherService.publish(rabbitExchanges.DISABLE_MARKETPLACE_EVENTS, payload);
-  }
-}

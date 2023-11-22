@@ -46,6 +46,8 @@ import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
 import { DisabledMarketplaceEventsService } from './disable-marketplace-events.service';
+import { MarketplaceDisablePublisherService } from 'src/modules/marketplaces/change-events-publisher.service';
+import { RabbitPublisherService } from '../rabbit.publisher';
 
 @Module({
   imports: [
@@ -99,6 +101,8 @@ import { DisabledMarketplaceEventsService } from './disable-marketplace-events.s
     UsdPriceService,
     AnalyticsEventsService,
     DisabledMarketplaceEventsService,
+    MarketplaceDisablePublisherService,
+    RabbitPublisherService,
   ],
   exports: [NftEventsService],
 })
