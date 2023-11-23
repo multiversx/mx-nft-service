@@ -298,6 +298,7 @@ export class MarketplacesService {
           name: request.marketplaceName ?? marketplace.name,
           url: request.marketplaceUrl ?? marketplace.url,
           type: marketplace.type ?? MarketplaceTypeEnum.Internal,
+          state: marketplace.state,
         }),
       );
 
