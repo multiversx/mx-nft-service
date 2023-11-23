@@ -36,7 +36,7 @@ export class NftEventsConsumer {
     if (nftAuctionEvents?.events) {
       const internalMarketplaces = await this.marketplaceService.getInternalMarketplacesAddreses();
       const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
-      const disabledMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
+      const disabledMarketplaces = await this.marketplaceService.getDisableMarketplacesAddreses();
 
       console.log({ disabledMarketplaces: JSON.stringify(disabledMarketplaces) });
       const disabledMarketplacesEvents = nftAuctionEvents?.events?.filter(

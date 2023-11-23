@@ -241,6 +241,7 @@ export class MarketplacesService {
           name: request.marketplaceName,
           url: request.marketplaceUrl,
           type: MarketplaceTypeEnum.Internal,
+          state: MarketplaceState.Enable,
         }),
       );
 
