@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { rabbitExchanges } from '../rabbitmq/rabbit-config';
-import { RabbitPublisherService } from '../rabbitmq/rabbit.publisher';
+import { rabbitExchanges } from './rabbit-config';
+import { RabbitPublisherService } from './rabbit.publisher';
 
 @Injectable()
 export class MarketplaceDisablePublisherService {

@@ -45,13 +45,12 @@ import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
-import { DisabledMarketplaceEventsService } from './disable-marketplace-events.service';
-import { MarketplaceDisablePublisherService } from 'src/modules/marketplaces/change-events-publisher.service';
-import { RabbitPublisherService } from '../rabbit.publisher';
+import { RabbitMqModule } from './rabbitmq.module';
 
 @Module({
   imports: [
     CommonModule,
+    forwardRef(() => RabbitMqModule.register()),
     CacheEventsPublisherModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
@@ -100,9 +99,6 @@ import { RabbitPublisherService } from '../rabbit.publisher';
     FeedEventsSenderService,
     UsdPriceService,
     AnalyticsEventsService,
-    DisabledMarketplaceEventsService,
-    MarketplaceDisablePublisherService,
-    RabbitPublisherService,
   ],
   exports: [NftEventsService],
 })

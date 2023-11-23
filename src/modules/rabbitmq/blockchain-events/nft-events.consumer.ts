@@ -10,7 +10,7 @@ import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { MintersService } from 'src/modules/minters/minters.service';
-import { DisabledMarketplaceEventsService } from './disable-marketplace-events.service';
+import { DisabledMarketplaceEventsService } from '../disable-marketplace-events.service';
 
 @Injectable()
 export class NftEventsConsumer {
