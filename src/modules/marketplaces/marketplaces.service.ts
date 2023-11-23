@@ -259,6 +259,32 @@ export class MarketplacesService {
     }
   }
 
+  async updateMarketplaceState(address: string, martekplaceState: MarketplaceState): Promise<Boolean> {
+    const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+    if (!marketplaces?.length) {
+      throw new BadRequestError('No marketplace with this address');
+    }
+    try {
+      marketplaces.forEach((m) => (m.state = martekplaceState));
+      const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+      if (updatedMarketplaces) {
+        for (let index = 0; index < updatedMarketplaces.length; index++) {
+          const element = updatedMarketplaces[index];
+          this.triggerCacheInvalidation(element.key, null, element.address);
+        }
+      }
+      return updatedMarketplaces ? true : false;
+    } catch (error) {
+      this.logger.error('An error has occured while updating marketplace state', {
+        path: this.updateMarketplaceState.name,
+        marketplace: address,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
   async updateMarketplace(request: UpdateMarketplaceRequest): Promise<Boolean> {
     const marketplace = await this.persistenceService.getMarketplaceByKey(request.marketplaceKey);
     if (!marketplace) {

@@ -17,6 +17,10 @@ export class MarketplaceRepository {
     return this.marketplaceRepository.findOne({ where: { address } });
   }
 
+  async getMarketplacesByAddress(address: string): Promise<MarketplaceEntity[]> {
+    return this.marketplaceRepository.find({ where: { address } });
+  }
+
   async getMarketplacesByKeys(marketplaceKeys: string[]): Promise<MarketplaceEntity[]> {
     return this.marketplaceRepository
       .createQueryBuilder('marketplaces')
@@ -44,6 +48,10 @@ export class MarketplaceRepository {
 
   async saveMarketplace(entity: MarketplaceEntity): Promise<MarketplaceEntity> {
     return this.marketplaceRepository.save(entity);
+  }
+
+  async saveMarketplaces(entities: MarketplaceEntity[]): Promise<MarketplaceEntity[]> {
+    return this.marketplaceRepository.save(entities);
   }
 
   async updateMarketplace(entity: MarketplaceEntity): Promise<boolean> {
