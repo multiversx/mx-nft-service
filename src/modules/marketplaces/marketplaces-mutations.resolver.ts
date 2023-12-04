@@ -53,6 +53,6 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @Mutation(() => Boolean)
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async enableMarketplace(@Args('input') input: UpdateMarketplaceStateArgs): Promise<Boolean> {
-    return this.marketplaceService.updateMarketplaceState(input.marketplaceScAddress, MarketplaceState.Enable);
+    return this.marketplaceService.disable(input.marketplaceScAddress, MarketplaceState.Enable);
   }
 }

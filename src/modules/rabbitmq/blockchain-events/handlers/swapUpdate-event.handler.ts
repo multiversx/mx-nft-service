@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
@@ -15,6 +15,7 @@ export class SwapUpdateEventHandler {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
     private usdPriceService: UsdPriceService,
   ) {}

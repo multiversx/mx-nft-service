@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
@@ -10,7 +10,7 @@ import { MinterEventsService } from './minter-events.service';
 import { NftEventsService } from './nft-events.service';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { MintersService } from 'src/modules/minters/minters.service';
-import { DisabledMarketplaceEventsService } from '../disable-marketplace-events.service';
+import { DisabledMarketplaceEventsService } from './disable-marketplace/disable-marketplace-events.service';
 
 @Injectable()
 export class NftEventsConsumer {
@@ -30,7 +30,7 @@ export class NftEventsConsumer {
     connection: 'default',
     queueName: process.env.RABBITMQ_QUEUE,
     exchange: process.env.RABBITMQ_EXCHANGE,
-    dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
+    // dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents?.events) {

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { MxApiService, MxElasticService } from 'src/common';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
@@ -29,6 +29,7 @@ import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 export class AssetsGetterService {
   constructor(
     private apiService: MxApiService,
+    @Inject(forwardRef(() => CollectionsGetterService))
     private collectionsService: CollectionsGetterService,
     private featuredCollectionsService: FeaturedService,
     private elasticService: MxElasticService,

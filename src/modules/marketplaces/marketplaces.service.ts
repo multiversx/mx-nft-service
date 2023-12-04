@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import '../../utils/extensions';
 import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
@@ -14,6 +14,7 @@ import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceReq
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { mxConfig } from 'src/config';
+import { DisabledMarketplaceEventsService } from '../rabbitmq/blockchain-events/disable-marketplace/disable-marketplace-events.service';
 
 @Injectable()
 export class MarketplacesService {
@@ -21,6 +22,8 @@ export class MarketplacesService {
     private readonly persistenceService: PersistenceService,
     private readonly cacheService: MarketplacesCachingService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
+    @Inject(forwardRef(() => DisabledMarketplaceEventsService))
+    private readonly marketplaceService: DisabledMarketplaceEventsService,
     private readonly logger: Logger,
   ) {}
 
@@ -263,6 +266,35 @@ export class MarketplacesService {
     try {
       const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
 
+      if (!marketplaces || marketplaces.length === 0) {
+        throw new BadRequestError('No marketplace with this address');
+      }
+
+      marketplaces.forEach((m) => (m.state = marketplaceState));
+
+      const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+      if (updatedMarketplaces) {
+        for (const updatedMarketplace of updatedMarketplaces) {
+          this.triggerCacheInvalidation(updatedMarketplace.key, null, updatedMarketplace.address);
+        }
+      }
+
+      return !!updatedMarketplaces;
+    } catch (error) {
+      this.logger.error('An error has occurred while updating marketplace state', {
+        path: this.updateMarketplaceState.name,
+        marketplace: address,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async disable(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+    try {
+      const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+      const test = await this.marketplaceService.handleAuctionFor();
       if (!marketplaces || marketplaces.length === 0) {
         throw new BadRequestError('No marketplace with this address');
       }
