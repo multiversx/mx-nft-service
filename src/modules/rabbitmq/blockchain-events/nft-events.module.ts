@@ -45,12 +45,10 @@ import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
-import { RabbitMqModule } from './rabbitmq.module';
 
 @Module({
   imports: [
     CommonModule,
-    forwardRef(() => RabbitMqModule.register()),
     CacheEventsPublisherModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CampaignsModuleGraph),
