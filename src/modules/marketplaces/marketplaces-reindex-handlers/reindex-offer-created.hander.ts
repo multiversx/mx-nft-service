@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { constants } from 'src/config';
 import { OfferEntity } from 'src/db/offers';
 import { OfferStatusEnum } from 'src/modules/offers/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
@@ -12,6 +13,7 @@ export class ReindexOfferCreatedHandler {
 
   handle(marketplaceReindexState: MarketplaceReindexState, input: OfferCreatedSummary, decimals: number): void {
     const modifiedDate = DateUtils.getUtcDateFromTimestamp(input.timestamp);
+    const priceAmountDenominated = BigNumberUtils.denominateAmount(input.price, decimals);
     const offer = new OfferEntity({
       id: marketplaceReindexState.offers.length,
       creationDate: modifiedDate,
@@ -23,9 +25,9 @@ export class ReindexOfferCreatedHandler {
       priceToken: input.paymentToken,
       priceNonce: input.paymentNonce,
       priceAmount: input.price,
-      priceAmountDenominated: BigNumberUtils.denominateAmount(input.price, decimals),
+      priceAmountDenominated: Math.min(priceAmountDenominated, constants.dbMaxDenominatedValue),
       ownerAddress: input.address,
-      endDate: input.endTime,
+      endDate: Math.min(input.endTime, constants.dbMaxTimestamp),
       boughtTokensNo: input.itemsCount,
       marketplaceKey: marketplaceReindexState.marketplace.key,
       status: OfferStatusEnum.Active,

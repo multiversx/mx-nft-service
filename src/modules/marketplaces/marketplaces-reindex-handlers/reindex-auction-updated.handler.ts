@@ -1,5 +1,6 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 import { Injectable } from '@nestjs/common';
+import { constants } from 'src/config';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DateUtils } from 'src/utils/date-utils';
 import { MarketplaceReindexState } from '../models/MarketplaceReindexState';
@@ -21,9 +22,15 @@ export class ReindexAuctionUpdatedHandler {
     marketplaceReindexState.auctions[auctionIndex].modifiedDate = modifiedDate;
 
     marketplaceReindexState.auctions[auctionIndex].minBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = BigNumberUtils.denominateAmount(input.minBid, decimals);
+    marketplaceReindexState.auctions[auctionIndex].minBidDenominated = Math.min(
+      BigNumberUtils.denominateAmount(input.minBid, decimals),
+      constants.dbMaxDenominatedValue,
+    );
     marketplaceReindexState.auctions[auctionIndex].maxBid = input.minBid;
-    marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = marketplaceReindexState.auctions[auctionIndex].minBidDenominated;
+    marketplaceReindexState.auctions[auctionIndex].maxBidDenominated = Math.min(
+      marketplaceReindexState.auctions[auctionIndex].minBidDenominated,
+      constants.dbMaxDenominatedValue,
+    );
 
     if (input.paymentToken) {
       marketplaceReindexState.auctions[auctionIndex].paymentToken = input.paymentToken;

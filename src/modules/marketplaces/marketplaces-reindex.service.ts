@@ -93,7 +93,7 @@ export class MarketplacesReindexService {
       return [
         new MarketplaceReindexState({
           marketplace,
-          isReindexFromTheBeginning: input.afterTimestamp ? false : true,
+          isFullStateInMemory: input.afterTimestamp ? false : true,
         }),
       ];
     }
@@ -106,7 +106,7 @@ export class MarketplacesReindexService {
       marketplaceReindexStates.push(
         new MarketplaceReindexState({
           marketplace: internalMarketplaces[i],
-          isReindexFromTheBeginning: input.afterTimestamp ? false : true,
+          isFullStateInMemory: input.afterTimestamp ? false : true,
           listedCollections: marketplaceCollections,
         }),
       );
@@ -138,6 +138,13 @@ export class MarketplacesReindexService {
         marketplaceReindexStates,
         processInNextBatch.concat(batch),
       );
+
+      processInNextBatch = await this.processEventsBatchAndReturnUnprocessedEvents(
+        marketplaceReindexStates,
+        processInNextBatch.concat(batch),
+      );
+
+      await this.addInactiveStateItemsToDb(marketplaceReindexStates);
     } while (input.beforeTimestamp ? afterTimestamp < input.beforeTimestamp : true);
 
     const isFinalBatch = true;
@@ -209,7 +216,7 @@ export class MarketplacesReindexService {
       eventOrdersAndTx,
     );
 
-    if (!marketplaceReindexStates[0].isReindexFromTheBeginning) {
+    if (!marketplaceReindexStates[0].isFullStateInMemory) {
       await Promise.all(
         marketplaceReindexStates.map((state) => {
           return this.getStateFromDbIfMissing(state, eventsSetSummaries);
@@ -402,15 +409,60 @@ export class MarketplacesReindexService {
     }
   }
 
+  private async addInactiveStateItemsToDb(marketplaceReindexStates: MarketplaceReindexState[]): Promise<void> {
+    for (const marketplaceReindexState of marketplaceReindexStates) {
+      marketplaceReindexState.setStateItemsToExpiredIfOlderThanTimestamp(DateUtils.getCurrentTimestamp());
+
+      const [inactiveAuctions, inactiveOrders, inactiveOffers] = marketplaceReindexState.popInactiveItems();
+
+      await this.populateAuctionAssetTags(inactiveAuctions);
+
+      for (let i = 0; i < inactiveOrders.length; i++) {
+        inactiveOrders[i].auctionId = inactiveAuctions.findIndex((a) => a.id === inactiveOrders[i].auctionId);
+        delete inactiveOrders[i].id;
+      }
+
+      for (let i = 0; i < inactiveAuctions.length; i++) {
+        delete inactiveAuctions[i].id;
+      }
+
+      await this.auctionSetterService.saveBulkAuctions(inactiveAuctions);
+
+      let tags: TagEntity[] = [];
+      inactiveAuctions.map((auction) => {
+        const assetTags = auction.tags.split(',');
+        assetTags.map((assetTag) => {
+          if (assetTag !== '') {
+            tags.push(
+              new TagEntity({
+                auctionId: auction.id,
+                tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
+                auction: auction,
+              }),
+            );
+          }
+        });
+      });
+
+      const saveTagsPromise = this.persistenceService.saveTags(tags);
+
+      for (let i = 0; i < inactiveOrders.length; i++) {
+        inactiveOrders[i].auction = inactiveAuctions[inactiveOrders[i].auctionId];
+        inactiveOrders[i].auctionId = inactiveAuctions[inactiveOrders[i].auctionId].id;
+      }
+      inactiveOffers.map((o) => delete o.id);
+
+      await Promise.all([
+        saveTagsPromise,
+        this.persistenceService.saveBulkOrders(inactiveOrders),
+        this.persistenceService.saveBulkOffers(inactiveOffers),
+      ]);
+    }
+  }
+
   private async addMarketplaceStateToDb(marketplaceReindexState: MarketplaceReindexState): Promise<void> {
     marketplaceReindexState.auctions.map((a) => {
       delete a.id;
-      if (a.startDate > constants.dbMaxTimestamp) {
-        a.startDate = constants.dbMaxTimestamp;
-      }
-      if (a.endDate > constants.dbMaxTimestamp) {
-        a.endDate = constants.dbMaxTimestamp;
-      }
     });
     marketplaceReindexState.orders.map((o) => delete o.id);
     marketplaceReindexState.offers.map((o) => delete o.id);
@@ -430,7 +482,7 @@ export class MarketplacesReindexService {
           tags.push(
             new TagEntity({
               auctionId: auction.id,
-              tag: assetTag.trim().slice(0, 20),
+              tag: assetTag.trim().slice(0, constants.dbMaxTagLength),
               auction: auction,
             }),
           );
@@ -438,9 +490,11 @@ export class MarketplacesReindexService {
       });
     });
 
-    await this.persistenceService.saveTags(tags);
-    await this.persistenceService.saveBulkOrders(marketplaceReindexState.orders);
-    await this.persistenceService.saveBulkOffers(marketplaceReindexState.offers);
+    await Promise.all([
+      this.persistenceService.saveBulkOrders(marketplaceReindexState.orders),
+      this.persistenceService.saveBulkOffers(marketplaceReindexState.offers),
+      this.persistenceService.saveTags(tags),
+    ]);
   }
 
   private async populateAuctionAssetTags(auctions: AuctionEntity[]): Promise<void> {

@@ -732,11 +732,15 @@ export class PersistenceService {
   }
 
   async getMarketplaceEventsAsc(
-    marketplaceKey: string,
+    marketplaceAddress: string,
     afterTimestamp?: number,
     beforeTimestamp?: number,
   ): Promise<MarketplaceEventsEntity[]> {
-    return await this.marketplaceEventsRepository.getEventsByMarketplaceAndTimestampsAsc(marketplaceKey, afterTimestamp, beforeTimestamp);
+    return await this.marketplaceEventsRepository.getEventsByMarketplaceAndTimestampsAsc(
+      marketplaceAddress,
+      afterTimestamp,
+      beforeTimestamp,
+    );
   }
 
   async getBlacklistedCollections(): Promise<[BlacklistedCollectionEntity[], number]> {

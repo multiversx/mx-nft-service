@@ -42,7 +42,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
     const address = event.data.eventData?.address ?? tx.receiver;
     const topics = this.getTopics(event);
 
-    if (!topics || (!topics.price && !topics.minBid)) {
+    if (!topics || (!topics.price && !topics.minBid) || !topics.auctionType) {
       return;
     }
 
@@ -60,7 +60,7 @@ export class AuctionStartedSummary extends ReindexGenericSummary {
       minBid: topics.minBid ?? topics.price,
       maxBid: topics.maxBid ?? '0',
       minBidDiff: minBidDiff,
-      startTime: topics.startTime,
+      startTime: topics.startTime ?? event.timestamp,
       endTime: topics.endTime ?? topics.deadline ?? 0,
       paymentToken: topics.paymentToken,
       paymentNonce: topics.paymentNonce ?? topics.paymentTokenNonce ?? 0,
