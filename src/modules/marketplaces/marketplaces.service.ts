@@ -294,11 +294,11 @@ export class MarketplacesService {
   async disable(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
     try {
       const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
-      const test = await this.marketplaceService.handleAuctionFor();
       if (!marketplaces || marketplaces.length === 0) {
         throw new BadRequestError('No marketplace with this address');
       }
 
+      const test = await this.marketplaceService.handleAuctionFor(marketplaces);
       marketplaces.forEach((m) => (m.state = marketplaceState));
 
       const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);

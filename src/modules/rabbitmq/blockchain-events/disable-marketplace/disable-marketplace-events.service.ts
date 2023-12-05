@@ -3,6 +3,8 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { MarketplaceEventsService } from '../marketplace-events.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { Marketplace } from 'src/modules/marketplaces/models';
+import { MarketplaceEntity } from 'src/db/marketplaces';
 
 @Injectable()
 export class DisabledMarketplaceEventsService {
@@ -14,12 +16,12 @@ export class DisabledMarketplaceEventsService {
     }
   }
 
-  public async handleAuctionFor() {
+  public async handleAuctionFor(marketplaces: MarketplaceEntity[]) {
     const events = await this.redisCacheService.lpop(CacheInfo.MarketplaceEvents.key);
     const parseEvents = JSON.parse(events[0]);
     const auctionsEvents = parseEvents[0];
     if (auctionsEvents?.events?.length) {
-      await this.marketplaceEventsService.handleNftAuctionEvents(auctionsEvents?.events, auctionsEvents.hash, MarketplaceTypeEnum.Internal);
+      await this.marketplaceEventsService.handleNftAuctionEvents(auctionsEvents?.events, auctionsEvents.hash, marketplaces[0].type);
     }
   }
 }
