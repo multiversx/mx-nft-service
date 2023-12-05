@@ -34,8 +34,15 @@ describe('Marketplaces Service', () => {
         type: MarketplaceTypeEnum.Internal,
         state: MarketplaceState.Enable,
       }),
+      new MarketplaceEntity({
+        address: 'disabledAddress',
+        name: 'name',
+        key: 'test',
+        type: MarketplaceTypeEnum.External,
+        state: MarketplaceState.Disable,
+      }),
     ],
-    2,
+    3,
   ];
 
   beforeEach(async () => {
@@ -92,6 +99,7 @@ describe('Marketplaces Service', () => {
             address: 'address',
             name: 'name',
             key: 'xoxno',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.External,
           }),
           new Marketplace({
@@ -99,9 +107,17 @@ describe('Marketplaces Service', () => {
             name: 'name2',
             key: 'common',
             type: MarketplaceTypeEnum.Internal,
+            state: MarketplaceState.Enable,
+          }),
+          new Marketplace({
+            address: 'disabledAddress',
+            name: 'name',
+            key: 'test',
+            type: MarketplaceTypeEnum.External,
+            state: MarketplaceState.Disable,
           }),
         ],
-        count: 2,
+        count: 3,
       });
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
@@ -115,6 +131,7 @@ describe('Marketplaces Service', () => {
 
       expect(result).toMatchObject(expectedResult);
     });
+
     it('when filters by marketplaceKey and marketplaceAddress returns list with one item', async () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
 
@@ -398,7 +415,7 @@ describe('Marketplaces Service', () => {
   describe('getMarketplacesAddreses', () => {
     it('returns list of addresses for all marketplaces', async () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
-      const expectedResult = ['address', 'address2'];
+      const expectedResult = ['address', 'address2', 'disabledAddress'];
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
@@ -591,19 +608,43 @@ describe('Marketplaces Service', () => {
       const expectedResult = new CollectionType({
         items: [
           new Marketplace({
+            acceptedPaymentIdentifiers: null,
             address: 'address',
-            name: 'name',
+            iconUrl: 'https://media.elrond.com/markets/xoxno.svg',
+            id: undefined,
             key: 'xoxno',
+            lastIndexTimestamp: undefined,
+            name: 'name',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.External,
+            url: undefined,
           }),
           new Marketplace({
+            acceptedPaymentIdentifiers: null,
             address: 'address2',
-            name: 'name2',
+            iconUrl: 'https://media.elrond.com/markets/metaspace.svg',
+            id: undefined,
             key: 'common',
+            lastIndexTimestamp: undefined,
+            name: 'name2',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.Internal,
+            url: undefined,
+          }),
+          new Marketplace({
+            acceptedPaymentIdentifiers: null,
+            address: 'disabledAddress',
+            iconUrl: 'https://media.elrond.com/markets/test.svg',
+            id: undefined,
+            key: 'test',
+            lastIndexTimestamp: undefined,
+            name: 'name',
+            state: MarketplaceState.Disable,
+            type: MarketplaceTypeEnum.External,
+            url: undefined,
           }),
         ],
-        count: 2,
+        count: 3,
       });
 
       persistenceService.getMarketplaces = jest.fn().mockReturnValueOnce([inputMarketplaces, inputCount]);
@@ -989,6 +1030,54 @@ describe('Marketplaces Service', () => {
       const expectedResult = await service.disableMarketplace('address', MarketplaceState.Disable);
 
       expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('getDisableMarketplacesAddreses', () => {
+    it('returns list of addresses of disabled marketplaces', async () => {
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const expectedResult = ['disabledAddress'];
+      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
+        new CollectionType({
+          items: inputMarketplaces,
+          count: inputCount,
+        }),
+      );
+
+      const result = await service.getDisabledMarketplacesAddreses();
+
+      expect(result).toMatchObject(expectedResult);
+    });
+
+    it('when no expernal marketplace exists returns empty array', async () => {
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+
+      const expectedResult = [];
+      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
+        new CollectionType({
+          items: [
+            new Marketplace({
+              address: 'address',
+              name: 'name',
+              key: 'xoxno',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+            new Marketplace({
+              address: 'address2',
+              name: 'name2',
+              key: 'common',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+          ],
+          count: 2,
+        }),
+      );
+
+      const result = await service.getDisabledMarketplacesAddreses();
+
+      expect(result).toMatchObject(expectedResult);
     });
   });
 });

@@ -85,13 +85,14 @@ export class MarketplacesService {
     return externalMarketplaces.map((m) => m.address);
   }
 
-  async getDisableMarketplacesAddreses(): Promise<string[]> {
+  async getDisabledMarketplacesAddreses(): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const externalMarketplaces = allMarketplaces?.items?.filter((m) => m.state === MarketplaceState.Disable);
+    const disabledMarketplaces = allMarketplaces?.items?.filter((m) => m.state === MarketplaceState.Disable);
 
-    return externalMarketplaces.map((m) => m.address);
+    return disabledMarketplaces.map((m) => m.address);
   }
+
   async getMarketplacesAddreses(): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 
