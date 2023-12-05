@@ -47,12 +47,12 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @Mutation(() => Boolean)
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async disableMarketplace(@Args('input') input: UpdateMarketplaceStateArgs): Promise<Boolean> {
-    return this.marketplaceService.updateMarketplaceState(input.marketplaceScAddress, MarketplaceState.Disable);
+    return this.marketplaceService.disableMarketplace(input.marketplaceScAddress, MarketplaceState.Disable);
   }
 
   @Mutation(() => Boolean)
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async enableMarketplace(@Args('input') input: UpdateMarketplaceStateArgs): Promise<Boolean> {
-    return this.marketplaceService.disable(input.marketplaceScAddress, MarketplaceState.Enable);
+    return this.marketplaceService.enableMarketplace(input.marketplaceScAddress, MarketplaceState.Enable);
   }
 }

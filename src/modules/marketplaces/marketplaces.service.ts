@@ -262,15 +262,14 @@ export class MarketplacesService {
     }
   }
 
-  async updateMarketplaceState(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+  async disableMarketplace(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+    const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+
+    if (!marketplaces || marketplaces.length === 0) {
+      throw new BadRequestError('No marketplace with this address');
+    }
     try {
-      const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
-
-      if (!marketplaces || marketplaces.length === 0) {
-        throw new BadRequestError('No marketplace with this address');
-      }
-
-      marketplaces.forEach((m) => (m.state = marketplaceState));
+      marketplaces?.forEach((m) => (m.state = marketplaceState));
 
       const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
 
@@ -282,7 +281,7 @@ export class MarketplacesService {
 
       return !!updatedMarketplaces;
     } catch (error) {
-      this.logger.error('An error has occurred while updating marketplace state', {
+      this.logger.error('An error has occurred while disabaling marketplace state', {
         path: this.updateMarketplaceState.name,
         marketplace: address,
         exception: error,
@@ -291,15 +290,14 @@ export class MarketplacesService {
     }
   }
 
-  async disable(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+  async enableMarketplace(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+    const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+    if (!marketplaces || marketplaces.length === 0) {
+      throw new BadRequestError('No marketplace with this address');
+    }
     try {
-      const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
-      if (!marketplaces || marketplaces.length === 0) {
-        throw new BadRequestError('No marketplace with this address');
-      }
-
-      const test = await this.marketplaceService.handleAuctionFor(marketplaces);
-      marketplaces.forEach((m) => (m.state = marketplaceState));
+      await this.marketplaceService.processMissedEventsSinceDisabled(marketplaces);
+      marketplaces?.forEach((m) => (m.state = marketplaceState));
 
       const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
 
@@ -311,7 +309,7 @@ export class MarketplacesService {
 
       return !!updatedMarketplaces;
     } catch (error) {
-      this.logger.error('An error has occurred while updating marketplace state', {
+      this.logger.error('An error has occurred while enabeling marketplace', {
         path: this.updateMarketplaceState.name,
         marketplace: address,
         exception: error,
@@ -374,5 +372,19 @@ export class MarketplacesService {
         extraInfo: { collection: collection },
       }),
     );
+  }
+
+  private async updateMarketplaceState(marketplaces: MarketplaceEntity[], marketplaceState: MarketplaceState) {
+    marketplaces?.forEach((m) => (m.state = marketplaceState));
+
+    const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+    if (updatedMarketplaces) {
+      for (const updatedMarketplace of updatedMarketplaces) {
+        this.triggerCacheInvalidation(updatedMarketplace.key, null, updatedMarketplace.address);
+      }
+    }
+
+    return !!updatedMarketplaces;
   }
 }

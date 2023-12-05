@@ -16,7 +16,7 @@ export class DisabledMarketplaceEventsService {
     }
   }
 
-  public async handleAuctionFor(marketplaces: MarketplaceEntity[]) {
+  public async processMissedEventsSinceDisabled(marketplaces: MarketplaceEntity[]) {
     const events = await this.redisCacheService.lpop(CacheInfo.MarketplaceEvents.key);
     if (events?.length) {
       const parseEvents = JSON.parse(events[0]);
