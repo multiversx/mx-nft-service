@@ -4,7 +4,7 @@ import { CollectionType } from 'src/modules/assets/models';
 import { MarketplacesService } from '../marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces-caching.service';
 import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketplaces';
-import { MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
 import { MarketplaceFilters } from '../models/Marketplace.Filter';
 import { Marketplace } from '../models';
 import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
@@ -13,6 +13,7 @@ import { Logger } from '@nestjs/common';
 import { WhitelistMarketplaceRequest } from '../models/requests/WhitelistMarketplaceRequest';
 import { UpdateMarketplaceRequest } from '../models/requests/UpdateMarketplaceRequest';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { DisabledMarketplaceEventsService } from 'src/modules/rabbitmq/blockchain-events/disable-marketplace/disable-marketplace-events.service';
 
 describe('Marketplaces Service', () => {
   let service: MarketplacesService;
@@ -24,12 +25,14 @@ describe('Marketplaces Service', () => {
         name: 'name',
         key: 'xoxno',
         type: MarketplaceTypeEnum.External,
+        state: MarketplaceState.Enable,
       }),
       new MarketplaceEntity({
         address: 'address2',
         name: 'name2',
         key: 'common',
         type: MarketplaceTypeEnum.Internal,
+        state: MarketplaceState.Enable,
       }),
     ],
     2,
@@ -47,6 +50,10 @@ describe('Marketplaces Service', () => {
         },
         {
           provide: MarketplacesCachingService,
+          useFactory: () => ({}),
+        },
+        {
+          provide: DisabledMarketplaceEventsService,
           useFactory: () => ({}),
         },
         {
