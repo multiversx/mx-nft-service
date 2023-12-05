@@ -18,10 +18,12 @@ export class DisabledMarketplaceEventsService {
 
   public async handleAuctionFor(marketplaces: MarketplaceEntity[]) {
     const events = await this.redisCacheService.lpop(CacheInfo.MarketplaceEvents.key);
-    const parseEvents = JSON.parse(events[0]);
-    const auctionsEvents = parseEvents[0];
-    if (auctionsEvents?.events?.length) {
-      await this.marketplaceEventsService.handleNftAuctionEvents(auctionsEvents?.events, auctionsEvents.hash, marketplaces[0].type);
+    if (events?.length) {
+      const parseEvents = JSON.parse(events[0]);
+      const auctionsEvents = parseEvents[0];
+      if (auctionsEvents?.events?.length) {
+        await this.marketplaceEventsService.handleNftAuctionEvents(auctionsEvents?.events, auctionsEvents.hash, marketplaces[0].type);
+      }
     }
   }
 }
