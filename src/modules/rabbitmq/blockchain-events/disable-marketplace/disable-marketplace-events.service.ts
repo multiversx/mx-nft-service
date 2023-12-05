@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { MarketplaceEventsService } from '../marketplace-events.service';
@@ -10,16 +10,16 @@ export class DisabledMarketplaceEventsService {
 
   public async handleAuctionEventsForDisableMarketplace(auctionEvents: any[], hash: string) {
     if (auctionEvents?.length) {
-      await this.redisCacheService.rpush(CacheInfo.MarketplaceEvents.key, { hash: hash, events: auctionEvents });
+      await this.redisCacheService.rpush(CacheInfo.MarketplaceEvents.key, JSON.stringify([{ hash: hash, events: auctionEvents }]));
     }
   }
 
   public async handleAuctionFor() {
-    const auctionEvents = await this.redisCacheService.lpop(CacheInfo.MarketplaceEvents.key);
-    console.log({ auctionEvents: JSON.stringify(auctionEvents) });
-
-    if (auctionEvents?.length) {
-      await this.marketplaceEventsService.handleNftAuctionEvents(auctionEvents, 'hash', MarketplaceTypeEnum.Internal);
+    const events = await this.redisCacheService.lpop(CacheInfo.MarketplaceEvents.key);
+    const parseEvents = JSON.parse(events[0]);
+    const auctionsEvents = parseEvents[0];
+    if (auctionsEvents?.events?.length) {
+      await this.marketplaceEventsService.handleNftAuctionEvents(auctionsEvents?.events, auctionsEvents.hash, MarketplaceTypeEnum.Internal);
     }
   }
 }
