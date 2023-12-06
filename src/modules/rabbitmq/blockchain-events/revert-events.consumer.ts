@@ -10,7 +10,7 @@ export class RevertEventsConsumer {
     connection: 'default',
     queueName: process.env.RABBITMQ_QUEUE_REVERT,
     exchange: process.env.RABBITMQ_EXCHANGE_REVERT,
-    // dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE_REVERT,
+    dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE_REVERT,
   })
   async consumeRevertEvents(nftAuctionEvents: any) {
     if (nftAuctionEvents.events) {
