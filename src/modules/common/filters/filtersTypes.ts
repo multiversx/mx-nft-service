@@ -178,10 +178,6 @@ export class AssetsFilter {
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
 
-  @IsOptional()
-  @Field(() => CustomFiltersEnum, { nullable: true })
-  customFilters: CustomFiltersEnum;
-
   @Field(() => [NftTrait], { nullable: 'itemsAndList' })
   traits: NftTrait[];
 

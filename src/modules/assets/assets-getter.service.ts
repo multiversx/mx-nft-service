@@ -66,19 +66,19 @@ export class AssetsGetterService {
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
 
-    if (filters.ownerAddress && filters.customFilters) {
-      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(
-        new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }),
-      );
-      if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>();
+    // if (filters.ownerAddress && filters.customFilters) {
+    //   const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(
+    //     new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }),
+    //   );
+    //   if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>();
 
-      const ticketCollectionIdentifiers = ticketsCollections.map((x) => x.collection).toString();
-      return await this.getAssetsForUser(
-        filters.ownerAddress,
-        `?identifiers=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
-        `?identifiers=${ticketCollectionIdentifiers}`,
-      );
-    }
+    //   const ticketCollectionIdentifiers = ticketsCollections.map((x) => x.collection).toString();
+    //   return await this.getAssetsForUser(
+    //     filters.ownerAddress,
+    //     `?identifiers=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
+    //     `?identifiers=${ticketCollectionIdentifiers}`,
+    //   );
+    // }
 
     if (sorting === AssetsSortingEnum.MostLikes) {
       const assets = await this.assetsLikedService.getMostLikedAssets();
