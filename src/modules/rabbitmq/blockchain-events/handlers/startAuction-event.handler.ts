@@ -29,7 +29,6 @@ export class StartAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    console.log(11111111);
     const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
     if (!auctionTokenEvent && !topics) return;
 

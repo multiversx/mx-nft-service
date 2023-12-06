@@ -38,11 +38,9 @@ export class NftEventsConsumer {
       const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
       const disabledMarketplaces = await this.marketplaceService.getDisabledMarketplacesAddreses();
 
-      console.log({ disabledMarketplaces: JSON.stringify(disabledMarketplaces) });
       const disabledMarketplacesEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => disabledMarketplaces.includes(e.address) === true,
       );
-      console.log({ disabledMarketplacesEvents: JSON.stringify(disabledMarketplacesEvents) });
 
       const internalMarketplaceEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => internalMarketplaces.includes(e.address) === true,
