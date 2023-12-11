@@ -1,14 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Address,
-  AddressValue,
-  BytesValue,
-  Interaction,
-  ResultsParser,
-  U32Value,
-  VariadicType,
-  VariadicValue,
-} from '@multiversx/sdk-core/out';
+import { Address, AddressValue, BytesValue, Interaction, List, ResultsParser, U32Value, VariadicValue } from '@multiversx/sdk-core/out';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
@@ -28,9 +19,16 @@ export class ProxyDeployerAbiService {
   async deployMinterSc(request: DeployMinterRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
-    return contract.methods
-      .contractDeploy([1, request.royaltiesClaimAddress, request.mintClaimAddress, request.maxNftsPerTransaction])
-      .check()
+    return contract.methodsExplicit
+      .contractDeploy([
+        new AddressValue(Address.fromString(process.env.TEMPLATE_MINTER_ADDRESS)),
+        VariadicValue.fromItems(
+          BytesValue.fromHex(Address.fromString(request.royaltiesClaimAddress).hex()),
+          BytesValue.fromHex(Address.fromString(request.mintClaimAddress).hex()),
+          new U32Value(request.maxNftsPerTransaction),
+          BytesValue.fromHex(Address.fromString(request.ownerAddress).hex()),
+        ),
+      ])
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .withSender(Address.fromString(request.ownerAddress))
@@ -39,11 +37,13 @@ export class ProxyDeployerAbiService {
   }
 
   async deployBulkSc(ownerAddress: string): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.BULK_ADDRESS);
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
-    return contract.methods
-      .contractDeploy([ownerAddress])
-      .check()
+    return contract.methodsExplicit
+      .contractDeploy([
+        new AddressValue(Address.fromString(process.env.TEMPLATE_BULK_ADDRESS)),
+        VariadicValue.fromItems(BytesValue.fromHex(Address.fromString(ownerAddress).hex())),
+      ])
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .withSender(Address.fromString(ownerAddress))
@@ -52,10 +52,13 @@ export class ProxyDeployerAbiService {
   }
 
   async deployMarketplaceSc(ownerAddress: string, marketplaceFee: string, paymentTokens?: string[]): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.BULK_ADDRESS);
+    const contract = await this.contract.getContract(process.env.TEMPLATE_MARKETPLACE_ADDRESS);
 
     return contract.methods
-      .contractDeploy([marketplaceFee, paymentTokens])
+      .contractDeploy([
+        new AddressValue(Address.fromString(process.env.TEMPLATE_MINTER_ADDRESS)),
+        VariadicValue.fromItems(new U32Value(marketplaceFee), List.fromItems(paymentTokens?.map((tag) => BytesValue.fromUTF8(tag)))),
+      ])
       .check()
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
