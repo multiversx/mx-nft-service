@@ -1036,7 +1036,7 @@ describe('Marketplaces Service', () => {
   describe('getDisableMarketplacesAddreses', () => {
     it('returns list of addresses of disabled marketplaces', async () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
-      const expectedResult = ['disabledAddress'];
+      const expected = ['disabledAddress'];
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
           items: inputMarketplaces,
@@ -1046,7 +1046,7 @@ describe('Marketplaces Service', () => {
 
       const result = await service.getDisabledMarketplacesAddreses();
 
-      expect(result).toMatchObject(expectedResult);
+      expect(result).toMatchObject(expected);
     });
 
     it('when no expernal marketplace exists returns empty array', async () => {
