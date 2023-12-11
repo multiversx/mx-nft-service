@@ -94,4 +94,23 @@ describe('Proxy  Deployer Abi Service', () => {
       expect(result).toMatchObject(expectedResult);
     });
   });
+
+  it('returns built transaction with right arguments including paymentTokens', async () => {
+    const result = await service.deployMarketplaceSc('erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha', '10000', ['EGLD']);
+
+    const expectedResult = {
+      chainID: 'T',
+      data: 'Y29udHJhY3REZXBsb3lAMDAwMDAwMDAwMDAwMDAwMDA1MDAyZjcwNTEzMzE1ZTIwNDM0MDNhMDkwMTEyNmRkODYzMmNkZTc3MTU5ZTNkZkAyNzEwQDAwMDAwMDA0NDU0NzRjNDQ=',
+      gasLimit: 70000000,
+      gasPrice: 1000000000,
+      nonce: 0,
+      options: undefined,
+      receiver: 'erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam',
+      sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+      signature: undefined,
+      value: '0',
+      version: 1,
+    };
+    expect(result).toMatchObject(expectedResult);
+  });
 });
