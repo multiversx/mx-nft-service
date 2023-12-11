@@ -52,14 +52,15 @@ export class ProxyDeployerAbiService {
   }
 
   async deployMarketplaceSc(ownerAddress: string, marketplaceFee: string, paymentTokens?: string[]): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.TEMPLATE_MARKETPLACE_ADDRESS);
-
-    return contract.methods
-      .contractDeploy([
-        new AddressValue(Address.fromString(process.env.TEMPLATE_MINTER_ADDRESS)),
+    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const args: any[] = [new AddressValue(Address.fromString(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
+    if (paymentTokens) {
+      args.push(
         VariadicValue.fromItems(new U32Value(marketplaceFee), List.fromItems(paymentTokens?.map((tag) => BytesValue.fromUTF8(tag)))),
-      ])
-      .check()
+      );
+    }
+    return contract.methods
+      .contractDeploy(args)
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .withSender(Address.fromString(ownerAddress))
