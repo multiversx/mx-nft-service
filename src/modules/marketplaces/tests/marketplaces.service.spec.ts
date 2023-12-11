@@ -1039,8 +1039,23 @@ describe('Marketplaces Service', () => {
       const expected = ['disabledAddress'];
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplaces,
-          count: inputCount,
+          items: [
+            new MarketplaceEntity({
+              address: 'address2',
+              name: 'name2',
+              key: 'common',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+            new MarketplaceEntity({
+              address: 'disabledAddress',
+              name: 'name',
+              key: 'test',
+              type: MarketplaceTypeEnum.External,
+              state: MarketplaceState.Disable,
+            }),
+          ],
+          count: 2,
         }),
       );
 
