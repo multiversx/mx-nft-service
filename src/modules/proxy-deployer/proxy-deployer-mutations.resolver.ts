@@ -7,9 +7,9 @@ import { DeployMinterArgsP, UpgradeMinterArgs } from './models/DeployMinterArgs'
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { ProxyDeployerAbiService } from './proxy-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
-import { AuthUser } from '../auth/authUser';
-import { UserAuthResult } from '../auth/userAuthResult';
 import { MintersResponse } from './models/MintersResponse';
+import { DeployBulkArgs } from './models/DeployBulkArgs';
+import { DeployMarketplaceArgs } from './models/DeployMarketplaceArgs';
 
 @Resolver(() => MintersResponse)
 export class ProxyDeployerMutationsResolver extends BaseResolver(MintersResponse) {
@@ -19,8 +19,20 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(MintersResponse
 
   @Mutation(() => TransactionNode)
   // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async deployMinterP(@Args('input') input: DeployMinterArgsP): Promise<TransactionNode> {
-    return await this.minterDeployerService.deployMinter(DeployMinterRequest.fromArgs(input));
+  async deployMinterSmartContract(@Args('input') input: DeployMinterArgsP): Promise<TransactionNode> {
+    return await this.minterDeployerService.deployMinterSc(DeployMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => TransactionNode)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async deployBulkSmartContract(@Args('input') input: DeployBulkArgs): Promise<TransactionNode> {
+    return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
+  }
+
+  @Mutation(() => TransactionNode)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async deployMarketplaceContract(@Args('input') input: DeployMarketplaceArgs): Promise<TransactionNode> {
+    return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
   }
 
   // @Mutation(() => TransactionNode)

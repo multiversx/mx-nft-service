@@ -25,7 +25,7 @@ export class ProxyDeployerAbiService {
     this.parser = new ResultsParser();
   }
 
-  async deployMinter(request: DeployMinterRequest): Promise<TransactionNode> {
+  async deployMinterSc(request: DeployMinterRequest): Promise<TransactionNode> {
     const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
 
     return contract.methods
@@ -34,6 +34,32 @@ export class ProxyDeployerAbiService {
       .withChainID(mxConfig.chainID)
       .withGasLimit(gas.deployMinter)
       .withSender(Address.fromString(request.ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
+  }
+
+  async deployBulkSc(ownerAddress: string): Promise<TransactionNode> {
+    const contract = await this.contract.getContract(process.env.BULK_ADDRESS);
+
+    return contract.methods
+      .contractDeploy([ownerAddress])
+      .check()
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.deployMinter)
+      .withSender(Address.fromString(ownerAddress))
+      .buildTransaction()
+      .toPlainObject();
+  }
+
+  async deployMarketplaceSc(ownerAddress: string, marketplaceFee: string, paymentTokens?: string[]): Promise<TransactionNode> {
+    const contract = await this.contract.getContract(process.env.BULK_ADDRESS);
+
+    return contract.methods
+      .contractDeploy([marketplaceFee, paymentTokens])
+      .check()
+      .withChainID(mxConfig.chainID)
+      .withGasLimit(gas.deployMinter)
+      .withSender(Address.fromString(ownerAddress))
       .buildTransaction()
       .toPlainObject();
   }
