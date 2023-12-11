@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';

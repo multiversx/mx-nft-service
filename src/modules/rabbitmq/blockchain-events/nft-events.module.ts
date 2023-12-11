@@ -86,7 +86,7 @@ import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-m
     MinterEventsService,
     RevertEventsConsumer,
     RevertEventsService,
-    // ElasiticUpdatesConsumer,
+    ElasiticUpdatesConsumer,
     ElasticUpdatesEventsService,
     AssetRarityInfoRedisHandler,
     VerifyContentService,
@@ -99,7 +99,6 @@ import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-m
     FeedEventsSenderService,
     UsdPriceService,
     AnalyticsEventsService,
-    // DisabledMarketplaceEventsService,
   ],
   exports: [NftEventsService, NftEventsConsumer],
 })
