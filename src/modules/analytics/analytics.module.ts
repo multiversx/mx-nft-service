@@ -1,7 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MxCommunicationModule } from 'src/common';
-import { MarketplacesService } from '../marketplaces/marketplaces.service';
-import { MarketplacesCachingService } from '../marketplaces/marketplaces-caching.service';
 import { AuctionsModuleGraph } from '../auctions/auctions.module';
 import { CommonModule } from 'src/common.module';
 import { TrendingCollectionsService } from './trending/trending-collections.service';
@@ -30,11 +28,10 @@ import { HoldersResolver } from './holders.resolver';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AccountsRedisHandler } from '../account-stats/loaders/accounts.redis-handler';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
+import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 
 @Module({
   providers: [
-    MarketplacesService,
-    MarketplacesCachingService,
     TrendingCollectionsService,
     ElasticAnalyticsService,
     BuyEventParser,
@@ -66,6 +63,7 @@ import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
     CommonModule,
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => CollectionsModuleGraph),
+    forwardRef(() => MarketplacesModuleGraph),
     TimescaleDbModule,
   ],
   exports: [TrendingCollectionsService, ElasticAnalyticsService, AnalyticsService, GeneralAnalyticsService, CollectionsAnalyticsService],

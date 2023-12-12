@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
@@ -12,6 +12,7 @@ export class WithdrawOfferEventHandler {
   constructor(
     private readonly offersService: OffersService,
     private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
   ) {}
 

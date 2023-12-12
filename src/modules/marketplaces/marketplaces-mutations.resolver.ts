@@ -11,6 +11,8 @@ import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { UpdateMarketplaceArgs } from './models/UpdateMarketplaceArgs';
 import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceRequest';
+import { UpdateMarketplaceStateArgs } from './models/UpdateMarketplaceStateArgs';
+import { MarketplaceState } from './models/MarketplaceType.enum';
 
 @Resolver(() => Marketplace)
 export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
@@ -40,5 +42,17 @@ export class MarketplacesMutationsResolver extends BaseResolver(Marketplace) {
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistMarketplace(@Args('input') input: WhitelistMarketplaceArgs): Promise<Boolean> {
     return this.marketplaceService.whitelistMarketplace(WhitelistMarketplaceRequest.fromArgs(input));
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async disableMarketplace(@Args('input') input: UpdateMarketplaceStateArgs): Promise<Boolean> {
+    return this.marketplaceService.disableMarketplace(input.marketplaceScAddress, MarketplaceState.Disable);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async enableMarketplace(@Args('input') input: UpdateMarketplaceStateArgs): Promise<Boolean> {
+    return this.marketplaceService.enableMarketplace(input.marketplaceScAddress, MarketplaceState.Enable);
   }
 }

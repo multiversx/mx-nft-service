@@ -45,7 +45,8 @@ import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
-
+import { DisabledMarketplaceEventsService } from './disable-marketplace/disable-marketplace-events.service';
+import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-marketplace-events.module';
 @Module({
   imports: [
     CommonModule,
@@ -59,6 +60,7 @@ import { MintersModuleGraph } from 'src/modules/minters/minters.module';
     forwardRef(() => MxCommunicationModule),
     forwardRef(() => OffersModuleGraph),
     forwardRef(() => PluginModule),
+    forwardRef(() => DisabledMarketplaceEventsModule),
     UsdPriceModuleGraph,
     NftRarityModuleGraph,
     ScamModule,
@@ -98,6 +100,6 @@ import { MintersModuleGraph } from 'src/modules/minters/minters.module';
     UsdPriceService,
     AnalyticsEventsService,
   ],
-  exports: [NftEventsService],
+  exports: [NftEventsService, NftEventsConsumer],
 })
 export class NftEventsModule {}
