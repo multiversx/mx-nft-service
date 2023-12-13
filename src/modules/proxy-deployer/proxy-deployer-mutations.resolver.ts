@@ -6,13 +6,12 @@ import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { DeployMinterRequest } from './models/requests/DeployMinterRequest';
 import { ProxyDeployerAbiService } from './proxy-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
-import { MintersResponse } from './models/MintersResponse';
 import { DeployBulkArgs } from './models/DeployBulkArgs';
 import { DeployMarketplaceArgs } from './models/DeployMarketplaceArgs';
 import {DeployMinterArgs} from './models/DeployMinterArgs';
 
-@Resolver(() => MintersResponse)
-export class ProxyDeployerMutationsResolver extends BaseResolver(MintersResponse) {
+@Resolver(() => TransactionNode)
+export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode) {
   constructor(private minterDeployerService: ProxyDeployerAbiService) {
     super();
   }
