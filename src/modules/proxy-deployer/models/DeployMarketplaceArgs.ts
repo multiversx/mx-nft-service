@@ -18,10 +18,3 @@ export class DeployMarketplaceArgs {
   })
   paymentTokens: string[];
 }
-
-@InputType()
-export class UpgradeMinterArgs {
-  @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
-  @Field()
-  minterAddress: string;
-}
