@@ -706,13 +706,6 @@ input DeployMinterArgs {
   royaltiesClaimAddress: String!
 }
 
-input DeployMinterArgsP {
-  maxNftsPerTransaction: Int!
-  mintClaimAddress: String!
-  ownerAddress: String!
-  royaltiesClaimAddress: String!
-}
-
 type ExploreCollectionsStats {
   activeLast30DaysCount: Int!
   allCollectionsCount: Int!
@@ -993,7 +986,7 @@ type Mutation {
   deployBulkSmartContract(input: DeployBulkArgs!): TransactionNode!
   deployMarketplaceContract(input: DeployMarketplaceArgs!): TransactionNode!
   deployMinter(input: DeployMinterArgs!): TransactionNode!
-  deployMinterSmartContract(input: DeployMinterArgsP!): TransactionNode!
+  deployMinterSmartContract(input: DeployMinterArgs!): TransactionNode!
   disableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   enableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   endAuction(auctionId: Int!): TransactionNode!

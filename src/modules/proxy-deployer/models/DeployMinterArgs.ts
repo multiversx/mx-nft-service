@@ -3,7 +3,7 @@ import { Matches } from 'class-validator';
 import { ADDRESS_ERROR, ADDRESS_RGX } from 'src/utils/constants';
 
 @InputType()
-export class DeployMinterArgsP {
+export class DeployMinterArgs {
   @Matches(RegExp(ADDRESS_RGX), { message: ADDRESS_ERROR })
   @Field()
   royaltiesClaimAddress: string;

@@ -3,13 +3,13 @@ import { BaseResolver } from '../common/base.resolver';
 import { UseGuards } from '@nestjs/common';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
-import { DeployMinterArgsP, UpgradeMinterArgs } from './models/DeployMinterArgs';
-import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
+import { DeployMinterRequest } from './models/requests/DeployMinterRequest';
 import { ProxyDeployerAbiService } from './proxy-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
 import { MintersResponse } from './models/MintersResponse';
 import { DeployBulkArgs } from './models/DeployBulkArgs';
 import { DeployMarketplaceArgs } from './models/DeployMarketplaceArgs';
+import {DeployMinterArgs} from './models/DeployMinterArgs';
 
 @Resolver(() => MintersResponse)
 export class ProxyDeployerMutationsResolver extends BaseResolver(MintersResponse) {
@@ -18,32 +18,20 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(MintersResponse
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async deployMinterSmartContract(@Args('input') input: DeployMinterArgsP): Promise<TransactionNode> {
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async deployMinterSmartContract(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployMinterSc(DeployMinterRequest.fromArgs(input));
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployBulkSmartContract(@Args('input') input: DeployBulkArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMarketplaceContract(@Args('input') input: DeployMarketplaceArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
   }
-
-  // @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  // async pauseMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
-  //   return await this.minterDeployerService.pauseNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
-  // }
-
-  // @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  // async resumeMinter(@Args('input') input: UpgradeMinterArgs, @AuthUser() user: UserAuthResult): Promise<TransactionNode> {
-  //   return await this.minterDeployerService.resumeNftMinter(user.address, UpgradeMinterRequest.fromArgs(input));
-  // }
 }

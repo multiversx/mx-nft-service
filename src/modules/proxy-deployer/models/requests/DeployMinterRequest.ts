@@ -1,4 +1,4 @@
-import { DeployMinterArgsP, UpgradeMinterArgs } from '../DeployMinterArgs';
+import { DeployMinterArgs, UpgradeMinterArgs } from '../DeployMinterArgs';
 
 export class DeployMinterRequest {
   royaltiesClaimAddress: string;
@@ -9,7 +9,7 @@ export class DeployMinterRequest {
     Object.assign(this, init);
   }
 
-  static fromArgs(args: DeployMinterArgsP) {
+  static fromArgs(args: DeployMinterArgs) {
     return new DeployMinterRequest({
       royaltiesClaimAddress: args.royaltiesClaimAddress,
       mintClaimAddress: args.mintClaimAddress,
