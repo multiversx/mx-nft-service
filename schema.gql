@@ -207,7 +207,6 @@ input AssetsFilter {
   """This will work only with an owner address"""
   collections: [String!]
   creatorAddress: String
-  customFilters: CustomFiltersEnum
   identifier: String
   identifiers: [String!]
   likedByAddress: String
@@ -686,10 +685,6 @@ input CurrentPaymentTokensFilters {
   marketplaceKey: String
 }
 
-enum CustomFiltersEnum {
-  Tickets
-}
-
 input DeployBulkArgs {
   ownerAddress: String!
 }
@@ -998,9 +993,9 @@ type Mutation {
   deployBulkSmartContract(input: DeployBulkArgs!): TransactionNode!
   deployMarketplaceContract(input: DeployMarketplaceArgs!): TransactionNode!
   deployMinter(input: DeployMinterArgs!): TransactionNode!
+  deployMinterSmartContract(input: DeployMinterArgsP!): TransactionNode!
   disableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   enableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
-  deployMinterSmartContract(input: DeployMinterArgsP!): TransactionNode!
   endAuction(auctionId: Int!): TransactionNode!
   flagCollection(input: FlagCollectionInput!): Boolean!
   flagNft(input: FlagNftInput!): Boolean!
