@@ -8,7 +8,7 @@ import { ProxyDeployerAbiService } from './proxy-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
 import { DeployBulkArgs } from './models/DeployBulkArgs';
 import { DeployMarketplaceArgs } from './models/DeployMarketplaceArgs';
-import {DeployMinterArgs} from './models/DeployMinterArgs';
+import { DeployMinterArgs } from './models/DeployMinterArgs';
 
 @Resolver(() => TransactionNode)
 export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode) {
