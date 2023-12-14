@@ -207,7 +207,6 @@ input AssetsFilter {
   """This will work only with an owner address"""
   collections: [String!]
   creatorAddress: String
-  customFilters: CustomFiltersEnum
   identifier: String
   identifiers: [String!]
   likedByAddress: String
@@ -686,8 +685,18 @@ input CurrentPaymentTokensFilters {
   marketplaceKey: String
 }
 
-enum CustomFiltersEnum {
-  Tickets
+input DeployBulkArgs {
+  ownerAddress: String!
+}
+
+input DeployMarketplaceArgs {
+  marketplaceFee: String!
+  ownerAddress: String!
+
+  """
+  The accepted payment tokens for auction on the marketplace. By default, if left empty, accepts all payment tokens
+  """
+  paymentTokens: [String!]
 }
 
 input DeployMinterArgs {
@@ -974,7 +983,10 @@ type Mutation {
   createAuction(input: CreateAuctionArgs!): TransactionNode!
   createNft(file: Upload!, input: CreateNftArgs!): TransactionNode!
   createNftWithMultipleFiles(files: [Upload!]!, input: CreateNftArgs!): TransactionNode!
+  deployBulkSmartContract(input: DeployBulkArgs!): TransactionNode!
+  deployMarketplaceContract(input: DeployMarketplaceArgs!): TransactionNode!
   deployMinter(input: DeployMinterArgs!): TransactionNode!
+  deployMinterSmartContract(input: DeployMinterArgs!): TransactionNode!
   disableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   enableMarketplace(input: UpdateMarketplaceStateArgs!): Boolean!
   endAuction(auctionId: Int!): TransactionNode!

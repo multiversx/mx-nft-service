@@ -40,6 +40,7 @@ import '@multiversx/sdk-nestjs-common/lib/utils/extensions/number.extensions';
 import { TimescaleDbModule } from './common/persistence/timescaledb/timescaledb.module';
 import { MintersModuleGraph } from './modules/minters/minters.module';
 import { PersistenceModule } from './common/persistence/persistence.module';
+import { ProxyDeployerModuleGraph } from './modules/proxy-deployer/proxy-deployer.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { PersistenceModule } from './common/persistence/persistence.module';
     ExploreStatsModuleGraph,
     TimescaleDbModule,
     MintersModuleGraph,
+    ProxyDeployerModuleGraph,
   ],
 })
 export class AppModule {}

@@ -6,7 +6,7 @@ import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { MintersService } from './minters.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { WhitelistMinterRequest } from './models/requests/whitelistMinterRequest';
-import { DeployMinterArgs, UpgradeMinterArgs } from './models/DeployMinterArgs';
+import { DeployMinterArgs, UpgradeMinterArgs } from '../proxy-deployer/models/DeployMinterArgs';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
 import { MintersDeployerAbiService } from './minters-deployer.abi.service';
 import { TransactionNode } from '../common/transaction';
