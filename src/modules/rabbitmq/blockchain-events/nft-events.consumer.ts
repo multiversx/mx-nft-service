@@ -50,6 +50,7 @@ export class NftEventsConsumer {
       );
 
       const minters = await this.mintersService.getMintersAddresses();
+      console.log({minters})
       await this.nftEventsService.handleNftMintEvents(
         nftAuctionEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
