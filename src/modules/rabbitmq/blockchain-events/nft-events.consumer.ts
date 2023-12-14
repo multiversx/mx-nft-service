@@ -33,6 +33,7 @@ export class NftEventsConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
+    console.log(11111111, nftAuctionEvents)
     if (nftAuctionEvents?.events) {
       const internalMarketplaces = await this.marketplaceService.getInternalMarketplacesAddreses();
       const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
