@@ -17,7 +17,7 @@ export class ProxyDeployerAbiService {
   }
 
   async deployMinterSc(request: DeployMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .contractDeploy([
@@ -37,7 +37,7 @@ export class ProxyDeployerAbiService {
   }
 
   async deployBulkSc(ownerAddress: string): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .contractDeploy([
@@ -52,7 +52,7 @@ export class ProxyDeployerAbiService {
   }
 
   async deployMarketplaceSc(ownerAddress: string, marketplaceFee: string, paymentTokens?: string[]): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
     const args: any[] = [new AddressValue(Address.fromString(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
     if (paymentTokens) {
       args.push(
@@ -69,7 +69,7 @@ export class ProxyDeployerAbiService {
   }
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
@@ -81,7 +81,7 @@ export class ProxyDeployerAbiService {
   }
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
 
     return contract.methodsExplicit
       .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
@@ -93,7 +93,7 @@ export class ProxyDeployerAbiService {
   }
 
   public async getMintersForAddress(address: string): Promise<string[]> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
+    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
     let getDataQuery = <Interaction>contract.methodsExplicit.getUserNftMinterContracts([new AddressValue(new Address(address))]);
 
     const response = await this.getFirstQueryResult(getDataQuery);
