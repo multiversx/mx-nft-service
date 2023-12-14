@@ -12,7 +12,6 @@ export class MinterEventsService {
 
   public async handleNftMinterEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
-      console.log({Minevent: JSON.stringify(event)})
       switch (event.identifier) {
         case MinterEventEnum.callBack:
           const brandEvent = new BrandCreatedEvent(event);
