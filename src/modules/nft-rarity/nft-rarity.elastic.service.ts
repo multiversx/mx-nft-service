@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { ElasticQuery, ElasticSortOrder, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, MatchQuery, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Locker } from '@multiversx/sdk-nestjs-common';
 import { NftTypeEnum } from '../assets/models';
 import { NftRarityData } from './models/nft-rarity-data.model';
@@ -171,7 +171,7 @@ export class NftRarityElasticService {
       const query = ElasticQuery.create()
         .withMustExistCondition('nonce')
         .withMustCondition(QueryType.Match('token', collectionTicker, QueryOperator.AND))
-        .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
+        .withMustCondition(QueryType.Nested('data', [new MatchQuery('data.nonEmptyURIs', true )]))
         // TODO(whiteListedStorage)
         // .withMustCondition(
         //   QueryType.Nested('data', { 'data.whiteListedStorage': true }),
@@ -406,7 +406,7 @@ export class NftRarityElasticService {
     return ElasticQuery.create()
       .withMustExistCondition('nonce')
       .withMustNotCondition(QueryType.Exists(ELASTIC_NFT_HASRARITY))
-      .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
+      .withMustCondition(QueryType.Nested('data', [new MatchQuery('data.nonEmptyURIs', true )]))
       .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
       .withFields(['token'])
       .withPagination({
