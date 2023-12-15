@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { ElasticQuery, ElasticSortOrder, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, MatchQuery, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 
 @Injectable()
@@ -14,14 +14,10 @@ export class AssetsHistoryElasticService {
 
     const query = ElasticQuery.create()
       .withMustCondition(
-        QueryType.Nested('events', {
-          'events.topics': encodedCollection,
-        }),
+        QueryType.Nested('events', [new MatchQuery('events.topics', encodedCollection )]) ,
       )
       .withMustCondition(
-        QueryType.Nested('events', {
-          'events.topics': encodedNonce,
-        }),
+        QueryType.Nested('events', [new MatchQuery('events.topics', encodedCollection )]),
       )
       .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])

@@ -5,6 +5,7 @@ import {
   RangeGreaterThan,
   ElasticSortOrder,
   QueryConditionOptions,
+  MatchQuery,
 } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
@@ -34,11 +35,7 @@ export const getMarketplaceTransactionsElasticQuery = (input: MarketplaceEventsI
 
 export const getMarketplaceEventsElasticQuery = (input: MarketplaceEventsIndexingRequest): ElasticQuery => {
   return ElasticQuery.create()
-    .withMustCondition(
-      QueryType.Nested('events', {
-        'events.address': input.marketplaceAddress,
-      }),
-    )
+    .withMustCondition(QueryType.Nested('events', [new MatchQuery('events.address', input.marketplaceAddress)]))
     .withRangeFilter('timestamp', new RangeLowerThan(input.beforeTimestamp))
     .withRangeFilter('timestamp', new RangeGreaterThan(input.afterTimestamp))
     .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
