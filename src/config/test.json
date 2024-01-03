@@ -8,7 +8,7 @@
     "mex": "MEX-27f4cd",
     "lkmex": "",
     "usdc": "USDC-8c999d",
-    "burnNftActivationEpoch": 1185
+    "burnNftActivationEpoch": 0
   },
   "fileStorage": {
     "host": "ipfs.infura.io",
