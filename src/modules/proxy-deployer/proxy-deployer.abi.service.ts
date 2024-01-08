@@ -94,7 +94,12 @@ export class ProxyDeployerAbiService {
 
   public async getMintersForAddress(address: string): Promise<string[]> {
     const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getUserNftMinterContracts([new AddressValue(new Address(address))]);
+    let getDataQuery = <Interaction>(
+      contract.methodsExplicit.getDeployerContractsByTemplate([
+        new AddressValue(new Address(address)),
+        new AddressValue(new Address(process.env.TEMPLATE_MINTER_ADDRESS)),
+      ])
+    );
 
     const response = await this.getFirstQueryResult(getDataQuery);
     const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();

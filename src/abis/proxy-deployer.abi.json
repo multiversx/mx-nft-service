@@ -13,7 +13,7 @@
     },
     "framework": {
       "name": "multiversx-sc",
-      "version": "0.44.0"
+      "version": "0.45.2"
     }
   },
   "name": "ProxyDeployer",
@@ -157,6 +157,40 @@
       "outputs": []
     },
     {
+      "name": "getDeployerContractsByTemplate",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "Address"
+        },
+        {
+          "name": "template_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Address>"
+        }
+      ]
+    },
+    {
+      "name": "getAllDeployerContracts",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Address>"
+        }
+      ]
+    },
+    {
       "name": "getAllDeployedContractsByTemplate",
       "mutability": "readonly",
       "inputs": [
@@ -203,22 +237,6 @@
       ]
     },
     {
-      "name": "getDeployerContractAddresses",
-      "mutability": "readonly",
-      "inputs": [
-        {
-          "name": "deployer_address",
-          "type": "Address"
-        }
-      ],
-      "outputs": [
-        {
-          "type": "variadic<Address>",
-          "multi_result": true
-        }
-      ]
-    },
-    {
       "name": "getAllBlacklistedDeployers",
       "mutability": "readonly",
       "inputs": [],
@@ -254,7 +272,6 @@
       ]
     }
   ],
-  "events": [],
   "esdtAttributes": [],
   "hasCallback": false,
   "types": {

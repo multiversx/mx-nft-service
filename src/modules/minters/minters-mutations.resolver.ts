@@ -23,7 +23,11 @@ export class MintersMutationsResolver extends BaseResolver(MintersResponse) {
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistMinter(@Args('input') input: WhitelistMinterArgs): Promise<Boolean> {
-    return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
+    const contractAddresses = await this.minterDeployerService.getMintersForAddress(input.adminAddress);
+    if (contractAddresses.includes(input.address)) {
+      return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
+    }
+    return false;
   }
 
   @Mutation(() => TransactionNode)
