@@ -92,12 +92,12 @@ export class ProxyDeployerAbiService {
       .toPlainObject();
   }
 
-  public async getMintersForAddress(address: string): Promise<string[]> {
+  public async getDeplyedContractsForAddressAndTamplate(address: string, templateAddress: string): Promise<string[]> {
     const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getDeployerContractsByTemplate([
         new AddressValue(new Address(address)),
-        new AddressValue(new Address(process.env.TEMPLATE_MINTER_ADDRESS)),
+        new AddressValue(new Address(process.env.templateAddress)),
       ])
     );
 

@@ -7,9 +7,10 @@ import { AuthModule } from '../auth/auth.module';
 import { ProxyDeployerAbiService } from './proxy-deployer.abi.service';
 import { CacheEventsPublisherModule } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import { MintersModuleGraph } from '../minters/minters.module';
+import { ProxyDeployerQueriesResolver } from './proxy-deployer-queries.resolver';
 
 @Module({
-  providers: [ProxyDeployerMutationsResolver, ProxyDeployerAbiService],
+  providers: [ProxyDeployerMutationsResolver, ProxyDeployerQueriesResolver, ProxyDeployerAbiService],
   imports: [
     PubSubListenerModule,
     MxCommunicationModule,
