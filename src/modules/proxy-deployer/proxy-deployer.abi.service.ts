@@ -97,13 +97,13 @@ export class ProxyDeployerAbiService {
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getDeployerContractsByTemplate([
         new AddressValue(new Address(address)),
-        new AddressValue(new Address(process.env.templateAddress)),
+        new AddressValue(new Address(templateAddress)),
       ])
     );
 
     const response = await this.getFirstQueryResult(getDataQuery);
     const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();
-    return contractAddresses.map((x) => x.valueOf().bech32());
+    return contractAddresses?.map((x) => x.valueOf().bech32());
   }
 
   private async getFirstQueryResult(interaction: Interaction) {
