@@ -27,9 +27,7 @@ export class MultiTransferEventsTopics {
   private pairs: any[] = [];
 
   constructor(rawTopics: string[]) {
-    console.log({ rawTopics });
     for (let index = 0; index < rawTopics.length - 1; index += 3) {
-      console.log({ index });
       this.pairs.push({
         collection: BinaryUtils.base64Decode(rawTopics[index]),
         nonce: BinaryUtils.base64ToHex(rawTopics[index + 1]),
