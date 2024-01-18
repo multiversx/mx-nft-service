@@ -8,6 +8,7 @@ import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-tra
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
 import { CollectionVolumeLast24 } from 'src/modules/analytics/models/collection-volume';
+import { CollectionElastic } from 'src/common/services/mx-communication/elastic-collection.model';
 
 @ObjectType()
 export class Collection {
@@ -122,8 +123,10 @@ export class Collection {
     });
   }
 
-  static fromCollectionElastic(collectionElastic: any, artistAddress?: string, followersCount?: number) {
-    if (!collectionElastic) return null;
+  static fromCollectionElastic(collectionElastic: CollectionElastic, artistAddress?: string, followersCount?: number) {
+    if (!collectionElastic) {
+      return null;
+    }
 
     return new Collection({
       collection: collectionElastic.token,
@@ -142,7 +145,7 @@ export class Collection {
       canCreate: collectionElastic.properties.canMint,
       artistFollowersCount: followersCount,
       nftsCount: collectionElastic.api_nftCount,
-      verified: collectionElastic.api_isVerified ?? 0,
+      verified: collectionElastic.api_isVerified ?? false,
     });
   }
 }

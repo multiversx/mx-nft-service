@@ -20,6 +20,7 @@ import { TrendingCollectionsService } from '../analytics/trending/trending-colle
 import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 import { ElasticQuery, QueryType, ElasticSortOrder } from '@multiversx/sdk-nestjs-elastic';
 import { NftTypeEnum } from '../assets/models';
+import { CollectionElastic } from 'src/common/services/mx-communication/elastic-collection.model';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -244,7 +245,7 @@ export class CollectionsGetterService {
   public async getFullCollectionsRaw(): Promise<[Collection[], number]> {
     const query = this.getCollectionQuery();
     let collectionsResponse: Collection[] = [];
-    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items: CollectionElastic[]) => {
       let mappedCollections = await this.getMappedCollections(items);
 
       mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
@@ -307,12 +308,12 @@ export class CollectionsGetterService {
     return [groupedCollections, groupedCollections.length];
   }
 
-  private async getMappedCollections(items): Promise<Collection[]> {
+  private async getMappedCollections(items: CollectionElastic[]): Promise<Collection[]> {
     const promisesCollections = items?.map((collection): Promise<Collection> => this.mapCollection(collection));
     return await Promise.all(promisesCollections);
   }
 
-  private async mapCollection(collection: any): Promise<Collection> {
+  private async mapCollection(collection: CollectionElastic): Promise<Collection> {
     const ownerAddress = new Address(collection.currentOwner);
     if (ownerAddress.isContractAddress()) {
       const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.currentOwner);
