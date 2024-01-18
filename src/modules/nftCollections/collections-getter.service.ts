@@ -313,14 +313,14 @@ export class CollectionsGetterService {
   }
 
   private async mapCollection(collection: any): Promise<Collection> {
-    const ownerAddress = new Address(collection.owner);
+    const ownerAddress = new Address(collection.currentOwner);
     if (ownerAddress.isContractAddress()) {
-      const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.owner);
+      const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.currentOwner);
       const followersCount = await this.idService.getFollowersCount(artist?.value?.owner);
       return Collection.fromCollectionElastic(collection, artist?.value?.owner, followersCount?.count);
     }
-    const followersCount = await this.idService.getFollowersCount(collection.owner);
-    return Collection.fromCollectionElastic(collection, collection.owner, followersCount?.count);
+    const followersCount = await this.idService.getFollowersCount(collection.currentOwner);
+    return Collection.fromCollectionElastic(collection, collection.currentOwner, followersCount?.count);
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
@@ -424,7 +424,7 @@ export class CollectionsGetterService {
     return ElasticQuery.create()
       .withMustNotExistCondition('identifier')
       .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
-      .withPagination({ from: 0, size: constants.getCollectionsFromElasticBatchSize })
+      .withPagination({ from: 0, size: 20 })
       .withSort([
         { name: 'api_isVerified', order: ElasticSortOrder.descending },
         { name: 'timestamp', order: ElasticSortOrder.descending },

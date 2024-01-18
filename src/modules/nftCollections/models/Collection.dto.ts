@@ -124,10 +124,7 @@ export class Collection {
 
   static fromCollectionElastic(collectionElastic: any, artistAddress?: string, followersCount?: number) {
     if (!collectionElastic) return null;
-    if (!collectionElastic.currentOwner) {
-      console.log({ collectionElastic });
-    }
-    console.log();
+
     return new Collection({
       collection: collectionElastic.token,
       artistAddress: artistAddress,
