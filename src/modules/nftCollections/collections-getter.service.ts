@@ -424,7 +424,7 @@ export class CollectionsGetterService {
     return ElasticQuery.create()
       .withMustNotExistCondition('identifier')
       .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
-      .withPagination({ from: 0, size: 20 })
+      .withPagination({ from: 0, size: constants.getCollectionsFromElasticBatchSize })
       .withSort([
         { name: 'api_isVerified', order: ElasticSortOrder.descending },
         { name: 'timestamp', order: ElasticSortOrder.descending },
