@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
 import { Address } from '@multiversx/sdk-core';
-import { genericDescriptions } from 'src/config';
+import { constants, genericDescriptions } from 'src/config';
 import { Collection, CollectionAsset } from './models';
 import { CollectionQuery } from './collection-query';
-import { CollectionApi, MxApiService, MxIdentityService } from 'src/common';
+import { MxApiService, MxElasticService, MxIdentityService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
@@ -17,6 +17,9 @@ import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model
 import { DocumentDbService } from 'src/document-db/document-db.service';
 import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
 import { TrendingCollectionsService } from '../analytics/trending/trending-collections.service';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
+import { ElasticQuery, QueryType, ElasticSortOrder } from '@multiversx/sdk-nestjs-elastic';
+import { NftTypeEnum } from '../assets/models';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -31,6 +34,7 @@ export class CollectionsGetterService {
     private analyticsService: TrendingCollectionsService,
     private documentDbService: DocumentDbService,
     private blacklistedCollectionsService: BlacklistedCollectionsService,
+    private elasticService: MxElasticService,
   ) {}
 
   async getCollections(
@@ -238,25 +242,19 @@ export class CollectionsGetterService {
   }
 
   public async getFullCollectionsRaw(): Promise<[Collection[], number]> {
-    const size = 25;
-    let from = 0;
-
-    const totalCount = await this.apiService.getCollectionsCount('?type=NonFungibleESDT,SemiFungibleESDT');
+    const query = this.getCollectionQuery();
     let collectionsResponse: Collection[] = [];
-    do {
-      let mappedCollections = await this.getMappedCollections(from, size);
+    await this.elasticService.getScrollableList(ELASTIC_TOKENS_INDEX, 'token', query, async (items) => {
+      let mappedCollections = await this.getMappedCollections(items);
 
       mappedCollections = await this.mapCollectionNftsCount(mappedCollections);
 
       mappedCollections = await this.mapCollectionNfts(mappedCollections);
 
       collectionsResponse.push(...mappedCollections);
+    });
 
-      from = from + size;
-    } while (from < totalCount && from <= 9975);
     let uniqueCollections = [...new Map(collectionsResponse.map((item) => [item.collection, item])).values()];
-    uniqueCollections = orderBy(uniqueCollections, ['verified', 'creationDate'], ['desc', 'desc']);
-
     return [uniqueCollections, uniqueCollections?.length];
   }
 
@@ -309,21 +307,20 @@ export class CollectionsGetterService {
     return [groupedCollections, groupedCollections.length];
   }
 
-  private async getMappedCollections(page: number, size: number): Promise<Collection[]> {
-    const collections = await this.apiService.getCollections(new CollectionQuery().addPageSize(page, size).build());
-    const promisesCollections = collections?.map((collection): Promise<Collection> => this.mapCollection(collection));
+  private async getMappedCollections(items): Promise<Collection[]> {
+    const promisesCollections = items?.map((collection): Promise<Collection> => this.mapCollection(collection));
     return await Promise.all(promisesCollections);
   }
 
-  private async mapCollection(collection: CollectionApi): Promise<Collection> {
+  private async mapCollection(collection: any): Promise<Collection> {
     const ownerAddress = new Address(collection.owner);
     if (ownerAddress.isContractAddress()) {
       const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.owner);
       const followersCount = await this.idService.getFollowersCount(artist?.value?.owner);
-      return Collection.fromCollectionApi(collection, artist?.value?.owner, followersCount?.count);
+      return Collection.fromCollectionElastic(collection, artist?.value?.owner, followersCount?.count);
     }
     const followersCount = await this.idService.getFollowersCount(collection.owner);
-    return Collection.fromCollectionApi(collection, collection.owner, followersCount?.count);
+    return Collection.fromCollectionElastic(collection, collection.owner, followersCount?.count);
   }
 
   private async mapCollectionNfts(localCollections: Collection[]) {
@@ -421,5 +418,16 @@ export class CollectionsGetterService {
       return undefined;
     }
     return CollectionNftTrait.fromCollectionTraits(traitSummary.traitTypes);
+  }
+
+  private getCollectionQuery(): ElasticQuery {
+    return ElasticQuery.create()
+      .withMustNotExistCondition('identifier')
+      .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
+      .withPagination({ from: 0, size: constants.getCollectionsFromElasticBatchSize })
+      .withSort([
+        { name: 'api_isVerified', order: ElasticSortOrder.descending },
+        { name: 'timestamp', order: ElasticSortOrder.descending },
+      ]);
   }
 }

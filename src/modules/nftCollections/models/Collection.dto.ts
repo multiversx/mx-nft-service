@@ -121,6 +121,29 @@ export class Collection {
       scamInfo: ScamInfo.fromScamInfoApi(collectionApi.scamInfo),
     });
   }
+
+  static fromCollectionElastic(collectionElastic: any, artistAddress?: string, followersCount?: number) {
+    if (!collectionElastic) return null;
+    return new Collection({
+      collection: collectionElastic.token,
+      artistAddress: artistAddress,
+      type: NftTypeEnum[collectionElastic.type],
+      ticker: collectionElastic.ticker,
+      ownerAddress: collectionElastic.currentOwner,
+      creationDate: collectionElastic.timestamp,
+      name: collectionElastic.name,
+      canTransferRole: collectionElastic.properties.canTransferNFTCreateRole,
+      canPause: collectionElastic.properties.canPause,
+      canBurn: collectionElastic.properties.canBurn,
+      canFreeze: collectionElastic.properties.canFreeze,
+      canWipe: collectionElastic.properties.canWipe,
+      canAddQuantity: collectionElastic.properties.canAddQuantity,
+      canCreate: collectionElastic.properties.canMint,
+      artistFollowersCount: followersCount,
+      nftsCount: collectionElastic.api_nftCount,
+      verified: collectionElastic.api_isVerified ?? 0,
+    });
+  }
 }
 
 @ObjectType()
