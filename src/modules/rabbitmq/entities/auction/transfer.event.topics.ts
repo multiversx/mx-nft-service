@@ -21,3 +21,29 @@ export class TransferEventsTopics {
     };
   }
 }
+
+export class MultiTransferEventsTopics {
+  private receiverAddress: Address;
+  private pairs: any[] = [];
+
+  constructor(rawTopics: string[]) {
+    for (let index = 0; index < rawTopics.length - 1; index += 3) {
+      this.pairs.push({
+        collection: BinaryUtils.base64Decode(rawTopics[index]),
+        nonce: BinaryUtils.base64ToHex(rawTopics[index + 1]),
+        value: Buffer.from(rawTopics[index + 2], 'base64')
+          .toString('hex')
+          .hexBigNumberToString(),
+      });
+    }
+
+    this.receiverAddress = new Address(Buffer.from(rawTopics[rawTopics.length - 1], 'base64'));
+  }
+
+  toPlainObject() {
+    return {
+      pairs: this.pairs,
+      receiverAddress: this.receiverAddress,
+    };
+  }
+}

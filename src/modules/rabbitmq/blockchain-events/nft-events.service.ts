@@ -4,7 +4,7 @@ import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { CacheEventTypeEnum, ChangedEvent } from '../cache-invalidation/events/changed.event';
 import { MintEvent } from '../entities/auction/mint.event';
-import { TransferEvent } from '../entities/auction/transfer.event';
+import { MultiTransferEvent, TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
 import { BurnEvent } from '../entities/auction/burn.event';
 
@@ -55,21 +55,23 @@ export class NftEventsService {
           break;
 
         case NftEventEnum.MultiESDTNFTTransfer:
-          const multiTransferEvent = new TransferEvent(event);
+          const multiTransferEvent = new MultiTransferEvent(event);
           multiTransferEvent.getAddress();
           const multiTransferTopics = multiTransferEvent.getTopics();
-          const collectionDetails = await this.mxApiService.getCollectionByIdentifierForQuery(
-            multiTransferTopics.collection,
-            'fields=name,type',
-          );
-          if (collectionDetails?.type === NftTypeEnum.NonFungibleESDT || collectionDetails?.type === NftTypeEnum.SemiFungibleESDT) {
-            this.triggerCacheInvalidationWithOwner(
-              `${multiTransferTopics.collection}-${multiTransferTopics.nonce}`,
-              CacheEventTypeEnum.OwnerChanged,
-              multiTransferEvent.getAddress(),
-              multiTransferTopics.receiverAddress.toString(),
-            );
+          for (const pair of multiTransferTopics.pairs) {
+            if (pair.nonce !== '') {
+              const collectionDetails = await this.mxApiService.getCollectionByIdentifierForQuery(pair.collection, 'fields=name,type');
+              if (collectionDetails?.type === NftTypeEnum.NonFungibleESDT || collectionDetails?.type === NftTypeEnum.SemiFungibleESDT) {
+                this.triggerCacheInvalidationWithOwner(
+                  `${pair.collection}-${pair.nonce}`,
+                  CacheEventTypeEnum.OwnerChanged,
+                  multiTransferEvent.getAddress(),
+                  multiTransferTopics.receiverAddress.toString(),
+                );
+              }
+            }
           }
+
           break;
       }
     }
